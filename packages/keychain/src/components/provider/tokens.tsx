@@ -151,7 +151,6 @@ export function TokensProvider({
 
       // Get fresh token addresses to query
       const tokenAddresses = Object.keys(tokens);
-      console.log("Balance query running for tokens:", tokenAddresses);
 
       // Fetch balances for all current tokens
       const balanceUpdates: Record<string, bigint> = {};
@@ -180,10 +179,6 @@ export function TokensProvider({
             };
           }
         });
-        console.log(
-          "Balance query updated tokens keys:",
-          Object.keys(updatedTokens),
-        );
         return updatedTokens;
       });
 
@@ -213,34 +208,16 @@ export function TokensProvider({
   );
 
   useEffect(() => {
-    console.log(
-      "Price data received:",
-      priceData?.priceByAddresses?.length,
-      "prices for",
-      addresses.length,
-      "addresses",
-    );
-    console.log("Addresses:", addresses);
     if (priceData?.priceByAddresses) {
-      console.log(
-        "Prices:",
-        priceData.priceByAddresses.map((p) => ({
-          base: p.base,
-          amount: p.amount,
-        })),
-      );
       setTokens((prevTokens) => {
         const newTokens = { ...prevTokens };
         priceData.priceByAddresses.forEach((price) => {
           const address = getChecksumAddress(price.base);
           if (newTokens[address]) {
-            console.log("Setting price for", address);
             newTokens[address] = {
               ...newTokens[address],
               price,
             };
-          } else {
-            console.log("Token not found for price:", address);
           }
         });
         setIsPricesLoaded(true);
@@ -254,7 +231,6 @@ export function TokensProvider({
       if (!controller) return;
 
       const normalizedAddress = getChecksumAddress(address);
-      console.log("registerPair called for:", normalizedAddress);
 
       const contract = new ERC20Contract({
         address: normalizedAddress,
@@ -276,16 +252,9 @@ export function TokensProvider({
           balance,
         };
 
-        console.log("Loaded token metadata:", metadata.name, metadata.symbol);
-
         setTokens((prevTokens) => {
-          console.log(
-            "setTokens called, prevTokens keys:",
-            Object.keys(prevTokens),
-          );
           // Check if token already exists
           if (prevTokens[normalizedAddress]) {
-            console.log("Token already exists, skipping");
             return prevTokens;
           }
 
@@ -294,7 +263,6 @@ export function TokensProvider({
             [normalizedAddress]: newToken,
           };
 
-          console.log("Updated tokens keys:", Object.keys(updatedTokens));
           setAdresses(Object.keys(updatedTokens));
           return updatedTokens;
         });

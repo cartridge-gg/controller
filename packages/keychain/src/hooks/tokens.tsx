@@ -84,37 +84,15 @@ export function convertTokenAmountToUSD(
   decimals: number,
   price: { amount: string; decimals: number },
 ) {
-  console.log("convertTokenAmountToUSD called with:", {
-    amount: amount.toString(),
-    decimals,
-    priceAmount: price.amount,
-    priceDecimals: price.decimals,
-  });
-
   // Convert price to BigInt
   const priceAmount = BigInt(price.amount);
 
-  // The price API returns prices in USDC smallest units (10^6)
-  // Formula: (tokenAmount / 10^token_decimals) * (priceAmount / 10^6)
-  // In BigInt math: (amount * priceAmount) / (10^token_decimals * 10^6)
-  const USDC_DECIMALS = 6;
-  const tokenDecimalsDivisor = BigInt(10 ** decimals);
-  const usdcDecimalsDivisor = BigInt(10 ** USDC_DECIMALS);
-  const valueInSmallestUnit =
-    (amount * priceAmount) / (tokenDecimalsDivisor * usdcDecimalsDivisor);
+  // Calculate USD value entirely in BigInt
+  // Formula: (amount * priceAmount) / (10 ** decimals)
+  const valueInBaseUnits = (amount * priceAmount) / BigInt(10 ** decimals);
 
-  console.log("Calculation steps:", {
-    tokenDecimals: decimals,
-    usdcDecimals: USDC_DECIMALS,
-    tokenDecimalsDivisor: tokenDecimalsDivisor.toString(),
-    usdcDecimalsDivisor: usdcDecimalsDivisor.toString(),
-    product: (amount * priceAmount).toString(),
-    totalDivisor: (tokenDecimalsDivisor * usdcDecimalsDivisor).toString(),
-    valueInSmallestUnit: valueInSmallestUnit.toString(),
-  });
-
-  // Convert to decimal for display
-  const valueInUsd = Number(valueInSmallestUnit);
+  // Convert to decimal for display, handling the price decimals
+  const valueInUsd = Number(valueInBaseUnits) / 10 ** price.decimals;
 
   // Handle zero amount
   if (valueInUsd === 0) {
@@ -141,10 +119,7 @@ export function convertTokenAmountToUSD(
   const isWhole = formatted.endsWith(".00");
 
   // Return whole numbers without decimals, otherwise show exactly 2 decimal places
-  const result =
-    "$" + (isWhole ? Math.floor(valueInUsd).toString() : formatted);
-  console.log("Final USD result:", result);
-  return result;
+  return "$" + (isWhole ? Math.floor(valueInUsd).toString() : formatted);
 }
 
 export function convertUSDToTokenAmount(

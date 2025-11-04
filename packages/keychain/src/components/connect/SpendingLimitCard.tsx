@@ -49,12 +49,10 @@ export function SpendingLimitCard({
         !tokens[checksumAddress] &&
         !registeredAddresses.current.has(checksumAddress)
       ) {
-        console.log("Registering token:", checksumAddress);
         registeredAddresses.current.add(checksumAddress);
         registerPair(checksumAddress);
       }
     });
-    console.log("Current tokens:", Object.keys(tokens));
   }, [tokenContracts, tokens, registerPair]);
 
   if (tokenContracts.length === 0) {
@@ -76,15 +74,6 @@ export function SpendingLimitCard({
 
         const checksumAddress = getChecksumAddress(address);
         const token = tokens[checksumAddress];
-
-        console.log(`Processing token ${checksumAddress}:`, {
-          contractName: contract.name,
-          amount,
-          tokenDecimals: token?.decimals,
-          metaDecimals: contract.meta?.decimals,
-          hasPrice: !!token?.price,
-          price: token?.price,
-        });
 
         // Use decimals and price from TokensProvider, with fallbacks to metadata
         const decimals = token?.decimals ?? contract.meta?.decimals ?? 18;
