@@ -7,13 +7,14 @@ import {
   useCallback,
 } from "react";
 import { useConnection } from "@/hooks/connection";
-import { ERC20 as ERC20Contract } from "@cartridge/ui/utils";
 import {
-  Price,
-  usePriceByAddressesQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+  ERC20 as ERC20Contract,
+  USDC_CONTRACT_ADDRESS,
+} from "@cartridge/ui/utils";
+import { Price } from "@cartridge/ui/utils/api/cartridge";
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
+import { fetchSwapQuoteInUsdc, chainIdToEkuboNetwork } from "@/utils/ekubo";
 
 export const DEFAULT_TOKENS = [
   {
@@ -193,25 +194,76 @@ export function TokensProvider({
     },
   );
 
+  // Fetch prices using Ekubo
   const {
     data: priceData,
     isLoading: isPriceLoading,
     error: priceError,
-  } = usePriceByAddressesQuery(
-    {
-      addresses,
+  } = useQuery(
+    ["token-prices-ekubo", addresses, chainId],
+    async () => {
+      if (addresses.length === 0) return [];
+
+      const network = chainIdToEkuboNetwork(chainId);
+      const USDC_DECIMALS = 6;
+      const AMOUNT_TO_QUOTE = BigInt(10 ** USDC_DECIMALS); // 1 USDC
+
+      const prices = await Promise.allSettled(
+        addresses.map(async (address) => {
+          try {
+            // Skip USDC itself
+            if (
+              getChecksumAddress(address) ===
+              getChecksumAddress(USDC_CONTRACT_ADDRESS)
+            ) {
+              return {
+                base: address,
+                amount: String(AMOUNT_TO_QUOTE),
+                decimals: 18,
+                quote: "USDC",
+              };
+            }
+
+            // Fetch quote from Ekubo
+            const usdcAmount = await fetchSwapQuoteInUsdc(
+              address,
+              AMOUNT_TO_QUOTE,
+              network,
+            );
+
+            return {
+              base: address,
+              amount: String(usdcAmount),
+              decimals: 18,
+              quote: "USDC",
+            };
+          } catch (error) {
+            console.error(`Failed to fetch price for ${address}:`, error);
+            return null;
+          }
+        }),
+      );
+
+      return prices
+        .filter(
+          (result): result is PromiseFulfilledResult<Price | null> =>
+            result.status === "fulfilled",
+        )
+        .map((result) => result.value)
+        .filter((price): price is Price => price !== null);
     },
     {
       refetchInterval,
       enabled: addresses.length > 0,
+      staleTime: 30000, // Consider data fresh for 30 seconds
     },
   );
 
   useEffect(() => {
-    if (priceData?.priceByAddresses) {
+    if (priceData) {
       setTokens((prevTokens) => {
         const newTokens = { ...prevTokens };
-        priceData.priceByAddresses.forEach((price) => {
+        priceData.forEach((price) => {
           const address = getChecksumAddress(price.base);
           if (newTokens[address]) {
             newTokens[address] = {
@@ -224,7 +276,7 @@ export function TokensProvider({
         return newTokens;
       });
     }
-  }, [priceData?.priceByAddresses, addresses, isPricesLoaded]);
+  }, [priceData, addresses, isPricesLoaded]);
 
   const registerPair = useCallback(
     async (address: string) => {
