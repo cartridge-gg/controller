@@ -59,21 +59,26 @@ export function useTraceabilities({
     const newTraceabilities: { [key: string]: Traceability } = {};
 
     transfersData.forEach((transfer) => {
-      const key = `${transfer.transactionHash}-${transfer.eventId}`;
+      // Extract transaction hash from event_id
+      // event_id format: "txHash:eventIndex"
+      const eventId = transfer.event_id || "";
+      const transactionHash = eventId.split(":")[0] || "";
+
+      const key = `${transactionHash}-${eventId}`;
       const traceability: Traceability = {
-        project: "", // Project is not available from SQL query
+        project: "", // Project is not available from TokenTransfer
         amount: Number(transfer.amount),
-        contractAddress: transfer.contractAddress,
-        decimals: Number(transfer.decimals),
-        eventId: transfer.eventId,
-        executedAt: transfer.executedAt,
-        fromAddress: transfer.fromAddress,
-        toAddress: transfer.toAddress,
-        metadata: transfer.metadata,
-        name: transfer.name,
-        symbol: transfer.symbol,
-        tokenId: transfer.tokenId,
-        transactionHash: transfer.transactionHash,
+        contractAddress: transfer.contract_address,
+        decimals: 0, // Not available in TokenTransfer
+        eventId: eventId,
+        executedAt: new Date(transfer.executed_at * 1000).toISOString(), // Convert timestamp to ISO string
+        fromAddress: transfer.from_address,
+        toAddress: transfer.to_address,
+        metadata: "", // Not available in TokenTransfer
+        name: "", // Not available in TokenTransfer
+        symbol: "", // Not available in TokenTransfer
+        tokenId: transfer.token_id || "",
+        transactionHash: transactionHash,
       };
       newTraceabilities[key] = traceability;
     });

@@ -168,4 +168,61 @@ export default {
       return { items: [] };
     }
   },
+
+  /**
+   * Fetch token balances for given contracts, accounts, and token IDs
+   * @param client - The ToriiClient instance
+   * @param contractAddresses - Array of contract addresses
+   * @param accountAddresses - Array of account addresses
+   * @param tokenIds - Array of token IDs
+   * @param count - Maximum number of items to fetch
+   * @returns Object containing balance items and next cursor
+   */
+  async fetchTransfers(
+    client: torii.ToriiClient,
+    contractAddresses: string[],
+    accountAddresses: string[],
+    tokenIds: string[],
+    count: number,
+  ): Promise<{
+    items: torii.TokenTransfer[];
+  }> {
+    try {
+      let transfers = await client.getTokenTransfers({
+        contract_addresses: contractAddresses,
+        account_addresses: accountAddresses,
+        token_ids: tokenIds.map((id) =>
+          addAddressPadding(id).replace("0x", ""),
+        ),
+        pagination: {
+          cursor: undefined,
+          limit: BATCH_SIZE,
+          order_by: [],
+          direction: "Forward",
+        },
+      });
+      const allTransfers = [...transfers.items];
+      while (transfers.next_cursor && allTransfers.length < count) {
+        transfers = await client.getTokenTransfers({
+          contract_addresses: [],
+          account_addresses: [],
+          token_ids: [],
+          pagination: {
+            limit: BATCH_SIZE,
+            cursor: transfers.next_cursor,
+            order_by: [],
+            direction: "Forward",
+          },
+        });
+        allTransfers.push(...transfers.items);
+      }
+      if (allTransfers.length !== 0) {
+        return { items: allTransfers };
+      }
+      return { items: [] };
+    } catch (err) {
+      console.error(err);
+      return { items: [] };
+    }
+  },
 };
