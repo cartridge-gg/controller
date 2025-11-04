@@ -14,7 +14,6 @@ import {
   StarknetIcon,
   Thumbnail,
   TokenSelectHeader,
-  Spinner,
 } from "@cartridge/ui";
 import { CostDetails } from "../types";
 import {
@@ -101,13 +100,11 @@ export function OnchainCostBreakdown({
   quote,
   platform,
   openFeesTooltip = false,
-  isQuoteLoading = false,
   showTokenSelector = false,
 }: {
   quote: OnchainQuote;
   platform?: ExternalPlatform;
   openFeesTooltip?: boolean;
-  isQuoteLoading?: boolean;
   showTokenSelector?: boolean;
 }) {
   const {
@@ -209,27 +206,25 @@ export function OnchainCostBreakdown({
                     {formatAmount(paymentAmount)} {symbol}
                   </span>
                   {!isPaymentTokenSameAsSelected &&
-                    (isQuoteLoading || isFetchingConversion ? (
-                      <Spinner />
-                    ) : convertedEquivalent !== null && displayToken ? (
+                    convertedEquivalent !== null &&
+                    displayToken &&
+                    !isFetchingConversion && (
                       <span className="text-foreground-100">
                         {formatAmount(convertedEquivalent)}{" "}
                         {convertedPrice?.tokenMetadata.symbol}
                       </span>
-                    ) : null)}
+                    )}
                 </>
               ) : (
                 <>
                   <span className="text-foreground-400">
                     {formatAmount(paymentAmount)} {symbol}
                   </span>
-                  {isQuoteLoading || isFetchingConversion ? (
-                    <Spinner size="sm" />
-                  ) : convertedEquivalent !== null ? (
+                  {convertedEquivalent !== null && !isFetchingConversion && (
                     <span className="text-foreground-100">
                       ${formatAmount(convertedEquivalent)}
                     </span>
-                  ) : null}
+                  )}
                 </>
               )}
             </div>
