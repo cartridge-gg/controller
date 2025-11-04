@@ -187,10 +187,22 @@ export function TokensProvider({
   );
 
   useEffect(() => {
-    console.log("Price data received:", priceData?.priceByAddresses?.length, "prices for", addresses.length, "addresses");
+    console.log(
+      "Price data received:",
+      priceData?.priceByAddresses?.length,
+      "prices for",
+      addresses.length,
+      "addresses",
+    );
     console.log("Addresses:", addresses);
     if (priceData?.priceByAddresses) {
-      console.log("Prices:", priceData.priceByAddresses.map(p => ({ base: p.base, amount: p.amount })));
+      console.log(
+        "Prices:",
+        priceData.priceByAddresses.map((p) => ({
+          base: p.base,
+          amount: p.amount,
+        })),
+      );
       setTokens((prevTokens) => {
         const newTokens = { ...prevTokens };
         priceData.priceByAddresses.forEach((price) => {
@@ -216,9 +228,7 @@ export function TokensProvider({
       if (!controller) return;
 
       const normalizedAddress = getChecksumAddress(address);
-      if (tokens[normalizedAddress]) return;
 
-      const newTokens = { ...tokens };
       const contract = new ERC20Contract({
         address: normalizedAddress,
         provider: controller.provider,
@@ -229,7 +239,7 @@ export function TokensProvider({
         await contract.init();
         const metadata = contract.metadata();
 
-        newTokens[normalizedAddress] = {
+        const newToken = {
           name: metadata.name,
           symbol: metadata.symbol,
           decimals: metadata.decimals,
@@ -239,13 +249,25 @@ export function TokensProvider({
           balance,
         };
 
-        setTokens(newTokens);
-        setAdresses(Object.keys(newTokens));
+        setTokens((prevTokens) => {
+          // Check if token already exists
+          if (prevTokens[normalizedAddress]) {
+            return prevTokens;
+          }
+
+          const updatedTokens = {
+            ...prevTokens,
+            [normalizedAddress]: newToken,
+          };
+
+          setAdresses(Object.keys(updatedTokens));
+          return updatedTokens;
+        });
       } catch (error) {
         console.error(`Failed to load token ${normalizedAddress}:`, error);
       }
     },
-    [controller, tokens],
+    [controller],
   );
 
   const value = useMemo(
