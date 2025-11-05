@@ -6,7 +6,7 @@ import type { TokenTransfer } from "@dojoengine/torii-wasm";
 
 export type Transfer = TokenTransfer;
 
-export const useTransfers = (contractAddress: string, tokenId: string) => {
+export const useTransfers = (contractAddress: string, tokenId: string[]) => {
   const { project } = useConnection();
   const [client, setClient] = useState<Awaited<
     ReturnType<typeof Torii.getClient>
@@ -25,7 +25,7 @@ export const useTransfers = (contractAddress: string, tokenId: string) => {
         client,
         [contractAddress],
         [], // No account filter
-        [tokenId],
+        tokenId,
         1000, // Limit
       );
       return result.items;
