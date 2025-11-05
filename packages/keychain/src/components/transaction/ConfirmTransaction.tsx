@@ -13,6 +13,7 @@ import { ErrorCode } from "@cartridge/controller-wasm";
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
   onError?: (error: ControllerError) => void;
+  onCancel?: () => void;
   transactions: Call[];
   executionError?: ControllerError;
 }
@@ -20,6 +21,7 @@ interface ConfirmTransactionProps {
 export function ConfirmTransaction({
   onComplete,
   onError,
+  onCancel,
   transactions,
   executionError,
 }: ConfirmTransactionProps) {
@@ -104,6 +106,7 @@ export function ConfirmTransaction({
           setSkipSession(true);
           setNeedsSessionRefresh(false);
         }}
+        onCancel={onCancel}
       />
     );
   }
@@ -120,6 +123,7 @@ export function ConfirmTransaction({
           setSkipSession(true); // Move past the session creation screen
         }}
         onSkip={() => setSkipSession(true)}
+        onCancel={onCancel}
       />
     );
   }

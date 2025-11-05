@@ -30,11 +30,13 @@ export function CreateSession({
   policies,
   onConnect,
   onSkip,
+  onCancel,
   isUpdate,
 }: {
   policies: ParsedSessionPolicies;
   onConnect: () => void;
   onSkip?: () => void;
+  onCancel?: () => void;
   isUpdate?: boolean;
 }) {
   return (
@@ -46,6 +48,7 @@ export function CreateSession({
         isUpdate={isUpdate}
         onConnect={onConnect}
         onSkip={onSkip}
+        onCancel={onCancel}
       />
     </CreateSessionProvider>
   );
@@ -55,10 +58,12 @@ const CreateSessionLayout = ({
   isUpdate,
   onConnect,
   onSkip,
+  onCancel,
 }: {
   isUpdate?: boolean;
   onConnect: () => void;
   onSkip?: () => void;
+  onCancel?: () => void;
 }) => {
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -191,7 +196,7 @@ const CreateSessionLayout = ({
         policies={policies}
         isConnecting={isConnecting}
         error={error}
-        onBack={() => setStep("summary")}
+        onBack={onCancel ? onCancel : () => setStep("summary")}
         onConnect={() => {
           void handlePrimaryAction();
         }}
