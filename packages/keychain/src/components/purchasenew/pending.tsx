@@ -168,7 +168,7 @@ export function PurchasePendingInner({
     <>
       <HeaderInner title={`Purchasing ${name}`} icon={<Spinner />} />
       <LayoutContent>
-        <Receiving title="Receiving" items={items} isLoading={true} />
+        <Receiving title="Receiving" items={items} isLoading={false} />
       </LayoutContent>
       <LayoutFooter>
         {paymentMethod === "crypto" && (
@@ -243,7 +243,7 @@ export function OnchainPurchasePendingInner({
     <>
       <HeaderInner title={`Purchasing ${name}`} icon={<Spinner />} />
       <LayoutContent>
-        <Receiving title="Receiving" items={items} isLoading={true} />
+        <Receiving title="Receiving" items={items} isLoading={false} />
       </LayoutContent>
       <LayoutFooter>
         <ConfirmingTransaction
@@ -295,7 +295,7 @@ export function ClaimPendingInner({
     <>
       <HeaderInner title={`Purchasing ${name}`} icon={<Spinner />} />
       <LayoutContent>
-        <Receiving title="Receiving" items={items} isLoading={true} />
+        <Receiving title="Receiving" items={items} isLoading={false} />
       </LayoutContent>
       <LayoutFooter>
         <ConfirmingTransaction
