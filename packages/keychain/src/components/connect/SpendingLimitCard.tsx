@@ -13,6 +13,7 @@ import {
 } from "@/hooks/tokens";
 import type { ParsedSessionPolicies } from "@/hooks/session";
 import { getChecksumAddress } from "starknet";
+import makeBlockie from "ethereum-blockies-base64";
 
 // Maximum value for uint256
 const MAX_UINT256 =
@@ -78,7 +79,7 @@ export function SpendingLimitCard({
         // Use decimals and price from TokensProvider, with fallbacks to metadata
         const decimals = token?.decimals ?? contract.meta?.decimals ?? 18;
         const price = token?.price;
-        const icon = token?.icon || contract.meta?.icon;
+        const icon = token?.icon || contract.meta?.icon || makeBlockie(address);
         const symbol =
           token?.symbol || contract.meta?.symbol || contract.name || "";
         const name =
