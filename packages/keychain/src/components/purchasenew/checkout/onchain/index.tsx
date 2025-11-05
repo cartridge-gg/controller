@@ -73,6 +73,9 @@ export function OnchainCheckout() {
 
   // Determine if we're still loading balance/conversion data
   const isLoadingBalance = useMemo(() => {
+    // If there's a balance error, stop showing loading state
+    if (balanceError) return false;
+
     // If there's a conversion error and we need conversion, stop showing loading state
     if (conversionError && tokenToCheck?.needsConversion) return false;
 
@@ -89,6 +92,7 @@ export function OnchainCheckout() {
     balance,
     tokenToCheck,
     conversionError,
+    balanceError,
   ]);
 
   // Check if user has sufficient balance (only when not loading)
@@ -146,19 +150,14 @@ export function OnchainCheckout() {
           setBalance(balanceBN);
           setBalanceError(null);
           setIsChecking(false);
-          return; // Success, exit early
+          return;
         } catch (error) {
           lastError = error;
           const errorMessage =
             error instanceof Error ? error.message : String(error);
 
           // If it's an EntrypointNotFound error, try the next entrypoint
-          if (
-            errorMessage.includes("EntrypointNotFound") ||
-            errorMessage.includes("Entry point") ||
-            errorMessage.includes("not found")
-          ) {
-            console.log(`Entrypoint '${entrypoint}' not found, trying next...`);
+          if (errorMessage.includes("EntrypointNotFound")) {
             continue;
           }
 
