@@ -166,7 +166,7 @@ export function PurchasePendingInner({
 
   return (
     <>
-      <HeaderInner title={`Purchasing ${name}`} icon={<Spinner />} />
+      <HeaderInner title={`Purchasing ${name}`} />
       <LayoutContent>
         <Receiving title="Receiving" items={items} isLoading={false} />
       </LayoutContent>
@@ -241,7 +241,7 @@ export function OnchainPurchasePendingInner({
 
   return (
     <>
-      <HeaderInner title={`Purchasing ${name}`} icon={<Spinner />} />
+      <HeaderInner title={`Purchasing ${name}`} />
       <LayoutContent>
         <Receiving title="Receiving" items={items} isLoading={false} />
       </LayoutContent>
@@ -293,7 +293,7 @@ export function ClaimPendingInner({
 
   return (
     <>
-      <HeaderInner title={`Purchasing ${name}`} icon={<Spinner />} />
+      <HeaderInner title={`Purchasing ${name}`} />
       <LayoutContent>
         <Receiving title="Receiving" items={items} isLoading={false} />
       </LayoutContent>
