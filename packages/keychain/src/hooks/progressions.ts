@@ -27,7 +27,13 @@ export function useProgressions({
 
   // Fetch achievement creations from raw events
   const projects: Project[] = useMemo(
-    () => [{ model: addAddressPadding(getSelectorFromTag(namespace, name)), namespace, project }],
+    () => [
+      {
+        model: addAddressPadding(getSelectorFromTag(namespace, name)),
+        namespace,
+        project,
+      },
+    ],
     [namespace, name, project],
   );
 
