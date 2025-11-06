@@ -30,6 +30,7 @@ export function Claim() {
     starterpackDetails: starterpackDetailsRaw,
     setClaimItems,
     setTransactionHash,
+    ethereumPrivateKey,
   } = usePurchaseContext();
 
   const starterpackDetails = starterpackDetailsRaw as
@@ -49,10 +50,20 @@ export function Claim() {
   } = useMerkleClaim({
     keys: keys!,
     address: externalAddress!,
-    type: type as ExternalWalletType | "controller",
+    type: type as ExternalWalletType | "controller" | "privatekey",
+    ethereumPrivateKey,
   });
 
   const wallet = useMemo(() => {
+    // For private key mode, show a generic wallet representation
+    if (type === "privatekey") {
+      return {
+        type: "privatekey" as const,
+        name: "Ethereum Wallet",
+        subIcon: null,
+        icon: null,
+      };
+    }
     return getWallet(type as ExternalWalletType | "controller");
   }, [type]);
 

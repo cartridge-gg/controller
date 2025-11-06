@@ -19,6 +19,7 @@ import { useConnection } from "./connection";
 import { parseSignature } from "viem";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 import { evmNetworks } from "@/components/purchasenew/wallet/config";
+import { signMessageWithPrivateKey } from "@/utils/eth-signing";
 
 export interface MerkleClaim {
   key: string;
@@ -40,10 +41,12 @@ export const useMerkleClaim = ({
   keys,
   address,
   type,
+  ethereumPrivateKey,
 }: {
   keys: string;
   address: string;
-  type: ExternalWalletType | "controller";
+  type: ExternalWalletType | "controller" | "privatekey";
+  ethereumPrivateKey?: string;
 }) => {
   const { controller, isMainnet, externalSignMessage, externalSignTypedData } =
     useConnection();
@@ -187,12 +190,21 @@ export const useMerkleClaim = ({
         let signature: Calldata;
         if (isEvm) {
           const msg = evmMessage(controller.address());
-          const { result, error } = await externalSignMessage(address, msg);
-          if (error) {
-            throw new Error(error);
+          
+          let signatureResult: string;
+          
+          // Use private key signing if available, otherwise use external wallet
+          if (ethereumPrivateKey) {
+            signatureResult = await signMessageWithPrivateKey(msg, ethereumPrivateKey);
+          } else {
+            const { result, error } = await externalSignMessage(address, msg);
+            if (error) {
+              throw new Error(error);
+            }
+            signatureResult = result as `0x${string}`;
           }
 
-          const { r, s, v } = parseSignature(result as `0x${string}`);
+          const { r, s, v } = parseSignature(signatureResult as `0x${string}`);
           signature = CallData.compile([
             num.toHex(v!),
             cairo.uint256(r),
@@ -252,6 +264,7 @@ export const useMerkleClaim = ({
       isMainnet,
       externalSignMessage,
       externalSignTypedData,
+      ethereumPrivateKey,
     ],
   );
 
