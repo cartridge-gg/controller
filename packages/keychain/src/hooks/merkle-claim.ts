@@ -41,12 +41,12 @@ export const useMerkleClaim = ({
   keys,
   address,
   type,
-  ethereumPrivateKey,
+  ethereumPreimage,
 }: {
   keys: string;
   address: string;
-  type: ExternalWalletType | "controller" | "privatekey";
-  ethereumPrivateKey?: string;
+  type: ExternalWalletType | "controller" | "preimage";
+  ethereumPreimage?: string;
 }) => {
   const { controller, isMainnet, externalSignMessage, externalSignTypedData } =
     useConnection();
@@ -190,12 +190,15 @@ export const useMerkleClaim = ({
         let signature: Calldata;
         if (isEvm) {
           const msg = evmMessage(controller.address());
-          
+
           let signatureResult: string;
-          
-          // Use private key signing if available, otherwise use external wallet
-          if (ethereumPrivateKey) {
-            signatureResult = await signMessageWithPrivateKey(msg, ethereumPrivateKey);
+
+          // Use preimage signing if available, otherwise use external wallet
+          if (ethereumPreimage) {
+            signatureResult = await signMessageWithPrivateKey(
+              msg,
+              ethereumPreimage,
+            );
           } else {
             const { result, error } = await externalSignMessage(address, msg);
             if (error) {
@@ -264,7 +267,7 @@ export const useMerkleClaim = ({
       isMainnet,
       externalSignMessage,
       externalSignTypedData,
-      ethereumPrivateKey,
+      ethereumPreimage,
     ],
   );
 

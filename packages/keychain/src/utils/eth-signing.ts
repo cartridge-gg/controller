@@ -37,4 +37,3 @@ export function getAddressFromPrivateKey(privateKey: string): string {
   const account = privateKeyToAccount(formattedPrivateKey);
   return account.address;
 }
-
