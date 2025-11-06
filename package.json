@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@cartridge/presets": "github:cartridge-gg/presets#bac9813",
-    "@cartridge/ui": "github:cartridge-gg/ui#dfecbda",
+    "@cartridge/ui": "github:cartridge-gg/ui#a4087b2",
     "tailwindcss": "catalog:",
     "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/typescript": "^2.4.8",
