@@ -36,7 +36,14 @@ import {
 } from "@cartridge/ui/utils";
 import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import { SemVer } from "semver";
 import {
@@ -210,6 +217,17 @@ export function useConnectionValue() {
   }, [controller, setRpcUrl]);
 
   const [searchParams] = useSearchParams();
+  const urlParamsRef = useRef<{
+    theme: string | null;
+    preset: string | null;
+    policies: string | null;
+    version: string | null;
+    project: string | null;
+    namespace: string | null;
+    tokens: string[];
+    ref: string | null;
+    refGroup: string | null;
+  }>();
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(searchParams);
@@ -242,7 +260,8 @@ export function useConnectionValue() {
       setRpcUrl(decodeURIComponent(rpcUrl));
     }
 
-    return {
+    // Create new params object
+    const newParams = {
       theme,
       preset,
       policies,
@@ -253,6 +272,30 @@ export function useConnectionValue() {
       ref,
       refGroup,
     };
+
+    // If we have a previous ref and new params are all empty (navigation without params),
+    // preserve the previous values instead of overwriting with nulls
+    if (urlParamsRef.current) {
+      const hasAnyNewParam =
+        theme ||
+        preset ||
+        policies ||
+        version ||
+        project ||
+        namespace ||
+        ref ||
+        refGroup ||
+        erc20Param;
+
+      if (!hasAnyNewParam) {
+        // No new params in URL, preserve previous values
+        return urlParamsRef.current;
+      }
+    }
+
+    // Store the new params for future reference
+    urlParamsRef.current = newParams;
+    return newParams;
   }, [searchParams]);
 
   // Fetch chain ID from RPC provider when rpcUrl changes
