@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { useCollections } from "@/hooks/collection";
+import { ERC1155, useCollections } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
@@ -41,7 +41,7 @@ export function Collections() {
           <Link
             className="w-full group select-none"
             draggable={false}
-            to={`./collection/${collection.address}?${searchParams.toString()}`}
+            to={`./${collection.type === ERC1155 ? "collectible" : "collection"}/${collection.address}?${searchParams.toString()}`}
             key={collection.address}
           >
             <CollectibleCard

@@ -5,6 +5,7 @@ import {
   useEffect,
   useRef,
 } from "react";
+import { useDevice } from "./device";
 
 export interface KeyboardState {
   isOpen: boolean;
@@ -30,7 +31,18 @@ export function useDetectKeyboardOpen(
   minKeyboardHeight = 300,
   debounceMs = 100,
 ): KeyboardState {
+  const { isMobile } = useDevice();
+
   const [keyboardState, setKeyboardState] = useState<KeyboardState>(() => {
+    if (!isMobile) {
+      return {
+        isOpen: false,
+        viewportHeight: window.innerHeight,
+        screenHeight: window.screen.height,
+        keyboardHeight: 0,
+      };
+    }
+
     const screenHeight = window.screen.height;
     const viewportHeight = window.visualViewport?.height || window.innerHeight;
     const keyboardHeight = Math.max(0, screenHeight - viewportHeight);
@@ -45,6 +57,10 @@ export function useDetectKeyboardOpen(
   });
 
   const updateKeyboardState = useCallback(() => {
+    if (!isMobile) {
+      return;
+    }
+
     const screenHeight = window.screen.height;
     const viewportHeight = window.visualViewport?.height || window.innerHeight;
     const keyboardHeight = Math.max(0, screenHeight - viewportHeight);
@@ -66,11 +82,15 @@ export function useDetectKeyboardOpen(
       }
       return prevState;
     });
-  }, [minKeyboardHeight]);
+  }, [minKeyboardHeight, isMobile]);
 
   // Support for focus events to detect keyboard on iOS Safari
   useEffect(() => {
     const handleFocusIn = (e: FocusEvent) => {
+      if (!isMobile) {
+        return;
+      }
+
       if (!e.target) {
         return;
       }
@@ -81,6 +101,10 @@ export function useDetectKeyboardOpen(
     };
     document.addEventListener("focusin", handleFocusIn);
     const handleFocusOut = (e: FocusEvent) => {
+      if (!isMobile) {
+        return;
+      }
+
       if (!e.target) {
         return;
       }
@@ -95,10 +119,14 @@ export function useDetectKeyboardOpen(
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
     };
-  }, []);
+  }, [isMobile]);
 
   useLayoutEffect(() => {
     let timeoutId: NodeJS.Timeout;
+
+    if (!isMobile) {
+      return;
+    }
 
     const debouncedUpdate = () => {
       clearTimeout(timeoutId);
@@ -131,7 +159,7 @@ export function useDetectKeyboardOpen(
         window.removeEventListener("orientationchange", debouncedUpdate);
       };
     }
-  }, [updateKeyboardState, debounceMs]);
+  }, [updateKeyboardState, debounceMs, isMobile]);
 
   return keyboardState;
 }

@@ -49,10 +49,9 @@ export function useTraceabilities({
   tokenId,
 }: TraceabilitiesProps): UseTraceabilitiesResponse {
   const { sales: salesData, listings: listingsData } = useMarketplace();
-  const { data: transfersData, status } = useTransfers(
-    contractAddress,
+  const { data: transfersData, status } = useTransfers(contractAddress, [
     tokenId,
-  );
+  ]);
 
   const traceabilities = useMemo(() => {
     if (!transfersData || transfersData.length === 0) return {};

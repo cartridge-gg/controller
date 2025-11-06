@@ -5568,7 +5568,9 @@ export enum TeamIncubatorStage {
 }
 
 export type TeamInput = {
+  address?: InputMaybe<Scalars["String"]>;
   email?: InputMaybe<Scalars["String"]>;
+  taxId?: InputMaybe<Scalars["String"]>;
 };
 
 /**
