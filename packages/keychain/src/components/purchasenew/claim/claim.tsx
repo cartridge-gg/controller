@@ -30,6 +30,7 @@ export function Claim() {
     starterpackDetails: starterpackDetailsRaw,
     setClaimItems,
     setTransactionHash,
+    ethereumPreimage,
   } = usePurchaseContext();
 
   const starterpackDetails = starterpackDetailsRaw as
@@ -49,10 +50,20 @@ export function Claim() {
   } = useMerkleClaim({
     keys: keys!,
     address: externalAddress!,
-    type: type as ExternalWalletType | "controller",
+    type: type as ExternalWalletType | "controller" | "preimage",
+    ethereumPreimage,
   });
 
   const wallet = useMemo(() => {
+    // For preimage mode, show a generic wallet representation
+    if (type === "preimage") {
+      return {
+        type: "preimage" as const,
+        name: "Ethereum Wallet",
+        subIcon: null,
+        icon: null,
+      };
+    }
     return getWallet(type as ExternalWalletType | "controller");
   }, [type]);
 

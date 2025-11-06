@@ -57,3 +57,9 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
 
   return debounced;
 }
+
+// Ethereum signing utilities
+export {
+  signMessageWithPrivateKey,
+  getAddressFromPrivateKey,
+} from "./eth-signing";
