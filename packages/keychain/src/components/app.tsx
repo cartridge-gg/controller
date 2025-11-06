@@ -58,6 +58,7 @@ import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
+import { useEffect } from "react";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -68,20 +69,22 @@ function DefaultRoute() {
   const searchParams = new URLSearchParams(search);
   const redirectUrl = searchParams.get("redirect_url");
 
-  // If redirect_url is present, route to connect component
-  if (redirectUrl) {
-    navigate(`/connect${search}`, { replace: true });
-    return null;
-  }
+  // Use useEffect to handle navigation to avoid updating state during render
+  useEffect(() => {
+    // If redirect_url is present, route to connect component
+    if (redirectUrl) {
+      navigate(`/connect${search}`, { replace: true });
+      return;
+    }
 
-  // When logged in and at root path, redirect to inventory
-  // Preserve all URL parameters during redirect
-  if (account?.username) {
-    navigate(`/account/${account.username}/inventory${search}`, {
-      replace: true,
-    });
-    return null;
-  }
+    // When logged in and at root path, redirect to inventory
+    // Preserve all URL parameters during redirect
+    if (account?.username) {
+      navigate(`/account/${account.username}/inventory${search}`, {
+        replace: true,
+      });
+    }
+  }, [redirectUrl, account?.username, search, navigate]);
 
   // If no account, render nothing (Authentication component will handle login)
   return null;
