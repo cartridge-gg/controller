@@ -1,4 +1,5 @@
 import {
+  Button,
   Card,
   CardDescription,
   CheckIcon,
@@ -199,6 +200,9 @@ export function PurchasePendingInner({
             </div>
           </div>
         )}
+        <Button className="w-full" variant="primary" disabled={true}>
+          Purchase
+        </Button>
       </LayoutFooter>
     </>
   );
@@ -251,6 +255,9 @@ export function OnchainPurchasePendingInner({
           externalLink={getExplorer("starknet", transactionHash, isMainnet).url}
           isLoading={isPurchasing}
         />
+        <Button className="w-full" variant="primary" disabled={true}>
+          Purchase
+        </Button>
       </LayoutFooter>
     </>
   );
@@ -303,6 +310,9 @@ export function ClaimPendingInner({
           externalLink={getExplorer("starknet", transactionHash, isMainnet).url}
           isLoading={isClaiming}
         />
+        <Button className="w-full" variant="primary" disabled={true}>
+          Purchase
+        </Button>
       </LayoutFooter>
     </>
   );
