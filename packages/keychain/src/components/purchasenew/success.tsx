@@ -11,9 +11,11 @@ import { usePurchaseContext } from "@/context";
 import { useMemo } from "react";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 import { Item } from "@/context/purchase";
+import { ConfirmingTransaction } from "./pending";
+import { getExplorer } from "@/hooks/payments/crypto";
 
 export function Success() {
-  const { purchaseItems, claimItems, starterpackDetails } =
+  const { purchaseItems, claimItems, starterpackDetails, transactionHash } =
     usePurchaseContext();
 
   const items = useMemo(() => {
@@ -30,6 +32,7 @@ export function Success() {
     <PurchaseSuccessInner
       items={items}
       acquisitionType={starterpackDetails!.acquisitionType}
+      transactionHash={transactionHash}
     />
   );
 }
@@ -37,11 +40,13 @@ export function Success() {
 export function PurchaseSuccessInner({
   items,
   acquisitionType,
+  transactionHash,
 }: {
   items: Item[];
   acquisitionType: StarterpackAcquisitionType;
+  transactionHash?: string;
 }) {
-  const { closeModal } = useConnection();
+  const { closeModal, isMainnet } = useConnection();
   return (
     <>
       <HeaderInner
@@ -57,6 +62,15 @@ export function PurchaseSuccessInner({
         />
       </LayoutContent>
       <LayoutFooter>
+        {transactionHash && (
+          <ConfirmingTransaction
+            title={`${acquisitionType === StarterpackAcquisitionType.Claimed ? "Claimed" : "Confirmed"} on Starknet`}
+            externalLink={
+              getExplorer("starknet", transactionHash, isMainnet).url
+            }
+            isLoading={false}
+          />
+        )}
         <Button variant="secondary" onClick={closeModal}>
           Close
         </Button>
