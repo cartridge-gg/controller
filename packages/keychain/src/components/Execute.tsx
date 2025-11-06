@@ -69,7 +69,7 @@ export function Execute() {
           code: 0,
         },
       });
-      console.log("close modal");
+
       navigateToRoot();
     });
   }, [params?.reject, params?.resolve, setOnModalClose, navigateToRoot]);
@@ -82,7 +82,6 @@ export function Execute() {
     <ConfirmTransaction
       transactions={params.params.transactions}
       executionError={params.params.error}
-      // onCancel={handleCancel}
       onComplete={(transaction_hash) => {
         // Check if there's a returnTo URL parameter and navigate there
         const returnTo = searchParams.get("returnTo");

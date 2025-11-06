@@ -73,15 +73,15 @@ function DefaultRoute() {
   useEffect(() => {
     // If redirect_url is present, route to connect component
     if (redirectUrl) {
-      navigate(`/connect${search}`, { replace: true });
+      navigate(`/connect`, { replace: true });
       return;
     }
 
     // When logged in and at root path, redirect to inventory
     // Preserve all URL parameters during redirect
     if (account?.username) {
-      navigate(`/account/${account.username}/inventory${search}`, {
-        replace: true,
+      navigate(`/account/${account.username}/inventory`, {
+        reset: true,
       });
     }
   }, [redirectUrl, account?.username, search, navigate]);

@@ -6,7 +6,6 @@ import { useCallback } from "react";
 export type NavigationHeaderProps = {
   // Navigation props
   onClose?: () => void;
-  onBack?: () => void;
 
   // Manual overrides
   forceShowBack?: boolean;
@@ -15,7 +14,6 @@ export type NavigationHeaderProps = {
 
 export function NavigationHeader({
   onClose,
-  onBack,
   forceShowBack = false,
   forceShowClose = false,
   ...props
@@ -32,16 +30,10 @@ export function NavigationHeader({
 
   // Handle back navigation
   const handleBack = useCallback(() => {
-    // If a custom onBack handler is provided, use it
-    if (onBack) {
-      onBack();
-      return;
-    }
-
     if (canGoBack) {
       goBack();
     }
-  }, [canGoBack, goBack, onBack]);
+  }, [canGoBack, goBack]);
 
   // Handle close navigation
   const handleCloseAction = useCallback(() => {
