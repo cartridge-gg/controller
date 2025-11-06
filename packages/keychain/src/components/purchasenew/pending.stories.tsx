@@ -13,6 +13,14 @@ import {
 import { ReactNode } from "react";
 import { ExternalWalletType } from "@cartridge/controller";
 
+const TOKEN_ICONS = {
+  USDC: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e5aaa970-a998-47e8-bd43-4a3b56b87200/logo",
+  STRK: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
+  ETH: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
+  LORDS:
+    "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/a3bfe959-50c4-4f89-0aef-b19207d82a00/logo",
+};
+
 const MockPurchaseProvider = ({ children }: { children: ReactNode }) => {
   const mockContext: PurchaseContextType = {
     usdAmount: 100,
@@ -85,7 +93,7 @@ export const CryptoPurchaseWithCredits: Story = {
         {
           title: "STRK",
           subtitle: "Starknet Token",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
+          icon: TOKEN_ICONS.STRK,
           value: 100,
           type: ItemType.ERC20,
         },
@@ -127,7 +135,7 @@ export const CryptoPurchaseWithNFT: Story = {
         {
           title: "ETH",
           subtitle: "0.25 Ethereum",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
+          icon: TOKEN_ICONS.ETH,
           value: 0.25,
           type: ItemType.ERC20,
         },
@@ -164,7 +172,7 @@ export const CryptoPurchaseWithoutWallet: Story = {
         {
           title: "STRK",
           subtitle: "50 Starknet tokens",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
+          icon: TOKEN_ICONS.STRK,
           value: 50,
           type: ItemType.ERC20,
         },
@@ -194,7 +202,7 @@ export const StripePurchase: Story = {
         {
           title: "USDC",
           subtitle: "500 USDC tokens",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e5aaa970-a998-47e8-bd43-4a3b56b87200/logo",
+          icon: TOKEN_ICONS.USDC,
           value: 500,
           type: ItemType.ERC20,
         },
@@ -220,7 +228,7 @@ export const OnchainPurchaseWithCredits: Story = {
         {
           title: "WETH",
           subtitle: "1.5 Wrapped Ethereum",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
+          icon: TOKEN_ICONS.ETH,
           value: 1.5,
           type: ItemType.ERC20,
         },
@@ -254,7 +262,7 @@ export const OnchainPurchaseWithMultipleItems: Story = {
         {
           title: "USDC",
           subtitle: "750 USDC stablecoin",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e5aaa970-a998-47e8-bd43-4a3b56b87200/logo",
+          icon: TOKEN_ICONS.USDC,
           value: 750,
           type: ItemType.ERC20,
         },
@@ -279,7 +287,7 @@ export const ClaimFreeCredits: Story = {
         {
           title: "LORDS",
           subtitle: "25 LORDS tokens",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e5aaa970-a998-47e8-bd43-4a3b56b87200/logo",
+          icon: TOKEN_ICONS.LORDS,
           value: 25,
           type: ItemType.ERC20,
         },
@@ -308,7 +316,7 @@ export const ClaimFreeNFT: Story = {
         {
           title: "STRK",
           subtitle: "10 Starknet tokens",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
+          icon: TOKEN_ICONS.STRK,
           value: 10,
           type: ItemType.ERC20,
         },
@@ -358,14 +366,14 @@ export const TokenPurchaseSmallAmount: Story = {
         {
           title: "USDC",
           subtitle: "10 USDC - Stablecoin",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e5aaa970-a998-47e8-bd43-4a3b56b87200/logo",
+          icon: TOKEN_ICONS.USDC,
           value: 10,
           type: ItemType.ERC20,
         },
         {
           title: "LORDS",
           subtitle: "5 LORDS gaming tokens",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/a3bfe959-50c4-4f89-0aef-b19207d82a00/logo",
+          icon: TOKEN_ICONS.LORDS,
           value: 5,
           type: ItemType.ERC20,
         },
@@ -396,21 +404,21 @@ export const TokenPurchaseLargeAmount: Story = {
         {
           title: "ETH",
           subtitle: "0.5 Ethereum",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
+          icon: TOKEN_ICONS.ETH,
           value: 0.5,
           type: ItemType.ERC20,
         },
         {
           title: "STRK",
           subtitle: "5,000 Starknet tokens",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
+          icon: TOKEN_ICONS.STRK,
           value: 5000,
           type: ItemType.ERC20,
         },
         {
           title: "USDC",
           subtitle: "1,000 USDC",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e5aaa970-a998-47e8-bd43-4a3b56b87200/logo",
+          icon: TOKEN_ICONS.USDC,
           value: 1000,
           type: ItemType.ERC20,
         },
@@ -441,21 +449,21 @@ export const OnchainTokensWithPrices: Story = {
         {
           title: "STRK",
           subtitle: "1,000 Starknet tokens",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
+          icon: TOKEN_ICONS.STRK,
           value: 1000,
           type: ItemType.ERC20,
         },
         {
           title: "LORDS",
           subtitle: "500 LORDS gaming tokens",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/a3bfe959-50c4-4f89-0aef-b19207d82a00/logo",
+          icon: TOKEN_ICONS.LORDS,
           value: 500,
           type: ItemType.ERC20,
         },
         {
           title: "ETH",
           subtitle: "2.5 Ethereum",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
+          icon: TOKEN_ICONS.ETH,
           value: 2.5,
           type: ItemType.ERC20,
         },
@@ -479,14 +487,14 @@ export const MixedTokensAndCredits: Story = {
         {
           title: "USDC",
           subtitle: "25 USDC tokens",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e5aaa970-a998-47e8-bd43-4a3b56b87200/logo",
+          icon: TOKEN_ICONS.USDC,
           value: 25,
           type: ItemType.ERC20,
         },
         {
           title: "ETH",
           subtitle: "0.1 Ethereum",
-          icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
+          icon: TOKEN_ICONS.ETH,
           value: 0.1,
           type: ItemType.ERC20,
         },
