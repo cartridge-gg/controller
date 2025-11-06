@@ -62,6 +62,7 @@ import { useAccount } from "@/hooks/account";
 function DefaultRoute() {
   const account = useAccount();
   const { search } = useLocation();
+  const { navigate } = useNavigation();
 
   // Check if we have a redirect_url parameter
   const searchParams = new URLSearchParams(search);
@@ -69,12 +70,17 @@ function DefaultRoute() {
 
   // If redirect_url is present, route to connect component
   if (redirectUrl) {
-    return <Navigate to={`/connect${search}`} replace />;
+    navigate(`/connect${search}`, { replace: true });
+    return null;
   }
 
   // When logged in and at root path, redirect to inventory
+  // Preserve all URL parameters during redirect
   if (account?.username) {
-    return <Navigate to={`/account/${account.username}/inventory`} replace />;
+    navigate(`/account/${account.username}/inventory${search}`, {
+      replace: true,
+    });
+    return null;
   }
 
   // If no account, render nothing (Authentication component will handle login)

@@ -2,7 +2,7 @@ import { useConnection } from "@/hooks/connection";
 import { getCallbacks } from "@/utils/connection/callbacks";
 import { ExecuteParams } from "@/utils/connection/execute";
 import { ResponseCodes } from "@cartridge/controller";
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { useRouteParams, useRouteCompletion } from "@/hooks/route";
@@ -52,6 +52,7 @@ export function Execute() {
   const [searchParams] = useSearchParams();
   const params = useRouteParams(parseExecuteParams);
   const handleCompletion = useRouteCompletion();
+  const { navigateToRoot } = useNavigation();
 
   // Execute has different cancel behavior - it resolves with ERROR instead of CANCELED
   useEffect(() => {
@@ -67,23 +68,10 @@ export function Execute() {
           code: 0,
         },
       });
-    });
-  }, [params?.reject, params?.resolve, setOnModalClose]);
 
-  // Handle cancellation when user navigates back
-  const handleCancel = useCallback(() => {
-    if (params?.resolve) {
-      params.resolve({
-        code: ResponseCodes.ERROR,
-        message: "User canceled",
-        error: {
-          message: "User canceled",
-          code: 0,
-        },
-      });
-    }
-    closeModal?.();
-  }, [params, closeModal]);
+      navigateToRoot();
+    });
+  }, [params?.reject, params?.resolve, setOnModalClose, navigateToRoot]);
 
   if (!params) {
     return null;
@@ -93,7 +81,7 @@ export function Execute() {
     <ConfirmTransaction
       transactions={params.params.transactions}
       executionError={params.params.error}
-      onCancel={handleCancel}
+      // onCancel={handleCancel}
       onComplete={(transaction_hash) => {
         // Check if there's a returnTo URL parameter and navigate there
         const returnTo = searchParams.get("returnTo");
