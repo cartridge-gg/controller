@@ -260,38 +260,18 @@ export function useConnectionValue() {
       setRpcUrl(decodeURIComponent(rpcUrl));
     }
 
-    // Create new params object
+    // Build params object, preserving previous values for any param that is null/empty
     const newParams = {
-      theme,
-      preset,
-      policies,
-      version,
-      project,
-      namespace,
-      tokens,
-      ref,
-      refGroup,
+      theme: theme || urlParamsRef.current?.theme || null,
+      preset: preset || urlParamsRef.current?.preset || null,
+      policies: policies || urlParamsRef.current?.policies || null,
+      version: version || urlParamsRef.current?.version || null,
+      project: project || urlParamsRef.current?.project || null,
+      namespace: namespace || urlParamsRef.current?.namespace || null,
+      tokens: erc20Param ? tokens : urlParamsRef.current?.tokens || tokens,
+      ref: ref || urlParamsRef.current?.ref || null,
+      refGroup: refGroup || urlParamsRef.current?.refGroup || null,
     };
-
-    // If we have a previous ref and new params are all empty (navigation without params),
-    // preserve the previous values instead of overwriting with nulls
-    if (urlParamsRef.current) {
-      const hasAnyNewParam =
-        theme ||
-        preset ||
-        policies ||
-        version ||
-        project ||
-        namespace ||
-        ref ||
-        refGroup ||
-        erc20Param;
-
-      if (!hasAnyNewParam) {
-        // No new params in URL, preserve previous values
-        return urlParamsRef.current;
-      }
-    }
 
     // Store the new params for future reference
     urlParamsRef.current = newParams;
