@@ -79,11 +79,28 @@ const CreateSessionLayout = ({
     [policies],
   );
 
+  // Check if spending limit has already been shown and approved for this origin
+  const getSpendingLimitStorageKey = useCallback(() => {
+    if (!policies?.project) return null;
+    return `spendingLimit:${policies.project}`;
+  }, [policies?.project]);
+
+  const hasSeenSpendingLimit = useMemo(() => {
+    const key = getSpendingLimitStorageKey();
+    if (!key) return false;
+    const stored = localStorage.getItem(key);
+    return stored === "approved" || stored === "dismissed";
+  }, [getSpendingLimitStorageKey]);
+
   const defaultStep = useMemo<"summary" | "spending-limit">(() => {
+    // Skip spending limit page if already seen and approved/dismissed
+    if (hasSeenSpendingLimit) {
+      return "summary";
+    }
     return policies?.verified && hasTokenApprovals
       ? "spending-limit"
       : "summary";
-  }, [policies?.verified, hasTokenApprovals]);
+  }, [policies?.verified, hasTokenApprovals, hasSeenSpendingLimit]);
 
   const [step, setStep] = useState<"summary" | "spending-limit">(defaultStep);
 
@@ -196,8 +213,26 @@ const CreateSessionLayout = ({
         policies={policies}
         isConnecting={isConnecting}
         error={error}
-        onBack={onCancel ? onCancel : () => setStep("summary")}
+        onBack={() => {
+          // Store that user dismissed the spending limit page
+          const key = getSpendingLimitStorageKey();
+          if (key) {
+            localStorage.setItem(key, "dismissed");
+          }
+
+          if (onCancel) {
+            onCancel();
+          } else {
+            setStep("summary");
+          }
+        }}
         onConnect={() => {
+          // Store that user approved the spending limit page
+          const key = getSpendingLimitStorageKey();
+          if (key) {
+            localStorage.setItem(key, "approved");
+          }
+
           void handlePrimaryAction();
         }}
       />

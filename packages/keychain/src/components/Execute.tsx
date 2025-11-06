@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { useRouteParams, useRouteCompletion } from "@/hooks/route";
+import { useNavigation } from "@/context";
 
 function parseExecuteParams(searchParams: URLSearchParams): {
   params: ExecuteParams;
@@ -68,7 +69,7 @@ export function Execute() {
           code: 0,
         },
       });
-
+      console.log("close modal");
       navigateToRoot();
     });
   }, [params?.reject, params?.resolve, setOnModalClose, navigateToRoot]);

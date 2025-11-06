@@ -69,6 +69,8 @@ export function NavigationProvider({
     navigate("/", { replace: true });
   }, [navigate]);
 
+  console.log(navigationStack);
+
   // Initialize with current location
   useEffect(() => {
     if (!isInitialized.current) {
