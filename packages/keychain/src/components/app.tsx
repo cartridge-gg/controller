@@ -84,7 +84,7 @@ function DefaultRoute() {
         reset: true,
       });
     }
-  }, [redirectUrl, account?.username, search, navigate]);
+  }, [redirectUrl, account?.username, navigate]);
 
   // If no account, render nothing (Authentication component will handle login)
   return null;
