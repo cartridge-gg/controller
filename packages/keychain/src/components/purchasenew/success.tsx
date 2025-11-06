@@ -53,7 +53,7 @@ export function PurchaseSuccessInner({
           title="You Received"
           items={items}
           isLoading={false}
-          showPrice={false}
+          showPrice={true}
         />
       </LayoutContent>
       <LayoutFooter>

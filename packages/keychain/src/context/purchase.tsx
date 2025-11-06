@@ -168,7 +168,7 @@ export interface PurchaseContextType {
   fetchFees: () => Promise<void>;
 }
 
-const PurchaseContext = createContext<PurchaseContextType | undefined>(
+export const PurchaseContext = createContext<PurchaseContextType | undefined>(
   undefined,
 );
 
