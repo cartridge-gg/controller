@@ -65,7 +65,9 @@ export function PurchaseSuccessInner({
         {transactionHash && (
           <ConfirmingTransaction
             title={`${acquisitionType === StarterpackAcquisitionType.Claimed ? "Claimed" : "Confirmed"} on Starknet`}
-            externalLink={getExplorer("starknet", transactionHash, isMainnet).url}
+            externalLink={
+              getExplorer("starknet", transactionHash, isMainnet).url
+            }
             isLoading={false}
           />
         )}
