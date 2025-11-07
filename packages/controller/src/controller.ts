@@ -69,6 +69,32 @@ export default class ControllerProvider extends BaseProvider {
       refGroup: urlParams?.get("ref_group") ?? undefined,
     };
 
+    // Handle automatic redirect to keychain for standalone flow
+    // When controller_redirect is present, automatically redirect to keychain
+    // This establishes first-party storage access for the keychain
+    // IMPORTANT: Check this BEFORE cleaning up URL parameters
+    if (typeof window !== "undefined") {
+      // Check if controller_redirect flag is present (any value or just the key)
+      const hasControllerRedirect = urlParams?.has("controller_redirect");
+      if (hasControllerRedirect) {
+        // Use configured keychain URL (not user-provided)
+        const keychainUrl = new URL(options.url || KEYCHAIN_URL);
+
+        // Add the current page as the redirect_url so keychain knows where to return
+        const redirectUrl = window.location.origin + window.location.pathname;
+        keychainUrl.searchParams.set("redirect_url", redirectUrl);
+
+        // Preserve the preset if it was configured in options
+        if (options.preset) {
+          keychainUrl.searchParams.set("preset", options.preset);
+        }
+
+        // Redirect to keychain
+        window.location.href = keychainUrl.toString();
+        return; // Stop further initialization
+      }
+    }
+
     // Auto-detect and set lastUsedConnector from URL parameter
     // This is set by the keychain after redirect flow completion
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
@@ -99,31 +125,6 @@ export default class ControllerProvider extends BaseProvider {
             window.location.hash;
           window.history.replaceState({}, "", newUrl);
         }
-      }
-    }
-
-    // Handle automatic redirect to keychain for standalone flow
-    // When controller_redirect is present, automatically redirect to keychain
-    // This establishes first-party storage access for the keychain
-    if (typeof window !== "undefined") {
-      // Check if controller_redirect flag is present (any value or just the key)
-      const hasControllerRedirect = urlParams?.has("controller_redirect");
-      if (hasControllerRedirect) {
-        // Use configured keychain URL (not user-provided)
-        const keychainUrl = new URL(options.url || KEYCHAIN_URL);
-
-        // Add the current page as the redirect_url so keychain knows where to return
-        const redirectUrl = window.location.origin + window.location.pathname;
-        keychainUrl.searchParams.set("redirect_url", redirectUrl);
-
-        // Preserve the preset if it was configured in options
-        if (options.preset) {
-          keychainUrl.searchParams.set("preset", options.preset);
-        }
-
-        // Redirect to keychain
-        window.location.href = keychainUrl.toString();
-        return; // Stop further initialization
       }
     }
 
