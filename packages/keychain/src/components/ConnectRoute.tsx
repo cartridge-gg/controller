@@ -32,35 +32,15 @@ export function ConnectRoute() {
     setShowSuccessScreen,
   } = useConnection();
 
-  // const [hasAutoConnected, setHasAutoConnected] = useState(() => {
-  //   // If we should show success, mark as auto-connected immediately
-  //   return shouldShowSuccess === "true";
-  // });
-
   const [showSuccess, setShowSuccess] = useState(() => {
     return showSuccessScreen && !!controller;
   });
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Check if we should show success screen (controller just created)
-  // This handles both initial mount and when controller becomes available after mount
-  useEffect(() => {
-    const checkShowSuccess = sessionStorage.getItem("showSuccess");
-
-    // If we should show success and controller exists
-    if (checkShowSuccess === "true" && controller) {
-      // If showSuccess is not already true, set it
-      if (!showSuccess) {
-        // Mark as auto-connected to prevent immediate auto-connect
-        setShowSuccess(true);
-      }
-    }
-  }, [controller, showSuccess, authMethod]);
-
   // Separate effect to handle timeout whenever showSuccess is true
   useEffect(() => {
-    if (showSuccess && controller && !timeoutRef.current) {
+    if (showSuccess && !timeoutRef.current) {
       timeoutRef.current = setTimeout(() => {
         // Reset hasAutoConnected so auto-connect can happen after success screen
         setShowSuccess(false);
