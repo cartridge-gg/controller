@@ -17,7 +17,6 @@ export function CryptoCheckout() {
     isCryptoLoading,
     displayError,
     selectedWallet,
-    selectedPlatform,
     costDetails,
     isFetchingFees,
     fetchFees,
@@ -50,7 +49,6 @@ export function CryptoCheckout() {
           <CostBreakdown
             rails={"crypto"}
             paymentUnit="usdc"
-            platform={selectedPlatform}
             walletType={selectedWallet?.type}
             costDetails={costDetails}
           />
