@@ -1,7 +1,7 @@
 import {
+  Button,
   Card,
   CardDescription,
-  CheckIcon,
   ExternalIcon,
   HeaderInner,
   LayoutContent,
@@ -74,6 +74,7 @@ export function Pending() {
   ) {
     return (
       <ClaimPendingInner
+        name={starterpackDetails?.name || "Items"}
         items={claimItems}
         transactionHash={transactionHash!}
       />
@@ -84,6 +85,7 @@ export function Pending() {
   if (!paymentMethod) {
     return (
       <OnchainPurchasePendingInner
+        name={starterpackDetails?.name || "Items"}
         items={purchaseItems}
         transactionHash={transactionHash!}
       />
@@ -92,6 +94,7 @@ export function Pending() {
 
   return (
     <PurchasePendingInner
+      name={starterpackDetails?.name || "Items"}
       items={purchaseItems}
       paymentId={paymentId}
       transactionHash={transactionHash}
@@ -103,6 +106,7 @@ export function Pending() {
 }
 
 export function PurchasePendingInner({
+  name,
   items,
   paymentMethod,
   paymentId,
@@ -110,6 +114,7 @@ export function PurchasePendingInner({
   explorer,
   wallet,
 }: {
+  name: string;
   items: Item[];
   paymentMethod?: PaymentMethod;
   transactionHash?: string;
@@ -161,9 +166,9 @@ export function PurchasePendingInner({
 
   return (
     <>
-      <HeaderInner title="Pending Confirmation" icon={<Spinner />} />
+      <HeaderInner title={`Purchasing ${name}`} />
       <LayoutContent>
-        <Receiving title="Receiving" items={items} isLoading={true} />
+        <Receiving title="Receiving" items={items} isLoading={false} />
       </LayoutContent>
       <LayoutFooter>
         {paymentMethod === "crypto" && (
@@ -194,15 +199,20 @@ export function PurchasePendingInner({
             </div>
           </div>
         )}
+        <Button className="w-full" variant="primary" disabled={true}>
+          Purchase
+        </Button>
       </LayoutFooter>
     </>
   );
 }
 
 export function OnchainPurchasePendingInner({
+  name,
   items,
   transactionHash,
 }: {
+  name: string;
   items: Item[];
   transactionHash: string;
 }) {
@@ -234,9 +244,9 @@ export function OnchainPurchasePendingInner({
 
   return (
     <>
-      <HeaderInner title="Pending Confirmation" icon={<Spinner />} />
+      <HeaderInner title={`Purchasing ${name}`} />
       <LayoutContent>
-        <Receiving title="Receiving" items={items} isLoading={true} />
+        <Receiving title="Receiving" items={items} isLoading={false} />
       </LayoutContent>
       <LayoutFooter>
         <ConfirmingTransaction
@@ -244,15 +254,20 @@ export function OnchainPurchasePendingInner({
           externalLink={getExplorer("starknet", transactionHash, isMainnet).url}
           isLoading={isPurchasing}
         />
+        <Button className="w-full" variant="primary" disabled={true}>
+          Purchase
+        </Button>
       </LayoutFooter>
     </>
   );
 }
 
 export function ClaimPendingInner({
+  name,
   items,
   transactionHash,
 }: {
+  name: string;
   items: Item[];
   transactionHash: string;
 }) {
@@ -284,9 +299,9 @@ export function ClaimPendingInner({
 
   return (
     <>
-      <HeaderInner title="Pending Confirmation" icon={<Spinner />} />
+      <HeaderInner title={`Purchasing ${name}`} />
       <LayoutContent>
-        <Receiving title="Receiving" items={items} isLoading={true} />
+        <Receiving title="Receiving" items={items} isLoading={false} />
       </LayoutContent>
       <LayoutFooter>
         <ConfirmingTransaction
@@ -294,6 +309,9 @@ export function ClaimPendingInner({
           externalLink={getExplorer("starknet", transactionHash, isMainnet).url}
           isLoading={isClaiming}
         />
+        <Button className="w-full" variant="primary" disabled={true}>
+          Purchase
+        </Button>
       </LayoutFooter>
     </>
   );
@@ -313,7 +331,7 @@ export function ConfirmingTransaction({
       <CardDescription className="flex flex-row items-start gap-3 items-center">
         <div className="flex justify-between w-full">
           <div className="text-foreground-200 font-normal text-xs flex items-center gap-1">
-            {isLoading ? <Spinner size="sm" /> : <CheckIcon size="sm" />}
+            {isLoading && <Spinner size="sm" />}
             {title}
           </div>
           {externalLink && (

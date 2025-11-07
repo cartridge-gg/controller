@@ -243,13 +243,13 @@ export function TokensProvider({
             // Fetch quote from Ekubo: how many token base units = 1 USDC
             const tokenAmount = await fetchSwapQuoteInUsdc(
               address,
-              BigInt(10 ** tokenDecimals),
+              BigInt(10 ** (tokenDecimals + 1)),
               network,
             );
 
             return {
               base: address,
-              amount: String(tokenAmount),
+              amount: String(tokenAmount / BigInt(10)),
               decimals: USDC_DECIMALS,
               quote: "USDC",
             };

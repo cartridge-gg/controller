@@ -36,7 +36,14 @@ import {
 } from "@cartridge/ui/utils";
 import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import { SemVer } from "semver";
 import {
@@ -210,6 +217,17 @@ export function useConnectionValue() {
   }, [controller, setRpcUrl]);
 
   const [searchParams] = useSearchParams();
+  const urlParamsRef = useRef<{
+    theme: string | null;
+    preset: string | null;
+    policies: string | null;
+    version: string | null;
+    project: string | null;
+    namespace: string | null;
+    tokens: string[];
+    ref: string | null;
+    refGroup: string | null;
+  }>();
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(searchParams);
@@ -242,17 +260,22 @@ export function useConnectionValue() {
       setRpcUrl(decodeURIComponent(rpcUrl));
     }
 
-    return {
-      theme,
-      preset,
-      policies,
-      version,
-      project,
-      namespace,
-      tokens,
-      ref,
-      refGroup,
+    // Build params object, preserving previous values for any param that is null/empty
+    const newParams = {
+      theme: theme || urlParamsRef.current?.theme || null,
+      preset: preset || urlParamsRef.current?.preset || null,
+      policies: policies || urlParamsRef.current?.policies || null,
+      version: version || urlParamsRef.current?.version || null,
+      project: project || urlParamsRef.current?.project || null,
+      namespace: namespace || urlParamsRef.current?.namespace || null,
+      tokens: erc20Param ? tokens : urlParamsRef.current?.tokens || tokens,
+      ref: ref || urlParamsRef.current?.ref || null,
+      refGroup: refGroup || urlParamsRef.current?.refGroup || null,
     };
+
+    // Store the new params for future reference
+    urlParamsRef.current = newParams;
+    return newParams;
   }, [searchParams]);
 
   // Fetch chain ID from RPC provider when rpcUrl changes
