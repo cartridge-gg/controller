@@ -450,6 +450,7 @@ describe("ConnectRoute", () => {
       await waitFor(() => {
         expect(mockSafeRedirect).toHaveBeenCalledWith(
           "https://example.com/callback",
+          true,
         );
       });
     });

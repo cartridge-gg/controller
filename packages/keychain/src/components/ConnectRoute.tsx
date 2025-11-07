@@ -96,8 +96,9 @@ export function ConnectRoute() {
     }
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
+    // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
-      safeRedirect(redirectUrl);
+      safeRedirect(redirectUrl, true);
       return;
     }
 
@@ -118,8 +119,9 @@ export function ConnectRoute() {
     }
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
+    // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
-      safeRedirect(redirectUrl);
+      safeRedirect(redirectUrl, true);
       return;
     }
 
