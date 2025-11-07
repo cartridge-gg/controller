@@ -906,6 +906,7 @@ export type CreateCryptoPaymentInput = {
 export type CreateLayerswapDepositInput = {
   amount: Scalars["BigInt"];
   layerswapFees?: InputMaybe<Scalars["BigInt"]>;
+  marginPercent?: InputMaybe<Scalars["Int"]>;
   sourceNetwork: LayerswapSourceNetwork;
   username: Scalars["String"];
 };
@@ -1805,16 +1806,9 @@ export type LayerswapPayment = {
   sourceNetwork: LayerswapSourceNetwork;
   sourceTokenAddress: Scalars["String"];
   sourceTokenAmount: Scalars["BigInt"];
-  status: LayerswapPaymentStatus;
+  status: LayerswapStatus;
   swapId: Scalars["String"];
 };
-
-export enum LayerswapPaymentStatus {
-  Confirmed = "CONFIRMED",
-  Expired = "EXPIRED",
-  Failed = "FAILED",
-  Pending = "PENDING",
-}
 
 export type LayerswapQuote = {
   __typename?: "LayerswapQuote";
@@ -1864,6 +1858,13 @@ export type LayerswapSourceToken = {
   status: Scalars["String"];
   symbol: Scalars["String"];
 };
+
+export enum LayerswapStatus {
+  Confirmed = "CONFIRMED",
+  Expired = "EXPIRED",
+  Failed = "FAILED",
+  Pending = "PENDING",
+}
 
 export type Lock = Node & {
   __typename?: "Lock";
@@ -3437,6 +3438,7 @@ export type Query = {
   layerswapPayment?: Maybe<LayerswapPayment>;
   layerswapQuote: LayerswapQuote;
   layerswapSources: Array<LayerswapSource>;
+  layerswapStatus: LayerswapStatus;
   me?: Maybe<Account>;
   merkleClaims: MerkleClaimConnection;
   merkleClaimsForAddress: Array<MerkleClaim>;
@@ -3582,12 +3584,17 @@ export type QueryLayerswapPaymentArgs = {
 };
 
 export type QueryLayerswapQuoteArgs = {
-  input: CreateLayerswapPaymentInput;
+  input: CreateLayerswapDepositInput;
 };
 
 export type QueryLayerswapSourcesArgs = {
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   token: Scalars["String"];
+};
+
+export type QueryLayerswapStatusArgs = {
+  isMainnet: Scalars["Boolean"];
+  swapId: Scalars["ID"];
 };
 
 export type QueryMerkleClaimsArgs = {
