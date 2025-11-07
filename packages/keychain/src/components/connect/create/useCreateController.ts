@@ -340,8 +340,8 @@ export function useCreateController({
         const urlSearchParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlSearchParams.get("redirect_url");
         if (redirectUrl) {
-          // Safely redirect to the specified URL
-          safeRedirect(redirectUrl);
+          // Safely redirect to the specified URL with lastUsedConnector param
+          safeRedirect(redirectUrl, true);
         }
       }
 
@@ -539,8 +539,8 @@ export function useCreateController({
       const urlSearchParams = new URLSearchParams(window.location.search);
       const redirectUrl = urlSearchParams.get("redirect_url");
       if (redirectUrl) {
-        // Safely redirect to the specified URL
-        safeRedirect(redirectUrl);
+        // Safely redirect to the specified URL with lastUsedConnector param
+        safeRedirect(redirectUrl, true);
       }
     },
     [
