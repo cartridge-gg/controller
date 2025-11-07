@@ -76,7 +76,15 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController } = useConnection();
+  const {
+    origin,
+    rpcUrl,
+    chainId,
+    setController,
+    setAuthMethod: setContextAuthMethod,
+    setIsNewUser,
+    setShowSuccessScreen,
+  } = useConnection();
 
   const params = useMemo(() => {
     return parseConnectParams(searchParams);
@@ -235,13 +243,19 @@ export function useCreateController({
         setController(controller);
         setIsLoading(false);
 
-        sessionStorage.setItem("showSuccess", "true");
+        setShowSuccessScreen(true);
 
         // Show success screen - parent component will handle closing/moving forward after 3 seconds
         onAuthenticationSuccess?.();
       }
     },
-    [setController, origin, onAuthenticationSuccess, setIsLoading],
+    [
+      setController,
+      origin,
+      onAuthenticationSuccess,
+      setIsLoading,
+      setShowSuccessScreen,
+    ],
   );
 
   const handleSignup = useCallback(
@@ -255,15 +269,15 @@ export function useCreateController({
       }
 
       // Store auth info for ConnectRoute to show success screen
-      sessionStorage.setItem("authMethod", JSON.stringify(authenticationMode));
-      sessionStorage.setItem("isNew", "true");
+      setContextAuthMethod(authenticationMode);
+      setIsNewUser(true);
 
       let signupResponse: SignupResponse | undefined;
       let signer: SignerInput | undefined;
       switch (authenticationMode) {
         case "webauthn":
           await signupWithWebauthn(username, doPopupFlow);
-          sessionStorage.setItem("showSuccess", "true");
+          setShowSuccessScreen(true);
           return;
         case "google":
         case "discord":
@@ -348,6 +362,9 @@ export function useCreateController({
       signupWithWalletConnect,
       passwordAuth,
       finishSignup,
+      setContextAuthMethod,
+      setIsNewUser,
+      setShowSuccessScreen,
     ],
   );
 
@@ -411,12 +428,18 @@ export function useCreateController({
       setController(loginRet.controller);
       setIsLoading(false);
 
-      sessionStorage.setItem("showSuccess", "true");
+      setShowSuccessScreen(true);
 
       // Show success screen - parent component will handle closing/moving forward after 3 seconds
       onAuthenticationSuccess?.();
     },
-    [origin, setController, onAuthenticationSuccess, setIsLoading],
+    [
+      origin,
+      setController,
+      onAuthenticationSuccess,
+      setIsLoading,
+      setShowSuccessScreen,
+    ],
   );
 
   const handleLogin = useCallback(
@@ -435,11 +458,8 @@ export function useCreateController({
       }
 
       // Store auth info for ConnectRoute to show success screen
-      sessionStorage.setItem(
-        "authMethod",
-        JSON.stringify(authenticationMethod),
-      );
-      sessionStorage.setItem("isNew", "false");
+      setContextAuthMethod(authenticationMethod);
+      setIsNewUser(false);
 
       let loginResponse: LoginResponse | undefined;
       switch (authenticationMethod) {
@@ -466,7 +486,7 @@ export function useCreateController({
             },
             !!isSlot,
           );
-          sessionStorage.setItem("showSuccess", "true");
+          setShowSuccessScreen(true);
           return;
         }
         case "google":
@@ -553,6 +573,9 @@ export function useCreateController({
       finishLogin,
       passwordAuth,
       setWaitingForConfirmation,
+      setContextAuthMethod,
+      setIsNewUser,
+      setShowSuccessScreen,
     ],
   );
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ResponseCodes, AuthOption } from "@cartridge/controller";
+import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
@@ -22,35 +22,23 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, verified } = useConnection();
+  const {
+    controller,
+    policies,
+    verified,
+    authMethod,
+    isNewUser,
+    showSuccessScreen,
+    setShowSuccessScreen,
+  } = useConnection();
 
-  // Check for success screen synchronously on mount (before first render)
-  const shouldShowSuccess = sessionStorage.getItem("showSuccess");
-  const authMethodStr = sessionStorage.getItem("authMethod");
-  const isNewStr = sessionStorage.getItem("isNew");
-
-  const [hasAutoConnected, setHasAutoConnected] = useState(() => {
-    // If we should show success, mark as auto-connected immediately
-    return shouldShowSuccess === "true";
-  });
+  // const [hasAutoConnected, setHasAutoConnected] = useState(() => {
+  //   // If we should show success, mark as auto-connected immediately
+  //   return shouldShowSuccess === "true";
+  // });
 
   const [showSuccess, setShowSuccess] = useState(() => {
-    return shouldShowSuccess === "true" && !!controller;
-  });
-
-  const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(() => {
-    if (authMethodStr) {
-      try {
-        return JSON.parse(authMethodStr) as AuthOption;
-      } catch (e) {
-        console.error("Failed to parse authMethod:", e);
-      }
-    }
-    return undefined;
-  });
-
-  const [isNew, setIsNew] = useState<boolean | undefined>(() => {
-    return isNewStr === "true";
+    return showSuccessScreen && !!controller;
   });
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -64,44 +52,18 @@ export function ConnectRoute() {
     if (checkShowSuccess === "true" && controller) {
       // If showSuccess is not already true, set it
       if (!showSuccess) {
-        setShowSuccess(true);
         // Mark as auto-connected to prevent immediate auto-connect
-        setHasAutoConnected(true);
-
-        // Get auth info if not already set
-        const authMethodStr = sessionStorage.getItem("authMethod");
-        const isNewStr = sessionStorage.getItem("isNew");
-
-        if (authMethodStr && !authMethod) {
-          try {
-            setAuthMethod(JSON.parse(authMethodStr) as AuthOption);
-          } catch (e) {
-            console.error("Failed to parse authMethod:", e);
-          }
-        }
-
-        if (isNewStr && isNew === undefined) {
-          setIsNew(isNewStr === "true");
-        }
-      } else {
-        // If already showing, still mark as auto-connected
-        setHasAutoConnected(true);
+        setShowSuccess(true);
       }
-
-      // Clear sessionStorage
-      sessionStorage.removeItem("showSuccess");
-      sessionStorage.removeItem("authMethod");
-      sessionStorage.removeItem("isNew");
     }
-  }, [controller, showSuccess, authMethod, isNew]);
+  }, [controller, showSuccess, authMethod]);
 
   // Separate effect to handle timeout whenever showSuccess is true
   useEffect(() => {
     if (showSuccess && controller && !timeoutRef.current) {
       timeoutRef.current = setTimeout(() => {
-        setShowSuccess(false);
         // Reset hasAutoConnected so auto-connect can happen after success screen
-        setHasAutoConnected(false);
+        setShowSuccess(false);
         timeoutRef.current = null;
       }, 1000);
     }
@@ -182,7 +144,7 @@ export function ConnectRoute() {
   // Handle cases where we can connect immediately (embedded mode only)
   // Don't run if we're showing success screen
   useEffect(() => {
-    if (!params || !controller || hasAutoConnected || showSuccess) {
+    if (!params || !controller || showSuccess) {
       return;
     }
 
@@ -193,7 +155,7 @@ export function ConnectRoute() {
     }
 
     // Mark as auto-connected immediately to prevent race conditions
-    setHasAutoConnected(true);
+    setShowSuccessScreen(true);
 
     // if no policies, we can connect immediately
     if (!policies) {
@@ -242,9 +204,9 @@ export function ConnectRoute() {
     handleCompletion,
     isStandalone,
     redirectUrl,
-    hasAutoConnected,
     showSuccess,
     hasTokenApprovals,
+    setShowSuccessScreen,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
@@ -254,7 +216,7 @@ export function ConnectRoute() {
 
   // Show success screen for 1 seconds when controller is first created
   if (showSuccess) {
-    return <ConnectionSuccess isNew={isNew} authMethod={authMethod} />;
+    return <ConnectionSuccess isNew={isNewUser} authMethod={authMethod} />;
   }
 
   // In standalone mode with redirect_url, show connect UI
