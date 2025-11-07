@@ -598,12 +598,8 @@ export function useConnectionValue() {
       setOrigin(currentOrigin);
 
       setParent({
-        close: () => {
-          throw new Error("Can't call this function when not in an iFrame");
-        },
-        reload: () => {
-          throw new Error("Can't call this function when not in an iFrame");
-        },
+        close: async () => {},
+        reload: async () => {},
         externalDetectWallets:
           iframeMethods.externalDetectWallets(currentOrigin),
         externalConnectWallet:
