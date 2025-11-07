@@ -102,6 +102,7 @@ describe("StandaloneConnect", () => {
       await waitFor(() => {
         expect(mockSafeRedirect).toHaveBeenCalledWith(
           "https://example.com/callback",
+          true,
         );
       });
     });
@@ -162,6 +163,7 @@ describe("StandaloneConnect", () => {
       await waitFor(() => {
         expect(mockSafeRedirect).toHaveBeenCalledWith(
           "https://example.com/callback",
+          true,
         );
       });
     });
