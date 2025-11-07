@@ -81,7 +81,9 @@ const createSession = async ({
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
       });
-      cleanupCallbacks(params.params.id);
+      if (params.params.id) {
+        cleanupCallbacks(params.params.id);
+      }
       handleCompletion();
     } else {
       // Fallback: just close modal if params not available (race condition)
@@ -124,7 +126,9 @@ const createSession = async ({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
     });
-    cleanupCallbacks(currentParams.params.id);
+    if (currentParams.params.id) {
+      cleanupCallbacks(currentParams.params.id);
+    }
     handleCompletion();
   } catch (e) {
     console.error("Failed to create verified session:", e);

@@ -232,7 +232,7 @@ export const CreateAccount = React.forwardRef<
           className,
         )}
       >
-        <div className="flex items-center justify-between gap-1 bg-background-200 rounded shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] z-10">
+        <div className="flex items-center justify-between gap-1 bg-background-200 rounded z-10">
           <div
             className="h-12 flex items-center justify-between gap-1 flex-1 cursor-pointer p-2"
             onClick={() => {

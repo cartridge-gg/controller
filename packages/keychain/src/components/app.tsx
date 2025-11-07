@@ -73,7 +73,7 @@ function DefaultRoute() {
   useEffect(() => {
     // If redirect_url is present, route to connect component
     if (redirectUrl) {
-      navigate(`/connect`, { replace: true });
+      navigate(`/connect${search}`, { replace: true });
       return;
     }
 
@@ -84,7 +84,7 @@ function DefaultRoute() {
         reset: true,
       });
     }
-  }, [redirectUrl, account?.username, navigate]);
+  }, [redirectUrl, account?.username, navigate, search]);
 
   // If no account, render nothing (Authentication component will handle login)
   return null;
