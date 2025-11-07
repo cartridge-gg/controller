@@ -141,11 +141,9 @@ const createSession = async ({
 export function useCreateController({
   isSlot,
   signers,
-  onAuthenticationSuccess,
 }: {
   isSlot?: boolean;
   signers?: AuthOptions;
-  onAuthenticationSuccess?: () => void;
 }) {
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -347,9 +345,6 @@ export function useCreateController({
           }
         }
       }
-
-      // Call the authentication success callback
-      onAuthenticationSuccess?.();
     },
     [
       setController,
@@ -357,7 +352,6 @@ export function useCreateController({
       policies,
       handleCompletion,
       params,
-      onAuthenticationSuccess,
       closeModal,
       searchParams,
     ],
@@ -538,9 +532,6 @@ export function useCreateController({
         });
       }
 
-      // Call the authentication success callback
-      onAuthenticationSuccess?.();
-
       // Only redirect if we auto-created the session
       // Otherwise, user needs to see consent screen or spending limit screen first
       if (shouldAutoCreateSession) {
@@ -558,7 +549,6 @@ export function useCreateController({
       policies,
       handleCompletion,
       params,
-      onAuthenticationSuccess,
       closeModal,
       searchParams,
     ],
