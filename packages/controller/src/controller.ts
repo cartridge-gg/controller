@@ -498,8 +498,8 @@ export default class ControllerProvider extends BaseProvider {
     keychainUrl.searchParams.set("redirect_url", redirectUrl);
 
     // Add preset if provided
-    if (options.preset) {
-      keychainUrl.searchParams.set("preset", options.preset);
+    if (this.options.preset) {
+      keychainUrl.searchParams.set("preset", this.options.preset);
     }
 
     // Add controller configuration parameters
