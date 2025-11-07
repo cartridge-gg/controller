@@ -421,8 +421,8 @@ export function useConnectionValue() {
 
     const allowedOrigins = toArray(configData.origin as string | string[]);
 
-    // In standalone mode (no parent origin), verify preset if redirect_url matches preset whitelist
-    if (!origin) {
+    // In standalone mode (not iframe), verify preset if redirect_url matches preset whitelist
+    if (!isIframe()) {
       const searchParams = new URLSearchParams(window.location.search);
       const redirectUrl = searchParams.get("redirect_url");
 
@@ -453,10 +453,14 @@ export function useConnectionValue() {
 
     // Embedded mode: verify against parent origin
     // Always consider localhost as verified for development (not 127.0.0.1)
-    const isLocalhost = origin.includes("localhost");
-    const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
-    const finalVerified = isLocalhost || isOriginAllowed;
-    setVerified(finalVerified);
+    if (origin) {
+      const isLocalhost = origin.includes("localhost");
+      const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
+      const finalVerified = isLocalhost || isOriginAllowed;
+      setVerified(finalVerified);
+    } else {
+      setVerified(false);
+    }
   }, [origin, configData, isConfigLoading]);
 
   // Store referral data when URL params are available
