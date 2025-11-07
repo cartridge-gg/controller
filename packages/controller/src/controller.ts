@@ -69,6 +69,24 @@ export default class ControllerProvider extends BaseProvider {
       refGroup: urlParams?.get("ref_group") ?? undefined,
     };
 
+    // Auto-detect and set lastUsedConnector from URL parameter
+    // This is set by the keychain after redirect flow completion
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      const lastUsedConnector = urlParams?.get("lastUsedConnector");
+      if (lastUsedConnector) {
+        localStorage.setItem("lastUsedConnector", lastUsedConnector);
+        // Clean up the URL by removing the parameter
+        if (urlParams && window.history?.replaceState) {
+          urlParams.delete("lastUsedConnector");
+          const newUrl =
+            window.location.pathname +
+            (urlParams.toString() ? "?" + urlParams.toString() : "") +
+            window.location.hash;
+          window.history.replaceState({}, "", newUrl);
+        }
+      }
+    }
+
     this.options = { ...options, chains, defaultChainId };
 
     this.initializeChains(chains);

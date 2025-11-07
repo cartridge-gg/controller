@@ -24,8 +24,8 @@ export function StandaloneConnect({
     }
 
     setIsConnecting(true);
-    // Safely redirect to the specified URL
-    safeRedirect(redirectUrl);
+    // Safely redirect to the specified URL with lastUsedConnector param
+    safeRedirect(redirectUrl, true);
   }, [controller, redirectUrl]);
 
   if (!controller) {
