@@ -14,7 +14,7 @@ import { ControllerErrorAlert } from "@/components/ErrorAlert";
 export function CryptoCheckout() {
   const {
     purchaseItems,
-    isCryptoLoading,
+    isDepositLoading,
     displayError,
     selectedWallet,
     selectedPlatform,
@@ -58,7 +58,7 @@ export function CryptoCheckout() {
         {displayError && <ControllerErrorAlert error={displayError} />}
         <Button
           onClick={onPurchase}
-          isLoading={isCryptoLoading || isFetchingFees}
+          isLoading={isDepositLoading || isFetchingFees}
           disabled={!!displayError}
         >
           Purchase

@@ -13,7 +13,6 @@ import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import { useMemo } from "react";
 import CheckoutForm from "./StripeCheckout";
-import { CryptoCheckout } from "./CryptoCheckout";
 import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { PaymentMethod } from "./PaymentMethod";
 import { Supply } from "./Supply";
@@ -33,9 +32,7 @@ export function Purchase(props: PurchaseCreditsProps) {
     state,
     clientSecret,
     pricingDetails,
-    wholeCredits,
     selectedWallet,
-    walletAddress,
     displayError,
     stripePromise,
     isStripeLoading,
@@ -50,13 +47,7 @@ export function Purchase(props: PurchaseCreditsProps) {
     onCompletePurchase,
   } = usePurchase(props);
 
-  const {
-    wallets,
-    type,
-    starterpackDetails,
-    teamId,
-    title: propsTitle,
-  } = props;
+  const { wallets, type, starterpackDetails, title: propsTitle } = props;
 
   const title = useMemo(() => {
     if (propsTitle) {
@@ -104,18 +95,6 @@ export function Purchase(props: PurchaseCreditsProps) {
     );
   }
 
-  if (state === PurchaseState.CRYPTO_CHECKOUT) {
-    return (
-      <CryptoCheckout
-        walletAddress={walletAddress!}
-        selectedWallet={selectedWallet!}
-        wholeCredits={wholeCredits}
-        starterpackDetails={starterpackDetails}
-        teamId={teamId}
-        onComplete={onCompletePurchase}
-      />
-    );
-  }
   // const isCloseable = isSlot
   //   ? false
   //   : state === PurchaseState.SELECTION || state === PurchaseState.SUCCESS;
