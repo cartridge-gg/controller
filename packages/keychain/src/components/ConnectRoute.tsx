@@ -59,7 +59,9 @@ export function ConnectRoute() {
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
     });
-    cleanupCallbacks(params.params.id);
+    if (params.params.id) {
+      cleanupCallbacks(params.params.id);
+    }
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     if (isStandalone && redirectUrl) {
@@ -79,7 +81,9 @@ export function ConnectRoute() {
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
     });
-    cleanupCallbacks(params.params.id);
+    if (params.params.id) {
+      cleanupCallbacks(params.params.id);
+    }
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     if (isStandalone && redirectUrl) {
