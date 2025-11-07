@@ -49,7 +49,32 @@ export function PurchaseStarterpack() {
     }
   }, [starterpackId, isStarterpackLoading, setStarterpack]);
 
-  if (isStarterpackLoading || !details) {
+  if (isStarterpackLoading) {
+    return <LoadingState />;
+  }
+
+  if (!details && displayError) {
+    return (
+      <>
+        <HeaderInner
+          title="Starterpack Error"
+          description={
+            <span className="text-foreground-200 text-xs font-normal">
+              Unable to load starterpack
+            </span>
+          }
+          hideIcon
+        />
+        <LayoutContent />
+        <LayoutFooter>
+          <ErrorAlert title="Error" description={displayError.message} />
+        </LayoutFooter>
+      </>
+    );
+  }
+
+  // If no details and no error, keep showing loading (shouldn't happen)
+  if (!details) {
     return <LoadingState />;
   }
 
@@ -76,7 +101,6 @@ export function PurchaseStarterpack() {
         description={details.description}
         items={details.items}
         quote={details.quote}
-        isQuoteLoading={details.isQuoteLoading}
         isMainnet={isMainnet}
         error={displayError}
       />
@@ -235,7 +259,6 @@ export function OnchainStarterPackInner({
   description,
   items,
   quote,
-  isQuoteLoading,
   isMainnet,
   error,
 }: {
@@ -253,7 +276,6 @@ export function OnchainStarterPackInner({
       decimals: number;
     };
   } | null;
-  isQuoteLoading?: boolean;
   isMainnet?: boolean;
   error?: Error | null;
 }) {
@@ -302,7 +324,7 @@ export function OnchainStarterPackInner({
         {error ? (
           <ErrorAlert title="Error" description={error.message} />
         ) : quote ? (
-          <OnchainCostBreakdown quote={quote} isQuoteLoading={isQuoteLoading} />
+          <OnchainCostBreakdown quote={quote} />
         ) : (
           <Card className="gap-3">
             <div className="flex flex-row gap-3 h-[40px]">

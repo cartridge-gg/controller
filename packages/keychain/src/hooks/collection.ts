@@ -69,7 +69,7 @@ export function useCollection({
       const rawBalances = await Torii.fetchBalances(
         client,
         [contractAddress],
-        tokenIds.length > 0 ? [] : [address],
+        [address],
         tokenIds.length > 0 ? [...tokenIds] : [],
         LIMIT,
       );

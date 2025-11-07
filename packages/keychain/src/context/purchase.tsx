@@ -146,6 +146,7 @@ export interface PurchaseContextType {
   } | null;
   swapQuote: SwapQuote | null; // Full swap quote for executing the swap
   isFetchingConversion: boolean;
+  conversionError: Error | null;
 
   // Actions
   setUsdAmount: (amount: number) => void;
@@ -167,7 +168,7 @@ export interface PurchaseContextType {
   fetchFees: () => Promise<void>;
 }
 
-const PurchaseContext = createContext<PurchaseContextType | undefined>(
+export const PurchaseContext = createContext<PurchaseContextType | undefined>(
   undefined,
 );
 
@@ -218,6 +219,7 @@ export const PurchaseProvider = ({
   } | null>(null);
   const [swapQuote, setSwapQuote] = useState<SwapQuote | null>(null);
   const [isFetchingConversion, setIsFetchingConversion] = useState(false);
+  const [conversionError, setConversionError] = useState<Error | null>(null);
 
   // Wrapper for setSelectedToken that ensures we always have a valid token
   const setSelectedToken = useCallback((token: TokenOption | undefined) => {
@@ -273,7 +275,7 @@ export const PurchaseProvider = ({
     return USDC_ADDRESSES[network];
   }, [controller]);
 
-  // Available tokens for onchain purchases (ETH, STRK, USDC)
+  // Available tokens for onchain purchases (ETH, STRK, USDC, and payment token if different)
   const availableTokens = useMemo(() => {
     if (!controller) return [];
 
@@ -289,6 +291,27 @@ export const PurchaseProvider = ({
       },
     ];
 
+    // Add payment token from quote if it's not already in the list
+    if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
+      const quote = starterpackDetails.quote;
+      if (quote) {
+        const paymentTokenAddress = getChecksumAddress(quote.paymentToken);
+        const isAlreadyIncluded = tokenMetadata.some(
+          (token) => getChecksumAddress(token.address) === paymentTokenAddress,
+        );
+
+        if (!isAlreadyIncluded) {
+          tokenMetadata.push({
+            address: paymentTokenAddress,
+            name: quote.paymentTokenMetadata.symbol,
+            symbol: quote.paymentTokenMetadata.symbol,
+            decimals: quote.paymentTokenMetadata.decimals,
+            icon: "", // No icon for now, as mentioned by user
+          });
+        }
+      }
+    }
+
     const tokens: TokenOption[] = tokenMetadata.map((token) => ({
       name: token.name,
       symbol: token.symbol,
@@ -302,7 +325,7 @@ export const PurchaseProvider = ({
     }));
 
     return tokens;
-  }, [controller, usdcAddress]);
+  }, [controller, usdcAddress, starterpackDetails]);
 
   // Default to USDC if available, otherwise first token
   const defaultToken = useMemo(() => {
@@ -354,6 +377,7 @@ export const PurchaseProvider = ({
     setSelectedToken(undefined);
     setConvertedPrice(null);
     setSwapQuote(null);
+    setConversionError(null);
   }, [starterpack, setSelectedToken]);
 
   // Fetch conversion price when selected token or quote changes
@@ -372,6 +396,7 @@ export const PurchaseProvider = ({
       setConvertedPrice(null);
       setSwapQuote(null);
       setIsFetchingConversion(false);
+      setConversionError(null);
       return;
     }
 
@@ -388,6 +413,7 @@ export const PurchaseProvider = ({
     // Fetch new conversion price (we need the full swap quote for execution)
     const fetchConversion = async () => {
       setIsFetchingConversion(true);
+      setConversionError(null); // Clear previous errors
       try {
         const network = chainIdToEkuboNetwork(controller.chainId());
         const fetchedSwapQuote = await fetchSwapQuote(
@@ -411,10 +437,12 @@ export const PurchaseProvider = ({
           },
         });
         setSwapQuote(fetchedSwapQuote);
+        setConversionError(null);
       } catch (error) {
         console.error("Failed to fetch conversion price:", error);
         setConvertedPrice(null);
         setSwapQuote(null);
+        setConversionError(error as Error);
       } finally {
         setIsFetchingConversion(false);
       }
@@ -444,7 +472,11 @@ export const PurchaseProvider = ({
     acquisitionType: backendAcquisitionType,
     isLoading: isBackendLoading,
     error: backendError,
-  } = useStarterPack(source === "backend" ? String(starterpack) : undefined);
+  } = useStarterPack(
+    source === "backend" && starterpack !== undefined
+      ? String(starterpack)
+      : undefined,
+  );
 
   // Onchain hook (Smart contract) - only run if onchain source
   const {
@@ -454,7 +486,9 @@ export const PurchaseProvider = ({
     isQuoteLoading: isOnchainQuoteLoading,
     error: onchainError,
   } = useStarterPackOnchain(
-    source === "onchain" ? Number(starterpack) : undefined,
+    source === "onchain" && starterpack !== undefined
+      ? Number(starterpack)
+      : undefined,
   );
 
   // Unified loading and error state
@@ -961,6 +995,7 @@ export const PurchaseProvider = ({
     convertedPrice,
     swapQuote,
     isFetchingConversion,
+    conversionError,
 
     // Setters
     setUsdAmount,
