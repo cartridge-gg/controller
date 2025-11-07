@@ -3593,7 +3593,7 @@ export type QueryLayerswapSourcesArgs = {
 };
 
 export type QueryLayerswapStatusArgs = {
-  isMainnet: Scalars["Boolean"];
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
   swapId: Scalars["ID"];
 };
 
