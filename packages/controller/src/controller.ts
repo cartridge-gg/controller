@@ -80,8 +80,12 @@ export default class ControllerProvider extends BaseProvider {
         // Use configured keychain URL (not user-provided)
         const keychainUrl = new URL(options.url || KEYCHAIN_URL);
 
-        // Add the current page as the redirect_url so keychain knows where to return
-        const redirectUrl = window.location.origin + window.location.pathname;
+        // Build redirect URL preserving all query params and hash except controller_redirect
+        // This matches the behavior of open() method which uses window.location.href
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.delete("controller_redirect");
+        const redirectUrl = currentUrl.toString();
+
         keychainUrl.searchParams.set("redirect_url", redirectUrl);
 
         // Preserve the preset if it was configured in options
