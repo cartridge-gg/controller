@@ -1,4 +1,4 @@
-import { type MerkleDrop } from "@/hooks/starterpack";
+import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
 import {
   ArbitrumColorIcon,
   BaseColorIcon,
@@ -8,7 +8,13 @@ import {
   OptimismColorIcon,
   StarknetColorIcon,
 } from "@cartridge/ui";
-import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
+
+// Merkle drop type for display purposes
+type MerkleDrop = {
+  key: string;
+  network: MerkleDropNetwork;
+  description?: string | null;
+};
 import React, { useCallback } from "react";
 
 export const MerkleDrops = React.forwardRef<

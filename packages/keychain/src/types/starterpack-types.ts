@@ -1,36 +1,12 @@
-import { StarterPackItem } from "@cartridge/controller";
 import {
-  MintAllowance,
   StarterpackAcquisitionType,
-  MerkleDropNetwork,
 } from "@cartridge/ui/utils/api/cartridge";
 
 /**
- * Discriminated union for starterpack sources
- */
-export type StarterpackSource = "backend" | "onchain";
-
-/**
- * Backend starterpack (existing flow via GraphQL)
- */
-export interface BackendStarterpackDetails {
-  source: "backend";
-  id: string; // UUID from backend
-  name: string;
-  description?: string;
-  priceUsd: number;
-  supply?: number;
-  mintAllowance?: MintAllowance;
-  acquisitionType: StarterpackAcquisitionType;
-  starterPackItems: StarterPackItem[];
-  merkleDrops?: MerkleDrop[];
-}
-
-/**
- * Onchain starterpack (new flow via smart contract)
+ * Onchain starterpack (smart contract flow)
+ * Supports both paid and future free acquisition types
  */
 export interface OnchainStarterpackDetails {
-  source: "onchain";
   id: number; // Numeric ID from contract
   name: string;
   description: string;
@@ -38,15 +14,14 @@ export interface OnchainStarterpackDetails {
   items: OnchainItem[];
   quote: OnchainQuote | null;
   isQuoteLoading: boolean;
-  acquisitionType: StarterpackAcquisitionType.Paid;
+  acquisitionType: StarterpackAcquisitionType;
 }
 
 /**
- * Unified starterpack details (discriminated union)
+ * Starterpack details - currently only onchain starterpacks
+ * Merkle claims use a separate flow via useMerkleClaim hook
  */
-export type StarterpackDetails =
-  | BackendStarterpackDetails
-  | OnchainStarterpackDetails;
+export type StarterpackDetails = OnchainStarterpackDetails;
 
 /**
  * Onchain item metadata
@@ -85,48 +60,11 @@ export interface OnchainQuote {
 }
 
 /**
- * Merkle drop for claims (backend only)
+ * Type guard for onchain starterpacks
+ * Currently all starterpacks are onchain, so this always returns true if details exist
  */
-export interface MerkleDrop {
-  key: string;
-  network: MerkleDropNetwork;
-  contract: string;
-  entrypoint: string;
-  merkleRoot: string;
-  description?: string | null;
-}
-
-/**
- * Type guards
- */
-export function isBackendStarterpack(
-  details: StarterpackDetails | undefined,
-): details is BackendStarterpackDetails {
-  return details?.source === "backend";
-}
-
 export function isOnchainStarterpack(
   details: StarterpackDetails | undefined,
 ): details is OnchainStarterpackDetails {
-  return details?.source === "onchain";
-}
-
-/**
- * Detects whether a starterpack ID is for backend or onchain
- * - Numeric IDs (or strings that are purely numeric) → onchain
- * - UUID/string IDs → backend
- */
-export function detectStarterpackSource(
-  id: string | number | undefined,
-): StarterpackSource {
-  if (id === undefined) return "backend"; // default
-
-  // If it's already a number, it's onchain
-  if (typeof id === "number") return "onchain";
-
-  // If string is purely numeric, it's onchain
-  if (/^\d+$/.test(id)) return "onchain";
-
-  // Otherwise it's a backend UUID
-  return "backend";
+  return details !== undefined;
 }

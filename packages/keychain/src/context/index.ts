@@ -10,13 +10,10 @@ export type {
 } from "./purchase";
 export type {
   StarterpackDetails,
-  BackendStarterpackDetails,
   OnchainStarterpackDetails,
   OnchainItem,
   OnchainQuote,
 } from "../types/starterpack-types";
 export {
-  isBackendStarterpack,
   isOnchainStarterpack,
-  detectStarterpackSource,
 } from "../types/starterpack-types";

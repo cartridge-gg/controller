@@ -1,7 +1,10 @@
 import { ExternalWallet } from "@cartridge/controller";
 import { Button, CreditCardIcon, SparklesIcon } from "@cartridge/ui";
 import { useMemo } from "react";
-import { MintAllowance, StarterPackDetails } from "@/hooks/starterpack";
+import { MintAllowance } from "@cartridge/ui/utils/api/cartridge";
+
+// Legacy type - these old purchase components are deprecated
+type StarterPackDetails = { id?: string };
 
 export type PaymentMethodProps = {
   starterpackDetails?: StarterPackDetails;

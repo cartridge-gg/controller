@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
-import { useStarterPack } from "@/hooks/starterpack";
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "../components/funding/AmountSelection";
@@ -26,11 +25,10 @@ export function usePurchase({
     connectWallet,
   } = useWallets();
 
-  const {
-    claim,
-    isClaiming,
-    isLoading: isStarterpackLoading,
-  } = useStarterPack(starterpackDetails?.id);
+  // Legacy purchase hook - merkle claims now have dedicated flow via useMerkleClaim
+  const claim = async () => {};
+  const isClaiming = false;
+  const isStarterpackLoading = false;
 
   const [clientSecret, setClientSecret] = useState("");
   const [pricingDetails, setPricingDetails] = useState<PricingDetails | null>(
@@ -38,7 +36,7 @@ export function usePurchase({
   );
   const [state, setState] = useState<PurchaseState>(initState);
   const [wholeCredits, setWholeCredits] = useState<number>(
-    usdToCredits(starterpackDetails?.priceUsd || USD_AMOUNTS[0]),
+    usdToCredits(USD_AMOUNTS[0]),
   );
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();

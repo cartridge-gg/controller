@@ -1,9 +1,8 @@
 import {
   useNavigation,
   usePurchaseContext,
-  type BackendStarterpackDetails,
 } from "@/context";
-import { MerkleDrop } from "@/hooks/starterpack";
+import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
 import { humanizeString } from "@cartridge/controller";
 import {
   ArbitrumIcon,
@@ -21,22 +20,27 @@ import {
   StarknetIcon,
   Thumbnail,
 } from "@cartridge/ui";
-import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
+
+type MerkleDrop = {
+  key: string;
+  network: MerkleDropNetwork;
+  description?: string | null;
+};
 import { useCallback } from "react";
 
 export const Collections = () => {
   const { isStarterpackLoading, starterpackDetails: detailsRaw } =
     usePurchaseContext();
 
-  // MerkleDrops are backend-only (part of claims), so we can safely cast
-  const details = detailsRaw as BackendStarterpackDetails | undefined;
+  // MerkleDrops are for merkle claim flow - extract from raw details
+  const details = detailsRaw as { name?: string; merkleDrops?: MerkleDrop[] } | undefined;
 
   if (isStarterpackLoading || !details) {
     return <></>;
   }
 
   return (
-    <CollectionsInner name={details.name} merkleDrops={details.merkleDrops} />
+    <CollectionsInner name={details.name || "Collections"} merkleDrops={details.merkleDrops} />
   );
 };
 

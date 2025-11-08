@@ -17,11 +17,9 @@ import { useMerkleClaim, MerkleClaim } from "@/hooks/merkle-claim";
 import { Item, ItemType, usePurchaseContext } from "@/context/purchase";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
-import { StarterpackReceiving } from "../starterpack/starterpack";
-import { ExternalWalletType, StarterPackItemType } from "@cartridge/controller";
+import { ExternalWalletType, StarterPackItemType, StarterPackItem } from "@cartridge/controller";
 import { getWallet } from "../wallet/config";
 import { formatAddress } from "@cartridge/ui/utils";
-import type { BackendStarterpackDetails } from "@/context";
 
 export function Claim() {
   const { keys, address: externalAddress, type } = useParams();
@@ -32,8 +30,12 @@ export function Claim() {
     setTransactionHash,
   } = usePurchaseContext();
 
+  // Claim flow doesn't use starterpack details from purchase context
+  // It directly uses merkle claim data
   const starterpackDetails = starterpackDetailsRaw as
-    | BackendStarterpackDetails
+    | {
+        starterPackItems?: StarterPackItem[];
+      }
     | undefined;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -248,10 +250,11 @@ export function Claim() {
           />
         ) : (
           <div className="flex flex-col gap-4">
-            <StarterpackReceiving
-              mintAllowance={starterpackDetails?.mintAllowance}
-              starterpackItems={filteredStarterpackItems}
-            />
+            {filteredStarterpackItems && filteredStarterpackItems.length > 0 && (
+              <StarterpackReceiving
+                starterpackItems={filteredStarterpackItems}
+              />
+            )}
             <div className="flex flex-col gap-2">
               <div className="text-foreground-400 text-xs font-semibold">
                 Your Collections
@@ -346,5 +349,31 @@ export const LoadingState = () => {
       <Skeleton className="min-h-[180px] w-full rounded" />
       <Skeleton className="min-h-[180px] w-full rounded" />
     </LayoutContent>
+  );
+};
+
+const StarterpackReceiving = ({
+  starterpackItems = [],
+}: {
+  starterpackItems: StarterPackItem[];
+}) => {
+  return (
+    <div className="flex flex-col gap-2">
+      <h1 className="text-xs font-semibold text-foreground-400">
+        You receive
+      </h1>
+      <div className="flex flex-col gap-2">
+        {starterpackItems
+          .filter((item) => item.type === StarterPackItemType.NONFUNGIBLE)
+          .map((item, index) => (
+            <div key={index} className="text-sm">{item.name}</div>
+          ))}
+        {starterpackItems
+          .filter((item) => item.type === StarterPackItemType.FUNGIBLE)
+          .map((item, index) => (
+            <div key={index} className="text-sm">{item.name}</div>
+          ))}
+      </div>
+    </div>
   );
 };

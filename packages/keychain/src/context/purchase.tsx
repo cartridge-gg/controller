@@ -47,8 +47,7 @@ import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useLayerswapDeposit } from "@/hooks/payments/crypto";
-import { useStarterPack } from "@/hooks/starterpack";
-import { useStarterPackOnchain } from "@/hooks/starterpack-onchain";
+import { useOnchainStarterpack } from "@/hooks/paid-starterpack";
 import { depositToLayerswapInput } from "@/utils/payments";
 import {
   CreateLayerswapDepositInput,
@@ -56,7 +55,6 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import {
   StarterpackDetails,
-  detectStarterpackSource,
 } from "@/types/starterpack-types";
 
 export interface CostDetails {
@@ -458,43 +456,20 @@ export const PurchaseProvider = ({
     swapQuote,
   ]);
 
-  // Detect which source (backend or onchain) based on starterpack ID
-  const source = detectStarterpackSource(starterpack);
-
-  // Backend hook (GraphQL) - only run if backend source
-  const {
-    name: backendName,
-    items: backendItems,
-    supply: backendSupply,
-    mintAllowance: backendMintAllowance,
-    merkleDrops: backendMerkleDrops,
-    priceUsd: backendPriceUsd,
-    acquisitionType: backendAcquisitionType,
-    isLoading: isBackendLoading,
-    error: backendError,
-  } = useStarterPack(
-    source === "backend" && starterpack !== undefined
-      ? String(starterpack)
-      : undefined,
-  );
-
-  // Onchain hook (Smart contract) - only run if onchain source
+  // Onchain hook (Smart contract) - all starterpacks are now onchain
   const {
     metadata: onchainMetadata,
     quote: onchainQuote,
     isLoading: isOnchainLoading,
     isQuoteLoading: isOnchainQuoteLoading,
     error: onchainError,
-  } = useStarterPackOnchain(
-    source === "onchain" && starterpack !== undefined
-      ? Number(starterpack)
-      : undefined,
+  } = useOnchainStarterpack(
+    starterpack !== undefined ? Number(starterpack) : undefined,
   );
 
-  // Unified loading and error state
-  const isStarterpackLoading =
-    source === "backend" ? isBackendLoading : isOnchainLoading;
-  const starterpackError = source === "backend" ? backendError : onchainError;
+  // Loading and error state
+  const isStarterpackLoading = isOnchainLoading;
+  const starterpackError = onchainError;
 
   const [swapInput, setSwapInput] = useState<CreateLayerswapDepositInput>();
 
@@ -504,22 +479,8 @@ export const PurchaseProvider = ({
         setSwapInput(undefined);
         return;
       }
-      // Skip Layerswap input creation for claim-only starterpacks
-      // Claim flows don't need payment/swap setup since they're merkle drops
-      // Note: Onchain starterpacks are always PAID, only backend can be CLAIMED
-      if (
-        source === "backend" &&
-        backendAcquisitionType === StarterpackAcquisitionType.Claimed
-      ) {
-        setSwapInput(undefined);
-        return;
-      }
 
-      if (
-        source === "onchain" &&
-        selectedPlatform !== "starknet" &&
-        depositAmount
-      ) {
+      if (selectedPlatform !== "starknet" && depositAmount) {
         const input = depositToLayerswapInput(
           depositAmount,
           Number(layerswapFees || 0),
@@ -538,87 +499,42 @@ export const PurchaseProvider = ({
     starterpack,
     selectedPlatform,
     isMainnet,
-    source,
-    backendAcquisitionType,
   ]);
 
-  // Transform data based on source (backend vs onchain)
+  // Transform onchain starterpack data
   useEffect(() => {
-    if (!starterpack) return;
+    if (!starterpack || !onchainMetadata) return;
 
-    if (source === "backend") {
-      // Backend flow (existing)
-      const purchaseItems: Item[] = backendItems.map((item) => {
-        const itemPriceUsd = item.price
-          ? usdcToUsd(item.price) * (item.amount || 1)
-          : 0;
+    // Onchain flow - show metadata as soon as it's available
+    const purchaseItems: Item[] = onchainMetadata.items.map((item) => {
+      // TODO: Calculate price per item if needed
+      return {
+        title: item.name,
+        subtitle: item.description,
+        icon: item.imageUri,
+        value: 0, // Will be calculated from quote
+        type: ItemType.NFT,
+      };
+    });
 
-        return {
-          title: item.name,
-          subtitle: item.description,
-          icon: item.iconURL,
-          value: itemPriceUsd,
-          type: ItemType.NFT,
-        };
-      });
+    // Convert total cost from USDC (6 decimals) to USD if quote is available
+    const totalUsd = onchainQuote ? usdcToUsd(onchainQuote.totalCost) : 0;
 
-      setPurchaseItems(purchaseItems);
-      setUsdAmount(backendPriceUsd);
+    setPurchaseItems(purchaseItems);
+    setUsdAmount(totalUsd);
 
-      setStarterpackDetails({
-        source: "backend",
-        id: String(starterpack),
-        name: backendName,
-        starterPackItems: backendItems,
-        supply: backendSupply,
-        mintAllowance: backendMintAllowance,
-        merkleDrops: backendMerkleDrops,
-        priceUsd: backendPriceUsd,
-        acquisitionType: backendAcquisitionType,
-      });
-    } else if (source === "onchain" && onchainMetadata) {
-      // Onchain flow (new) - show metadata as soon as it's available
-      const purchaseItems: Item[] = onchainMetadata.items.map((item) => {
-        // TODO: Calculate price per item if needed
-        return {
-          title: item.name,
-          subtitle: item.description,
-          icon: item.imageUri,
-          value: 0, // Will be calculated from quote
-          type: ItemType.NFT,
-        };
-      });
-
-      // Convert total cost from USDC (6 decimals) to USD if quote is available
-      const totalUsd = onchainQuote ? usdcToUsd(onchainQuote.totalCost) : 0;
-
-      setPurchaseItems(purchaseItems);
-      setUsdAmount(totalUsd);
-
-      setStarterpackDetails({
-        source: "onchain",
-        id: Number(starterpack),
-        name: onchainMetadata.name,
-        description: onchainMetadata.description,
-        imageUri: onchainMetadata.imageUri,
-        items: onchainMetadata.items,
-        quote: onchainQuote,
-        isQuoteLoading: isOnchainQuoteLoading,
-        acquisitionType: "PAID" as StarterpackAcquisitionType.Paid,
-      });
-    }
+    setStarterpackDetails({
+      id: Number(starterpack),
+      name: onchainMetadata.name,
+      description: onchainMetadata.description,
+      imageUri: onchainMetadata.imageUri,
+      items: onchainMetadata.items,
+      quote: onchainQuote,
+      isQuoteLoading: isOnchainQuoteLoading,
+      acquisitionType: StarterpackAcquisitionType.Paid,
+    });
   }, [
     starterpack,
-    source,
-    // Backend dependencies
-    backendItems,
-    backendPriceUsd,
-    backendName,
-    backendSupply,
-    backendMintAllowance,
-    backendMerkleDrops,
-    backendAcquisitionType,
-    // Onchain dependencies
     onchainMetadata,
     onchainQuote,
     isOnchainQuoteLoading,

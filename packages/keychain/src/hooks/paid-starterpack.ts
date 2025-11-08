@@ -153,7 +153,7 @@ function chainIdToEkuboNetwork(chainId: string): EkuboNetwork {
   }
 }
 
-export const useStarterPackOnchain = (
+export const useOnchainStarterpack = (
   starterpackId?: number,
   amount?: number,
   targetToken?: string, // Token to convert prices to (defaults to USDC)

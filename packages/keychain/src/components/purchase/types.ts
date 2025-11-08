@@ -1,6 +1,8 @@
 import { ExternalWallet } from "@cartridge/controller";
 import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
-import { StarterPackDetails } from "@/hooks/starterpack";
+
+// Legacy type - these old purchase components are deprecated
+type StarterPackDetails = { id?: string };
 
 export enum PurchaseState {
   SELECTION = 0,
