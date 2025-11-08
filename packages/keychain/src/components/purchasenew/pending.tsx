@@ -65,7 +65,7 @@ export function Pending() {
     explorer,
     paymentMethod,
     selectedWallet,
-    paymentId,
+    swapId,
     transactionHash,
   } = usePurchaseContext();
 
@@ -96,7 +96,7 @@ export function Pending() {
     <PurchasePendingInner
       name={starterpackDetails?.name || "Items"}
       items={purchaseItems}
-      paymentId={paymentId}
+      swapId={swapId}
       transactionHash={transactionHash}
       paymentMethod={paymentMethod}
       explorer={explorer}
@@ -109,7 +109,7 @@ export function PurchasePendingInner({
   name,
   items,
   paymentMethod,
-  paymentId,
+  swapId,
   transactionHash,
   explorer,
   wallet,
@@ -118,12 +118,12 @@ export function PurchasePendingInner({
   items: Item[];
   paymentMethod?: PaymentMethod;
   transactionHash?: string;
-  paymentId?: string;
+  swapId?: string;
   explorer?: Explorer;
   wallet?: ExternalWallet;
 }) {
   const { navigate } = useNavigation();
-  const { waitForPayment, selectedPlatform } = usePurchaseContext();
+  const { waitForDeposit, selectedPlatform } = usePurchaseContext();
   const { externalWaitForTransaction } = useConnection();
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [depositCompleted, setDepositCompleted] = useState(false);
@@ -146,10 +146,10 @@ export function PurchasePendingInner({
   }, [wallet, transactionHash, externalWaitForTransaction, navigate]);
 
   useEffect(() => {
-    if (paymentId) {
-      waitForPayment(paymentId).then(() => setPaymentCompleted(true));
+    if (swapId) {
+      waitForDeposit(swapId).then(() => setPaymentCompleted(true));
     }
-  }, [paymentId, waitForPayment, navigate]);
+  }, [swapId, waitForDeposit, navigate]);
 
   useEffect(() => {
     if (depositCompleted) {

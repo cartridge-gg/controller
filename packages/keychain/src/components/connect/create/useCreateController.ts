@@ -57,11 +57,9 @@ export interface LoginResponse {
 export function useCreateController({
   isSlot,
   signers,
-  onAuthenticationSuccess,
 }: {
   isSlot?: boolean;
   signers?: AuthOptions;
-  onAuthenticationSuccess?: () => void;
 }) {
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -244,18 +242,9 @@ export function useCreateController({
         setIsLoading(false);
 
         setShowSuccessScreen(true);
-
-        // Show success screen - parent component will handle closing/moving forward after 3 seconds
-        onAuthenticationSuccess?.();
       }
     },
-    [
-      setController,
-      origin,
-      onAuthenticationSuccess,
-      setIsLoading,
-      setShowSuccessScreen,
-    ],
+    [setController, origin, setIsLoading, setShowSuccessScreen],
   );
 
   const handleSignup = useCallback(
@@ -429,17 +418,8 @@ export function useCreateController({
       setIsLoading(false);
 
       setShowSuccessScreen(true);
-
-      // Show success screen - parent component will handle closing/moving forward after 3 seconds
-      onAuthenticationSuccess?.();
     },
-    [
-      origin,
-      setController,
-      onAuthenticationSuccess,
-      setIsLoading,
-      setShowSuccessScreen,
-    ],
+    [origin, setController, setIsLoading, setShowSuccessScreen],
   );
 
   const handleLogin = useCallback(

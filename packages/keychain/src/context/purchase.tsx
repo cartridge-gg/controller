@@ -46,20 +46,18 @@ import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
-import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
+import { Explorer, useLayerswapDeposit } from "@/hooks/payments/crypto";
 import { useStarterPack } from "@/hooks/starterpack";
 import { useStarterPackOnchain } from "@/hooks/starterpack-onchain";
-import { starterPackToLayerswapInput } from "@/utils/payments";
+import { depositToLayerswapInput } from "@/utils/payments";
 import {
-  CreateLayerswapPaymentInput,
+  CreateLayerswapDepositInput,
   StarterpackAcquisitionType,
 } from "@cartridge/ui/utils/api/cartridge";
 import {
   StarterpackDetails,
   detectStarterpackSource,
 } from "@/types/starterpack-types";
-
-const CARTRIDGE_FEE = 0.025;
 
 export interface CostDetails {
   baseCostInCents: number;
@@ -116,7 +114,7 @@ export interface PurchaseContextType {
   walletAddress?: string;
   wallets?: ExternalWallet[];
   transactionHash?: string;
-  paymentId?: string;
+  swapId?: string;
   explorer?: Explorer;
 
   // Stripe state
@@ -126,7 +124,7 @@ export interface PurchaseContextType {
 
   // Loading states
   isStripeLoading: boolean;
-  isCryptoLoading: boolean;
+  isDepositLoading: boolean;
   isStarterpackLoading: boolean;
 
   // Error state
@@ -150,6 +148,7 @@ export interface PurchaseContextType {
 
   // Actions
   setUsdAmount: (amount: number) => void;
+  setDepositAmount: (amount: number) => void;
   setPurchaseItems: (items: Item[]) => void;
   setClaimItems: (items: Item[]) => void;
   setStarterpack: (starterpack: string | number) => void;
@@ -164,7 +163,7 @@ export interface PurchaseContextType {
     platform: ExternalPlatform,
     chainId?: string,
   ) => Promise<string | undefined>;
-  waitForPayment: (paymentId: string) => Promise<boolean>;
+  waitForDeposit: (swapId: string) => Promise<boolean>;
   fetchFees: () => Promise<void>;
 }
 
@@ -189,10 +188,11 @@ export const PurchaseProvider = ({
     StarterpackDetails | undefined
   >();
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
+  const [depositAmount, setDepositAmount] = useState<number | undefined>();
   const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
   const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
   const [claimItems, setClaimItems] = useState<Item[]>([]);
-  const [paymentId, setPaymentId] = useState<string | undefined>();
+  const [swapId, setSwapId] = useState<string | undefined>();
   const [explorer, setExplorer] = useState<Explorer | undefined>();
   const [transactionHash, setTransactionHash] = useState<string | undefined>();
   const [walletAddress, setWalletAddress] = useState<string>();
@@ -234,12 +234,12 @@ export const PurchaseProvider = ({
   } = useStripePayment({ isSlot });
 
   const {
-    error: cryptoError,
-    isLoading: isCryptoLoading,
-    sendPayment,
-    estimateStarterPackFees,
-    waitForPayment,
-  } = useCryptoPayment();
+    error: depositError,
+    isLoading: isDepositLoading,
+    sendDeposit,
+    estimateLayerswapFees,
+    waitForDeposit,
+  } = useLayerswapDeposit();
 
   // Helper function to fetch token metadata
   const fetchTokenMetadata = useCallback(
@@ -496,7 +496,7 @@ export const PurchaseProvider = ({
     source === "backend" ? isBackendLoading : isOnchainLoading;
   const starterpackError = source === "backend" ? backendError : onchainError;
 
-  const [swapInput, setSwapInput] = useState<CreateLayerswapPaymentInput>();
+  const [swapInput, setSwapInput] = useState<CreateLayerswapDepositInput>();
 
   useEffect(() => {
     const getSwapInput = () => {
@@ -514,23 +514,27 @@ export const PurchaseProvider = ({
         setSwapInput(undefined);
         return;
       }
-      // Layerswap only works for backend starterpacks currently
-      if (source === "backend") {
-        const input = starterPackToLayerswapInput(
-          String(starterpack),
+
+      if (
+        source === "onchain" &&
+        selectedPlatform !== "starknet" &&
+        depositAmount
+      ) {
+        const input = depositToLayerswapInput(
+          depositAmount,
+          Number(layerswapFees || 0),
           controller.username(),
           selectedPlatform,
           isMainnet,
         );
         setSwapInput(input);
-      } else {
-        // TODO: Handle onchain starterpack payments (direct contract interaction)
-        setSwapInput(undefined);
       }
     };
     getSwapInput();
   }, [
     controller,
+    depositAmount,
+    layerswapFees,
     starterpack,
     selectedPlatform,
     isMainnet,
@@ -624,11 +628,11 @@ export const PurchaseProvider = ({
     setDisplayError(
       stripeError ||
         walletError ||
-        cryptoError ||
+        depositError ||
         starterpackError ||
         undefined,
     );
-  }, [stripeError, walletError, cryptoError, starterpackError]);
+  }, [stripeError, walletError, depositError, starterpackError]);
 
   const clearError = useCallback(() => {
     setDisplayError(undefined);
@@ -674,7 +678,7 @@ export const PurchaseProvider = ({
       swapInput.layerswapFees = layerswapFees;
 
       // Use existing payment method
-      const { paymentId, transactionHash } = await sendPayment(
+      const { swapId, transactionHash } = await sendDeposit(
         swapInput,
         walletAddress,
         walletType,
@@ -683,7 +687,7 @@ export const PurchaseProvider = ({
           setExplorer(explorer);
         },
       );
-      setPaymentId(paymentId);
+      setSwapId(swapId);
       setTransactionHash(transactionHash);
     } catch (e) {
       setDisplayError(e as Error);
@@ -696,7 +700,7 @@ export const PurchaseProvider = ({
     walletType,
     swapInput,
     layerswapFees,
-    sendPayment,
+    sendDeposit,
   ]);
 
   const onOnchainPurchase = useCallback(async () => {
@@ -932,17 +936,15 @@ export const PurchaseProvider = ({
     try {
       setIsFetchingFees(true);
 
-      const quote = await estimateStarterPackFees(swapInput);
+      const quote = await estimateLayerswapFees(swapInput);
       const amountInCents = usdAmount / 1e4;
-      const cartridgeFees = amountInCents * CARTRIDGE_FEE;
       const layerswapFeesInCents = Number(quote.totalFees) / 1e4;
-      const totalFeesInCents = cartridgeFees + layerswapFeesInCents;
-      const totalInCents = amountInCents + totalFeesInCents;
+      const totalInCents = amountInCents + layerswapFeesInCents;
 
       setLayerswapFees(quote.totalFees);
       setCostDetails({
         baseCostInCents: amountInCents,
-        processingFeeInCents: cartridgeFees + layerswapFeesInCents,
+        processingFeeInCents: layerswapFeesInCents,
         totalInCents,
       });
     } catch (e) {
@@ -951,7 +953,7 @@ export const PurchaseProvider = ({
     } finally {
       setIsFetchingFees(false);
     }
-  }, [swapInput, usdAmount, estimateStarterPackFees]);
+  }, [swapInput, usdAmount, estimateLayerswapFees]);
 
   const contextValue: PurchaseContextType = {
     // Purchase details
@@ -968,7 +970,7 @@ export const PurchaseProvider = ({
     selectedPlatform,
     walletAddress,
     transactionHash,
-    paymentId,
+    swapId,
     explorer,
 
     // Stripe state
@@ -978,7 +980,7 @@ export const PurchaseProvider = ({
 
     // Loading states
     isStripeLoading,
-    isCryptoLoading,
+    isDepositLoading,
     isStarterpackLoading,
 
     // Error state
@@ -999,6 +1001,7 @@ export const PurchaseProvider = ({
 
     // Setters
     setUsdAmount,
+    setDepositAmount,
     setPurchaseItems,
     setClaimItems,
     setStarterpack,
@@ -1009,7 +1012,7 @@ export const PurchaseProvider = ({
     onBackendCryptoPurchase,
     onOnchainPurchase,
     onExternalConnect,
-    waitForPayment,
+    waitForDeposit,
     fetchFees,
   };
 
