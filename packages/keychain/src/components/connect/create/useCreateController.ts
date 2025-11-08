@@ -369,7 +369,6 @@ export function useCreateController({
       loginResponse: LoginResponse;
       authenticationMethod: AuthOption;
     }) => {
-      console.log(authenticationMethod);
       // Verify correct EVM wallet account is selected
       if (authenticationMethod !== "password") {
         const connectedAddress = signerToAddress(loginResponse.signer);

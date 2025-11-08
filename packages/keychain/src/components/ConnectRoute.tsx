@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
@@ -32,18 +32,13 @@ export function ConnectRoute() {
     setShowSuccessScreen,
   } = useConnection();
 
-  const [showSuccess, setShowSuccess] = useState(() => {
-    return showSuccessScreen && !!controller;
-  });
-
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Separate effect to handle timeout whenever showSuccess is true
+  // Handle timeout to hide success screen after 1 second
   useEffect(() => {
-    if (showSuccess && !timeoutRef.current) {
+    if (showSuccessScreen && controller && !timeoutRef.current) {
       timeoutRef.current = setTimeout(() => {
-        // Reset hasAutoConnected so auto-connect can happen after success screen
-        setShowSuccess(false);
+        setShowSuccessScreen(false);
         timeoutRef.current = null;
       }, 1000);
     }
@@ -54,7 +49,7 @@ export function ConnectRoute() {
         timeoutRef.current = null;
       }
     };
-  }, [showSuccess, controller]);
+  }, [showSuccessScreen, controller, setShowSuccessScreen]);
 
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
@@ -131,7 +126,7 @@ export function ConnectRoute() {
   // Handle cases where we can connect immediately (embedded mode only)
   // Don't run if we're showing success screen
   useEffect(() => {
-    if (!params || !controller || showSuccess) {
+    if (!params || !controller || showSuccessScreen) {
       return;
     }
 
@@ -140,9 +135,6 @@ export function ConnectRoute() {
     if (isStandalone && redirectUrl) {
       return;
     }
-
-    // Mark as auto-connected immediately to prevent race conditions
-    setShowSuccessScreen(true);
 
     // if no policies, we can connect immediately
     if (!policies) {
@@ -196,9 +188,9 @@ export function ConnectRoute() {
     handleCompletion,
     isStandalone,
     redirectUrl,
-    showSuccess,
-    hasTokenApprovals,
+    showSuccessScreen,
     setShowSuccessScreen,
+    hasTokenApprovals,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
@@ -206,8 +198,8 @@ export function ConnectRoute() {
     return null;
   }
 
-  // Show success screen for 1 seconds when controller is first created
-  if (showSuccess) {
+  // Show success screen for 1 second when controller is first created
+  if (showSuccessScreen) {
     return <ConnectionSuccess isNew={isNewUser} authMethod={authMethod} />;
   }
 

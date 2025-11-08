@@ -540,9 +540,7 @@ describe("ConnectRoute", () => {
       expect(screen.getByText(/Success!/i)).toBeInTheDocument();
     });
 
-    it("hides success screen after timeout", async () => {
-      vi.useFakeTimers();
-
+    it("hides success screen after 1 second timeout", async () => {
       const mockSetShowSuccessScreen = vi.fn();
 
       mockUseConnection.mockReturnValue({
@@ -562,15 +560,16 @@ describe("ConnectRoute", () => {
       // Should show success screen initially
       expect(screen.getByText(/Success!/i)).toBeInTheDocument();
 
-      // Fast-forward time by 1 second (the timeout duration)
-      vi.advanceTimersByTime(1000);
+      // setShowSuccessScreen should not be called immediately
+      expect(mockSetShowSuccessScreen).not.toHaveBeenCalled();
 
-      await waitFor(() => {
-        // setShowSuccessScreen should be called with false to hide it
-        expect(mockSetShowSuccessScreen).toHaveBeenCalledWith(false);
-      });
-
-      vi.useRealTimers();
+      // Wait for the timeout (1 second) to complete
+      await waitFor(
+        () => {
+          expect(mockSetShowSuccessScreen).toHaveBeenCalledWith(false);
+        },
+        { timeout: 1500 },
+      );
     });
 
     it("does not show success screen when controller is not available", () => {
