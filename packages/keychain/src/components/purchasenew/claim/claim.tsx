@@ -11,14 +11,14 @@ import {
   LayoutFooter,
   Skeleton,
 } from "@cartridge/ui";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMerkleClaim, MerkleClaim } from "@/hooks/merkle-claim";
-import { Item, ItemType, usePurchaseContext } from "@/context/purchase";
+import { usePurchaseContext } from "@/context/purchase";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
 import { StarterpackReceiving } from "../starterpack/starterpack";
-import { ExternalWalletType, StarterPackItemType } from "@cartridge/controller";
+import { ExternalWalletType } from "@cartridge/controller";
 import { getWallet } from "../wallet/config";
 import { formatAddress } from "@cartridge/ui/utils";
 import type { BackendStarterpackDetails } from "@/context";
@@ -26,11 +26,8 @@ import type { BackendStarterpackDetails } from "@/context";
 export function Claim() {
   const { keys, address: externalAddress, type } = useParams();
   const { goBack, navigate } = useNavigation();
-  const {
-    starterpackDetails: starterpackDetailsRaw,
-    setClaimItems,
-    setTransactionHash,
-  } = usePurchaseContext();
+  const { starterpackDetails: starterpackDetailsRaw, setTransactionHash } =
+    usePurchaseContext();
 
   const starterpackDetails = starterpackDetailsRaw as
     | BackendStarterpackDetails
@@ -109,7 +106,7 @@ export function Claim() {
 
   // Filter starterpack items based on matchStarterpackItem flag
   const filteredStarterpackItems = useMemo(() => {
-    if (!starterpackDetails?.starterPackItems) {
+    if (!starterpackDetails?.items) {
       return undefined;
     }
 
@@ -119,7 +116,7 @@ export function Claim() {
     );
 
     if (!shouldFilterItems) {
-      return starterpackDetails.starterPackItems;
+      return starterpackDetails.items;
     }
 
     // Get eligible claim names from unclaimed claims
@@ -129,76 +126,64 @@ export function Claim() {
       .filter((name): name is string => name !== null);
 
     // Filter items by name match
-    const filteredItems = starterpackDetails.starterPackItems.filter((item) =>
+    const filteredItems = starterpackDetails.items.filter((item) =>
       eligibleNames.some(
         (name) =>
-          item.name.toLowerCase().includes(name.toLowerCase()) ||
-          name.toLowerCase().includes(item.name.toLowerCase()),
+          item.title.toLowerCase().includes(name.toLowerCase()) ||
+          name.toLowerCase().includes(item.title.toLowerCase()),
       ),
     );
 
     // Fallback to all items if no matches found
-    return filteredItems.length > 0
-      ? filteredItems
-      : starterpackDetails.starterPackItems;
+    return filteredItems.length > 0 ? filteredItems : starterpackDetails.items;
   }, [claimsData, starterpackDetails]);
 
-  // Set claim items based on filtered starterpack items for display on pending/success screens
-  useEffect(() => {
-    if (!filteredStarterpackItems || filteredStarterpackItems.length === 0) {
-      setClaimItems([]);
-      return;
-    }
+  // // Set claim items based on filtered starterpack items for display on pending/success screens
+  // useEffect(() => {
+  //   if (!filteredStarterpackItems || filteredStarterpackItems.length === 0) {
+  //     return;
+  //   }
 
-    // Check if we should prepend amounts (when matchStarterpackItem is enabled)
-    const shouldPrependAmount = claimsData.some(
-      (claim) => claim.matchStarterpackItem === true,
-    );
+  //   // Check if we should prepend amounts (when matchStarterpackItem is enabled)
+  //   const shouldPrependAmount = claimsData.some(
+  //     (claim) => claim.matchStarterpackItem === true,
+  //   );
 
-    const items: Item[] = filteredStarterpackItems.map((item) => {
-      let title = item.name;
+  //   const items: Item[] = filteredStarterpackItems.map((item) => {
+  //     let title = item.title;
 
-      // Prepend claim amount to item name if matching is enabled
-      if (shouldPrependAmount) {
-        // Find matching claim(s) for this item
-        const matchingClaims = claimsData.filter(
-          (claim) =>
-            !claim.claimed &&
-            (claim.description
-              ?.toLowerCase()
-              .includes(item.name.toLowerCase()) ||
-              item.name
-                .toLowerCase()
-                .includes(claim.description?.toLowerCase() ?? "") ||
-              claim.key.toLowerCase().includes(item.name.toLowerCase()) ||
-              item.name.toLowerCase().includes(claim.key.toLowerCase())),
-        );
+  //     // Prepend claim amount to item name if matching is enabled
+  //     if (shouldPrependAmount) {
+  //       // Find matching claim(s) for this item
+  //       const matchingClaims = claimsData.filter(
+  //         (claim) =>
+  //           !claim.claimed &&
+  //           (claim.description
+  //             ?.toLowerCase()
+  //             .includes(item.title.toLowerCase()) ||
+  //             item.title
+  //               .toLowerCase()
+  //               .includes(claim.description?.toLowerCase() ?? "") ||
+  //             claim.key.toLowerCase().includes(item.title.toLowerCase()) ||
+  //             item.title.toLowerCase().includes(claim.key.toLowerCase())),
+  //       );
 
-        // Calculate total amount from matching claims
-        const totalAmount = matchingClaims.reduce(
-          (acc, claim) => acc + Number(claim.data[0] || 0),
-          0,
-        );
+  //       // Calculate total amount from matching claims
+  //       const totalAmount = matchingClaims.reduce(
+  //         (acc, claim) => acc + Number(claim.data[0] || 0),
+  //         0,
+  //       );
 
-        if (totalAmount > 0) {
-          title = `(${totalAmount}) ${item.name}`;
-        }
-      }
+  //       if (totalAmount > 0) {
+  //         title = `(${totalAmount}) ${item.title}`;
+  //       }
+  //     }
 
-      return {
-        title,
-        subtitle: item.description,
-        icon: item.iconURL ?? <GiftIcon variant="solid" />,
-        value: item.amount,
-        type:
-          item.type === StarterPackItemType.NONFUNGIBLE
-            ? ItemType.NFT
-            : ItemType.ERC20,
-      };
-    });
+  //     return item;
+  //   });
 
-    setClaimItems(items);
-  }, [filteredStarterpackItems, claimsData, setClaimItems]);
+  //   setClaimItems(items);
+  // }, [filteredStarterpackItems, claimsData]);
 
   // Group claims by key (e.g., network/collection)
   const groupedClaims = useMemo(() => {
@@ -248,10 +233,7 @@ export function Claim() {
           />
         ) : (
           <div className="flex flex-col gap-4">
-            <StarterpackReceiving
-              mintAllowance={starterpackDetails?.mintAllowance}
-              starterpackItems={filteredStarterpackItems}
-            />
+            <StarterpackReceiving starterpackItems={filteredStarterpackItems} />
             <div className="flex flex-col gap-2">
               <div className="text-foreground-400 text-xs font-semibold">
                 Your Collections

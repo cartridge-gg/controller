@@ -1,28 +1,20 @@
-import { StarterPackItem } from "@cartridge/controller";
-import {
-  MintAllowance,
-  StarterpackAcquisitionType,
-  MerkleDropNetwork,
-} from "@cartridge/ui/utils/api/cartridge";
+import { Item } from "@/context";
+import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
 
 /**
  * Discriminated union for starterpack sources
  */
-export type StarterpackSource = "backend" | "onchain";
+export type StarterpackType = "claimed" | "onchain";
 
 /**
  * Backend starterpack (existing flow via GraphQL)
  */
 export interface BackendStarterpackDetails {
-  source: "backend";
+  type: "claimed";
   id: string; // UUID from backend
   name: string;
   description?: string;
-  priceUsd: number;
-  supply?: number;
-  mintAllowance?: MintAllowance;
-  acquisitionType: StarterpackAcquisitionType;
-  starterPackItems: StarterPackItem[];
+  items: Item[];
   merkleDrops?: MerkleDrop[];
 }
 
@@ -30,15 +22,14 @@ export interface BackendStarterpackDetails {
  * Onchain starterpack (new flow via smart contract)
  */
 export interface OnchainStarterpackDetails {
-  source: "onchain";
+  type: "onchain";
   id: number; // Numeric ID from contract
   name: string;
   description: string;
   imageUri: string;
-  items: OnchainItem[];
-  quote: OnchainQuote | null;
+  items: Item[];
+  quote: Quote | null;
   isQuoteLoading: boolean;
-  acquisitionType: StarterpackAcquisitionType.Paid;
 }
 
 /**
@@ -47,15 +38,6 @@ export interface OnchainStarterpackDetails {
 export type StarterpackDetails =
   | BackendStarterpackDetails
   | OnchainStarterpackDetails;
-
-/**
- * Onchain item metadata
- */
-export interface OnchainItem {
-  name: string;
-  description: string;
-  imageUri: string;
-}
 
 /**
  * Token metadata for onchain payments
@@ -68,7 +50,7 @@ export interface TokenMetadata {
 /**
  * Onchain pricing quote
  */
-export interface OnchainQuote {
+export interface Quote {
   basePrice: bigint;
   referralFee: bigint;
   protocolFee: bigint;
@@ -99,16 +81,16 @@ export interface MerkleDrop {
 /**
  * Type guards
  */
-export function isBackendStarterpack(
+export function isClaimStarterpack(
   details: StarterpackDetails | undefined,
 ): details is BackendStarterpackDetails {
-  return details?.source === "backend";
+  return details?.type === "claimed";
 }
 
 export function isOnchainStarterpack(
   details: StarterpackDetails | undefined,
 ): details is OnchainStarterpackDetails {
-  return details?.source === "onchain";
+  return details?.type === "onchain";
 }
 
 /**
@@ -116,10 +98,10 @@ export function isOnchainStarterpack(
  * - Numeric IDs (or strings that are purely numeric) → onchain
  * - UUID/string IDs → backend
  */
-export function detectStarterpackSource(
+export function detectStarterpackType(
   id: string | number | undefined,
-): StarterpackSource {
-  if (id === undefined) return "backend"; // default
+): StarterpackType {
+  if (id === undefined) return "claimed"; // default
 
   // If it's already a number, it's onchain
   if (typeof id === "number") return "onchain";
@@ -127,6 +109,6 @@ export function detectStarterpackSource(
   // If string is purely numeric, it's onchain
   if (/^\d+$/.test(id)) return "onchain";
 
-  // Otherwise it's a backend UUID
-  return "backend";
+  // Otherwise it's a claimed UUID
+  return "claimed";
 }
