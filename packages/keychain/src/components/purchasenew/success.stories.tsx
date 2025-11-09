@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { PurchaseSuccessInner } from "./success";
 import { CreditIcon } from "@cartridge/ui";
 import { ItemType } from "@/context/purchase";
-import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 const meta = {
   component: PurchaseSuccessInner,
@@ -22,7 +21,7 @@ const TOKEN_ICONS = {
 
 export const Credits: Story = {
   args: {
-    acquisitionType: StarterpackAcquisitionType.Paid,
+    type: "onchain",
     items: [
       {
         title: "Credits",
@@ -36,7 +35,7 @@ export const Credits: Story = {
 
 export const NFT: Story = {
   args: {
-    acquisitionType: StarterpackAcquisitionType.Paid,
+    type: "onchain",
     items: [
       {
         title: "Village pass",
@@ -49,7 +48,7 @@ export const NFT: Story = {
 
 export const TokenPurchase: Story = {
   args: {
-    acquisitionType: StarterpackAcquisitionType.Paid,
+    type: "onchain",
     items: [
       {
         title: "USDC",
@@ -71,7 +70,7 @@ export const TokenPurchase: Story = {
 
 export const MixedPurchase: Story = {
   args: {
-    acquisitionType: StarterpackAcquisitionType.Paid,
+    type: "onchain",
     items: [
       {
         title: "Credits",
@@ -97,7 +96,7 @@ export const MixedPurchase: Story = {
 
 export const ClaimedItems: Story = {
   args: {
-    acquisitionType: StarterpackAcquisitionType.Claimed,
+    type: "claimed",
     items: [
       {
         title: "Credits",

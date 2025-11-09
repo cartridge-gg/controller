@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
-import { useStarterPack } from "@/hooks/starterpack";
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "../components/funding/AmountSelection";
@@ -26,19 +25,13 @@ export function usePurchase({
     connectWallet,
   } = useWallets();
 
-  const {
-    claim,
-    isClaiming,
-    isLoading: isStarterpackLoading,
-  } = useStarterPack(starterpackDetails?.id);
-
   const [clientSecret, setClientSecret] = useState("");
   const [pricingDetails, setPricingDetails] = useState<PricingDetails | null>(
     null,
   );
   const [state, setState] = useState<PurchaseState>(initState);
   const [wholeCredits, setWholeCredits] = useState<number>(
-    usdToCredits(starterpackDetails?.priceUsd || USD_AMOUNTS[0]),
+    usdToCredits(USD_AMOUNTS[0]),
   );
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
@@ -63,17 +56,6 @@ export function usePurchase({
     [setWholeCredits],
   );
 
-  const onClaim = useCallback(async () => {
-    if (!controller) return;
-
-    try {
-      await claim();
-      setState(PurchaseState.SUCCESS);
-    } catch (e) {
-      setDisplayError(e as Error);
-    }
-  }, [claim, controller]);
-
   const onCreditCard = useCallback(async () => {
     if (!controller) return;
 
@@ -82,7 +64,7 @@ export function usePurchase({
         wholeCredits,
         controller.username(),
         teamId,
-        starterpackDetails?.id,
+        starterpackDetails?.id?.toString(),
       );
       setClientSecret(paymentIntent.clientSecret);
       setPricingDetails(paymentIntent.pricing);
@@ -138,11 +120,8 @@ export function usePurchase({
     stripePromise,
     isStripeLoading,
     isLoadingWallets,
-    isStarterpackLoading,
-    isClaiming,
     closeModal,
     onAmountChanged,
-    onClaim,
     onCreditCard,
     onExternalConnect,
     onBack,

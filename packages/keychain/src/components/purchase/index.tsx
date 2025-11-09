@@ -15,7 +15,6 @@ import { useMemo } from "react";
 import CheckoutForm from "./StripeCheckout";
 import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { PaymentMethod } from "./PaymentMethod";
-import { Supply } from "./Supply";
 import { PurchaseContent } from "./PurchaseContent";
 import { usePurchase } from "@/hooks/purchase";
 import { PurchaseState, PurchaseCreditsProps } from "./types";
@@ -37,11 +36,8 @@ export function Purchase(props: PurchaseCreditsProps) {
     stripePromise,
     isStripeLoading,
     isLoadingWallets,
-    isStarterpackLoading,
-    isClaiming,
     closeModal,
     onAmountChanged,
-    onClaim,
     onCreditCard,
     onExternalConnect,
     onCompletePurchase,
@@ -101,16 +97,7 @@ export function Purchase(props: PurchaseCreditsProps) {
 
   return (
     <>
-      <HeaderInner
-        title={title}
-        right={
-          state === PurchaseState.SELECTION &&
-          starterpackDetails?.supply !== undefined ? (
-            <Supply amount={starterpackDetails!.supply} />
-          ) : undefined
-        }
-        hideIcon
-      />
+      <HeaderInner title={title} hideIcon />
       <LayoutContent>
         <PurchaseContent
           state={state}
@@ -154,12 +141,8 @@ export function Purchase(props: PurchaseCreditsProps) {
           <PaymentMethod
             starterpackDetails={starterpackDetails}
             isStripeLoading={isStripeLoading}
-            isStarterpackLoading={isStarterpackLoading}
-            isClaiming={isClaiming}
             selectedWallet={selectedWallet}
             wallets={wallets}
-            mintAllowance={starterpackDetails?.mintAllowance}
-            onClaim={onClaim}
             onCreditCard={onCreditCard}
             onExternalConnect={onExternalConnect}
           />

@@ -23,7 +23,7 @@ import {
 } from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
-import type { OnchainQuote } from "@/context";
+import type { Quote } from "@/types/starterpack-types";
 import { useCallback, useMemo, useEffect } from "react";
 import { usePurchaseContext } from "@/context";
 import { num } from "starknet";
@@ -102,7 +102,7 @@ export function OnchainCostBreakdown({
   openFeesTooltip = false,
   showTokenSelector = false,
 }: {
-  quote: OnchainQuote;
+  quote: Quote;
   platform?: ExternalPlatform;
   openFeesTooltip?: boolean;
   showTokenSelector?: boolean;
