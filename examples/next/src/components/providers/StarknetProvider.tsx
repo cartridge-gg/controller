@@ -206,6 +206,7 @@ const controller = new ControllerConnector({
   ],
   slot: "arcade-pistols",
   namespace: "pistols",
+  preset: "ponziland",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,

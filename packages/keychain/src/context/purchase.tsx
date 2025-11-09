@@ -79,6 +79,7 @@ export type Item = {
   subtitle?: string;
   icon: string | React.ReactNode;
   value?: number;
+  quantity?: number;
   type: ItemType;
 };
 
@@ -148,6 +149,7 @@ export interface PurchaseContextType {
   setDepositAmount: (amount: number) => void;
   setStarterpackId: (starterpackId: string | number) => void;
   setTransactionHash: (hash: string) => void;
+  setClaimItems: (items: Item[]) => void;
 
   // Payment actions
   onCreditCardPurchase: () => Promise<void>;
@@ -186,6 +188,7 @@ export const PurchaseProvider = ({
   const [depositAmount, setDepositAmount] = useState<number | undefined>();
   const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
   const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
+  const [claimItemsState, setClaimItemsState] = useState<Item[]>([]);
   const [swapId, setSwapId] = useState<string | undefined>();
   const [explorer, setExplorer] = useState<Explorer | undefined>();
   const [transactionHash, setTransactionHash] = useState<string | undefined>();
@@ -458,7 +461,7 @@ export const PurchaseProvider = ({
   // Claim hook (GraphQL) - only run if claimed source
   const {
     name: claimName,
-    items: claimItems,
+    items: claimItemsFromHook,
     merkleDrops,
     isLoading: isClaimLoading,
     error: claimError,
@@ -467,6 +470,11 @@ export const PurchaseProvider = ({
       ? String(starterpackId)
       : undefined,
   );
+
+  // Use manually set claimItems if available, otherwise use items from hook
+  const claimItems = useMemo(() => {
+    return claimItemsState.length > 0 ? claimItemsState : claimItemsFromHook;
+  }, [claimItemsState, claimItemsFromHook]);
 
   // Onchain hook (Smart contract) - only run if onchain source
   const {
@@ -961,6 +969,7 @@ export const PurchaseProvider = ({
     setDepositAmount,
     setStarterpackId,
     setTransactionHash,
+    setClaimItems: setClaimItemsState,
 
     // Actions
     onCreditCardPurchase,

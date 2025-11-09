@@ -21,17 +21,13 @@ import { StarterpackReceiving } from "../starterpack/starterpack";
 import { ExternalWalletType } from "@cartridge/controller";
 import { getWallet } from "../wallet/config";
 import { formatAddress } from "@cartridge/ui/utils";
-import type { BackendStarterpackDetails } from "@/context";
 
 export function Claim() {
   const { keys, address: externalAddress, type } = useParams();
   const { goBack, navigate } = useNavigation();
-  const { starterpackDetails: starterpackDetailsRaw, setTransactionHash } =
+  const { starterpackDetails, setTransactionHash, setClaimItems } =
     usePurchaseContext();
 
-  const starterpackDetails = starterpackDetailsRaw as
-    | BackendStarterpackDetails
-    | undefined;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [showIndividualClaims, setShowIndividualClaims] = useState(false);
@@ -52,57 +48,6 @@ export function Claim() {
   const wallet = useMemo(() => {
     return getWallet(type as ExternalWalletType | "controller");
   }, [type]);
-
-  const onSubmit = useCallback(async () => {
-    try {
-      setIsSubmitting(true);
-      setError(null);
-      const hash = await onSendClaim();
-      setTransactionHash(hash);
-      navigate("/purchase/pending", { reset: true });
-    } catch (error) {
-      setError(error as Error);
-      // Fallback to individual claims on error
-      setShowIndividualClaims(true);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [onSendClaim, setTransactionHash, navigate]);
-
-  const onSubmitIndividual = useCallback(
-    async (claimIndex: number) => {
-      try {
-        setClaimingIndices((prev) => new Set(prev).add(claimIndex));
-        setError(null);
-        const hash = await onSendClaim([claimIndex]);
-        setTransactionHash(hash);
-        navigate("/purchase/pending", { reset: true });
-      } catch (error) {
-        setError(error as Error);
-      } finally {
-        setClaimingIndices((prev) => {
-          const next = new Set(prev);
-          next.delete(claimIndex);
-          return next;
-        });
-      }
-    },
-    [onSendClaim, setTransactionHash, navigate],
-  );
-
-  const isClaimed = useMemo(() => {
-    return claimsData.every((claim) => claim.claimed);
-  }, [claimsData]);
-
-  const isCheckingClaimed = useMemo(() => {
-    return claimsData.every((claim) => claim.loading);
-  }, [claimsData]);
-
-  const totalClaimable = useMemo(() => {
-    return claimsData
-      .filter((claim) => !claim.claimed)
-      .reduce((acc, claim) => acc + Number(claim.data[0] || 0), 0);
-  }, [claimsData]);
 
   // Filter starterpack items based on matchStarterpackItem flag
   const filteredStarterpackItems = useMemo(() => {
@@ -138,52 +83,112 @@ export function Claim() {
     return filteredItems.length > 0 ? filteredItems : starterpackDetails.items;
   }, [claimsData, starterpackDetails]);
 
-  // // Set claim items based on filtered starterpack items for display on pending/success screens
-  // useEffect(() => {
-  //   if (!filteredStarterpackItems || filteredStarterpackItems.length === 0) {
-  //     return;
-  //   }
+  // Helper function to enrich claim items with quantities
+  const enrichClaimItems = useCallback(() => {
+    if (!filteredStarterpackItems || filteredStarterpackItems.length === 0) {
+      return;
+    }
 
-  //   // Check if we should prepend amounts (when matchStarterpackItem is enabled)
-  //   const shouldPrependAmount = claimsData.some(
-  //     (claim) => claim.matchStarterpackItem === true,
-  //   );
+    // Check if we should prepend amounts (when matchStarterpackItem is enabled)
+    const shouldPrependAmount = claimsData.some(
+      (claim) => claim.matchStarterpackItem === true,
+    );
 
-  //   const items: Item[] = filteredStarterpackItems.map((item) => {
-  //     let title = item.title;
+    const enrichedItems = filteredStarterpackItems.map((item) => {
+      // Strip any existing prepended amount (e.g., "(5) " from "(5) Village")
+      const originalTitle = item.title.replace(/^\(\d+\)\s+/, "");
+      let title = originalTitle;
 
-  //     // Prepend claim amount to item name if matching is enabled
-  //     if (shouldPrependAmount) {
-  //       // Find matching claim(s) for this item
-  //       const matchingClaims = claimsData.filter(
-  //         (claim) =>
-  //           !claim.claimed &&
-  //           (claim.description
-  //             ?.toLowerCase()
-  //             .includes(item.title.toLowerCase()) ||
-  //             item.title
-  //               .toLowerCase()
-  //               .includes(claim.description?.toLowerCase() ?? "") ||
-  //             claim.key.toLowerCase().includes(item.title.toLowerCase()) ||
-  //             item.title.toLowerCase().includes(claim.key.toLowerCase())),
-  //       );
+      // Prepend claim amount to item name if matching is enabled
+      if (shouldPrependAmount) {
+        // Find matching claim(s) for this item - use originalTitle for matching
+        const matchingClaims = claimsData.filter(
+          (claim) =>
+            !claim.claimed &&
+            (claim.description
+              ?.toLowerCase()
+              .includes(originalTitle.toLowerCase()) ||
+              originalTitle
+                .toLowerCase()
+                .includes(claim.description?.toLowerCase() ?? "") ||
+              claim.key.toLowerCase().includes(originalTitle.toLowerCase()) ||
+              originalTitle.toLowerCase().includes(claim.key.toLowerCase())),
+        );
 
-  //       // Calculate total amount from matching claims
-  //       const totalAmount = matchingClaims.reduce(
-  //         (acc, claim) => acc + Number(claim.data[0] || 0),
-  //         0,
-  //       );
+        // Calculate total amount from matching claims
+        const totalAmount = matchingClaims.reduce(
+          (acc, claim) => acc + Number(claim.data[0] || 0),
+          0,
+        );
 
-  //       if (totalAmount > 0) {
-  //         title = `(${totalAmount}) ${item.title}`;
-  //       }
-  //     }
+        if (totalAmount > 0) {
+          title = `(${totalAmount}) ${originalTitle}`;
+        }
+      }
 
-  //     return item;
-  //   });
+      return {
+        ...item,
+        title,
+      };
+    });
 
-  //   setClaimItems(items);
-  // }, [filteredStarterpackItems, claimsData]);
+    setClaimItems(enrichedItems);
+  }, [filteredStarterpackItems, claimsData, setClaimItems]);
+
+  const onSubmit = useCallback(async () => {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      const hash = await onSendClaim();
+      setTransactionHash(hash);
+      // Enrich claim items with quantities before navigating to success screen
+      enrichClaimItems();
+      navigate("/purchase/pending", { reset: true });
+    } catch (error) {
+      setError(error as Error);
+      // Fallback to individual claims on error
+      setShowIndividualClaims(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [onSendClaim, setTransactionHash, navigate, enrichClaimItems]);
+
+  const onSubmitIndividual = useCallback(
+    async (claimIndex: number) => {
+      try {
+        setClaimingIndices((prev) => new Set(prev).add(claimIndex));
+        setError(null);
+        const hash = await onSendClaim([claimIndex]);
+        setTransactionHash(hash);
+        // Enrich claim items with quantities before navigating to success screen
+        enrichClaimItems();
+        navigate("/purchase/pending", { reset: true });
+      } catch (error) {
+        setError(error as Error);
+      } finally {
+        setClaimingIndices((prev) => {
+          const next = new Set(prev);
+          next.delete(claimIndex);
+          return next;
+        });
+      }
+    },
+    [onSendClaim, setTransactionHash, navigate, enrichClaimItems],
+  );
+
+  const isClaimed = useMemo(() => {
+    return claimsData.every((claim) => claim.claimed);
+  }, [claimsData]);
+
+  const isCheckingClaimed = useMemo(() => {
+    return claimsData.every((claim) => claim.loading);
+  }, [claimsData]);
+
+  const totalClaimable = useMemo(() => {
+    return claimsData
+      .filter((claim) => !claim.claimed)
+      .reduce((acc, claim) => acc + Number(claim.data[0] || 0), 0);
+  }, [claimsData]);
 
   // Group claims by key (e.g., network/collection)
   const groupedClaims = useMemo(() => {

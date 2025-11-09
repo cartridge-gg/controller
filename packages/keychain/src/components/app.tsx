@@ -28,6 +28,7 @@ import { Settings } from "./settings";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
+import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { PaymentMethod } from "./purchasenew/method";
 import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { Success as PurchaseSuccess } from "./purchasenew/success";
@@ -179,6 +180,10 @@ export function App() {
           <Route
             path="credits"
             element={<Purchase type={PurchaseType.Credits} />}
+          />
+          <Route
+            path="starterpack/:starterpackId"
+            element={<PurchaseStarterpack />}
           />
           <Route path="starterpack/collections" element={<Collections />} />
           <Route path="claim/:keys/:address/:type" element={<Claim />} />

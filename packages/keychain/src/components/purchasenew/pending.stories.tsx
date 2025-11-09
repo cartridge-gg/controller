@@ -45,6 +45,7 @@ const MockPurchaseProvider = ({ children }: { children: ReactNode }) => {
     setStarterpackId: () => {},
     setTransactionHash: () => {},
     setSelectedToken: () => {},
+    setClaimItems: () => {},
     onCreditCardPurchase: async () => {},
     onBackendCryptoPurchase: async () => {},
     onOnchainPurchase: async () => {},
