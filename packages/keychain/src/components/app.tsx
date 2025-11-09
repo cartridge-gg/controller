@@ -28,13 +28,11 @@ import { Settings } from "./settings";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
-import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { PaymentMethod } from "./purchasenew/method";
 import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { Success as PurchaseSuccess } from "./purchasenew/success";
 import { Pending as PurchasePending } from "./purchasenew/pending";
 import { SelectWallet } from "./purchasenew/wallet/wallet";
-import { CryptoCheckout } from "./purchasenew/checkout/crypto";
 import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
 import { Execute } from "./Execute";
@@ -182,17 +180,12 @@ export function App() {
             path="credits"
             element={<Purchase type={PurchaseType.Credits} />}
           />
-          <Route
-            path="starterpack/:starterpackId"
-            element={<PurchaseStarterpack />}
-          />
           <Route path="starterpack/collections" element={<Collections />} />
           <Route path="claim/:keys/:address/:type" element={<Claim />} />
           <Route path="method/:platforms" element={<PaymentMethod />} />
           <Route path="network/:platforms" element={<ChooseNetwork />} />
           <Route path="wallet/:platforms" element={<SelectWallet />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
-          <Route path="checkout/crypto" element={<CryptoCheckout />} />
           <Route path="checkout/onchain" element={<OnchainCheckout />} />
           <Route path="review" element={<></>} />
           <Route path="pending" element={<PurchasePending />} />
