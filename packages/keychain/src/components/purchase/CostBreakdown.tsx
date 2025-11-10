@@ -6,6 +6,7 @@ import {
   Separator,
   Thumbnail,
 } from "@cartridge/ui";
+import { TOKEN_ICONS } from "@/constants";
 import { PricingDetails } from ".";
 import { ExternalWalletType } from "@cartridge/controller";
 import { WALLET_CONFIG } from "./CryptoCheckout";
@@ -103,13 +104,7 @@ const PaymentType = ({ unit }: { unit?: PaymentUnit }) => {
     <CardContent className="flex items-center px-3 bg-background-200 gap-2 rounded-[4px] text-sm font-medium">
       <Thumbnail
         size="sm"
-        icon={
-          unit === "usdc" ? (
-            "https://static.cartridge.gg/tokens/usdc.svg"
-          ) : (
-            <CreditIcon />
-          )
-        }
+        icon={unit === "usdc" ? TOKEN_ICONS.USDC : <CreditIcon />}
         variant="light"
         rounded
       />

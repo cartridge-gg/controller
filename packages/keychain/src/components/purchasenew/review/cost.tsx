@@ -16,6 +16,7 @@ import type { OnchainQuote } from "@/context";
 import { useCallback, useMemo, useEffect } from "react";
 import { usePurchaseContext } from "@/context";
 import { num } from "starknet";
+import { TOKEN_ICONS } from "@/constants";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -300,13 +301,7 @@ const PaymentType = ({ unit }: { unit?: PaymentUnit }) => {
     <CardContent className="flex items-center px-3 bg-background-200 gap-2 rounded-[4px] text-sm font-medium">
       <Thumbnail
         size="sm"
-        icon={
-          unit === "usdc" ? (
-            "https://static.cartridge.gg/tokens/usdc.svg"
-          ) : (
-            <CreditIcon />
-          )
-        }
+        icon={unit === "usdc" ? TOKEN_ICONS.USDC : <CreditIcon />}
         variant="light"
         rounded
       />
