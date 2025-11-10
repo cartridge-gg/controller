@@ -208,7 +208,18 @@ export const networkWalletData: NetworkWalletData = {
   ],
 };
 
-export const getWallet = (type: ExternalWalletType | "controller") => {
+export const getWallet = (
+  type: ExternalWalletType | "controller" | "preimage",
+) => {
+  if (type === "preimage") {
+    return {
+      name: "Preimage",
+      type: "preimage",
+      icon: null,
+      subIcon: null,
+    };
+  }
+
   const wallet = evmWallets.get(type) || snWallets.get(type);
   if (!wallet) {
     throw new Error(`Wallet ${type} not found`);

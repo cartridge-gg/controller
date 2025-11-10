@@ -451,7 +451,10 @@ export default class ControllerProvider extends BaseProvider {
     });
   }
 
-  async openStarterPack(starterpackId: string | number): Promise<void> {
+  async openStarterPack(
+    starterpackId: string | number,
+    preimage?: string,
+  ): Promise<void> {
     if (!this.iframes) {
       return;
     }
@@ -461,7 +464,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    await this.keychain.openStarterPack(starterpackId);
+    await this.keychain.openStarterPack(starterpackId, preimage);
     this.iframes.keychain?.open();
   }
 

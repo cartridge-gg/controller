@@ -307,7 +307,7 @@ export function ClaimPendingInner({
           isLoading={isClaiming}
         />
         <Button className="w-full" variant="primary" disabled={true}>
-          Purchase
+          Claiming
         </Button>
       </LayoutFooter>
     </>
