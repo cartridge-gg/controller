@@ -114,7 +114,6 @@ export interface PurchaseContextType {
   transactionHash?: string;
   swapId?: string;
   explorer?: Explorer;
-  ethereumPreimage?: string; // Optional Ethereum preimage for claim signing
 
   // Stripe state
   clientSecret?: string;
@@ -150,7 +149,6 @@ export interface PurchaseContextType {
   setDepositAmount: (amount: number) => void;
   setStarterpackId: (starterpackId: string | number) => void;
   setTransactionHash: (hash: string) => void;
-  setEthereumPreimage: (preimage: string | undefined) => void;
   setClaimItems: (items: Item[]) => void;
 
   // Payment actions
@@ -219,9 +217,6 @@ export const PurchaseProvider = ({
   const [swapQuote, setSwapQuote] = useState<SwapQuote | null>(null);
   const [isFetchingConversion, setIsFetchingConversion] = useState(false);
   const [conversionError, setConversionError] = useState<Error | null>(null);
-  const [ethereumPreimage, setEthereumPreimage] = useState<
-    string | undefined
-  >();
 
   // Wrapper for setSelectedToken that ensures we always have a valid token
   const setSelectedToken = useCallback((token: TokenOption | undefined) => {
@@ -942,7 +937,6 @@ export const PurchaseProvider = ({
     transactionHash,
     swapId,
     explorer,
-    ethereumPreimage,
 
     // Stripe state
     clientSecret,
@@ -975,7 +969,6 @@ export const PurchaseProvider = ({
     setDepositAmount,
     setStarterpackId,
     setTransactionHash,
-    setEthereumPreimage,
     setClaimItems: setClaimItemsState,
 
     // Actions

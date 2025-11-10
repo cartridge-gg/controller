@@ -16,7 +16,7 @@ import {
   VerifiedIcon,
   Spinner,
 } from "@cartridge/ui";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
 import { useEffect } from "react";
@@ -27,6 +27,9 @@ import { Quote } from "@/types/starterpack-types";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
+  const [searchParams] = useSearchParams();
+  const preimage = searchParams.get("preimage");
+  const { navigate } = useNavigation();
 
   const {
     isStarterpackLoading,
@@ -43,7 +46,27 @@ export function PurchaseStarterpack() {
     }
   }, [starterpackId, isStarterpackLoading, setStarterpackId]);
 
-  if (isStarterpackLoading) {
+  // Auto-redirect to claim page if preimage is available
+  useEffect(() => {
+    if (
+      !isStarterpackLoading &&
+      isClaimStarterpack(details) &&
+      preimage &&
+      details.merkleDrops?.some((drop) => drop.network === "ETHEREUM") &&
+      !displayError
+    ) {
+      const keys = details.merkleDrops
+        .filter((drop) => drop.network === "ETHEREUM")
+        .map((drop) => drop.key)
+        .join(";");
+
+      navigate(`/purchase/claim/${keys}/${preimage}/preimage`, {
+        replace: true,
+      });
+    }
+  }, [isStarterpackLoading, details, preimage, displayError, navigate]);
+
+  if (isStarterpackLoading || preimage) {
     return <LoadingState />;
   }
 

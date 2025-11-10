@@ -41,12 +41,12 @@ export const useMerkleClaim = ({
   keys,
   address,
   type,
-  ethereumPreimage,
+  preimage,
 }: {
   keys: string;
   address: string;
   type: ExternalWalletType | "controller" | "preimage";
-  ethereumPreimage?: string;
+  preimage?: string;
 }) => {
   const { controller, isMainnet, externalSignMessage, externalSignTypedData } =
     useConnection();
@@ -194,11 +194,8 @@ export const useMerkleClaim = ({
           let signatureResult: string;
 
           // Use preimage signing if available, otherwise use external wallet
-          if (ethereumPreimage) {
-            signatureResult = await signMessageWithPrivateKey(
-              msg,
-              ethereumPreimage,
-            );
+          if (preimage) {
+            signatureResult = await signMessageWithPrivateKey(msg, preimage);
           } else {
             const { result, error } = await externalSignMessage(address, msg);
             if (error) {
@@ -216,6 +213,11 @@ export const useMerkleClaim = ({
 
           signature.unshift("0x0"); // Enum Ethereum Signature
         } else {
+          if (preimage) {
+            throw new Error(
+              "Ethereum preimage is not supported for Starknet claims",
+            );
+          }
           const msg: TypedData = starknetMessage(
             controller.address(),
             isMainnet,
@@ -267,7 +269,7 @@ export const useMerkleClaim = ({
       isMainnet,
       externalSignMessage,
       externalSignTypedData,
-      ethereumPreimage,
+      preimage,
     ],
   );
 
