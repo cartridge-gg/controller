@@ -1,7 +1,7 @@
 {
   "name": "@cartridge/controller-example-next",
   "private": true,
-  "version": "0.10.7",
+  "version": "0.11.0",
   "scripts": {
     "dev": "env-cmd -f .env.dev next dev -p 3002",
     "dev:live": "env-cmd -f .env.live next dev -p 3002",
