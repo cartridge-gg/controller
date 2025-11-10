@@ -53,7 +53,7 @@ export function createConnectUrl(
 }
 
 export function parseConnectParams(searchParams: URLSearchParams): {
-  params: { id: string; signers: AuthOptions | undefined };
+  params: { id?: string; signers: AuthOptions | undefined };
   resolve?: (result: unknown) => void;
   reject?: (reason?: unknown) => void;
   onCancel?: () => void;
@@ -61,11 +61,6 @@ export function parseConnectParams(searchParams: URLSearchParams): {
   try {
     const id = searchParams.get("id");
     const signersParam = searchParams.get("signers");
-
-    if (!id) {
-      console.error("Missing required id parameter");
-      return null;
-    }
 
     let signers: AuthOptions | undefined;
     if (signersParam) {
@@ -81,7 +76,10 @@ export function parseConnectParams(searchParams: URLSearchParams): {
       }
     }
 
-    const callbacks = getCallbacks(id) as ConnectCallback | undefined;
+    let callbacks: ConnectCallback | undefined;
+    if (id) {
+      callbacks = getCallbacks(id) as ConnectCallback | undefined;
+    }
 
     const reject = callbacks?.reject
       ? (reason?: unknown) => {
@@ -108,7 +106,7 @@ export function parseConnectParams(searchParams: URLSearchParams): {
       : undefined;
 
     return {
-      params: { id, signers },
+      params: { id: id || undefined, signers },
       resolve,
       reject,
       onCancel,

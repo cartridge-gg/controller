@@ -1,15 +1,15 @@
 import { useState, useCallback } from "react";
 import {
-  CreateLayerswapPaymentDocument,
-  CreateLayerswapPaymentMutation,
-  CryptoPaymentQuery,
-  CryptoPaymentDocument,
   LayerswapQuoteQuery,
   LayerswapQuoteDocument,
   LayerswapSourceNetwork,
-  CreateLayerswapPaymentInput,
+  CreateLayerswapDepositInput,
   LayerswapQuoteQueryVariables,
-  CreateLayerswapPaymentMutationVariables,
+  CreateLayerswapDepositMutation,
+  CreateLayerswapDepositDocument,
+  CreateLayerswapDepositMutationVariables,
+  LayerswapStatusQuery,
+  LayerswapStatusDocument,
 } from "@cartridge/ui/utils/api/cartridge";
 import { request } from "@/utils/graphql";
 import { useConnection } from "../connection";
@@ -26,12 +26,12 @@ import {
 import { ethers } from "ethers";
 import erc20abi from "./erc20abi.json" assert { type: "json" };
 
-export interface SendPaymentResult {
-  paymentId: string;
+export interface SendDepositResult {
+  swapId: string;
   transactionHash?: string;
 }
 
-export const useCryptoPayment = () => {
+export const useLayerswapDeposit = () => {
   const { controller, isMainnet, externalSendTransaction } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -108,7 +108,7 @@ export const useCryptoPayment = () => {
     [externalSendTransaction],
   );
 
-  const requestEvmPayment = useCallback(
+  const requestEvmDeposit = useCallback(
     async (
       walletAddress: string,
       walletType: ExternalWalletType,
@@ -142,14 +142,14 @@ export const useCryptoPayment = () => {
     [externalSendTransaction],
   );
 
-  const sendPayment = useCallback(
+  const sendDeposit = useCallback(
     async (
-      input: CreateLayerswapPaymentInput,
+      input: CreateLayerswapDepositInput,
       walletAddress: string,
       walletType: ExternalWalletType,
       platform: ExternalPlatform,
       onSubmitted?: (explorer: Explorer) => void,
-    ): Promise<SendPaymentResult> => {
+    ): Promise<SendDepositResult> => {
       if (!controller) {
         throw new Error("Controller not connected");
       }
@@ -159,11 +159,11 @@ export const useCryptoPayment = () => {
         setError(null);
 
         const {
-          id: paymentId,
+          id: swapId,
           depositAddress,
           tokenAmount,
           tokenAddress,
-        } = await createCryptoPayment(input);
+        } = await createLayerswapDeposit(input);
 
         let transactionHash: string | undefined;
 
@@ -172,7 +172,7 @@ export const useCryptoPayment = () => {
           case "arbitrum":
           case "optimism":
           case "base": {
-            const hash = await requestEvmPayment(
+            const hash = await requestEvmDeposit(
               walletAddress,
               walletType,
               depositAddress,
@@ -204,7 +204,7 @@ export const useCryptoPayment = () => {
           }
         }
 
-        return { paymentId, transactionHash };
+        return { swapId, transactionHash };
       } catch (err) {
         setError(err as Error);
         throw err;
@@ -212,11 +212,11 @@ export const useCryptoPayment = () => {
         setIsLoading(false);
       }
     },
-    [controller, isMainnet, requestPhantomPayment, requestEvmPayment],
+    [controller, isMainnet, requestPhantomPayment, requestEvmDeposit],
   );
 
-  const estimateStarterPackFees = useCallback(
-    async (input: CreateLayerswapPaymentInput) => {
+  const estimateLayerswapFees = useCallback(
+    async (input: CreateLayerswapDepositInput) => {
       const result = await request<
         LayerswapQuoteQuery,
         LayerswapQuoteQueryVariables
@@ -229,28 +229,31 @@ export const useCryptoPayment = () => {
     [],
   );
 
-  const waitForPayment = useCallback(async (paymentId: string) => {
+  const waitForDeposit = useCallback(async (swapId: string) => {
     const MAX_WAIT_TIME = 10 * 60 * 1000; // 10 minutes
     const POLL_INTERVAL = 3000; // 3 seconds
     const startTime = Date.now();
 
     while (Date.now() - startTime < MAX_WAIT_TIME) {
-      const result = await request<CryptoPaymentQuery>(CryptoPaymentDocument, {
-        id: paymentId,
-      });
+      const result = await request<LayerswapStatusQuery>(
+        LayerswapStatusDocument,
+        {
+          id: swapId,
+        },
+      );
 
-      const payment = result.cryptoPayment;
-      if (!payment) {
-        throw new Error("Payment not found");
+      const status = result.layerswapStatus;
+      if (!status) {
+        throw new Error("Swap not found");
       }
 
-      switch (payment.status) {
+      switch (status) {
         case "CONFIRMED":
           return true;
         case "FAILED":
-          throw new Error(`Payment failed, ref id: ${paymentId}`);
+          throw new Error(`Deposit failed, swap id: ${swapId}`);
         case "EXPIRED":
-          throw new Error(`Payment expired, ref id: ${paymentId}`);
+          throw new Error(`Deposit expired, swap id: ${swapId}`);
         case "PENDING":
           await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
           break;
@@ -258,49 +261,31 @@ export const useCryptoPayment = () => {
     }
 
     throw new Error(
-      `Payment confirmation timed out after 10 minutes, ref id: ${paymentId}`,
+      `Deposit confirmation timed out after 10 minutes, swap id: ${swapId}`,
     );
   }, []);
 
-  async function createCryptoPayment(input: CreateLayerswapPaymentInput) {
-    const result = await request<CreateLayerswapPaymentMutation>(
-      CreateLayerswapPaymentDocument,
-      {
-        input,
-      },
-    );
-
-    return {
-      id: result.createLayerswapPayment.cryptoPaymentId,
-      depositAddress: result.createLayerswapPayment.sourceDepositAddress,
-      tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
-      tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
-      swapId: result.createLayerswapPayment.swapId,
-    };
-  }
-
-  async function createStarterPackPayment(input: CreateLayerswapPaymentInput) {
+  async function createLayerswapDeposit(input: CreateLayerswapDepositInput) {
     const result = await request<
-      CreateLayerswapPaymentMutation,
-      CreateLayerswapPaymentMutationVariables
-    >(CreateLayerswapPaymentDocument, {
+      CreateLayerswapDepositMutation,
+      CreateLayerswapDepositMutationVariables
+    >(CreateLayerswapDepositDocument, {
       input,
     });
 
     return {
-      id: result.createLayerswapPayment.cryptoPaymentId,
-      depositAddress: result.createLayerswapPayment.sourceDepositAddress,
-      tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
-      tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
-      swapId: result.createLayerswapPayment.swapId,
+      id: result.createLayerswapDeposit.swapId,
+      depositAddress: result.createLayerswapDeposit.sourceDepositAddress,
+      tokenAmount: result.createLayerswapDeposit.sourceTokenAmount,
+      tokenAddress: result.createLayerswapDeposit.sourceTokenAddress,
     };
   }
 
   return {
-    sendPayment,
-    estimateStarterPackFees,
-    waitForPayment,
-    createStarterPackPayment,
+    createLayerswapDeposit,
+    estimateLayerswapFees,
+    waitForDeposit,
+    sendDeposit,
     isLoading,
     error,
   };

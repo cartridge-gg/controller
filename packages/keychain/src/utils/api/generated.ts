@@ -903,11 +903,18 @@ export type CreateCryptoPaymentInput = {
   username: Scalars["String"];
 };
 
+export type CreateLayerswapDepositInput = {
+  amount: Scalars["BigInt"];
+  layerswapFees?: InputMaybe<Scalars["BigInt"]>;
+  marginPercent?: InputMaybe<Scalars["Int"]>;
+  sourceNetwork: LayerswapSourceNetwork;
+  username: Scalars["String"];
+};
+
 export type CreateLayerswapPaymentInput = {
   credits?: InputMaybe<CreditsInput>;
   destinationNetwork: LayerswapDestinationNetwork;
   layerswapFees?: InputMaybe<Scalars["BigInt"]>;
-  outsideExecution?: InputMaybe<OutsideExecution>;
   purchaseType: PurchaseType;
   sourceNetwork: LayerswapSourceNetwork;
   starterpackId?: InputMaybe<Scalars["ID"]>;
@@ -945,6 +952,8 @@ export type CreateMerkleDropInput = {
   key: Scalars["String"];
   matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
   merkleRoot: Scalars["String"];
+  /** Additional metadata for the merkle drop */
+  metadata?: InputMaybe<Scalars["JSON"]>;
   network: MerkleDropNetwork;
   salt: Scalars["String"];
   starterpackID?: InputMaybe<Scalars["ID"]>;
@@ -1799,16 +1808,9 @@ export type LayerswapPayment = {
   sourceNetwork: LayerswapSourceNetwork;
   sourceTokenAddress: Scalars["String"];
   sourceTokenAmount: Scalars["BigInt"];
-  status: LayerswapPaymentStatus;
+  status: LayerswapStatus;
   swapId: Scalars["String"];
 };
-
-export enum LayerswapPaymentStatus {
-  Confirmed = "CONFIRMED",
-  Expired = "EXPIRED",
-  Failed = "FAILED",
-  Pending = "PENDING",
-}
 
 export type LayerswapQuote = {
   __typename?: "LayerswapQuote";
@@ -1858,6 +1860,13 @@ export type LayerswapSourceToken = {
   status: Scalars["String"];
   symbol: Scalars["String"];
 };
+
+export enum LayerswapStatus {
+  Confirmed = "CONFIRMED",
+  Expired = "EXPIRED",
+  Failed = "FAILED",
+  Pending = "PENDING",
+}
 
 export type Lock = Node & {
   __typename?: "Lock";
@@ -2083,6 +2092,8 @@ export type MerkleDrop = Node & {
   key: Scalars["String"];
   matchStarterpackItem: Scalars["Boolean"];
   merkleRoot: Scalars["String"];
+  /** Additional metadata for the merkle drop */
+  metadata?: Maybe<Scalars["JSON"]>;
   network: MerkleDropNetwork;
   salt: Scalars["String"];
   starterpack?: Maybe<Starterpack>;
@@ -2325,6 +2336,7 @@ export type Mutation = {
   claimFreeStarterpack: Scalars["String"];
   createCryptoPayment: CryptoPayment;
   createDeployment: Deployment;
+  createLayerswapDeposit: LayerswapPayment;
   createLayerswapPayment: LayerswapPayment;
   createMerkleDrop: MerkleDrop;
   createPaymaster: Paymaster;
@@ -2399,6 +2411,10 @@ export type MutationCreateDeploymentArgs = {
   team?: InputMaybe<Scalars["String"]>;
   tier?: InputMaybe<DeploymentTier>;
   wait?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type MutationCreateLayerswapDepositArgs = {
+  input: CreateLayerswapDepositInput;
 };
 
 export type MutationCreateLayerswapPaymentArgs = {
@@ -2593,13 +2609,6 @@ export enum OrderDirection {
   /** Specifies a descending order for a given `orderBy` argument. */
   Desc = "DESC",
 }
-
-export type OutsideExecution = {
-  address: Scalars["String"];
-  execution: Scalars["JSON"];
-  signature: Array<Scalars["String"]>;
-  swap: SwapAmount;
-};
 
 export type Ownership = {
   __typename?: "Ownership";
@@ -2966,6 +2975,8 @@ export type PaymasterPolicy = Node & {
   paymasters?: Maybe<Paymaster>;
   /** Predicate configuration for the policy */
   predicate?: Maybe<PolicyPredicate>;
+  /** If set, this policy only applies to requests from the specified katana project (e.g., 'myproject' for /x/myproject/katana) */
+  requiredKatanaProject?: Maybe<Scalars["String"]>;
   selector: Scalars["String"];
   updatedAt: Scalars["Time"];
 };
@@ -3081,6 +3092,22 @@ export type PaymasterPolicyWhereInput = {
   paymasterIDNEQ?: InputMaybe<Scalars["ID"]>;
   paymasterIDNotIn?: InputMaybe<Array<Scalars["ID"]>>;
   paymasterIDNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** required_katana_project field predicates */
+  requiredKatanaProject?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectContains?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectContainsFold?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectEqualFold?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectGT?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectGTE?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectHasPrefix?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectHasSuffix?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectIn?: InputMaybe<Array<Scalars["String"]>>;
+  requiredKatanaProjectIsNil?: InputMaybe<Scalars["Boolean"]>;
+  requiredKatanaProjectLT?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectLTE?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectNEQ?: InputMaybe<Scalars["String"]>;
+  requiredKatanaProjectNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  requiredKatanaProjectNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** selector field predicates */
   selector?: InputMaybe<Scalars["String"]>;
   selectorContains?: InputMaybe<Scalars["String"]>;
@@ -3391,7 +3418,7 @@ export type Project = {
 
 export enum PurchaseType {
   Credits = "CREDITS",
-  OutsideExecution = "OUTSIDE_EXECUTION",
+  /** @deprecated Starterpack purchases are now handled client-side */
   Starterpack = "STARTERPACK",
 }
 
@@ -3415,6 +3442,7 @@ export type Query = {
   layerswapPayment?: Maybe<LayerswapPayment>;
   layerswapQuote: LayerswapQuote;
   layerswapSources: Array<LayerswapSource>;
+  layerswapStatus: LayerswapStatus;
   me?: Maybe<Account>;
   merkleClaims: MerkleClaimConnection;
   merkleClaimsForAddress: Array<MerkleClaim>;
@@ -3560,12 +3588,17 @@ export type QueryLayerswapPaymentArgs = {
 };
 
 export type QueryLayerswapQuoteArgs = {
-  input: CreateLayerswapPaymentInput;
+  input: CreateLayerswapDepositInput;
 };
 
 export type QueryLayerswapSourcesArgs = {
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   token: Scalars["String"];
+};
+
+export type QueryLayerswapStatusArgs = {
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  swapId: Scalars["ID"];
 };
 
 export type QueryMerkleClaimsArgs = {
@@ -5307,13 +5340,9 @@ export type StripePricingDetails = {
   totalInCents: Scalars["Int"];
 };
 
-export type SwapAmount = {
-  amount: Scalars["BigInt"];
-  tokenAddress: Scalars["String"];
-};
-
 export type Team = Node & {
   __typename?: "Team";
+  address?: Maybe<Scalars["String"]>;
   /** Credits to use for slot billing. 1 credit = 0.01 USD. */
   credits: Scalars["Int"];
   /** Soft delete flag for legal and billing purposes. */
@@ -5332,6 +5361,7 @@ export type Team = Node & {
   rpcAPIKeys: RpcApiKeyConnection;
   rpcCorsDomains: RpcCorsDomainConnection;
   starterpacks: StarterpackConnection;
+  taxID?: Maybe<Scalars["String"]>;
   /** Total amount debited for incubator stage tracking. 1 credit = 0.01 USD. */
   totalDebits: Scalars["Int"];
 };
@@ -5549,7 +5579,9 @@ export enum TeamIncubatorStage {
 }
 
 export type TeamInput = {
+  address?: InputMaybe<Scalars["String"]>;
   email?: InputMaybe<Scalars["String"]>;
+  taxId?: InputMaybe<Scalars["String"]>;
 };
 
 /**
@@ -5557,6 +5589,22 @@ export type TeamInput = {
  * Input was generated by ent.
  */
 export type TeamWhereInput = {
+  /** address field predicates */
+  address?: InputMaybe<Scalars["String"]>;
+  addressContains?: InputMaybe<Scalars["String"]>;
+  addressContainsFold?: InputMaybe<Scalars["String"]>;
+  addressEqualFold?: InputMaybe<Scalars["String"]>;
+  addressGT?: InputMaybe<Scalars["String"]>;
+  addressGTE?: InputMaybe<Scalars["String"]>;
+  addressHasPrefix?: InputMaybe<Scalars["String"]>;
+  addressHasSuffix?: InputMaybe<Scalars["String"]>;
+  addressIn?: InputMaybe<Array<Scalars["String"]>>;
+  addressIsNil?: InputMaybe<Scalars["Boolean"]>;
+  addressLT?: InputMaybe<Scalars["String"]>;
+  addressLTE?: InputMaybe<Scalars["String"]>;
+  addressNEQ?: InputMaybe<Scalars["String"]>;
+  addressNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  addressNotNil?: InputMaybe<Scalars["Boolean"]>;
   and?: InputMaybe<Array<TeamWhereInput>>;
   /** credits field predicates */
   credits?: InputMaybe<Scalars["Int"]>;
@@ -5660,6 +5708,22 @@ export type TeamWhereInput = {
   nameNotIn?: InputMaybe<Array<Scalars["String"]>>;
   not?: InputMaybe<TeamWhereInput>;
   or?: InputMaybe<Array<TeamWhereInput>>;
+  /** tax_id field predicates */
+  taxID?: InputMaybe<Scalars["String"]>;
+  taxIDContains?: InputMaybe<Scalars["String"]>;
+  taxIDContainsFold?: InputMaybe<Scalars["String"]>;
+  taxIDEqualFold?: InputMaybe<Scalars["String"]>;
+  taxIDGT?: InputMaybe<Scalars["String"]>;
+  taxIDGTE?: InputMaybe<Scalars["String"]>;
+  taxIDHasPrefix?: InputMaybe<Scalars["String"]>;
+  taxIDHasSuffix?: InputMaybe<Scalars["String"]>;
+  taxIDIn?: InputMaybe<Array<Scalars["String"]>>;
+  taxIDIsNil?: InputMaybe<Scalars["Boolean"]>;
+  taxIDLT?: InputMaybe<Scalars["String"]>;
+  taxIDLTE?: InputMaybe<Scalars["String"]>;
+  taxIDNEQ?: InputMaybe<Scalars["String"]>;
+  taxIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  taxIDNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** total_debits field predicates */
   totalDebits?: InputMaybe<Scalars["Int"]>;
   totalDebitsGT?: InputMaybe<Scalars["Int"]>;
@@ -5819,8 +5883,10 @@ export type UpdateMerkleClaimInput = {
  */
 export type UpdateMerkleDropInput = {
   addClaimIDs?: InputMaybe<Array<Scalars["ID"]>>;
+  appendMetadata?: InputMaybe<Scalars["JSON"]>;
   clearClaims?: InputMaybe<Scalars["Boolean"]>;
   clearDescription?: InputMaybe<Scalars["Boolean"]>;
+  clearMetadata?: InputMaybe<Scalars["Boolean"]>;
   clearStarterpack?: InputMaybe<Scalars["Boolean"]>;
   contract?: InputMaybe<Scalars["String"]>;
   createdAt?: InputMaybe<Scalars["Time"]>;
@@ -5829,6 +5895,8 @@ export type UpdateMerkleDropInput = {
   key?: InputMaybe<Scalars["String"]>;
   matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
   merkleRoot?: InputMaybe<Scalars["String"]>;
+  /** Additional metadata for the merkle drop */
+  metadata?: InputMaybe<Scalars["JSON"]>;
   network?: InputMaybe<MerkleDropNetwork>;
   removeClaimIDs?: InputMaybe<Array<Scalars["ID"]>>;
   salt?: InputMaybe<Scalars["String"]>;

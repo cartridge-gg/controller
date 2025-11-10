@@ -1,4 +1,13 @@
 import {
+  ArgentIcon,
+  ArgentColorIcon,
+  StarknetIcon,
+  MetaMaskIcon,
+  MetaMaskColorIcon,
+  EthereumIcon,
+  PhantomIcon,
+  PhantomColorIcon,
+  SolanaIcon,
   Card,
   CardContent,
   CreditIcon,
@@ -8,11 +17,34 @@ import {
 } from "@cartridge/ui";
 import { PricingDetails } from ".";
 import { ExternalWalletType } from "@cartridge/controller";
-import { WALLET_CONFIG } from "./CryptoCheckout";
 import { FeesTooltip } from "./FeesTooltip";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
+
+export const WALLET_CONFIG = {
+  argent: {
+    icon: ArgentIcon,
+    colorIcon: ArgentColorIcon,
+    network: "Starknet",
+    networkIcon: StarknetIcon,
+    bgColor: "#FF875B",
+  },
+  metamask: {
+    icon: MetaMaskIcon,
+    colorIcon: MetaMaskColorIcon,
+    network: "Ethereum",
+    networkIcon: EthereumIcon,
+    bgColor: "#E88A39",
+  },
+  phantom: {
+    icon: PhantomIcon,
+    colorIcon: PhantomColorIcon,
+    network: "Solana",
+    networkIcon: SolanaIcon,
+    bgColor: "#AB9FF2",
+  },
+} as const;
 
 export function CostBreakdown({
   rails,

@@ -4,6 +4,7 @@ import {
   useProgressionsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { Progress, RawProgress, getSelectorFromTag } from "@/models";
+import { addAddressPadding } from "starknet";
 
 interface Response {
   items: { achievements: RawProgress[] }[];
@@ -26,7 +27,13 @@ export function useProgressions({
 
   // Fetch achievement creations from raw events
   const projects: Project[] = useMemo(
-    () => [{ model: getSelectorFromTag(namespace, name), namespace, project }],
+    () => [
+      {
+        model: addAddressPadding(getSelectorFromTag(namespace, name)),
+        namespace,
+        project,
+      },
+    ],
     [namespace, name, project],
   );
 

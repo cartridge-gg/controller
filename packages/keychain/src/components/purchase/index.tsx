@@ -13,10 +13,8 @@ import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import { useMemo } from "react";
 import CheckoutForm from "./StripeCheckout";
-import { CryptoCheckout } from "./CryptoCheckout";
 import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { PaymentMethod } from "./PaymentMethod";
-import { Supply } from "./Supply";
 import { PurchaseContent } from "./PurchaseContent";
 import { usePurchase } from "@/hooks/purchase";
 import { PurchaseState, PurchaseCreditsProps } from "./types";
@@ -33,30 +31,19 @@ export function Purchase(props: PurchaseCreditsProps) {
     state,
     clientSecret,
     pricingDetails,
-    wholeCredits,
     selectedWallet,
-    walletAddress,
     displayError,
     stripePromise,
     isStripeLoading,
     isLoadingWallets,
-    isStarterpackLoading,
-    isClaiming,
     closeModal,
     onAmountChanged,
-    onClaim,
     onCreditCard,
     onExternalConnect,
     onCompletePurchase,
   } = usePurchase(props);
 
-  const {
-    wallets,
-    type,
-    starterpackDetails,
-    teamId,
-    title: propsTitle,
-  } = props;
+  const { wallets, type, starterpackDetails, title: propsTitle } = props;
 
   const title = useMemo(() => {
     if (propsTitle) {
@@ -104,34 +91,13 @@ export function Purchase(props: PurchaseCreditsProps) {
     );
   }
 
-  if (state === PurchaseState.CRYPTO_CHECKOUT) {
-    return (
-      <CryptoCheckout
-        walletAddress={walletAddress!}
-        selectedWallet={selectedWallet!}
-        wholeCredits={wholeCredits}
-        starterpackDetails={starterpackDetails}
-        teamId={teamId}
-        onComplete={onCompletePurchase}
-      />
-    );
-  }
   // const isCloseable = isSlot
   //   ? false
   //   : state === PurchaseState.SELECTION || state === PurchaseState.SUCCESS;
 
   return (
     <>
-      <HeaderInner
-        title={title}
-        right={
-          state === PurchaseState.SELECTION &&
-          starterpackDetails?.supply !== undefined ? (
-            <Supply amount={starterpackDetails!.supply} />
-          ) : undefined
-        }
-        hideIcon
-      />
+      <HeaderInner title={title} hideIcon />
       <LayoutContent>
         <PurchaseContent
           state={state}
@@ -175,12 +141,8 @@ export function Purchase(props: PurchaseCreditsProps) {
           <PaymentMethod
             starterpackDetails={starterpackDetails}
             isStripeLoading={isStripeLoading}
-            isStarterpackLoading={isStarterpackLoading}
-            isClaiming={isClaiming}
             selectedWallet={selectedWallet}
             wallets={wallets}
-            mintAllowance={starterpackDetails?.mintAllowance}
-            onClaim={onClaim}
             onCreditCard={onCreditCard}
             onExternalConnect={onExternalConnect}
           />
