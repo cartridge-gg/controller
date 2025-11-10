@@ -31,7 +31,7 @@ import { parseChainId } from "./utils";
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
   private options: ControllerOptions;
-  private iframes: IFrames;
+  private iframes?: IFrames;
   private selectedChain: ChainId;
   private chains: Map<ChainId, Chain>;
   private referral: { ref?: string; refGroup?: string };
@@ -68,6 +68,8 @@ export default class ControllerProvider extends BaseProvider {
       ref: urlParams?.get("ref") ?? undefined,
       refGroup: urlParams?.get("ref_group") ?? undefined,
     };
+
+    this.options = { ...options, chains, defaultChainId };
 
     // Handle automatic redirect to keychain for standalone flow
     // When controller_redirect is present, automatically redirect to keychain
@@ -132,8 +134,6 @@ export default class ControllerProvider extends BaseProvider {
       }
     }
 
-    this.options = { ...options, chains, defaultChainId };
-
     this.initializeChains(chains);
 
     this.iframes = {
@@ -183,6 +183,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async probe(): Promise<WalletAccount | undefined> {
+    if (!this.iframes) {
+      return;
+    }
+
     try {
       // Ensure iframe is created if using lazy loading
       if (!this.iframes.keychain) {
@@ -217,6 +221,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async connect(): Promise<WalletAccount | undefined> {
+    if (!this.iframes) {
+      return;
+    }
+
     if (this.account) {
       return this.account;
     }
@@ -267,6 +275,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async switchStarknetChain(chainId: string): Promise<boolean> {
+    if (!this.iframes) {
+      return false;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return false;
@@ -309,6 +321,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfile(tab: ProfileContextTypeVariant = "inventory") {
+    if (!this.iframes) {
+      return;
+    }
+
     // Profile functionality is now integrated into keychain
     // Navigate keychain iframe to profile page
     if (!this.keychain || !this.iframes.keychain) {
@@ -333,6 +349,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfileTo(to: string) {
+    if (!this.iframes) {
+      return;
+    }
+
     // Profile functionality is now integrated into keychain
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
@@ -355,6 +375,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfileAt(at: string) {
+    if (!this.iframes) {
+      return;
+    }
+
     // Profile functionality is now integrated into keychain
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
@@ -370,6 +394,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   openSettings() {
+    if (!this.iframes) {
+      return;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -410,12 +438,16 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   openPurchaseCredits() {
+    if (!this.iframes) {
+      return;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
     this.keychain.navigate("/purchase/credits").then(() => {
-      this.iframes.keychain?.open();
+      this.iframes!.keychain?.open();
     });
   }
 
@@ -423,6 +455,10 @@ export default class ControllerProvider extends BaseProvider {
     starterpackId: string | number,
     preimage?: string,
   ): Promise<void> {
+    if (!this.iframes) {
+      return;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -433,6 +469,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openExecute(calls: any, chainId?: string) {
+    if (!this.iframes) {
+      return;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
