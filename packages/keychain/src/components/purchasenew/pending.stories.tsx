@@ -31,7 +31,7 @@ const MockPurchaseProvider = ({ children }: { children: ReactNode }) => {
     selectedPlatform: "ethereum",
     stripePromise: Promise.resolve(null),
     isStripeLoading: false,
-    isCryptoLoading: false,
+    isDepositLoading: false,
     isStarterpackLoading: false,
     clearError: () => {},
     clearSelectedWallet: () => {},
@@ -41,16 +41,16 @@ const MockPurchaseProvider = ({ children }: { children: ReactNode }) => {
     isFetchingConversion: false,
     conversionError: null,
     setUsdAmount: () => {},
-    setPurchaseItems: () => {},
-    setClaimItems: () => {},
-    setStarterpack: () => {},
+    setDepositAmount: () => {},
+    setStarterpackId: () => {},
     setTransactionHash: () => {},
     setSelectedToken: () => {},
+    setClaimItems: () => {},
     onCreditCardPurchase: async () => {},
     onBackendCryptoPurchase: async () => {},
     onOnchainPurchase: async () => {},
     onExternalConnect: async () => undefined,
-    waitForPayment: async () => true,
+    waitForDeposit: async () => true,
     fetchFees: async () => {},
   };
 
@@ -99,7 +99,7 @@ export const CryptoPurchaseWithCredits: Story = {
         },
       ]}
       paymentMethod="crypto"
-      paymentId="payment_123"
+      swapId="payment_123"
       transactionHash="0x1234567890abcdef"
       explorer={{
         name: "Etherscan",
@@ -141,7 +141,7 @@ export const CryptoPurchaseWithNFT: Story = {
         },
       ]}
       paymentMethod="crypto"
-      paymentId="payment_456"
+      swapId="payment_456"
       transactionHash="0xabcdef1234567890"
       explorer={{
         name: "Etherscan",
@@ -178,7 +178,7 @@ export const CryptoPurchaseWithoutWallet: Story = {
         },
       ]}
       paymentMethod="crypto"
-      paymentId="payment_789"
+      swapId="payment_789"
     />
   ),
 };
@@ -208,7 +208,7 @@ export const StripePurchase: Story = {
         },
       ]}
       paymentMethod="stripe"
-      paymentId="pi_stripe123"
+      swapId="pi_stripe123"
     />
   ),
 };
@@ -340,7 +340,7 @@ export const CryptoPurchaseLoading: Story = {
         },
       ]}
       paymentMethod="crypto"
-      paymentId="payment_loading"
+      swapId="payment_loading"
       transactionHash="0x0000000000000000"
       explorer={{
         name: "Etherscan",
@@ -379,7 +379,7 @@ export const TokenPurchaseSmallAmount: Story = {
         },
       ]}
       paymentMethod="crypto"
-      paymentId="payment_small_tokens"
+      swapId="payment_small_tokens"
       transactionHash="0xabc123def456"
       explorer={{
         name: "Etherscan",
@@ -424,7 +424,7 @@ export const TokenPurchaseLargeAmount: Story = {
         },
       ]}
       paymentMethod="crypto"
-      paymentId="payment_large_tokens"
+      swapId="payment_large_tokens"
       transactionHash="0xdef789abc012"
       explorer={{
         name: "Etherscan",

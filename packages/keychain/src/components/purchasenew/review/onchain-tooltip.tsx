@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@cartridge/ui";
-import type { OnchainQuote } from "@/context";
+import type { Quote } from "@/types/starterpack-types";
 import { usePurchaseContext } from "@/context";
 
 /**
@@ -27,7 +27,7 @@ export const OnchainFeesTooltip = ({
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
-  quote: OnchainQuote;
+  quote: Quote;
 }) => {
   const { decimals, symbol } = quote.paymentTokenMetadata;
   const { purchaseItems } = usePurchaseContext();

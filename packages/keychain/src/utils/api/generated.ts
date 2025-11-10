@@ -906,6 +906,7 @@ export type CreateCryptoPaymentInput = {
 export type CreateLayerswapDepositInput = {
   amount: Scalars["BigInt"];
   layerswapFees?: InputMaybe<Scalars["BigInt"]>;
+  marginPercent?: InputMaybe<Scalars["Int"]>;
   sourceNetwork: LayerswapSourceNetwork;
   username: Scalars["String"];
 };
@@ -951,6 +952,8 @@ export type CreateMerkleDropInput = {
   key: Scalars["String"];
   matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
   merkleRoot: Scalars["String"];
+  /** Additional metadata for the merkle drop */
+  metadata?: InputMaybe<Scalars["JSON"]>;
   network: MerkleDropNetwork;
   salt: Scalars["String"];
   starterpackID?: InputMaybe<Scalars["ID"]>;
@@ -1805,16 +1808,9 @@ export type LayerswapPayment = {
   sourceNetwork: LayerswapSourceNetwork;
   sourceTokenAddress: Scalars["String"];
   sourceTokenAmount: Scalars["BigInt"];
-  status: LayerswapPaymentStatus;
+  status: LayerswapStatus;
   swapId: Scalars["String"];
 };
-
-export enum LayerswapPaymentStatus {
-  Confirmed = "CONFIRMED",
-  Expired = "EXPIRED",
-  Failed = "FAILED",
-  Pending = "PENDING",
-}
 
 export type LayerswapQuote = {
   __typename?: "LayerswapQuote";
@@ -1864,6 +1860,13 @@ export type LayerswapSourceToken = {
   status: Scalars["String"];
   symbol: Scalars["String"];
 };
+
+export enum LayerswapStatus {
+  Confirmed = "CONFIRMED",
+  Expired = "EXPIRED",
+  Failed = "FAILED",
+  Pending = "PENDING",
+}
 
 export type Lock = Node & {
   __typename?: "Lock";
@@ -2089,6 +2092,8 @@ export type MerkleDrop = Node & {
   key: Scalars["String"];
   matchStarterpackItem: Scalars["Boolean"];
   merkleRoot: Scalars["String"];
+  /** Additional metadata for the merkle drop */
+  metadata?: Maybe<Scalars["JSON"]>;
   network: MerkleDropNetwork;
   salt: Scalars["String"];
   starterpack?: Maybe<Starterpack>;
@@ -3437,6 +3442,7 @@ export type Query = {
   layerswapPayment?: Maybe<LayerswapPayment>;
   layerswapQuote: LayerswapQuote;
   layerswapSources: Array<LayerswapSource>;
+  layerswapStatus: LayerswapStatus;
   me?: Maybe<Account>;
   merkleClaims: MerkleClaimConnection;
   merkleClaimsForAddress: Array<MerkleClaim>;
@@ -3582,12 +3588,17 @@ export type QueryLayerswapPaymentArgs = {
 };
 
 export type QueryLayerswapQuoteArgs = {
-  input: CreateLayerswapPaymentInput;
+  input: CreateLayerswapDepositInput;
 };
 
 export type QueryLayerswapSourcesArgs = {
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   token: Scalars["String"];
+};
+
+export type QueryLayerswapStatusArgs = {
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  swapId: Scalars["ID"];
 };
 
 export type QueryMerkleClaimsArgs = {
@@ -5872,8 +5883,10 @@ export type UpdateMerkleClaimInput = {
  */
 export type UpdateMerkleDropInput = {
   addClaimIDs?: InputMaybe<Array<Scalars["ID"]>>;
+  appendMetadata?: InputMaybe<Scalars["JSON"]>;
   clearClaims?: InputMaybe<Scalars["Boolean"]>;
   clearDescription?: InputMaybe<Scalars["Boolean"]>;
+  clearMetadata?: InputMaybe<Scalars["Boolean"]>;
   clearStarterpack?: InputMaybe<Scalars["Boolean"]>;
   contract?: InputMaybe<Scalars["String"]>;
   createdAt?: InputMaybe<Scalars["Time"]>;
@@ -5882,6 +5895,8 @@ export type UpdateMerkleDropInput = {
   key?: InputMaybe<Scalars["String"]>;
   matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
   merkleRoot?: InputMaybe<Scalars["String"]>;
+  /** Additional metadata for the merkle drop */
+  metadata?: InputMaybe<Scalars["JSON"]>;
   network?: InputMaybe<MerkleDropNetwork>;
   removeClaimIDs?: InputMaybe<Array<Scalars["ID"]>>;
   salt?: InputMaybe<Scalars["String"]>;

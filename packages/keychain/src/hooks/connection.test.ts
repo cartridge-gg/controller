@@ -221,6 +221,54 @@ describe("Config Loading and Verification Separation", () => {
 
       expect(redirectOrigin).toBe("https://example.com:8080");
     });
+
+    it("should verify loot-survivor preset with matching redirect_url", () => {
+      // Simulates: https://x.cartridge.gg/?redirect_url=https://lootsurvivor.io&preset=loot-survivor
+      const redirectUrl = "https://lootsurvivor.io";
+      const allowedOrigins = [
+        "lootsurvivor.io",
+        "claims.lootsurvivor.io",
+        "tournaments.lootsurvivor.io",
+      ];
+
+      const url = new URL(redirectUrl);
+      const redirectOrigin = url.origin;
+
+      // Extract hostname from redirect origin
+      const redirectHostname = url.hostname;
+
+      // Verify that the redirect hostname matches the preset's allowed origins
+      const isVerified = isOriginVerified(redirectOrigin, allowedOrigins);
+
+      expect(redirectHostname).toBe("lootsurvivor.io");
+      expect(isVerified).toBe(true);
+    });
+
+    it("should verify loot-survivor preset with subdomain redirect_url", () => {
+      const redirectUrl = "https://claims.lootsurvivor.io";
+      const allowedOrigins = [
+        "lootsurvivor.io",
+        "claims.lootsurvivor.io",
+        "tournaments.lootsurvivor.io",
+      ];
+
+      const isVerified = isOriginVerified(redirectUrl, allowedOrigins);
+
+      expect(isVerified).toBe(true);
+    });
+
+    it("should not verify loot-survivor preset with non-matching redirect_url", () => {
+      const redirectUrl = "https://malicious-site.com";
+      const allowedOrigins = [
+        "lootsurvivor.io",
+        "claims.lootsurvivor.io",
+        "tournaments.lootsurvivor.io",
+      ];
+
+      const isVerified = isOriginVerified(redirectUrl, allowedOrigins);
+
+      expect(isVerified).toBe(false);
+    });
   });
 
   describe("Multiple allowed origins verification", () => {

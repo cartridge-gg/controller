@@ -1,5 +1,6 @@
 import { ExternalPlatform } from "@cartridge/controller";
 import {
+  CreateLayerswapDepositInput,
   CreateLayerswapPaymentInput,
   LayerswapDestinationNetwork,
   PurchaseType,
@@ -7,34 +8,32 @@ import {
 import { mapPlatformToLayerswapSourceNetwork } from "@/hooks/payments/crypto";
 
 /**
- * Converts a starterpack ID to a CreateLayerswapPaymentInput object.
+ * Converts a deposit amount to a CreateLayerswapDepositInput object.
  *
- * @param starterpack The starterpack ID.
+ * @param amount The deposit amount.
+ * @param layerswapFees The Layerswap fees.
  * @param username The user's username.
  * @param platform The source platform for the payment.
  * @param isMainnet Whether the transaction is for mainnet or testnet.
- * @returns A CreateLayerswapPaymentInput object.
+ * @returns A CreateLayerswapDepositInput object.
  */
-export function starterPackToLayerswapInput(
-  starterpack: string,
+export function depositToLayerswapInput(
+  amount: number,
+  layerswapFees: number,
   username: string,
   platform: ExternalPlatform,
   isMainnet: boolean,
-): CreateLayerswapPaymentInput {
+): CreateLayerswapDepositInput {
   const sourceNetwork = mapPlatformToLayerswapSourceNetwork(
     platform,
     isMainnet,
   );
-  const destinationNetwork = isMainnet
-    ? LayerswapDestinationNetwork.StarknetMainnet
-    : LayerswapDestinationNetwork.StarknetSepolia;
 
   return {
+    amount: amount.toString(),
+    layerswapFees: layerswapFees.toString(),
     username,
     sourceNetwork,
-    destinationNetwork,
-    purchaseType: PurchaseType.Starterpack,
-    starterpackId: starterpack,
   };
 }
 

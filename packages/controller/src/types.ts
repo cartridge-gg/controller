@@ -260,21 +260,6 @@ export type Tokens = {
   erc20?: Token[];
 };
 
-export enum StarterPackItemType {
-  NONFUNGIBLE = "NONFUNGIBLE",
-  FUNGIBLE = "FUNGIBLE",
-}
-
-export interface StarterPackItem {
-  type: StarterPackItemType;
-  name: string;
-  description: string;
-  iconURL?: string;
-  amount?: number;
-  price?: bigint;
-  call?: Call[];
-}
-
 export type OpenOptions = {
   /** The URL to redirect to after authentication (defaults to current page) */
   redirectUrl?: string;
