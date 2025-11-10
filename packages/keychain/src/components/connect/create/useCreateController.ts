@@ -81,7 +81,9 @@ const createSession = async ({
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
       });
-      cleanupCallbacks(params.params.id);
+      if (params.params.id) {
+        cleanupCallbacks(params.params.id);
+      }
       handleCompletion();
     } else {
       // Fallback: just close modal if params not available (race condition)
@@ -124,7 +126,9 @@ const createSession = async ({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
     });
-    cleanupCallbacks(currentParams.params.id);
+    if (currentParams.params.id) {
+      cleanupCallbacks(currentParams.params.id);
+    }
     handleCompletion();
   } catch (e) {
     console.error("Failed to create verified session:", e);
@@ -137,11 +141,9 @@ const createSession = async ({
 export function useCreateController({
   isSlot,
   signers,
-  onAuthenticationSuccess,
 }: {
   isSlot?: boolean;
   signers?: AuthOptions;
-  onAuthenticationSuccess?: () => void;
 }) {
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -318,10 +320,10 @@ export function useCreateController({
         setController(controller);
 
         // Handle session creation for auto-close cases (no policies or verified policies without token approvals)
-        if (
-          !policies ||
-          (policies.verified && !hasApprovalPolicies(policies))
-        ) {
+        const shouldAutoCreateSession =
+          !policies || (policies.verified && !hasApprovalPolicies(policies));
+
+        if (shouldAutoCreateSession) {
           await createSession({
             controller,
             policies,
@@ -332,17 +334,17 @@ export function useCreateController({
           });
         }
 
-        // Check for redirect_url parameter and redirect after successful signup
-        const urlSearchParams = new URLSearchParams(window.location.search);
-        const redirectUrl = urlSearchParams.get("redirect_url");
-        if (redirectUrl) {
-          // Safely redirect to the specified URL
-          safeRedirect(redirectUrl);
+        // Only redirect if we auto-created the session
+        // Otherwise, user needs to see consent screen or spending limit screen first
+        if (shouldAutoCreateSession) {
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          const redirectUrl = urlSearchParams.get("redirect_url");
+          if (redirectUrl) {
+            // Safely redirect to the specified URL with lastUsedConnector param
+            safeRedirect(redirectUrl, true);
+          }
         }
       }
-
-      // Call the authentication success callback
-      onAuthenticationSuccess?.();
     },
     [
       setController,
@@ -350,7 +352,6 @@ export function useCreateController({
       policies,
       handleCompletion,
       params,
-      onAuthenticationSuccess,
       closeModal,
       searchParams,
     ],
@@ -517,7 +518,10 @@ export function useCreateController({
       setController(loginRet.controller);
 
       // Handle session creation for auto-close cases (no policies or verified policies without token approvals)
-      if (!policies || (policies.verified && !hasApprovalPolicies(policies))) {
+      const shouldAutoCreateSession =
+        !policies || (policies.verified && !hasApprovalPolicies(policies));
+
+      if (shouldAutoCreateSession) {
         await createSession({
           controller: loginRet.controller,
           policies,
@@ -528,15 +532,15 @@ export function useCreateController({
         });
       }
 
-      // Call the authentication success callback
-      onAuthenticationSuccess?.();
-
-      // Check for redirect_url parameter and redirect after successful login
-      const urlSearchParams = new URLSearchParams(window.location.search);
-      const redirectUrl = urlSearchParams.get("redirect_url");
-      if (redirectUrl) {
-        // Safely redirect to the specified URL
-        safeRedirect(redirectUrl);
+      // Only redirect if we auto-created the session
+      // Otherwise, user needs to see consent screen or spending limit screen first
+      if (shouldAutoCreateSession) {
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlSearchParams.get("redirect_url");
+        if (redirectUrl) {
+          // Safely redirect to the specified URL with lastUsedConnector param
+          safeRedirect(redirectUrl, true);
+        }
       }
     },
     [
@@ -545,7 +549,6 @@ export function useCreateController({
       policies,
       handleCompletion,
       params,
-      onAuthenticationSuccess,
       closeModal,
       searchParams,
     ],

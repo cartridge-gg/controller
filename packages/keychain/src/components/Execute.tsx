@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { useRouteParams, useRouteCompletion } from "@/hooks/route";
+import { useNavigation } from "@/context";
 
 function parseExecuteParams(searchParams: URLSearchParams): {
   params: ExecuteParams;
@@ -52,6 +53,7 @@ export function Execute() {
   const [searchParams] = useSearchParams();
   const params = useRouteParams(parseExecuteParams);
   const handleCompletion = useRouteCompletion();
+  const { navigateToRoot } = useNavigation();
 
   // Execute has different cancel behavior - it resolves with ERROR instead of CANCELED
   useEffect(() => {
@@ -67,8 +69,10 @@ export function Execute() {
           code: 0,
         },
       });
+
+      navigateToRoot();
     });
-  }, [params?.reject, params?.resolve, setOnModalClose]);
+  }, [params?.reject, params?.resolve, setOnModalClose, navigateToRoot]);
 
   if (!params) {
     return null;

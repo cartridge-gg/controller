@@ -1,6 +1,6 @@
+import { StarterpackDetails } from "@/context";
 import { ExternalWallet } from "@cartridge/controller";
 import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
-import { StarterPackDetails } from "@/hooks/starterpack";
 
 export enum PurchaseState {
   SELECTION = 0,
@@ -15,7 +15,7 @@ export type PurchaseCreditsProps = {
   isSlot?: boolean;
   wallets?: ExternalWallet[];
   type: PurchaseType;
-  starterpackDetails?: StarterPackDetails;
+  starterpackDetails?: StarterpackDetails;
   initState?: PurchaseState;
   onComplete?: () => void;
 };

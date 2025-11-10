@@ -30,6 +30,7 @@ export function ConnectRoute() {
   });
 
   const handleCompletion = useRouteCompletion();
+
   useRouteCallbacks(params, CANCEL_RESPONSE);
 
   // Check if this is standalone mode (not in iframe)
@@ -58,11 +59,14 @@ export function ConnectRoute() {
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
     });
-    cleanupCallbacks(params.params.id);
+    if (params.params.id) {
+      cleanupCallbacks(params.params.id);
+    }
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
+    // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
-      safeRedirect(redirectUrl);
+      safeRedirect(redirectUrl, true);
       return;
     }
 
@@ -78,11 +82,14 @@ export function ConnectRoute() {
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
     });
-    cleanupCallbacks(params.params.id);
+    if (params.params.id) {
+      cleanupCallbacks(params.params.id);
+    }
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
+    // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
-      safeRedirect(redirectUrl);
+      safeRedirect(redirectUrl, true);
       return;
     }
 
@@ -110,7 +117,10 @@ export function ConnectRoute() {
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
       });
-      cleanupCallbacks(params.params.id);
+
+      if (params.params.id) {
+        cleanupCallbacks(params.params.id);
+      }
       handleCompletion();
       return;
     }
@@ -134,7 +144,9 @@ export function ConnectRoute() {
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
           });
-          cleanupCallbacks(params.params.id);
+          if (params.params.id) {
+            cleanupCallbacks(params.params.id);
+          }
           handleCompletion();
         } catch (e) {
           console.error("Failed to create verified session:", e);

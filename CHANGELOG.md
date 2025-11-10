@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.11.0] - 2025-11-10
+
+### ✨ New Features
+- **@cartridge/controller**: Added controller_redirect parameter for standalone flow, enabling automatic redirect to keychain for first-party storage access with preset support (#2192)
+- **@cartridge/keychain**: Added Layerswap deposit support for starterpack purchases, replacing backend purchase flow with more flexible deposit-based approach (#2194)
+- **@cartridge/keychain**: Added transaction hash display on success screen for onchain purchases, improving transaction transparency and user feedback (#2186)
+- **@cartridge/keychain**: Added balance_of fallback and enhanced error handling for token balance checks, improving reliability of token balance queries (#2178)
+- **Development**: Added conductor.json workspace configuration for improved development workflow (#2195)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Refactored starterpack architecture to separate claim and onchain flows with clearer terminology - "backend" starterpacks renamed to "claimed" starterpacks for better clarity (#2199)
+- **@cartridge/keychain**: Enhanced standalone flow with automatic connector detection from redirect flow, improving user experience (#2189)
+- **@cartridge/keychain**: Improved mobile detection logic for better cross-platform compatibility (#2175)
+- **@cartridge/keychain**: Redesigned starterpack receiving and success screens for improved user experience (#2183)
+- **@cartridge/keychain**: Enhanced transaction cancellation handling when navigating back from transaction flows (#2180)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed torii token configuration for improved token handling (#2201)
+- **@cartridge/keychain**: Fixed session auto-creation redirect timing in standalone authentication flow (#2196)
+- **@cartridge/keychain**: Fixed preset verification in standalone flow for more reliable preset validation (#2191)
+- **@cartridge/keychain**: Fixed URL search parameter preservation in connect route to maintain state during navigation (#2188)
+- **@cartridge/keychain**: Fixed achievement display issues for better user profile experience (#2181)
+
+### 🔧 Refactoring
+- **@cartridge/controller**: Removed unused onAuthenticationSuccess callback to streamline authentication flow (#2197)
+- **@cartridge/keychain**: Deprecated CryptoCheckout component in favor of new Layerswap deposit approach (#2194)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Updated to latest version for improved design consistency (#2190, #2182)
+
 ## [0.10.7] - 2025-10-01
 
 ### ✨ New Features

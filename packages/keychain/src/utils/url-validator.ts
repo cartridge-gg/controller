@@ -74,9 +74,13 @@ export function validateRedirectUrl(redirectUrl: string): {
  * If validation fails, logs error and does not redirect.
  *
  * @param redirectUrl - The URL to redirect to
+ * @param addLastUsedConnector - Whether to add lastUsedConnector=controller query param
  * @returns true if redirect was performed, false if blocked
  */
-export function safeRedirect(redirectUrl: string): boolean {
+export function safeRedirect(
+  redirectUrl: string,
+  addLastUsedConnector = false,
+): boolean {
   const validation = validateRedirectUrl(redirectUrl);
 
   if (!validation.isValid) {
@@ -87,7 +91,20 @@ export function safeRedirect(redirectUrl: string): boolean {
     return false;
   }
 
+  // Add lastUsedConnector query parameter if requested
+  let finalUrl = redirectUrl;
+  if (addLastUsedConnector) {
+    try {
+      const url = new URL(redirectUrl);
+      url.searchParams.set("lastUsedConnector", "controller");
+      finalUrl = url.toString();
+    } catch (error) {
+      console.error("Failed to add lastUsedConnector parameter:", error);
+      // Continue with original URL if adding param fails
+    }
+  }
+
   // Safe to redirect
-  window.location.href = redirectUrl;
+  window.location.href = finalUrl;
   return true;
 }

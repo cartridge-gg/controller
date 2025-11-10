@@ -8,16 +8,11 @@ import {
   WalletIcon,
 } from "@cartridge/ui";
 import { networkWalletData, evmNetworks } from "./config";
-import {
-  useNavigation,
-  usePurchaseContext,
-  isOnchainStarterpack,
-} from "@/context";
+import { useNavigation, usePurchaseContext } from "@/context";
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 import { Network } from "../types";
 import { useConnection } from "@/hooks/connection";
 
@@ -48,13 +43,9 @@ export function SelectWallet() {
         .filter(Boolean) || [];
 
     // If acquisition type is claimed, filter networks to only show those with merkle drop support
-    if (
-      starterpackDetails?.acquisitionType ===
-        StarterpackAcquisitionType.Claimed &&
-      starterpackDetails.merkleDrops?.length
-    ) {
+    if (starterpackDetails?.type === "claimed") {
       const supportedNetworkPlatforms = new Set(
-        starterpackDetails.merkleDrops.map((drop) =>
+        starterpackDetails?.merkleDrops?.map((drop) =>
           drop.network.toLowerCase(),
         ),
       );
@@ -117,23 +108,17 @@ export function SelectWallet() {
   }, [clearError, clearSelectedWallet]);
 
   const onControllerWalletSelect = useCallback(() => {
-    if (
-      starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Paid
-    ) {
-      // Route to onchain checkout for onchain starterpacks, crypto for backend
-      const checkoutPath = isOnchainStarterpack(starterpackDetails)
-        ? `/purchase/checkout/onchain`
-        : `/purchase/checkout/crypto`;
-      navigate(checkoutPath);
+    if (starterpackDetails?.type === "claimed") {
+      const keys = starterpackDetails?.merkleDrops
+        ?.filter((drop) => drop.network === "STARKNET")
+        .map((drop) => drop.key)
+        .join(";");
+      navigate(`/purchase/claim/${keys}/${controller!.address()}/controller`);
       return;
     }
 
-    const keys = starterpackDetails?.merkleDrops
-      ?.filter((drop) => drop.network === "STARKNET")
-      .map((drop) => drop.key)
-      .join(";");
-
-    navigate(`/purchase/claim/${keys}/${controller!.address()}/controller`);
+    navigate(`/purchase/checkout/onchain`);
+    return;
   }, [navigate, starterpackDetails, controller]);
 
   const onExternalWalletSelect = useCallback(
@@ -146,36 +131,30 @@ export function SelectWallet() {
           chainIds.get(network.platform),
         );
 
-        if (
-          starterpackDetails?.acquisitionType ===
-          StarterpackAcquisitionType.Paid
-        ) {
-          // Route to onchain checkout for onchain starterpacks, crypto for backend
-          const checkoutPath = isOnchainStarterpack(starterpackDetails)
-            ? `/purchase/checkout/onchain`
-            : `/purchase/checkout/crypto`;
-          navigate(checkoutPath);
+        if (starterpackDetails?.type === "claimed") {
+          // Claim starterpack
+          const isCurrentEvm = evmNetworks.includes(network.platform);
+
+          const keys = starterpackDetails?.merkleDrops
+            ?.filter((drop) => {
+              const dropNetwork =
+                drop.network.toLowerCase() as ExternalPlatform;
+
+              // For EVM networks, include all EVM merkle drops
+              if (isCurrentEvm) {
+                return evmNetworks.includes(dropNetwork);
+              }
+              // For non-EVM networks, only include drops for that specific network
+              return dropNetwork === network.platform;
+            })
+            .map((drop) => drop.key)
+            .join(";");
+
+          navigate(`/purchase/claim/${keys}/${address}/${wallet.type}`);
           return;
         }
 
-        // Claim starterpack
-        const isCurrentEvm = evmNetworks.includes(network.platform);
-
-        const keys = starterpackDetails?.merkleDrops
-          ?.filter((drop) => {
-            const dropNetwork = drop.network.toLowerCase() as ExternalPlatform;
-
-            // For EVM networks, include all EVM merkle drops
-            if (isCurrentEvm) {
-              return evmNetworks.includes(dropNetwork);
-            }
-            // For non-EVM networks, only include drops for that specific network
-            return dropNetwork === network.platform;
-          })
-          .map((drop) => drop.key)
-          .join(";");
-
-        navigate(`/purchase/claim/${keys}/${address}/${wallet.type}`);
+        navigate(`/purchase/checkout/onchain`);
       } catch (e) {
         setError(e as Error);
       } finally {
