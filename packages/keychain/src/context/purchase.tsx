@@ -25,7 +25,6 @@ import {
 } from "starknet";
 import { isOnchainStarterpack } from "@/types/starterpack-types";
 import { getCurrentReferral } from "@/utils/referral";
-import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
 import { ERC20 as ERC20Contract } from "@cartridge/ui/utils";
 import {
   DEFAULT_TOKENS,
@@ -98,6 +97,7 @@ export interface PurchaseContextType {
   // Purchase details
   usdAmount: number;
   starterpackDetails?: StarterpackDetails;
+  quantity: number;
 
   teamId?: string;
   purchaseItems: Item[];
@@ -150,6 +150,8 @@ export interface PurchaseContextType {
   setStarterpackId: (starterpackId: string | number) => void;
   setTransactionHash: (hash: string) => void;
   setClaimItems: (items: Item[]) => void;
+  incrementQuantity: () => void;
+  decrementQuantity: () => void;
 
   // Payment actions
   onCreditCardPurchase: () => Promise<void>;
@@ -217,10 +219,19 @@ export const PurchaseProvider = ({
   const [swapQuote, setSwapQuote] = useState<SwapQuote | null>(null);
   const [isFetchingConversion, setIsFetchingConversion] = useState(false);
   const [conversionError, setConversionError] = useState<Error | null>(null);
+  const [quantity, setQuantity] = useState(1);
 
   // Wrapper for setSelectedToken that ensures we always have a valid token
   const setSelectedToken = useCallback((token: TokenOption | undefined) => {
     setSelectedTokenState(token);
+  }, []);
+
+  const incrementQuantity = useCallback(() => {
+    setQuantity((prev) => prev + 1);
+  }, []);
+
+  const decrementQuantity = useCallback(() => {
+    setQuantity((prev) => Math.max(prev - 1, 1));
   }, []);
 
   const {
@@ -265,13 +276,6 @@ export const PurchaseProvider = ({
     [],
   );
 
-  // Get network-specific USDC address
-  const usdcAddress = useMemo(() => {
-    if (!controller) return USDC_CONTRACT_ADDRESS;
-    const network = chainIdToEkuboNetwork(controller.chainId());
-    return USDC_ADDRESSES[network];
-  }, [controller]);
-
   // Available tokens for onchain purchases (ETH, STRK, USDC, and payment token if different)
   const availableTokens = useMemo(() => {
     if (!controller) return [];
@@ -280,7 +284,7 @@ export const PurchaseProvider = ({
     const tokenMetadata: ERC20Metadata[] = [
       ...DEFAULT_TOKENS,
       {
-        address: usdcAddress,
+        address: isMainnet ? USDC_ADDRESSES.mainnet : USDC_ADDRESSES.sepolia,
         name: "USD Coin",
         symbol: "USDC",
         decimals: 6,
@@ -322,59 +326,56 @@ export const PurchaseProvider = ({
     }));
 
     return tokens;
-  }, [controller, usdcAddress, starterpackDetails]);
+  }, [controller, starterpackDetails, isMainnet]);
 
-  // Default to USDC if available, otherwise first token
-  const defaultToken = useMemo(() => {
-    const usdc = availableTokens.find(
-      (token: TokenOption) =>
-        token.address.toLowerCase() === usdcAddress.toLowerCase(),
-    );
-    return usdc || availableTokens[0];
-  }, [availableTokens, usdcAddress]);
-
-  // Initialize selected token immediately when default token becomes available
-  // This ensures USDC (or first token) is selected by default
-  useEffect(() => {
-    if (defaultToken && !selectedToken) {
-      setSelectedToken(defaultToken);
-    }
-  }, [defaultToken, selectedToken, setSelectedToken]);
-
-  // Also ensure selectedToken is set when tokens first become available
-  useEffect(() => {
-    if (availableTokens.length > 0 && defaultToken && !selectedToken) {
-      setSelectedToken(defaultToken);
-    }
-  }, [availableTokens.length, defaultToken, selectedToken, setSelectedToken]);
-
-  // Initialize convertedPrice from quote if available and matches selected token
+  // Set selected token to payment token and initialize convertedPrice from quote
   useEffect(() => {
     if (
       starterpackDetails &&
       isOnchainStarterpack(starterpackDetails) &&
-      selectedToken
+      availableTokens.length > 0
     ) {
       const quote = starterpackDetails.quote;
-      const convertedPriceFromQuote = quote?.convertedPrice;
-      if (convertedPriceFromQuote) {
-        const targetToken = selectedToken.address.toLowerCase();
-        if (convertedPriceFromQuote.token.toLowerCase() === targetToken) {
-          setConvertedPrice({
-            amount: convertedPriceFromQuote.amount,
-            tokenMetadata: convertedPriceFromQuote.tokenMetadata,
-          });
+      if (quote) {
+        const paymentTokenAddress = getChecksumAddress(
+          quote.paymentToken,
+        ).toLowerCase();
+
+        // Set selected token to payment token if not set
+        if (!selectedToken) {
+          const paymentToken = availableTokens.find(
+            (token: TokenOption) =>
+              token.address.toLowerCase() === paymentTokenAddress,
+          );
+          if (paymentToken) {
+            setSelectedToken(paymentToken);
+          }
+        }
+
+        // Initialize convertedPrice from quote if available and matches selected token
+        if (selectedToken) {
+          const convertedPriceFromQuote = quote.convertedPrice;
+          if (convertedPriceFromQuote) {
+            const targetToken = selectedToken.address.toLowerCase();
+            if (convertedPriceFromQuote.token.toLowerCase() === targetToken) {
+              setConvertedPrice({
+                amount: convertedPriceFromQuote.amount,
+                tokenMetadata: convertedPriceFromQuote.tokenMetadata,
+              });
+            }
+          }
         }
       }
     }
-  }, [starterpackDetails, selectedToken]);
+  }, [starterpackDetails, selectedToken, availableTokens, setSelectedToken]);
 
-  // Reset token selection when starterpack changes
+  // Reset token selection and quantity when starterpack changes
   useEffect(() => {
     setSelectedToken(undefined);
     setConvertedPrice(null);
     setSwapQuote(null);
     setConversionError(null);
+    setQuantity(1);
   }, [starterpackId, setSelectedToken]);
 
   // Fetch conversion price when selected token or quote changes
@@ -697,6 +698,9 @@ export const PurchaseProvider = ({
         selectedToken &&
         num.toHex(selectedToken.address) !== num.toHex(quote.paymentToken);
 
+      // Calculate total cost with quantity
+      const totalCostWithQuantity = quote.totalCost * BigInt(quantity);
+
       // Build all transaction calls
       let allCalls: Call[] = [];
 
@@ -714,11 +718,13 @@ export const PurchaseProvider = ({
           const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
           const swapAmount =
             swapQuote.total < 0n ? -swapQuote.total : swapQuote.total;
-          const doubledTotal = swapAmount * 2n;
+          // Multiply swap amount by quantity
+          const swapAmountWithQuantity = swapAmount * BigInt(quantity);
+          const doubledTotal = swapAmountWithQuantity * 2n;
           const totalQuoteSum =
-            doubledTotal < swapAmount + BigInt(1e19)
+            doubledTotal < swapAmountWithQuantity + BigInt(1e19)
               ? doubledTotal
-              : swapAmount + BigInt(1e19);
+              : swapAmountWithQuantity + BigInt(1e19);
 
           // Step 0a: Approve selected token for router
           const approveSelectedTokenAmount = uint256.bnToUint256(totalQuoteSum);
@@ -736,7 +742,7 @@ export const PurchaseProvider = ({
           const swapCallsWithoutApprove = generateSwapCalls(
             selectedToken.address, // purchaseToken (selected token)
             quote.paymentToken, // targetToken (payment token)
-            quote.totalCost, // minimumAmount (minimum payment token to receive)
+            totalCostWithQuantity, // minimumAmount (minimum payment token to receive)
             swapQuote,
             network,
           );
@@ -751,8 +757,8 @@ export const PurchaseProvider = ({
         }
       }
 
-      // Convert totalCost to u256 (low, high)
-      const amount256 = uint256.bnToUint256(quote.totalCost);
+      // Convert totalCost to u256 (low, high) with quantity
+      const amount256 = uint256.bnToUint256(totalCostWithQuantity);
 
       // Step 1: Approve payment token for the exact transfer amount
       const approvePaymentTokenCall: Call = {
@@ -776,7 +782,7 @@ export const PurchaseProvider = ({
         calldata: [
           recipient, // recipient
           starterpackId, // starterpack_id: u32
-          0x1, // quantity: u32 (always 1 for now)
+          quantity, // quantity: u32
           ...(referralData?.refAddress
             ? [0x0, num.toHex(referralData.refAddress)]
             : [0x1]),
@@ -844,6 +850,7 @@ export const PurchaseProvider = ({
     selectedToken,
     swapQuote,
     selectedWallet,
+    quantity,
     externalSendTransaction,
   ]);
 
@@ -924,6 +931,7 @@ export const PurchaseProvider = ({
     // Purchase details
     usdAmount,
     starterpackDetails,
+    quantity,
     purchaseItems,
     claimItems,
     layerswapFees,
@@ -970,6 +978,8 @@ export const PurchaseProvider = ({
     setStarterpackId,
     setTransactionHash,
     setClaimItems: setClaimItemsState,
+    incrementQuantity,
+    decrementQuantity,
 
     // Actions
     onCreditCardPurchase,

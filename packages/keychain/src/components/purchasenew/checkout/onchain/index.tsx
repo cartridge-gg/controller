@@ -16,10 +16,12 @@ import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import { isOnchainStarterpack } from "@/context";
 import { num, uint256 } from "starknet";
+import { getWallet } from "../../wallet/config";
 
 export function OnchainCheckout() {
   const {
     purchaseItems,
+    quantity,
     displayError,
     starterpackDetails,
     selectedWallet,
@@ -28,8 +30,6 @@ export function OnchainCheckout() {
     clearError,
     selectedToken,
     convertedPrice,
-    isFetchingConversion,
-    conversionError,
   } = usePurchaseContext();
   const { navigate } = useNavigation();
   const { controller } = useConnection();
@@ -37,6 +37,7 @@ export function OnchainCheckout() {
   const [balance, setBalance] = useState<bigint | null>(null);
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const wallet = getWallet(selectedWallet?.type || "controller");
 
   // Extract quote from onchain starterpack
   const quote = useMemo(() => {
@@ -71,29 +72,18 @@ export function OnchainCheckout() {
     };
   }, [quote, selectedToken, convertedPrice]);
 
-  // Determine if we're still loading balance/conversion data
+  // Determine if we're still loading balance data
   const isLoadingBalance = useMemo(() => {
     // If there's a balance error, stop showing loading state
     if (balanceError) return false;
 
-    // If there's a conversion error and we need conversion, stop showing loading state
-    if (conversionError && tokenToCheck?.needsConversion) return false;
-
     return (
       isChecking ||
-      (isFetchingConversion && tokenToCheck?.needsConversion) ||
       balance === null ||
       tokenToCheck === null ||
       tokenToCheck.requiredAmount === null
     );
-  }, [
-    isChecking,
-    isFetchingConversion,
-    balance,
-    tokenToCheck,
-    conversionError,
-    balanceError,
-  ]);
+  }, [isChecking, balance, tokenToCheck, balanceError]);
 
   // Check if user has sufficient balance (only when not loading)
   const hasSufficientBalance = useMemo(() => {
@@ -216,7 +206,10 @@ export function OnchainCheckout() {
         icon={<GiftIcon variant="solid" />}
       />
       <LayoutContent>
-        <Receiving title="Receiving" items={purchaseItems} />
+        <Receiving
+          title={`Receiving ${quantity > 1 ? `(${quantity})` : ""}`}
+          items={purchaseItems}
+        />
       </LayoutContent>
       <LayoutFooter>
         {/* Balance Retrieval Error */}
@@ -233,58 +226,39 @@ export function OnchainCheckout() {
         )}
 
         {/* Insufficient Balance Warning */}
-        {!isLoadingBalance &&
-          !hasSufficientBalance &&
-          !balanceError &&
-          !(conversionError && tokenToCheck?.needsConversion) && (
-            <Card className="border-warning">
-              <CardContent className="flex flex-row items-center gap-3 p-3 text-warning">
-                <ErrorAlertIcon variant="warning" size="sm" />
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold">Insufficient Balance</p>
-                  <p className="text-xs text-foreground-300">
-                    You need more {tokenSymbol} to complete this purchase.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-        {/* Conversion Error Warning - only show if we actually need conversion */}
-        {conversionError && tokenToCheck?.needsConversion && (
-          <Card className="border-error">
-            <CardContent className="flex flex-row items-center gap-3 p-3 text-error">
-              <ErrorAlertIcon variant="error" size="sm" />
+        {!isLoadingBalance && !hasSufficientBalance && !balanceError && (
+          <Card className="border-warning">
+            <CardContent className="flex flex-row items-center gap-3 p-3 text-warning">
+              <ErrorAlertIcon variant="warning" size="sm" />
               <div className="flex flex-col gap-1">
-                <p className="text-sm font-semibold">Insufficient Liquidity</p>
+                <p className="text-sm font-semibold">Insufficient Balance</p>
                 <p className="text-xs text-foreground-300">
-                  Unable to convert to {tokenSymbol}. Try selecting a different
-                  token.
+                  You need more {tokenSymbol} to complete this purchase.
                 </p>
               </div>
             </CardContent>
           </Card>
         )}
 
-        <OnchainCostBreakdown quote={quote} showTokenSelector />
+        {/* Wallet Display */}
+        <div className="flex justify-between border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2">
+          <div className="flex gap-2">
+            {wallet.subIcon} Purchase with {wallet.name}
+          </div>
+        </div>
+
+        <OnchainCostBreakdown quote={quote} lockTokenSelection />
         {displayError && <ControllerErrorAlert error={displayError} />}
         <Button
           onClick={onPurchase}
           isLoading={isLoading || isLoadingBalance}
-          disabled={
-            !hasSufficientBalance ||
-            isLoadingBalance ||
-            !!balanceError ||
-            (!!conversionError && tokenToCheck?.needsConversion)
-          }
+          disabled={!hasSufficientBalance || isLoadingBalance || !!balanceError}
         >
           {balanceError
             ? "Balance Check Failed"
-            : conversionError && tokenToCheck?.needsConversion
-              ? "Insufficient Liquidity"
-              : !hasSufficientBalance && !isLoadingBalance
-                ? "Insufficient Balance"
-                : "Confirm"}
+            : !hasSufficientBalance && !isLoadingBalance
+              ? "Insufficient Balance"
+              : "Confirm"}
         </Button>
       </LayoutFooter>
     </>

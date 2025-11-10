@@ -197,7 +197,7 @@ export function PurchasePendingInner({
           </div>
         )}
         <Button className="w-full" variant="primary" disabled={true}>
-          Purchase
+          Play
         </Button>
       </LayoutFooter>
     </>
@@ -252,7 +252,7 @@ export function OnchainPurchasePendingInner({
           isLoading={isPurchasing}
         />
         <Button className="w-full" variant="primary" disabled={true}>
-          Purchase
+          Play
         </Button>
       </LayoutFooter>
     </>

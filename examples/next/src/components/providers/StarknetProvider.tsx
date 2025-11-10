@@ -206,7 +206,6 @@ const controller = new ControllerConnector({
   ],
   slot: "arcade-pistols",
   namespace: "pistols",
-  preset: "ponziland",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
@@ -217,8 +216,8 @@ const controller = new ControllerConnector({
 
 const session = new SessionConnector({
   policies,
-  rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
-  chainId: constants.StarknetChainId.SN_MAIN,
+  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA!,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   disconnectRedirectUrl: "whatsapp://",
   keychainUrl: getKeychainUrl(),
@@ -229,7 +228,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={mainnet.id}
+      defaultChainId={sepolia.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}

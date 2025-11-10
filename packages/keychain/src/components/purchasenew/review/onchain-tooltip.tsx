@@ -23,10 +23,12 @@ export const OnchainFeesTooltip = ({
   trigger,
   defaultOpen,
   quote,
+  quantity = 1,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
   quote: Quote;
+  quantity?: number;
 }) => {
   const { decimals, symbol } = quote.paymentTokenMetadata;
 
@@ -41,13 +43,23 @@ export const OnchainFeesTooltip = ({
         >
           <div className="flex flex-row justify-between text-foreground-300">
             <span>Base Price:</span>
-            <span>{formatTokenAmount(quote.basePrice, decimals, symbol)}</span>
+            <span>
+              {formatTokenAmount(
+                quote.basePrice * BigInt(quantity),
+                decimals,
+                symbol,
+              )}
+            </span>
           </div>
           <Separator className="bg-background-125" />
           <div className="flex flex-row justify-between text-foreground-300">
             <span>Protocol Fee:</span>
             <span>
-              {formatTokenAmount(quote.protocolFee, decimals, symbol)}
+              {formatTokenAmount(
+                quote.protocolFee * BigInt(quantity),
+                decimals,
+                symbol,
+              )}
             </span>
           </div>
           {quote.referralFee > 0n && (
@@ -55,7 +67,11 @@ export const OnchainFeesTooltip = ({
               <div className="flex flex-row justify-between text-foreground-300">
                 <span>Referral Fee:</span>
                 <span>
-                  {formatTokenAmount(quote.referralFee, decimals, symbol)}
+                  {formatTokenAmount(
+                    quote.referralFee * BigInt(quantity),
+                    decimals,
+                    symbol,
+                  )}
                 </span>
               </div>
             </>
@@ -63,7 +79,13 @@ export const OnchainFeesTooltip = ({
           <Separator className="bg-background-125" />
           <div className="flex flex-row justify-between text-foreground-100 font-medium">
             <span>Total:</span>
-            <span>{formatTokenAmount(quote.totalCost, decimals, symbol)}</span>
+            <span>
+              {formatTokenAmount(
+                quote.totalCost * BigInt(quantity),
+                decimals,
+                symbol,
+              )}
+            </span>
           </div>
         </TooltipContent>
       </Tooltip>
