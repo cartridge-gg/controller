@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.11.1] - 2025-11-10
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced iframe initialization safety by adding null checks to all controller methods, preventing crashes when iframes haven't been initialized yet (#2205)
+- **@cartridge/keychain**: Improved app ID detection for standalone mode with redirect URLs - now correctly uses the redirect URL's origin as the app ID instead of the keychain origin, ensuring proper app identification and session management (#2205)
+
 ## [0.11.0] - 2025-11-10
 
 ### ✨ New Features
