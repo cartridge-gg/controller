@@ -588,7 +588,7 @@ export function useConnectionValue() {
       connection.promise
         .then((parentConnection) => {
           setOrigin(normalizeOrigin(parentConnection.origin));
-          setParent(parentConnection);
+          setParent(parentConnection as unknown as ParentMethods);
         })
         .catch((error) => {
           console.error("Penpal connection failed:", error);
