@@ -149,6 +149,8 @@ export class TurnkeyWallet {
 
       localStorage.setItem(URL_PARAMS_KEY, urlParamsString);
       localStorage.setItem(RPC_URL_KEY, this.rpcUrl);
+      // Store nonce for use after redirect (iframe will be recreated)
+      localStorage.setItem("turnkey-nonce", nonce);
 
       const redirectUri =
         windowUri.pathname === "/session"
@@ -199,6 +201,7 @@ export class TurnkeyWallet {
     } catch (error) {
       localStorage.removeItem(URL_PARAMS_KEY);
       localStorage.removeItem(RPC_URL_KEY);
+      localStorage.removeItem("turnkey-nonce");
       console.error(`Error connecting to Turnkey:`, error);
       return {
         success: false,
@@ -234,9 +237,13 @@ export class TurnkeyWallet {
         : undefined;
 
       const rpcUrl = localStorage.getItem(RPC_URL_KEY);
+      // Use stored nonce (iframe was recreated during redirect)
+      const storedNonce = localStorage.getItem("turnkey-nonce");
+      localStorage.removeItem("turnkey-nonce");
+
       return {
         ...(await this.finishConnect({
-          nonce: result.appState.nonce,
+          nonce: storedNonce || result.appState.nonce,
         })),
         ...result.appState,
         rpcUrl,
