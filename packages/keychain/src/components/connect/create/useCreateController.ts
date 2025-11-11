@@ -36,12 +36,8 @@ import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
-import { processPolicies } from "../CreateSession";
-import { cleanupCallbacks } from "@/utils/connection/callbacks";
-import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
+import { useRouteCallbacks } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
-import { ParsedSessionPolicies, hasApprovalPolicies } from "@/hooks/session";
-import { safeRedirect } from "@/utils/url-validator";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -57,86 +53,6 @@ export interface SignupResponse {
 export interface LoginResponse {
   signer: Signer;
 }
-
-const createSession = async ({
-  controller,
-  policies,
-  params,
-  handleCompletion,
-  closeModal,
-  searchParams,
-}: {
-  controller: Controller;
-  policies?: ParsedSessionPolicies;
-  params?: ReturnType<typeof parseConnectParams>;
-  handleCompletion: () => void;
-  closeModal?: () => void;
-  searchParams: URLSearchParams;
-}) => {
-  // Handle no policies case - try to resolve connection, fallback to just closing modal
-  if (!policies) {
-    if (params) {
-      // Ideal case: resolve connection promise properly
-      params.resolve?.({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address(),
-      });
-      if (params.params.id) {
-        cleanupCallbacks(params.params.id);
-      }
-      handleCompletion();
-    } else {
-      // Fallback: just close modal if params not available (race condition)
-      console.warn(
-        "No params available for no-policies case, falling back to closeModal",
-      );
-      closeModal?.();
-    }
-    return;
-  }
-
-  // For verified policies, we need params to properly notify parent
-  // Try to wait for params briefly if not available
-  let currentParams = params;
-  if (!currentParams) {
-    // Brief wait for params to be available (up to 500ms)
-    for (let i = 0; i < 5; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      currentParams = parseConnectParams(searchParams);
-      if (currentParams) break;
-    }
-  }
-
-  if (!currentParams) {
-    console.error(
-      "Params not available for verified policies, cannot resolve connection",
-    );
-    // Don't close modal - let normal flow handle it
-    return;
-  }
-
-  try {
-    // Use a default duration for verified sessions (24 hours)
-    const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-    const expiresAt = duration + now();
-
-    const processedPolicies = processPolicies(policies, false);
-    await controller.createSession(expiresAt, processedPolicies);
-    currentParams.resolve?.({
-      code: ResponseCodes.SUCCESS,
-      address: controller.address(),
-    });
-    if (currentParams.params.id) {
-      cleanupCallbacks(currentParams.params.id);
-    }
-    handleCompletion();
-  } catch (e) {
-    console.error("Failed to create verified session:", e);
-    // Fall back to showing the UI if auto-creation fails
-    currentParams.reject?.(e);
-  }
-  return;
-};
 
 export function useCreateController({
   isSlot,
@@ -158,14 +74,19 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController, policies, closeModal } =
-    useConnection();
+  const {
+    origin,
+    rpcUrl,
+    chainId,
+    setController,
+    setAuthMethod: setContextAuthMethod,
+    setIsNewUser,
+    setShowSuccessScreen,
+  } = useConnection();
 
-  // Import route params and completion for connection resolution
   const params = useMemo(() => {
     return parseConnectParams(searchParams);
   }, [searchParams]);
-  const handleCompletion = useRouteCompletion();
 
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
@@ -318,43 +239,12 @@ export function useCreateController({
       if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
+        setIsLoading(false);
 
-        // Handle session creation for auto-close cases (no policies or verified policies without token approvals)
-        const shouldAutoCreateSession =
-          !policies || (policies.verified && !hasApprovalPolicies(policies));
-
-        if (shouldAutoCreateSession) {
-          await createSession({
-            controller,
-            policies,
-            params,
-            handleCompletion,
-            closeModal,
-            searchParams,
-          });
-        }
-
-        // Only redirect if we auto-created the session
-        // Otherwise, user needs to see consent screen or spending limit screen first
-        if (shouldAutoCreateSession) {
-          const urlSearchParams = new URLSearchParams(window.location.search);
-          const redirectUrl = urlSearchParams.get("redirect_url");
-          if (redirectUrl) {
-            // Safely redirect to the specified URL with lastUsedConnector param
-            safeRedirect(redirectUrl, true);
-          }
-        }
+        setShowSuccessScreen(true);
       }
     },
-    [
-      setController,
-      origin,
-      policies,
-      handleCompletion,
-      params,
-      closeModal,
-      searchParams,
-    ],
+    [setController, origin, setIsLoading, setShowSuccessScreen],
   );
 
   const handleSignup = useCallback(
@@ -367,11 +257,16 @@ export function useCreateController({
         throw new Error("Origin, chainId, or rpcUrl not found");
       }
 
+      // Store auth info for ConnectRoute to show success screen
+      setContextAuthMethod(authenticationMode);
+      setIsNewUser(true);
+
       let signupResponse: SignupResponse | undefined;
       let signer: SignerInput | undefined;
       switch (authenticationMode) {
         case "webauthn":
           await signupWithWebauthn(username, doPopupFlow);
+          setShowSuccessScreen(true);
           return;
         case "google":
         case "discord":
@@ -456,6 +351,9 @@ export function useCreateController({
       signupWithWalletConnect,
       passwordAuth,
       finishSignup,
+      setContextAuthMethod,
+      setIsNewUser,
+      setShowSuccessScreen,
     ],
   );
 
@@ -516,42 +414,11 @@ export function useCreateController({
 
       window.controller = loginRet.controller;
       setController(loginRet.controller);
+      setIsLoading(false);
 
-      // Handle session creation for auto-close cases (no policies or verified policies without token approvals)
-      const shouldAutoCreateSession =
-        !policies || (policies.verified && !hasApprovalPolicies(policies));
-
-      if (shouldAutoCreateSession) {
-        await createSession({
-          controller: loginRet.controller,
-          policies,
-          params,
-          handleCompletion,
-          closeModal,
-          searchParams,
-        });
-      }
-
-      // Only redirect if we auto-created the session
-      // Otherwise, user needs to see consent screen or spending limit screen first
-      if (shouldAutoCreateSession) {
-        const urlSearchParams = new URLSearchParams(window.location.search);
-        const redirectUrl = urlSearchParams.get("redirect_url");
-        if (redirectUrl) {
-          // Safely redirect to the specified URL with lastUsedConnector param
-          safeRedirect(redirectUrl, true);
-        }
-      }
+      setShowSuccessScreen(true);
     },
-    [
-      origin,
-      setController,
-      policies,
-      handleCompletion,
-      params,
-      closeModal,
-      searchParams,
-    ],
+    [origin, setController, setIsLoading, setShowSuccessScreen],
   );
 
   const handleLogin = useCallback(
@@ -568,6 +435,10 @@ export function useCreateController({
       if (!controller) {
         throw new Error("Undefined controller");
       }
+
+      // Store auth info for ConnectRoute to show success screen
+      setContextAuthMethod(authenticationMethod);
+      setIsNewUser(false);
 
       let loginResponse: LoginResponse | undefined;
       switch (authenticationMethod) {
@@ -594,6 +465,7 @@ export function useCreateController({
             },
             !!isSlot,
           );
+          setShowSuccessScreen(true);
           return;
         }
         case "google":
@@ -680,6 +552,9 @@ export function useCreateController({
       finishLogin,
       passwordAuth,
       setWaitingForConfirmation,
+      setContextAuthMethod,
+      setIsNewUser,
+      setShowSuccessScreen,
     ],
   );
 

@@ -2,6 +2,7 @@ import { ParentMethods } from "@/hooks/connection";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import Controller from "@/utils/controller";
 import {
+  AuthOption,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -65,6 +66,12 @@ export type ConnectionContextValue = {
     txHash: string,
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
+  authMethod?: AuthOption;
+  setAuthMethod: (method: AuthOption) => void;
+  isNewUser: boolean;
+  setIsNewUser: (isNew: boolean) => void;
+  showSuccessScreen: boolean;
+  setShowSuccessScreen: (show: boolean) => void;
 };
 
 export type VerifiableControllerTheme = ControllerTheme & {

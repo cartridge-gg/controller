@@ -49,6 +49,12 @@ export const defaultMockConnection: ConnectionContextValue = {
   externalGetBalance: vi.fn(),
   externalWaitForTransaction: vi.fn(),
   controllerVersion: new SemVer("1.0.0"),
+  isNewUser: false,
+  setIsNewUser: vi.fn(),
+  showSuccessScreen: false,
+  setShowSuccessScreen: vi.fn(),
+  authMethod: undefined,
+  setAuthMethod: vi.fn(),
 };
 
 export function createMockConnection(

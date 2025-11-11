@@ -9,6 +9,7 @@ import { connectToController } from "@/utils/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
+  AuthOption,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -205,6 +206,11 @@ export function useConnectionValue() {
   const [onModalClose, setOnModalCloseInternal] = useState<
     (() => void) | undefined
   >();
+  const [isNewUser, setIsNewUser] = useState<boolean>(false);
+  const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(
+    undefined,
+  );
+  const [showSuccessScreen, setShowSuccessScreen] = useState<boolean>(false);
 
   const setOnModalClose = useCallback((fn: (() => void) | undefined) => {
     setOnModalCloseInternal(() => fn);
@@ -779,6 +785,12 @@ export function useConnectionValue() {
     externalSendTransaction,
     externalGetBalance,
     externalWaitForTransaction,
+    authMethod,
+    setAuthMethod,
+    isNewUser,
+    setIsNewUser,
+    showSuccessScreen,
+    setShowSuccessScreen,
   };
 }
 

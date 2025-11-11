@@ -1,8 +1,8 @@
 import {
   CheckIcon,
+  HeaderInner,
   LayoutContainer,
   LayoutContent,
-  LayoutHeader,
 } from "@cartridge/ui";
 import { AuthOption } from "@cartridge/controller";
 import { getAuthMethodDisplayName, getAuthMethodIcon } from "@/utils/auth";
@@ -20,12 +20,9 @@ export function ConnectionSuccess({
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <HeaderInner
         title={`${isNew ? "Sign Up" : "Log In"} with ${authDisplay}`}
         icon={<CheckIcon />}
-        hideUsername
-        hideSettings
-        onBack={() => {}}
       />
       <LayoutContent className="gap-4">
         <SignerPendingCard authMethod={authMethod} />

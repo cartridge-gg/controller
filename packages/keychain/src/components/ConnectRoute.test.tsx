@@ -87,6 +87,12 @@ describe("ConnectRoute", () => {
         name: "TestApp",
         verified: true,
       },
+      isNewUser: false,
+      authMethod: undefined,
+      showSuccessScreen: false,
+      setShowSuccessScreen: vi.fn(),
+      setIsNewUser: vi.fn(),
+      setAuthMethod: vi.fn(),
     });
   });
 
@@ -100,6 +106,12 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -122,6 +134,12 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: true,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -148,6 +166,12 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: false,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -165,6 +189,12 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: true,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -198,6 +228,12 @@ describe("ConnectRoute", () => {
           name: "TestApp",
           verified: true,
         },
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -222,6 +258,12 @@ describe("ConnectRoute", () => {
           name: "TestApp",
           verified: true,
         },
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -243,6 +285,12 @@ describe("ConnectRoute", () => {
           name: "TestApp",
           verified: true,
         },
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -263,6 +311,12 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: false,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -279,6 +333,12 @@ describe("ConnectRoute", () => {
           name: "TestApp",
           verified: false,
         },
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -294,6 +354,12 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -321,6 +387,12 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: true,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -335,6 +407,12 @@ describe("ConnectRoute", () => {
         controller: null,
         policies: null,
         verified: false,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       const { container } = renderWithProviders(<ConnectRoute />);
@@ -356,6 +434,12 @@ describe("ConnectRoute", () => {
           name: "TestApp",
           verified: true,
         },
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -380,6 +464,12 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -406,6 +496,12 @@ describe("ConnectRoute", () => {
           messages: [{ id: "3", content: "Sign this", authorized: true }],
         },
         verified: true,
+        isNewUser: false,
+        authMethod: undefined,
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -421,6 +517,119 @@ describe("ConnectRoute", () => {
         );
         expect(policies.messages[0]).not.toHaveProperty("id");
       });
+    });
+  });
+
+  describe("Success screen", () => {
+    it("shows success screen when showSuccessScreen is true in context", () => {
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        verified: true,
+        isNewUser: true,
+        authMethod: "webauthn",
+        showSuccessScreen: true,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      // Should show ConnectionSuccess component
+      expect(screen.getByText(/Success!/i)).toBeInTheDocument();
+    });
+
+    it("hides success screen after 1 second timeout", async () => {
+      const mockSetShowSuccessScreen = vi.fn();
+
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        verified: true,
+        isNewUser: false,
+        authMethod: "webauthn",
+        showSuccessScreen: true,
+        setShowSuccessScreen: mockSetShowSuccessScreen,
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      // Should show success screen initially
+      expect(screen.getByText(/Success!/i)).toBeInTheDocument();
+
+      // setShowSuccessScreen should not be called immediately
+      expect(mockSetShowSuccessScreen).not.toHaveBeenCalled();
+
+      // Wait for the timeout (1 second) to complete
+      await waitFor(
+        () => {
+          expect(mockSetShowSuccessScreen).toHaveBeenCalledWith(false);
+        },
+        { timeout: 1500 },
+      );
+    });
+
+    it("does not show success screen when controller is not available", () => {
+      mockUseConnection.mockReturnValue({
+        controller: null,
+        policies: null,
+        verified: false,
+        isNewUser: true,
+        authMethod: "webauthn",
+        showSuccessScreen: true,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
+      });
+
+      const { container } = renderWithProviders(<ConnectRoute />);
+
+      // Should return null when controller is not available
+      expect(container.firstChild).toBeNull();
+    });
+
+    it("does not show success screen when showSuccessScreen is false", () => {
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        verified: true,
+        isNewUser: true,
+        authMethod: "webauthn",
+        showSuccessScreen: false,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      // Should NOT show success screen
+      expect(screen.queryByText(/Success!/i)).not.toBeInTheDocument();
+    });
+
+    it("prevents auto-connect when showing success screen", () => {
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        verified: true,
+        isNewUser: true,
+        authMethod: "webauthn",
+        showSuccessScreen: true,
+        setShowSuccessScreen: vi.fn(),
+        setIsNewUser: vi.fn(),
+        setAuthMethod: vi.fn(),
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      // Should show success screen
+      expect(screen.getByText(/Success!/i)).toBeInTheDocument();
+
+      // Should NOT auto-connect while showing success screen
+      expect(mockParams.resolve).not.toHaveBeenCalled();
     });
   });
 });
