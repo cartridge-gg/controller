@@ -23,6 +23,7 @@ export function hasStorageAccessFactory() {
 // Storage Access API utility for requesting first-party storage access
 export function requestStorageAccessFactory() {
   return async (): Promise<boolean> => {
+    console.log("Requesting storage access...")
     // Check if Storage Access API is supported
     if (typeof document === "undefined" || !document.requestStorageAccess) {
       // Browser doesn't support Storage Access API

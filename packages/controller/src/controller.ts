@@ -654,6 +654,8 @@ export default class ControllerProvider extends BaseProvider {
           typeof sessionStorage !== "undefined" &&
           sessionStorage.getItem("controller_standalone") === "1";
 
+        console.log("Returning from redirect flow", isReturningFromRedirect);
+
         // If returning from redirect flow, immediately request storage access
         // This ensures the iframe can access the first-party storage established during the redirect
         if (isReturningFromRedirect) {

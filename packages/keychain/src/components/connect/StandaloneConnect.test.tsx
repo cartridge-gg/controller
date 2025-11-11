@@ -45,11 +45,6 @@ describe("StandaloneConnect", () => {
       );
 
       expect(screen.getByText("Connect to TestApp")).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          "You're already authenticated. Click connect to continue.",
-        ),
-      ).toBeInTheDocument();
     });
 
     it("displays connected account information", () => {

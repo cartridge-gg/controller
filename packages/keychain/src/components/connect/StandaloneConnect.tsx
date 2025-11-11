@@ -35,17 +35,11 @@ export function StandaloneConnect({
   return (
     <>
       <HeaderInner
-        className="pb-0"
+        className="pb-10"
         title={`Connect to ${theme.name || "Application"}`}
-        description="You're already authenticated. Click connect to continue."
+        description={`${theme.name} is requesting access to your Controller`}
       />
       <LayoutContent className="pb-0 flex flex-col gap-4">
-        <div className="flex flex-col gap-2 p-4 bg-background-100 rounded-md">
-          <div className="text-sm font-medium">Connected Account</div>
-          <div className="text-xs text-muted-foreground">
-            {controller.username()}
-          </div>
-        </div>
         {!isVerified && (
           <div className="text-xs text-destructive-100 p-3 bg-background-100 rounded-md border border-destructive-100">
             ⚠️ This application is not verified. Make sure you trust the site
