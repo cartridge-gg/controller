@@ -195,6 +195,8 @@ export class TurnkeyWallet {
         },
         { popup },
       );
+      // Clean up stored nonce after successful popup auth
+      localStorage.removeItem("turnkey-nonce");
       return await this.finishConnect({
         nonce,
       });
