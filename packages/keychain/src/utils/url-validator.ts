@@ -98,9 +98,9 @@ export function safeRedirect(
       const url = new URL(redirectUrl);
       // Add lastUsedConnector for backwards compatibility
       url.searchParams.set("lastUsedConnector", "controller");
-      // Add dedicated parameter to indicate storage access is ready
+      // Add dedicated parameter to indicate standalone auth flow completion
       // This is more reliable than lastUsedConnector which can be set by other frameworks
-      url.searchParams.set("controller_storage_ready", "1");
+      url.searchParams.set("controller_standalone", "1");
       finalUrl = url.toString();
     } catch (error) {
       console.error("Failed to add redirect parameters:", error);
