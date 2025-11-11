@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => ({
     // Add visualizer in build mode
     mode === "production" &&
       visualizer({
-        open: true,
+        open: false,
         gzipSize: true,
         brotliSize: true,
       }),
