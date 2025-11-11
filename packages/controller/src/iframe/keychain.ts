@@ -9,6 +9,7 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     ref?: string;
     refGroup?: string;
     needsStorageAccess?: boolean;
+    onStorageAccessGranted?: () => void;
   };
 
 export class KeychainIFrame extends IFrame<Keychain> {
@@ -27,6 +28,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     ref,
     refGroup,
     needsStorageAccess,
+    onStorageAccessGranted,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
@@ -100,7 +102,18 @@ export class KeychainIFrame extends IFrame<Keychain> {
       ...iframeOptions,
       id: "controller-keychain",
       url: _url,
-      methods: walletBridge.getIFrameMethods(),
+      methods: {
+        ...walletBridge.getIFrameMethods(),
+        // Expose callback for keychain to notify parent that storage access was granted
+        onStorageAccessGranted: (_origin: string) => () => {
+          console.log(
+            "[Storage Access Flow] KeychainIFrame: onStorageAccessGranted method called from keychain",
+          );
+          if (onStorageAccessGranted) {
+            onStorageAccessGranted();
+          }
+        },
+      },
     });
 
     this.walletBridge = walletBridge;

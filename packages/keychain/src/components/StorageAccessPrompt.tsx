@@ -21,7 +21,7 @@ export function StorageAccessPrompt({
 }: StorageAccessPromptProps) {
   const [isRequesting, setIsRequesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { theme } = useConnection();
+  const { theme, parent } = useConnection();
 
   console.log(
     "[Storage Access Flow] StorageAccessPrompt: Component rendered and waiting for user interaction",
@@ -29,6 +29,10 @@ export function StorageAccessPrompt({
   console.log(
     "[Storage Access Flow] StorageAccessPrompt: Application name =",
     theme.name,
+  );
+  console.log(
+    "[Storage Access Flow] StorageAccessPrompt: Parent connection available =",
+    !!parent,
   );
 
   const handleContinue = useCallback(async () => {
@@ -54,7 +58,37 @@ export function StorageAccessPrompt({
 
       if (granted) {
         console.log(
-          "[Storage Access Flow] StorageAccessPrompt: SUCCESS - Storage access granted, calling onSuccess()",
+          "[Storage Access Flow] StorageAccessPrompt: SUCCESS - Storage access granted",
+        );
+
+        // Notify parent controller that storage access was granted
+        if (
+          parent &&
+          "onStorageAccessGranted" in parent &&
+          typeof parent.onStorageAccessGranted === "function"
+        ) {
+          console.log(
+            "[Storage Access Flow] StorageAccessPrompt: Calling parent.onStorageAccessGranted()",
+          );
+          try {
+            await parent.onStorageAccessGranted();
+            console.log(
+              "[Storage Access Flow] StorageAccessPrompt: Parent notified successfully",
+            );
+          } catch (err) {
+            console.error(
+              "[Storage Access Flow] StorageAccessPrompt: Error notifying parent:",
+              err,
+            );
+          }
+        } else {
+          console.warn(
+            "[Storage Access Flow] StorageAccessPrompt: Parent onStorageAccessGranted method not available",
+          );
+        }
+
+        console.log(
+          "[Storage Access Flow] StorageAccessPrompt: Calling onSuccess() callback",
         );
         onSuccess();
       } else {
@@ -88,7 +122,7 @@ export function StorageAccessPrompt({
       );
       setIsRequesting(false);
     }
-  }, [onSuccess, onError]);
+  }, [onSuccess, onError, parent]);
 
   return (
     <LayoutContainer>

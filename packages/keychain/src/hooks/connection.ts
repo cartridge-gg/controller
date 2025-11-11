@@ -108,6 +108,9 @@ export type ParentMethods = AsyncMethodReturns<{
     txHash: string,
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
+
+  // Storage access callback
+  onStorageAccessGranted?: () => Promise<void>;
 }>;
 
 /**

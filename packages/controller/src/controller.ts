@@ -695,7 +695,7 @@ export default class ControllerProvider extends BaseProvider {
       isReturningFromRedirect,
     );
 
-    return new KeychainIFrame({
+    const iframe = new KeychainIFrame({
       ...this.options,
       rpcUrl: this.rpcUrl(),
       onClose: this.keychain?.reset,
@@ -711,7 +711,30 @@ export default class ControllerProvider extends BaseProvider {
       ref: this.referral.ref,
       refGroup: this.referral.refGroup,
       needsStorageAccess: isReturningFromRedirect,
+      onStorageAccessGranted: () => {
+        console.log(
+          "[Storage Access Flow] Controller: onStorageAccessGranted callback triggered",
+        );
+        console.log(
+          "[Storage Access Flow] Controller: Calling probe() to re-establish connection with storage access",
+        );
+        // Re-probe to establish connection now that storage access is granted
+        this.probe();
+      },
     });
+
+    // If we're returning from redirect, open the modal immediately to show storage access prompt
+    if (isReturningFromRedirect) {
+      console.log(
+        "[Storage Access Flow] Controller: Opening iframe modal to show storage access prompt",
+      );
+      // Open after a short delay to ensure iframe is ready
+      setTimeout(() => {
+        iframe.open();
+      }, 100);
+    }
+
+    return iframe;
   }
 
   private waitForKeychain({
