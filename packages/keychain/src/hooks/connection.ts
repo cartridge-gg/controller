@@ -109,8 +109,8 @@ export type ParentMethods = AsyncMethodReturns<{
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
 
-  // Storage access callback
-  onStorageAccessGranted?: () => Promise<void>;
+  // Session creation callback (for standalone auth flow)
+  onSessionCreated?: () => Promise<void>;
 }>;
 
 /**

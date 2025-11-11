@@ -340,8 +340,23 @@ export function useCreateController({
           const urlSearchParams = new URLSearchParams(window.location.search);
           const redirectUrl = urlSearchParams.get("redirect_url");
           if (redirectUrl) {
-            // Safely redirect to the specified URL with lastUsedConnector param
-            safeRedirect(redirectUrl, true);
+            // Get username from controller to pass in URL
+            const username = await controller.username();
+
+            // Build redirect URL with username and controller_standalone parameters
+            const redirectUrlObj = new URL(redirectUrl);
+            redirectUrlObj.searchParams.set("controller_standalone", "1");
+            if (username) {
+              redirectUrlObj.searchParams.set("username", username);
+            }
+
+            console.log(
+              "[Standalone Flow] useCreateController: Redirecting after signup with username =",
+              username,
+            );
+
+            // Safely redirect to the specified URL with parameters
+            safeRedirect(redirectUrlObj.toString());
           }
         }
       }
@@ -538,8 +553,23 @@ export function useCreateController({
         const urlSearchParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlSearchParams.get("redirect_url");
         if (redirectUrl) {
-          // Safely redirect to the specified URL with lastUsedConnector param
-          safeRedirect(redirectUrl, true);
+          // Get username from controller to pass in URL
+          const username = await loginRet.controller.username();
+
+          // Build redirect URL with username and controller_standalone parameters
+          const redirectUrlObj = new URL(redirectUrl);
+          redirectUrlObj.searchParams.set("controller_standalone", "1");
+          if (username) {
+            redirectUrlObj.searchParams.set("username", username);
+          }
+
+          console.log(
+            "[Standalone Flow] useCreateController: Redirecting after login with username =",
+            username,
+          );
+
+          // Safely redirect to the specified URL with parameters
+          safeRedirect(redirectUrlObj.toString());
         }
       }
     },

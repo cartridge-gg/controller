@@ -8,8 +8,9 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     version?: string;
     ref?: string;
     refGroup?: string;
-    needsStorageAccess?: boolean;
-    onStorageAccessGranted?: () => void;
+    needsSessionCreation?: boolean;
+    username?: string;
+    onSessionCreated?: () => void;
   };
 
 export class KeychainIFrame extends IFrame<Keychain> {
@@ -27,8 +28,9 @@ export class KeychainIFrame extends IFrame<Keychain> {
     rpcUrl,
     ref,
     refGroup,
-    needsStorageAccess,
-    onStorageAccessGranted,
+    needsSessionCreation,
+    username,
+    onSessionCreated,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
@@ -65,23 +67,31 @@ export class KeychainIFrame extends IFrame<Keychain> {
       _url.searchParams.set("ref_group", encodeURIComponent(refGroup));
     }
 
-    if (needsStorageAccess) {
+    if (needsSessionCreation) {
       console.log(
-        "[Storage Access Flow] KeychainIFrame: needsStorageAccess parameter received =",
-        needsStorageAccess,
+        "[Standalone Flow] KeychainIFrame: needsSessionCreation parameter received =",
+        needsSessionCreation,
       );
-      _url.searchParams.set("needs_storage_access", "true");
+      _url.searchParams.set("needs_session_creation", "true");
       console.log(
-        "[Storage Access Flow] KeychainIFrame: Added needs_storage_access=true to URL",
+        "[Standalone Flow] KeychainIFrame: Added needs_session_creation=true to URL",
       );
     } else {
       console.log(
-        "[Storage Access Flow] KeychainIFrame: needsStorageAccess NOT set, normal iframe load",
+        "[Standalone Flow] KeychainIFrame: needsSessionCreation NOT set, normal iframe load",
       );
     }
 
+    if (username) {
+      console.log(
+        "[Standalone Flow] KeychainIFrame: Adding username parameter =",
+        username,
+      );
+      _url.searchParams.set("username", encodeURIComponent(username));
+    }
+
     console.log(
-      "[Storage Access Flow] KeychainIFrame: Final iframe URL =",
+      "[Standalone Flow] KeychainIFrame: Final iframe URL =",
       _url.toString(),
     );
 
@@ -104,13 +114,13 @@ export class KeychainIFrame extends IFrame<Keychain> {
       url: _url,
       methods: {
         ...walletBridge.getIFrameMethods(),
-        // Expose callback for keychain to notify parent that storage access was granted
-        onStorageAccessGranted: (_origin: string) => () => {
+        // Expose callback for keychain to notify parent that session was created and storage access granted
+        onSessionCreated: (_origin: string) => () => {
           console.log(
-            "[Storage Access Flow] KeychainIFrame: onStorageAccessGranted method called from keychain",
+            "[Standalone Flow] KeychainIFrame: onSessionCreated method called from keychain",
           );
-          if (onStorageAccessGranted) {
-            onStorageAccessGranted();
+          if (onSessionCreated) {
+            onSessionCreated();
           }
         },
       },

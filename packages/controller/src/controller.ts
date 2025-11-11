@@ -668,30 +668,30 @@ export default class ControllerProvider extends BaseProvider {
       typeof sessionStorage !== "undefined" &&
       sessionStorage.getItem("controller_standalone") === "1";
 
+    // Extract username from URL if present (passed from keychain after auth)
+    const urlParams =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : undefined;
+    const username = urlParams?.get("username") ?? undefined;
+
+    console.log("[Standalone Flow] Controller: createKeychainIframe called");
     console.log(
-      "[Storage Access Flow] Controller: createKeychainIframe called",
-    );
-    console.log(
-      "[Storage Access Flow] Controller: isReturningFromRedirect =",
+      "[Standalone Flow] Controller: isReturningFromRedirect =",
       isReturningFromRedirect,
     );
-    console.log(
-      "[Storage Access Flow] Controller: sessionStorage value =",
-      typeof sessionStorage !== "undefined"
-        ? sessionStorage.getItem("controller_standalone")
-        : "undefined",
-    );
+    console.log("[Standalone Flow] Controller: username from URL =", username);
 
     // Clear the flag after detecting it
     if (isReturningFromRedirect) {
       console.log(
-        "[Storage Access Flow] Controller: Clearing controller_standalone flag from sessionStorage",
+        "[Standalone Flow] Controller: Clearing controller_standalone flag from sessionStorage",
       );
       sessionStorage.removeItem("controller_standalone");
     }
 
     console.log(
-      "[Storage Access Flow] Controller: Creating KeychainIFrame with needsStorageAccess =",
+      "[Standalone Flow] Controller: Creating KeychainIFrame with needsSessionCreation =",
       isReturningFromRedirect,
     );
 
@@ -702,31 +702,30 @@ export default class ControllerProvider extends BaseProvider {
       onConnect: (keychain) => {
         this.keychain = keychain;
         console.log(
-          "[Storage Access Flow] Controller: Keychain connected successfully",
+          "[Standalone Flow] Controller: Keychain connected successfully",
         );
-        // Storage access will be requested via UI prompt (StorageAccessPrompt component)
-        // when needsStorageAccess parameter is detected by the keychain
       },
       version: version,
       ref: this.referral.ref,
       refGroup: this.referral.refGroup,
-      needsStorageAccess: isReturningFromRedirect,
-      onStorageAccessGranted: () => {
+      needsSessionCreation: isReturningFromRedirect,
+      username: username,
+      onSessionCreated: () => {
         console.log(
-          "[Storage Access Flow] Controller: onStorageAccessGranted callback triggered",
+          "[Standalone Flow] Controller: onSessionCreated callback triggered",
         );
         console.log(
-          "[Storage Access Flow] Controller: Calling probe() to re-establish connection with storage access",
+          "[Standalone Flow] Controller: Calling probe() to re-establish connection with storage access",
         );
-        // Re-probe to establish connection now that storage access is granted
+        // Re-probe to establish connection now that storage access is granted and session created
         this.probe();
       },
     });
 
-    // If we're returning from redirect, open the modal immediately to show storage access prompt
+    // If we're returning from redirect, open the modal immediately to show session creation prompt
     if (isReturningFromRedirect) {
       console.log(
-        "[Storage Access Flow] Controller: Opening iframe modal to show storage access prompt",
+        "[Standalone Flow] Controller: Opening iframe modal to show session creation UI",
       );
       // Open after a short delay to ensure iframe is ready
       setTimeout(() => {
