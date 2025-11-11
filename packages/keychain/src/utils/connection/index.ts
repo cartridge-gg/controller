@@ -14,6 +14,7 @@ import {
   hasStorageAccessFactory,
   requestStorageAccessFactory,
 } from "./storage-access";
+import { StarterpackOptions } from "@cartridge/controller";
 
 export type { ControllerError } from "./execute";
 
@@ -70,9 +71,9 @@ export function connectToController<ParentMethods extends object>({
         navigate("/funding", { replace: true });
       },
       openStarterPack:
-        () => (starterpackId: string | number, preimage?: string) => {
+        () => (id: string | number, options?: StarterpackOptions) => {
           navigate(
-            `/purchase/starterpack/${starterpackId}${preimage ? `?preimage=${preimage}` : ""}`,
+            `/purchase/starterpack/${id}${options?.preimage ? `?preimage=${options.preimage}` : ""}`,
             { replace: true },
           );
         },

@@ -162,8 +162,8 @@ export interface Keychain {
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
   openStarterPack(
-    starterpackId: string | number,
-    preimage?: string,
+    id: string | number,
+    options?: StarterpackOptions,
   ): Promise<void>;
   navigate(path: string): Promise<void>;
   hasStorageAccess(): Promise<boolean>;
@@ -267,4 +267,9 @@ export type Tokens = {
 export type OpenOptions = {
   /** The URL to redirect to after authentication (defaults to current page) */
   redirectUrl?: string;
+};
+
+export type StarterpackOptions = {
+  /** The preimage to use */
+  preimage?: string;
 };

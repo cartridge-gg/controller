@@ -108,7 +108,9 @@ export const Starterpack = () => {
                   if (claimSpId.trim()) {
                     controllerConnector.controller.openStarterPack(
                       claimSpId.trim(),
-                      claimPreimage.trim() || undefined,
+                      {
+                        preimage: claimPreimage.trim(),
+                      },
                     );
                   }
                 }}
