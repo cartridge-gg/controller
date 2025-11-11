@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/keychain",
-  "version": "0.10.7",
+  "version": "0.11.1",
   "private": true,
   "type": "module",
   "scripts": {

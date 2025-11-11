@@ -15,7 +15,6 @@ import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 import { TransactionFinalityStatus } from "starknet";
 
 // Retry utility for waitForTransaction
@@ -69,9 +68,7 @@ export function Pending() {
     transactionHash,
   } = usePurchaseContext();
 
-  if (
-    starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Claimed
-  ) {
+  if (starterpackDetails?.type === "claimed") {
     return (
       <ClaimPendingInner
         name={starterpackDetails?.name || "Items"}
@@ -310,7 +307,7 @@ export function ClaimPendingInner({
           isLoading={isClaiming}
         />
         <Button className="w-full" variant="primary" disabled={true}>
-          Purchase
+          Claiming
         </Button>
       </LayoutFooter>
     </>

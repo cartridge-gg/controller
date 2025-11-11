@@ -65,9 +65,13 @@ export function connectToController<ParentMethods extends object>({
       openPurchaseCredits: () => () => {
         navigate("/funding", { replace: true });
       },
-      openStarterPack: () => (starterpackId: string) => {
-        navigate(`/purchase/starterpack/${starterpackId}`, { replace: true });
-      },
+      openStarterPack:
+        () => (starterpackId: string | number, preimage?: string) => {
+          navigate(
+            `/purchase/starterpack/${starterpackId}${preimage ? `?preimage=${preimage}` : ""}`,
+            { replace: true },
+          );
+        },
       switchChain: () => switchChain({ setController, setRpcUrl }),
     },
   });

@@ -9,19 +9,17 @@ import { Receiving } from "./receiving";
 import { useConnection } from "@/hooks/connection";
 import { usePurchaseContext } from "@/context";
 import { useMemo } from "react";
-import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 import { Item } from "@/context/purchase";
 import { ConfirmingTransaction } from "./pending";
 import { getExplorer } from "@/hooks/payments/crypto";
+import { StarterpackType } from "@/types/starterpack-types";
 
 export function Success() {
   const { purchaseItems, claimItems, starterpackDetails, transactionHash } =
     usePurchaseContext();
 
   const items = useMemo(() => {
-    if (
-      starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Claimed
-    ) {
+    if (starterpackDetails?.type === "claimed") {
       return claimItems;
     }
 
@@ -31,7 +29,7 @@ export function Success() {
   return (
     <PurchaseSuccessInner
       items={items}
-      acquisitionType={starterpackDetails!.acquisitionType}
+      type={starterpackDetails!.type}
       transactionHash={transactionHash}
     />
   );
@@ -39,18 +37,18 @@ export function Success() {
 
 export function PurchaseSuccessInner({
   items,
-  acquisitionType,
+  type,
   transactionHash,
 }: {
   items: Item[];
-  acquisitionType: StarterpackAcquisitionType;
+  type: StarterpackType;
   transactionHash?: string;
 }) {
   const { closeModal, isMainnet } = useConnection();
   return (
     <>
       <HeaderInner
-        title={`${acquisitionType === StarterpackAcquisitionType.Claimed ? "Claim" : "Purchase"} Complete`}
+        title={`${type === "claimed" ? "Claim" : "Purchase"} Complete`}
         icon={<CheckIcon />}
       />
       <LayoutContent>
@@ -64,7 +62,7 @@ export function PurchaseSuccessInner({
       <LayoutFooter>
         {transactionHash && (
           <ConfirmingTransaction
-            title={`${acquisitionType === StarterpackAcquisitionType.Claimed ? "Claimed" : "Confirmed"} on Starknet`}
+            title={`${type === "claimed" ? "Claimed" : "Confirmed"} on Starknet`}
             externalLink={
               getExplorer("starknet", transactionHash, isMainnet).url
             }

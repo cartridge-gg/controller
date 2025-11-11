@@ -161,7 +161,10 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
-  openStarterPack(starterpackId: string | number): Promise<void>;
+  openStarterPack(
+    starterpackId: string | number,
+    preimage?: string,
+  ): Promise<void>;
   navigate(path: string): Promise<void>;
   hasStorageAccess(): Promise<boolean>;
 
@@ -259,21 +262,6 @@ export type Token = "eth" | "strk" | "lords" | "usdc" | "usdt";
 export type Tokens = {
   erc20?: Token[];
 };
-
-export enum StarterPackItemType {
-  NONFUNGIBLE = "NONFUNGIBLE",
-  FUNGIBLE = "FUNGIBLE",
-}
-
-export interface StarterPackItem {
-  type: StarterPackItemType;
-  name: string;
-  description: string;
-  iconURL?: string;
-  amount?: number;
-  price?: bigint;
-  call?: Call[];
-}
 
 export type OpenOptions = {
   /** The URL to redirect to after authentication (defaults to current page) */

@@ -47,16 +47,13 @@ import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useLayerswapDeposit } from "@/hooks/payments/crypto";
-import { useStarterPack } from "@/hooks/starterpack";
-import { useStarterPackOnchain } from "@/hooks/starterpack-onchain";
+import { useClaimStarterpack } from "@/hooks/starterpack-claim";
+import { useOnchainStarterpack } from "@/hooks/starterpack-onchain";
 import { depositToLayerswapInput } from "@/utils/payments";
-import {
-  CreateLayerswapDepositInput,
-  StarterpackAcquisitionType,
-} from "@cartridge/ui/utils/api/cartridge";
+import { CreateLayerswapDepositInput } from "@cartridge/ui/utils/api/cartridge";
 import {
   StarterpackDetails,
-  detectStarterpackSource,
+  detectStarterpackType,
 } from "@/types/starterpack-types";
 
 export interface CostDetails {
@@ -82,6 +79,7 @@ export type Item = {
   subtitle?: string;
   icon: string | React.ReactNode;
   value?: number;
+  quantity?: number;
   type: ItemType;
 };
 
@@ -149,10 +147,9 @@ export interface PurchaseContextType {
   // Actions
   setUsdAmount: (amount: number) => void;
   setDepositAmount: (amount: number) => void;
-  setPurchaseItems: (items: Item[]) => void;
-  setClaimItems: (items: Item[]) => void;
-  setStarterpack: (starterpack: string | number) => void;
+  setStarterpackId: (starterpackId: string | number) => void;
   setTransactionHash: (hash: string) => void;
+  setClaimItems: (items: Item[]) => void;
 
   // Payment actions
   onCreditCardPurchase: () => Promise<void>;
@@ -183,7 +180,7 @@ export const PurchaseProvider = ({
   const { controller, isMainnet, origin, externalSendTransaction } =
     useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
-  const [starterpack, setStarterpack] = useState<string | number>();
+  const [starterpackId, setStarterpackId] = useState<string | number>();
   const [starterpackDetails, setStarterpackDetails] = useState<
     StarterpackDetails | undefined
   >();
@@ -191,7 +188,7 @@ export const PurchaseProvider = ({
   const [depositAmount, setDepositAmount] = useState<number | undefined>();
   const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
   const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
-  const [claimItems, setClaimItems] = useState<Item[]>([]);
+  const [claimItemsState, setClaimItemsState] = useState<Item[]>([]);
   const [swapId, setSwapId] = useState<string | undefined>();
   const [explorer, setExplorer] = useState<Explorer | undefined>();
   const [transactionHash, setTransactionHash] = useState<string | undefined>();
@@ -378,7 +375,7 @@ export const PurchaseProvider = ({
     setConvertedPrice(null);
     setSwapQuote(null);
     setConversionError(null);
-  }, [starterpack, setSelectedToken]);
+  }, [starterpackId, setSelectedToken]);
 
   // Fetch conversion price when selected token or quote changes
   useEffect(() => {
@@ -458,25 +455,26 @@ export const PurchaseProvider = ({
     swapQuote,
   ]);
 
-  // Detect which source (backend or onchain) based on starterpack ID
-  const source = detectStarterpackSource(starterpack);
+  // Detect which source (claimed or onchain) based on starterpack ID
+  const type = detectStarterpackType(starterpackId);
 
-  // Backend hook (GraphQL) - only run if backend source
+  // Claim hook (GraphQL) - only run if claimed source
   const {
-    name: backendName,
-    items: backendItems,
-    supply: backendSupply,
-    mintAllowance: backendMintAllowance,
-    merkleDrops: backendMerkleDrops,
-    priceUsd: backendPriceUsd,
-    acquisitionType: backendAcquisitionType,
-    isLoading: isBackendLoading,
-    error: backendError,
-  } = useStarterPack(
-    source === "backend" && starterpack !== undefined
-      ? String(starterpack)
+    name: claimName,
+    items: claimItemsFromHook,
+    merkleDrops,
+    isLoading: isClaimLoading,
+    error: claimError,
+  } = useClaimStarterpack(
+    type === "claimed" && starterpackId !== undefined
+      ? String(starterpackId)
       : undefined,
   );
+
+  // Use manually set claimItems if available, otherwise use items from hook
+  const claimItems = useMemo(() => {
+    return claimItemsState.length > 0 ? claimItemsState : claimItemsFromHook;
+  }, [claimItemsState, claimItemsFromHook]);
 
   // Onchain hook (Smart contract) - only run if onchain source
   const {
@@ -485,38 +483,33 @@ export const PurchaseProvider = ({
     isLoading: isOnchainLoading,
     isQuoteLoading: isOnchainQuoteLoading,
     error: onchainError,
-  } = useStarterPackOnchain(
-    source === "onchain" && starterpack !== undefined
-      ? Number(starterpack)
+  } = useOnchainStarterpack(
+    type === "onchain" && starterpackId !== undefined
+      ? Number(starterpackId)
       : undefined,
   );
 
   // Unified loading and error state
   const isStarterpackLoading =
-    source === "backend" ? isBackendLoading : isOnchainLoading;
-  const starterpackError = source === "backend" ? backendError : onchainError;
+    type === "claimed" ? isClaimLoading : isOnchainLoading;
+  const starterpackError = type === "claimed" ? claimError : onchainError;
 
   const [swapInput, setSwapInput] = useState<CreateLayerswapDepositInput>();
 
   useEffect(() => {
     const getSwapInput = () => {
-      if (!controller || !starterpack || !selectedPlatform) {
+      if (!controller || starterpackId === undefined || !selectedPlatform) {
         setSwapInput(undefined);
         return;
       }
-      // Skip Layerswap input creation for claim-only starterpacks
-      // Claim flows don't need payment/swap setup since they're merkle drops
-      // Note: Onchain starterpacks are always PAID, only backend can be CLAIMED
-      if (
-        source === "backend" &&
-        backendAcquisitionType === StarterpackAcquisitionType.Claimed
-      ) {
+
+      if (type === "claimed") {
         setSwapInput(undefined);
         return;
       }
 
       if (
-        source === "onchain" &&
+        type === "onchain" &&
         selectedPlatform !== "starknet" &&
         depositAmount
       ) {
@@ -535,48 +528,25 @@ export const PurchaseProvider = ({
     controller,
     depositAmount,
     layerswapFees,
-    starterpack,
+    starterpackId,
     selectedPlatform,
     isMainnet,
-    source,
-    backendAcquisitionType,
+    type,
   ]);
 
-  // Transform data based on source (backend vs onchain)
+  // Transform data based on source (claimed vs onchain)
   useEffect(() => {
-    if (!starterpack) return;
+    if (starterpackId === undefined) return;
 
-    if (source === "backend") {
-      // Backend flow (existing)
-      const purchaseItems: Item[] = backendItems.map((item) => {
-        const itemPriceUsd = item.price
-          ? usdcToUsd(item.price) * (item.amount || 1)
-          : 0;
-
-        return {
-          title: item.name,
-          subtitle: item.description,
-          icon: item.iconURL,
-          value: itemPriceUsd,
-          type: ItemType.NFT,
-        };
-      });
-
-      setPurchaseItems(purchaseItems);
-      setUsdAmount(backendPriceUsd);
-
+    if (type === "claimed") {
       setStarterpackDetails({
-        source: "backend",
-        id: String(starterpack),
-        name: backendName,
-        starterPackItems: backendItems,
-        supply: backendSupply,
-        mintAllowance: backendMintAllowance,
-        merkleDrops: backendMerkleDrops,
-        priceUsd: backendPriceUsd,
-        acquisitionType: backendAcquisitionType,
+        type: "claimed",
+        id: String(starterpackId),
+        name: claimName,
+        items: claimItems,
+        merkleDrops,
       });
-    } else if (source === "onchain" && onchainMetadata) {
+    } else if (type === "onchain" && onchainMetadata) {
       // Onchain flow (new) - show metadata as soon as it's available
       const purchaseItems: Item[] = onchainMetadata.items.map((item) => {
         // TODO: Calculate price per item if needed
@@ -596,28 +566,23 @@ export const PurchaseProvider = ({
       setUsdAmount(totalUsd);
 
       setStarterpackDetails({
-        source: "onchain",
-        id: Number(starterpack),
+        type: "onchain",
+        id: Number(starterpackId),
         name: onchainMetadata.name,
         description: onchainMetadata.description,
         imageUri: onchainMetadata.imageUri,
-        items: onchainMetadata.items,
+        items: purchaseItems,
         quote: onchainQuote,
         isQuoteLoading: isOnchainQuoteLoading,
-        acquisitionType: "PAID" as StarterpackAcquisitionType.Paid,
       });
     }
   }, [
-    starterpack,
-    source,
-    // Backend dependencies
-    backendItems,
-    backendPriceUsd,
-    backendName,
-    backendSupply,
-    backendMintAllowance,
-    backendMerkleDrops,
-    backendAcquisitionType,
+    starterpackId,
+    type,
+    // Claim dependencies
+    claimName,
+    claimItems,
+    merkleDrops,
     // Onchain dependencies
     onchainMetadata,
     onchainQuote,
@@ -651,7 +616,7 @@ export const PurchaseProvider = ({
         usdToCredits(usdAmount),
         controller.username(),
         undefined,
-        typeof starterpack == "string" ? starterpack : undefined,
+        typeof starterpackId == "string" ? starterpackId : undefined,
       );
       setClientSecret(paymentIntent.clientSecret);
       setCostDetails(paymentIntent.pricing);
@@ -659,7 +624,7 @@ export const PurchaseProvider = ({
       setDisplayError(e as Error);
       throw e;
     }
-  }, [usdAmount, controller, starterpack, createPaymentIntent]);
+  }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
   const onBackendCryptoPurchase = useCallback(async () => {
     if (
@@ -1002,10 +967,9 @@ export const PurchaseProvider = ({
     // Setters
     setUsdAmount,
     setDepositAmount,
-    setPurchaseItems,
-    setClaimItems,
-    setStarterpack,
+    setStarterpackId,
     setTransactionHash,
+    setClaimItems: setClaimItemsState,
 
     // Actions
     onCreditCardPurchase,

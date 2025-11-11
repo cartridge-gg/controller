@@ -34,7 +34,6 @@ import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { Success as PurchaseSuccess } from "./purchasenew/success";
 import { Pending as PurchasePending } from "./purchasenew/pending";
 import { SelectWallet } from "./purchasenew/wallet/wallet";
-import { CryptoCheckout } from "./purchasenew/checkout/crypto";
 import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
 import { Execute } from "./Execute";
@@ -192,7 +191,6 @@ export function App() {
           <Route path="network/:platforms" element={<ChooseNetwork />} />
           <Route path="wallet/:platforms" element={<SelectWallet />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
-          <Route path="checkout/crypto" element={<CryptoCheckout />} />
           <Route path="checkout/onchain" element={<OnchainCheckout />} />
           <Route path="review" element={<></>} />
           <Route path="pending" element={<PurchasePending />} />

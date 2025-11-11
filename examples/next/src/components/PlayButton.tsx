@@ -17,7 +17,11 @@ const GAMES: Game[] = [
     url: "https://x.cartridge.gg?redirect_url=https://lootsurvivor.io&preset=loot-survivor",
     description: "Survive the adventure, earn rewards",
   },
-  // Add more games here as needed
+  {
+    name: "Nums",
+    url: "https://x.cartridge.gg?redirect_url=https://nums-blond.vercel.app&preset=nums",
+    description: "Survive the adventure, earn rewards",
+  },
 ];
 
 export const PlayButton = () => {
