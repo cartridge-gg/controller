@@ -1,6 +1,6 @@
 {
   "name": "cartridge-node-example",
-  "version": "0.11.1",
+  "version": "0.11.2-alpha.1",
   "description": "Example of using Cartridge session controller with Node.js",
   "type": "module",
   "scripts": {
