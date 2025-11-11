@@ -11,6 +11,7 @@ import {
   SelectContent,
   SelectItem,
   SolanaIcon,
+  Spinner,
   StarknetIcon,
   Thumbnail,
   TokenSelectHeader,
@@ -201,20 +202,23 @@ export function OnchainCostBreakdown({
                 quantity={quantity}
               />
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-foreground-100">
-                {formatAmount(paymentAmount)}
-              </span>
-              {!isPaymentTokenSameAsSelected &&
-                convertedEquivalent !== null &&
-                displayToken &&
-                !isFetchingConversion && (
-                  <span className="text-foreground-100">
-                    {formatAmount(convertedEquivalent)}{" "}
-                    {convertedPrice?.tokenMetadata.symbol}
-                  </span>
-                )}
-            </div>
+            {isFetchingConversion ? (
+              <Spinner />
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <span className="text-foreground-300">
+                  {formatAmount(paymentAmount)}
+                </span>
+                {!isPaymentTokenSameAsSelected &&
+                  convertedEquivalent !== null &&
+                  displayToken &&
+                  !isFetchingConversion && (
+                    <span className="text-foreground-100">
+                      {formatAmount(convertedEquivalent)}
+                    </span>
+                  )}
+              </div>
+            )}
           </div>
         </CardContent>
         <Select

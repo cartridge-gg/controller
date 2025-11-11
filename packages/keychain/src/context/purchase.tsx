@@ -713,18 +713,31 @@ export const PurchaseProvider = ({
 
           const network = chainIdToEkuboNetwork(controller.chainId());
 
+          // Scale the swap quote by quantity
+          // swapQuote is for quantity 1, so we need to scale it for the actual quantity
+          const scaledSwapQuote: SwapQuote = {
+            impact: swapQuote.impact,
+            total: swapQuote.total * BigInt(quantity),
+            splits: swapQuote.splits.map((split) => ({
+              ...split,
+              amount_specified: (
+                BigInt(split.amount_specified) * BigInt(quantity)
+              ).toString(),
+            })),
+          };
+
           // Generate swap calls
-          // swapQuote.total is the amount of selectedToken we need to spend
+          // scaledSwapQuote.total is the amount of selectedToken we need to spend
           const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
           const swapAmount =
-            swapQuote.total < 0n ? -swapQuote.total : swapQuote.total;
-          // Multiply swap amount by quantity
-          const swapAmountWithQuantity = swapAmount * BigInt(quantity);
-          const doubledTotal = swapAmountWithQuantity * 2n;
+            scaledSwapQuote.total < 0n
+              ? -scaledSwapQuote.total
+              : scaledSwapQuote.total;
+          const doubledTotal = swapAmount * 2n;
           const totalQuoteSum =
-            doubledTotal < swapAmountWithQuantity + BigInt(1e19)
+            doubledTotal < swapAmount + BigInt(1e19)
               ? doubledTotal
-              : swapAmountWithQuantity + BigInt(1e19);
+              : swapAmount + BigInt(1e19);
 
           // Step 0a: Approve selected token for router
           const approveSelectedTokenAmount = uint256.bnToUint256(totalQuoteSum);
@@ -743,7 +756,7 @@ export const PurchaseProvider = ({
             selectedToken.address, // purchaseToken (selected token)
             quote.paymentToken, // targetToken (payment token)
             totalCostWithQuantity, // minimumAmount (minimum payment token to receive)
-            swapQuote,
+            scaledSwapQuote,
             network,
           );
 

@@ -66,6 +66,7 @@ export function Pending() {
     selectedWallet,
     swapId,
     transactionHash,
+    quantity,
   } = usePurchaseContext();
 
   if (starterpackDetails?.type === "claimed") {
@@ -73,6 +74,7 @@ export function Pending() {
       <ClaimPendingInner
         name={starterpackDetails?.name || "Items"}
         items={claimItems}
+        quantity={quantity}
         transactionHash={transactionHash!}
       />
     );
@@ -263,10 +265,12 @@ export function ClaimPendingInner({
   name,
   items,
   transactionHash,
+  quantity,
 }: {
   name: string;
   items: Item[];
   transactionHash: string;
+  quantity: number;
 }) {
   const { isMainnet, controller } = useConnection();
   const { navigate } = useNavigation();
@@ -298,7 +302,11 @@ export function ClaimPendingInner({
     <>
       <HeaderInner title={`Purchasing ${name}`} />
       <LayoutContent>
-        <Receiving title="Receiving" items={items} isLoading={false} />
+        <Receiving
+          title={`Receiving ${quantity > 1 ? `(${quantity})` : ""}`}
+          items={items}
+          isLoading={false}
+        />
       </LayoutContent>
       <LayoutFooter>
         <ConfirmingTransaction
