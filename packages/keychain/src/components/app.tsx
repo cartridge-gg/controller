@@ -57,8 +57,9 @@ import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
-import { useEffect } from "react";
 import { BoosterPack } from "./booster-pack";
+import { useEffect, useState } from "react";
+import { StorageAccessPrompt } from "./StorageAccessPrompt";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -93,8 +94,63 @@ function DefaultRoute() {
 function Authentication() {
   const { controller, isConfigLoading } = useConnection();
   const { pathname, search } = useLocation();
+  const [storageAccessGranted, setStorageAccessGranted] = useState(false);
 
   const upgrade = useUpgrade();
+
+  // Check if storage access is needed
+  const searchParams = new URLSearchParams(search);
+  const needsStorageAccess =
+    searchParams.get("needs_storage_access") === "true";
+
+  console.log(
+    "[Storage Access Flow] Keychain: Authentication component loaded",
+  );
+  console.log("[Storage Access Flow] Keychain: pathname =", pathname);
+  console.log("[Storage Access Flow] Keychain: search params =", search);
+  console.log(
+    "[Storage Access Flow] Keychain: needs_storage_access param =",
+    searchParams.get("needs_storage_access"),
+  );
+  console.log(
+    "[Storage Access Flow] Keychain: needsStorageAccess =",
+    needsStorageAccess,
+  );
+  console.log(
+    "[Storage Access Flow] Keychain: storageAccessGranted =",
+    storageAccessGranted,
+  );
+
+  // If storage access is needed and not yet granted, show the prompt
+  if (needsStorageAccess && !storageAccessGranted) {
+    console.log(
+      "[Storage Access Flow] Keychain: Rendering StorageAccessPrompt (user action required)",
+    );
+    return (
+      <StorageAccessPrompt
+        onSuccess={() => {
+          console.log(
+            "[Storage Access Flow] Keychain: StorageAccessPrompt onSuccess - continuing with normal flow",
+          );
+          setStorageAccessGranted(true);
+        }}
+        onError={(error) => {
+          console.error(
+            "[Storage Access Flow] Keychain: StorageAccessPrompt onError:",
+            error,
+          );
+          // Continue anyway, might work in some browsers
+          setStorageAccessGranted(true);
+        }}
+      />
+    );
+  }
+
+  if (needsStorageAccess && storageAccessGranted) {
+    console.log(
+      "[Storage Access Flow] Keychain: Storage access already granted, proceeding with normal authentication",
+    );
+  }
 
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {

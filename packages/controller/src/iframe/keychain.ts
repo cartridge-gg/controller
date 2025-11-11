@@ -8,6 +8,7 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     version?: string;
     ref?: string;
     refGroup?: string;
+    needsStorageAccess?: boolean;
   };
 
 export class KeychainIFrame extends IFrame<Keychain> {
@@ -25,6 +26,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     rpcUrl,
     ref,
     refGroup,
+    needsStorageAccess,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
@@ -60,6 +62,26 @@ export class KeychainIFrame extends IFrame<Keychain> {
     if (refGroup) {
       _url.searchParams.set("ref_group", encodeURIComponent(refGroup));
     }
+
+    if (needsStorageAccess) {
+      console.log(
+        "[Storage Access Flow] KeychainIFrame: needsStorageAccess parameter received =",
+        needsStorageAccess,
+      );
+      _url.searchParams.set("needs_storage_access", "true");
+      console.log(
+        "[Storage Access Flow] KeychainIFrame: Added needs_storage_access=true to URL",
+      );
+    } else {
+      console.log(
+        "[Storage Access Flow] KeychainIFrame: needsStorageAccess NOT set, normal iframe load",
+      );
+    }
+
+    console.log(
+      "[Storage Access Flow] KeychainIFrame: Final iframe URL =",
+      _url.toString(),
+    );
 
     // Policy precedence logic:
     // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies

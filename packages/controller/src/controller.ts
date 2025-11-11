@@ -107,10 +107,24 @@ export default class ControllerProvider extends BaseProvider {
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       // Check our dedicated parameter to detect return from standalone auth flow
       const standaloneParam = urlParams?.get("controller_standalone");
+      console.log(
+        "[Storage Access Flow] Controller: Checking URL for controller_standalone parameter",
+      );
+      console.log(
+        "[Storage Access Flow] Controller: controller_standalone =",
+        standaloneParam,
+      );
+
       if (standaloneParam === "1") {
+        console.log(
+          "[Storage Access Flow] Controller: Detected return from standalone auth flow!",
+        );
         // Store a flag in sessionStorage so lazy-loaded iframes can detect this
         // Use sessionStorage instead of localStorage to avoid cross-tab issues
         sessionStorage.setItem("controller_standalone", "1");
+        console.log(
+          "[Storage Access Flow] Controller: Set controller_standalone=1 in sessionStorage",
+        );
       }
 
       // Also handle lastUsedConnector for backwards compatibility
@@ -124,6 +138,9 @@ export default class ControllerProvider extends BaseProvider {
         let needsCleanup = false;
 
         if (standaloneParam) {
+          console.log(
+            "[Storage Access Flow] Controller: Removing controller_standalone from URL",
+          );
           urlParams.delete("controller_standalone");
           needsCleanup = true;
         }
@@ -144,6 +161,10 @@ export default class ControllerProvider extends BaseProvider {
             window.location.pathname +
             (urlParams.toString() ? "?" + urlParams.toString() : "") +
             window.location.hash;
+          console.log(
+            "[Storage Access Flow] Controller: Cleaned URL, new URL =",
+            newUrl,
+          );
           window.history.replaceState({}, "", newUrl);
         }
       }
@@ -641,40 +662,55 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   private createKeychainIframe(): KeychainIFrame {
+    // Check if we're returning from standalone auth flow
+    const isReturningFromRedirect =
+      typeof window !== "undefined" &&
+      typeof sessionStorage !== "undefined" &&
+      sessionStorage.getItem("controller_standalone") === "1";
+
+    console.log(
+      "[Storage Access Flow] Controller: createKeychainIframe called",
+    );
+    console.log(
+      "[Storage Access Flow] Controller: isReturningFromRedirect =",
+      isReturningFromRedirect,
+    );
+    console.log(
+      "[Storage Access Flow] Controller: sessionStorage value =",
+      typeof sessionStorage !== "undefined"
+        ? sessionStorage.getItem("controller_standalone")
+        : "undefined",
+    );
+
+    // Clear the flag after detecting it
+    if (isReturningFromRedirect) {
+      console.log(
+        "[Storage Access Flow] Controller: Clearing controller_standalone flag from sessionStorage",
+      );
+      sessionStorage.removeItem("controller_standalone");
+    }
+
+    console.log(
+      "[Storage Access Flow] Controller: Creating KeychainIFrame with needsStorageAccess =",
+      isReturningFromRedirect,
+    );
+
     return new KeychainIFrame({
       ...this.options,
       rpcUrl: this.rpcUrl(),
       onClose: this.keychain?.reset,
       onConnect: (keychain) => {
         this.keychain = keychain;
-
-        // Check if we're returning from standalone auth flow
-        const isReturningFromRedirect =
-          typeof window !== "undefined" &&
-          typeof sessionStorage !== "undefined" &&
-          sessionStorage.getItem("controller_standalone") === "1";
-
-        console.log("Returning from redirect flow", isReturningFromRedirect);
-
-        // If returning from redirect flow, immediately request storage access
-        // This ensures the iframe can access the first-party storage established during the redirect
-        if (isReturningFromRedirect) {
-          // Clear the flag after using it
-          sessionStorage.removeItem("controller_standalone");
-
-          if (this.keychain.requestStorageAccess) {
-            this.keychain.requestStorageAccess().catch((e) => {
-              console.warn(
-                "Failed to request storage access after redirect:",
-                e,
-              );
-            });
-          }
-        }
+        console.log(
+          "[Storage Access Flow] Controller: Keychain connected successfully",
+        );
+        // Storage access will be requested via UI prompt (StorageAccessPrompt component)
+        // when needsStorageAccess parameter is detected by the keychain
       },
       version: version,
       ref: this.referral.ref,
       refGroup: this.referral.refGroup,
+      needsStorageAccess: isReturningFromRedirect,
     });
   }
 
