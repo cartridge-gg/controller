@@ -248,7 +248,9 @@ export class TurnkeyWallet {
       const rpcUrl = localStorage.getItem(RPC_URL_KEY);
 
       // Retrieve stored iframe public key and nonce to handle redirect flow
-      const storedIframePublicKey = localStorage.getItem(TURNKEY_IFRAME_PUBLIC_KEY);
+      const storedIframePublicKey = localStorage.getItem(
+        TURNKEY_IFRAME_PUBLIC_KEY,
+      );
       const storedNonce = localStorage.getItem(TURNKEY_NONCE);
 
       // Clean up stored values
@@ -260,7 +262,7 @@ export class TurnkeyWallet {
 
       if (storedNonce && storedNonce !== result.appState.nonce) {
         console.info(
-          `[Turnkey] Using stored nonce to prevent mismatch (stored: ${storedNonce?.slice(0, 10)}..., appState: ${result.appState.nonce?.slice(0, 10)}...)`
+          `[Turnkey] Using stored nonce to prevent mismatch (stored: ${storedNonce?.slice(0, 10)}..., appState: ${result.appState.nonce?.slice(0, 10)}...)`,
         );
       }
 
@@ -299,7 +301,7 @@ export class TurnkeyWallet {
       const expectedNonce = getNonce(storedIframePublicKey);
       if (expectedNonce !== nonce) {
         console.info(
-          `[Turnkey] Iframe was recreated during redirect. Using stored nonce. Expected: ${expectedNonce}, Got: ${nonce}`
+          `[Turnkey] Iframe was recreated during redirect. Using stored nonce. Expected: ${expectedNonce}, Got: ${nonce}`,
         );
       }
     }
@@ -311,7 +313,7 @@ export class TurnkeyWallet {
       // If nonce mismatch, try with current iframe's public key (iframe was likely recreated)
       if ((error as Error & { code?: string }).code === NONCE_MISMATCH_ERROR) {
         console.warn(
-          `[Turnkey] Nonce mismatch detected. Attempting recovery with current iframe public key.`
+          `[Turnkey] Nonce mismatch detected. Attempting recovery with current iframe public key.`,
         );
 
         // Get current iframe's public key and calculate its nonce
@@ -319,7 +321,7 @@ export class TurnkeyWallet {
         const currentNonce = getNonce(currentIframePublicKey);
 
         console.info(
-          `[Turnkey] Retrying with current nonce: ${currentNonce.slice(0, 10)}... (was: ${nonce.slice(0, 10)}...)`
+          `[Turnkey] Retrying with current nonce: ${currentNonce.slice(0, 10)}... (was: ${nonce.slice(0, 10)}...)`,
         );
 
         // Retry with current nonce
