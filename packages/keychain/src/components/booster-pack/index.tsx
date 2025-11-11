@@ -82,8 +82,8 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
                   : card,
               ),
             );
-          }, 600);
-        }, index * 800); // Stagger each card by 800ms
+          }, 500);
+        }, index * 500); // Stagger each card by 800ms
       });
 
       // Stop confetti after all cards revealed
@@ -160,21 +160,6 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
               >
                 {/* Card container with fade-up animation */}
                 <div className="relative w-full h-full">
-                  {/* Card Back (unrevealed placeholder) */}
-                  <div
-                    className="absolute inset-0 rounded-lg overflow-hidden shadow-[0px_4px_16px_0px_#000000] flex items-center justify-center transition-opacity duration-500"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #1a1f1c 0%, #0f1410 100%)",
-                      opacity:
-                        card.revealState === RevealState.UNREVEALED ? 1 : 0,
-                      pointerEvents:
-                        card.revealState === RevealState.UNREVEALED
-                          ? "auto"
-                          : "none",
-                    }}
-                  ></div>
-
                   {/* Card Front (revealed with fade-up) */}
                   <div
                     className="absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out"
