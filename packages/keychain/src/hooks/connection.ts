@@ -597,26 +597,37 @@ export function useConnectionValue() {
     } else {
       const localWalletBridge = new WalletBridge();
       const iframeMethods = localWalletBridge.getIFrameMethods();
-      const currentOrigin = window.location.origin;
 
-      setOrigin(currentOrigin);
+      // In standalone mode with redirect, use redirect URI's origin for app ID
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get("redirect_url");
+      let appOrigin = window.location.origin;
+
+      if (redirectUrl) {
+        try {
+          const redirectUrlObj = new URL(redirectUrl);
+          appOrigin = redirectUrlObj.origin;
+        } catch (error) {
+          console.error("Failed to parse redirect_url for app ID:", error);
+          // Fall back to window.location.origin if redirect URL is invalid
+        }
+      }
+
+      setOrigin(appOrigin);
 
       setParent({
         close: async () => {},
         reload: async () => {},
-        externalDetectWallets:
-          iframeMethods.externalDetectWallets(currentOrigin),
-        externalConnectWallet:
-          iframeMethods.externalConnectWallet(currentOrigin),
-        externalSignMessage: iframeMethods.externalSignMessage(currentOrigin),
-        externalSignTypedData:
-          iframeMethods.externalSignTypedData(currentOrigin),
+        externalDetectWallets: iframeMethods.externalDetectWallets(appOrigin),
+        externalConnectWallet: iframeMethods.externalConnectWallet(appOrigin),
+        externalSignMessage: iframeMethods.externalSignMessage(appOrigin),
+        externalSignTypedData: iframeMethods.externalSignTypedData(appOrigin),
         externalSendTransaction:
-          iframeMethods.externalSendTransaction(currentOrigin),
-        externalGetBalance: iframeMethods.externalGetBalance(currentOrigin),
-        externalSwitchChain: iframeMethods.externalSwitchChain(currentOrigin),
+          iframeMethods.externalSendTransaction(appOrigin),
+        externalGetBalance: iframeMethods.externalGetBalance(appOrigin),
+        externalSwitchChain: iframeMethods.externalSwitchChain(appOrigin),
         externalWaitForTransaction:
-          iframeMethods.externalWaitForTransaction(currentOrigin),
+          iframeMethods.externalWaitForTransaction(appOrigin),
       });
     }
 

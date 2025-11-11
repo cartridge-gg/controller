@@ -11,7 +11,7 @@ import {
   LayoutFooter,
   Skeleton,
 } from "@cartridge/ui";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMerkleClaim, MerkleClaim } from "@/hooks/merkle-claim";
 import { usePurchaseContext } from "@/context/purchase";
@@ -21,11 +21,16 @@ import { StarterpackReceiving } from "../starterpack/starterpack";
 import { ExternalWalletType } from "@cartridge/controller";
 import { getWallet } from "../wallet/config";
 import { formatAddress } from "@cartridge/ui/utils";
+import { getAddressFromPrivateKey } from "@/utils";
+import { useConnection } from "@/hooks/connection";
+
+type ClaimWalletTypes = ExternalWalletType | "controller" | "preimage";
 
 export function Claim() {
-  const { keys, address: externalAddress, type } = useParams();
+  const { keys, address, type } = useParams();
+  const { closeModal } = useConnection();
   const { goBack, navigate } = useNavigation();
-  const { starterpackDetails, setTransactionHash, setClaimItems } =
+  const { starterpackDetails, setClaimItems, setTransactionHash } =
     usePurchaseContext();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,18 +40,51 @@ export function Claim() {
     new Set(),
   );
 
+  // If type is preimage, then address is actually the private key
+  const { externalAddress, preimage, addressError } = useMemo(() => {
+    if (type === "preimage") {
+      try {
+        return {
+          externalAddress: getAddressFromPrivateKey(address!),
+          preimage: address,
+          addressError: null,
+        };
+      } catch (error) {
+        return {
+          externalAddress: address!,
+          preimage: undefined,
+          addressError: error as Error,
+        };
+      }
+    }
+
+    return {
+      externalAddress: address!,
+      preimage: undefined,
+      addressError: null,
+    };
+  }, [type, address]);
+
+  // Handle address conversion errors
+  useEffect(() => {
+    if (addressError) {
+      setError(addressError);
+    }
+  }, [addressError]);
+
   const {
     claims: claimsData,
     isLoading: isLoadingClaims,
     onSendClaim,
   } = useMerkleClaim({
     keys: keys!,
-    address: externalAddress!,
-    type: type as ExternalWalletType | "controller",
+    address: externalAddress,
+    type: type as ClaimWalletTypes,
+    preimage,
   });
 
   const wallet = useMemo(() => {
-    return getWallet(type as ExternalWalletType | "controller");
+    return getWallet(type as ClaimWalletTypes);
   }, [type]);
 
   // Filter starterpack items based on matchStarterpackItem flag
@@ -226,14 +264,18 @@ export function Claim() {
   return (
     <>
       <HeaderInner
-        title="Claim Starterpack"
+        title={starterpackDetails?.name ?? "Claim Starterpack"}
         icon={<GiftIcon variant="solid" />}
       />
       <LayoutContent>
         {claimsData.length === 0 ? (
           <Empty
             icon="claim"
-            title="Nothing to claim from this wallet"
+            title={
+              type === "preimage"
+                ? "Preimage Not Found"
+                : "Nothing to claim from this wallet"
+            }
             className="h-full md:h-[420px]"
           />
         ) : (
@@ -294,17 +336,27 @@ export function Claim() {
       </LayoutContent>
       <LayoutFooter>
         {error && <ControllerErrorAlert error={error} />}
-        <div className="flex justify-between border border-background-300 rounded py-2 px-3">
-          <div className="flex items-center gap-1 text-foreground-300 text-xs">
-            {wallet.subIcon} {wallet.name} (
-            {formatAddress(externalAddress!, { first: 5, last: 4 })})
+        {type !== "preimage" && (
+          <div className="flex justify-between border border-background-300 rounded py-2 px-3">
+            <div className="flex items-center gap-1 text-foreground-300 text-xs">
+              {wallet.subIcon} {wallet.name} (
+              {formatAddress(externalAddress!, { first: 5, last: 4 })})
+            </div>
+            <div className="flex items-center gap-1 text-foreground-300 text-xs">
+              Connected
+            </div>
           </div>
-          <div className="flex items-center gap-1 text-foreground-300 text-xs">
-            Connected
-          </div>
-        </div>
+        )}
         {claimsData.length === 0 ? (
-          <Button onClick={() => goBack()}>Check Another Wallet</Button>
+          <>
+            {type !== "preimage" ? (
+              <Button onClick={() => goBack()}>Check Another Wallet</Button>
+            ) : (
+              <Button variant="secondary" onClick={() => closeModal?.()}>
+                Close
+              </Button>
+            )}
+          </>
         ) : (
           !showIndividualClaims && (
             <Button

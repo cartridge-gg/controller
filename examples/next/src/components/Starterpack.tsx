@@ -27,6 +27,7 @@ export const Starterpack = () => {
 
   const defaultIds = getDefaultStarterpackIds();
   const [claimSpId, setClaimSpId] = useState<string>(defaultIds.claim);
+  const [claimPreimage, setClaimPreimage] = useState<string>("");
   const [purchaseOnchainSpId, setPurchaseOnchainSpId] = useState<number>(
     defaultIds.purchaseOnchain,
   );
@@ -93,25 +94,35 @@ export const Starterpack = () => {
 
         <div className="flex flex-col gap-2">
           <h3>Claim Starterpack</h3>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <Input
+                className="max-w-80"
+                type="text"
+                value={claimSpId}
+                onChange={(e) => setClaimSpId(e.target.value)}
+                placeholder="Enter starterpack ID"
+              />
+              <Button
+                onClick={() => {
+                  if (claimSpId.trim()) {
+                    controllerConnector.controller.openStarterPack(
+                      claimSpId.trim(),
+                      claimPreimage.trim() || undefined,
+                    );
+                  }
+                }}
+              >
+                Claim
+              </Button>
+            </div>
             <Input
               className="max-w-80"
               type="text"
-              value={claimSpId}
-              onChange={(e) => setClaimSpId(e.target.value)}
-              placeholder="Enter starterpack ID"
+              value={claimPreimage}
+              onChange={(e) => setClaimPreimage(e.target.value)}
+              placeholder="Optional: Enter preimage"
             />
-            <Button
-              onClick={() => {
-                if (claimSpId.trim()) {
-                  controllerConnector.controller.openStarterPack(
-                    claimSpId.trim(),
-                  );
-                }
-              }}
-            >
-              Claim
-            </Button>
           </div>
         </div>
       </div>

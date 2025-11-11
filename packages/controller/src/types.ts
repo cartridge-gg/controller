@@ -161,7 +161,10 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
-  openStarterPack(starterpackId: string | number): Promise<void>;
+  openStarterPack(
+    starterpackId: string | number,
+    preimage?: string,
+  ): Promise<void>;
   navigate(path: string): Promise<void>;
   hasStorageAccess(): Promise<boolean>;
 
