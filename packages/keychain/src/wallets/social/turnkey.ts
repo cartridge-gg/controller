@@ -252,6 +252,10 @@ export class TurnkeyWallet {
         searchParams,
       };
     } catch (error) {
+      // Clean up any stored values on error
+      localStorage.removeItem("turnkey-nonce");
+      localStorage.removeItem(URL_PARAMS_KEY);
+      localStorage.removeItem(RPC_URL_KEY);
       setError(new Error(`Final error: ${(error as Error).message}`));
       throw error;
     }
