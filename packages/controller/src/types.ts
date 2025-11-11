@@ -167,6 +167,7 @@ export interface Keychain {
   ): Promise<void>;
   navigate(path: string): Promise<void>;
   hasStorageAccess(): Promise<boolean>;
+  requestStorageAccess(): Promise<boolean>;
 
   // External wallet methods
   externalDetectWallets(): Promise<ExternalWallet[]>;

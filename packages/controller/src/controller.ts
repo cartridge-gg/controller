@@ -103,7 +103,18 @@ export default class ControllerProvider extends BaseProvider {
 
     // Auto-detect and set lastUsedConnector from URL parameter
     // This is set by the keychain after redirect flow completion
+    let isReturningFromRedirect = false;
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      // Check our dedicated parameter to detect return from standalone auth flow
+      const storageReady = urlParams?.get("controller_storage_ready");
+      if (storageReady === "1") {
+        isReturningFromRedirect = true;
+        // Store a flag in sessionStorage so lazy-loaded iframes can detect this
+        // Use sessionStorage instead of localStorage to avoid cross-tab issues
+        sessionStorage.setItem("controller_storage_ready", "1");
+      }
+
+      // Also handle lastUsedConnector for backwards compatibility
       const lastUsedConnector = urlParams?.get("lastUsedConnector");
       if (lastUsedConnector) {
         localStorage.setItem("lastUsedConnector", lastUsedConnector);
@@ -112,6 +123,11 @@ export default class ControllerProvider extends BaseProvider {
       // Clean up the URL by removing controller flow parameters
       if (urlParams && window.history?.replaceState) {
         let needsCleanup = false;
+
+        if (storageReady) {
+          urlParams.delete("controller_storage_ready");
+          needsCleanup = true;
+        }
 
         if (lastUsedConnector) {
           urlParams.delete("lastUsedConnector");
@@ -137,8 +153,13 @@ export default class ControllerProvider extends BaseProvider {
     this.initializeChains(chains);
 
     this.iframes = {
-      keychain: options.lazyload ? undefined : this.createKeychainIframe(),
+      keychain: options.lazyload ? undefined : this.createKeychainIframe(isReturningFromRedirect),
     };
+
+    // Clear the redirect flag if not using lazy load (already consumed)
+    if (!options.lazyload && isReturningFromRedirect && typeof sessionStorage !== "undefined") {
+      sessionStorage.removeItem("controller_storage_ready");
+    }
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;
@@ -190,7 +211,15 @@ export default class ControllerProvider extends BaseProvider {
     try {
       // Ensure iframe is created if using lazy loading
       if (!this.iframes.keychain) {
-        this.iframes.keychain = this.createKeychainIframe();
+        // Check if we're returning from redirect by looking at sessionStorage
+        const isReturningFromRedirect = typeof window !== "undefined" &&
+          typeof sessionStorage !== "undefined" &&
+          sessionStorage.getItem("controller_storage_ready") === "1";
+        this.iframes.keychain = this.createKeychainIframe(isReturningFromRedirect);
+        // Clear the flag after using it once
+        if (isReturningFromRedirect && typeof sessionStorage !== "undefined") {
+          sessionStorage.removeItem("controller_storage_ready");
+        }
       }
 
       await this.waitForKeychain();
@@ -198,6 +227,15 @@ export default class ControllerProvider extends BaseProvider {
       if (!this.keychain) {
         console.error(new NotReadyToConnect().message);
         return;
+      }
+
+      // Request storage access if needed before probing
+      // This ensures we can access the stored authentication state
+      if (typeof document !== "undefined" && !!document.hasStorageAccess) {
+        const ok = await document.hasStorageAccess();
+        if (!ok) {
+          await document.requestStorageAccess();
+        }
       }
 
       const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
@@ -231,7 +269,15 @@ export default class ControllerProvider extends BaseProvider {
 
     // Ensure iframe is created if using lazy loading
     if (!this.iframes.keychain) {
-      this.iframes.keychain = this.createKeychainIframe();
+      // Check if we're returning from redirect by looking at sessionStorage
+      const isReturningFromRedirect = typeof window !== "undefined" &&
+        typeof sessionStorage !== "undefined" &&
+        sessionStorage.getItem("controller_storage_ready") === "1";
+      this.iframes.keychain = this.createKeychainIframe(isReturningFromRedirect);
+      // Clear the flag after using it once
+      if (isReturningFromRedirect && typeof sessionStorage !== "undefined") {
+        sessionStorage.removeItem("controller_storage_ready");
+      }
       // Wait for the keychain to be ready
       await this.waitForKeychain();
     }
@@ -625,13 +671,30 @@ export default class ControllerProvider extends BaseProvider {
     }
   }
 
-  private createKeychainIframe(): KeychainIFrame {
+  private createKeychainIframe(isReturningFromRedirect = false): KeychainIFrame {
     return new KeychainIFrame({
       ...this.options,
       rpcUrl: this.rpcUrl(),
       onClose: this.keychain?.reset,
-      onConnect: (keychain) => {
+      onConnect: async (keychain) => {
         this.keychain = keychain;
+
+        // If returning from redirect flow, immediately request storage access
+        // This ensures the iframe can access the first-party storage established during the redirect
+        if (isReturningFromRedirect) {
+          try {
+            // First try to request storage access from the iframe itself
+            if (this.keychain.requestStorageAccess) {
+              await this.keychain.requestStorageAccess();
+            }
+            // Also try from the parent document
+            else if (typeof document !== "undefined" && !!document.requestStorageAccess) {
+              await document.requestStorageAccess();
+            }
+          } catch (error) {
+            console.warn("Failed to request storage access after redirect:", error);
+          }
+        }
       },
       version: version,
       ref: this.referral.ref,
