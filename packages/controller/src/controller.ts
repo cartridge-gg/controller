@@ -215,15 +215,6 @@ export default class ControllerProvider extends BaseProvider {
         return;
       }
 
-      // Request storage access if needed before probing
-      // This ensures we can access the stored authentication state
-      if (typeof document !== "undefined" && !!document.hasStorageAccess) {
-        const ok = await document.hasStorageAccess();
-        if (!ok) {
-          await document.requestStorageAccess();
-        }
-      }
-
       const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
 
       // For backwards compat with controller <=0.6.0
@@ -671,7 +662,10 @@ export default class ControllerProvider extends BaseProvider {
 
           if (this.keychain.requestStorageAccess) {
             this.keychain.requestStorageAccess().catch((e) => {
-              console.warn("Failed to request storage access after redirect:", e);
+              console.warn(
+                "Failed to request storage access after redirect:",
+                e,
+              );
             });
           }
         }
