@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.11.2-alpha.1] - 2025-11-11
+
+### ✨ New Features
+- **@cartridge/keychain**: Added Ethereum preimage signing for Merkle claims, enabling users to claim tokens using a preimage when external wallets are not available or preferred (#2185)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Refactored `openStarterPack` method signature to accept an options object instead of direct parameters, making the API more extensible for future additions (#2213)
+- **@cartridge/keychain**: Simplified game redirect URLs in PlayButton component to use cleaner parameter format with direct game URLs (#2209)
+- **Development**: Disabled Vite visualizer auto-open in production builds to streamline the build process (#2211)
+- **Examples**: Added Nums game integration to the PlayButton component with appropriate redirect and preset configuration (#2206)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed Turnkey nonce mismatch by persisting nonce in localStorage across Auth0 redirects, resolving iframe recreation issues during the authentication flow (#2210)
+
+### 📦 Dependencies
+- **@cartridge/controller-wasm**: Updated to version 0.3.17 for improved functionality (#2207)
+
 ## [0.11.0] - 2025-11-10
 
 ### ✨ New Features
