@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.2-alpha.2] - 2025-11-11
+
+### 🚀 Improvements
+- **@cartridge/controller**: Refactored `openStarterPack` method signature to accept an options object instead of direct parameters, making the API more extensible for future additions (#2213)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed standalone auth flow storage access by implementing dedicated `controller_storage_ready` parameter for redirect detection and automatic Storage Access API requests, enabling seamless cross-domain authentication flow (#2212)
+- **@cartridge/keychain**: Reverted Turnkey nonce mismatch fix to address reliability issues (#2215)
+
 ## [0.11.2-alpha.1] - 2025-11-11
 
 ### ✨ New Features
