@@ -24,6 +24,7 @@ import {
   ProfileContextTypeVariant,
   ResponseCodes,
   OpenOptions,
+  StarterpackOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
@@ -452,8 +453,8 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openStarterPack(
-    starterpackId: string | number,
-    preimage?: string,
+    id: string | number,
+    options?: StarterpackOptions,
   ): Promise<void> {
     if (!this.iframes) {
       return;
@@ -464,7 +465,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    await this.keychain.openStarterPack(starterpackId, preimage);
+    await this.keychain.openStarterPack(id, options);
     this.iframes.keychain?.open();
   }
 
