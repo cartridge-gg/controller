@@ -91,15 +91,19 @@ export function safeRedirect(
     return false;
   }
 
-  // Add lastUsedConnector query parameter if requested
+  // Add parameters to indicate successful standalone auth flow
   let finalUrl = redirectUrl;
   if (addLastUsedConnector) {
     try {
       const url = new URL(redirectUrl);
+      // Add lastUsedConnector for backwards compatibility
       url.searchParams.set("lastUsedConnector", "controller");
+      // Add dedicated parameter to indicate standalone auth flow completion
+      // This is more reliable than lastUsedConnector which can be set by other frameworks
+      url.searchParams.set("controller_standalone", "1");
       finalUrl = url.toString();
     } catch (error) {
-      console.error("Failed to add lastUsedConnector parameter:", error);
+      console.error("Failed to add redirect parameters:", error);
       // Continue with original URL if adding param fails
     }
   }

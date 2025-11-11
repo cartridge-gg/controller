@@ -105,6 +105,15 @@ export default class ControllerProvider extends BaseProvider {
     // Auto-detect and set lastUsedConnector from URL parameter
     // This is set by the keychain after redirect flow completion
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      // Check our dedicated parameter to detect return from standalone auth flow
+      const standaloneParam = urlParams?.get("controller_standalone");
+      if (standaloneParam === "1") {
+        // Store a flag in sessionStorage so lazy-loaded iframes can detect this
+        // Use sessionStorage instead of localStorage to avoid cross-tab issues
+        sessionStorage.setItem("controller_standalone", "1");
+      }
+
+      // Also handle lastUsedConnector for backwards compatibility
       const lastUsedConnector = urlParams?.get("lastUsedConnector");
       if (lastUsedConnector) {
         localStorage.setItem("lastUsedConnector", lastUsedConnector);
@@ -113,6 +122,11 @@ export default class ControllerProvider extends BaseProvider {
       // Clean up the URL by removing controller flow parameters
       if (urlParams && window.history?.replaceState) {
         let needsCleanup = false;
+
+        if (standaloneParam) {
+          urlParams.delete("controller_standalone");
+          needsCleanup = true;
+        }
 
         if (lastUsedConnector) {
           urlParams.delete("lastUsedConnector");
@@ -633,6 +647,28 @@ export default class ControllerProvider extends BaseProvider {
       onClose: this.keychain?.reset,
       onConnect: (keychain) => {
         this.keychain = keychain;
+
+        // Check if we're returning from standalone auth flow
+        const isReturningFromRedirect =
+          typeof window !== "undefined" &&
+          typeof sessionStorage !== "undefined" &&
+          sessionStorage.getItem("controller_standalone") === "1";
+
+        // If returning from redirect flow, immediately request storage access
+        // This ensures the iframe can access the first-party storage established during the redirect
+        if (isReturningFromRedirect) {
+          // Clear the flag after using it
+          sessionStorage.removeItem("controller_standalone");
+
+          if (this.keychain.requestStorageAccess) {
+            this.keychain.requestStorageAccess().catch((e) => {
+              console.warn(
+                "Failed to request storage access after redirect:",
+                e,
+              );
+            });
+          }
+        }
       },
       version: version,
       ref: this.referral.ref,
