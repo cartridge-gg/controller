@@ -19,6 +19,7 @@ import {
   getWallet,
   SocialProvider,
   OIDC_INVALID_TOKEN_ERROR,
+  NONCE_MISMATCH_ERROR,
 } from "./turnkey_utils";
 
 export const Auth0SocialProviderName: Record<SocialProvider, string> = {
@@ -30,6 +31,8 @@ let AUTH0_CLIENT_PROMISE: Promise<Auth0Client> | null = null;
 
 const URL_PARAMS_KEY = "auth0-url-params";
 const RPC_URL_KEY = "rpc-url-tk-storage";
+const TURNKEY_IFRAME_PUBLIC_KEY = "turnkey-iframe-public-key";
+const TURNKEY_NONCE = "turnkey-nonce";
 
 export class TurnkeyWallet {
   readonly type: ExternalWalletType = "turnkey" as ExternalWalletType;
@@ -119,6 +122,7 @@ export class TurnkeyWallet {
         try {
           const connectResult = await this.finishConnect({
             nonce,
+            storedIframePublicKey: null, // Not needed for cached auth flow
           });
           // If no account is specified this is a typical login flow, continue with the redirect
           // If an account is specified and we're connected to the right account, return now
@@ -149,6 +153,11 @@ export class TurnkeyWallet {
 
       localStorage.setItem(URL_PARAMS_KEY, urlParamsString);
       localStorage.setItem(RPC_URL_KEY, this.rpcUrl);
+
+      // Store iframe public key and nonce to persist across redirects
+      // This prevents nonce mismatch when iframe is recreated after Auth0 redirect
+      localStorage.setItem(TURNKEY_IFRAME_PUBLIC_KEY, iframePublicKey);
+      localStorage.setItem(TURNKEY_NONCE, nonce);
 
       const redirectUri =
         windowUri.pathname === "/session"
@@ -195,10 +204,13 @@ export class TurnkeyWallet {
       );
       return await this.finishConnect({
         nonce,
+        storedIframePublicKey: iframePublicKey, // Pass the public key for validation
       });
     } catch (error) {
       localStorage.removeItem(URL_PARAMS_KEY);
       localStorage.removeItem(RPC_URL_KEY);
+      localStorage.removeItem(TURNKEY_IFRAME_PUBLIC_KEY);
+      localStorage.removeItem(TURNKEY_NONCE);
       console.error(`Error connecting to Turnkey:`, error);
       return {
         success: false,
@@ -234,9 +246,28 @@ export class TurnkeyWallet {
         : undefined;
 
       const rpcUrl = localStorage.getItem(RPC_URL_KEY);
+
+      // Retrieve stored iframe public key and nonce to handle redirect flow
+      const storedIframePublicKey = localStorage.getItem(TURNKEY_IFRAME_PUBLIC_KEY);
+      const storedNonce = localStorage.getItem(TURNKEY_NONCE);
+
+      // Clean up stored values
+      localStorage.removeItem(TURNKEY_IFRAME_PUBLIC_KEY);
+      localStorage.removeItem(TURNKEY_NONCE);
+
+      // Use stored nonce if available (iframe was recreated), otherwise use the one from appState
+      const nonceToUse = storedNonce || result.appState.nonce;
+
+      if (storedNonce && storedNonce !== result.appState.nonce) {
+        console.info(
+          `[Turnkey] Using stored nonce to prevent mismatch (stored: ${storedNonce?.slice(0, 10)}..., appState: ${result.appState.nonce?.slice(0, 10)}...)`
+        );
+      }
+
       return {
         ...(await this.finishConnect({
-          nonce: result.appState.nonce,
+          nonce: nonceToUse,
+          storedIframePublicKey,
         })),
         ...result.appState,
         rpcUrl,
@@ -250,8 +281,10 @@ export class TurnkeyWallet {
 
   async finishConnect({
     nonce,
+    storedIframePublicKey,
   }: {
     nonce: string;
+    storedIframePublicKey?: string | null;
   }): Promise<ExternalWalletResponse> {
     if (!this.socialProvider) {
       throw new Error("Social Provider should be defined");
@@ -260,7 +293,41 @@ export class TurnkeyWallet {
     const auth0Client = await this.getAuth0Client(10_000);
 
     const tokenClaims = await auth0Client.getIdTokenClaims();
-    const oidcTokenString = await getAuth0OidcToken(tokenClaims, nonce);
+
+    // Validate nonce using stored iframe public key if available
+    if (storedIframePublicKey) {
+      const expectedNonce = getNonce(storedIframePublicKey);
+      if (expectedNonce !== nonce) {
+        console.info(
+          `[Turnkey] Iframe was recreated during redirect. Using stored nonce. Expected: ${expectedNonce}, Got: ${nonce}`
+        );
+      }
+    }
+
+    let oidcTokenString: string;
+    try {
+      oidcTokenString = await getAuth0OidcToken(tokenClaims, nonce);
+    } catch (error) {
+      // If nonce mismatch, try with current iframe's public key (iframe was likely recreated)
+      if ((error as Error & { code?: string }).code === NONCE_MISMATCH_ERROR) {
+        console.warn(
+          `[Turnkey] Nonce mismatch detected. Attempting recovery with current iframe public key.`
+        );
+
+        // Get current iframe's public key and calculate its nonce
+        const currentIframePublicKey = await this.pollIframePublicKey(5_000);
+        const currentNonce = getNonce(currentIframePublicKey);
+
+        console.info(
+          `[Turnkey] Retrying with current nonce: ${currentNonce.slice(0, 10)}... (was: ${nonce.slice(0, 10)}...)`
+        );
+
+        // Retry with current nonce
+        oidcTokenString = await getAuth0OidcToken(tokenClaims, currentNonce);
+      } else {
+        throw error;
+      }
+    }
 
     const subOrganizationId = this.username
       ? await getOrCreateTurnkeySuborg(

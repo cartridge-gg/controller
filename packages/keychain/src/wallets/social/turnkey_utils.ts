@@ -6,6 +6,7 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 import { getIframePublicKey } from "./turnkey";
 
 export const OIDC_INVALID_TOKEN_ERROR = "Invalid OIDC token";
+export const NONCE_MISMATCH_ERROR = "NONCE_MISMATCH";
 
 export const getWallet = async (
   subOrgId: string,
@@ -113,9 +114,11 @@ export const getAuth0OidcToken = async (
   }
 
   if (decodedToken.tknonce !== expectedNonce) {
-    throw new Error(
+    const error = new Error(
       `Nonce mismatch: expected ${expectedNonce}, got ${decodedToken.tknonce}`,
     );
+    (error as Error & { code?: string }).code = NONCE_MISMATCH_ERROR;
+    throw error;
   }
 
   return oidcTokenString;
