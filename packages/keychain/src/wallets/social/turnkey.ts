@@ -260,7 +260,17 @@ export class TurnkeyWallet {
     const auth0Client = await this.getAuth0Client(10_000);
 
     const tokenClaims = await auth0Client.getIdTokenClaims();
-    const oidcTokenString = await getAuth0OidcToken(tokenClaims, nonce);
+
+    let oidcTokenString: string;
+    try {
+      oidcTokenString = await getAuth0OidcToken(tokenClaims, nonce);
+    } catch {
+      // Iframe was likely recreated during redirect - retry with current iframe's nonce
+      console.warn("[Turnkey] Nonce mismatch, retrying with current iframe nonce");
+      const currentIframePublicKey = await this.pollIframePublicKey(5_000);
+      const currentNonce = getNonce(currentIframePublicKey);
+      oidcTokenString = await getAuth0OidcToken(tokenClaims, currentNonce);
+    }
 
     const subOrganizationId = this.username
       ? await getOrCreateTurnkeySuborg(
