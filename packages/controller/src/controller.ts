@@ -654,7 +654,7 @@ export default class ControllerProvider extends BaseProvider {
       ...this.options,
       rpcUrl: this.rpcUrl(),
       onClose: this.keychain?.reset,
-      onConnect: async (keychain) => {
+      onConnect: (keychain) => {
         this.keychain = keychain;
 
         // Check if we're returning from standalone auth flow
@@ -669,23 +669,10 @@ export default class ControllerProvider extends BaseProvider {
           // Clear the flag after using it
           sessionStorage.removeItem("controller_standalone");
 
-          try {
-            // First try to request storage access from the iframe itself
-            if (this.keychain.requestStorageAccess) {
-              await this.keychain.requestStorageAccess();
-            }
-            // Also try from the parent document
-            else if (
-              typeof document !== "undefined" &&
-              !!document.requestStorageAccess
-            ) {
-              await document.requestStorageAccess();
-            }
-          } catch (error) {
-            console.warn(
-              "Failed to request storage access after redirect:",
-              error,
-            );
+          if (this.keychain.requestStorageAccess) {
+            this.keychain.requestStorageAccess().catch((e) => {
+              console.warn("Failed to request storage access after redirect:", e);
+            });
           }
         }
       },
