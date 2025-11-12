@@ -60,7 +60,7 @@ import { useAccount } from "@/hooks/account";
 import { BoosterPack } from "./booster-pack";
 import { useEffect } from "react";
 import { StandaloneSessionCreation } from "./connect/StandaloneSessionCreation";
-import { StandaloneConnectWrapper } from "./connect/StandaloneConnectWrapper";
+import { StandaloneConnect } from "./connect/StandaloneConnect";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -127,7 +127,7 @@ function Authentication() {
       return <StandaloneSessionCreation username={username} />;
     } else {
       // Show simple standalone connect UI for verified presets with no custom policies
-      return <StandaloneConnectWrapper username={username} />;
+      return <StandaloneConnect username={username} />;
     }
   }
 

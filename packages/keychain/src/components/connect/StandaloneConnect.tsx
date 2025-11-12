@@ -1,4 +1,4 @@
-import { useConnection } from "@/hooks/connection";
+import { ParentMethods, useConnection } from "@/hooks/connection";
 import { requestStorageAccessFactory } from "@/utils/connection/storage-access";
 import { safeRedirect } from "@/utils/url-validator";
 import {
@@ -10,19 +10,49 @@ import {
   LayoutFooter,
 } from "@cartridge/ui";
 import { useCallback, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
-export function StandaloneConnect({
+/**
+ * Standalone connect component for verified presets with no custom policies.
+ * Used in standalone auth flow to request storage access and redirect back to the application.
+ */
+export function StandaloneConnect({ username }: { username?: string }) {
+  const [searchParams] = useSearchParams();
+  const { verified, theme, parent } = useConnection();
+
+  const redirectUrl = searchParams.get("redirect_url");
+  console.log("StandaloneConnect: redirectUrl=", redirectUrl);
+
+  if (!redirectUrl) {
+    return null;
+  }
+
+  return (
+    <StandaloneConnectInner
+      redirectUrl={redirectUrl}
+      isVerified={verified}
+      username={username}
+      theme={theme}
+      parent={parent}
+    />
+  );
+}
+
+function StandaloneConnectInner({
   redirectUrl,
   isVerified,
   username,
+  theme,
+  parent,
 }: {
   redirectUrl: string;
   isVerified: boolean;
   username?: string;
+  theme: { name?: string };
+  parent: ParentMethods | undefined;
 }) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { theme, parent } = useConnection();
 
   const handleConnect = useCallback(async () => {
     if (!redirectUrl) {

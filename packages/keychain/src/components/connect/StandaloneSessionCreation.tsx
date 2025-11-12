@@ -43,9 +43,6 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
   const { policies } = useConnection();
 
   if (!policies) {
-    console.error(
-      "[Standalone Flow] StandaloneSessionCreation: No policies available",
-    );
     return null;
   }
 
@@ -73,7 +70,7 @@ const StandaloneSessionCreationLayout = ({
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
-  const { controller, theme, parent } = useConnection();
+  const { controller, theme, parent, closeModal } = useConnection();
 
   const redirectUrl = searchParams.get("redirect_url");
 
@@ -183,10 +180,6 @@ const StandaloneSessionCreationLayout = ({
         setError(undefined);
         setIsConnecting(true);
 
-        console.log(
-          "[Standalone Flow] StandaloneSessionCreation: Creating session",
-        );
-
         // Request storage access (user gesture!)
         const requestStorageAccess = requestStorageAccessFactory();
         const granted = await requestStorageAccess();
@@ -200,18 +193,23 @@ const StandaloneSessionCreationLayout = ({
         await controller.createSession(expiresAt, processedPolicies);
 
         // Notify parent that session was created
-        if (
-          parent &&
-          "onSessionCreated" in parent &&
-          typeof parent.onSessionCreated === "function"
-        ) {
-          try {
-            await parent.onSessionCreated();
-          } catch (err) {
-            console.error(
-              "[Standalone Flow] StandaloneSessionCreation: Error notifying parent:",
-              err,
-            );
+        if (parent) {
+          if (
+            "onSessionCreated" in parent &&
+            typeof parent.onSessionCreated === "function"
+          ) {
+            try {
+              await parent.onSessionCreated();
+            } catch (err) {
+              console.error(
+                "[Standalone Flow] StandaloneSessionCreation: Error notifying parent:",
+                err,
+              );
+            }
+          }
+
+          if (closeModal) {
+            closeModal();
           }
         }
 
@@ -228,7 +226,7 @@ const StandaloneSessionCreationLayout = ({
         setIsConnecting(false);
       }
     },
-    [controller, policies, expiresAt, redirectUrl, parent],
+    [closeModal, controller, policies, expiresAt, redirectUrl, parent],
   );
 
   const handlePrimaryAction = useCallback(async () => {
@@ -299,15 +297,18 @@ const StandaloneSessionCreationLayout = ({
 
   if (hasTokenApprovals && step === "spending-limit") {
     return (
-      <SpendingLimitPage
-        policies={policies}
-        isConnecting={isConnecting}
-        error={error}
-        onBack={() => setStep("summary")}
-        onConnect={() => {
-          void handlePrimaryAction();
-        }}
-      />
+      <LayoutContainer>
+        <NavigationHeader variant="hidden" forceShowClose />
+        <SpendingLimitPage
+          policies={policies}
+          isConnecting={isConnecting}
+          error={error}
+          onBack={() => setStep("summary")}
+          onConnect={() => {
+            void handlePrimaryAction();
+          }}
+        />
+      </LayoutContainer>
     );
   }
 
