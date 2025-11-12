@@ -143,7 +143,9 @@ const StandaloneSessionCreationLayout = ({
           }
 
           // Redirect back to application
-          safeRedirect(redirectUrl, true);
+          if (redirectUrl) {
+            safeRedirect(redirectUrl, true);
+          }
         } catch (err) {
           console.error(
             "[Standalone Flow] StandaloneSessionCreation: Auto-approval failed:",
@@ -214,7 +216,9 @@ const StandaloneSessionCreationLayout = ({
         }
 
         // Redirect back to application
-        safeRedirect(redirectUrl, true);
+        if (redirectUrl) {
+          safeRedirect(redirectUrl, true);
+        }
       } catch (e) {
         console.error(
           "[Standalone Flow] StandaloneSessionCreation: Session creation failed:",

@@ -51,15 +51,9 @@ export function requestStorageAccessFactory() {
           );
           return true;
         }
-        console.log(
-          "[Storage Access] Do not have storage access yet, requesting...",
-        );
       }
 
       // Request storage access - this MUST be called in a user gesture context
-      console.log(
-        "[Storage Access] Calling document.requestStorageAccess()...",
-      );
       await document.requestStorageAccess();
       console.log("[Storage Access] Request completed successfully");
 

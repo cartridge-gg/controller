@@ -103,47 +103,30 @@ function Authentication() {
   const needsSessionCreation =
     searchParams.get("needs_session_creation") === "true";
   const username = searchParams.get("username") ?? undefined;
-
-  console.log("[Standalone Flow] Keychain: Authentication component loaded");
-  console.log("[Standalone Flow] Keychain: pathname =", pathname);
-  console.log("[Standalone Flow] Keychain: search params =", search);
-  console.log(
-    "[Standalone Flow] Keychain: needsSessionCreation =",
-    needsSessionCreation,
-  );
-  console.log("[Standalone Flow] Keychain: username =", username);
-  console.log("[Standalone Flow] Keychain: verified =", verified);
-  console.log(
-    "[Standalone Flow] Keychain: has policies =",
-    policies && Object.keys(policies).length > 0,
-  );
+  const preset = searchParams.get("preset");
 
   // If session creation is needed (returning from standalone auth)
   if (needsSessionCreation) {
+    // Wait for config to load before making routing decision
+    // This prevents rendering with incorrect initial state (verified=false, policies=undefined)
+    if (preset && isConfigLoading) {
+      return (
+        <CreateController
+          isSlot={pathname.startsWith("/slot")}
+          isLoading={true}
+        />
+      );
+    }
+
     // Decide which UI to show based on verification status and policies
     const hasManualPolicies = policies && Object.keys(policies).length > 0;
     const shouldShowSessionConsent = !verified || hasManualPolicies;
 
-    console.log(
-      "[Standalone Flow] Keychain: hasManualPolicies =",
-      hasManualPolicies,
-    );
-    console.log(
-      "[Standalone Flow] Keychain: shouldShowSessionConsent =",
-      shouldShowSessionConsent,
-    );
-
     if (shouldShowSessionConsent) {
       // Show session creation consent UI for unverified presets or custom policies
-      console.log(
-        "[Standalone Flow] Keychain: Rendering StandaloneSessionCreation",
-      );
       return <StandaloneSessionCreation username={username} />;
     } else {
       // Show simple standalone connect UI for verified presets with no custom policies
-      console.log(
-        "[Standalone Flow] Keychain: Rendering StandaloneConnectWrapper",
-      );
       return <StandaloneConnectWrapper username={username} />;
     }
   }
