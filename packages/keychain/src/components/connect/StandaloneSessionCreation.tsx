@@ -70,7 +70,7 @@ const StandaloneSessionCreationLayout = ({
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
-  const { controller, theme, parent, closeModal } = useConnection();
+  const { controller, theme, parent, closeModal, origin } = useConnection();
 
   const redirectUrl = searchParams.get("redirect_url");
 
@@ -128,7 +128,7 @@ const StandaloneSessionCreationLayout = ({
 
           // Create session with verified policies
           const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(expiresAt, processedPolicies);
+          await controller.createSession(origin, expiresAt, processedPolicies);
 
           // Notify parent
           if (
@@ -164,6 +164,7 @@ const StandaloneSessionCreationLayout = ({
     hasTokenApprovals,
     expiresAt,
     parent,
+    origin,
   ]);
 
   const createSession = useCallback(
@@ -190,7 +191,7 @@ const StandaloneSessionCreationLayout = ({
 
         // Create session (now we have storage access)
         const processedPolicies = processPolicies(policies, toggleOff);
-        await controller.createSession(expiresAt, processedPolicies);
+        await controller.createSession(origin, expiresAt, processedPolicies);
 
         // Notify parent that session was created
         if (parent) {
@@ -226,7 +227,7 @@ const StandaloneSessionCreationLayout = ({
         setIsConnecting(false);
       }
     },
-    [closeModal, controller, policies, expiresAt, redirectUrl, parent],
+    [closeModal, controller, policies, expiresAt, redirectUrl, parent, origin],
   );
 
   const handlePrimaryAction = useCallback(async () => {

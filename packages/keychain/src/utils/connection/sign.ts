@@ -129,6 +129,7 @@ export function signMessageFactory({
     async?: boolean,
   ): Promise<Signature | ConnectError> => {
     const controller = window.controller;
+    const origin = window.appOrigin;
 
     const showSignMessage = ({ resolve, reject }: SignMessageCallback = {}) => {
       const url = createSignMessageUrl(typedData, {
@@ -153,9 +154,15 @@ export function signMessageFactory({
           return reject("Controller not connected");
         }
 
+        if (!origin) {
+          return reject("App origin not available");
+        }
+
         // If a session call and there is no session available
         // fallback to manual apporval flow
-        if (!(await controller.hasAuthorizedPoliciesForMessage(typedData))) {
+        if (
+          !(await controller.hasAuthorizedPoliciesForMessage(origin, typedData))
+        ) {
           showSignMessage({ resolve, reject });
 
           return resolve({

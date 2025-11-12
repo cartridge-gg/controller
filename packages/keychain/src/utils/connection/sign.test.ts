@@ -283,7 +283,10 @@ describe("sign message utils", () => {
     beforeEach(() => {
       mockNavigate.mockClear();
       // @ts-expect-error - Mocking global
-      global.window = { controller: mockController };
+      global.window = {
+        controller: mockController,
+        appOrigin: "https://test.app",
+      };
     });
 
     it("should navigate immediately when async is false", async () => {

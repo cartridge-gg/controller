@@ -21,7 +21,7 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, verified } = useConnection();
+  const { controller, policies, verified, origin } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
 
   // Parse params and set RPC URL immediately
@@ -139,7 +139,7 @@ export function ConnectRoute() {
           const expiresAt = duration + now();
 
           const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(expiresAt, processedPolicies);
+          await controller.createSession(origin, expiresAt, processedPolicies);
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
@@ -166,6 +166,7 @@ export function ConnectRoute() {
     redirectUrl,
     hasAutoConnected,
     hasTokenApprovals,
+    origin,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading

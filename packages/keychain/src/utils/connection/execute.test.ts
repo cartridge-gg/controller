@@ -42,7 +42,10 @@ describe("execute utils", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // @ts-expect-error - Mocking global
-    global.window = { controller: mockController };
+    global.window = {
+      controller: mockController,
+      appOrigin: "https://test.app",
+    };
   });
 
   afterEach(() => {

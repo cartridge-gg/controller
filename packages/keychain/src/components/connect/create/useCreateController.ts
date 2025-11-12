@@ -60,6 +60,7 @@ export interface LoginResponse {
 
 const createSession = async ({
   controller,
+  origin,
   policies,
   params,
   handleCompletion,
@@ -67,6 +68,7 @@ const createSession = async ({
   searchParams,
 }: {
   controller: Controller;
+  origin: string;
   policies?: ParsedSessionPolicies;
   params?: ReturnType<typeof parseConnectParams>;
   handleCompletion: () => void;
@@ -121,7 +123,7 @@ const createSession = async ({
     const expiresAt = duration + now();
 
     const processedPolicies = processPolicies(policies, false);
-    await controller.createSession(expiresAt, processedPolicies);
+    await controller.createSession(origin, expiresAt, processedPolicies);
     currentParams.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -347,6 +349,7 @@ export function useCreateController({
         if (shouldAutoCreateSession) {
           await createSession({
             controller,
+            origin,
             policies,
             params,
             handleCompletion,
@@ -555,6 +558,7 @@ export function useCreateController({
       if (shouldAutoCreateSession) {
         await createSession({
           controller: loginRet.controller,
+          origin,
           policies,
           params,
           handleCompletion,

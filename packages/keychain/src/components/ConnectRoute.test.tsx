@@ -83,6 +83,7 @@ describe("ConnectRoute", () => {
       controller: mockController,
       policies: null,
       verified: true,
+      origin: "https://test.app",
       theme: {
         name: "TestApp",
         verified: true,
@@ -100,6 +101,7 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -122,6 +124,7 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: true,
+        origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -148,6 +151,7 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: false,
+        origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -165,6 +169,7 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: true,
+        origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -194,6 +199,7 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: true,
+        origin: "https://test.app",
         theme: {
           name: "TestApp",
           verified: true,
@@ -218,6 +224,7 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        origin: "https://test.app",
         theme: {
           name: "TestApp",
           verified: true,
@@ -239,6 +246,7 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: true,
+        origin: "https://test.app",
         theme: {
           name: "TestApp",
           verified: true,
@@ -263,6 +271,7 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: false,
+        origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -275,6 +284,7 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: false,
+        origin: "https://test.app",
         theme: {
           name: "TestApp",
           verified: false,
@@ -294,6 +304,7 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -321,6 +332,7 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: true,
+        origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -335,6 +347,7 @@ describe("ConnectRoute", () => {
         controller: null,
         policies: null,
         verified: false,
+        origin: "https://test.app",
       });
 
       const { container } = renderWithProviders(<ConnectRoute />);
@@ -352,6 +365,7 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        origin: "https://test.app",
         theme: {
           name: "TestApp",
           verified: true,
@@ -380,6 +394,7 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -406,6 +421,7 @@ describe("ConnectRoute", () => {
           messages: [{ id: "3", content: "Sign this", authorized: true }],
         },
         verified: true,
+        origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);

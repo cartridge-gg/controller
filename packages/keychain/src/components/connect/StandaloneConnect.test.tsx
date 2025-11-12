@@ -26,6 +26,7 @@ describe("StandaloneConnect", () => {
     vi.clearAllMocks();
     mockUseConnection.mockReturnValue({
       controller: mockController,
+      origin: "https://test.app",
       theme: {
         name: "TestApp",
         verified: true,
@@ -37,46 +38,26 @@ describe("StandaloneConnect", () => {
 
   describe("Verified session", () => {
     it("renders connect screen with app name", () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={true}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={true} />);
 
       expect(screen.getByText("Connect to TestApp")).toBeInTheDocument();
     });
 
     it("displays connected account information", () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={true}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={true} />);
 
       expect(screen.getByText("Connected Account")).toBeInTheDocument();
       expect(screen.getByText("testuser")).toBeInTheDocument();
     });
 
     it("shows connect button", () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={true}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={true} />);
 
       expect(screen.getByText("Connect")).toBeInTheDocument();
     });
 
     it("does not show unverified warning", () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={true}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={true} />);
 
       expect(
         screen.queryByText(/This application is not verified/),
@@ -84,12 +65,7 @@ describe("StandaloneConnect", () => {
     });
 
     it("redirects when connect button is clicked", async () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={true}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={true} />);
 
       const connectButton = screen.getByText("Connect");
       fireEvent.click(connectButton);
@@ -103,12 +79,7 @@ describe("StandaloneConnect", () => {
     });
 
     it("disables button during redirect", async () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={true}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={true} />);
 
       const connectButton = screen.getByText("Connect");
       fireEvent.click(connectButton);
@@ -119,12 +90,7 @@ describe("StandaloneConnect", () => {
 
   describe("Unverified session", () => {
     it("displays warning for unverified applications", () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={false}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={false} />);
 
       expect(
         screen.getByText(
@@ -134,23 +100,13 @@ describe("StandaloneConnect", () => {
     });
 
     it("still shows connect button for unverified apps", () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={false}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={false} />);
 
       expect(screen.getByText("Connect")).toBeInTheDocument();
     });
 
     it("allows connecting to unverified apps", async () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={false}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={false} />);
 
       const connectButton = screen.getByText("Connect");
       fireEvent.click(connectButton);
@@ -168,6 +124,7 @@ describe("StandaloneConnect", () => {
     it("returns null when controller is not available", () => {
       mockUseConnection.mockReturnValue({
         controller: null,
+        origin: "https://test.app",
         theme: {
           name: "TestApp",
           verified: true,
@@ -175,10 +132,7 @@ describe("StandaloneConnect", () => {
       });
 
       const { container } = renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={true}
-        />,
+        <StandaloneConnect isVerified={true} />,
       );
 
       expect(container.firstChild).toBeNull();
@@ -187,18 +141,14 @@ describe("StandaloneConnect", () => {
     it("handles missing theme name gracefully", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
+        origin: "https://test.app",
         theme: {
           name: "",
           verified: true,
         },
       });
 
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={true}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={true} />);
 
       expect(screen.getByText("Connect to Application")).toBeInTheDocument();
     });
@@ -218,12 +168,7 @@ describe("StandaloneConnect", () => {
     });
 
     it("handles multiple rapid clicks gracefully", async () => {
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={true}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={true} />);
 
       const connectButton = screen.getByText("Connect");
 
@@ -243,18 +188,14 @@ describe("StandaloneConnect", () => {
     it("displays unverified theme correctly", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
+        origin: "https://test.app",
         theme: {
           name: "UnverifiedApp",
           verified: false,
         },
       });
 
-      renderWithProviders(
-        <StandaloneConnect
-          redirectUrl="https://example.com/callback"
-          isVerified={false}
-        />,
-      );
+      renderWithProviders(<StandaloneConnect isVerified={false} />);
 
       expect(screen.getByText("Connect to UnverifiedApp")).toBeInTheDocument();
       expect(

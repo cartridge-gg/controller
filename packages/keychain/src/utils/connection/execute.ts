@@ -97,8 +97,13 @@ export async function executeCore(
     throw new Error("Controller not found");
   }
 
+  const origin = window.appOrigin;
+  if (!origin) {
+    throw new Error("App origin not available");
+  }
+
   const calls = normalizeCalls(transactions);
-  return await controller.trySessionExecute(calls, feeSource);
+  return await controller.trySessionExecute(origin, calls, feeSource);
 }
 
 export function execute({
