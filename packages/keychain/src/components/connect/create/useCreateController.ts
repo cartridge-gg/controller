@@ -327,10 +327,6 @@ export function useCreateController({
           // Standalone flow: skip session creation here, redirect immediately
           // Session will be created on the application site after redirect
           const username = controller.username();
-          console.log(
-            "[Standalone Flow] useCreateController: Redirecting after signup, username=",
-            username,
-          );
 
           // Build redirect URL with username and controller_standalone parameters
           const redirectUrlObj = new URL(redirectUrl);
@@ -539,10 +535,6 @@ export function useCreateController({
         // Standalone flow: skip session creation here, redirect immediately
         // Session will be created on the application site after redirect
         const username = loginRet.controller.username();
-        console.log(
-          "[Standalone Flow] useCreateController: Redirecting after login, username=",
-          username,
-        );
 
         // Build redirect URL with username and controller_standalone parameters
         const redirectUrlObj = new URL(redirectUrl);

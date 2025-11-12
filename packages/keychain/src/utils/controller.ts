@@ -98,6 +98,8 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
+    console.log(this._appId);
+
     return await this.cartridge.createSession(
       this._appId,
       toWasmPolicies(policies),

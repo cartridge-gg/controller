@@ -672,6 +672,7 @@ export default class ControllerProvider extends BaseProvider {
       needsSessionCreation: isReturningFromRedirect,
       username: username,
       onSessionCreated: () => {
+        console.log("onSessionCreated");
         // Re-probe to establish connection now that storage access is granted and session created
         this.probe();
       },
