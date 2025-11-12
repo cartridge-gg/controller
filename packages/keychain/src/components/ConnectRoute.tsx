@@ -21,7 +21,7 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, verified, origin } = useConnection();
+  const { controller, policies, origin } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
 
   // Parse params and set RPC URL immediately
@@ -178,9 +178,7 @@ export function ConnectRoute() {
   if (isStandalone && redirectUrl) {
     // If verified session without approvals, show simple connect screen
     if (!policies || (policies.verified && !hasTokenApprovals)) {
-      return (
-        <StandaloneConnect redirectUrl={redirectUrl} isVerified={verified} />
-      );
+      return <StandaloneConnect username={controller.username()} />;
     }
     // If unverified session with policies, show CreateSession for consent
     return (

@@ -16,9 +16,14 @@ export function switchChain({
     }
 
     const controller: Controller = window.controller;
+    const appId = window.appOrigin;
+
+    if (!appId) {
+      throw new Error("App origin not available");
+    }
 
     const nextController = await Controller.create({
-      appId: controller.appId(),
+      appId,
       classHash: controller.classHash(),
       rpcUrl,
       address: controller.address(),

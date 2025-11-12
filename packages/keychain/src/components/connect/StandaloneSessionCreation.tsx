@@ -192,7 +192,6 @@ const StandaloneSessionCreationLayout = ({
         // Create session (now we have storage access)
         const processedPolicies = processPolicies(policies, toggleOff);
         await controller.createSession(origin, expiresAt, processedPolicies);
-
         // Notify parent that session was created
         if (parent) {
           if (

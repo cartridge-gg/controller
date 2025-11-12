@@ -671,10 +671,10 @@ export default class ControllerProvider extends BaseProvider {
       refGroup: this.referral.refGroup,
       needsSessionCreation: isReturningFromRedirect,
       username: username,
-      onSessionCreated: () => {
+      onSessionCreated: async () => {
         console.log("onSessionCreated");
         // Re-probe to establish connection now that storage access is granted and session created
-        this.probe();
+        await this.probe();
       },
     });
 

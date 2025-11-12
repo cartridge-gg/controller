@@ -48,7 +48,7 @@ export function Authenticate({
             throw new Error("Window opener not found");
           }
 
-          const controller = await Controller.fromStore(appId);
+          const controller = await Controller.fromStore();
           const ret = await controller?.createPasskeySigner(
             import.meta.env.VITE_RP_ID,
           );

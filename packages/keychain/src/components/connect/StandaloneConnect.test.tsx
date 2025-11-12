@@ -38,26 +38,26 @@ describe("StandaloneConnect", () => {
 
   describe("Verified session", () => {
     it("renders connect screen with app name", () => {
-      renderWithProviders(<StandaloneConnect isVerified={true} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       expect(screen.getByText("Connect to TestApp")).toBeInTheDocument();
     });
 
     it("displays connected account information", () => {
-      renderWithProviders(<StandaloneConnect isVerified={true} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       expect(screen.getByText("Connected Account")).toBeInTheDocument();
       expect(screen.getByText("testuser")).toBeInTheDocument();
     });
 
     it("shows connect button", () => {
-      renderWithProviders(<StandaloneConnect isVerified={true} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       expect(screen.getByText("Connect")).toBeInTheDocument();
     });
 
     it("does not show unverified warning", () => {
-      renderWithProviders(<StandaloneConnect isVerified={true} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       expect(
         screen.queryByText(/This application is not verified/),
@@ -65,7 +65,7 @@ describe("StandaloneConnect", () => {
     });
 
     it("redirects when connect button is clicked", async () => {
-      renderWithProviders(<StandaloneConnect isVerified={true} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       const connectButton = screen.getByText("Connect");
       fireEvent.click(connectButton);
@@ -79,7 +79,7 @@ describe("StandaloneConnect", () => {
     });
 
     it("disables button during redirect", async () => {
-      renderWithProviders(<StandaloneConnect isVerified={true} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       const connectButton = screen.getByText("Connect");
       fireEvent.click(connectButton);
@@ -90,7 +90,7 @@ describe("StandaloneConnect", () => {
 
   describe("Unverified session", () => {
     it("displays warning for unverified applications", () => {
-      renderWithProviders(<StandaloneConnect isVerified={false} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       expect(
         screen.getByText(
@@ -100,13 +100,13 @@ describe("StandaloneConnect", () => {
     });
 
     it("still shows connect button for unverified apps", () => {
-      renderWithProviders(<StandaloneConnect isVerified={false} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       expect(screen.getByText("Connect")).toBeInTheDocument();
     });
 
     it("allows connecting to unverified apps", async () => {
-      renderWithProviders(<StandaloneConnect isVerified={false} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       const connectButton = screen.getByText("Connect");
       fireEvent.click(connectButton);
@@ -132,7 +132,7 @@ describe("StandaloneConnect", () => {
       });
 
       const { container } = renderWithProviders(
-        <StandaloneConnect isVerified={true} />,
+        <StandaloneConnect username="testuser" />,
       );
 
       expect(container.firstChild).toBeNull();
@@ -148,15 +148,13 @@ describe("StandaloneConnect", () => {
         },
       });
 
-      renderWithProviders(<StandaloneConnect isVerified={true} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       expect(screen.getByText("Connect to Application")).toBeInTheDocument();
     });
 
     it("does not call redirect without redirect URL", async () => {
-      renderWithProviders(
-        <StandaloneConnect redirectUrl="" isVerified={true} />,
-      );
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       const connectButton = screen.getByText("Connect");
       fireEvent.click(connectButton);
@@ -168,7 +166,7 @@ describe("StandaloneConnect", () => {
     });
 
     it("handles multiple rapid clicks gracefully", async () => {
-      renderWithProviders(<StandaloneConnect isVerified={true} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       const connectButton = screen.getByText("Connect");
 
@@ -195,7 +193,7 @@ describe("StandaloneConnect", () => {
         },
       });
 
-      renderWithProviders(<StandaloneConnect isVerified={false} />);
+      renderWithProviders(<StandaloneConnect username="testuser" />);
 
       expect(screen.getByText("Connect to UnverifiedApp")).toBeInTheDocument();
       expect(
