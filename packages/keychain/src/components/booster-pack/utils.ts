@@ -302,13 +302,16 @@ export async function signClaimMessage(
 export async function checkAssetEligibility(
   address: string,
 ): Promise<CheckAssetResponse> {
-  const response = await fetch("http://localhost:8000/booster/check_for_asset", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${import.meta.env.VITE_CARTRIDGE_API_URL}/booster/check_for_asset`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ address }),
     },
-    body: JSON.stringify({ address }),
-  });
+  );
 
   if (!response.ok) {
     throw new Error(`Asset check failed: ${response.statusText}`);
@@ -325,7 +328,7 @@ export async function checkAssetEligibility(
 export async function claimBoosterCredits(
   request: ClaimCreditsRequest,
 ): Promise<ClaimCreditsResponse> {
-  const response = await fetch("http://localhost:8000/booster/claim_credits", {
+  const response = await fetch(`${import.meta.env.VITE_CARTRIDGE_API_URL}/booster/claim_credits`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
