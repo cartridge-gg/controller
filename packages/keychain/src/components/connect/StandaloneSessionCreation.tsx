@@ -169,10 +169,10 @@ const StandaloneSessionCreationLayout = ({
 
   const createSession = useCallback(
     async ({ toggleOff }: { toggleOff: boolean }) => {
-      if (!controller || !policies || !redirectUrl) {
+      if (!controller || !policies) {
         console.error(
           "[Standalone Flow] StandaloneSessionCreation: Missing required data",
-          { controller: !!controller, policies: !!policies, redirectUrl },
+          { controller: !!controller, policies: !!policies },
         );
         return;
       }

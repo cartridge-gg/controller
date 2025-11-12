@@ -75,15 +75,6 @@ export class KeychainIFrame extends IFrame<Keychain> {
       _url.searchParams.set("username", encodeURIComponent(username));
     }
 
-    if (needsSessionCreation) {
-      console.log(
-        "[Standalone Flow] KeychainIFrame: Initializing with needsSessionCreation=true, username=",
-        username,
-        "url=",
-        _url.toString(),
-      );
-    }
-
     // Policy precedence logic:
     // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
     // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
@@ -106,9 +97,6 @@ export class KeychainIFrame extends IFrame<Keychain> {
         // Expose callback for keychain to notify parent that session was created and storage access granted
         onSessionCreated: (_origin: string) => () => {
           if (onSessionCreated) {
-            console.log(
-              "[Standalone Flow] KeychainIFrame: onSessionCreated callback triggered",
-            );
             onSessionCreated();
           }
         },

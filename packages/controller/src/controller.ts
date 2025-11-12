@@ -107,24 +107,10 @@ export default class ControllerProvider extends BaseProvider {
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       // Check our dedicated parameter to detect return from standalone auth flow
       const standaloneParam = urlParams?.get("controller_standalone");
-      console.log(
-        "[Storage Access Flow] Controller: Checking URL for controller_standalone parameter",
-      );
-      console.log(
-        "[Storage Access Flow] Controller: controller_standalone =",
-        standaloneParam,
-      );
-
       if (standaloneParam === "1") {
-        console.log(
-          "[Storage Access Flow] Controller: Detected return from standalone auth flow!",
-        );
         // Store a flag in sessionStorage so lazy-loaded iframes can detect this
         // Use sessionStorage instead of localStorage to avoid cross-tab issues
         sessionStorage.setItem("controller_standalone", "1");
-        console.log(
-          "[Storage Access Flow] Controller: Set controller_standalone=1 in sessionStorage",
-        );
       }
 
       // Also handle lastUsedConnector for backwards compatibility
@@ -138,9 +124,6 @@ export default class ControllerProvider extends BaseProvider {
         let needsCleanup = false;
 
         if (standaloneParam) {
-          console.log(
-            "[Storage Access Flow] Controller: Removing controller_standalone from URL",
-          );
           urlParams.delete("controller_standalone");
           needsCleanup = true;
         }
@@ -161,10 +144,6 @@ export default class ControllerProvider extends BaseProvider {
             window.location.pathname +
             (urlParams.toString() ? "?" + urlParams.toString() : "") +
             window.location.hash;
-          console.log(
-            "[Storage Access Flow] Controller: Cleaned URL, new URL =",
-            newUrl,
-          );
           window.history.replaceState({}, "", newUrl);
         }
       }
@@ -675,25 +654,10 @@ export default class ControllerProvider extends BaseProvider {
         : undefined;
     const username = urlParams?.get("username") ?? undefined;
 
-    console.log("[Standalone Flow] Controller: createKeychainIframe called");
-    console.log(
-      "[Standalone Flow] Controller: isReturningFromRedirect =",
-      isReturningFromRedirect,
-    );
-    console.log("[Standalone Flow] Controller: username from URL =", username);
-
     // Clear the flag after detecting it
     if (isReturningFromRedirect) {
-      console.log(
-        "[Standalone Flow] Controller: Clearing controller_standalone flag from sessionStorage",
-      );
       sessionStorage.removeItem("controller_standalone");
     }
-
-    console.log(
-      "[Standalone Flow] Controller: Creating KeychainIFrame with needsSessionCreation =",
-      isReturningFromRedirect,
-    );
 
     const iframe = new KeychainIFrame({
       ...this.options,
@@ -701,9 +665,6 @@ export default class ControllerProvider extends BaseProvider {
       onClose: this.keychain?.reset,
       onConnect: (keychain) => {
         this.keychain = keychain;
-        console.log(
-          "[Standalone Flow] Controller: Keychain connected successfully",
-        );
       },
       version: version,
       ref: this.referral.ref,
@@ -711,12 +672,6 @@ export default class ControllerProvider extends BaseProvider {
       needsSessionCreation: isReturningFromRedirect,
       username: username,
       onSessionCreated: () => {
-        console.log(
-          "[Standalone Flow] Controller: onSessionCreated callback triggered",
-        );
-        console.log(
-          "[Standalone Flow] Controller: Calling probe() to re-establish connection with storage access",
-        );
         // Re-probe to establish connection now that storage access is granted and session created
         this.probe();
       },
@@ -724,9 +679,6 @@ export default class ControllerProvider extends BaseProvider {
 
     // If we're returning from redirect, open the modal immediately to show session creation prompt
     if (isReturningFromRedirect) {
-      console.log(
-        "[Standalone Flow] Controller: Opening iframe modal to show session creation UI",
-      );
       // Open after a short delay to ensure iframe is ready
       setTimeout(() => {
         iframe.open();
