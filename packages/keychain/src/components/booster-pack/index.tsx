@@ -5,8 +5,17 @@ import { BackgroundStars } from "./assets/background-stars";
 import { ArcadeLogo } from "./assets/arcade-logo";
 import { ArcadeIcon } from "./assets/arcade-icon";
 import { generateColorShades } from "../../utils/color-utils";
-import { computeRewards, createRewardCards } from "./utils";
+import {
+  computeRewards,
+  createRewardCards,
+  deriveEthereumAddress,
+  checkAssetEligibility,
+  signClaimMessage,
+  claimBoosterCredits,
+  ClaimCreditsMessage,
+} from "./utils";
 import { RewardCard, RevealState } from "./types";
+// import { useAccount } from "../../hooks/account";
 
 interface BoosterPackProps {
   starColor?: string;
@@ -14,6 +23,15 @@ interface BoosterPackProps {
 
 export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
   const { privateKey } = useParams<{ privateKey: string }>();
+  // const account = useAccount();
+
+  // MOCK DATA FOR TESTING - Remove when connect is ready
+  const account = {
+    address:
+      "0x01697eB1512f6567a58cB35268b87cA172Ee2A4b53b1A1A310fC52f16C9AE633",
+    username: "testuser",
+  };
+
   const [showConfetti, setShowConfetti] = useState(false);
   const [numberOfPieces, setNumberOfPieces] = useState(500);
   const [windowDimensions, setWindowDimensions] = useState({
@@ -23,6 +41,14 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
   const [rewardCards, setRewardCards] = useState<RewardCard[]>([]);
   const [isClaimed, setIsClaimed] = useState(false);
   const [isRevealing, setIsRevealing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [assetInfo, setAssetInfo] = useState<{
+    type: string;
+    value: number;
+  } | null>(null);
+  const [isCheckingAsset, setIsCheckingAsset] = useState(true);
+  const [assetCardImage, setAssetCardImage] = useState<string | null>(null);
 
   // Update window dimensions on resize
   useEffect(() => {
@@ -37,64 +63,187 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Check asset eligibility on first load
+  useEffect(() => {
+    const checkAsset = async () => {
+      if (!privateKey) {
+        setError("No private key provided");
+        setIsCheckingAsset(false);
+        return;
+      }
+
+      try {
+        setIsCheckingAsset(true);
+        setError(null);
+
+        // Derive Ethereum address from private key
+        const ethereumAddress = deriveEthereumAddress(privateKey);
+
+        // Check asset eligibility
+        const asset = await checkAssetEligibility(ethereumAddress);
+
+        setAssetInfo(asset);
+
+        // Determine the card image based on asset type
+        const assetType = asset.type.toUpperCase();
+        const assetValue = asset.value;
+
+        // Map asset type to image path
+        let imagePath = "/booster-pack/EXPLAINER.png"; // default
+
+        if (assetType === "CREDITS") {
+          imagePath = `/booster-pack/CREDITS_${assetValue * 10 ** 18}.png`;
+        } else if (assetType === "MYSTERY_ASSET") {
+          imagePath = "/booster-pack/MYSTERY_ASSET.png";
+        } else if (assetType === "SURVIVOR") {
+          imagePath = `/booster-pack/SURVIVOR_${assetValue * 10 ** 18}.png`;
+        } else if (assetType === "LORDS") {
+          imagePath = `/booster-pack/LORDS_${assetValue * 10 ** 18}.png`;
+        } else if (assetType === "NUMS") {
+          imagePath = `/booster-pack/NUMS_${assetValue * 10 ** 18}.png`;
+        } else if (assetType === "PAPER") {
+          imagePath = `/booster-pack/PAPER_${assetValue * 10 ** 18}.png`;
+        }
+
+        setAssetCardImage(imagePath);
+        setIsCheckingAsset(false);
+      } catch (err) {
+        console.error("Asset check error:", err);
+        setIsCheckingAsset(false);
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to check asset";
+
+        if (errorMessage.includes("not found")) {
+          setError("This address is not eligible for a booster pack");
+        } else {
+          setError("Failed to check asset eligibility");
+        }
+      }
+    };
+
+    checkAsset();
+  }, [privateKey]);
+
   // Generate color shades from the star color
   const confettiColors = generateColorShades(starColor);
 
-  // Handle claim button click - prefetch and reveal rewards
+  // Handle connect button click - disabled for testing
+  const handleConnect = () => {
+    // TODO: Implement connect flow when ready
+    console.log("Connect clicked - using mock account for now");
+  };
+
+  // Handle claim button click - call API and reveal rewards
   const handleClaim = async () => {
-    if (!privateKey || isClaimed || isRevealing) return;
+    if (!privateKey || !assetInfo || isClaimed || isRevealing || isLoading)
+      return;
 
-    setIsClaimed(true);
-    setIsRevealing(true);
+    // Check if user is logged in
+    if (!account?.username) {
+      setError("Please connect your account to claim rewards");
+      return;
+    }
 
-    // Compute rewards immediately using the private key
-    const rewards = computeRewards(privateKey, 3);
-    const cards = createRewardCards(rewards);
+    setIsLoading(true);
+    setError(null);
 
-    // Wait 2 seconds before showing cards and starting reveal
-    setTimeout(() => {
-      setRewardCards(cards);
+    try {
+      // Derive Ethereum address from private key
+      const ethereumAddress = deriveEthereumAddress(privateKey);
 
-      // Show confetti after cards appear
-      setShowConfetti(true);
-      setNumberOfPieces(500);
+      // Only call claim_credits API if asset type is "credits"
+      if (assetInfo.type.toLowerCase() === "credits") {
+        // Create claim message
+        const message: ClaimCreditsMessage = {
+          account_username: account.username,
+          amount: `0x${assetInfo.value.toString(16)}`, // Convert to hex
+        };
 
-      // Stop generating new pieces after 3 seconds
-      setTimeout(() => setNumberOfPieces(0), 3000);
+        // Sign the message
+        const signature = await signClaimMessage(privateKey, message);
 
-      // Start revealing cards sequentially with delays
-      cards.forEach((_, index) => {
-        setTimeout(() => {
-          setRewardCards((prevCards) =>
-            prevCards.map((card, i) =>
-              i === index
-                ? { ...card, revealState: RevealState.REVEALING }
-                : card,
-            ),
-          );
+        // Call claim API
+        await claimBoosterCredits({
+          account_username: account.username,
+          message,
+          signature,
+          signer_address: ethereumAddress,
+        });
+      }
 
-          // Complete reveal after flip animation
+      // Success! Now show the animation
+      setIsClaimed(true);
+      setIsRevealing(true);
+      setIsLoading(false);
+
+      // Compute rewards immediately using the private key
+      const rewards = computeRewards(privateKey, 3);
+      const cards = createRewardCards(rewards);
+
+      // Wait 2 seconds before showing cards and starting reveal
+      setTimeout(() => {
+        setRewardCards(cards);
+
+        // Show confetti after cards appear
+        setShowConfetti(true);
+        setNumberOfPieces(500);
+
+        // Stop generating new pieces after 3 seconds
+        setTimeout(() => setNumberOfPieces(0), 3000);
+
+        // Start revealing cards sequentially with delays
+        cards.forEach((_, index) => {
           setTimeout(() => {
             setRewardCards((prevCards) =>
               prevCards.map((card, i) =>
                 i === index
-                  ? { ...card, revealState: RevealState.REVEALED }
+                  ? { ...card, revealState: RevealState.REVEALING }
                   : card,
               ),
             );
-          }, 500);
-        }, index * 500); // Stagger each card by 800ms
-      });
 
-      // Stop confetti after all cards revealed
-      setTimeout(
-        () => {
-          setShowConfetti(false);
-          setIsRevealing(false);
-        },
-        cards.length * 800 + 2000,
-      );
-    }, 2000); // 2 second delay before revealing
+            // Complete reveal after flip animation
+            setTimeout(() => {
+              setRewardCards((prevCards) =>
+                prevCards.map((card, i) =>
+                  i === index
+                    ? { ...card, revealState: RevealState.REVEALED }
+                    : card,
+                ),
+              );
+            }, 500);
+          }, index * 500); // Stagger each card by 500ms
+        });
+
+        // Stop confetti after all cards revealed
+        setTimeout(
+          () => {
+            setShowConfetti(false);
+            setIsRevealing(false);
+          },
+          cards.length * 800 + 2000,
+        );
+      }, 2000); // 2 second delay before revealing
+    } catch (err) {
+      console.error("Claim error:", err);
+      setIsLoading(false);
+      setIsClaimed(false);
+      setIsRevealing(false);
+
+      // Parse error message
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to claim rewards";
+
+      if (errorMessage.includes("already claimed")) {
+        setError("This booster pack has already been claimed");
+      } else if (errorMessage.includes("not eligible")) {
+        setError("This address is not eligible for a booster pack");
+      } else if (errorMessage.includes("Account not found")) {
+        setError("Account not found. Please try again");
+      } else {
+        setError("Failed to claim rewards. Please try again");
+      }
+    }
   };
 
   return (
@@ -134,10 +283,12 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
 
         {/* Connect Button */}
         <button
-          className="px-3 py-2 md:px-4 md:py-2.5 bg-[#161a17] border rounded text-xs md:text-sm font-medium uppercase tracking-wider hover:bg-[#1a1f1c] transition-colors"
+          onClick={handleConnect}
+          className="px-3 py-2 md:px-4 md:py-2.5 bg-[#161a17] border rounded text-xs md:text-sm font-medium uppercase tracking-wider hover:bg-[#1a1f1c] transition-colors disabled:opacity-50 disabled:cursor-default"
           style={{ borderColor: starColor, color: starColor }}
+          disabled={!!account?.username}
         >
-          CONNECT
+          {account?.username || "CONNECT"}
         </button>
       </header>
 
@@ -189,27 +340,57 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
             ))}
           </div>
         ) : (
-          // Placeholder before claim - Explainer image
+          // Placeholder before claim - Show asset card or loading
           <div className="relative w-[200px] h-[272px] md:w-[280px] md:h-[380px] rounded-lg overflow-hidden shadow-[0px_4px_16px_0px_#000000]">
-            <img
-              src="/booster-pack/EXPLAINER.png"
-              alt="Booster Pack Explainer"
-              className="w-full h-full object-cover"
-            />
+            {isCheckingAsset ? (
+              <div className="w-full h-full flex items-center justify-center bg-[#161a17]">
+                <p className="text-white text-sm">Loading...</p>
+              </div>
+            ) : assetCardImage ? (
+              <img
+                src={assetCardImage}
+                alt={`${assetInfo?.type} asset`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <img
+                src="/booster-pack/EXPLAINER.png"
+                alt="Booster Pack Explainer"
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="backdrop-blur-sm bg-red-900/80 px-4 py-3 rounded-lg max-w-md text-center">
+            <p className="text-red-200 text-sm">{error}</p>
           </div>
         )}
 
         {/* Claim Button */}
         <button
           onClick={handleClaim}
-          disabled={isClaimed}
+          disabled={isClaimed || isLoading || isCheckingAsset || !assetInfo}
           className="px-6 py-3 rounded-3xl text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            backgroundColor: isClaimed ? "#666" : starColor,
+            backgroundColor:
+              isClaimed || isLoading || isCheckingAsset || !assetInfo
+                ? "#666"
+                : starColor,
             color: "#0f1410",
           }}
         >
-          {isClaimed ? (isRevealing ? "REVEALING..." : "CLAIMED") : "CLAIM"}
+          {isCheckingAsset
+            ? "CHECKING..."
+            : isLoading
+              ? "CLAIMING..."
+              : isClaimed
+                ? isRevealing
+                  ? "REVEALING..."
+                  : "CLAIMED"
+                : "CLAIM"}
         </button>
       </div>
     </div>

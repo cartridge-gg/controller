@@ -1,4 +1,5 @@
 import { Reward, RewardType, RevealState, RewardCard } from "./types";
+import { ethers } from "ethers";
 
 // Reward definitions with metadata
 export const REWARD_POOL: Reward[] = [
@@ -228,4 +229,114 @@ export function getRarityColor(rarity: string): string {
     default:
       return "#9D9D9D"; // Gray
   }
+}
+
+// ===== API Integration =====
+
+/**
+ * API Types
+ */
+export interface ClaimCreditsMessage {
+  account_username: string;
+  amount: string; // hex format (e.g., "0xa")
+}
+
+export interface ClaimCreditsRequest {
+  account_username: string;
+  message: ClaimCreditsMessage;
+  signature: string;
+  signer_address: string;
+}
+
+export interface ClaimCreditsResponse {
+  success: boolean;
+  credits_granted: number;
+  new_balance: number;
+  message?: string;
+}
+
+export interface CheckAssetResponse {
+  value: number;
+  type: string;
+}
+
+/**
+ * Derive Ethereum address from private key
+ */
+export function deriveEthereumAddress(privateKey: string): string {
+  // Ensure 0x prefix
+  const key = privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`;
+  const wallet = new ethers.Wallet(key);
+  return wallet.address;
+}
+
+/**
+ * Sign EIP-191 message with private key
+ * @param privateKey - Ethereum private key
+ * @param message - Message object to sign
+ * @returns Signature as hex string
+ */
+export async function signClaimMessage(
+  privateKey: string,
+  message: ClaimCreditsMessage,
+): Promise<string> {
+  // Ensure 0x prefix
+  const key = privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`;
+  const wallet = new ethers.Wallet(key);
+
+  // Serialize message to JSON string for signing
+  const messageString = JSON.stringify(message);
+
+  // Sign using EIP-191 (Ethereum personal sign)
+  // ethers.signMessage automatically adds the "\x19Ethereum Signed Message:\n" prefix
+  const signature = await wallet.signMessage(messageString);
+
+  return signature;
+}
+
+/**
+ * Check asset eligibility for an Ethereum address
+ * @param address - Ethereum address to check
+ * @returns Asset value and type
+ */
+export async function checkAssetEligibility(
+  address: string,
+): Promise<CheckAssetResponse> {
+  const response = await fetch("http://localhost:8000/booster/check_for_asset", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ address }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Asset check failed: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Claim booster pack credits
+ * @param request - Claim request with signature
+ * @returns Claim response with credit details
+ */
+export async function claimBoosterCredits(
+  request: ClaimCreditsRequest,
+): Promise<ClaimCreditsResponse> {
+  const response = await fetch("http://localhost:8000/booster/claim_credits", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Claim failed: ${errorText}`);
+  }
+
+  return response.json();
 }
