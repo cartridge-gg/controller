@@ -13,7 +13,8 @@ import {
   ClaimCreditsMessage,
 } from "./utils";
 import { RewardCard, RevealState, RewardType } from "./types";
-// import { useAccount } from "../../hooks/account";
+import { useAccount } from "@/hooks/account";
+import { useConnection } from "@/hooks/connection";
 
 interface BoosterPackProps {
   starColor?: string;
@@ -21,21 +22,12 @@ interface BoosterPackProps {
 
 export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
   const { privateKey } = useParams<{ privateKey: string }>();
-  // const account = useAccount();
-
-  // MOCK DATA FOR TESTING - Remove when connect is ready
-  const account = {
-    address:
-      "0x01697eB1512f6567a58cB35268b87cA172Ee2A4b53b1A1A310fC52f16C9AE633",
-    username: "testuser",
-  };
+  const account = useAccount();
+  const { controller } = useConnection();
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [numberOfPieces, setNumberOfPieces] = useState(500);
-  const [windowDimensions, setWindowDimensions] = useState({
-    width: typeof window !== "undefined" ? window.innerWidth : 0,
-    height: typeof window !== "undefined" ? window.innerHeight : 0,
-  });
+  const [username, setUsername] = useState<string | null>(null);
   const [rewardCards, setRewardCards] = useState<RewardCard[]>([]);
   const [isClaimed, setIsClaimed] = useState(false);
   const [isRevealing, setIsRevealing] = useState(false);
@@ -48,18 +40,11 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
   const [isCheckingAsset, setIsCheckingAsset] = useState(true);
   const [assetCardImage, setAssetCardImage] = useState<string | null>(null);
 
-  // Update window dimensions on resize
   useEffect(() => {
-    const handleResize = () => {
-      setWindowDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    if (controller) {
+      setUsername(controller.username());
+    }
+  }, [controller]);
 
   // Check asset eligibility on first load
   useEffect(() => {
@@ -137,7 +122,7 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
       return;
 
     // Check if user is logged in
-    if (!account?.username) {
+    if (!username || !account) {
       setError("Please connect your account to claim rewards");
       return;
     }
@@ -274,8 +259,8 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
       {/* Confetti */}
       {showConfetti && (
         <Confetti
-          width={windowDimensions.width}
-          height={windowDimensions.height}
+          width={window.innerWidth}
+          height={window.innerHeight}
           colors={confettiColors}
           numberOfPieces={numberOfPieces}
           recycle={false}
