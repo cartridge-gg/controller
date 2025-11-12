@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.11.2-alpha.3] - 2025-11-12
+
+### ✨ New Features
+- **@cartridge/controller**: Added `signupOptions` support to SessionProvider, enabling developers to configure which authentication methods (Google, Discord, MetaMask, etc.) are available during session creation and bringing SessionProvider feature parity with ControllerProvider (#2219)
+
 ## [0.11.2-alpha.2] - 2025-11-11
 
 ### 🚀 Improvements
