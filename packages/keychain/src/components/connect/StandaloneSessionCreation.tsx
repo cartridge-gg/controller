@@ -1,4 +1,5 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
+import { NavigationHeader } from "@/components/NavigationHeader";
 import { SessionConsent } from "@/components/connect";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
@@ -65,6 +66,7 @@ const StandaloneSessionCreationLayout = ({
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
+  const [hasAutoApproved, setHasAutoApproved] = useState(false);
   const createButtonRef = useRef<HTMLButtonElement>(null);
   const [searchParams] = useSearchParams();
 
@@ -94,6 +96,79 @@ const StandaloneSessionCreationLayout = ({
   const expiresAt = useMemo(() => {
     return duration + now();
   }, [duration]);
+
+  // Auto-approve verified presets without token approvals
+  useEffect(() => {
+    if (
+      !controller ||
+      !policies ||
+      !redirectUrl ||
+      hasAutoApproved ||
+      isConnecting
+    ) {
+      return;
+    }
+
+    // Only auto-approve verified presets without token approvals
+    if (policies.verified && !hasTokenApprovals) {
+      console.log(
+        "[Standalone Flow] StandaloneSessionCreation: Auto-approving verified preset",
+      );
+      setHasAutoApproved(true);
+
+      const autoCreateSession = async () => {
+        try {
+          setIsConnecting(true);
+
+          // Request storage access first
+          const requestStorageAccess = requestStorageAccessFactory();
+          const granted = await requestStorageAccess();
+
+          if (!granted) {
+            throw new Error("Storage access was not granted");
+          }
+
+          // Create session with verified policies
+          const processedPolicies = processPolicies(policies, false);
+          await controller.createSession(expiresAt, processedPolicies);
+
+          console.log(
+            "[Standalone Flow] StandaloneSessionCreation: Auto-approved session created",
+          );
+
+          // Notify parent
+          if (
+            parent &&
+            "onSessionCreated" in parent &&
+            typeof parent.onSessionCreated === "function"
+          ) {
+            await parent.onSessionCreated();
+          }
+
+          // Redirect back to application
+          safeRedirect(redirectUrl, true);
+        } catch (err) {
+          console.error(
+            "[Standalone Flow] StandaloneSessionCreation: Auto-approval failed:",
+            err,
+          );
+          setError(err as Error);
+          setIsConnecting(false);
+        }
+      };
+
+      void autoCreateSession();
+    }
+  }, [
+    controller,
+    policies,
+    redirectUrl,
+    hasAutoApproved,
+    isConnecting,
+    hasTokenApprovals,
+    expiresAt,
+    parent,
+  ]);
 
   const createSession = useCallback(
     async ({ toggleOff }: { toggleOff: boolean }) => {
@@ -265,6 +340,7 @@ const StandaloneSessionCreationLayout = ({
 
   return (
     <>
+      <NavigationHeader variant="hidden" forceShowClose />
       <HeaderInner
         className="pb-0"
         title={`Connect to ${theme.name || "Application"}`}

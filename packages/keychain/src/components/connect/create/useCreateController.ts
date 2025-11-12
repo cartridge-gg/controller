@@ -319,7 +319,38 @@ export function useCreateController({
         window.controller = controller;
         setController(controller);
 
-        // Handle session creation for auto-close cases (no policies or verified policies without token approvals)
+        // Check if this is a standalone redirect flow
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlSearchParams.get("redirect_url");
+
+        if (redirectUrl) {
+          // Standalone flow: skip session creation here, redirect immediately
+          // Session will be created on the application site after redirect
+          console.log(
+            "[Standalone Flow] useCreateController: Detected redirect_url, skipping session creation",
+          );
+
+          // Get username from controller to pass in URL
+          const username = await controller.username();
+
+          // Build redirect URL with username and controller_standalone parameters
+          const redirectUrlObj = new URL(redirectUrl);
+          redirectUrlObj.searchParams.set("controller_standalone", "1");
+          if (username) {
+            redirectUrlObj.searchParams.set("username", username);
+          }
+
+          console.log(
+            "[Standalone Flow] useCreateController: Redirecting after signup with username =",
+            username,
+          );
+
+          // Safely redirect to the specified URL with parameters
+          safeRedirect(redirectUrlObj.toString());
+          return; // Don't continue with session creation
+        }
+
+        // Normal embedded flow: handle session creation for auto-close cases
         const shouldAutoCreateSession =
           !policies || (policies.verified && !hasApprovalPolicies(policies));
 
@@ -332,32 +363,6 @@ export function useCreateController({
             closeModal,
             searchParams,
           });
-        }
-
-        // Only redirect if we auto-created the session
-        // Otherwise, user needs to see consent screen or spending limit screen first
-        if (shouldAutoCreateSession) {
-          const urlSearchParams = new URLSearchParams(window.location.search);
-          const redirectUrl = urlSearchParams.get("redirect_url");
-          if (redirectUrl) {
-            // Get username from controller to pass in URL
-            const username = await controller.username();
-
-            // Build redirect URL with username and controller_standalone parameters
-            const redirectUrlObj = new URL(redirectUrl);
-            redirectUrlObj.searchParams.set("controller_standalone", "1");
-            if (username) {
-              redirectUrlObj.searchParams.set("username", username);
-            }
-
-            console.log(
-              "[Standalone Flow] useCreateController: Redirecting after signup with username =",
-              username,
-            );
-
-            // Safely redirect to the specified URL with parameters
-            safeRedirect(redirectUrlObj.toString());
-          }
         }
       }
     },
@@ -532,7 +537,38 @@ export function useCreateController({
       window.controller = loginRet.controller;
       setController(loginRet.controller);
 
-      // Handle session creation for auto-close cases (no policies or verified policies without token approvals)
+      // Check if this is a standalone redirect flow
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlSearchParams.get("redirect_url");
+
+      if (redirectUrl) {
+        // Standalone flow: skip session creation here, redirect immediately
+        // Session will be created on the application site after redirect
+        console.log(
+          "[Standalone Flow] useCreateController: Detected redirect_url, skipping session creation",
+        );
+
+        // Get username from controller to pass in URL
+        const username = await loginRet.controller.username();
+
+        // Build redirect URL with username and controller_standalone parameters
+        const redirectUrlObj = new URL(redirectUrl);
+        redirectUrlObj.searchParams.set("controller_standalone", "1");
+        if (username) {
+          redirectUrlObj.searchParams.set("username", username);
+        }
+
+        console.log(
+          "[Standalone Flow] useCreateController: Redirecting after login with username =",
+          username,
+        );
+
+        // Safely redirect to the specified URL with parameters
+        safeRedirect(redirectUrlObj.toString());
+        return; // Don't continue with session creation
+      }
+
+      // Normal embedded flow: handle session creation for auto-close cases
       const shouldAutoCreateSession =
         !policies || (policies.verified && !hasApprovalPolicies(policies));
 
@@ -545,32 +581,6 @@ export function useCreateController({
           closeModal,
           searchParams,
         });
-      }
-
-      // Only redirect if we auto-created the session
-      // Otherwise, user needs to see consent screen or spending limit screen first
-      if (shouldAutoCreateSession) {
-        const urlSearchParams = new URLSearchParams(window.location.search);
-        const redirectUrl = urlSearchParams.get("redirect_url");
-        if (redirectUrl) {
-          // Get username from controller to pass in URL
-          const username = await loginRet.controller.username();
-
-          // Build redirect URL with username and controller_standalone parameters
-          const redirectUrlObj = new URL(redirectUrl);
-          redirectUrlObj.searchParams.set("controller_standalone", "1");
-          if (username) {
-            redirectUrlObj.searchParams.set("username", username);
-          }
-
-          console.log(
-            "[Standalone Flow] useCreateController: Redirecting after login with username =",
-            username,
-          );
-
-          // Safely redirect to the specified URL with parameters
-          safeRedirect(redirectUrlObj.toString());
-        }
       }
     },
     [
