@@ -2,7 +2,7 @@
 
 import ControllerConnector from "@cartridge/connector/controller";
 import SessionConnector from "@cartridge/connector/session";
-import { SessionPolicies } from "@cartridge/controller";
+import { AuthOptions, SessionPolicies } from "@cartridge/controller";
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import {
   cartridge,
@@ -184,6 +184,16 @@ if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
 //   });
 // }
 
+const signupOptions: AuthOptions = [
+  "google",
+  "webauthn",
+  "discord",
+  "walletconnect",
+  "metamask",
+  "password",
+  // "rabby",
+];
+
 const controller = new ControllerConnector({
   policies,
   // With the defaults, you can omit chains if you want to use:
@@ -194,16 +204,8 @@ const controller = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  url: getKeychainUrl(),
-  signupOptions: [
-    "google",
-    "webauthn",
-    "discord",
-    "walletconnect",
-    "metamask",
-    "rabby",
-    "password",
-  ],
+  url: "https://x.cartridge.gg",
+  signupOptions,
   slot: "arcade-pistols",
   namespace: "pistols",
   preset: "ponziland",
@@ -223,6 +225,7 @@ const session = new SessionConnector({
   disconnectRedirectUrl: "whatsapp://",
   keychainUrl: getKeychainUrl(),
   apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
+  signupOptions,
 });
 
 export function StarknetProvider({ children }: PropsWithChildren) {
