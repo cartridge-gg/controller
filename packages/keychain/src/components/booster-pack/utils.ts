@@ -328,13 +328,16 @@ export async function checkAssetEligibility(
 export async function claimBoosterCredits(
   request: ClaimCreditsRequest,
 ): Promise<ClaimCreditsResponse> {
-  const response = await fetch(`${import.meta.env.VITE_CARTRIDGE_API_URL}/booster/claim_credits`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${import.meta.env.VITE_CARTRIDGE_API_URL}/booster/claim_credits`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
     },
-    body: JSON.stringify(request),
-  });
+  );
 
   if (!response.ok) {
     const errorText = await response.text();

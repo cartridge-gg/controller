@@ -6,15 +6,13 @@ import { ArcadeLogo } from "./assets/arcade-logo";
 import { ArcadeIcon } from "./assets/arcade-icon";
 import { generateColorShades } from "../../utils/color-utils";
 import {
-  computeRewards,
-  createRewardCards,
   deriveEthereumAddress,
   checkAssetEligibility,
   signClaimMessage,
   claimBoosterCredits,
   ClaimCreditsMessage,
 } from "./utils";
-import { RewardCard, RevealState } from "./types";
+import { RewardCard, RevealState, RewardType } from "./types";
 // import { useAccount } from "../../hooks/account";
 
 interface BoosterPackProps {
@@ -171,59 +169,84 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
         });
       }
 
-      // Success! Now show the animation
+      // Success! Mark as claimed
       setIsClaimed(true);
-      setIsRevealing(true);
       setIsLoading(false);
 
-      // Compute rewards immediately using the private key
-      const rewards = computeRewards(privateKey, 3);
-      const cards = createRewardCards(rewards);
+      // Only show animation for mystery_asset type
+      if (assetInfo.type.toLowerCase() === "mystery_asset") {
+        setIsRevealing(true);
 
-      // Wait 2 seconds before showing cards and starting reveal
-      setTimeout(() => {
-        setRewardCards(cards);
+        // Create specific cards for mystery asset reveal
+        const mysteryCards: RewardCard[] = [
+          {
+            type: RewardType.LS2_GAME,
+            name: "LS2 Game Pass",
+            image: "/booster-pack/LS2_GAME.png",
+            rarity: "epic",
+            revealState: RevealState.UNREVEALED,
+          },
+          {
+            type: RewardType.NUMS_GAME,
+            name: "NUMS Game Pass",
+            image: "/booster-pack/NUMS_GAME.png",
+            rarity: "epic",
+            revealState: RevealState.UNREVEALED,
+          },
+          {
+            type: RewardType.REALM,
+            name: "Realm NFT",
+            image: "/booster-pack/REALM_1.png",
+            rarity: "epic",
+            revealState: RevealState.UNREVEALED,
+          },
+        ];
 
-        // Show confetti after cards appear
-        setShowConfetti(true);
-        setNumberOfPieces(500);
+        // Wait 2 seconds before showing cards and starting reveal
+        setTimeout(() => {
+          setRewardCards(mysteryCards);
 
-        // Stop generating new pieces after 3 seconds
-        setTimeout(() => setNumberOfPieces(0), 3000);
+          // Show confetti after cards appear
+          setShowConfetti(true);
+          setNumberOfPieces(500);
 
-        // Start revealing cards sequentially with delays
-        cards.forEach((_, index) => {
-          setTimeout(() => {
-            setRewardCards((prevCards) =>
-              prevCards.map((card, i) =>
-                i === index
-                  ? { ...card, revealState: RevealState.REVEALING }
-                  : card,
-              ),
-            );
+          // Stop generating new pieces after 3 seconds
+          setTimeout(() => setNumberOfPieces(0), 3000);
 
-            // Complete reveal after flip animation
+          // Start revealing cards sequentially with delays
+          mysteryCards.forEach((_, index) => {
             setTimeout(() => {
               setRewardCards((prevCards) =>
                 prevCards.map((card, i) =>
                   i === index
-                    ? { ...card, revealState: RevealState.REVEALED }
+                    ? { ...card, revealState: RevealState.REVEALING }
                     : card,
                 ),
               );
-            }, 500);
-          }, index * 500); // Stagger each card by 500ms
-        });
 
-        // Stop confetti after all cards revealed
-        setTimeout(
-          () => {
-            setShowConfetti(false);
-            setIsRevealing(false);
-          },
-          cards.length * 800 + 2000,
-        );
-      }, 2000); // 2 second delay before revealing
+              // Complete reveal after flip animation
+              setTimeout(() => {
+                setRewardCards((prevCards) =>
+                  prevCards.map((card, i) =>
+                    i === index
+                      ? { ...card, revealState: RevealState.REVEALED }
+                      : card,
+                  ),
+                );
+              }, 500);
+            }, index * 500); // Stagger each card by 500ms
+          });
+
+          // Stop confetti after all cards revealed
+          setTimeout(
+            () => {
+              setShowConfetti(false);
+              setIsRevealing(false);
+            },
+            mysteryCards.length * 800 + 2000,
+          );
+        }, 2000); // 2 second delay before revealing
+      }
     } catch (err) {
       console.error("Claim error:", err);
       setIsLoading(false);
