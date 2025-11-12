@@ -15003,7 +15003,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.15.3
+      '@types/node': 12.20.55
 
   '@types/cookie@0.6.0': {}
 
@@ -15120,7 +15120,7 @@ snapshots:
 
   '@types/ws@7.4.7':
     dependencies:
-      '@types/node': 22.15.3
+      '@types/node': 12.20.55
 
   '@types/ws@8.18.1':
     dependencies:

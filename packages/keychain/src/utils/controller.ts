@@ -144,7 +144,6 @@ export default class Controller {
     publicKey: string,
   ): Promise<Array<string>> {
     return await this.cartridge.registerSessionCalldata(
-      this._appId,
       toWasmPolicies(policies),
       expiresAt,
       publicKey,
@@ -322,7 +321,6 @@ export default class Controller {
       address,
       owner,
       import.meta.env.VITE_CARTRIDGE_API_URL,
-      appId,
     );
 
     const controller = Object.create(Controller.prototype) as Controller;
@@ -400,7 +398,7 @@ export default class Controller {
       cartridgeApiUrl,
       BigInt(session_expires_at_s),
       isControllerRegistered,
-      false, // createWildcardSession
+      true,
       appId,
     );
 
