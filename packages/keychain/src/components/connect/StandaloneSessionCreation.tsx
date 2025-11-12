@@ -112,14 +112,14 @@ const StandaloneSessionCreationLayout = ({
 
     // Only auto-approve verified presets without token approvals
     if (policies.verified && !hasTokenApprovals) {
-      console.log(
-        "[Standalone Flow] StandaloneSessionCreation: Auto-approving verified preset",
-      );
       setHasAutoApproved(true);
 
       const autoCreateSession = async () => {
         try {
           setIsConnecting(true);
+          console.log(
+            "[Standalone Flow] StandaloneSessionCreation: Auto-approving verified preset",
+          );
 
           // Request storage access first
           const requestStorageAccess = requestStorageAccessFactory();
@@ -132,10 +132,6 @@ const StandaloneSessionCreationLayout = ({
           // Create session with verified policies
           const processedPolicies = processPolicies(policies, false);
           await controller.createSession(expiresAt, processedPolicies);
-
-          console.log(
-            "[Standalone Flow] StandaloneSessionCreation: Auto-approved session created",
-          );
 
           // Notify parent
           if (
@@ -186,13 +182,10 @@ const StandaloneSessionCreationLayout = ({
         setIsConnecting(true);
 
         console.log(
-          "[Standalone Flow] StandaloneSessionCreation: Starting session creation flow",
+          "[Standalone Flow] StandaloneSessionCreation: Creating session",
         );
 
-        // STEP 1: Request storage access (user gesture!)
-        console.log(
-          "[Standalone Flow] StandaloneSessionCreation: Requesting storage access",
-        );
+        // Request storage access (user gesture!)
         const requestStorageAccess = requestStorageAccessFactory();
         const granted = await requestStorageAccess();
 
@@ -200,56 +193,31 @@ const StandaloneSessionCreationLayout = ({
           throw new Error("Storage access was not granted");
         }
 
-        console.log(
-          "[Standalone Flow] StandaloneSessionCreation: Storage access granted",
-        );
-
-        // STEP 2: Create session (now we have storage access)
-        console.log(
-          "[Standalone Flow] StandaloneSessionCreation: Creating session",
-        );
+        // Create session (now we have storage access)
         const processedPolicies = processPolicies(policies, toggleOff);
         await controller.createSession(expiresAt, processedPolicies);
 
-        console.log(
-          "[Standalone Flow] StandaloneSessionCreation: Session created successfully",
-        );
-
-        // STEP 3: Notify parent that session was created
+        // Notify parent that session was created
         if (
           parent &&
           "onSessionCreated" in parent &&
           typeof parent.onSessionCreated === "function"
         ) {
-          console.log(
-            "[Standalone Flow] StandaloneSessionCreation: Notifying parent controller",
-          );
           try {
             await parent.onSessionCreated();
-            console.log(
-              "[Standalone Flow] StandaloneSessionCreation: Parent notified successfully",
-            );
           } catch (err) {
             console.error(
               "[Standalone Flow] StandaloneSessionCreation: Error notifying parent:",
               err,
             );
           }
-        } else {
-          console.warn(
-            "[Standalone Flow] StandaloneSessionCreation: Parent onSessionCreated method not available",
-          );
         }
 
-        // STEP 4: Redirect back to application
-        console.log(
-          "[Standalone Flow] StandaloneSessionCreation: Redirecting to:",
-          redirectUrl,
-        );
+        // Redirect back to application
         safeRedirect(redirectUrl, true);
       } catch (e) {
         console.error(
-          "[Standalone Flow] StandaloneSessionCreation: Error during session creation:",
+          "[Standalone Flow] StandaloneSessionCreation: Session creation failed:",
           e,
         );
         setError(e as unknown as Error);

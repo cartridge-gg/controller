@@ -14,26 +14,10 @@ export function StandaloneConnectWrapper({ username }: { username?: string }) {
 
   if (!redirectUrl) {
     console.error(
-      "[Standalone Flow] StandaloneConnectWrapper: No redirect_url found in URL params",
+      "[Standalone Flow] StandaloneConnectWrapper: No redirect_url found",
     );
     return null;
   }
-
-  console.log(
-    "[Standalone Flow] StandaloneConnectWrapper: Rendering StandaloneConnect",
-  );
-  console.log(
-    "[Standalone Flow] StandaloneConnectWrapper: redirectUrl =",
-    redirectUrl,
-  );
-  console.log(
-    "[Standalone Flow] StandaloneConnectWrapper: username =",
-    username,
-  );
-  console.log(
-    "[Standalone Flow] StandaloneConnectWrapper: verified =",
-    verified,
-  );
 
   return (
     <StandaloneConnect

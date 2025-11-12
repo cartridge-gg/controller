@@ -68,32 +68,21 @@ export class KeychainIFrame extends IFrame<Keychain> {
     }
 
     if (needsSessionCreation) {
-      console.log(
-        "[Standalone Flow] KeychainIFrame: needsSessionCreation parameter received =",
-        needsSessionCreation,
-      );
       _url.searchParams.set("needs_session_creation", "true");
-      console.log(
-        "[Standalone Flow] KeychainIFrame: Added needs_session_creation=true to URL",
-      );
-    } else {
-      console.log(
-        "[Standalone Flow] KeychainIFrame: needsSessionCreation NOT set, normal iframe load",
-      );
     }
 
     if (username) {
-      console.log(
-        "[Standalone Flow] KeychainIFrame: Adding username parameter =",
-        username,
-      );
       _url.searchParams.set("username", encodeURIComponent(username));
     }
 
-    console.log(
-      "[Standalone Flow] KeychainIFrame: Final iframe URL =",
-      _url.toString(),
-    );
+    if (needsSessionCreation) {
+      console.log(
+        "[Standalone Flow] KeychainIFrame: Initializing with needsSessionCreation=true, username=",
+        username,
+        "url=",
+        _url.toString(),
+      );
+    }
 
     // Policy precedence logic:
     // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
@@ -116,10 +105,10 @@ export class KeychainIFrame extends IFrame<Keychain> {
         ...walletBridge.getIFrameMethods(),
         // Expose callback for keychain to notify parent that session was created and storage access granted
         onSessionCreated: (_origin: string) => () => {
-          console.log(
-            "[Standalone Flow] KeychainIFrame: onSessionCreated method called from keychain",
-          );
           if (onSessionCreated) {
+            console.log(
+              "[Standalone Flow] KeychainIFrame: onSessionCreated callback triggered",
+            );
             onSessionCreated();
           }
         },

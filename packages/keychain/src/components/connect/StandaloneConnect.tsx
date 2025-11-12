@@ -34,13 +34,9 @@ export function StandaloneConnect({
 
     try {
       console.log(
-        "[Standalone Flow] StandaloneConnect: User clicked Connect button (USER GESTURE CAPTURED)",
-      );
-
-      // STEP 1: Request storage access (user gesture!)
-      console.log(
         "[Standalone Flow] StandaloneConnect: Requesting storage access",
       );
+
       const requestStorageAccess = requestStorageAccessFactory();
       const granted = await requestStorageAccess();
 
@@ -55,40 +51,26 @@ export function StandaloneConnect({
       }
 
       console.log(
-        "[Standalone Flow] StandaloneConnect: Storage access granted successfully",
+        "[Standalone Flow] StandaloneConnect: Storage access granted, notifying parent and redirecting",
       );
 
-      // STEP 2: Notify parent controller that storage access was granted
+      // Notify parent controller that storage access was granted
       if (
         parent &&
         "onSessionCreated" in parent &&
         typeof parent.onSessionCreated === "function"
       ) {
-        console.log(
-          "[Standalone Flow] StandaloneConnect: Calling parent.onSessionCreated()",
-        );
         try {
           await parent.onSessionCreated();
-          console.log(
-            "[Standalone Flow] StandaloneConnect: Parent notified successfully",
-          );
         } catch (err) {
           console.error(
             "[Standalone Flow] StandaloneConnect: Error notifying parent:",
             err,
           );
         }
-      } else {
-        console.warn(
-          "[Standalone Flow] StandaloneConnect: Parent onSessionCreated method not available",
-        );
       }
 
-      // STEP 3: Redirect to application
-      console.log(
-        "[Standalone Flow] StandaloneConnect: Redirecting to:",
-        redirectUrl,
-      );
+      // Redirect to application
       safeRedirect(redirectUrl, true);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to connect";
