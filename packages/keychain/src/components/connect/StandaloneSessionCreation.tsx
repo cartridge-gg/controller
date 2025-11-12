@@ -19,6 +19,7 @@ import {
   Checkbox,
   cn,
   HeaderInner,
+  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   SliderIcon,
@@ -339,7 +340,7 @@ const StandaloneSessionCreationLayout = ({
   }
 
   return (
-    <>
+    <LayoutContainer>
       <NavigationHeader variant="hidden" forceShowClose />
       <HeaderInner
         className="pb-0"
@@ -438,6 +439,6 @@ const StandaloneSessionCreationLayout = ({
 
         {!error && <div className="flex flex-col" />}
       </LayoutFooter>
-    </>
+    </LayoutContainer>
   );
 };

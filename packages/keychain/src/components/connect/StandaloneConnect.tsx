@@ -5,6 +5,7 @@ import {
   AlertIcon,
   Button,
   HeaderInner,
+  LayoutContainer,
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/ui";
@@ -101,7 +102,7 @@ export function StandaloneConnect({
   }, [redirectUrl, parent]);
 
   return (
-    <>
+    <LayoutContainer>
       <HeaderInner
         className="pb-10"
         title={`Connect to ${theme.name || "Application"}`}
@@ -144,6 +145,6 @@ export function StandaloneConnect({
           Connect
         </Button>
       </LayoutFooter>
-    </>
+    </LayoutContainer>
   );
 }
