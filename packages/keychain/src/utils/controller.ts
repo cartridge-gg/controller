@@ -210,11 +210,18 @@ export default class Controller {
     calls: Call[],
     feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.trySessionExecute(this._appId, toJsCalls(calls), feeSource);
+    return await this.cartridge.trySessionExecute(
+      this._appId,
+      toJsCalls(calls),
+      feeSource,
+    );
   }
 
   async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
-    return await this.cartridge.hasAuthorizedPoliciesForCalls(this._appId, toJsCalls(calls));
+    return await this.cartridge.hasAuthorizedPoliciesForCalls(
+      this._appId,
+      toJsCalls(calls),
+    );
   }
 
   async hasAuthorizedPoliciesForMessage(
@@ -237,7 +244,10 @@ export default class Controller {
   }
 
   async isRequestedSession(policies: ParsedSessionPolicies): Promise<boolean> {
-    return await this.cartridge.hasRequestedSession(this._appId, toWasmPolicies(policies));
+    return await this.cartridge.hasRequestedSession(
+      this._appId,
+      toWasmPolicies(policies),
+    );
   }
 
   async estimateInvokeFee(calls: Call[]): Promise<FeeEstimate> {
