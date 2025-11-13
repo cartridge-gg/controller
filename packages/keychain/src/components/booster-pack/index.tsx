@@ -24,12 +24,12 @@ const CONFETTI_COLORS = generateColorShades(STAR_COLOR);
 
 // Map asset types to game names for Play button
 const ASSET_TO_GAME_MAP: Record<string, { name: string; url: string }> = {
-  CREDITS: { name: "CARTRIDGE", url: "https://cartridge.gg" },
-  SURVIVOR: { name: "LOOT SURVIVOR", url: "https://survivor.realms.world" },
+  CREDITS: { name: "CARTRIDGE", url: "https://play.cartridge.gg" },
+  SURVIVOR: { name: "LOOT SURVIVOR", url: "https://lootsurvivor.io" },
   LORDS: { name: "REALMS", url: "https://realms.world" },
-  NUMS: { name: "NUMS", url: "https://nums.game" },
-  PAPER: { name: "PAPER", url: "https://paper.xyz" },
-  MYSTERY_ASSET: { name: "ARCADE", url: "https://cartridge.gg" },
+  NUMS: { name: "NUMS", url: "https://nums.gg" },
+  PAPER: { name: "DOPE WARS", url: "https://dopewars.game" },
+  MYSTERY_ASSET: { name: "ARCADE", url: "https://play.cartridge.gg" },
 };
 
 export function BoosterPack() {
@@ -428,13 +428,10 @@ export function BoosterPack() {
           // Show Claim button before claiming
           <button
             onClick={handleClaim}
-            disabled={isClaimed || isLoading || isCheckingAsset || !assetInfo}
+            disabled={isClaimed || isLoading}
             className="px-6 py-3 rounded-3xl text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              backgroundColor:
-                isClaimed || isLoading || isCheckingAsset || !assetInfo
-                  ? "#666"
-                  : STAR_COLOR,
+              backgroundColor: isClaimed || isLoading ? "#666" : STAR_COLOR,
               color: "#0f1410",
             }}
           >
