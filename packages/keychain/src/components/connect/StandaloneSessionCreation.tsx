@@ -1,73 +1,50 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
+import { NavigationHeader } from "@/components/NavigationHeader";
 import { SessionConsent } from "@/components/connect";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { now } from "@/constants";
-import { CreateSessionProvider } from "@/context/session";
 import { useConnection } from "@/hooks/connection";
-import {
-  type ContractType,
-  type ParsedSessionPolicies,
-  useCreateSession,
-  hasApprovalPolicies,
-} from "@/hooks/session";
+import { useCreateSession, hasApprovalPolicies } from "@/hooks/session";
 import type { ControllerError } from "@/utils/connection";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
+import { safeRedirect } from "@/utils/url-validator";
 import {
   Button,
   Checkbox,
   cn,
   HeaderInner,
+  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   SliderIcon,
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { SpendingLimitPage } from "./SpendingLimitPage";
+import { processPolicies } from "./CreateSession";
 
-const requiredPolicies: Array<ContractType> = ["VRF"];
-
-export function CreateSession({
-  policies,
-  onConnect,
-  onSkip,
-  isUpdate,
-}: {
-  policies: ParsedSessionPolicies;
-  onConnect: () => void;
-  onSkip?: () => void;
-  isUpdate?: boolean;
-}) {
-  return (
-    <CreateSessionProvider
-      initialPolicies={policies}
-      requiredPolicies={requiredPolicies}
-    >
-      <CreateSessionLayout
-        isUpdate={isUpdate}
-        onConnect={onConnect}
-        onSkip={onSkip}
-      />
-    </CreateSessionProvider>
-  );
-}
-
-const CreateSessionLayout = ({
-  isUpdate,
-  onConnect,
-  onSkip,
-}: {
-  isUpdate?: boolean;
-  onConnect: () => void;
-  onSkip?: () => void;
-}) => {
+/**
+ * StandaloneSessionCreation component for creating sessions in standalone auth flow.
+ * This is displayed after user returns from standalone authentication at keychain site.
+ * Key differences from embedded CreateSession:
+ * - Requests storage access via user gesture before creating session
+ * - Displays username from URL parameter (no controller access yet)
+ * - Redirects to redirect_url after session creation
+ */
+export function StandaloneSessionCreation({ username }: { username?: string }) {
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
+  const [hasAutoApproved, setHasAutoApproved] = useState(false);
   const createButtonRef = useRef<HTMLButtonElement>(null);
+  const [searchParams] = useSearchParams();
 
-  const { policies, duration, isEditable, onToggleEditable } =
-    useCreateSession();
-  const { controller, theme, origin } = useConnection();
+  const { duration, isEditable, onToggleEditable } = useCreateSession();
+  const { controller, theme, parent, closeModal, origin, policies } =
+    useConnection();
+
+  const redirectUrl = searchParams.get("redirect_url");
 
   const hasTokenApprovals = useMemo(
     () => hasApprovalPolicies(policies),
@@ -90,29 +67,136 @@ const CreateSessionLayout = ({
     return duration + now();
   }, [duration]);
 
+  // Auto-approve verified presets without token approvals
+  useEffect(() => {
+    if (
+      !controller ||
+      !policies ||
+      !redirectUrl ||
+      hasAutoApproved ||
+      isConnecting
+    ) {
+      return;
+    }
+
+    // Only auto-approve verified presets without token approvals
+    if (policies.verified && !hasTokenApprovals) {
+      setHasAutoApproved(true);
+
+      const autoCreateSession = async () => {
+        try {
+          setIsConnecting(true);
+          console.log(
+            "[Standalone Flow] StandaloneSessionCreation: Auto-approving verified preset",
+          );
+
+          // Request storage access first
+          const granted = await requestStorageAccess();
+
+          if (!granted) {
+            throw new Error("Storage access was not granted");
+          }
+
+          // Create session with verified policies
+          const processedPolicies = processPolicies(policies, false);
+          await controller.createSession(origin, expiresAt, processedPolicies);
+
+          // Notify parent
+          if (
+            parent &&
+            "onSessionCreated" in parent &&
+            typeof parent.onSessionCreated === "function"
+          ) {
+            await parent.onSessionCreated();
+          }
+
+          // Redirect back to application
+          if (redirectUrl) {
+            safeRedirect(redirectUrl, true);
+          }
+        } catch (err) {
+          console.error(
+            "[Standalone Flow] StandaloneSessionCreation: Auto-approval failed:",
+            err,
+          );
+          setError(err as Error);
+          setIsConnecting(false);
+        }
+      };
+
+      void autoCreateSession();
+    }
+  }, [
+    controller,
+    policies,
+    redirectUrl,
+    hasAutoApproved,
+    isConnecting,
+    hasTokenApprovals,
+    expiresAt,
+    parent,
+    origin,
+  ]);
+
   const createSession = useCallback(
-    async ({
-      toggleOff,
-      successCallback,
-    }: {
-      toggleOff: boolean;
-      successCallback?: () => void;
-    }) => {
-      if (!controller || !policies) return;
+    async ({ toggleOff }: { toggleOff: boolean }) => {
+      if (!controller || !policies) {
+        console.error(
+          "[Standalone Flow] StandaloneSessionCreation: Missing required data",
+          { controller: !!controller, policies: !!policies },
+        );
+        return;
+      }
+
       try {
         setError(undefined);
         setIsConnecting(true);
 
+        // Request storage access (user gesture!)
+        const granted = await requestStorageAccess();
+
+        if (!granted) {
+          throw new Error("Storage access was not granted");
+        }
+
+        // Create session (now we have storage access)
         const processedPolicies = processPolicies(policies, toggleOff);
         await controller.createSession(origin, expiresAt, processedPolicies);
-        successCallback?.();
+        // Notify parent that session was created
+        if (parent) {
+          if (
+            "onSessionCreated" in parent &&
+            typeof parent.onSessionCreated === "function"
+          ) {
+            try {
+              await parent.onSessionCreated();
+            } catch (err) {
+              console.error(
+                "[Standalone Flow] StandaloneSessionCreation: Error notifying parent:",
+                err,
+              );
+            }
+          }
+
+          if (closeModal) {
+            closeModal();
+          }
+        }
+
+        // Redirect back to application
+        if (redirectUrl) {
+          safeRedirect(redirectUrl, true);
+        }
       } catch (e) {
+        console.error(
+          "[Standalone Flow] StandaloneSessionCreation: Session creation failed:",
+          e,
+        );
         setError(e as unknown as Error);
-      } finally {
         setIsConnecting(false);
       }
     },
-    [controller, policies, expiresAt, origin],
+    [closeModal, controller, policies, expiresAt, redirectUrl, parent, origin],
   );
 
   const handlePrimaryAction = useCallback(async () => {
@@ -130,10 +214,7 @@ const CreateSessionLayout = ({
       return;
     }
 
-    await createSession({
-      toggleOff: false,
-      successCallback: onConnect,
-    });
+    await createSession({ toggleOff: false });
   }, [
     policies,
     isConnecting,
@@ -141,7 +222,6 @@ const CreateSessionLayout = ({
     hasTokenApprovals,
     step,
     createSession,
-    onConnect,
   ]);
 
   const handleKeyDown = useCallback(
@@ -187,24 +267,28 @@ const CreateSessionLayout = ({
 
   if (hasTokenApprovals && step === "spending-limit") {
     return (
-      <SpendingLimitPage
-        policies={policies}
-        isConnecting={isConnecting}
-        error={error}
-        onBack={() => setStep("summary")}
-        onConnect={() => {
-          void handlePrimaryAction();
-        }}
-      />
+      <LayoutContainer>
+        <NavigationHeader variant="hidden" forceShowClose />
+        <SpendingLimitPage
+          policies={policies}
+          isConnecting={isConnecting}
+          error={error}
+          onBack={() => setStep("summary")}
+          onConnect={() => {
+            void handlePrimaryAction();
+          }}
+        />
+      </LayoutContainer>
     );
   }
 
   return (
-    <>
+    <LayoutContainer>
+      <NavigationHeader variant="hidden" forceShowClose />
       <HeaderInner
         className="pb-0"
-        title={!isUpdate ? "Create Session" : "Update Session"}
-        description={isUpdate ? "The policies were updated" : undefined}
+        title={`Connect to ${theme.name || "Application"}`}
+        description={username ? `Continue as ${username}` : undefined}
         right={
           !isEditable ? (
             <Button
@@ -275,10 +359,7 @@ const CreateSessionLayout = ({
             <Button
               variant="secondary"
               onClick={async () => {
-                await createSession({
-                  toggleOff: true,
-                  successCallback: onSkip,
-                });
+                await createSession({ toggleOff: true });
               }}
               disabled={isConnecting}
               className="px-8"
@@ -295,52 +376,12 @@ const CreateSessionLayout = ({
               void handlePrimaryAction();
             }}
           >
-            {isUpdate ? "update" : "create"} session
+            create session
           </Button>
         </div>
 
         {!error && <div className="flex flex-col" />}
       </LayoutFooter>
-    </>
+    </LayoutContainer>
   );
-};
-
-/**
- * Deep copy the policies and remove the id fields
- * @param policies The policies to clean
- * @param toggleOff Optional. When true, sets all policies to unauthorized (false)
- */
-export const processPolicies = (
-  policies: ParsedSessionPolicies,
-  toggleOff?: boolean,
-): ParsedSessionPolicies => {
-  // Deep copy the policies
-  const processPolicies: ParsedSessionPolicies = JSON.parse(
-    JSON.stringify(policies),
-  );
-
-  // Remove the id fields from the methods and optionally set authorized to false
-  if (processPolicies.contracts) {
-    Object.values(processPolicies.contracts).forEach((contract) => {
-      contract.methods.forEach((method) => {
-        delete method.id;
-        if (toggleOff !== undefined) {
-          method.authorized = !toggleOff;
-        }
-      });
-    });
-  }
-
-  // Remove the id fields from the messages and optionally set authorized to false
-  if (processPolicies.messages) {
-    processPolicies.messages.forEach((message) => {
-      delete message.id;
-      if (toggleOff !== undefined) {
-        message.authorized = !toggleOff;
-      }
-    });
-  }
-
-  // Return the cleaned policies
-  return processPolicies;
-};
+}

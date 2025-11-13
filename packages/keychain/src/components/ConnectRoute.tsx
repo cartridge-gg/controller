@@ -5,7 +5,6 @@ import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { CreateSession, processPolicies } from "./connect/CreateSession";
-import { StandaloneConnect } from "./connect";
 import { now } from "@/constants";
 import {
   useRouteParams,
@@ -14,6 +13,7 @@ import {
 } from "@/hooks/route";
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
+import { StandaloneConnect } from "./connect/StandaloneConnect";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -21,7 +21,7 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, verified } = useConnection();
+  const { controller, policies, origin } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
 
   // Parse params and set RPC URL immediately
@@ -103,7 +103,7 @@ export function ConnectRoute() {
     }
 
     // In standalone mode with redirect_url, don't auto-connect
-    // Show UI to let user manually connect
+    // Show StandaloneConnect UI to let user manually connect
     if (isStandalone && redirectUrl) {
       return;
     }
@@ -139,7 +139,7 @@ export function ConnectRoute() {
           const expiresAt = duration + now();
 
           const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(expiresAt, processedPolicies);
+          await controller.createSession(origin, expiresAt, processedPolicies);
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
@@ -166,6 +166,7 @@ export function ConnectRoute() {
     redirectUrl,
     hasAutoConnected,
     hasTokenApprovals,
+    origin,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
@@ -173,22 +174,13 @@ export function ConnectRoute() {
     return null;
   }
 
-  // In standalone mode with redirect_url, show connect UI
+  // Standalone mode: Show StandaloneConnect for verified sessions with redirect_url
   if (isStandalone && redirectUrl) {
-    // If verified session without approvals, show simple connect screen
+    // Show StandaloneConnect for verified sessions without custom policies
     if (!policies || (policies.verified && !hasTokenApprovals)) {
-      return (
-        <StandaloneConnect redirectUrl={redirectUrl} isVerified={verified} />
-      );
+      return <StandaloneConnect username={controller.username()} />;
     }
-    // If unverified session with policies, show CreateSession for consent
-    return (
-      <CreateSession
-        policies={policies}
-        onConnect={handleConnect}
-        onSkip={handleSkip}
-      />
-    );
+    // For unverified policies, fall through to CreateSession
   }
 
   // Embedded mode: No policies and verified policies are handled in useCreateController
@@ -203,7 +195,7 @@ export function ConnectRoute() {
     return null;
   }
 
-  // Show CreateSession for sessions that require approval UI in embedded mode
+  // Show CreateSession for sessions that require approval UI
 
   return (
     <CreateSession

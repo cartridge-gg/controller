@@ -10,8 +10,8 @@ catalogs:
       specifier: 0.3.5
       version: 0.3.5
     '@cartridge/controller-wasm':
-      specifier: 0.3.19
-      version: 0.3.19
+      specifier: 0.8.0
+      version: 0.8.0
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -282,7 +282,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.19
+        version: 0.8.0
       starknet:
         specifier: 'catalog:'
         version: 8.5.4
@@ -393,7 +393,7 @@ importers:
     dependencies:
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.19
+        version: 0.8.0
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -454,7 +454,7 @@ importers:
         version: 5.14.0(rollup@4.40.2)
       ts-jest:
         specifier: ^29.2.5
-        version: 29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(esbuild@0.25.4)(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3)
+        version: 29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3)
       tsup:
         specifier: 'catalog:'
         version: 8.4.0(@microsoft/api-extractor@7.52.6(@types/node@18.19.87))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@1.21.7)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.7.1)
@@ -521,7 +521,7 @@ importers:
         version: link:../controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.19
+        version: 0.8.0
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -1195,8 +1195,8 @@ packages:
   '@cartridge/controller-wasm@0.2.1':
     resolution: {integrity: sha512-uB0ffQEHAlu7+2E4Y/EoWUgbIYNrjMXks2FYHS8lg9ngaFwETvrUFI5Y+Pp71VQTthEnuwVcNKBqluO5TSPAug==}
 
-  '@cartridge/controller-wasm@0.3.19':
-    resolution: {integrity: sha512-dz+Clq3ji1+zQzylBUKJJrrTo4AgB98xIZgzfKkTk9yo24WfItZPoWZ8DhyJovVfrSHpi3WLa1cRvfHieoMIQg==}
+  '@cartridge/controller-wasm@0.8.0':
+    resolution: {integrity: sha512-wxwrIMceVX/xyfv8z43sF+hCGunQZ6kV/h+VlZn8beDP3rlAEMTaSpjBox1YhKp+xImT4KvxuCSR6+3vVDJFMA==}
 
   '@cartridge/controller@0.9.0':
     resolution: {integrity: sha512-bIikpiIR+N16MaEyxjab/AN3uDvOj+pdixWbJLSVqGpItpUq58AiQ0GFwPKXnpAwKVT66aqNrVBINSuMWemRhQ==}
@@ -5247,10 +5247,6 @@ packages:
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
-
-  chalk@5.4.1:
-    resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
-    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   chalk@5.6.2:
     resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
@@ -10716,16 +10712,16 @@ snapshots:
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@babel/code-frame': 7.27.1
-      '@babel/generator': 7.27.1
+      '@babel/generator': 7.28.3
       '@babel/helper-compilation-targets': 7.27.2
       '@babel/helper-module-transforms': 7.27.1(@babel/core@7.27.1)
       '@babel/helpers': 7.27.1
       '@babel/parser': 7.27.2
       '@babel/template': 7.27.2
-      '@babel/traverse': 7.27.1
-      '@babel/types': 7.27.1
+      '@babel/traverse': 7.28.4
+      '@babel/types': 7.28.4
       convert-source-map: 2.0.0
-      debug: 4.4.0
+      debug: 4.4.3
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -10829,7 +10825,7 @@ snapshots:
   '@babel/helpers@7.27.1':
     dependencies:
       '@babel/template': 7.27.2
-      '@babel/types': 7.27.1
+      '@babel/types': 7.28.4
 
   '@babel/parser@7.27.2':
     dependencies:
@@ -11203,7 +11199,7 @@ snapshots:
 
   '@cartridge/controller-wasm@0.2.1': {}
 
-  '@cartridge/controller-wasm@0.3.19': {}
+  '@cartridge/controller-wasm@0.8.0': {}
 
   '@cartridge/controller@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(open@10.1.2)(react@18.3.1)(starknet@8.5.4)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@8.5.4)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
@@ -12689,7 +12685,7 @@ snapshots:
       nopt: 5.0.0
       npmlog: 5.0.1
       rimraf: 3.0.2
-      semver: 7.7.1
+      semver: 7.7.3
       tar: 6.2.1
     transitivePeerDependencies:
       - encoding
@@ -14257,7 +14253,7 @@ snapshots:
 
   '@scure/starknet@1.1.0':
     dependencies:
-      '@noble/curves': 1.9.0
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
 
   '@sideway/address@4.1.5':
@@ -14486,7 +14482,7 @@ snapshots:
       jsdoc-type-pratt-parser: 4.1.0
       process: 0.11.10
       recast: 0.23.11
-      semver: 7.7.1
+      semver: 7.7.3
       util: 0.12.5
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
@@ -14573,9 +14569,9 @@ snapshots:
   '@storybook/test-runner@0.21.3(@swc/helpers@0.5.17)(@types/node@18.19.87)(babel-plugin-macros@3.1.0)(storybook@8.6.12(bufferutil@4.0.9)(prettier@3.5.3)(utf-8-validate@5.0.10))(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3))':
     dependencies:
       '@babel/core': 7.27.1
-      '@babel/generator': 7.27.1
+      '@babel/generator': 7.28.3
       '@babel/template': 7.27.2
-      '@babel/types': 7.27.1
+      '@babel/types': 7.28.4
       '@jest/types': 29.6.3
       '@storybook/csf': 0.1.13
       '@swc/core': 1.11.24(@swc/helpers@0.5.17)
@@ -14783,7 +14779,7 @@ snapshots:
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.27.1
-      '@babel/runtime': 7.27.1
+      '@babel/runtime': 7.28.4
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       chalk: 4.1.2
@@ -14994,24 +14990,24 @@ snapshots:
 
   '@types/babel__core@7.20.5':
     dependencies:
-      '@babel/parser': 7.27.2
-      '@babel/types': 7.27.1
+      '@babel/parser': 7.28.4
+      '@babel/types': 7.28.4
       '@types/babel__generator': 7.27.0
       '@types/babel__template': 7.4.4
       '@types/babel__traverse': 7.20.7
 
   '@types/babel__generator@7.27.0':
     dependencies:
-      '@babel/types': 7.27.1
+      '@babel/types': 7.28.4
 
   '@types/babel__template@7.4.4':
     dependencies:
-      '@babel/parser': 7.27.2
-      '@babel/types': 7.27.1
+      '@babel/parser': 7.28.4
+      '@babel/types': 7.28.4
 
   '@types/babel__traverse@7.20.7':
     dependencies:
-      '@babel/types': 7.27.1
+      '@babel/types': 7.28.4
 
   '@types/connect@3.4.38':
     dependencies:
@@ -15223,7 +15219,7 @@ snapshots:
 
   '@typescript/vfs@1.6.1(typescript@5.8.3)':
     dependencies:
-      debug: 4.4.0
+      debug: 4.4.3
       typescript: 5.8.3
     transitivePeerDependencies:
       - supports-color
@@ -15836,7 +15832,7 @@ snapshots:
 
   '@walletconnect/relay-auth@1.1.0':
     dependencies:
-      '@noble/curves': 1.9.0
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
@@ -16120,7 +16116,7 @@ snapshots:
   '@walletconnect/utils@2.19.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
       '@noble/ciphers': 1.2.1
-      '@noble/curves': 1.9.0
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/keyvaluestorage': 1.1.1
@@ -16317,6 +16313,11 @@ snapshots:
       typescript: 5.8.3
       zod: 3.24.4
 
+  abitype@1.1.1(typescript@5.8.3)(zod@3.22.4):
+    optionalDependencies:
+      typescript: 5.8.3
+      zod: 3.22.4
+
   abitype@1.1.1(typescript@5.8.3)(zod@3.24.4):
     optionalDependencies:
       typescript: 5.8.3
@@ -16340,7 +16341,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.4.0
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -16636,7 +16637,7 @@ snapshots:
   babel-plugin-jest-hoist@29.6.3:
     dependencies:
       '@babel/template': 7.27.2
-      '@babel/types': 7.27.1
+      '@babel/types': 7.28.4
       '@types/babel__core': 7.20.5
       '@types/babel__traverse': 7.20.7
 
@@ -17005,8 +17006,6 @@ snapshots:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
-
-  chalk@5.4.1: {}
 
   chalk@5.6.2: {}
 
@@ -17898,7 +17897,7 @@ snapshots:
 
   esbuild-register@3.6.0(esbuild@0.25.4):
     dependencies:
-      debug: 4.4.0
+      debug: 4.4.3
       esbuild: 0.25.4
     transitivePeerDependencies:
       - supports-color
@@ -18953,7 +18952,7 @@ snapshots:
   https-proxy-agent@5.0.1:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.4.0
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -19309,7 +19308,7 @@ snapshots:
   istanbul-lib-instrument@5.2.1:
     dependencies:
       '@babel/core': 7.27.1
-      '@babel/parser': 7.27.2
+      '@babel/parser': 7.28.4
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.2
       semver: 6.3.1
@@ -19322,7 +19321,7 @@ snapshots:
       '@babel/parser': 7.27.2
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.2
-      semver: 7.7.1
+      semver: 7.7.3
     transitivePeerDependencies:
       - supports-color
 
@@ -19343,7 +19342,7 @@ snapshots:
 
   istanbul-lib-source-maps@4.0.1:
     dependencies:
-      debug: 4.4.0
+      debug: 4.4.3
       istanbul-lib-coverage: 3.2.2
       source-map: 0.6.1
     transitivePeerDependencies:
@@ -19730,10 +19729,10 @@ snapshots:
   jest-snapshot@29.7.0:
     dependencies:
       '@babel/core': 7.27.1
-      '@babel/generator': 7.27.1
+      '@babel/generator': 7.28.3
       '@babel/plugin-syntax-jsx': 7.27.1(@babel/core@7.27.1)
       '@babel/plugin-syntax-typescript': 7.27.1(@babel/core@7.27.1)
-      '@babel/types': 7.27.1
+      '@babel/types': 7.28.4
       '@jest/expect-utils': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
@@ -19773,7 +19772,7 @@ snapshots:
   jest-watch-typeahead@2.2.2(jest@29.7.0(@types/node@18.19.87)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3))):
     dependencies:
       ansi-escapes: 6.2.1
-      chalk: 5.4.1
+      chalk: 5.6.2
       jest: 29.7.0(@types/node@18.19.87)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3))
       jest-regex-util: 29.6.3
       jest-watcher: 29.7.0
@@ -20604,12 +20603,12 @@ snapshots:
 
   ox@0.6.7(typescript@5.8.3)(zod@3.24.4):
     dependencies:
-      '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.9.0
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.4)
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.1(typescript@5.8.3)(zod@3.24.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.8.3
@@ -20618,12 +20617,12 @@ snapshots:
 
   ox@0.6.9(typescript@5.8.3)(zod@3.22.4):
     dependencies:
-      '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.9.0
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.8.3)(zod@3.22.4)
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.1(typescript@5.8.3)(zod@3.22.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.8.3
@@ -20632,12 +20631,12 @@ snapshots:
 
   ox@0.6.9(typescript@5.8.3)(zod@3.24.4):
     dependencies:
-      '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.9.0
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.4)
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.1(typescript@5.8.3)(zod@3.24.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.8.3
@@ -20909,7 +20908,7 @@ snapshots:
   portfinder@1.0.37:
     dependencies:
       async: 3.2.6
-      debug: 4.4.0
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -21177,8 +21176,8 @@ snapshots:
   react-docgen@7.1.1:
     dependencies:
       '@babel/core': 7.27.1
-      '@babel/traverse': 7.27.1
-      '@babel/types': 7.27.1
+      '@babel/traverse': 7.28.4
+      '@babel/types': 7.28.4
       '@types/babel__core': 7.20.5
       '@types/babel__traverse': 7.20.7
       '@types/doctrine': 0.0.9
@@ -21803,9 +21802,9 @@ snapshots:
 
   starknet@8.5.4:
     dependencies:
-      '@noble/curves': 1.9.0
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@scure/base': 1.2.5
+      '@scure/base': 1.2.6
       '@scure/starknet': 1.1.0
       '@starknet-io/starknet-types-08': '@starknet-io/types-js@0.8.4'
       '@starknet-io/starknet-types-09': '@starknet-io/types-js@0.9.2'
@@ -22046,7 +22045,7 @@ snapshots:
 
   sucrase@3.35.0:
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.8
+      '@jridgewell/gen-mapping': 0.3.13
       commander: 4.1.1
       glob: 10.4.5
       lines-and-columns: 1.2.4
@@ -22316,7 +22315,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  ts-jest@29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(esbuild@0.25.4)(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3):
+  ts-jest@29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3):
     dependencies:
       bs-logger: 0.2.6
       ejs: 3.1.10
@@ -22335,7 +22334,6 @@ snapshots:
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
       babel-jest: 29.7.0(@babel/core@7.27.1)
-      esbuild: 0.25.4
 
   ts-log@2.2.7: {}
 
@@ -22457,7 +22455,7 @@ snapshots:
       cac: 6.7.14
       chokidar: 4.0.3
       consola: 3.4.2
-      debug: 4.4.0
+      debug: 4.4.3
       esbuild: 0.25.4
       joycon: 3.1.1
       picocolors: 1.1.1
@@ -22486,7 +22484,7 @@ snapshots:
       cac: 6.7.14
       chokidar: 4.0.3
       consola: 3.4.2
-      debug: 4.4.0
+      debug: 4.4.3
       esbuild: 0.25.4
       joycon: 3.1.1
       picocolors: 1.1.1
@@ -22837,7 +22835,7 @@ snapshots:
 
   viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4):
     dependencies:
-      '@noble/curves': 1.9.0
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
@@ -22854,7 +22852,7 @@ snapshots:
 
   viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.22.4):
     dependencies:
-      '@noble/curves': 1.9.0
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
@@ -22871,7 +22869,7 @@ snapshots:
 
   viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4):
     dependencies:
-      '@noble/curves': 1.9.0
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
@@ -22906,7 +22904,7 @@ snapshots:
   vite-node@2.1.8(@types/node@18.19.87):
     dependencies:
       cac: 6.7.14
-      debug: 4.4.0
+      debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 1.1.2
       vite: 5.4.19(@types/node@18.19.87)
@@ -23088,7 +23086,7 @@ snapshots:
     dependencies:
       chalk: 2.4.2
       commander: 3.0.2
-      debug: 4.4.0
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 

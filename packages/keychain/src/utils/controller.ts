@@ -37,15 +37,10 @@ import { toJsFeeEstimate } from "./fee";
 export default class Controller {
   private cartridge: CartridgeAccount;
   private cartridgeMeta: CartridgeAccountMeta;
-  private _appId: string;
   provider: Provider;
 
   constructor() {
     throw new Error("Initialize with Controller.login or Controller.create");
-  }
-
-  appId() {
-    return this._appId;
   }
 
   address() {
@@ -89,6 +84,7 @@ export default class Controller {
   }
 
   async createSession(
+    appId: string,
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -99,18 +95,18 @@ export default class Controller {
     }
 
     return await this.cartridge.createSession(
-      this._appId,
+      appId,
       toWasmPolicies(policies),
       expiresAt,
     );
   }
 
-  async skipSession(policies: ParsedSessionPolicies) {
+  async skipSession(appId: string, policies: ParsedSessionPolicies) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
 
-    await this.cartridge.skipSession(this._appId, toWasmPolicies(policies));
+    await this.cartridge.skipSession(appId, toWasmPolicies(policies));
   }
 
   async createPasskeySigner(rpId: string) {
@@ -151,6 +147,7 @@ export default class Controller {
   }
 
   async registerSession(
+    appId: string,
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
     publicKey: string,
@@ -161,7 +158,7 @@ export default class Controller {
     }
 
     return await this.cartridge.registerSession(
-      this._appId,
+      appId,
       toWasmPolicies(policies),
       expiresAt,
       publicKey,
@@ -206,28 +203,33 @@ export default class Controller {
   }
 
   async trySessionExecute(
+    appId: string,
     calls: Call[],
     feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
     return await this.cartridge.trySessionExecute(
-      this._appId,
+      appId,
       toJsCalls(calls),
       feeSource,
     );
   }
 
-  async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
+  async hasAuthorizedPoliciesForCalls(
+    appId: string,
+    calls: Call[],
+  ): Promise<boolean> {
     return await this.cartridge.hasAuthorizedPoliciesForCalls(
-      this._appId,
+      appId,
       toJsCalls(calls),
     );
   }
 
   async hasAuthorizedPoliciesForMessage(
+    appId: string,
     typedData: TypedData,
   ): Promise<boolean> {
     return await this.cartridge.hasAuthorizedPoliciesForMessage(
-      this._appId,
+      appId,
       JSON.stringify(typedData),
     );
   }
@@ -242,9 +244,12 @@ export default class Controller {
     );
   }
 
-  async isRequestedSession(policies: ParsedSessionPolicies): Promise<boolean> {
+  async isRequestedSession(
+    appId: string,
+    policies: ParsedSessionPolicies,
+  ): Promise<boolean> {
     return await this.cartridge.hasRequestedSession(
-      this._appId,
+      appId,
       toWasmPolicies(policies),
     );
   }
@@ -300,14 +305,12 @@ export default class Controller {
   }
 
   static async apiLogin({
-    appId,
     classHash,
     rpcUrl,
     address,
     username,
     owner,
   }: {
-    appId: string;
     classHash: string;
     rpcUrl: string;
     address: string;
@@ -327,20 +330,17 @@ export default class Controller {
     controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
     controller.cartridgeMeta = accountWithMeta.meta();
     controller.cartridge = accountWithMeta.intoAccount();
-    controller._appId = appId;
 
     return controller;
   }
 
   static async create({
-    appId,
     classHash,
     rpcUrl,
     address,
     username,
     owner,
   }: {
-    appId: string;
     classHash: string;
     rpcUrl: string;
     address: string;
@@ -360,7 +360,6 @@ export default class Controller {
     controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
     controller.cartridgeMeta = accountWithMeta.meta();
     controller.cartridge = accountWithMeta.intoAccount();
-    controller._appId = appId;
 
     return controller;
   }
@@ -408,7 +407,6 @@ export default class Controller {
     controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
     controller.cartridgeMeta = accountWithMeta.meta();
     controller.cartridge = accountWithMeta.intoAccount();
-    controller._appId = appId;
 
     return {
       controller,
@@ -416,7 +414,7 @@ export default class Controller {
     };
   }
 
-  static async fromStore(appId: string): Promise<Controller | undefined> {
+  static async fromStore(): Promise<Controller | undefined> {
     const cartridgeWithMeta = await ControllerFactory.fromStorage(
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
@@ -429,7 +427,6 @@ export default class Controller {
     controller.provider = new RpcProvider({ nodeUrl: meta.rpcUrl() });
     controller.cartridge = cartridgeWithMeta.intoAccount();
     controller.cartridgeMeta = meta;
-    controller._appId = appId;
     return controller;
   }
 }

@@ -57,8 +57,11 @@ import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
-import { useEffect } from "react";
 import { BoosterPack } from "./booster-pack";
+import { useEffect } from "react";
+import { StandaloneSessionCreation } from "./connect/StandaloneSessionCreation";
+import { StandaloneConnect } from "./connect/StandaloneConnect";
+import { hasApprovalPolicies } from "@/hooks/session";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -91,10 +94,43 @@ function DefaultRoute() {
 }
 
 function Authentication() {
-  const { controller, isConfigLoading } = useConnection();
+  const { controller, isConfigLoading, policies, verified } = useConnection();
   const { pathname, search } = useLocation();
 
   const upgrade = useUpgrade();
+
+  // Check if session creation is needed (returning from standalone auth flow)
+  const searchParams = new URLSearchParams(search);
+  const needsSessionCreation =
+    searchParams.get("needs_session_creation") === "true";
+  const username = searchParams.get("username") ?? undefined;
+  const preset = searchParams.get("preset");
+
+  // If session creation is needed (returning from standalone auth)
+  if (needsSessionCreation) {
+    // Show loading while config is loading
+    if (preset && isConfigLoading) {
+      return (
+        <CreateController
+          isSlot={pathname.startsWith("/slot")}
+          isLoading={true}
+        />
+      );
+    }
+
+    // Decide which UI to show based on verification status and policies
+    const hasManualPolicies = policies?.contracts || policies?.messages;
+    const shouldShowSessionConsent =
+      !verified || hasManualPolicies || hasApprovalPolicies(policies);
+
+    if (shouldShowSessionConsent) {
+      // Show session creation consent UI for unverified presets or custom policies
+      return <StandaloneSessionCreation username={username} />;
+    } else {
+      // Show simple standalone connect UI for verified presets with no custom policies
+      return <StandaloneConnect username={username} />;
+    }
+  }
 
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {

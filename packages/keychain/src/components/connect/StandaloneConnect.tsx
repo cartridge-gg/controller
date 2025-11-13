@@ -1,55 +1,123 @@
 import { useConnection } from "@/hooks/connection";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { safeRedirect } from "@/utils/url-validator";
 import {
+  AlertIcon,
   Button,
   HeaderInner,
+  LayoutContainer,
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/ui";
 import { useCallback, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
-export function StandaloneConnect({
-  redirectUrl,
-  isVerified,
-}: {
-  redirectUrl: string;
-  isVerified: boolean;
-}) {
+/**
+ * Standalone connect component for verified presets with no custom policies.
+ * Used in standalone auth flow to request storage access and redirect back to the application.
+ */
+export function StandaloneConnect({ username }: { username?: string }) {
+  const [searchParams] = useSearchParams();
+  const { verified, theme, parent } = useConnection();
+
   const [isConnecting, setIsConnecting] = useState(false);
-  const { controller, theme } = useConnection();
+  const [error, setError] = useState<string | null>(null);
 
-  const handleConnect = useCallback(() => {
-    if (!controller || !redirectUrl) {
+  const redirectUrl = searchParams.get("redirect_url");
+
+  const handleConnect = useCallback(async () => {
+    if (!redirectUrl) {
       return;
     }
 
     setIsConnecting(true);
-    // Safely redirect to the specified URL with lastUsedConnector param
-    safeRedirect(redirectUrl, true);
-  }, [controller, redirectUrl]);
+    setError(null);
 
-  if (!controller) {
+    try {
+      console.log(
+        "[Standalone Flow] StandaloneConnect: Requesting storage access",
+      );
+
+      const granted = await requestStorageAccess();
+
+      if (!granted) {
+        const errorMsg = "Storage access was not granted";
+        console.error(
+          "[Standalone Flow] StandaloneConnect: Storage access denied",
+        );
+        setError(errorMsg);
+        setIsConnecting(false);
+        return;
+      }
+
+      console.log(
+        "[Standalone Flow] StandaloneConnect: Storage access granted, notifying parent and redirecting",
+      );
+
+      // Notify parent controller that storage access was granted
+      if (
+        parent &&
+        "onSessionCreated" in parent &&
+        typeof parent.onSessionCreated === "function"
+      ) {
+        try {
+          await parent.onSessionCreated();
+        } catch (err) {
+          console.error(
+            "[Standalone Flow] StandaloneConnect: Error notifying parent:",
+            err,
+          );
+        }
+      }
+
+      // Redirect to application
+      safeRedirect(redirectUrl, true);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to connect";
+      console.error(
+        "[Standalone Flow] StandaloneConnect: Error during connect:",
+        err,
+      );
+      setError(errorMsg);
+      setIsConnecting(false);
+    }
+  }, [redirectUrl, parent]);
+
+  if (!redirectUrl) {
     return null;
   }
 
   return (
-    <>
+    <LayoutContainer>
       <HeaderInner
-        className="pb-0"
+        className="pb-10"
         title={`Connect to ${theme.name || "Application"}`}
-        description="You're already authenticated. Click connect to continue."
+        description={
+          username
+            ? `Continue as ${username}`
+            : `${theme.name} is requesting access to your Controller`
+        }
       />
       <LayoutContent className="pb-0 flex flex-col gap-4">
-        <div className="flex flex-col gap-2 p-4 bg-background-100 rounded-md">
-          <div className="text-sm font-medium">Connected Account</div>
-          <div className="text-xs text-muted-foreground">
-            {controller.username()}
-          </div>
-        </div>
-        {!isVerified && (
+        {!verified && (
           <div className="text-xs text-destructive-100 p-3 bg-background-100 rounded-md border border-destructive-100">
             ⚠️ This application is not verified. Make sure you trust the site
             before connecting.
+          </div>
+        )}
+
+        {error && (
+          <div className="flex items-start gap-2 text-xs text-destructive-100 p-3 bg-background-100 rounded-md border border-destructive-100">
+            <AlertIcon className="flex-shrink-0 mt-0.5" />
+            <div className="flex flex-col gap-2">
+              <div>{error}</div>
+              <button
+                onClick={handleConnect}
+                className="text-left underline hover:no-underline"
+              >
+                Try again
+              </button>
+            </div>
           </div>
         )}
       </LayoutContent>
@@ -63,6 +131,6 @@ export function StandaloneConnect({
           Connect
         </Button>
       </LayoutFooter>
-    </>
+    </LayoutContainer>
   );
 }

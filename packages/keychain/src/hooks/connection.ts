@@ -108,6 +108,9 @@ export type ParentMethods = AsyncMethodReturns<{
     txHash: string,
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
+
+  // Session creation callback (for standalone auth flow)
+  onSessionCreated?: () => Promise<void>;
 }>;
 
 /**
@@ -585,7 +588,10 @@ export function useConnectionValue() {
       connection.promise
         .then((parentConnection) => {
           setOrigin(normalizeOrigin(parentConnection.origin));
-          setParent(parentConnection);
+          // Extract origin and spread the rest to match ParentMethods type
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { origin: _, ...methods } = parentConnection;
+          setParent(methods as ParentMethods);
         })
         .catch((error) => {
           console.error("Penpal connection failed:", error);

@@ -256,13 +256,6 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (typeof document !== "undefined" && !!document.hasStorageAccess) {
-      const ok = await document.hasStorageAccess();
-      if (!ok) {
-        await document.requestStorageAccess();
-      }
-    }
-
     this.iframes.keychain.open();
 
     try {
@@ -322,13 +315,6 @@ export default class ControllerProvider extends BaseProvider {
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
-    }
-
-    if (typeof document !== "undefined" && !!document.hasStorageAccess) {
-      const ok = await document.hasStorageAccess();
-      if (!ok) {
-        await document.requestStorageAccess();
-      }
     }
 
     this.account = undefined;
@@ -641,39 +627,51 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   private createKeychainIframe(): KeychainIFrame {
-    return new KeychainIFrame({
+    // Check if we're returning from standalone auth flow
+    const isReturningFromRedirect =
+      typeof window !== "undefined" &&
+      typeof sessionStorage !== "undefined" &&
+      sessionStorage.getItem("controller_standalone") === "1";
+
+    // Extract username from URL if present (passed from keychain after auth)
+    const urlParams =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : undefined;
+    const username = urlParams?.get("username") ?? undefined;
+
+    // Clear the flag after detecting it
+    if (isReturningFromRedirect) {
+      sessionStorage.removeItem("controller_standalone");
+    }
+
+    const iframe = new KeychainIFrame({
       ...this.options,
       rpcUrl: this.rpcUrl(),
       onClose: this.keychain?.reset,
       onConnect: (keychain) => {
         this.keychain = keychain;
-
-        // Check if we're returning from standalone auth flow
-        const isReturningFromRedirect =
-          typeof window !== "undefined" &&
-          typeof sessionStorage !== "undefined" &&
-          sessionStorage.getItem("controller_standalone") === "1";
-
-        // If returning from redirect flow, immediately request storage access
-        // This ensures the iframe can access the first-party storage established during the redirect
-        if (isReturningFromRedirect) {
-          // Clear the flag after using it
-          sessionStorage.removeItem("controller_standalone");
-
-          if (this.keychain.requestStorageAccess) {
-            this.keychain.requestStorageAccess().catch((e) => {
-              console.warn(
-                "Failed to request storage access after redirect:",
-                e,
-              );
-            });
-          }
-        }
       },
       version: version,
       ref: this.referral.ref,
       refGroup: this.referral.refGroup,
+      needsSessionCreation: isReturningFromRedirect,
+      username: username,
+      onSessionCreated: async () => {
+        // Re-probe to establish connection now that storage access is granted and session created
+        await this.probe();
+      },
     });
+
+    // If we're returning from redirect, open the modal immediately to show session creation prompt
+    if (isReturningFromRedirect) {
+      // Open after a short delay to ensure iframe is ready
+      setTimeout(() => {
+        iframe.open();
+      }, 100);
+    }
+
+    return iframe;
   }
 
   private waitForKeychain({
