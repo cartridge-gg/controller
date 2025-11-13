@@ -570,27 +570,6 @@ export default class ControllerProvider extends BaseProvider {
     window.location.href = keychainUrl.toString();
   }
 
-  /**
-   * Checks if the keychain iframe has first-party storage access.
-   * Returns true if the user has previously authenticated via standalone mode.
-   * @returns Promise<boolean> indicating if storage access is available
-   */
-  async hasFirstPartyAccess(): Promise<boolean> {
-    if (!this.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return false;
-    }
-
-    try {
-      // Ask the keychain iframe if it has storage access
-      const hasAccess = await this.keychain.hasStorageAccess();
-      return hasAccess;
-    } catch (error) {
-      console.error("Error checking storage access:", error);
-      return false;
-    }
-  }
-
   private initializeChains(chains: Chain[]) {
     for (const chain of chains) {
       try {

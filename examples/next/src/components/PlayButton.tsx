@@ -3,7 +3,7 @@
 import { Button } from "@cartridge/ui";
 import ControllerConnector from "@cartridge/connector/controller";
 import { useConnect } from "@starknet-react/core";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 interface Game {
   name: string;
@@ -26,7 +26,6 @@ const GAMES: Game[] = [
 
 export const PlayButton = () => {
   const { connectors } = useConnect();
-  const [isChecking, setIsChecking] = useState(false);
   const controllerConnector = useMemo(
     () => ControllerConnector.fromConnectors(connectors),
     [connectors],
@@ -38,28 +37,7 @@ export const PlayButton = () => {
       return;
     }
 
-    setIsChecking(true);
-    try {
-      // Check if we have first-party storage access
-      const hasAccess =
-        await controllerConnector.controller.hasFirstPartyAccess();
-
-      if (!hasAccess) {
-        // Redirect through standalone auth first to establish first-party storage
-        controllerConnector.controller.open({
-          redirectUrl: game.url,
-        });
-      } else {
-        // Direct navigation - user already authenticated via standalone
-        window.location.href = game.url;
-      }
-    } catch (error) {
-      console.error("Error checking storage access:", error);
-      // Fallback: try direct navigation
-      window.location.href = game.url;
-    } finally {
-      setIsChecking(false);
-    }
+    window.location.href = game.url;
   };
 
   return (
@@ -80,12 +58,8 @@ export const PlayButton = () => {
               <h3 className="text-lg font-semibold">{game.name}</h3>
               <p className="text-sm text-muted">{game.description}</p>
             </div>
-            <Button
-              onClick={() => handlePlayGame(game)}
-              disabled={isChecking}
-              className="ml-4"
-            >
-              {isChecking ? "Checking..." : "Play"}
+            <Button onClick={() => handlePlayGame(game)} className="ml-4">
+              Play
             </Button>
           </div>
         ))}

@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --mode dev",
-    "dev:live": "vite --mode live",
+    "dev": "env-cmd -f .env.dev vite",
+    "dev:live": "env-cmd -f .env.live vite",
     "build": "tsc -b && vite build",
     "build:compat": "tsc -b && vite build",
     "preview": "vite preview --port 3001",

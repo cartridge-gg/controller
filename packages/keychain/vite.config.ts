@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
       }),
   ],
   server: {
-    port: mode === "dev" || mode === "live" ? 3001 : undefined,
+    port: mode === "development" ? 3001 : undefined,
   },
   resolve: {
     alias: {
