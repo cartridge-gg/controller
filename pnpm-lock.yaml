@@ -16,7 +16,7 @@ catalogs:
       specifier: ^6.2.4
       version: 6.2.4
     '@cartridge/ui':
-      specifier: github:cartridge-gg/ui#e1d0f3c
+      specifier: github:cartridge-gg/ui#df8934d
       version: 0.7.14-alpha.2
     '@eslint/js':
       specifier: ^9.18.0
@@ -165,8 +165,8 @@ importers:
         specifier: github:cartridge-gg/presets#bac9813
         version: https://codeload.github.com/cartridge-gg/presets/tar.gz/bac9813
       '@cartridge/ui':
-        specifier: github:cartridge-gg/ui#e1d0f3c
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/e1d0f3c(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
+        specifier: github:cartridge-gg/ui#df8934d
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/df8934d(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
       '@graphql-codegen/cli':
         specifier: ^2.6.2
         version: 2.16.5(@babel/core@7.27.1)(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(bufferutil@4.0.9)(encoding@0.1.13)(graphql@16.11.0)(typescript@5.8.3)(utf-8-validate@5.0.10)
@@ -206,7 +206,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/ui':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/e1d0f3c(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/df8934d(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
       '@starknet-react/chains':
         specifier: ^5.0.1
         version: 5.0.1
@@ -454,7 +454,7 @@ importers:
         version: 5.14.0(rollup@4.40.2)
       ts-jest:
         specifier: ^29.2.5
-        version: 29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(esbuild@0.25.4)(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3)
+        version: 29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3)
       tsup:
         specifier: 'catalog:'
         version: 8.4.0(@microsoft/api-extractor@7.52.6(@types/node@18.19.87))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@1.21.7)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.7.1)
@@ -527,7 +527,7 @@ importers:
         version: 6.2.4
       '@cartridge/ui':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/e1d0f3c(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/df8934d(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
       '@dojoengine/torii-wasm':
         specifier: ^1.8.2
         version: 1.8.2
@@ -1215,8 +1215,8 @@ packages:
     resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/bac9813}
     version: 0.0.1
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/e1d0f3c':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/ui/tar.gz/e1d0f3c}
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/df8934d':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/ui/tar.gz/df8934d}
     version: 0.7.14-alpha.2
     peerDependencies:
       react: ^18.2.0
@@ -11246,7 +11246,7 @@ snapshots:
     dependencies:
       '@starknet-io/types-js': 0.8.4
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/e1d0f3c(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))':
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/df8934d(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))':
     dependencies:
       '@cartridge/presets': https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0
       '@radix-ui/react-accordion': 1.2.1(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -11291,7 +11291,7 @@ snapshots:
       - react-native
       - tailwindcss
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/e1d0f3c(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))':
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/df8934d(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))':
     dependencies:
       '@cartridge/presets': https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0
       '@radix-ui/react-accordion': 1.2.1(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -15003,7 +15003,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 12.20.55
+      '@types/node': 22.15.3
 
   '@types/cookie@0.6.0': {}
 
@@ -15120,7 +15120,7 @@ snapshots:
 
   '@types/ws@7.4.7':
     dependencies:
-      '@types/node': 12.20.55
+      '@types/node': 22.15.3
 
   '@types/ws@8.18.1':
     dependencies:
@@ -22299,7 +22299,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  ts-jest@29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(esbuild@0.25.4)(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3):
+  ts-jest@29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3):
     dependencies:
       bs-logger: 0.2.6
       ejs: 3.1.10
@@ -22318,7 +22318,6 @@ snapshots:
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
       babel-jest: 29.7.0(@babel/core@7.27.1)
-      esbuild: 0.25.4
 
   ts-log@2.2.7: {}
 
