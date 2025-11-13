@@ -81,6 +81,7 @@
     "posthog-js-lite": "3.2.1",
     "qrcode.react": "catalog:",
     "react": "catalog:",
+    "react-confetti": "^6.4.0",
     "react-dom": "catalog:",
     "react-query": "catalog:",
     "react-router-dom": "catalog:",

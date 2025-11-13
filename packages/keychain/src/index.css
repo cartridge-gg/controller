@@ -2,6 +2,7 @@
 @import "@cartridge/ui/themes/dark.css";
 @import "@cartridge/ui/themes/fonts.css";
 @import "@cartridge/ui/themes/scrollbar.css";
+@import "./fonts.css";
 
 @tailwind base;
 @tailwind components;

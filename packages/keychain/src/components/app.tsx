@@ -58,6 +58,7 @@ import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
 import { useEffect } from "react";
+import { BoosterPack } from "./booster-pack";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -154,6 +155,7 @@ export function App() {
 
   return (
     <Routes>
+      <Route path="/booster-pack/:privateKey" element={<BoosterPack />} />
       <Route path="/" element={<Authentication />}>
         <Route index element={<DefaultRoute />} />
         <Route path="/settings" element={<Settings />} />
