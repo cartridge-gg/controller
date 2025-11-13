@@ -1,5 +1,8 @@
 import { ethers } from "ethers";
 
+const BASE_URL =
+  "https://storage.googleapis.com/c7e-prod-static/media/devconnect";
+
 // ===== API Integration =====
 
 /**
@@ -122,30 +125,40 @@ export async function claimBoosterCredits(
  * @returns Full URL to the asset image
  */
 export function assetTokenImageUrl(assetType: string): string {
-  const baseUrl =
-    "https://storage.googleapis.com/c7e-prod-static/media/devconnect";
-
   // Backend returns lowercase type names, normalize to uppercase for comparison
   const normalizedType = assetType.toUpperCase();
 
   // Handle MYSTERY_ASSET separately (backend returns "mystery" with no value)
   if (normalizedType === "MYSTERY" || normalizedType === "MYSTERY_ASSET") {
-    return `${baseUrl}/MYSTERY_ASSET.png`;
+    return `${BASE_URL}/MYSTERY_ASSET.png`;
   }
 
   switch (normalizedType) {
     case "CREDITS":
-      return `${baseUrl}/CREDITS_150000000000000000000.png`;
+      return `${BASE_URL}/CREDITS_150000000000000000000.png`;
     case "SURVIVOR":
-      return `${baseUrl}/SURVIVOR_10000000000000000000.png`;
+      return `${BASE_URL}/SURVIVOR_10000000000000000000.png`;
     case "LORDS":
-      return `${baseUrl}/LORDS_75000000000000000000.png`;
+      return `${BASE_URL}/LORDS_75000000000000000000.png`;
     case "NUMS":
-      return `${baseUrl}/NUMS_2000000000000000000000.png`;
+      return `${BASE_URL}/NUMS_2000000000000000000000.png`;
     case "PAPER":
-      return `${baseUrl}/PAPER_3000000000000000000000.png`;
+      return `${BASE_URL}/PAPER_3000000000000000000000.png`;
     default:
       // Fallback for unknown asset types
-      return `${baseUrl}/EXPLAINER.png`;
+      return `${BASE_URL}/EXPLAINER.png`;
+  }
+}
+
+export function assetGameTokenImageUrl(assetType: string): string {
+  switch (assetType) {
+    case "LS2_GAME":
+      return `${BASE_URL}/LS2_GAME.png`;
+    case "NUMS_GAME":
+      return `${BASE_URL}/NUMS_GAME.png`;
+    case "REALM":
+      return `${BASE_URL}/REALM_1.png`;
+    default:
+      return `${BASE_URL}/EXPLAINER.png`;
   }
 }
