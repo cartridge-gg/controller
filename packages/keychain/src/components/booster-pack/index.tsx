@@ -369,8 +369,8 @@ export function BoosterPack() {
               </>
             ) : (
               <img
-                src="/booster-pack/EXPLAINER.png"
-                alt="Booster Pack Explainer"
+                src={assetTokenImageUrl(RewardType.EXPLAINER)}
+                alt={RewardType.EXPLAINER}
                 className="w-full h-full object-cover"
               />
             )}
