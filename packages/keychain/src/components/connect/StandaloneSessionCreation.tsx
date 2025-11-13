@@ -4,13 +4,8 @@ import { SessionConsent } from "@/components/connect";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { now } from "@/constants";
-import { CreateSessionProvider } from "@/context/session";
 import { useConnection } from "@/hooks/connection";
-import {
-  type ContractType,
-  useCreateSession,
-  hasApprovalPolicies,
-} from "@/hooks/session";
+import { useCreateSession, hasApprovalPolicies } from "@/hooks/session";
 import type { ControllerError } from "@/utils/connection";
 import { requestStorageAccessFactory } from "@/utils/connection/storage-access";
 import { safeRedirect } from "@/utils/url-validator";
@@ -29,8 +24,6 @@ import { useSearchParams } from "react-router-dom";
 import { SpendingLimitPage } from "./SpendingLimitPage";
 import { processPolicies } from "./CreateSession";
 
-const requiredPolicies: Array<ContractType> = ["VRF"];
-
 /**
  * StandaloneSessionCreation component for creating sessions in standalone auth flow.
  * This is displayed after user returns from standalone authentication at keychain site.
@@ -40,27 +33,6 @@ const requiredPolicies: Array<ContractType> = ["VRF"];
  * - Redirects to redirect_url after session creation
  */
 export function StandaloneSessionCreation({ username }: { username?: string }) {
-  const { policies } = useConnection();
-
-  if (!policies) {
-    return null;
-  }
-
-  return (
-    <CreateSessionProvider
-      initialPolicies={policies}
-      requiredPolicies={requiredPolicies}
-    >
-      <StandaloneSessionCreationLayout username={username} />
-    </CreateSessionProvider>
-  );
-}
-
-const StandaloneSessionCreationLayout = ({
-  username,
-}: {
-  username?: string;
-}) => {
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
@@ -68,9 +40,9 @@ const StandaloneSessionCreationLayout = ({
   const createButtonRef = useRef<HTMLButtonElement>(null);
   const [searchParams] = useSearchParams();
 
-  const { policies, duration, isEditable, onToggleEditable } =
-    useCreateSession();
-  const { controller, theme, parent, closeModal, origin } = useConnection();
+  const { duration, isEditable, onToggleEditable } = useCreateSession();
+  const { controller, theme, parent, closeModal, origin, policies } =
+    useConnection();
 
   const redirectUrl = searchParams.get("redirect_url");
 
@@ -414,4 +386,4 @@ const StandaloneSessionCreationLayout = ({
       </LayoutFooter>
     </LayoutContainer>
   );
-};
+}

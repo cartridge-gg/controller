@@ -1,4 +1,4 @@
-import { ParentMethods, useConnection } from "@/hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { requestStorageAccessFactory } from "@/utils/connection/storage-access";
 import { safeRedirect } from "@/utils/url-validator";
 import {
@@ -20,39 +20,11 @@ export function StandaloneConnect({ username }: { username?: string }) {
   const [searchParams] = useSearchParams();
   const { verified, theme, parent } = useConnection();
 
-  const redirectUrl = searchParams.get("redirect_url");
-  console.log("StandaloneConnect: redirectUrl=", redirectUrl);
-
-  if (!redirectUrl) {
-    return null;
-  }
-
-  return (
-    <StandaloneConnectInner
-      redirectUrl={redirectUrl}
-      isVerified={verified}
-      username={username}
-      theme={theme}
-      parent={parent}
-    />
-  );
-}
-
-function StandaloneConnectInner({
-  redirectUrl,
-  isVerified,
-  username,
-  theme,
-  parent,
-}: {
-  redirectUrl: string;
-  isVerified: boolean;
-  username?: string;
-  theme: { name?: string };
-  parent: ParentMethods | undefined;
-}) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const redirectUrl = searchParams.get("redirect_url");
+  console.log("StandaloneConnect: redirectUrl=", redirectUrl);
 
   const handleConnect = useCallback(async () => {
     if (!redirectUrl) {
@@ -113,6 +85,10 @@ function StandaloneConnectInner({
     }
   }, [redirectUrl, parent]);
 
+  if (!redirectUrl) {
+    return null;
+  }
+
   return (
     <LayoutContainer>
       <HeaderInner
@@ -125,7 +101,7 @@ function StandaloneConnectInner({
         }
       />
       <LayoutContent className="pb-0 flex flex-col gap-4">
-        {!isVerified && (
+        {!verified && (
           <div className="text-xs text-destructive-100 p-3 bg-background-100 rounded-md border border-destructive-100">
             ⚠️ This application is not verified. Make sure you trust the site
             before connecting.

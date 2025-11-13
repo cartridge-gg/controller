@@ -5,7 +5,6 @@ import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { CreateSession, processPolicies } from "./connect/CreateSession";
-import { StandaloneConnect } from "./connect";
 import { now } from "@/constants";
 import {
   useRouteParams,
@@ -174,20 +173,10 @@ export function ConnectRoute() {
     return null;
   }
 
-  // In standalone mode with redirect_url, show connect UI
+  // In standalone mode with redirect_url immediately
   if (isStandalone && redirectUrl) {
-    // If verified session without approvals, show simple connect screen
-    if (!policies || (policies.verified && !hasTokenApprovals)) {
-      return <StandaloneConnect username={controller.username()} />;
-    }
-    // If unverified session with policies, show CreateSession for consent
-    return (
-      <CreateSession
-        policies={policies}
-        onConnect={handleConnect}
-        onSkip={handleSkip}
-      />
-    );
+    safeRedirect(redirectUrl, true);
+    return null;
   }
 
   // Embedded mode: No policies and verified policies are handled in useCreateController

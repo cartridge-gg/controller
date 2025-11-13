@@ -8,7 +8,7 @@ export function probe({
 }) {
   // The ignored param is origin which is no longer needed but have to be kept for compatibility
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return (_origin: string) =>
+  return (origin: string) =>
     // The ignored param is rpcUrl which is no longer needed but have to be kept for compatibility
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (_rpcUrl: string): Promise<ProbeReply> => {

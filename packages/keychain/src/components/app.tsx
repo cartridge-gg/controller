@@ -58,9 +58,11 @@ import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
 import { BoosterPack } from "./booster-pack";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StandaloneSessionCreation } from "./connect/StandaloneSessionCreation";
 import { StandaloneConnect } from "./connect/StandaloneConnect";
+import { requestStorageAccessFactory } from "@/utils/connection/storage-access";
+import { safeRedirect } from "@/utils/url-validator";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -93,8 +95,10 @@ function DefaultRoute() {
 }
 
 function Authentication() {
-  const { controller, isConfigLoading, policies, verified } = useConnection();
+  const { controller, isConfigLoading, policies, verified, origin } =
+    useConnection();
   const { pathname, search } = useLocation();
+  const [isCheckingSession, setIsCheckingSession] = useState(false);
 
   const upgrade = useUpgrade();
 
@@ -104,12 +108,57 @@ function Authentication() {
     searchParams.get("needs_session_creation") === "true";
   const username = searchParams.get("username") ?? undefined;
   const preset = searchParams.get("preset");
+  const redirectUrl = searchParams.get("redirect_url");
+
+  // Check for existing session and auto-redirect if found
+  useEffect(() => {
+    if (!needsSessionCreation || !controller || !origin || !redirectUrl) {
+      return;
+    }
+
+    const checkExistingSession = async () => {
+      setIsCheckingSession(true);
+      try {
+        const sessions = await controller.sessions();
+        const existingSession = sessions[origin];
+
+        // If a valid session exists for this origin and hasn't expired
+        if (
+          existingSession &&
+          existingSession.expiresAt > BigInt(Math.floor(Date.now() / 1000))
+        ) {
+          console.log(
+            "[Standalone Flow] Valid session already exists, redirecting immediately",
+          );
+
+          // Request storage access first
+          const requestStorageAccess = requestStorageAccessFactory();
+          const granted = await requestStorageAccess();
+
+          if (granted) {
+            // Redirect back to application
+            safeRedirect(redirectUrl, true);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error(
+          "[Standalone Flow] Error checking existing session:",
+          error,
+        );
+        // Continue with normal flow if check fails
+      } finally {
+        setIsCheckingSession(false);
+      }
+    };
+
+    void checkExistingSession();
+  }, [needsSessionCreation, controller, origin, redirectUrl]);
 
   // If session creation is needed (returning from standalone auth)
   if (needsSessionCreation) {
-    // Wait for config to load before making routing decision
-    // This prevents rendering with incorrect initial state (verified=false, policies=undefined)
-    if (preset && isConfigLoading) {
+    // Show loading while checking for existing session or config is loading
+    if (isCheckingSession || (preset && isConfigLoading)) {
       return (
         <CreateController
           isSlot={pathname.startsWith("/slot")}
@@ -123,9 +172,11 @@ function Authentication() {
     const shouldShowSessionConsent = !verified || hasManualPolicies;
 
     if (shouldShowSessionConsent) {
+      console.log("StandaloneSessionCreation");
       // Show session creation consent UI for unverified presets or custom policies
       return <StandaloneSessionCreation username={username} />;
     } else {
+      console.log("StandaloneConnect");
       // Show simple standalone connect UI for verified presets with no custom policies
       return <StandaloneConnect username={username} />;
     }
