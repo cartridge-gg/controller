@@ -15,33 +15,9 @@ export async function requestStorageAccess(): Promise<boolean> {
   }
 
   try {
-    // First check if we already have access
-    if (document.hasStorageAccess) {
-      const hasAccess = await document.hasStorageAccess();
-      if (hasAccess) {
-        console.log(
-          "[Storage Access] Already have storage access, no request needed",
-        );
-        return true;
-      }
-    }
-
     // Request storage access - this MUST be called in a user gesture context
     await document.requestStorageAccess();
     console.log("[Storage Access] Request completed successfully");
-
-    // Verify access was granted
-    if (document.hasStorageAccess) {
-      const hasAccess = await document.hasStorageAccess();
-      console.log(
-        `[Storage Access] Verification check: ${hasAccess ? "GRANTED" : "DENIED"}`,
-      );
-      return hasAccess;
-    }
-
-    console.log(
-      "[Storage Access] Assuming storage access granted (no verification method available)",
-    );
     return true;
   } catch (error) {
     // Provide detailed error information
