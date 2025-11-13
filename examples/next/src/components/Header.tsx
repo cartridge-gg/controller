@@ -1,16 +1,15 @@
 "use client";
 
-import { Button } from "@cartridge/ui";
+import { Button, useToast, showNetworkSwitchToast } from "@cartridge/ui";
 import ControllerConnector from "@cartridge/connector/controller";
 import {
   useAccount,
   useConnect,
   useDisconnect,
   useNetwork,
-  useSwitchChain,
 } from "@starknet-react/core";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { constants, num, shortString } from "starknet";
+import { num, shortString } from "starknet";
 import { Chain } from "@starknet-react/chains";
 import SessionConnector from "@cartridge/connector/session";
 
@@ -22,13 +21,9 @@ const Header = () => {
   const [networkOpen, setNetworkOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isControllerReady, setIsControllerReady] = useState(false);
-  const { switchChain } = useSwitchChain({
-    params: {
-      chainId: constants.StarknetChainId.SN_SEPOLIA,
-    },
-  });
   const networkRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   const controllerConnector = useMemo(
     () => ControllerConnector.fromConnectors(connectors),
     [connectors],
@@ -111,8 +106,19 @@ const Header = () => {
                   <button
                     key={c.id}
                     className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
-                    onClick={() => {
-                      switchChain({ chainId: num.toHex(c.id) });
+                    onClick={async () => {
+                      const success =
+                        await controllerConnector.controller.switchStarknetChain(
+                          num.toHex(c.id),
+                        );
+                      if (success) {
+                        toast(
+                          showNetworkSwitchToast({
+                            networkName: c.network,
+                            duration: 4000,
+                          }),
+                        );
+                      }
                       setNetworkOpen(false);
                     }}
                   >
@@ -121,10 +127,19 @@ const Header = () => {
                 ))}
                 <button
                   className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
-                  onClick={() => {
-                    switchChain({
-                      chainId: shortString.encodeShortString("UNSUPPORTED"),
-                    });
+                  onClick={async () => {
+                    const success =
+                      await controllerConnector.controller.switchStarknetChain(
+                        shortString.encodeShortString("UNSUPPORTED"),
+                      );
+                    if (success) {
+                      toast(
+                        showNetworkSwitchToast({
+                          networkName: "unsupported",
+                          duration: 4000,
+                        }),
+                      );
+                    }
                     setNetworkOpen(false);
                   }}
                 >

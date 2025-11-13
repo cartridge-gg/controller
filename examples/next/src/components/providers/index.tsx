@@ -2,6 +2,7 @@
 
 import { PropsWithChildren } from "react";
 import { ThemeProvider } from "./ThemeProvider";
+import { Toaster } from "@cartridge/ui";
 import dynamic from "next/dynamic";
 
 const StarknetProviderClient = dynamic(
@@ -18,6 +19,7 @@ export function Providers({ children }: PropsWithChildren) {
       disableTransitionOnChange
     >
       <StarknetProviderClient>{children}</StarknetProviderClient>
+      <Toaster />
     </ThemeProvider>
   );
 }
