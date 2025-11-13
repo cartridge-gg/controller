@@ -44,7 +44,6 @@ export function useWebauthnAuthentication() {
         return;
 
       const controller = await Controller.create({
-        appId: origin,
         classHash: controllerNode.constructorCalldata[0],
         rpcUrl,
         address: controllerNode.address,

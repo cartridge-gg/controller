@@ -200,7 +200,6 @@ export function useCreateController({
           origin
         ) {
           const controller = await Controller.create({
-            appId: origin,
             rpcUrl,
             username,
             classHash: controllerNode.constructorCalldata[0],
