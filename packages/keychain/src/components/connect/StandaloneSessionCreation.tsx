@@ -133,7 +133,15 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
         setIsConnecting(false);
       }
     },
-    [closeModal, policies, expiresAt, redirectUrl, parent, origin, setController],
+    [
+      closeModal,
+      policies,
+      expiresAt,
+      redirectUrl,
+      parent,
+      origin,
+      setController,
+    ],
   );
 
   const handlePrimaryAction = useCallback(async () => {
