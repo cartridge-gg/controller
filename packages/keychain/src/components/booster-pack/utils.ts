@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 
-const BASE_URL = "https://storage.googleapis.com/c7e-prod-static/media/devconnect";
+const BASE_URL =
+  "https://storage.googleapis.com/c7e-prod-static/media/devconnect";
 
 // ===== API Integration =====
 
@@ -124,7 +125,6 @@ export async function claimBoosterCredits(
  * @returns Full URL to the asset image
  */
 export function assetTokenImageUrl(assetType: string): string {
-
   // Backend returns lowercase type names, normalize to uppercase for comparison
   const normalizedType = assetType.toUpperCase();
 
@@ -149,7 +149,6 @@ export function assetTokenImageUrl(assetType: string): string {
       return `${BASE_URL}/EXPLAINER.png`;
   }
 }
-
 
 export function assetGameTokenImageUrl(assetType: string): string {
   switch (assetType) {
