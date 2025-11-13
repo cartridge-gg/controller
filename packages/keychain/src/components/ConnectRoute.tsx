@@ -13,6 +13,7 @@ import {
 } from "@/hooks/route";
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
+import { StandaloneConnect } from "./connect/StandaloneConnect";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -102,7 +103,7 @@ export function ConnectRoute() {
     }
 
     // In standalone mode with redirect_url, don't auto-connect
-    // Show UI to let user manually connect
+    // Show StandaloneConnect UI to let user manually connect
     if (isStandalone && redirectUrl) {
       return;
     }
@@ -173,10 +174,13 @@ export function ConnectRoute() {
     return null;
   }
 
-  // In standalone mode with redirect_url immediately
+  // Standalone mode: Show StandaloneConnect for verified sessions with redirect_url
   if (isStandalone && redirectUrl) {
-    safeRedirect(redirectUrl, true);
-    return null;
+    // Show StandaloneConnect for verified sessions without custom policies
+    if (!policies || (policies.verified && !hasTokenApprovals)) {
+      return <StandaloneConnect username={controller.username()} />;
+    }
+    // For unverified policies, fall through to CreateSession
   }
 
   // Embedded mode: No policies and verified policies are handled in useCreateController
@@ -191,7 +195,7 @@ export function ConnectRoute() {
     return null;
   }
 
-  // Show CreateSession for sessions that require approval UI in embedded mode
+  // Show CreateSession for sessions that require approval UI
 
   return (
     <CreateSession

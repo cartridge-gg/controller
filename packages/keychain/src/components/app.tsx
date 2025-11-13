@@ -93,8 +93,7 @@ function DefaultRoute() {
 }
 
 function Authentication() {
-  const { controller, isConfigLoading, policies, verified } =
-    useConnection();
+  const { controller, isConfigLoading, policies, verified } = useConnection();
   const { pathname, search } = useLocation();
 
   const upgrade = useUpgrade();

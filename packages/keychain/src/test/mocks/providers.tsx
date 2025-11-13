@@ -19,6 +19,7 @@ type ProvidersConfig = {
     defaultChainId: bigint;
     nodeUrl: string;
   };
+  initialUrl?: string;
 };
 
 const queryClient = new QueryClient();
@@ -27,7 +28,12 @@ export function renderWithProviders(
   ui: ReactNode,
   config: ProvidersConfig = {},
 ): RenderResult {
-  const wrapped = withConnection(
+  // If initialUrl is provided, update window.location BEFORE rendering
+  if (config.initialUrl) {
+    window.history.pushState({}, "", config.initialUrl);
+  }
+
+  const RouterComponent = (
     <BrowserRouter>
       <NavigationProvider>
         <FeatureProvider>
@@ -36,9 +42,10 @@ export function renderWithProviders(
           </QueryClientProvider>
         </FeatureProvider>
       </NavigationProvider>
-    </BrowserRouter>,
-    config.connection,
+    </BrowserRouter>
   );
+
+  const wrapped = withConnection(RouterComponent, config.connection);
 
   return render(wrapped);
 }
