@@ -15,12 +15,21 @@ import {
 import { RewardCard, RevealState, RewardType } from "./types";
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
+import { CheckIcon } from "./assets/check";
 
-interface BoosterPackProps {
-  starColor?: string;
-}
+const STAR_COLOR = "#FBCB4A";
 
-export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
+// Map asset types to game names for Play button
+const ASSET_TO_GAME_MAP: Record<string, { name: string; url: string }> = {
+  CREDITS: { name: "CARTRIDGE", url: "https://cartridge.gg" },
+  SURVIVOR: { name: "LOOT SURVIVOR", url: "https://survivor.realms.world" },
+  LORDS: { name: "REALMS", url: "https://realms.world" },
+  NUMS: { name: "NUMS", url: "https://nums.game" },
+  PAPER: { name: "PAPER", url: "https://paper.xyz" },
+  MYSTERY_ASSET: { name: "ARCADE", url: "https://cartridge.gg" },
+};
+
+export function BoosterPack() {
   const { privateKey } = useParams<{ privateKey: string }>();
   const account = useAccount();
   const { controller } = useConnection();
@@ -39,12 +48,49 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
   } | null>(null);
   const [isCheckingAsset, setIsCheckingAsset] = useState(true);
   const [assetCardImage, setAssetCardImage] = useState<string | null>(null);
+  const [isPendingClaim, setIsPendingClaim] = useState(false);
+  const [pendingClaimTimestamp, setPendingClaimTimestamp] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     if (controller) {
       setUsername(controller.username());
     }
   }, [controller]);
+
+  // Auto-claim when user connects within 300ms of clicking claim
+  useEffect(() => {
+    const attemptAutoClaim = async () => {
+      if (
+        account?.username &&
+        isPendingClaim &&
+        pendingClaimTimestamp &&
+        Date.now() - pendingClaimTimestamp <= 300
+      ) {
+        // User connected within 300ms, auto-trigger claim
+        setIsPendingClaim(false);
+        setPendingClaimTimestamp(null);
+        setError(null);
+        handleClaim();
+      }
+    };
+
+    attemptAutoClaim();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.username, isPendingClaim, pendingClaimTimestamp]);
+
+  // Clear pending claim after 300ms timeout
+  useEffect(() => {
+    if (isPendingClaim && pendingClaimTimestamp) {
+      const timeout = setTimeout(() => {
+        setIsPendingClaim(false);
+        setPendingClaimTimestamp(null);
+      }, 300);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isPendingClaim, pendingClaimTimestamp]);
 
   // Check asset eligibility on first load
   useEffect(() => {
@@ -60,10 +106,10 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
         setError(null);
 
         // Derive Ethereum address from private key
-        const ethereumAddress = deriveEthereumAddress(privateKey);
+        // const ethereumAddress = deriveEthereumAddress(privateKey);
 
         // Check asset eligibility
-        const asset = await checkAssetEligibility(ethereumAddress);
+        const asset = await checkAssetEligibility("ethereumAddress");
 
         setAssetInfo(asset);
 
@@ -72,20 +118,22 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
         const assetValue = asset.value;
 
         // Map asset type to image path
-        let imagePath = "/booster-pack/EXPLAINER.png"; // default
+        const baseUrl =
+          "https://storage.googleapis.com/c7e-prod-static/media/devconnect";
+        let imagePath = "/booster-pack/EXPLAINER.png"; // default fallback
 
         if (assetType === "CREDITS") {
-          imagePath = `/booster-pack/CREDITS_${assetValue * 10 ** 18}.png`;
+          imagePath = `${baseUrl}/CREDITS_${assetValue * 10 ** 18}.png`;
         } else if (assetType === "MYSTERY_ASSET") {
-          imagePath = "/booster-pack/MYSTERY_ASSET.png";
+          imagePath = `${baseUrl}/MYSTERY_ASSET.png`;
         } else if (assetType === "SURVIVOR") {
-          imagePath = `/booster-pack/SURVIVOR_${assetValue * 10 ** 18}.png`;
+          imagePath = `${baseUrl}/SURVIVOR_${assetValue * 10 ** 18}.png`;
         } else if (assetType === "LORDS") {
-          imagePath = `/booster-pack/LORDS_${assetValue * 10 ** 18}.png`;
+          imagePath = `${baseUrl}/LORDS_${assetValue * 10 ** 18}.png`;
         } else if (assetType === "NUMS") {
-          imagePath = `/booster-pack/NUMS_${assetValue * 10 ** 18}.png`;
+          imagePath = `${baseUrl}/NUMS_${assetValue * 10 ** 18}.png`;
         } else if (assetType === "PAPER") {
-          imagePath = `/booster-pack/PAPER_${assetValue * 10 ** 18}.png`;
+          imagePath = `${baseUrl}/PAPER_${assetValue * 10 ** 18}.png`;
         }
 
         setAssetCardImage(imagePath);
@@ -108,7 +156,7 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
   }, [privateKey]);
 
   // Generate color shades from the star color
-  const confettiColors = generateColorShades(starColor);
+  const confettiColors = generateColorShades(STAR_COLOR);
 
   // Handle connect button click - disabled for testing
   const handleConnect = () => {
@@ -123,7 +171,9 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
 
     // Check if user is logged in
     if (!username || !account) {
-      setError("Please connect your account to claim rewards");
+      setError("Connect your account to claim your rewards");
+      setIsPendingClaim(true);
+      setPendingClaimTimestamp(Date.now());
       return;
     }
 
@@ -153,6 +203,9 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
           signer_address: ethereumAddress,
         });
       }
+
+      //TODO: uncomment once controller login done
+      // controller.openStarterPack("claim-booster-pack-sepolia", { preimage: privateKey });
 
       // Success! Mark as claimed
       setIsClaimed(true);
@@ -272,7 +325,7 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
       {/* Background Gradient with Stars */}
       <div className="absolute inset-0 w-full h-full">
         <BackgroundStars
-          starColor={starColor}
+          starColor={STAR_COLOR}
           className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1512px] h-auto object-contain pointer-events-none"
         />
       </div>
@@ -282,18 +335,20 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
         {/* Arcade Logo */}
         <button className="flex items-center gap-2 shrink-0 relative">
           <div className="w-6 h-6 md:w-8 md:h-8">
-            <ArcadeIcon color={starColor} />
+            <ArcadeIcon color={STAR_COLOR} />
           </div>
           <div className="h-5 md:h-6 w-auto" style={{ width: "87px" }}>
-            <ArcadeLogo color={starColor} />
+            <ArcadeLogo color={STAR_COLOR} />
           </div>
         </button>
 
         {/* Connect Button */}
         <button
           onClick={handleConnect}
-          className="px-3 py-2 md:px-4 md:py-2.5 bg-[#161a17] border rounded text-xs md:text-sm font-medium uppercase tracking-wider hover:bg-[#1a1f1c] transition-colors disabled:opacity-50 disabled:cursor-default"
-          style={{ borderColor: starColor, color: starColor }}
+          className={`px-3 py-2 md:px-4 md:py-2.5 bg-[#161a17] border rounded text-xs md:text-sm font-medium uppercase tracking-wider hover:bg-[#1a1f1c] transition-colors disabled:opacity-50 disabled:cursor-default ${
+            isPendingClaim ? "animate-pulse" : ""
+          }`}
+          style={{ borderColor: STAR_COLOR, color: STAR_COLOR }}
           disabled={!!account?.username}
         >
           {account?.username || "CONNECT"}
@@ -355,11 +410,26 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
                 <p className="text-white text-sm">Loading...</p>
               </div>
             ) : assetCardImage ? (
-              <img
-                src={assetCardImage}
-                alt={`${assetInfo?.type} asset`}
-                className="w-full h-full object-cover"
-              />
+              <>
+                <img
+                  src={assetCardImage}
+                  alt={`${assetInfo?.type} asset`}
+                  className="w-full h-full object-cover"
+                />
+                {/* Claimed Overlay */}
+                {isClaimed && !isRevealing && (
+                  <div className="absolute inset-0 bg-[#00000060] flex flex-col items-center justify-center gap-3">
+                    <div className=" flex h-full w-full relative">
+                      <p className=" absolute left-1/2 -translate-x-1/2 text-white text-xl md:text-xl font-semibold uppercase tracking-wider bg-[#000] p-4 rounded-lg">
+                        CLAIMED
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-sm bg-[#000]/80 flex items-center justify-center absolute">
+                      <CheckIcon color={STAR_COLOR} />
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <img
                 src="/booster-pack/EXPLAINER.png"
@@ -377,29 +447,71 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
           </div>
         )}
 
-        {/* Claim Button */}
-        <button
-          onClick={handleClaim}
-          disabled={isClaimed || isLoading || isCheckingAsset || !assetInfo}
-          className="px-6 py-3 rounded-3xl text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{
-            backgroundColor:
-              isClaimed || isLoading || isCheckingAsset || !assetInfo
-                ? "#666"
-                : starColor,
-            color: "#0f1410",
-          }}
-        >
-          {isCheckingAsset
-            ? "CHECKING..."
-            : isLoading
-              ? "CLAIMING..."
-              : isClaimed
-                ? isRevealing
-                  ? "REVEALING..."
-                  : "CLAIMED"
-                : "CLAIM"}
-        </button>
+        {/* Action Buttons */}
+        {isClaimed && !isRevealing ? (
+          // Show Play and Inventory buttons after successful claim
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-center">
+            {/* Secondary CTA - View in Inventory Button */}
+            <button
+              onClick={() => {
+                if (controller && "openProfile" in controller) {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (controller as any).openProfile("inventory");
+                }
+              }}
+              className="px-6 py-4 rounded-3xl text-sm font-medium uppercase tracking-[2.1px] transition-all hover:bg-white/10"
+              style={{
+                color: STAR_COLOR,
+                backgroundColor: "#1E221F",
+              }}
+            >
+              VIEW IN INVENTORY
+            </button>
+            {/* Primary CTA - Play Game Button */}
+            <button
+              onClick={() => {
+                const gameInfo =
+                  ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
+                if (gameInfo?.url) {
+                  window.open(gameInfo.url, "_blank");
+                }
+              }}
+              className="px-8 py-3 rounded-3xl text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg hover:opacity-90"
+              style={{
+                backgroundColor: STAR_COLOR,
+                color: "#0f1410",
+              }}
+            >
+              PLAY{" "}
+              {ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]?.name ||
+                "GAME"}
+            </button>
+          </div>
+        ) : (
+          // Show Claim button before claiming
+          <button
+            onClick={handleClaim}
+            disabled={isClaimed || isLoading || isCheckingAsset || !assetInfo}
+            className="px-6 py-3 rounded-3xl text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor:
+                isClaimed || isLoading || isCheckingAsset || !assetInfo
+                  ? "#666"
+                  : STAR_COLOR,
+              color: "#0f1410",
+            }}
+          >
+            {isCheckingAsset
+              ? "CHECKING..."
+              : isLoading
+                ? "CLAIMING..."
+                : isClaimed
+                  ? isRevealing
+                    ? "REVEALING..."
+                    : "CLAIMED"
+                  : "CLAIM"}
+          </button>
+        )}
       </div>
     </div>
   );
