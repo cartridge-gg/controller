@@ -22,19 +22,8 @@ export enum RewardType {
   EXPLAINER = "EXPLAINER",
 }
 
-export interface Reward {
-  type: RewardType;
-  name: string;
-  image: string;
-  rarity: "common" | "rare" | "epic" | "legendary";
-}
-
 export enum RevealState {
   UNREVEALED = "unrevealed",
   REVEALING = "revealing",
   REVEALED = "revealed",
-}
-
-export interface RewardCard extends Reward {
-  revealState: RevealState;
 }

@@ -11,13 +11,16 @@ import {
   claimBoosterCredits,
   ClaimCreditsMessage,
   deriveEthereumAddress,
+  assetTokenImageUrl,
 } from "./utils";
-import { RewardCard, RevealState, RewardType } from "./types";
+import { RevealState, RewardType } from "./types";
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import { CheckIcon } from "./assets/check";
 
 const STAR_COLOR = "#FBCB4A";
+
+const CONFETTI_COLORS = generateColorShades(STAR_COLOR);
 
 // Map asset types to game names for Play button
 const ASSET_TO_GAME_MAP: Record<string, { name: string; url: string }> = {
@@ -37,7 +40,14 @@ export function BoosterPack() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [numberOfPieces, setNumberOfPieces] = useState(500);
   const [username, setUsername] = useState<string | null>(null);
-  const [rewardCards, setRewardCards] = useState<RewardCard[]>([]);
+  const [rewardCards, setRewardCards] = useState<
+    {
+      type: RewardType;
+      name: string;
+      image: string;
+      revealState: RevealState;
+    }[]
+  >([]);
   const [isClaimed, setIsClaimed] = useState(false);
   const [isRevealing, setIsRevealing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,49 +58,12 @@ export function BoosterPack() {
   } | null>(null);
   const [isCheckingAsset, setIsCheckingAsset] = useState(true);
   const [assetCardImage, setAssetCardImage] = useState<string | null>(null);
-  const [isPendingClaim, setIsPendingClaim] = useState(false);
-  const [pendingClaimTimestamp, setPendingClaimTimestamp] = useState<
-    number | null
-  >(null);
 
   useEffect(() => {
     if (controller) {
       setUsername(controller.username());
     }
   }, [controller]);
-
-  // Auto-claim when user connects within 300ms of clicking claim
-  useEffect(() => {
-    const attemptAutoClaim = async () => {
-      if (
-        account?.username &&
-        isPendingClaim &&
-        pendingClaimTimestamp &&
-        Date.now() - pendingClaimTimestamp <= 300
-      ) {
-        // User connected within 300ms, auto-trigger claim
-        setIsPendingClaim(false);
-        setPendingClaimTimestamp(null);
-        setError(null);
-        handleClaim();
-      }
-    };
-
-    attemptAutoClaim();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account?.username, isPendingClaim, pendingClaimTimestamp]);
-
-  // Clear pending claim after 300ms timeout
-  useEffect(() => {
-    if (isPendingClaim && pendingClaimTimestamp) {
-      const timeout = setTimeout(() => {
-        setIsPendingClaim(false);
-        setPendingClaimTimestamp(null);
-      }, 300);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [isPendingClaim, pendingClaimTimestamp]);
 
   // Check asset eligibility on first load
   useEffect(() => {
@@ -114,29 +87,7 @@ export function BoosterPack() {
         setAssetInfo(asset);
 
         // Determine the card image based on asset type
-        const assetType = asset.type.toUpperCase();
-        const assetValue = asset.value;
-
-        // Map asset type to image path
-        const baseUrl =
-          "https://storage.googleapis.com/c7e-prod-static/media/devconnect";
-        let imagePath = "/booster-pack/EXPLAINER.png"; // default fallback
-
-        if (assetType === "CREDITS") {
-          imagePath = `${baseUrl}/CREDITS_${assetValue * 10 ** 18}.png`;
-        } else if (assetType === "MYSTERY_ASSET") {
-          imagePath = `${baseUrl}/MYSTERY_ASSET.png`;
-        } else if (assetType === "SURVIVOR") {
-          imagePath = `${baseUrl}/SURVIVOR_${assetValue * 10 ** 18}.png`;
-        } else if (assetType === "LORDS") {
-          imagePath = `${baseUrl}/LORDS_${assetValue * 10 ** 18}.png`;
-        } else if (assetType === "NUMS") {
-          imagePath = `${baseUrl}/NUMS_${assetValue * 10 ** 18}.png`;
-        } else if (assetType === "PAPER") {
-          imagePath = `${baseUrl}/PAPER_${assetValue * 10 ** 18}.png`;
-        }
-
-        setAssetCardImage(imagePath);
+        setAssetCardImage(assetTokenImageUrl(asset.type));
         setIsCheckingAsset(false);
       } catch (err) {
         console.error("Asset check error:", err);
@@ -155,25 +106,17 @@ export function BoosterPack() {
     checkAsset();
   }, [privateKey]);
 
-  // Generate color shades from the star color
-  const confettiColors = generateColorShades(STAR_COLOR);
-
-  // Handle connect button click - disabled for testing
-  const handleConnect = () => {
-    // TODO: Implement connect flow when ready
-    console.log("Connect clicked - using mock account for now");
-  };
-
-  // Handle claim button click - call API and reveal rewards
+  // Handle claim button click - connects if needed, then claims
   const handleClaim = async () => {
     if (!privateKey || !assetInfo || isClaimed || isRevealing || isLoading)
       return;
 
     // Check if user is logged in
     if (!username || !account) {
-      setError("Connect your account to claim your rewards");
-      setIsPendingClaim(true);
-      setPendingClaimTimestamp(Date.now());
+      // Not connected - trigger connection flow
+
+      // TODO: Implement controller.connect() when ready
+      console.log("Triggering connection flow...");
       return;
     }
 
@@ -212,26 +155,23 @@ export function BoosterPack() {
         setIsRevealing(true);
 
         // Create specific cards for mystery asset reveal
-        const mysteryCards: RewardCard[] = [
+        const mysteryCards = [
           {
             type: RewardType.LS2_GAME,
             name: "LS2 Game Pass",
             image: "/booster-pack/LS2_GAME.png",
-            rarity: "epic",
             revealState: RevealState.UNREVEALED,
           },
           {
             type: RewardType.NUMS_GAME,
             name: "NUMS Game Pass",
             image: "/booster-pack/NUMS_GAME.png",
-            rarity: "epic",
             revealState: RevealState.UNREVEALED,
           },
           {
             type: RewardType.REALM,
             name: "Realm NFT",
             image: "/booster-pack/REALM_1.png",
-            rarity: "epic",
             revealState: RevealState.UNREVEALED,
           },
         ];
@@ -310,7 +250,7 @@ export function BoosterPack() {
         <Confetti
           width={window.innerWidth}
           height={window.innerHeight}
-          colors={confettiColors}
+          colors={CONFETTI_COLORS}
           numberOfPieces={numberOfPieces}
           recycle={false}
           gravity={0.3}
@@ -338,17 +278,15 @@ export function BoosterPack() {
           </div>
         </button>
 
-        {/* Connect Button */}
-        <button
-          onClick={handleConnect}
-          className={`px-3 py-2 md:px-4 md:py-2.5 bg-[#161a17] border rounded text-xs md:text-sm font-medium uppercase tracking-wider hover:bg-[#1a1f1c] transition-colors disabled:opacity-50 disabled:cursor-default ${
-            isPendingClaim ? "animate-pulse" : ""
-          }`}
-          style={{ borderColor: STAR_COLOR, color: STAR_COLOR }}
-          disabled={!!account?.username}
-        >
-          {account?.username || "CONNECT"}
-        </button>
+        {/* Display username if connected */}
+        {account?.username && (
+          <div
+            className="px-3 py-2 md:px-4 md:py-2.5 bg-[#161a17] border rounded text-xs md:text-sm font-medium uppercase tracking-wider"
+            style={{ borderColor: STAR_COLOR, color: STAR_COLOR }}
+          >
+            {account.username}
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
@@ -505,7 +443,9 @@ export function BoosterPack() {
                   ? isRevealing
                     ? "REVEALING..."
                     : "CLAIMED"
-                  : "CLAIM"}
+                  : !username || !account
+                    ? "CONNECT"
+                    : "CLAIM"}
           </button>
         )}
       </div>
