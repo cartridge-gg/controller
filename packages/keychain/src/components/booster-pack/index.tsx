@@ -6,11 +6,11 @@ import { ArcadeLogo } from "./assets/arcade-logo";
 import { ArcadeIcon } from "./assets/arcade-icon";
 import { generateColorShades } from "../../utils/color-utils";
 import {
-  deriveEthereumAddress,
   checkAssetEligibility,
   signClaimMessage,
   claimBoosterCredits,
   ClaimCreditsMessage,
+  deriveEthereumAddress,
 } from "./utils";
 import { RewardCard, RevealState, RewardType } from "./types";
 import { useAccount } from "@/hooks/account";
@@ -106,10 +106,10 @@ export function BoosterPack() {
         setError(null);
 
         // Derive Ethereum address from private key
-        // const ethereumAddress = deriveEthereumAddress(privateKey);
+        const ethereumAddress = deriveEthereumAddress(privateKey);
 
         // Check asset eligibility
-        const asset = await checkAssetEligibility("ethereumAddress");
+        const asset = await checkAssetEligibility(ethereumAddress);
 
         setAssetInfo(asset);
 
@@ -181,9 +181,6 @@ export function BoosterPack() {
     setError(null);
 
     try {
-      // Derive Ethereum address from private key
-      const ethereumAddress = deriveEthereumAddress(privateKey);
-
       // Only call claim_credits API if asset type is "credits"
       if (assetInfo.type.toLowerCase() === "credits") {
         // Create claim message
@@ -195,12 +192,11 @@ export function BoosterPack() {
         // Sign the message
         const signature = await signClaimMessage(privateKey, message);
 
-        // Call claim API
+        // Call claim API (backend recovers signer address from signature)
         await claimBoosterCredits({
           account_username: account.username,
           message,
           signature,
-          signer_address: ethereumAddress,
         });
       }
 

@@ -238,14 +238,13 @@ export function getRarityColor(rarity: string): string {
  */
 export interface ClaimCreditsMessage {
   account_username: string;
-  amount: string; // hex format (e.g., "0xa")
+  amount: string; // hex format (e.g., "0xa") - Note: backend uses hardcoded 150 credits for security
 }
 
 export interface ClaimCreditsRequest {
   account_username: string;
   message: ClaimCreditsMessage;
   signature: string;
-  signer_address: string;
 }
 
 export interface ClaimCreditsResponse {
