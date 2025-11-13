@@ -114,10 +114,9 @@ export function BoosterPack() {
 
     // Check if user is logged in
     if (!username || !account) {
-      // Not connected - trigger connection flow
-
-      // TODO: Implement controller.connect() when ready
-      console.log("Triggering connection flow...");
+      // Not connected - trigger connection flow// Redirect to connect page
+      const currentUrl = window.location.href;
+      window.location.href = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect`;
       return;
     }
 
