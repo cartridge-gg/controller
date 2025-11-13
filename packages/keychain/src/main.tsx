@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { SonnerToaster } from "@cartridge/ui";
+import { Toaster } from "@cartridge/ui";
 import { App } from "@/components/app";
 import { Provider } from "@/components/provider";
 import { NavigationProvider } from "@/context/navigation";
@@ -21,7 +21,7 @@ async function bootstrap() {
             <App />
           </Provider>
         </NavigationProvider>
-        <SonnerToaster position="bottom-right" />
+        <Toaster />
       </BrowserRouter>
     </StrictMode>,
   );
