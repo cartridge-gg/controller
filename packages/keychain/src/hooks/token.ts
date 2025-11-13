@@ -39,8 +39,8 @@ async function fetchContracts(
 }
 
 const LIMIT = 1000;
-export const TORII_MAINNET_TOKENS = "c7e-arcade-tokens-alpha";
-export const TORII_SEPOLIA_TOKENS = "c7e-arcade-tokens-sepolia";
+export const TORII_MAINNET_TOKENS = "c7e-tokens-starknet";
+export const TORII_SEPOLIA_TOKENS = "c7e-tokens-sepolia";
 
 export type Balance = {
   amount: number;

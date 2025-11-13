@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
+import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { CreateSession, processPolicies } from "./connect/CreateSession";
@@ -29,6 +30,7 @@ export function ConnectRoute() {
   });
 
   const handleCompletion = useRouteCompletion();
+
   useRouteCallbacks(params, CANCEL_RESPONSE);
 
   // Check if this is standalone mode (not in iframe)
@@ -43,6 +45,11 @@ export function ConnectRoute() {
     return null;
   }, [isStandalone]);
 
+  const hasTokenApprovals = useMemo(
+    () => hasApprovalPolicies(policies),
+    [policies],
+  );
+
   const handleConnect = useCallback(() => {
     if (!params || !controller) {
       return;
@@ -52,11 +59,14 @@ export function ConnectRoute() {
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
     });
-    cleanupCallbacks(params.params.id);
+    if (params.params.id) {
+      cleanupCallbacks(params.params.id);
+    }
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
+    // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
-      safeRedirect(redirectUrl);
+      safeRedirect(redirectUrl, true);
       return;
     }
 
@@ -72,11 +82,14 @@ export function ConnectRoute() {
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
     });
-    cleanupCallbacks(params.params.id);
+    if (params.params.id) {
+      cleanupCallbacks(params.params.id);
+    }
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
+    // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
-      safeRedirect(redirectUrl);
+      safeRedirect(redirectUrl, true);
       return;
     }
 
@@ -104,13 +117,21 @@ export function ConnectRoute() {
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
       });
-      cleanupCallbacks(params.params.id);
+
+      if (params.params.id) {
+        cleanupCallbacks(params.params.id);
+      }
       handleCompletion();
       return;
     }
 
     // Bypass session approval screen for verified sessions in embedded mode
+    // Note: This is a fallback - main logic is handled in useCreateController
     if (policies.verified && !isStandalone) {
+      if (hasTokenApprovals) {
+        return;
+      }
+
       const createSessionForVerifiedPolicies = async () => {
         try {
           // Use a default duration for verified sessions (24 hours)
@@ -123,7 +144,9 @@ export function ConnectRoute() {
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
           });
-          cleanupCallbacks(params.params.id);
+          if (params.params.id) {
+            cleanupCallbacks(params.params.id);
+          }
           handleCompletion();
         } catch (e) {
           console.error("Failed to create verified session:", e);
@@ -142,16 +165,18 @@ export function ConnectRoute() {
     isStandalone,
     redirectUrl,
     hasAutoConnected,
+    hasTokenApprovals,
   ]);
 
+  // Don't render anything if we don't have controller yet - CreateController handles loading
   if (!controller) {
     return null;
   }
 
   // In standalone mode with redirect_url, show connect UI
   if (isStandalone && redirectUrl) {
-    // If verified session, show simple connect screen
-    if (!policies || policies.verified) {
+    // If verified session without approvals, show simple connect screen
+    if (!policies || (policies.verified && !hasTokenApprovals)) {
       return (
         <StandaloneConnect redirectUrl={redirectUrl} isVerified={verified} />
       );
@@ -166,12 +191,20 @@ export function ConnectRoute() {
     );
   }
 
-  // Embedded mode: Don't show UI for no-policy or verified-policy connections
-  if (!policies || policies.verified) {
+  // Embedded mode: No policies and verified policies are handled in useCreateController
+  // This component only handles unverified policies that need user consent
+  if (!policies) {
+    // This should not be reached as no policies case is handled in useCreateController
     return null;
   }
 
-  // Show CreateSession for unverified sessions in embedded mode
+  if (policies.verified && !hasTokenApprovals) {
+    // This should not be reached as verified policies are handled in useCreateController
+    return null;
+  }
+
+  // Show CreateSession for sessions that require approval UI in embedded mode
+
   return (
     <CreateSession
       policies={policies}

@@ -2,11 +2,10 @@ import { ErrorAlert } from "@/components/ErrorAlert";
 import {
   useNavigation,
   usePurchaseContext,
-  isBackendStarterpack,
+  isClaimStarterpack,
   isOnchainStarterpack,
 } from "@/context";
-import { ItemType } from "@/context/purchase";
-import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
+import { Item, ItemType } from "@/context/purchase";
 import {
   Button,
   Card,
@@ -17,52 +16,91 @@ import {
   VerifiedIcon,
   Spinner,
 } from "@cartridge/ui";
-import {
-  MintAllowance,
-  StarterpackAcquisitionType,
-} from "@cartridge/ui/utils/api/cartridge";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { LoadingState } from "../loading";
-import { CostBreakdown, OnchainCostBreakdown } from "../review/cost";
-import { usdcToUsd } from "@/utils/starterpack";
+import { OnchainCostBreakdown } from "../review/cost";
 import { useConnection } from "@/hooks/connection";
-import { CostDetails } from "../types";
+import { Quote } from "@/types/starterpack-types";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
+  const [searchParams] = useSearchParams();
+  const preimage = searchParams.get("preimage");
+  const { navigate } = useNavigation();
 
   const {
     isStarterpackLoading,
     starterpackDetails: details,
     displayError,
-    setStarterpack,
+    setStarterpackId,
   } = usePurchaseContext();
 
   const { isMainnet } = useConnection();
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
-      setStarterpack(starterpackId);
+      setStarterpackId(starterpackId);
     }
-  }, [starterpackId, isStarterpackLoading, setStarterpack]);
+  }, [starterpackId, isStarterpackLoading, setStarterpackId]);
 
-  if (isStarterpackLoading || !details) {
+  // Auto-redirect to claim page if preimage is available
+  useEffect(() => {
+    if (
+      !isStarterpackLoading &&
+      isClaimStarterpack(details) &&
+      preimage &&
+      details.merkleDrops?.some((drop) => drop.network === "ETHEREUM") &&
+      !displayError
+    ) {
+      const keys = details.merkleDrops
+        .filter((drop) => drop.network === "ETHEREUM")
+        .map((drop) => drop.key)
+        .join(";");
+
+      navigate(`/purchase/claim/${keys}/${preimage}/preimage`, {
+        replace: true,
+      });
+    }
+  }, [isStarterpackLoading, details, preimage, displayError, navigate]);
+
+  if (isStarterpackLoading || preimage) {
+    return <LoadingState />;
+  }
+
+  if (!details && displayError) {
+    return (
+      <>
+        <HeaderInner
+          title="Starterpack Error"
+          description={
+            <span className="text-foreground-200 text-xs font-normal">
+              Unable to load starterpack
+            </span>
+          }
+          hideIcon
+        />
+        <LayoutContent />
+        <LayoutFooter>
+          <ErrorAlert title="Error" description={displayError.message} />
+        </LayoutFooter>
+      </>
+    );
+  }
+
+  // If no details and no error, keep showing loading (shouldn't happen)
+  if (!details) {
     return <LoadingState />;
   }
 
   // Handle backend starterpacks (GraphQL)
-  if (isBackendStarterpack(details)) {
+  if (isClaimStarterpack(details)) {
     return (
-      <StarterPackInner
+      <ClaimStarterPackInner
         name={details.name}
-        supply={details.supply}
-        mintAllowance={details.mintAllowance}
-        acquisitionType={details.acquisitionType}
-        starterpackItems={details.starterPackItems}
-        isMainnet={isMainnet}
+        starterpackItems={details.items}
         error={displayError}
       />
     );
@@ -76,7 +114,6 @@ export function PurchaseStarterpack() {
         description={details.description}
         items={details.items}
         quote={details.quote}
-        isQuoteLoading={details.isQuoteLoading}
         isMainnet={isMainnet}
         error={displayError}
       />
@@ -87,60 +124,26 @@ export function PurchaseStarterpack() {
   return <LoadingState />;
 }
 
-export function StarterPackInner({
+export function ClaimStarterPackInner({
   name,
   edition,
   isVerified,
-  isMainnet,
   supply,
-  mintAllowance,
-  acquisitionType,
   starterpackItems = [],
   error,
 }: {
   name: string;
   edition?: string;
   isVerified?: boolean;
-  isMainnet?: boolean;
   supply?: number;
-  mintAllowance?: MintAllowance;
-  acquisitionType: StarterpackAcquisitionType;
-  starterpackItems?: StarterPackItem[];
+  starterpackItems?: Item[];
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();
 
   const onProceed = () => {
-    switch (acquisitionType) {
-      case StarterpackAcquisitionType.Paid: {
-        const methods = isMainnet
-          ? "ethereum;base;arbitrum;optimism"
-          : "arbitrum;";
-
-        navigate(`/purchase/method/${methods}`);
-        break;
-      }
-      case StarterpackAcquisitionType.Claimed:
-        navigate(`/purchase/wallet/starknet;ethereum`);
-        break;
-      default:
-        throw new Error(`Invalid acquisition type: ${acquisitionType}`);
-    }
+    navigate(`/purchase/wallet/starknet;ethereum`);
   };
-
-  const price = useMemo(() => {
-    const totalUsdc = starterpackItems.reduce(
-      (acc, item) => acc + (item.price || 0n),
-      0n,
-    );
-    const total = usdcToUsd(totalUsdc);
-
-    return {
-      baseCostInCents: total * 100,
-      processingFeeInCents: 0,
-      totalInCents: total * 100,
-    } as CostDetails;
-  }, [starterpackItems]);
 
   return (
     <>
@@ -159,19 +162,12 @@ export function StarterPackInner({
       />
       <LayoutContent>
         <div className="flex flex-col gap-3">
-          <StarterpackReceiving
-            mintAllowance={mintAllowance}
-            starterpackItems={starterpackItems}
-          />
+          <StarterpackReceiving starterpackItems={starterpackItems} />
         </div>
       </LayoutContent>
       <LayoutFooter>
-        {error ? (
-          <ErrorAlert title="Error" description={error.message} />
-        ) : acquisitionType === StarterpackAcquisitionType.Paid ? (
-          <CostBreakdown rails="stripe" costDetails={price} />
-        ) : null}
-        {acquisitionType === StarterpackAcquisitionType.Claimed && !error && (
+        {error && <ErrorAlert title="Error" description={error.message} />}
+        {!error && (
           <Card>
             <CardContent
               className="flex flex-row justify-center items-center text-foreground-300 text-sm cursor-pointer h-[40px]"
@@ -182,9 +178,7 @@ export function StarterPackInner({
           </Card>
         )}
         <Button onClick={onProceed} disabled={!!error || supply === 0}>
-          {acquisitionType === StarterpackAcquisitionType.Paid
-            ? "Purchase"
-            : "Check Eligibility"}
+          Check Eligibility
         </Button>
       </LayoutFooter>
     </>
@@ -192,11 +186,9 @@ export function StarterPackInner({
 }
 
 export const StarterpackReceiving = ({
-  mintAllowance,
   starterpackItems = [],
 }: {
-  mintAllowance?: MintAllowance;
-  starterpackItems?: StarterPackItem[];
+  starterpackItems?: Item[];
 }) => {
   return (
     <div className="flex flex-col gap-2">
@@ -204,24 +196,11 @@ export const StarterpackReceiving = ({
         <h1 className="text-xs font-semibold text-foreground-400">
           You receive
         </h1>
-        {mintAllowance && (
-          <h1 className="text-xs font-semibold text-foreground-400">
-            Mints Remaining: {mintAllowance.limit - mintAllowance.count} /{" "}
-            {mintAllowance.limit}
-          </h1>
-        )}
       </div>
       <div className="flex flex-col gap-2">
-        {starterpackItems
-          .filter((item) => item.type === StarterPackItemType.NONFUNGIBLE)
-          .map((item, index) => (
-            <StarterItem key={index} {...item} />
-          ))}
-        {starterpackItems
-          .filter((item) => item.type === StarterPackItemType.FUNGIBLE)
-          .map((item, index) => (
-            <StarterItem key={index} {...item} />
-          ))}
+        {starterpackItems.map((item, index) => (
+          <StarterItem key={index} {...item} />
+        ))}
       </div>
     </div>
   );
@@ -235,25 +214,13 @@ export function OnchainStarterPackInner({
   description,
   items,
   quote,
-  isQuoteLoading,
   isMainnet,
   error,
 }: {
   name: string;
   description: string;
-  items: Array<{ name: string; description: string; imageUri: string }>;
-  quote?: {
-    basePrice: bigint;
-    referralFee: bigint;
-    protocolFee: bigint;
-    totalCost: bigint;
-    paymentToken: string;
-    paymentTokenMetadata: {
-      symbol: string;
-      decimals: number;
-    };
-  } | null;
-  isQuoteLoading?: boolean;
+  items: Item[];
+  quote?: Quote | null;
   isMainnet?: boolean;
   error?: Error | null;
 }) {
@@ -288,9 +255,9 @@ export function OnchainStarterPackInner({
                 <StarterItem
                   key={index}
                   type={ItemType.NFT}
-                  title={item.name}
-                  subtitle={item.description}
-                  icon={item.imageUri}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  icon={item.icon}
                   showPrice={false}
                 />
               ))}
@@ -302,7 +269,7 @@ export function OnchainStarterPackInner({
         {error ? (
           <ErrorAlert title="Error" description={error.message} />
         ) : quote ? (
-          <OnchainCostBreakdown quote={quote} isQuoteLoading={isQuoteLoading} />
+          <OnchainCostBreakdown quote={quote} />
         ) : (
           <Card className="gap-3">
             <div className="flex flex-row gap-3 h-[40px]">

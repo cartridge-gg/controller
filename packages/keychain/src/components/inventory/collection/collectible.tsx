@@ -10,8 +10,8 @@ import { useMemo } from "react";
 import placeholder from "/placeholder.svg?url";
 import { CollectionHeader } from "./header";
 import { useControllerTheme } from "@/hooks/connection";
-import { useCollectible } from "@/hooks/collectible";
 import { useMarketplace } from "@/hooks/marketplace";
+import { useCollection } from "@/hooks/collection";
 
 export function Collectible() {
   const { address } = useParams<{ address: string }>();
@@ -20,7 +20,11 @@ export function Collectible() {
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { collectible, assets, status } = useCollectible({
+  const {
+    collection: collectible,
+    assets,
+    status,
+  } = useCollection({
     contractAddress: address,
   });
 

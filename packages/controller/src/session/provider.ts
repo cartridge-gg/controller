@@ -10,6 +10,7 @@ import { encode } from "starknet";
 import { API_URL, KEYCHAIN_URL } from "../constants";
 import { ParsedSessionPolicies } from "../policies";
 import BaseProvider from "../provider";
+import { AuthOptions } from "../types";
 import { toWasmPolicies } from "../utils";
 import SessionAccount from "./account";
 
@@ -32,6 +33,7 @@ export type SessionOptions = {
   disconnectRedirectUrl?: string;
   keychainUrl?: string;
   apiUrl?: string;
+  signupOptions?: AuthOptions;
 };
 
 export default class SessionProvider extends BaseProvider {
@@ -48,6 +50,7 @@ export default class SessionProvider extends BaseProvider {
   protected _apiUrl: string;
   protected _publicKey: string;
   protected _sessionKeyGuid: string;
+  protected _signupOptions?: AuthOptions;
   public reopenBrowser: boolean = true;
 
   constructor({
@@ -58,6 +61,7 @@ export default class SessionProvider extends BaseProvider {
     disconnectRedirectUrl,
     keychainUrl,
     apiUrl,
+    signupOptions,
   }: SessionOptions) {
     super();
 
@@ -89,6 +93,7 @@ export default class SessionProvider extends BaseProvider {
     this._disconnectRedirectUrl = disconnectRedirectUrl;
     this._keychainUrl = keychainUrl || KEYCHAIN_URL;
     this._apiUrl = apiUrl ?? API_URL;
+    this._signupOptions = signupOptions;
 
     const account = this.tryRetrieveFromQueryOrStorage();
     if (!account) {
@@ -203,13 +208,17 @@ export default class SessionProvider extends BaseProvider {
         this._sessionKeyGuid = signerToGuid({
           starknet: { privateKey: encode.addHexPrefix(pk) },
         });
-        const url = `${
+        let url = `${
           this._keychainUrl
         }/session?public_key=${this._publicKey}&redirect_uri=${
           this._redirectUrl
         }&redirect_query_name=startapp&policies=${JSON.stringify(
           this._policies,
         )}&rpc_url=${this._rpcUrl}`;
+
+        if (this._signupOptions) {
+          url += `&signers=${encodeURIComponent(JSON.stringify(this._signupOptions))}`;
+        }
 
         window.open(url, "_blank");
       }

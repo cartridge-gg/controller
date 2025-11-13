@@ -8,7 +8,7 @@ import { cleanupCallbacks } from "@/utils/connection/callbacks";
  * @param parseParams - Function to parse the URLSearchParams
  * @returns Parsed params with callbacks, or null if parsing failed
  */
-export function useRouteParams<T extends { id: string }>(
+export function useRouteParams<T extends { id?: string }>(
   parseParams: (searchParams: URLSearchParams) => {
     params: T;
     resolve?: (result: unknown) => void;
@@ -59,7 +59,7 @@ export function useRouteCompletion() {
     if (returnTo) {
       navigate(returnTo, { replace: true });
     } else {
-      void closeModal?.();
+      closeModal?.();
     }
   }, [returnTo, navigate, closeModal]);
 
@@ -71,7 +71,7 @@ export function useRouteCompletion() {
  * @param params - Route params with resolve/reject callbacks
  * @param cancelResponse - Response to send when cancelled
  */
-export function useRouteCallbacks<T extends { id: string }>(
+export function useRouteCallbacks<T extends { id?: string }>(
   params: {
     params: T;
     resolve?: (result: unknown) => void;
@@ -83,7 +83,7 @@ export function useRouteCallbacks<T extends { id: string }>(
   const { setOnModalClose } = useConnection();
 
   const cancelWithoutClosing = useCallback(() => {
-    if (!params) {
+    if (!params || !params.params.id) {
       return;
     }
 

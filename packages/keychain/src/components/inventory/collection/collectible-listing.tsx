@@ -37,7 +37,7 @@ import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
-import { useCollectible } from "@/hooks/collectible";
+import { useCollection } from "@/hooks/collection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
@@ -96,7 +96,11 @@ export function CollectibleListing() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collectible, assets, status } = useCollectible({
+  const {
+    collection: collectible,
+    assets,
+    status,
+  } = useCollection({
     contractAddress: contractAddress,
     tokenIds,
   });
@@ -144,7 +148,7 @@ export function CollectibleListing() {
       return undefined;
     const value = selected.balance.value;
     const max = selected.balance.amount;
-    const total = (value * (split ? price : quantity * price)) / max;
+    const total = (value * (split ? quantity * price : price)) / max;
     return `$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   }, [selected, price, split, quantity]);
 
@@ -154,6 +158,7 @@ export function CollectibleListing() {
         assets: [],
         currency: { name: "", image: "", price: 0, value: "" },
       };
+
     const tokens = Array.from({ length: split ? quantity : 1 }, () => ({
       name:
         !split && quantity > 1 ? `${quantity} ${asset.name}(ડ)` : asset.name,
@@ -324,7 +329,7 @@ export function CollectibleListing() {
                   maximum={balance}
                 />
                 <Price
-                  multiple
+                  multiple={quantity > 1 && split}
                   price={price}
                   conversion={conversion}
                   setPrice={setPrice}

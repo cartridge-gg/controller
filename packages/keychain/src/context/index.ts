@@ -12,11 +12,9 @@ export type {
   StarterpackDetails,
   BackendStarterpackDetails,
   OnchainStarterpackDetails,
-  OnchainItem,
-  OnchainQuote,
 } from "../types/starterpack-types";
 export {
-  isBackendStarterpack,
+  isClaimStarterpack,
   isOnchainStarterpack,
-  detectStarterpackSource,
+  detectStarterpackType,
 } from "../types/starterpack-types";

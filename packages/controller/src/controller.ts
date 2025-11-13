@@ -24,6 +24,7 @@ import {
   ProfileContextTypeVariant,
   ResponseCodes,
   OpenOptions,
+  StarterpackOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
@@ -31,7 +32,7 @@ import { parseChainId } from "./utils";
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
   private options: ControllerOptions;
-  private iframes: IFrames;
+  private iframes?: IFrames;
   private selectedChain: ChainId;
   private chains: Map<ChainId, Chain>;
   private referral: { ref?: string; refGroup?: string };
@@ -70,6 +71,83 @@ export default class ControllerProvider extends BaseProvider {
     };
 
     this.options = { ...options, chains, defaultChainId };
+
+    // Handle automatic redirect to keychain for standalone flow
+    // When controller_redirect is present, automatically redirect to keychain
+    // This establishes first-party storage access for the keychain
+    // IMPORTANT: Check this BEFORE cleaning up URL parameters
+    if (typeof window !== "undefined") {
+      // Check if controller_redirect flag is present (any value or just the key)
+      const hasControllerRedirect = urlParams?.has("controller_redirect");
+      if (hasControllerRedirect) {
+        // Use configured keychain URL (not user-provided)
+        const keychainUrl = new URL(options.url || KEYCHAIN_URL);
+
+        // Build redirect URL preserving all query params and hash except controller_redirect
+        // This matches the behavior of open() method which uses window.location.href
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.delete("controller_redirect");
+        const redirectUrl = currentUrl.toString();
+
+        keychainUrl.searchParams.set("redirect_url", redirectUrl);
+
+        // Preserve the preset if it was configured in options
+        if (options.preset) {
+          keychainUrl.searchParams.set("preset", options.preset);
+        }
+
+        // Redirect to keychain
+        window.location.href = keychainUrl.toString();
+        return; // Stop further initialization
+      }
+    }
+
+    // Auto-detect and set lastUsedConnector from URL parameter
+    // This is set by the keychain after redirect flow completion
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      // Check our dedicated parameter to detect return from standalone auth flow
+      const standaloneParam = urlParams?.get("controller_standalone");
+      if (standaloneParam === "1") {
+        // Store a flag in sessionStorage so lazy-loaded iframes can detect this
+        // Use sessionStorage instead of localStorage to avoid cross-tab issues
+        sessionStorage.setItem("controller_standalone", "1");
+      }
+
+      // Also handle lastUsedConnector for backwards compatibility
+      const lastUsedConnector = urlParams?.get("lastUsedConnector");
+      if (lastUsedConnector) {
+        localStorage.setItem("lastUsedConnector", lastUsedConnector);
+      }
+
+      // Clean up the URL by removing controller flow parameters
+      if (urlParams && window.history?.replaceState) {
+        let needsCleanup = false;
+
+        if (standaloneParam) {
+          urlParams.delete("controller_standalone");
+          needsCleanup = true;
+        }
+
+        if (lastUsedConnector) {
+          urlParams.delete("lastUsedConnector");
+          needsCleanup = true;
+        }
+
+        // Also remove controller_redirect if present (shouldn't be after redirect, but just in case)
+        if (urlParams.has("controller_redirect")) {
+          urlParams.delete("controller_redirect");
+          needsCleanup = true;
+        }
+
+        if (needsCleanup) {
+          const newUrl =
+            window.location.pathname +
+            (urlParams.toString() ? "?" + urlParams.toString() : "") +
+            window.location.hash;
+          window.history.replaceState({}, "", newUrl);
+        }
+      }
+    }
 
     this.initializeChains(chains);
 
@@ -120,6 +198,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async probe(): Promise<WalletAccount | undefined> {
+    if (!this.iframes) {
+      return;
+    }
+
     try {
       // Ensure iframe is created if using lazy loading
       if (!this.iframes.keychain) {
@@ -154,6 +236,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async connect(): Promise<WalletAccount | undefined> {
+    if (!this.iframes) {
+      return;
+    }
+
     if (this.account) {
       return this.account;
     }
@@ -204,6 +290,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async switchStarknetChain(chainId: string): Promise<boolean> {
+    if (!this.iframes) {
+      return false;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return false;
@@ -246,6 +336,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfile(tab: ProfileContextTypeVariant = "inventory") {
+    if (!this.iframes) {
+      return;
+    }
+
     // Profile functionality is now integrated into keychain
     // Navigate keychain iframe to profile page
     if (!this.keychain || !this.iframes.keychain) {
@@ -270,6 +364,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfileTo(to: string) {
+    if (!this.iframes) {
+      return;
+    }
+
     // Profile functionality is now integrated into keychain
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
@@ -292,6 +390,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfileAt(at: string) {
+    if (!this.iframes) {
+      return;
+    }
+
     // Profile functionality is now integrated into keychain
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
@@ -307,6 +409,10 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   openSettings() {
+    if (!this.iframes) {
+      return;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -347,26 +453,41 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   openPurchaseCredits() {
+    if (!this.iframes) {
+      return;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
     this.keychain.navigate("/purchase/credits").then(() => {
-      this.iframes.keychain?.open();
+      this.iframes!.keychain?.open();
     });
   }
 
-  async openStarterPack(starterpackId: string | number): Promise<void> {
+  async openStarterPack(
+    id: string | number,
+    options?: StarterpackOptions,
+  ): Promise<void> {
+    if (!this.iframes) {
+      return;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    await this.keychain.openStarterPack(starterpackId);
+    await this.keychain.openStarterPack(id, options);
     this.iframes.keychain?.open();
   }
 
   async openExecute(calls: any, chainId?: string) {
+    if (!this.iframes) {
+      return;
+    }
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -435,8 +556,8 @@ export default class ControllerProvider extends BaseProvider {
     keychainUrl.searchParams.set("redirect_url", redirectUrl);
 
     // Add preset if provided
-    if (options.preset) {
-      keychainUrl.searchParams.set("preset", options.preset);
+    if (this.options.preset) {
+      keychainUrl.searchParams.set("preset", this.options.preset);
     }
 
     // Add controller configuration parameters
@@ -526,6 +647,28 @@ export default class ControllerProvider extends BaseProvider {
       onClose: this.keychain?.reset,
       onConnect: (keychain) => {
         this.keychain = keychain;
+
+        // Check if we're returning from standalone auth flow
+        const isReturningFromRedirect =
+          typeof window !== "undefined" &&
+          typeof sessionStorage !== "undefined" &&
+          sessionStorage.getItem("controller_standalone") === "1";
+
+        // If returning from redirect flow, immediately request storage access
+        // This ensures the iframe can access the first-party storage established during the redirect
+        if (isReturningFromRedirect) {
+          // Clear the flag after using it
+          sessionStorage.removeItem("controller_standalone");
+
+          if (this.keychain.requestStorageAccess) {
+            this.keychain.requestStorageAccess().catch((e) => {
+              console.warn(
+                "Failed to request storage access after redirect:",
+                e,
+              );
+            });
+          }
+        }
       },
       version: version,
       ref: this.referral.ref,

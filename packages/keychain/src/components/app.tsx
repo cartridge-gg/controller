@@ -34,7 +34,6 @@ import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { Success as PurchaseSuccess } from "./purchasenew/success";
 import { Pending as PurchasePending } from "./purchasenew/pending";
 import { SelectWallet } from "./purchasenew/wallet/wallet";
-import { CryptoCheckout } from "./purchasenew/checkout/crypto";
 import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
 import { Execute } from "./Execute";
@@ -51,7 +50,6 @@ import { Collections } from "./purchasenew/starterpack/collections";
 import { DeployController } from "./DeployController";
 import { useConnection } from "@/hooks/connection";
 import { CreateController, Upgrade } from "./connect";
-import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
@@ -59,24 +57,33 @@ import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
+import { useEffect } from "react";
 
 function DefaultRoute() {
   const account = useAccount();
   const { search } = useLocation();
+  const { navigate } = useNavigation();
 
   // Check if we have a redirect_url parameter
   const searchParams = new URLSearchParams(search);
   const redirectUrl = searchParams.get("redirect_url");
 
-  // If redirect_url is present, route to connect component
-  if (redirectUrl) {
-    return <Navigate to={`/connect${search}`} replace />;
-  }
+  // Use useEffect to handle navigation to avoid updating state during render
+  useEffect(() => {
+    // If redirect_url is present, route to connect component
+    if (redirectUrl) {
+      navigate(`/connect${search}`, { replace: true });
+      return;
+    }
 
-  // When logged in and at root path, redirect to inventory
-  if (account?.username) {
-    return <Navigate to={`/account/${account.username}/inventory`} replace />;
-  }
+    // When logged in and at root path, redirect to inventory
+    // Preserve all URL parameters during redirect
+    if (account?.username) {
+      navigate(`/account/${account.username}/inventory`, {
+        reset: true,
+      });
+    }
+  }, [redirectUrl, account?.username, navigate, search]);
 
   // If no account, render nothing (Authentication component will handle login)
   return null;
@@ -97,7 +104,7 @@ function Authentication() {
     return <Disconnect />;
   }
 
-  // No controller, send to login
+  // No controller, show CreateController
   if (!controller) {
     // Extract signers from URL if present (for connect flow)
     const searchParams = new URLSearchParams(search);
@@ -121,9 +128,14 @@ function Authentication() {
     );
   }
 
+  // Controller exists but upgrade not synced - show CreateController with loading instead of PageLoading
   if (!upgrade.isSynced || isConfigLoading) {
-    // This is likely never observable in a real application but just in case.
-    return <PageLoading />;
+    return (
+      <CreateController
+        isSlot={pathname.startsWith("/slot")}
+        isLoading={true}
+      />
+    );
   }
 
   if (upgrade.available) {
@@ -179,7 +191,6 @@ export function App() {
           <Route path="network/:platforms" element={<ChooseNetwork />} />
           <Route path="wallet/:platforms" element={<SelectWallet />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
-          <Route path="checkout/crypto" element={<CryptoCheckout />} />
           <Route path="checkout/onchain" element={<OnchainCheckout />} />
           <Route path="review" element={<></>} />
           <Route path="pending" element={<PurchasePending />} />

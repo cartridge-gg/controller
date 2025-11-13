@@ -364,10 +364,12 @@ export function CreateControllerView({
 export function CreateController({
   isSlot,
   signers,
+  isLoading: externalIsLoading = false,
 }: {
   isSlot?: boolean;
   error?: Error;
   signers?: AuthOptions;
+  isLoading?: boolean;
 }) {
   const posthog = usePostHog();
   const hasLoggedFocus = useRef(false);
@@ -393,7 +395,7 @@ export function CreateController({
   const { debouncedValue: debouncedValidation } = useDebounce(validation, 200);
 
   const {
-    isLoading,
+    isLoading: internalIsLoading,
     error,
     setError,
     handleSubmit,
@@ -410,6 +412,9 @@ export function CreateController({
     isSlot,
     signers,
   });
+
+  // Combine internal and external loading states
+  const isLoading = internalIsLoading || externalIsLoading;
 
   const handleFormSubmit = useCallback(
     (authenticationMode?: AuthOption, password?: string) => {

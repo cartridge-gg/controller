@@ -9,7 +9,6 @@ import {
   shortString,
   uint256,
 } from "starknet";
-import type { OnchainQuote } from "@/context";
 import {
   fetchSwapQuote,
   USDC_ADDRESSES,
@@ -21,6 +20,7 @@ import {
   ETH_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
 import { getCurrentReferral } from "@/utils/referral";
+import { Quote } from "@/types/starterpack-types";
 
 interface TokenMetadata {
   symbol: string;
@@ -127,8 +127,13 @@ async function fetchTokenMetadata(
     } as Call),
   ]);
 
+  let symbol = shortString.decodeShortString(symbolRes[0]);
+  if (symbolRes.length > 1) {
+    symbol = shortString.decodeShortString(symbolRes[1]);
+  }
+
   return {
-    symbol: shortString.decodeShortString(symbolRes[0]),
+    symbol,
     decimals: Number(decimalsRes[0]),
   };
 }
@@ -148,7 +153,7 @@ function chainIdToEkuboNetwork(chainId: string): EkuboNetwork {
   }
 }
 
-export const useStarterPackOnchain = (
+export const useOnchainStarterpack = (
   starterpackId?: number,
   amount?: number,
   targetToken?: string, // Token to convert prices to (defaults to USDC)
@@ -162,7 +167,7 @@ export const useStarterPackOnchain = (
   const [metadata, setMetadata] = useState<StarterPackMetadataOnchain | null>(
     null,
   );
-  const [quote, setQuote] = useState<OnchainQuote | null>(null);
+  const [quote, setQuote] = useState<Quote | null>(null);
   const [supply, setSupply] = useState<number | undefined>(undefined);
 
   // Auto-detect if there's a valid referral for the current game
@@ -194,16 +199,29 @@ export const useStarterPackOnchain = (
           metadataRes[Symbol.iterator](),
         );
         const metadataString = metadataByteArray.decodeUtf8();
-        const rawMetadata = JSON.parse(
-          metadataString,
-        ) as StarterPackMetadataOnchainRaw;
+
+        let rawMetadata: StarterPackMetadataOnchainRaw;
+        try {
+          rawMetadata = JSON.parse(
+            metadataString,
+          ) as StarterPackMetadataOnchainRaw;
+        } catch (parseError) {
+          console.error(
+            "Failed to parse starterpack metadata JSON:",
+            parseError,
+          );
+          console.error("Metadata string:", metadataString);
+          throw new Error(
+            "Invalid starterpack metadata. Please contact the starterpack creator.",
+          );
+        }
 
         // Convert snake_case to camelCase
         const metadata = convertMetadata(rawMetadata);
 
         setMetadata(metadata);
       } catch (error) {
-        console.error(error);
+        console.error("Failed to fetch starterpack metadata:", error);
         setError(error as Error);
       } finally {
         setIsLoading(false);
@@ -243,7 +261,7 @@ export const useStarterPackOnchain = (
           high: quoteRes[7],
         });
 
-        const quote: OnchainQuote = {
+        const quote: Quote = {
           basePrice: uint256.uint256ToBN({
             low: quoteRes[0],
             high: quoteRes[1],

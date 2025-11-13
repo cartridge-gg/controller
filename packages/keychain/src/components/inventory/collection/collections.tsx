@@ -1,9 +1,8 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { useCollections } from "@/hooks/collection";
+import { ERC1155, useCollections } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
-import { useCollectibles } from "@/hooks/collectible";
 import { useControllerTheme } from "@/hooks/connection";
 
 import { getChecksumAddress } from "starknet";
@@ -11,24 +10,23 @@ import { useMarketplace } from "@/hooks/marketplace";
 
 export function Collections() {
   const { collections, status: CollectionsStatus } = useCollections();
-  const { collectibles, status: CollectiblesStatus } = useCollectibles();
   const { getCollectionOrders } = useMarketplace();
   const theme = useControllerTheme();
   const [searchParams] = useSearchParams();
 
   const status = useMemo(() => {
-    if (CollectionsStatus === "loading" && CollectiblesStatus === "loading") {
+    if (CollectionsStatus === "loading") {
       return "loading";
     }
-    if (CollectionsStatus === "error" || CollectiblesStatus === "error") {
+    if (CollectionsStatus === "error") {
       return "error";
     }
     return "success";
-  }, [CollectionsStatus, CollectiblesStatus]);
+  }, [CollectionsStatus]);
 
   return status === "loading" ? (
     <LoadingState />
-  ) : status === "error" || (!collections.length && !collectibles.length) ? (
+  ) : status === "error" || !collections.length ? (
     <EmptyState />
   ) : (
     <div className="grid grid-cols-2 gap-4 place-items-center select-none">
@@ -43,7 +41,7 @@ export function Collections() {
           <Link
             className="w-full group select-none"
             draggable={false}
-            to={`./collection/${collection.address}?${searchParams.toString()}`}
+            to={`./${collection.type === ERC1155 ? "collectible" : "collection"}/${collection.address}?${searchParams.toString()}`}
             key={collection.address}
           >
             <CollectibleCard
@@ -51,34 +49,6 @@ export function Collections() {
               title={collection.name}
               images={[...collection.imageUrls, placeholder]}
               totalCount={collection.totalCount}
-              listingCount={listingCount}
-              selectable={false}
-            />
-          </Link>
-        );
-      })}
-      {collectibles.map((collectible) => {
-        const collectionAddress = getChecksumAddress(
-          collectible.address || "0x0",
-        );
-        const collectionOrders = getCollectionOrders(collectionAddress);
-        const listingCount = Object.values(collectionOrders).reduce(
-          (acc, orders) => {
-            return acc + orders.length;
-          },
-          0,
-        );
-        return (
-          <Link
-            className="w-full group select-none"
-            draggable={false}
-            to={`./collectible/${collectible.address}?${searchParams.toString()}`}
-            key={collectible.address}
-          >
-            <CollectibleCard
-              title={collectible.name}
-              images={[...collectible.imageUrls, placeholder]}
-              totalCount={collectible.totalCount}
               listingCount={listingCount}
               selectable={false}
             />

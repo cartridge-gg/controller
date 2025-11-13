@@ -19,6 +19,7 @@ import { useConnection } from "./connection";
 import { parseSignature } from "viem";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 import { evmNetworks } from "@/components/purchasenew/wallet/config";
+import { signMessageWithPrivateKey } from "@/utils/eth-signing";
 
 export interface MerkleClaim {
   key: string;
@@ -40,10 +41,12 @@ export const useMerkleClaim = ({
   keys,
   address,
   type,
+  preimage,
 }: {
   keys: string;
   address: string;
-  type: ExternalWalletType | "controller";
+  type: ExternalWalletType | "controller" | "preimage";
+  preimage?: string;
 }) => {
   const { controller, isMainnet, externalSignMessage, externalSignTypedData } =
     useConnection();
@@ -187,12 +190,21 @@ export const useMerkleClaim = ({
         let signature: Calldata;
         if (isEvm) {
           const msg = evmMessage(controller.address());
-          const { result, error } = await externalSignMessage(address, msg);
-          if (error) {
-            throw new Error(error);
+
+          let signatureResult: string;
+
+          // Use preimage signing if available, otherwise use external wallet
+          if (preimage) {
+            signatureResult = await signMessageWithPrivateKey(msg, preimage);
+          } else {
+            const { result, error } = await externalSignMessage(address, msg);
+            if (error) {
+              throw new Error(error);
+            }
+            signatureResult = result as `0x${string}`;
           }
 
-          const { r, s, v } = parseSignature(result as `0x${string}`);
+          const { r, s, v } = parseSignature(signatureResult as `0x${string}`);
           signature = CallData.compile([
             num.toHex(v!),
             cairo.uint256(r),
@@ -201,6 +213,11 @@ export const useMerkleClaim = ({
 
           signature.unshift("0x0"); // Enum Ethereum Signature
         } else {
+          if (preimage) {
+            throw new Error(
+              "Ethereum preimage is not supported for Starknet claims",
+            );
+          }
           const msg: TypedData = starknetMessage(
             controller.address(),
             isMainnet,
@@ -252,6 +269,7 @@ export const useMerkleClaim = ({
       isMainnet,
       externalSignMessage,
       externalSignTypedData,
+      preimage,
     ],
   );
 

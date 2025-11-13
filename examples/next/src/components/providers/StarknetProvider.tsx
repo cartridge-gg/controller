@@ -2,7 +2,7 @@
 
 import ControllerConnector from "@cartridge/connector/controller";
 import SessionConnector from "@cartridge/connector/session";
-import { SessionPolicies } from "@cartridge/controller";
+import { AuthOptions, SessionPolicies } from "@cartridge/controller";
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import {
   cartridge,
@@ -54,14 +54,13 @@ const policies: SessionPolicies = {
           name: "approve",
           entrypoint: "approve",
           // amount: "0xffffffffffffffffffffffffffffffff",
-          amount: "0x3",
+          amount: "0x1774160BC6690000",
           description:
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
         },
         { name: "transfer", entrypoint: "transfer" },
         { name: "mint", entrypoint: "mint" },
         { name: "burn", entrypoint: "burn" },
-        { name: "allowance", entrypoint: "allowance" },
       ],
     },
     [STRK_CONTRACT_ADDRESS]: {
@@ -185,6 +184,16 @@ if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
 //   });
 // }
 
+const signupOptions: AuthOptions = [
+  "google",
+  "webauthn",
+  "discord",
+  "walletconnect",
+  "metamask",
+  "password",
+  // "rabby",
+];
+
 const controller = new ControllerConnector({
   policies,
   // With the defaults, you can omit chains if you want to use:
@@ -196,15 +205,9 @@ const controller = new ControllerConnector({
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
   url: "https://x.cartridge.gg",
-  signupOptions: [
-    "google",
-    "webauthn",
-    "discord",
-    "password",
-  ],
-  // slot: "arcade-pistols",
-  // namespace: "pistols",
-  preset: "pistols",
+  signupOptions,
+  slot: "arcade-pistols",
+  namespace: "pistols",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
@@ -221,6 +224,7 @@ const session = new SessionConnector({
   disconnectRedirectUrl: "whatsapp://",
   keychainUrl: getKeychainUrl(),
   apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
+  signupOptions,
 });
 
 export function StarknetProvider({ children }: PropsWithChildren) {

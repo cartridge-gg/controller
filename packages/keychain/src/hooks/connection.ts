@@ -36,7 +36,14 @@ import {
 } from "@cartridge/ui/utils";
 import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import { SemVer } from "semver";
 import {
@@ -210,6 +217,17 @@ export function useConnectionValue() {
   }, [controller, setRpcUrl]);
 
   const [searchParams] = useSearchParams();
+  const urlParamsRef = useRef<{
+    theme: string | null;
+    preset: string | null;
+    policies: string | null;
+    version: string | null;
+    project: string | null;
+    namespace: string | null;
+    tokens: string[];
+    ref: string | null;
+    refGroup: string | null;
+  }>();
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(searchParams);
@@ -242,17 +260,22 @@ export function useConnectionValue() {
       setRpcUrl(decodeURIComponent(rpcUrl));
     }
 
-    return {
-      theme,
-      preset,
-      policies,
-      version,
-      project,
-      namespace,
-      tokens,
-      ref,
-      refGroup,
+    // Build params object, preserving previous values for any param that is null/empty
+    const newParams = {
+      theme: theme || urlParamsRef.current?.theme || null,
+      preset: preset || urlParamsRef.current?.preset || null,
+      policies: policies || urlParamsRef.current?.policies || null,
+      version: version || urlParamsRef.current?.version || null,
+      project: project || urlParamsRef.current?.project || null,
+      namespace: namespace || urlParamsRef.current?.namespace || null,
+      tokens: erc20Param ? tokens : urlParamsRef.current?.tokens || tokens,
+      ref: ref || urlParamsRef.current?.ref || null,
+      refGroup: refGroup || urlParamsRef.current?.refGroup || null,
     };
+
+    // Store the new params for future reference
+    urlParamsRef.current = newParams;
+    return newParams;
   }, [searchParams]);
 
   // Fetch chain ID from RPC provider when rpcUrl changes
@@ -398,8 +421,8 @@ export function useConnectionValue() {
 
     const allowedOrigins = toArray(configData.origin as string | string[]);
 
-    // In standalone mode (no parent origin), verify preset if redirect_url matches preset whitelist
-    if (!origin) {
+    // In standalone mode (not iframe), verify preset if redirect_url matches preset whitelist
+    if (!isIframe()) {
       const searchParams = new URLSearchParams(window.location.search);
       const redirectUrl = searchParams.get("redirect_url");
 
@@ -430,10 +453,14 @@ export function useConnectionValue() {
 
     // Embedded mode: verify against parent origin
     // Always consider localhost as verified for development (not 127.0.0.1)
-    const isLocalhost = origin.includes("localhost");
-    const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
-    const finalVerified = isLocalhost || isOriginAllowed;
-    setVerified(finalVerified);
+    if (origin) {
+      const isLocalhost = origin.includes("localhost");
+      const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
+      const finalVerified = isLocalhost || isOriginAllowed;
+      setVerified(finalVerified);
+    } else {
+      setVerified(false);
+    }
   }, [origin, configData, isConfigLoading]);
 
   // Store referral data when URL params are available
@@ -570,30 +597,37 @@ export function useConnectionValue() {
     } else {
       const localWalletBridge = new WalletBridge();
       const iframeMethods = localWalletBridge.getIFrameMethods();
-      const currentOrigin = window.location.origin;
 
-      setOrigin(currentOrigin);
+      // In standalone mode with redirect, use redirect URI's origin for app ID
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get("redirect_url");
+      let appOrigin = window.location.origin;
+
+      if (redirectUrl) {
+        try {
+          const redirectUrlObj = new URL(redirectUrl);
+          appOrigin = redirectUrlObj.origin;
+        } catch (error) {
+          console.error("Failed to parse redirect_url for app ID:", error);
+          // Fall back to window.location.origin if redirect URL is invalid
+        }
+      }
+
+      setOrigin(appOrigin);
 
       setParent({
-        close: () => {
-          throw new Error("Can't call this function when not in an iFrame");
-        },
-        reload: () => {
-          throw new Error("Can't call this function when not in an iFrame");
-        },
-        externalDetectWallets:
-          iframeMethods.externalDetectWallets(currentOrigin),
-        externalConnectWallet:
-          iframeMethods.externalConnectWallet(currentOrigin),
-        externalSignMessage: iframeMethods.externalSignMessage(currentOrigin),
-        externalSignTypedData:
-          iframeMethods.externalSignTypedData(currentOrigin),
+        close: async () => {},
+        reload: async () => {},
+        externalDetectWallets: iframeMethods.externalDetectWallets(appOrigin),
+        externalConnectWallet: iframeMethods.externalConnectWallet(appOrigin),
+        externalSignMessage: iframeMethods.externalSignMessage(appOrigin),
+        externalSignTypedData: iframeMethods.externalSignTypedData(appOrigin),
         externalSendTransaction:
-          iframeMethods.externalSendTransaction(currentOrigin),
-        externalGetBalance: iframeMethods.externalGetBalance(currentOrigin),
-        externalSwitchChain: iframeMethods.externalSwitchChain(currentOrigin),
+          iframeMethods.externalSendTransaction(appOrigin),
+        externalGetBalance: iframeMethods.externalGetBalance(appOrigin),
+        externalSwitchChain: iframeMethods.externalSwitchChain(appOrigin),
         externalWaitForTransaction:
-          iframeMethods.externalWaitForTransaction(currentOrigin),
+          iframeMethods.externalWaitForTransaction(appOrigin),
       });
     }
 

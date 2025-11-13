@@ -76,7 +76,7 @@ export function AggregateCard({
             icon={icon ?? <CodeIcon variant="solid" />}
             centered={true}
           />
-          <p>{`Approve ${title}`}</p>
+          <p>{`Authorize ${title}`}</p>
         </AccordionTrigger>
 
         <AccordionContent className="flex flex-col gap-2 px-3 pb-3">

@@ -14,7 +14,6 @@ import {
   StarknetIcon,
   Thumbnail,
   TokenSelectHeader,
-  Spinner,
 } from "@cartridge/ui";
 import { CostDetails } from "../types";
 import {
@@ -24,7 +23,7 @@ import {
 } from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
-import type { OnchainQuote } from "@/context";
+import type { Quote } from "@/types/starterpack-types";
 import { useCallback, useMemo, useEffect } from "react";
 import { usePurchaseContext } from "@/context";
 import { num } from "starknet";
@@ -101,13 +100,11 @@ export function OnchainCostBreakdown({
   quote,
   platform,
   openFeesTooltip = false,
-  isQuoteLoading = false,
   showTokenSelector = false,
 }: {
-  quote: OnchainQuote;
+  quote: Quote;
   platform?: ExternalPlatform;
   openFeesTooltip?: boolean;
-  isQuoteLoading?: boolean;
   showTokenSelector?: boolean;
 }) {
   const {
@@ -209,27 +206,25 @@ export function OnchainCostBreakdown({
                     {formatAmount(paymentAmount)} {symbol}
                   </span>
                   {!isPaymentTokenSameAsSelected &&
-                    (isQuoteLoading || isFetchingConversion ? (
-                      <Spinner />
-                    ) : convertedEquivalent !== null && displayToken ? (
+                    convertedEquivalent !== null &&
+                    displayToken &&
+                    !isFetchingConversion && (
                       <span className="text-foreground-100">
                         {formatAmount(convertedEquivalent)}{" "}
                         {convertedPrice?.tokenMetadata.symbol}
                       </span>
-                    ) : null)}
+                    )}
                 </>
               ) : (
                 <>
                   <span className="text-foreground-400">
                     {formatAmount(paymentAmount)} {symbol}
                   </span>
-                  {isQuoteLoading || isFetchingConversion ? (
-                    <Spinner size="sm" />
-                  ) : convertedEquivalent !== null ? (
+                  {convertedEquivalent !== null && !isFetchingConversion && (
                     <span className="text-foreground-100">
                       ${formatAmount(convertedEquivalent)}
                     </span>
-                  ) : null}
+                  )}
                 </>
               )}
             </div>

@@ -10,7 +10,11 @@ import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
-import { hasStorageAccessFactory } from "./storage-access";
+import {
+  hasStorageAccessFactory,
+  requestStorageAccessFactory,
+} from "./storage-access";
+import { StarterpackOptions } from "@cartridge/controller";
 
 export type { ControllerError } from "./execute";
 
@@ -45,6 +49,7 @@ export function connectToController<ParentMethods extends object>({
       openSettings: () => openSettingsFactory(),
       navigate: () => navigateFactory(),
       hasStorageAccess: () => hasStorageAccessFactory(),
+      requestStorageAccess: () => requestStorageAccessFactory(),
       reset: () => () => {
         // Reset handled by navigation
       },
@@ -65,9 +70,13 @@ export function connectToController<ParentMethods extends object>({
       openPurchaseCredits: () => () => {
         navigate("/funding", { replace: true });
       },
-      openStarterPack: () => (starterpackId: string) => {
-        navigate(`/purchase/starterpack/${starterpackId}`, { replace: true });
-      },
+      openStarterPack:
+        () => (id: string | number, options?: StarterpackOptions) => {
+          navigate(
+            `/purchase/starterpack/${id}${options?.preimage ? `?preimage=${options.preimage}` : ""}`,
+            { replace: true },
+          );
+        },
       switchChain: () => switchChain({ setController, setRpcUrl }),
     },
   });

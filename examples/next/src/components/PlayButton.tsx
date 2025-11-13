@@ -14,10 +14,14 @@ interface Game {
 const GAMES: Game[] = [
   {
     name: "Loot Survivor",
-    url: "https://x.cartridge.gg?redirect_url=https://lootsurvivor.io&preset=loot-survivor",
+    url: "https://lootsurvivor.io?controller_redirect",
     description: "Survive the adventure, earn rewards",
   },
-  // Add more games here as needed
+  {
+    name: "Nums",
+    url: "https://nums-blond.vercel.app?controller_redirect",
+    description: "Survive the adventure, earn rewards",
+  },
 ];
 
 export const PlayButton = () => {

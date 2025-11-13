@@ -7,13 +7,14 @@ import {
   useCallback,
 } from "react";
 import { useConnection } from "@/hooks/connection";
-import { ERC20 as ERC20Contract } from "@cartridge/ui/utils";
 import {
-  Price,
-  usePriceByAddressesQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+  ERC20 as ERC20Contract,
+  USDC_CONTRACT_ADDRESS,
+} from "@cartridge/ui/utils";
+import { Price } from "@cartridge/ui/utils/api/cartridge";
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
+import { fetchSwapQuoteInUsdc, chainIdToEkuboNetwork } from "@/utils/ekubo";
 
 export const DEFAULT_TOKENS = [
   {
@@ -82,11 +83,25 @@ export function TokensProvider({
   feeToken = DEFAULT_FEE_TOKEN,
   refetchInterval = 30000,
 }: TokensProviderProps) {
-  const { controller } = useConnection();
+  const { controller, chainId } = useConnection();
   const [tokens, setTokens] = useState<Record<string, ERC20>>({});
-  const [addresses, setAdresses] = useState<string[]>([]);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [isPricesLoaded, setIsPricesLoaded] = useState(false);
+
+  // Memoize addresses to prevent unnecessary re-renders and API calls
+  const addresses = useMemo(() => Object.keys(tokens).sort(), [tokens]);
+
+  // Debounced addresses - only updates after 1 second of no changes
+  // This prevents excessive API calls when registering multiple tokens rapidly
+  const [debouncedAddresses, setDebouncedAddresses] = useState<string[]>([]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedAddresses(addresses);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [addresses]);
 
   useEffect(() => {
     if (!controller) {
@@ -122,7 +137,6 @@ export function TokensProvider({
     );
 
     setTokens(initialTokens);
-    setAdresses(Object.keys(initialTokens));
 
     // Then update balances asynchronously
     Object.keys(initialTokens).forEach(async (address) => {
@@ -149,18 +163,39 @@ export function TokensProvider({
     async () => {
       if (!controller) return;
 
-      const updatedTokens = { ...tokens };
+      // Get fresh token addresses to query
+      const tokenAddresses = Object.keys(tokens);
+
+      // Fetch balances for all current tokens
+      const balanceUpdates: Record<string, bigint> = {};
       await Promise.all(
-        Object.values(updatedTokens).map(async (token) => {
-          const balance = await token.contract.balanceOf(controller.address());
-          updatedTokens[token.address] = {
-            ...token,
-            balance,
-          };
+        tokenAddresses.map(async (address) => {
+          try {
+            const token = tokens[address];
+            const balance = await token.contract.balanceOf(
+              controller.address(),
+            );
+            balanceUpdates[address] = balance;
+          } catch (error) {
+            console.error(`Error fetching balance for ${address}:`, error);
+          }
         }),
       );
 
-      setTokens(updatedTokens);
+      // Use functional update to merge with latest state
+      setTokens((prevTokens) => {
+        const updatedTokens = { ...prevTokens };
+        Object.entries(balanceUpdates).forEach(([address, balance]) => {
+          if (updatedTokens[address]) {
+            updatedTokens[address] = {
+              ...updatedTokens[address],
+              balance,
+            };
+          }
+        });
+        return updatedTokens;
+      });
+
       if (!initialLoadComplete) {
         setInitialLoadComplete(true);
       }
@@ -172,25 +207,79 @@ export function TokensProvider({
     },
   );
 
+  // Fetch prices using Ekubo
   const {
     data: priceData,
     isLoading: isPriceLoading,
     error: priceError,
-  } = usePriceByAddressesQuery(
-    {
-      addresses,
+  } = useQuery(
+    ["token-prices-ekubo", debouncedAddresses.join(","), chainId],
+    async () => {
+      if (debouncedAddresses.length === 0 || !chainId) return [];
+
+      const network = chainIdToEkuboNetwork(chainId);
+      const USDC_DECIMALS = 6;
+      const ONE_USDC = BigInt(10 ** USDC_DECIMALS); // 1 USDC
+
+      const prices = await Promise.allSettled(
+        debouncedAddresses.map(async (address) => {
+          try {
+            const checksumAddress = getChecksumAddress(address);
+
+            // Get token decimals - tokens should exist by the time price query runs
+            const token = tokens[checksumAddress];
+            const tokenDecimals = token?.decimals ?? 18; // Default to 18 if not found
+
+            // USDC price is always 1:1
+            if (checksumAddress === getChecksumAddress(USDC_CONTRACT_ADDRESS)) {
+              return {
+                base: address,
+                amount: String(ONE_USDC),
+                decimals: USDC_DECIMALS,
+                quote: "USDC",
+              };
+            }
+
+            // Fetch quote from Ekubo: how many token base units = 1 USDC
+            const tokenAmount = await fetchSwapQuoteInUsdc(
+              address,
+              BigInt(10 ** (tokenDecimals + 1)),
+              network,
+            );
+
+            return {
+              base: address,
+              amount: String(tokenAmount / BigInt(10)),
+              decimals: USDC_DECIMALS,
+              quote: "USDC",
+            };
+          } catch (error) {
+            console.error(`Failed to fetch price for ${address}:`, error);
+            return null;
+          }
+        }),
+      );
+
+      return prices
+        .filter(
+          (result): result is PromiseFulfilledResult<Price | null> =>
+            result.status === "fulfilled",
+        )
+        .map((result) => result.value)
+        .filter((price): price is Price => price !== null);
     },
     {
       refetchInterval,
-      enabled: addresses.length > 0,
+      enabled: debouncedAddresses.length > 0,
+      staleTime: 30000,
     },
   );
 
   useEffect(() => {
-    if (priceData?.priceByAddresses) {
+    if (priceData) {
       setTokens((prevTokens) => {
         const newTokens = { ...prevTokens };
-        priceData.priceByAddresses.forEach((price) => {
+        priceData.forEach((price) => {
           const address = getChecksumAddress(price.base);
           if (newTokens[address]) {
             newTokens[address] = {
@@ -203,16 +292,14 @@ export function TokensProvider({
         return newTokens;
       });
     }
-  }, [priceData?.priceByAddresses, addresses, isPricesLoaded]);
+  }, [priceData]);
 
   const registerPair = useCallback(
     async (address: string) => {
       if (!controller) return;
 
       const normalizedAddress = getChecksumAddress(address);
-      if (tokens[normalizedAddress]) return;
 
-      const newTokens = { ...tokens };
       const contract = new ERC20Contract({
         address: normalizedAddress,
         provider: controller.provider,
@@ -223,7 +310,7 @@ export function TokensProvider({
         await contract.init();
         const metadata = contract.metadata();
 
-        newTokens[normalizedAddress] = {
+        const newToken = {
           name: metadata.name,
           symbol: metadata.symbol,
           decimals: metadata.decimals,
@@ -233,13 +320,22 @@ export function TokensProvider({
           balance,
         };
 
-        setTokens(newTokens);
-        setAdresses(Object.keys(newTokens));
-      } catch (error) {
-        console.error(`Failed to load token ${normalizedAddress}:`, error);
+        setTokens((prevTokens) => {
+          // Check if token already exists
+          if (prevTokens[normalizedAddress]) {
+            return prevTokens;
+          }
+
+          return {
+            ...prevTokens,
+            [normalizedAddress]: newToken,
+          };
+        });
+      } catch {
+        // Failed to load token - skip
       }
     },
-    [controller, tokens],
+    [controller],
   );
 
   const value = useMemo(
