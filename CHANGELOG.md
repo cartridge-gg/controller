@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.2-alpha.4] - 2025-11-13
+
+### ✨ New Features
+- **@cartridge/keychain**: Added booster pack claim page for DevConnect rewards, enabling users to claim credits, tokens, and NFTs using private keys from reward URLs with comprehensive signature validation and post-claim actions (#2160)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Refactored session architecture to move app_id from account constructors to session-specific operations, enabling a single shared controller instance to serve multiple applications through app-specific sessions (#2220)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed standalone authentication flow storage access issues by adding debug logging for redirect detection, updating StandaloneConnect UI with generic permission messages, and removing pre-authenticated account display for improved security and clarity (#2217)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Updated to commit df8934d for improved design consistency and functionality (#2218)
+
 ## [0.11.2-alpha.3] - 2025-11-12
 
 ### ✨ New Features
