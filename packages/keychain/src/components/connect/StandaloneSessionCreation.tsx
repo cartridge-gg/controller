@@ -7,7 +7,7 @@ import { now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import { useCreateSession, hasApprovalPolicies } from "@/hooks/session";
 import type { ControllerError } from "@/utils/connection";
-import { requestStorageAccessFactory } from "@/utils/connection/storage-access";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { safeRedirect } from "@/utils/url-validator";
 import {
   Button,
@@ -91,7 +91,6 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
           );
 
           // Request storage access first
-          const requestStorageAccess = requestStorageAccessFactory();
           const granted = await requestStorageAccess();
 
           if (!granted) {
@@ -154,7 +153,6 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
         setIsConnecting(true);
 
         // Request storage access (user gesture!)
-        const requestStorageAccess = requestStorageAccessFactory();
         const granted = await requestStorageAccess();
 
         if (!granted) {

@@ -122,7 +122,6 @@ function Authentication() {
     const shouldShowSessionConsent = !verified || hasManualPolicies;
 
     if (shouldShowSessionConsent) {
-      console.log("StandaloneSessionCreation");
       // Show session creation consent UI for unverified presets or custom policies
       return <StandaloneSessionCreation username={username} />;
     } else {

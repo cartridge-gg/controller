@@ -1,5 +1,5 @@
 import { useConnection } from "@/hooks/connection";
-import { requestStorageAccessFactory } from "@/utils/connection/storage-access";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { safeRedirect } from "@/utils/url-validator";
 import {
   AlertIcon,
@@ -24,7 +24,6 @@ export function StandaloneConnect({ username }: { username?: string }) {
   const [error, setError] = useState<string | null>(null);
 
   const redirectUrl = searchParams.get("redirect_url");
-  console.log("StandaloneConnect: redirectUrl=", redirectUrl);
 
   const handleConnect = useCallback(async () => {
     if (!redirectUrl) {
@@ -39,7 +38,6 @@ export function StandaloneConnect({ username }: { username?: string }) {
         "[Standalone Flow] StandaloneConnect: Requesting storage access",
       );
 
-      const requestStorageAccess = requestStorageAccessFactory();
       const granted = await requestStorageAccess();
 
       if (!granted) {

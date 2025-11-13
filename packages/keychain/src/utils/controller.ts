@@ -94,8 +94,6 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    console.log(appId);
-
     return await this.cartridge.createSession(
       appId,
       toWasmPolicies(policies),
@@ -307,14 +305,12 @@ export default class Controller {
   }
 
   static async apiLogin({
-    appId,
     classHash,
     rpcUrl,
     address,
     username,
     owner,
   }: {
-    appId: string;
     classHash: string;
     rpcUrl: string;
     address: string;
@@ -330,8 +326,6 @@ export default class Controller {
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
 
-    console.log("apiLogin", appId);
-
     const controller = Object.create(Controller.prototype) as Controller;
     controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
     controller.cartridgeMeta = accountWithMeta.meta();
@@ -341,14 +335,12 @@ export default class Controller {
   }
 
   static async create({
-    appId,
     classHash,
     rpcUrl,
     address,
     username,
     owner,
   }: {
-    appId: string;
     classHash: string;
     rpcUrl: string;
     address: string;
@@ -363,8 +355,6 @@ export default class Controller {
       owner,
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
-
-    console.log("create", appId);
 
     const controller = Object.create(Controller.prototype) as Controller;
     controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
@@ -398,7 +388,6 @@ export default class Controller {
     controller: Controller;
     session: JsRevokableSession;
   }> {
-    console.log("login", appId);
     const loginResult = await ControllerFactory.login(
       username,
       classHash,

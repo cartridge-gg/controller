@@ -256,13 +256,6 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (typeof document !== "undefined" && !!document.hasStorageAccess) {
-      const ok = await document.hasStorageAccess();
-      if (!ok) {
-        await document.requestStorageAccess();
-      }
-    }
-
     this.iframes.keychain.open();
 
     try {
@@ -322,13 +315,6 @@ export default class ControllerProvider extends BaseProvider {
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
-    }
-
-    if (typeof document !== "undefined" && !!document.hasStorageAccess) {
-      const ok = await document.hasStorageAccess();
-      if (!ok) {
-        await document.requestStorageAccess();
-      }
     }
 
     this.account = undefined;
@@ -672,7 +658,6 @@ export default class ControllerProvider extends BaseProvider {
       needsSessionCreation: isReturningFromRedirect,
       username: username,
       onSessionCreated: async () => {
-        console.log("onSessionCreated");
         // Re-probe to establish connection now that storage access is granted and session created
         await this.probe();
       },

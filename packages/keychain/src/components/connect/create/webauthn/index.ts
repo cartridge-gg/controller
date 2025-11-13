@@ -78,7 +78,6 @@ export function useWebauthnAuthentication() {
       let controller: Controller;
       if (isSlot) {
         controller = await Controller.apiLogin({
-          appId: origin,
           classHash: controllerQuery.constructorCalldata[0],
           rpcUrl,
           address: controllerQuery.address,
