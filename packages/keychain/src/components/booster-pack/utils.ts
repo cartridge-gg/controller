@@ -121,9 +121,7 @@ export async function claimBoosterCredits(
  * @param assetValue - Asset value already scaled by backend (e.g., 150, 10, 3000)
  * @returns Full URL to the asset image
  */
-export function assetTokenImageUrl(
-  assetType: string,
-): string {
+export function assetTokenImageUrl(assetType: string): string {
   const baseUrl =
     "https://storage.googleapis.com/c7e-prod-static/media/devconnect";
 

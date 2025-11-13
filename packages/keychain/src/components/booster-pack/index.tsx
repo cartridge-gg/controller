@@ -151,7 +151,10 @@ export function BoosterPack() {
       setIsLoading(false);
 
       // Only show animation for mystery_asset type
-      if (assetInfo.type.toLowerCase() === "mystery_asset") {
+      if (
+        assetInfo.type.toLowerCase() === "mystery" ||
+        assetInfo.type.toLowerCase() === "mystery_asset"
+      ) {
         setIsRevealing(true);
 
         // Create specific cards for mystery asset reveal
