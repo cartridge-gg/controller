@@ -23,6 +23,7 @@ import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SpendingLimitPage } from "./SpendingLimitPage";
 import { processPolicies } from "./CreateSession";
+import Controller from "@/utils/controller";
 
 /**
  * StandaloneSessionCreation component for creating sessions in standalone auth flow.
@@ -36,12 +37,11 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
-  const [hasAutoApproved, setHasAutoApproved] = useState(false);
   const createButtonRef = useRef<HTMLButtonElement>(null);
   const [searchParams] = useSearchParams();
 
   const { duration, isEditable, onToggleEditable } = useCreateSession();
-  const { controller, theme, parent, closeModal, origin, policies } =
+  const { setController, theme, parent, closeModal, origin, policies } =
     useConnection();
 
   const redirectUrl = searchParams.get("redirect_url");
@@ -67,87 +67,8 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
     return duration + now();
   }, [duration]);
 
-  // Auto-approve verified presets without token approvals
-  useEffect(() => {
-    if (
-      !controller ||
-      !policies ||
-      !redirectUrl ||
-      hasAutoApproved ||
-      isConnecting
-    ) {
-      return;
-    }
-
-    // Only auto-approve verified presets without token approvals
-    if (policies.verified && !hasTokenApprovals) {
-      setHasAutoApproved(true);
-
-      const autoCreateSession = async () => {
-        try {
-          setIsConnecting(true);
-          console.log(
-            "[Standalone Flow] StandaloneSessionCreation: Auto-approving verified preset",
-          );
-
-          // Request storage access first
-          const granted = await requestStorageAccess();
-
-          if (!granted) {
-            throw new Error("Storage access was not granted");
-          }
-
-          // Create session with verified policies
-          const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(origin, expiresAt, processedPolicies);
-
-          // Notify parent
-          if (
-            parent &&
-            "onSessionCreated" in parent &&
-            typeof parent.onSessionCreated === "function"
-          ) {
-            await parent.onSessionCreated();
-          }
-
-          // Redirect back to application
-          if (redirectUrl) {
-            safeRedirect(redirectUrl, true);
-          }
-        } catch (err) {
-          console.error(
-            "[Standalone Flow] StandaloneSessionCreation: Auto-approval failed:",
-            err,
-          );
-          setError(err as Error);
-          setIsConnecting(false);
-        }
-      };
-
-      void autoCreateSession();
-    }
-  }, [
-    controller,
-    policies,
-    redirectUrl,
-    hasAutoApproved,
-    isConnecting,
-    hasTokenApprovals,
-    expiresAt,
-    parent,
-    origin,
-  ]);
-
   const createSession = useCallback(
     async ({ toggleOff }: { toggleOff: boolean }) => {
-      if (!controller || !policies) {
-        console.error(
-          "[Standalone Flow] StandaloneSessionCreation: Missing required data",
-          { controller: !!controller, policies: !!policies },
-        );
-        return;
-      }
-
       try {
         setError(undefined);
         setIsConnecting(true);
@@ -158,6 +79,22 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
         if (!granted) {
           throw new Error("Storage access was not granted");
         }
+
+        if (!policies) {
+          console.error(
+            "[Standalone Flow] StandaloneSessionCreation: Missing required data",
+            { policies },
+          );
+          return;
+        }
+
+        const controller = await Controller.fromStore();
+        if (!controller) {
+          throw new Error("Controller not found");
+        }
+
+        window.controller = controller;
+        setController(controller);
 
         // Create session (now we have storage access)
         const processedPolicies = processPolicies(policies, toggleOff);
@@ -196,7 +133,15 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
         setIsConnecting(false);
       }
     },
-    [closeModal, controller, policies, expiresAt, redirectUrl, parent, origin],
+    [
+      closeModal,
+      policies,
+      expiresAt,
+      redirectUrl,
+      parent,
+      origin,
+      setController,
+    ],
   );
 
   const handlePrimaryAction = useCallback(async () => {
