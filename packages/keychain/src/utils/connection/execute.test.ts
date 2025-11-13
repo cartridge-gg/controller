@@ -44,7 +44,6 @@ describe("execute utils", () => {
     // @ts-expect-error - Mocking global
     global.window = {
       controller: mockController,
-      appOrigin: "https://test.app",
     };
   });
 
@@ -226,7 +225,9 @@ describe("execute utils", () => {
     });
 
     it("should handle SessionRefreshRequired error from trySessionExecute", async () => {
-      const executeFunc = execute({ navigate: mockNavigate });
+      const executeFunc = execute({ navigate: mockNavigate })(
+        "https://example.com",
+      );
       const transactions: Call[] = [
         {
           contractAddress: "0x123",
@@ -268,7 +269,9 @@ describe("execute utils", () => {
     });
 
     it("should handle ManualExecutionRequired error from trySessionExecute", async () => {
-      const executeFunc = execute({ navigate: mockNavigate });
+      const executeFunc = execute({ navigate: mockNavigate })(
+        "https://example.com",
+      );
       const transactions: Call[] = [
         {
           contractAddress: "0x123",
@@ -360,7 +363,9 @@ describe("execute utils", () => {
     });
 
     it("should handle sync execution", async () => {
-      const executeFunc = execute({ navigate: mockNavigate });
+      const executeFunc = execute({ navigate: mockNavigate })(
+        "https://example.com",
+      );
       const transactions: Call[] = [
         {
           contractAddress: "0x123",
@@ -381,7 +386,9 @@ describe("execute utils", () => {
     });
 
     it("should handle authorized execution", async () => {
-      const executeFunc = execute({ navigate: mockNavigate });
+      const executeFunc = execute({ navigate: mockNavigate })(
+        "https://example.com",
+      );
       const transactions: Call[] = [
         {
           contractAddress: "0x123",
@@ -404,7 +411,9 @@ describe("execute utils", () => {
     });
 
     it("should handle unauthorized execution", async () => {
-      const executeFunc = execute({ navigate: mockNavigate });
+      const executeFunc = execute({ navigate: mockNavigate })(
+        "https://example.com",
+      );
       const transactions: Call[] = [
         {
           contractAddress: "0x123",
@@ -435,7 +444,9 @@ describe("execute utils", () => {
     });
 
     it("should handle execution errors", async () => {
-      const executeFunc = execute({ navigate: mockNavigate });
+      const executeFunc = execute({ navigate: mockNavigate })(
+        "https://example.com",
+      );
       const transactions: Call[] = [
         {
           contractAddress: "0x123",
@@ -469,7 +480,9 @@ describe("execute utils", () => {
       // @ts-expect-error - Mocking global
       global.window = { controller: undefined };
 
-      const executeFunc = execute({ navigate: mockNavigate });
+      const executeFunc = execute({ navigate: mockNavigate })(
+        "https://example.com",
+      );
       const transactions: Call[] = [];
 
       await expect(executeFunc(transactions)).rejects.toEqual({

@@ -285,12 +285,13 @@ describe("sign message utils", () => {
       // @ts-expect-error - Mocking global
       global.window = {
         controller: mockController,
-        appOrigin: "https://test.app",
       };
     });
 
     it("should navigate immediately when async is false", async () => {
-      const signMessage = signMessageFactory({ navigate: mockNavigate });
+      const signMessage = signMessageFactory({ navigate: mockNavigate })(
+        "https://example.com",
+      );
 
       // Call without waiting since it creates a promise that resolves via callback
       const promise = signMessage(mockTypedData, "0x123", false);
@@ -305,7 +306,9 @@ describe("sign message utils", () => {
     });
 
     it("should handle authorized message signing", async () => {
-      const signMessage = signMessageFactory({ navigate: mockNavigate });
+      const signMessage = signMessageFactory({ navigate: mockNavigate })(
+        "https://example.com",
+      );
       const mockSignature: Signature = ["0x1", "0x2"];
 
       mockController.hasAuthorizedPoliciesForMessage.mockResolvedValue(true);
@@ -318,7 +321,9 @@ describe("sign message utils", () => {
     });
 
     it("should navigate when message is not authorized", async () => {
-      const signMessage = signMessageFactory({ navigate: mockNavigate });
+      const signMessage = signMessageFactory({ navigate: mockNavigate })(
+        "https://example.com",
+      );
 
       mockController.hasAuthorizedPoliciesForMessage.mockResolvedValue(false);
 
@@ -336,7 +341,9 @@ describe("sign message utils", () => {
     });
 
     it("should handle signing errors", async () => {
-      const signMessage = signMessageFactory({ navigate: mockNavigate });
+      const signMessage = signMessageFactory({ navigate: mockNavigate })(
+        "https://example.com",
+      );
       const error = new Error("Signing failed");
 
       mockController.hasAuthorizedPoliciesForMessage.mockResolvedValue(true);
@@ -355,7 +362,9 @@ describe("sign message utils", () => {
       // @ts-expect-error - Mocking global
       global.window = { controller: undefined };
 
-      const signMessage = signMessageFactory({ navigate: mockNavigate });
+      const signMessage = signMessageFactory({ navigate: mockNavigate })(
+        "https://example.com",
+      );
 
       await expect(signMessage(mockTypedData, "0x123", true)).rejects.toBe(
         "Controller not connected",

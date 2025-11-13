@@ -640,13 +640,6 @@ export function useConnectionValue() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sync origin to window.appOrigin for global access
-  useEffect(() => {
-    if (origin) {
-      window.appOrigin = origin;
-    }
-  }, [origin]);
-
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
     window.location.reload();

@@ -35,13 +35,14 @@ export function connectToController<ParentMethods extends object>({
         }),
       ),
       deploy: () => deployFactory({ navigate }),
-      execute: () => execute({ navigate }),
+      execute: normalize(execute({ navigate })),
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),
-      signMessage: () =>
+      signMessage: normalize(
         signMessageFactory({
           navigate,
         }),
+      ),
       openSettings: () => openSettingsFactory(),
       navigate: () => navigateFactory(),
       reset: () => () => {

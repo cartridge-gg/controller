@@ -61,6 +61,7 @@ import { BoosterPack } from "./booster-pack";
 import { useEffect } from "react";
 import { StandaloneSessionCreation } from "./connect/StandaloneSessionCreation";
 import { StandaloneConnect } from "./connect/StandaloneConnect";
+import { hasApprovalPolicies } from "@/hooks/session";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -118,14 +119,14 @@ function Authentication() {
     }
 
     // Decide which UI to show based on verification status and policies
-    const hasManualPolicies = policies && Object.keys(policies).length > 0;
-    const shouldShowSessionConsent = !verified || hasManualPolicies;
+    const hasManualPolicies = policies?.contracts || policies?.messages;
+    const shouldShowSessionConsent =
+      !verified || hasManualPolicies || hasApprovalPolicies(policies);
 
     if (shouldShowSessionConsent) {
       // Show session creation consent UI for unverified presets or custom policies
       return <StandaloneSessionCreation username={username} />;
     } else {
-      console.log("StandaloneConnect");
       // Show simple standalone connect UI for verified presets with no custom policies
       return <StandaloneConnect username={username} />;
     }
