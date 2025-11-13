@@ -12,6 +12,7 @@ import {
   ClaimCreditsMessage,
   deriveEthereumAddress,
   assetTokenImageUrl,
+  assetGameTokenImageUrl,
 } from "./utils";
 import { RevealState, RewardType } from "./types";
 import { useAccount } from "@/hooks/account";
@@ -162,19 +163,19 @@ export function BoosterPack() {
           {
             type: RewardType.LS2_GAME,
             name: "LS2 Game Pass",
-            image: "/booster-pack/LS2_GAME.png",
+            image: assetGameTokenImageUrl(RewardType.LS2_GAME),
             revealState: RevealState.UNREVEALED,
           },
           {
             type: RewardType.NUMS_GAME,
             name: "NUMS Game Pass",
-            image: "/booster-pack/NUMS_GAME.png",
+            image: assetGameTokenImageUrl(RewardType.NUMS_GAME),
             revealState: RevealState.UNREVEALED,
           },
           {
             type: RewardType.REALM,
             name: "Realm NFT",
-            image: "/booster-pack/REALM_1.png",
+            image: assetTokenImageUrl(RewardType.REALM),
             revealState: RevealState.UNREVEALED,
           },
         ];
