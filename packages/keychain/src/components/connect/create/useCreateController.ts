@@ -324,22 +324,22 @@ export function useCreateController({
         const urlSearchParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlSearchParams.get("redirect_url");
 
-        if (redirectUrl) {
-          // Standalone flow: skip session creation here, redirect immediately
-          // Session will be created on the application site after redirect
-          const username = controller.username();
+        // if (redirectUrl) {
+        //   // Standalone flow: skip session creation here, redirect immediately
+        //   // Session will be created on the application site after redirect
+        //   const username = controller.username();
 
-          // Build redirect URL with username and controller_standalone parameters
-          const redirectUrlObj = new URL(redirectUrl);
-          redirectUrlObj.searchParams.set("controller_standalone", "1");
-          if (username) {
-            redirectUrlObj.searchParams.set("username", username);
-          }
+        //   // Build redirect URL with username and controller_standalone parameters
+        //   const redirectUrlObj = new URL(redirectUrl);
+        //   redirectUrlObj.searchParams.set("controller_standalone", "1");
+        //   if (username) {
+        //     redirectUrlObj.searchParams.set("username", username);
+        //   }
 
-          // Safely redirect to the specified URL with parameters
-          safeRedirect(redirectUrlObj.toString());
-          return; // Don't continue with session creation
-        }
+        //   // Safely redirect to the specified URL with parameters
+        //   safeRedirect(redirectUrlObj.toString());
+        //   return; // Don't continue with session creation
+        // }
 
         // Normal embedded flow: handle session creation for auto-close cases
         const shouldAutoCreateSession =
@@ -355,6 +355,10 @@ export function useCreateController({
             closeModal,
             searchParams,
           });
+        }
+
+        if (redirectUrl) {
+          safeRedirect(redirectUrl);
         }
       }
     },
@@ -533,22 +537,22 @@ export function useCreateController({
       const urlSearchParams = new URLSearchParams(window.location.search);
       const redirectUrl = urlSearchParams.get("redirect_url");
 
-      if (redirectUrl) {
-        // Standalone flow: skip session creation here, redirect immediately
-        // Session will be created on the application site after redirect
-        const username = loginRet.controller.username();
+      // if (redirectUrl) {
+      //   // Standalone flow: skip session creation here, redirect immediately
+      //   // Session will be created on the application site after redirect
+      //   const username = loginRet.controller.username();
 
-        // Build redirect URL with username and controller_standalone parameters
-        const redirectUrlObj = new URL(redirectUrl);
-        redirectUrlObj.searchParams.set("controller_standalone", "1");
-        if (username) {
-          redirectUrlObj.searchParams.set("username", username);
-        }
+      //   // Build redirect URL with username and controller_standalone parameters
+      //   const redirectUrlObj = new URL(redirectUrl);
+      //   redirectUrlObj.searchParams.set("controller_standalone", "1");
+      //   if (username) {
+      //     redirectUrlObj.searchParams.set("username", username);
+      //   }
 
-        // Safely redirect to the specified URL with parameters
-        safeRedirect(redirectUrlObj.toString());
-        return; // Don't continue with session creation
-      }
+      //   // Safely redirect to the specified URL with parameters
+      //   safeRedirect(redirectUrlObj.toString());
+      //   return; // Don't continue with session creation
+      // }
 
       // Normal embedded flow: handle session creation for auto-close cases
       const shouldAutoCreateSession =
@@ -564,6 +568,10 @@ export function useCreateController({
           closeModal,
           searchParams,
         });
+      }
+
+      if (redirectUrl) {
+        safeRedirect(redirectUrl);
       }
     },
     [
