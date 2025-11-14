@@ -89,11 +89,13 @@ export function ConnectRoute() {
     //   return;
     // }
 
-    handleCompletion();
 
     if (isStandalone && redirectUrl) {
       safeRedirect(redirectUrl, true);
+      return
     }
+
+    handleCompletion();
   }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
 
   const handleSkip = useCallback(async () => {
@@ -134,11 +136,12 @@ export function ConnectRoute() {
     //   return;
     // }
 
-    handleCompletion();
-
     if (isStandalone && redirectUrl) {
       safeRedirect(redirectUrl, true);
+      return;
     }
+
+    handleCompletion();
   }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
 
   // Handle cases where we can connect immediately (embedded mode only)
