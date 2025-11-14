@@ -117,14 +117,17 @@ export function BoosterPack() {
 
   // Handle claim button click - connects if needed, then claims
   const handleClaim = async () => {
-    if (!privateKey || !assetInfo || isClaimed || isRevealing || isLoading)
-      return;
-
-    // Check if user is logged in
+    // Check if user is logged in first (allow connecting even without asset info)
     if (!username || !account) {
       // Not connected - trigger connection flow// Redirect to connect page
       const currentUrl = window.location.href;
-      window.location.href = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect`;
+      const redirectTarget = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect`;
+      window.location.href = redirectTarget;
+      return;
+    }
+
+    // After login, check conditions for claiming
+    if (!privateKey || !assetInfo || isClaimed || isRevealing || isLoading) {
       return;
     }
 
