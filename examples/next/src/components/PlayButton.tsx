@@ -14,12 +14,12 @@ interface Game {
 const GAMES: Game[] = [
   {
     name: "Loot Survivor",
-    url: "https://lootsurvivor.io?controller_redirect",
+    url: `${process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL}?redirect_url=https://lootsurvivor.io&preset=loot-survivor`,
     description: "Survive the adventure, earn rewards",
   },
   {
     name: "Nums",
-    url: "https://nums-blond.vercel.app?controller_redirect",
+    url: `${process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL}?redirect_url=https://nums-blond.vercel.app&preset=nums`,
     description: "Survive the adventure, earn rewards",
   },
 ];
@@ -44,9 +44,7 @@ export const PlayButton = () => {
     <div className="border border-border rounded-lg p-6 bg-surface">
       <h2 className="text-2xl font-bold mb-4">Play Games</h2>
       <p className="text-muted mb-6">
-        Launch games with your Cartridge controller. First-time users will be
-        redirected through standalone authentication to enable seamless login
-        across all games.
+        Launch games with your Cartridge controller.
       </p>
       <div className="grid gap-4">
         {GAMES.map((game) => (

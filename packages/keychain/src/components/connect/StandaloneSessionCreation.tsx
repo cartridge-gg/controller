@@ -8,6 +8,7 @@ import { useConnection } from "@/hooks/connection";
 import { useCreateSession, hasApprovalPolicies } from "@/hooks/session";
 import type { ControllerError } from "@/utils/connection";
 import { safeRedirect } from "@/utils/url-validator";
+import { restoreLocalStorageFromCookie } from "@/utils/storageSnapshot";
 import {
   Button,
   Checkbox,
@@ -73,6 +74,9 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
         setIsConnecting(true);
 
         await document.requestStorageAccess();
+
+        // Restore localStorage from snapshot cookie
+        restoreLocalStorageFromCookie({ clearAfterRestore: true });
 
         if (!policies) {
           console.error(
