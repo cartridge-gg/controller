@@ -124,7 +124,7 @@ export function BoosterPack() {
     if (!username || !account) {
       // Not connected - trigger connection flow
       const currentUrl = window.location.href;
-      window.location.href = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect&needs_session_creation=true`;
+      window.location.href = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect`;
       return;
     }
 
