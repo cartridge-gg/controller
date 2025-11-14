@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Confetti from "react-confetti";
 import { BackgroundStars } from "./assets/background-stars";
@@ -18,6 +18,7 @@ import { RevealState, RewardType } from "./types";
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import { CheckIcon } from "./assets/check";
+import { useMerkleClaim } from "@/hooks/merkle-claim";
 
 const STAR_COLOR = "#FBCB4A";
 
@@ -44,7 +45,7 @@ const MYSTERY_CARD_GAME_MAP: Partial<Record<RewardType, string>> = {
 export function BoosterPack() {
   const { privateKey } = useParams<{ privateKey: string }>();
   const account = useAccount();
-  const { controller } = useConnection();
+  const { controller, isMainnet } = useConnection();
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [numberOfPieces, setNumberOfPieces] = useState(500);
@@ -74,10 +75,56 @@ export function BoosterPack() {
     }
   }, [controller]);
 
+  const ethereumAddress = useMemo(() => {
+    if (!privateKey) {
+      return;
+    }
+
+    try {
+      return deriveEthereumAddress(privateKey);
+    } catch (error) {
+      console.error("Error deriving Ethereum address:", error);
+      return undefined;
+    }
+  }, [privateKey]);
+
+  const keys = [
+    "booster-pack-nums-mainnet",
+    "booster-pack-credits-mainnet",
+    "booster-pack-lords-mainnet",
+    "booster-pack-mystery-mainnet",
+    "booster-pack-paper-mainnet",
+    "booster-pack-survivor-mainnet",
+  ].join(";");
+
+  const {
+    claims,
+    isLoading: isLoadingClaims,
+    onSendClaim,
+  } = useMerkleClaim({
+    keys,
+    type: "preimage",
+    address: ethereumAddress,
+    preimage: privateKey,
+  });
+
+  useEffect(() => {
+    if (isLoadingClaims) {
+      return;
+    }
+
+    if (claims.length === 0) {
+      setError("No claims found");
+      return;
+    }
+
+    setIsClaimed(claims.every((claim) => claim.claimed));
+  }, [claims, isLoadingClaims]);
+
   // Check asset eligibility on first load
   useEffect(() => {
     const checkAsset = async () => {
-      if (!privateKey) {
+      if (!privateKey || !ethereumAddress) {
         setError("No private key provided");
         setIsCheckingAsset(false);
         return;
@@ -86,9 +133,6 @@ export function BoosterPack() {
       try {
         setIsCheckingAsset(true);
         setError(null);
-
-        // Derive Ethereum address from private key
-        const ethereumAddress = deriveEthereumAddress(privateKey);
 
         // Check asset eligibility
         const asset = await checkAssetEligibility(ethereumAddress);
@@ -113,11 +157,18 @@ export function BoosterPack() {
     };
 
     checkAsset();
-  }, [privateKey]);
+  }, [privateKey, ethereumAddress]);
 
   // Handle claim button click - connects if needed, then claims
   const handleClaim = async () => {
-    if (!privateKey || !assetInfo || isClaimed || isRevealing || isLoading)
+    if (
+      !privateKey ||
+      !assetInfo ||
+      isClaimed ||
+      isRevealing ||
+      isLoading ||
+      isLoadingClaims
+    )
       return;
 
     // Check if user is logged in
@@ -151,8 +202,8 @@ export function BoosterPack() {
         });
       }
 
-      //TODO: uncomment once controller login done
-      // controller.openStarterPack("claim-booster-pack-sepolia", { preimage: privateKey });
+      const claimHash = await onSendClaim();
+      console.log({ claimHash, isMainnet });
 
       // Success! Mark as claimed
       setIsClaimed(true);
@@ -412,7 +463,7 @@ export function BoosterPack() {
           ) : null}
 
           <div>
-            {isClaimed && !isRevealing ? (
+            {isClaimed && !isRevealing && controller ? (
               // Show Play and Inventory buttons after successful claim
               <div className="flex flex-row gap-3 md:gap-4 items-center w-full sm:w-auto px-4">
                 {/* Primary CTA - Play Game Button */}
@@ -439,14 +490,14 @@ export function BoosterPack() {
               // Show Claim button before claiming
               <button
                 onClick={handleClaim}
-                disabled={isClaimed || isLoading}
+                disabled={isClaimed || isLoading || isLoadingClaims}
                 className="px-6 py-3 rounded-3xl text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: isClaimed || isLoading ? "#666" : STAR_COLOR,
                   color: "#0f1410",
                 }}
               >
-                {isCheckingAsset
+                {isCheckingAsset || isLoadingClaims
                   ? "CHECKING..."
                   : isLoading
                     ? "CLAIMING..."
