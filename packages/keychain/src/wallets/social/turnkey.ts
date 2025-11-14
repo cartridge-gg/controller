@@ -192,7 +192,11 @@ export class TurnkeyWallet {
       }
 
       console.log("[Turnkey] Using popup flow - opening popup");
-      const popup = await openPopup("");
+      // Use a known blank page as the initial popup URL instead of empty string
+      // This prevents iOS from navigating to about:blank
+      const popupUrl = isIOS() ? "https://x.cartridge.gg" : "";
+      console.log("[Turnkey] Opening popup with URL:", popupUrl);
+      const popup = openPopup(popupUrl);
 
       if (!popup) {
         console.error("[Turnkey] Failed to open popup");
@@ -551,6 +555,13 @@ export const getIframePublicKey = async (
     throw new Error("No iframe public key, please try again");
   }
   return iframePublicKey;
+};
+
+const isIOS = () => {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  ); // iPad on iOS 13+
 };
 
 const openPopup = (url: string) => {
