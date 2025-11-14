@@ -89,10 +89,9 @@ export function ConnectRoute() {
     //   return;
     // }
 
-
     if (isStandalone && redirectUrl) {
       safeRedirect(redirectUrl, true);
-      return
+      return;
     }
 
     handleCompletion();
