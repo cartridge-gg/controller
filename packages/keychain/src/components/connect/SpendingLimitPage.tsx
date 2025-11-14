@@ -45,7 +45,7 @@ export function SpendingLimitPage({
       <LayoutFooter className="pt-4">
         {error && <ControllerErrorAlert className="mb-3" error={error} />}
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           <Button
             className="w-full"
             disabled={isConnecting}
