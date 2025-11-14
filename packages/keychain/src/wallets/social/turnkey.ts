@@ -553,17 +553,72 @@ export const getIframePublicKey = async (
   return iframePublicKey;
 };
 
-const openPopup = (url: string) => {
+const isIOS = () => {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  ); // iPad on iOS 13+
+};
+
+const openPopup = async (url: string): Promise<Window | null> => {
   console.log("[Turnkey] openPopup called with url:", url || "(empty string)");
-  const popup = window.open(
-    url,
-    "auth0:authorize:popup",
-    `resizable,scrollbars=no,status=1`,
-  );
-  console.log(
-    "[Turnkey] window.open result:",
-    popup ? "popup object returned" : "null/undefined",
-  );
+
+  const isIOSDevice = isIOS();
+  console.log("[Turnkey] Device detection:", { isIOS: isIOSDevice });
+
+  const maxRetries = isIOSDevice ? 3 : 1;
+  const retryDelay = 200; // ms
+  let popup: Window | null = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    popup = window.open(
+      url,
+      "auth0:authorize:popup",
+      `resizable,scrollbars=no,status=1`,
+    );
+
+    console.log(
+      `[Turnkey] window.open attempt ${attempt + 1}/${maxRetries}:`,
+      popup ? "popup object returned" : "null/undefined",
+    );
+
+    if (popup) {
+      break;
+    }
+
+    // Wait before retrying (only on iOS with multiple attempts)
+    if (attempt < maxRetries - 1) {
+      console.log(`[Turnkey] Retrying popup open in ${retryDelay}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+    }
+  }
+
+  if (!popup) {
+    console.error("[Turnkey] Failed to open popup after all retries");
+    return null;
+  }
+
+  // Give the popup time to initialize before passing to Auth0 (iOS only)
+  if (isIOSDevice) {
+    console.log("[Turnkey] iOS detected, verifying popup stability...");
+    for (let i = 0; i < 3; i++) {
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+
+      if (popup.closed) {
+        console.error(
+          "[Turnkey] Popup was closed during initialization check:",
+          i + 1,
+        );
+        return null;
+      }
+
+      console.log(
+        `[Turnkey] Popup verified open after ${(i + 1) * retryDelay}ms`,
+      );
+    }
+  }
+
+  console.log("[Turnkey] Popup initialized successfully, returning to Auth0");
   return popup;
 };
 
