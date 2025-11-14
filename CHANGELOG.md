@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.11.2] - 2025-11-14
+
+### ✨ New Features
+- **@cartridge/keychain**: Implemented encrypted localStorage snapshot for Storage Access API using split-key encryption architecture, eliminating Cookie Store API dependency and enabling secure state transfer across third-party iframe boundaries (#2239)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Enhanced iOS popup reliability with retry logic, exponential backoff, and stability checks for improved authentication flow on iOS devices (#2244)
+- **@cartridge/keychain**: Updated booster pack claim flow with improved component structure and better user experience (#2240)
+- **@cartridge/keychain**: Enhanced debug logging with comprehensive Turnkey authentication logs for better troubleshooting (#2241)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed popup error handling by preventing thrown errors on blocked popups, maintaining original flow behavior for mobile compatibility (#2243)
+- **@cartridge/keychain**: Reverted popup error logging to address reliability issues and maintain stable authentication flows (#2242, #2238)
+- **@cartridge/keychain**: Fixed claim pill size display issues for better visual consistency (#2226)
+- **@cartridge/keychain**: Fixed default image handling bug in booster pack components (#2225)
+- **@cartridge/keychain**: Updated game links for improved navigation and user experience (#2224)
+- **@cartridge/keychain**: Enhanced dynamic height CSS for better responsive design (#2233)
+- **@cartridge/keychain**: Improved localStorage and dead-path cookie synchronization for standalone flows (#2232)
+- **@cartridge/keychain**: Removed deprecated controller_redirect functionality to streamline authentication flows (#2230)
+- **@cartridge/keychain**: Simplified storage access request logic for more reliable cross-domain authentication (#2229)
+- **@cartridge/controller**: Refactored session creation to load controller from store for improved session management (#2228)
+- **Development**: Fixed environment variable loading for live environment configuration (#2227)
+
+### 📦 Dependencies
+- **Development**: Added Storybook story for StandaloneConnect component for improved component testing and documentation (#2231)
+
 ## [0.11.2-alpha.4] - 2025-11-13
 
 ### ✨ New Features
