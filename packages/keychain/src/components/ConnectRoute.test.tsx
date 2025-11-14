@@ -41,6 +41,11 @@ vi.mock("@/utils/connection/connect", () => ({
   parseConnectParams: (...args: unknown[]) => mockParseConnectParams(...args),
 }));
 
+const mockSnapshotLocalStorageToCookie = vi.fn();
+vi.mock("@/utils/storageSnapshot", () => ({
+  snapshotLocalStorageToCookie: () => mockSnapshotLocalStorageToCookie(),
+}));
+
 const mockUseRouteParams = vi.fn();
 const mockUseRouteCompletion = vi.fn();
 const mockUseRouteCallbacks = vi.fn();
@@ -78,6 +83,7 @@ describe("ConnectRoute", () => {
     mockUseRouteParams.mockReturnValue(mockParams);
     mockUseRouteCompletion.mockReturnValue(vi.fn());
     mockLocation.search = "";
+    mockSnapshotLocalStorageToCookie.mockResolvedValue("mock-encrypted-blob");
 
     mockUseConnection.mockReturnValue({
       controller: mockController,
@@ -219,7 +225,7 @@ describe("ConnectRoute", () => {
       mockLocation.search = "?redirect_url=https://example.com/callback";
     });
 
-    it("immediately redirects for verified session with redirect_url", () => {
+    it("immediately redirects for verified session with redirect_url", async () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
@@ -235,13 +241,15 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      expect(mockSafeRedirect).toHaveBeenCalledWith(
-        "https://example.com/callback",
-        true,
-      );
+      await waitFor(() => {
+        expect(mockSafeRedirect).toHaveBeenCalled();
+      });
+      const redirectUrl = mockSafeRedirect.mock.calls[0][0];
+      expect(redirectUrl).toMatch(/^https:\/\/example\.com\/callback#kc=/);
+      expect(mockSafeRedirect.mock.calls[0][1]).toBe(true);
     });
 
-    it("immediately redirects for verified policies with redirect_url", () => {
+    it("immediately redirects for verified policies with redirect_url", async () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: {
@@ -261,13 +269,15 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      expect(mockSafeRedirect).toHaveBeenCalledWith(
-        "https://example.com/callback",
-        true,
-      );
+      await waitFor(() => {
+        expect(mockSafeRedirect).toHaveBeenCalled();
+      });
+      const redirectUrl = mockSafeRedirect.mock.calls[0][0];
+      expect(redirectUrl).toMatch(/^https:\/\/example\.com\/callback#kc=/);
+      expect(mockSafeRedirect.mock.calls[0][1]).toBe(true);
     });
 
-    it("immediately redirects for unverified policies with redirect_url", () => {
+    it("immediately redirects for unverified policies with redirect_url", async () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: {
@@ -287,13 +297,15 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      expect(mockSafeRedirect).toHaveBeenCalledWith(
-        "https://example.com/callback",
-        true,
-      );
+      await waitFor(() => {
+        expect(mockSafeRedirect).toHaveBeenCalled();
+      });
+      const redirectUrl = mockSafeRedirect.mock.calls[0][0];
+      expect(redirectUrl).toMatch(/^https:\/\/example\.com\/callback#kc=/);
+      expect(mockSafeRedirect.mock.calls[0][1]).toBe(true);
     });
 
-    it("immediately redirects for unverified app with redirect_url", () => {
+    it("immediately redirects for unverified app with redirect_url", async () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
@@ -309,10 +321,12 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      expect(mockSafeRedirect).toHaveBeenCalledWith(
-        "https://example.com/callback",
-        true,
-      );
+      await waitFor(() => {
+        expect(mockSafeRedirect).toHaveBeenCalled();
+      });
+      const redirectUrl = mockSafeRedirect.mock.calls[0][0];
+      expect(redirectUrl).toMatch(/^https:\/\/example\.com\/callback#kc=/);
+      expect(mockSafeRedirect.mock.calls[0][1]).toBe(true);
     });
 
     it("auto-connects when no redirect_url present", async () => {
