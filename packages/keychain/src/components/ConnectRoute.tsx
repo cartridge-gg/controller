@@ -192,7 +192,7 @@ export function ConnectRoute() {
 
     // Bypass session approval screen for verified sessions in embedded mode
     // Note: This is a fallback - main logic is handled in useCreateController
-    if (policies.verified && !isStandalone) {
+    if (policies.verified) {
       if (hasTokenApprovals) {
         return;
       }
