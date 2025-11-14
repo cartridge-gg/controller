@@ -72,36 +72,6 @@ export default class ControllerProvider extends BaseProvider {
 
     this.options = { ...options, chains, defaultChainId };
 
-    // Handle automatic redirect to keychain for standalone flow
-    // When controller_redirect is present, automatically redirect to keychain
-    // This establishes first-party storage access for the keychain
-    // IMPORTANT: Check this BEFORE cleaning up URL parameters
-    if (typeof window !== "undefined") {
-      // Check if controller_redirect flag is present (any value or just the key)
-      const hasControllerRedirect = urlParams?.has("controller_redirect");
-      if (hasControllerRedirect) {
-        // Use configured keychain URL (not user-provided)
-        const keychainUrl = new URL(options.url || KEYCHAIN_URL);
-
-        // Build redirect URL preserving all query params and hash except controller_redirect
-        // This matches the behavior of open() method which uses window.location.href
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.delete("controller_redirect");
-        const redirectUrl = currentUrl.toString();
-
-        keychainUrl.searchParams.set("redirect_url", redirectUrl);
-
-        // Preserve the preset if it was configured in options
-        if (options.preset) {
-          keychainUrl.searchParams.set("preset", options.preset);
-        }
-
-        // Redirect to keychain
-        window.location.href = keychainUrl.toString();
-        return; // Stop further initialization
-      }
-    }
-
     // Auto-detect and set lastUsedConnector from URL parameter
     // This is set by the keychain after redirect flow completion
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
@@ -130,12 +100,6 @@ export default class ControllerProvider extends BaseProvider {
 
         if (lastUsedConnector) {
           urlParams.delete("lastUsedConnector");
-          needsCleanup = true;
-        }
-
-        // Also remove controller_redirect if present (shouldn't be after redirect, but just in case)
-        if (urlParams.has("controller_redirect")) {
-          urlParams.delete("controller_redirect");
           needsCleanup = true;
         }
 
