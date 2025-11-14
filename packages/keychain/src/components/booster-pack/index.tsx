@@ -255,7 +255,7 @@ export function BoosterPack() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full min-h-screen bg-[#0f1410] overflow-hidden font-ld">
+    <div className="relative flex flex-col items-center justify-center w-full h-dvh bg-[#0f1410] overflow-hidden font-ld">
       {/* Confetti */}
       {showConfetti && (
         <Confetti
@@ -273,7 +273,7 @@ export function BoosterPack() {
       <div className="absolute inset-0 w-full h-full">
         <BackgroundStars
           starColor={STAR_COLOR}
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1512px] h-auto object-contain pointer-events-none"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-auto object-contain pointer-events-none"
         />
       </div>
 
@@ -369,7 +369,7 @@ export function BoosterPack() {
           </div>
         ) : (
           // Placeholder before claim - Show asset card or loading
-          <div className="relative w-[200px] h-[272px] md:w-[280px] md:h-[380px] rounded-lg overflow-hidden shadow-[0px_4px_16px_0px_#000000]">
+          <div className="relative w-[280px] h-[380px] md:w-[280px] md:h-[380px] rounded-lg overflow-hidden shadow-[0px_4px_16px_0px_#000000]">
             {isCheckingAsset ? (
               <div className="w-full h-full flex items-center justify-center bg-[#161a17]">
                 <p className="text-white text-sm">Loading...</p>
@@ -406,11 +406,11 @@ export function BoosterPack() {
         )}
 
         {/* Error Message */}
-        {error && (
+        {error ? (
           <div className="backdrop-blur-sm bg-red-900/80 px-4 py-3 rounded-lg max-w-md text-center">
             <p className="text-red-200 text-sm">{error}</p>
           </div>
-        )}
+        ) : null}
 
         {/* Action Buttons */}
         {isClaimed && !isRevealing ? (

@@ -21,10 +21,10 @@ export function validateRedirectUrl(redirectUrl: string): {
   let url: URL;
   try {
     url = new URL(redirectUrl);
-  } catch {
+  } catch (e) {
     return {
       isValid: false,
-      error: "Invalid URL format",
+      error: `Invalid URL format: ${e}`,
     };
   }
 

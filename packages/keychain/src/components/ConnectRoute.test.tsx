@@ -219,7 +219,7 @@ describe("ConnectRoute", () => {
       mockLocation.search = "?redirect_url=https://example.com/callback";
     });
 
-    it("shows StandaloneConnect for verified session with redirect_url", () => {
+    it("immediately redirects for verified session with redirect_url", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
@@ -235,11 +235,13 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      expect(screen.getByText("Connect")).toBeInTheDocument();
-      expect(screen.getByText(/testuser/)).toBeInTheDocument();
+      expect(mockSafeRedirect).toHaveBeenCalledWith(
+        "https://example.com/callback",
+        true,
+      );
     });
 
-    it("shows StandaloneConnect for verified policies with redirect_url", () => {
+    it("immediately redirects for verified policies with redirect_url", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: {
@@ -259,10 +261,13 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      expect(screen.getByText("Connect")).toBeInTheDocument();
+      expect(mockSafeRedirect).toHaveBeenCalledWith(
+        "https://example.com/callback",
+        true,
+      );
     });
 
-    it("shows CreateSession for unverified policies with redirect_url", () => {
+    it("immediately redirects for unverified policies with redirect_url", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: {
@@ -278,12 +283,17 @@ describe("ConnectRoute", () => {
         origin: "https://test.app",
       });
 
-      renderWithProviders(<ConnectRoute />);
+      renderWithProviders(<ConnectRoute />, {
+        initialUrl: "/?redirect_url=https://example.com/callback",
+      });
 
-      expect(screen.getByText("Create Session")).toBeInTheDocument();
+      expect(mockSafeRedirect).toHaveBeenCalledWith(
+        "https://example.com/callback",
+        true,
+      );
     });
 
-    it("shows unverified warning in StandaloneConnect", () => {
+    it("immediately redirects for unverified app with redirect_url", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
@@ -299,9 +309,10 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      expect(
-        screen.getByText(/This application is not verified/),
-      ).toBeInTheDocument();
+      expect(mockSafeRedirect).toHaveBeenCalledWith(
+        "https://example.com/callback",
+        true,
+      );
     });
 
     it("auto-connects when no redirect_url present", async () => {
