@@ -1,7 +1,7 @@
 import { useConnection } from "@/hooks/connection";
 import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { safeRedirect } from "@/utils/url-validator";
-import { restoreLocalStorageFromCookie } from "@/utils/storageSnapshot";
+import { restoreLocalStorageFromFragment } from "@/utils/storageSnapshot";
 import {
   AlertIcon,
   Button,
@@ -55,8 +55,19 @@ export function StandaloneConnect({ username }: { username?: string }) {
         "[Standalone Flow] StandaloneConnect: Storage access granted, restoring localStorage and redirecting",
       );
 
-      // Restore localStorage from snapshot cookie
-      restoreLocalStorageFromCookie({ clearAfterRestore: true });
+      // Restore localStorage from encrypted blob in URL fragment
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      const encryptedBlob = hashParams.get("kc");
+
+      if (encryptedBlob) {
+        await restoreLocalStorageFromFragment(encryptedBlob, {
+          clearAfterRestore: true,
+        });
+      } else {
+        console.warn(
+          "[Standalone Flow] No encrypted blob found in URL fragment",
+        );
+      }
 
       // Notify parent controller that storage access was granted
       if (

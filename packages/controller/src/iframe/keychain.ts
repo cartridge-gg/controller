@@ -11,6 +11,7 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     needsSessionCreation?: boolean;
     username?: string;
     onSessionCreated?: () => void;
+    encryptedBlob?: string;
   };
 
 export class KeychainIFrame extends IFrame<Keychain> {
@@ -31,6 +32,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     needsSessionCreation,
     username,
     onSessionCreated,
+    encryptedBlob,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
@@ -86,6 +88,12 @@ export class KeychainIFrame extends IFrame<Keychain> {
       );
     } else if (preset) {
       _url.searchParams.set("preset", preset);
+    }
+
+    // Add encrypted blob to URL fragment (hash) if present
+    // This contains the encrypted localStorage snapshot from keychain redirect
+    if (encryptedBlob) {
+      _url.hash = `kc=${encodeURIComponent(encryptedBlob)}`;
     }
 
     super({
