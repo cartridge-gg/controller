@@ -45,11 +45,8 @@ export const PopupCenter = (
   features.push("scrollbars=1");
 
   const newWindow = window.open(url, title, features.join(","));
-  if (!newWindow || newWindow.closed) {
-    throw new Error("Popup blocked: " + url);
-  }
 
-  newWindow.focus();
+  newWindow?.focus();
 
   return newWindow;
 };
