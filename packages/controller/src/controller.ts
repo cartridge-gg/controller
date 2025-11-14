@@ -120,7 +120,9 @@ export default class ControllerProvider extends BaseProvider {
           const hashParams = new URLSearchParams(cleanHash.slice(1));
           if (hashParams.has("kc")) {
             hashParams.delete("kc");
-            cleanHash = hashParams.toString() ? `#${hashParams.toString()}` : "";
+            cleanHash = hashParams.toString()
+              ? `#${hashParams.toString()}`
+              : "";
             needsCleanup = true;
           }
         }

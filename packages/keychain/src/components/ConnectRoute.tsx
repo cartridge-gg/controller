@@ -50,7 +50,7 @@ export function ConnectRoute() {
     [policies],
   );
 
-  console.log(isStandalone, redirectUrl)
+  console.log(isStandalone, redirectUrl);
 
   const handleConnect = useCallback(async () => {
     if (!params || !controller) {
