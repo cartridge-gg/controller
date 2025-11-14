@@ -192,7 +192,11 @@ export class TurnkeyWallet {
       }
 
       console.log("[Turnkey] Using popup flow - opening popup");
-      const popup = await openPopup("");
+      // Use a known blank page as the initial popup URL instead of empty string
+      // This prevents iOS from navigating to about:blank
+      const popupUrl = isIOS() ? "https://x.cartridge.gg" : "";
+      console.log("[Turnkey] Opening popup with URL:", popupUrl);
+      const popup = await openPopup(popupUrl);
 
       if (!popup) {
         console.error("[Turnkey] Failed to open popup");
@@ -562,7 +566,7 @@ const isIOS = () => {
 
 const openPopup = async (url: string): Promise<Window | null> => {
   console.log("[Turnkey] openPopup called with url:", url || "(empty string)");
-
+  
   const isIOSDevice = isIOS();
   console.log("[Turnkey] Device detection:", { isIOS: isIOSDevice });
 
@@ -571,19 +575,44 @@ const openPopup = async (url: string): Promise<Window | null> => {
   let popup: Window | null = null;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const beforeLocation = window.location.href;
+    
     popup = window.open(
       url,
       "auth0:authorize:popup",
       `resizable,scrollbars=no,status=1`,
     );
 
+    // Check if window.open caused a navigation instead of opening a popup
+    const afterLocation = window.location.href;
+    const didNavigate = beforeLocation !== afterLocation;
+    
     console.log(
       `[Turnkey] window.open attempt ${attempt + 1}/${maxRetries}:`,
-      popup ? "popup object returned" : "null/undefined",
+      {
+        popupReturned: popup ? "yes" : "no",
+        isCurrentWindow: popup === window,
+        didNavigate,
+        beforeLocation,
+        afterLocation,
+      }
     );
 
-    if (popup) {
+    // If window.open navigated the current page, that means popup was blocked
+    if (didNavigate) {
+      console.error("[Turnkey] window.open navigated current page instead of opening popup - popup blocked!");
+      return null;
+    }
+
+    // Check if popup is actually a different window
+    if (popup && popup !== window) {
+      console.log("[Turnkey] Valid popup window created");
       break;
+    }
+
+    if (popup === window) {
+      console.error("[Turnkey] window.open returned current window - popup blocked");
+      popup = null;
     }
 
     // Wait before retrying (only on iOS with multiple attempts)
