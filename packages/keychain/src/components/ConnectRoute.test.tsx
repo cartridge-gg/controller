@@ -43,8 +43,7 @@ vi.mock("@/utils/connection/connect", () => ({
 
 const mockSnapshotLocalStorageToCookie = vi.fn();
 vi.mock("@/utils/storageSnapshot", () => ({
-  snapshotLocalStorageToCookie: () =>
-    mockSnapshotLocalStorageToCookie(),
+  snapshotLocalStorageToCookie: () => mockSnapshotLocalStorageToCookie(),
 }));
 
 const mockUseRouteParams = vi.fn();
