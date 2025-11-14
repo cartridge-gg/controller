@@ -15,6 +15,41 @@ import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
 import { snapshotLocalStorageToCookie } from "@/utils/storageSnapshot";
 
+/**
+ * Merges URL fragment parameters properly, handling existing fragments.
+ *
+ * @param baseUrl - The URL which may or may not contain a fragment
+ * @param fragmentParams - Object of fragment parameters to add/merge
+ * @returns URL with properly merged fragment parameters
+ *
+ * @example
+ * mergeUrlFragment("https://example.com#section", { kc: "blob" })
+ * // Returns: "https://example.com#section&kc=blob"
+ *
+ * mergeUrlFragment("https://example.com", { kc: "blob" })
+ * // Returns: "https://example.com#kc=blob"
+ */
+function mergeUrlFragment(
+  baseUrl: string,
+  fragmentParams: Record<string, string>,
+): string {
+  const hashIndex = baseUrl.indexOf("#");
+  const urlWithoutHash = hashIndex >= 0 ? baseUrl.slice(0, hashIndex) : baseUrl;
+  const existingFragment = hashIndex >= 0 ? baseUrl.slice(hashIndex + 1) : "";
+
+  // Parse existing fragment parameters
+  const params = new URLSearchParams(existingFragment);
+
+  // Add new parameters
+  for (const [key, value] of Object.entries(fragmentParams)) {
+    params.set(key, value);
+  }
+
+  // Reconstruct URL with merged fragment
+  const mergedFragment = params.toString();
+  return mergedFragment ? `${urlWithoutHash}#${mergedFragment}` : urlWithoutHash;
+}
+
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
   message: "Canceled",
@@ -74,7 +109,9 @@ export function ConnectRoute() {
         const encryptedBlob = await snapshotLocalStorageToCookie();
         const redirectWithFragment =
           encryptedBlob && encryptedBlob.length > 0
-            ? `${redirectUrl}#kc=${encodeURIComponent(encryptedBlob)}`
+            ? mergeUrlFragment(redirectUrl, {
+                kc: encodeURIComponent(encryptedBlob),
+              })
             : redirectUrl;
         safeRedirect(redirectWithFragment, true);
       } catch (error) {
@@ -113,7 +150,9 @@ export function ConnectRoute() {
         const encryptedBlob = await snapshotLocalStorageToCookie();
         const redirectWithFragment =
           encryptedBlob && encryptedBlob.length > 0
-            ? `${redirectUrl}#kc=${encodeURIComponent(encryptedBlob)}`
+            ? mergeUrlFragment(redirectUrl, {
+                kc: encodeURIComponent(encryptedBlob),
+              })
             : redirectUrl;
         safeRedirect(redirectWithFragment, true);
       } catch (error) {
@@ -136,8 +175,7 @@ export function ConnectRoute() {
       return;
     }
 
-    // In standalone mode with redirect_url, don't auto-connect
-    // Show StandaloneConnect UI to let user manually connect
+    // In standalone mode with redirect_url, redirect immediately
     if (isStandalone && redirectUrl) {
       console.log("redirecting effect");
       (async () => {
@@ -146,7 +184,9 @@ export function ConnectRoute() {
           const encryptedBlob = await snapshotLocalStorageToCookie();
           const redirectWithFragment =
             encryptedBlob && encryptedBlob.length > 0
-              ? `${redirectUrl}#kc=${encodeURIComponent(encryptedBlob)}`
+              ? mergeUrlFragment(redirectUrl, {
+                  kc: encodeURIComponent(encryptedBlob),
+                })
               : redirectUrl;
           safeRedirect(redirectWithFragment, true);
         } catch (error) {

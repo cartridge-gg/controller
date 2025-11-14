@@ -36,6 +36,7 @@ export default class ControllerProvider extends BaseProvider {
   private selectedChain: ChainId;
   private chains: Map<ChainId, Chain>;
   private referral: { ref?: string; refGroup?: string };
+  private encryptedBlob?: string;
 
   isReady(): boolean {
     return !!this.keychain;
@@ -95,8 +96,8 @@ export default class ControllerProvider extends BaseProvider {
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
         const encryptedBlob = hashParams.get("kc");
         if (encryptedBlob) {
-          // Store encrypted blob in sessionStorage to pass to iframe
-          sessionStorage.setItem("keychain_encrypted_blob", encryptedBlob);
+          // Store encrypted blob as class variable to pass to iframe
+          this.encryptedBlob = encryptedBlob;
         }
       }
 
@@ -607,20 +608,17 @@ export default class ControllerProvider extends BaseProvider {
         : undefined;
     const username = urlParams?.get("username") ?? undefined;
 
-    // Extract encrypted blob from sessionStorage (stored during URL parsing)
-    const encryptedBlob =
-      typeof window !== "undefined" && typeof sessionStorage !== "undefined"
-        ? sessionStorage.getItem("keychain_encrypted_blob")
-        : null;
+    // Extract encrypted blob from class variable (stored during URL parsing)
+    const encryptedBlob = this.encryptedBlob;
 
     // Clear the flag after detecting it
     if (isReturningFromRedirect) {
       sessionStorage.removeItem("controller_standalone");
     }
 
-    // Clear encrypted blob after extracting
+    // Clear encrypted blob after using it
     if (encryptedBlob) {
-      sessionStorage.removeItem("keychain_encrypted_blob");
+      this.encryptedBlob = undefined;
     }
 
     const iframe = new KeychainIFrame({
