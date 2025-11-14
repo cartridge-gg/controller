@@ -252,17 +252,20 @@ export function useCreateController({
       popupSearchParams.set("action", "signup");
       setPendingUsername(username);
 
-      console.log("window.location.search", window.location.search);
-      console.log("popupSearchParams", popupSearchParams.toString());
-
-      PopupCenter(
-        `/authenticate?${popupSearchParams.toString()}`,
-        "Cartridge Signup",
-        480,
-        640,
-      );
+      try {
+        PopupCenter(
+          `/authenticate?${popupSearchParams.toString()}`,
+          "Cartridge Signup",
+          480,
+          640,
+        );
+      } catch (error) {
+        console.error("Failed to open popup for registration: ", error);
+        setError(error as Error);
+        setPendingUsername(undefined);
+      }
     },
-    [setPendingUsername],
+    [setPendingUsername, setError],
   );
 
   const signupOptions: AuthOptions = useMemo(() => {
