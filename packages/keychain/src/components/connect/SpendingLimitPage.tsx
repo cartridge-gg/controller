@@ -45,22 +45,22 @@ export function SpendingLimitPage({
       <LayoutFooter className="pt-4">
         {error && <ControllerErrorAlert className="mb-3" error={error} />}
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4">
           <Button
-            variant="secondary"
-            onClick={onBack}
-            disabled={isConnecting}
-            className="px-8"
-          >
-            Back
-          </Button>
-          <Button
-            className="flex-1"
+            className="w-full"
             disabled={isConnecting}
             isLoading={isConnecting}
             onClick={onConnect}
           >
             Confirm
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onBack}
+            disabled={isConnecting}
+            className="w-full"
+          >
+            Back
           </Button>
         </div>
 
