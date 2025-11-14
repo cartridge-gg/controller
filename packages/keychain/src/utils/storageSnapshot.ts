@@ -14,7 +14,8 @@ const STORAGE_KEY_PREFIX = "@cartridge/";
  * Default cookie configuration
  */
 const DEFAULT_COOKIE_NAME = "keychain_snapshot";
-const DEFAULT_COOKIE_PATH = "/__snapshot_never_hit_this_path_should_never_be_hit__";
+const DEFAULT_COOKIE_PATH =
+  "/__snapshot_never_hit_this_path_should_never_be_hit__";
 const DEFAULT_MAX_AGE_SECONDS = 300; // 5 minutes
 
 /**
