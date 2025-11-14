@@ -112,7 +112,7 @@ export function ConnectRoute() {
         const redirectWithFragment =
           encryptedBlob && encryptedBlob.length > 0
             ? mergeUrlFragment(redirectUrl, {
-                kc: encodeURIComponent(encryptedBlob),
+                kc: encryptedBlob,
               })
             : redirectUrl;
         safeRedirect(redirectWithFragment, true);
@@ -153,7 +153,7 @@ export function ConnectRoute() {
         const redirectWithFragment =
           encryptedBlob && encryptedBlob.length > 0
             ? mergeUrlFragment(redirectUrl, {
-                kc: encodeURIComponent(encryptedBlob),
+                kc: encryptedBlob,
               })
             : redirectUrl;
         safeRedirect(redirectWithFragment, true);
@@ -187,7 +187,7 @@ export function ConnectRoute() {
           const redirectWithFragment =
             encryptedBlob && encryptedBlob.length > 0
               ? mergeUrlFragment(redirectUrl, {
-                  kc: encodeURIComponent(encryptedBlob),
+                  kc: encryptedBlob,
                 })
               : redirectUrl;
           safeRedirect(redirectWithFragment, true);
