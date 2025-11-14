@@ -44,7 +44,6 @@ const DEFAULT_MAX_AGE_SECONDS = 300; // 5 minutes
  * - Dead path prevents accidental server transmission
  *
  * @param options - Configuration options for the snapshot
- * @throws {Error} If localStorage is not available or if cookie writing fails
  *
  * @example
  * ```typescript
@@ -107,7 +106,7 @@ export function snapshotLocalStorageToCookie(options?: SnapshotOptions): void {
     );
   } catch (error) {
     console.error("[storageSnapshot] Failed to create snapshot:", error);
-    throw error;
+    // Don't throw - allow application to continue even if snapshot fails
   }
 }
 
