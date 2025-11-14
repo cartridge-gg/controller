@@ -50,7 +50,9 @@ export function ConnectRoute() {
     [policies],
   );
 
-  const handleConnect = useCallback(() => {
+  console.log(isStandalone, redirectUrl)
+
+  const handleConnect = useCallback(async () => {
     if (!params || !controller) {
       return;
     }
@@ -66,23 +68,30 @@ export function ConnectRoute() {
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
+      console.log("redirecting");
       try {
-        snapshotLocalStorageToCookie();
+        // Create encrypted snapshot and append to URL fragment
+        const encryptedBlob = await snapshotLocalStorageToCookie();
+        const redirectWithFragment =
+          encryptedBlob && encryptedBlob.length > 0
+            ? `${redirectUrl}#kc=${encodeURIComponent(encryptedBlob)}`
+            : redirectUrl;
+        safeRedirect(redirectWithFragment, true);
       } catch (error) {
         console.error(
           "[ConnectRoute] Failed to create storage snapshot:",
           error,
         );
         // Continue with redirect even if snapshot fails
+        safeRedirect(redirectUrl, true);
       }
-      safeRedirect(redirectUrl, true);
       return;
     }
 
     handleCompletion();
   }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
 
-  const handleSkip = useCallback(() => {
+  const handleSkip = useCallback(async () => {
     if (!params || !controller) {
       return;
     }
@@ -98,16 +107,23 @@ export function ConnectRoute() {
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
+      console.log("redirecting skip");
       try {
-        snapshotLocalStorageToCookie();
+        // Create encrypted snapshot and append to URL fragment
+        const encryptedBlob = await snapshotLocalStorageToCookie();
+        const redirectWithFragment =
+          encryptedBlob && encryptedBlob.length > 0
+            ? `${redirectUrl}#kc=${encodeURIComponent(encryptedBlob)}`
+            : redirectUrl;
+        safeRedirect(redirectWithFragment, true);
       } catch (error) {
         console.error(
           "[ConnectRoute] Failed to create storage snapshot:",
           error,
         );
         // Continue with redirect even if snapshot fails
+        safeRedirect(redirectUrl, true);
       }
-      safeRedirect(redirectUrl, true);
       return;
     }
 
@@ -123,6 +139,25 @@ export function ConnectRoute() {
     // In standalone mode with redirect_url, don't auto-connect
     // Show StandaloneConnect UI to let user manually connect
     if (isStandalone && redirectUrl) {
+      console.log("redirecting effect");
+      (async () => {
+        try {
+          // Create encrypted snapshot and append to URL fragment
+          const encryptedBlob = await snapshotLocalStorageToCookie();
+          const redirectWithFragment =
+            encryptedBlob && encryptedBlob.length > 0
+              ? `${redirectUrl}#kc=${encodeURIComponent(encryptedBlob)}`
+              : redirectUrl;
+          safeRedirect(redirectWithFragment, true);
+        } catch (error) {
+          console.error(
+            "[ConnectRoute] Failed to create storage snapshot:",
+            error,
+          );
+          // Continue with redirect even if snapshot fails
+          safeRedirect(redirectUrl, true);
+        }
+      })();
       return;
     }
 
@@ -189,12 +224,6 @@ export function ConnectRoute() {
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
   if (!controller) {
-    return null;
-  }
-
-  // Standalone mode: Immediately redirect to application site
-  if (isStandalone && redirectUrl) {
-    safeRedirect(redirectUrl, true);
     return null;
   }
 

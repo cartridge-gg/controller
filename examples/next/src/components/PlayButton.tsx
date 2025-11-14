@@ -19,7 +19,7 @@ const GAMES: Game[] = [
   },
   {
     name: "Nums",
-    url: `${process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL}?redirect_url=https://nums-blond.vercel.app&preset=nums`,
+    url: `http://localhost:3001?redirect_url=https://nums-blond.vercel.app&preset=nums`,
     description: "Survive the adventure, earn rewards",
   },
 ];

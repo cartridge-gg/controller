@@ -89,6 +89,17 @@ export default class ControllerProvider extends BaseProvider {
         localStorage.setItem("lastUsedConnector", lastUsedConnector);
       }
 
+      // Extract encrypted blob from URL fragment (#kc=...)
+      // This contains the encrypted localStorage snapshot from keychain
+      if (window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const encryptedBlob = hashParams.get("kc");
+        if (encryptedBlob) {
+          // Store encrypted blob in sessionStorage to pass to iframe
+          sessionStorage.setItem("keychain_encrypted_blob", encryptedBlob);
+        }
+      }
+
       // Clean up the URL by removing controller flow parameters
       if (urlParams && window.history?.replaceState) {
         let needsCleanup = false;
@@ -103,11 +114,22 @@ export default class ControllerProvider extends BaseProvider {
           needsCleanup = true;
         }
 
+        // Also clean up the fragment if it contains our encrypted blob
+        let cleanHash = window.location.hash;
+        if (cleanHash) {
+          const hashParams = new URLSearchParams(cleanHash.slice(1));
+          if (hashParams.has("kc")) {
+            hashParams.delete("kc");
+            cleanHash = hashParams.toString() ? `#${hashParams.toString()}` : "";
+            needsCleanup = true;
+          }
+        }
+
         if (needsCleanup) {
           const newUrl =
             window.location.pathname +
             (urlParams.toString() ? "?" + urlParams.toString() : "") +
-            window.location.hash;
+            cleanHash;
           window.history.replaceState({}, "", newUrl);
         }
       }
@@ -583,9 +605,20 @@ export default class ControllerProvider extends BaseProvider {
         : undefined;
     const username = urlParams?.get("username") ?? undefined;
 
+    // Extract encrypted blob from sessionStorage (stored during URL parsing)
+    const encryptedBlob =
+      typeof window !== "undefined" && typeof sessionStorage !== "undefined"
+        ? sessionStorage.getItem("keychain_encrypted_blob")
+        : null;
+
     // Clear the flag after detecting it
     if (isReturningFromRedirect) {
       sessionStorage.removeItem("controller_standalone");
+    }
+
+    // Clear encrypted blob after extracting
+    if (encryptedBlob) {
+      sessionStorage.removeItem("keychain_encrypted_blob");
     }
 
     const iframe = new KeychainIFrame({
@@ -599,6 +632,7 @@ export default class ControllerProvider extends BaseProvider {
       ref: this.referral.ref,
       refGroup: this.referral.refGroup,
       needsSessionCreation: isReturningFromRedirect,
+      encryptedBlob: encryptedBlob ?? undefined,
       username: username,
       onSessionCreated: async () => {
         // Re-probe to establish connection now that storage access is granted and session created

@@ -3,6 +3,15 @@ import type {
   RestoreOptions,
   ClearOptions,
 } from "./storageSnapshot.types";
+import {
+  generateEncryptionKey,
+  exportKey,
+  importKey,
+  encryptSnapshot,
+  decryptSnapshot,
+  base64urlEncode,
+  base64urlDecode,
+} from "./snapshotCrypto";
 
 /**
  * Prefix for localStorage keys that should be synchronized via snapshot cookie.
@@ -13,46 +22,56 @@ const STORAGE_KEY_PREFIX = "@cartridge/";
 /**
  * Default cookie configuration
  */
-const DEFAULT_COOKIE_NAME = "keychain_snapshot";
-const DEFAULT_COOKIE_PATH =
-  "/__snapshot_never_hit_this_path_should_never_be_hit__";
+const DEFAULT_COOKIE_NAME = "keychain_snapshot_key";
+const DEFAULT_COOKIE_PATH = "/";
 const DEFAULT_MAX_AGE_SECONDS = 300; // 5 minutes
 
 /**
- * Creates a snapshot of localStorage items with the `cartridge/` prefix and stores
- * them in a "dead-path" cookie that will never be sent over the network.
+ * Creates an encrypted snapshot of localStorage items with the `@cartridge/` prefix.
  *
- * **Storage Access API Context:**
- * This function is designed to work around browser behavior where third-party iframes
- * have partitioned localStorage access. By storing localStorage data in a cookie on
- * a dead path (one that never matches any route), we can:
- * - Keep the data client-side only (never sent to server)
- * - Access it after calling `document.requestStorageAccess()` in an iframe
- * - Restore the original localStorage state in the iframe context
+ * **New Encrypted Architecture:**
+ * This function implements a split-key encryption approach where:
+ * 1. Generate random symmetric encryption key K
+ * 2. Encrypt localStorage snapshot with K → ciphertext B
+ * 3. Store K in cookie (on x.cartridge.gg, first-party only)
+ * 4. Return B to be passed via URL fragment (never sent to server)
+ *
+ * **Security Model:**
+ * - Encryption key K stored in cookie (accessible after Storage Access API grant)
+ * - Ciphertext B passed via URL fragment (visible to app, but useless without K)
+ * - Key and ciphertext separation provides defense-in-depth
+ * - AEAD (AES-GCM) ensures both confidentiality and integrity
+ * - Neither key nor ciphertext alone can decrypt the snapshot
  *
  * **Cookie Attributes:**
- * - Path: `/__snapshot_never_hit__` - Ensures cookie is never sent in HTTP requests
- * - Secure: Required for cross-site cookies
- * - SameSite=None: Allows third-party iframe access after Storage Access API grant
+ * - Path: `/` - Accessible from all paths (needed for iframe access)
+ * - Secure: Required for cross-site cookies (HTTPS only)
+ * - SameSite=None: Allows third-party iframe access after Storage Access API grant (HTTPS)
+ * - SameSite=Lax: Used for localhost/HTTP development (doesn't require Secure)
  * - Host-only: No Domain attribute, scoped to exact host (x.cartridge.gg)
  * - Short TTL: 5 minutes to minimize exposure window
  *
  * **Security Considerations:**
  * - NEVER include authentication tokens or sensitive credentials in localStorage
- * - Only sync keys prefixed with `cartridge/` to avoid third-party data
+ * - Only sync keys prefixed with `@cartridge/` to avoid third-party data
  * - Cookie expires quickly (5 min) to limit exposure
- * - Dead path prevents accidental server transmission
+ * - Encrypted blob passed in URL fragment (never sent to any server)
+ * - App domain (nums.gg) sees ciphertext but not the key
+ * - Keychain domain (x.cartridge.gg) has key but ciphertext only in fragment
  *
  * @param options - Configuration options for the snapshot
+ * @returns Promise resolving to encrypted blob (base64url string) to be passed via URL fragment
  *
  * @example
  * ```typescript
  * // Before redirecting to external site
- * snapshotLocalStorageToCookie();
- * window.location.href = redirectUrl;
+ * const encryptedBlob = await snapshotLocalStorageToCookie();
+ * window.location.href = redirectUrl + "#kc=" + encodeURIComponent(encryptedBlob);
  * ```
  */
-export function snapshotLocalStorageToCookie(options?: SnapshotOptions): void {
+export async function snapshotLocalStorageToCookie(
+  options?: SnapshotOptions,
+): Promise<string> {
   const cookieName = options?.cookieName ?? DEFAULT_COOKIE_NAME;
   const cookiePath = options?.cookiePath ?? DEFAULT_COOKIE_PATH;
   const maxAgeSeconds = options?.maxAgeSeconds ?? DEFAULT_MAX_AGE_SECONDS;
@@ -63,10 +82,10 @@ export function snapshotLocalStorageToCookie(options?: SnapshotOptions): void {
       console.warn(
         "[storageSnapshot] localStorage not available, skipping snapshot",
       );
-      return;
+      return "";
     }
 
-    // Gather all localStorage keys with the cartridge/ prefix
+    // Gather all localStorage keys with the @cartridge/ prefix
     const snapshot: Record<string, string | null> = {};
     let keysFound = 0;
 
@@ -82,57 +101,86 @@ export function snapshotLocalStorageToCookie(options?: SnapshotOptions): void {
       console.log(
         "[storageSnapshot] No keys with prefix found, skipping snapshot",
       );
-      return;
+      return "";
     }
 
-    // Serialize to JSON and URL-encode
-    const jsonPayload = JSON.stringify(snapshot);
-    const encodedPayload = encodeURIComponent(jsonPayload);
+    // STEP 1: Generate random encryption key
+    const encryptionKey = await generateEncryptionKey();
 
-    // Build cookie string
-    // Format: name=value; Path=path; Secure; SameSite=None; Max-Age=seconds
-    const cookieString = [
-      `${cookieName}=${encodedPayload}`,
+    // STEP 2: Encrypt the snapshot
+    const encryptedBlob = await encryptSnapshot(snapshot, encryptionKey);
+
+    // STEP 3: Export key and store in cookie
+    const keyBytes = await exportKey(encryptionKey);
+    const keyBase64url = base64urlEncode(keyBytes);
+
+    // Build cookie string with the encryption key
+    const cookieAttributes = [
+      `${cookieName}=${keyBase64url}`,
       `Path=${cookiePath}`,
-      "Secure",
-      "SameSite=None",
       `Max-Age=${maxAgeSeconds}`,
-    ].join("; ");
+    ];
 
+    // Only add Secure and SameSite=None for HTTPS contexts
+    // For localhost, use SameSite=Lax which works without Secure
+    if (
+      typeof window !== "undefined" &&
+      window.location.protocol === "https:"
+    ) {
+      cookieAttributes.push("Secure", "SameSite=None");
+    } else {
+      cookieAttributes.push("SameSite=Lax");
+    }
+
+    const cookieString = cookieAttributes.join("; ");
     document.cookie = cookieString;
 
     console.log(
-      `[storageSnapshot] Created snapshot with ${keysFound} keys (${encodedPayload.length} bytes)`,
+      `[storageSnapshot] Created encrypted snapshot with ${keysFound} keys (${encryptedBlob.length} bytes encrypted)`,
     );
+
+    // STEP 4: Return encrypted blob to be passed via URL fragment
+    return encryptedBlob;
   } catch (error) {
     console.error("[storageSnapshot] Failed to create snapshot:", error);
     // Don't throw - allow application to continue even if snapshot fails
+    return "";
   }
 }
 
 /**
- * Restores localStorage items from a snapshot cookie created by `snapshotLocalStorageToCookie()`.
+ * Restores localStorage items from an encrypted snapshot passed via URL fragment.
  *
- * **Usage Context:**
- * This function should be called immediately after successfully calling
- * `document.requestStorageAccess()` in an iframe context. The Storage Access API
- * grants the iframe access to its cookies, allowing us to read the snapshot cookie
- * and restore localStorage to its previous state.
+ * **New Encrypted Architecture:**
+ * This function decrypts and restores localStorage using the split-key approach:
+ * 1. Extract encrypted blob from URL fragment (#kc=...)
+ * 2. After Storage Access API grant, read encryption key from cookie
+ * 3. Decrypt blob with key
+ * 4. Restore all @cartridge/* keys to localStorage
+ * 5. Clear cookie and fragment
+ *
+ * **Security Model:**
+ * - Encryption key K read from cookie (only accessible after Storage Access API)
+ * - Ciphertext B passed via encryptedBlob parameter (from URL fragment)
+ * - AES-GCM decryption verifies integrity (tampered data rejected)
+ * - Function must be called AFTER `document.requestStorageAccess()` succeeds
  *
  * **Browser Compatibility:**
  * - Safari: Full support for Storage Access API
- * - Chrome: Supports Storage Access API (with user gesture requirement)
- * - Firefox: Supports Storage Access API
+ * - Chrome/Edge: Full support for Storage Access API
+ * - Firefox: Full support for Storage Access API
  * - iOS Safari: Full support
+ * - No Cookie Store API needed (simple document.cookie read)
  *
  * **Flow:**
- * 1. Top-level page creates snapshot before redirect
- * 2. User navigates back to iframe context
+ * 1. Top-level page creates encrypted snapshot before redirect
+ * 2. User navigates back to iframe context with #kc=<encrypted_blob>
  * 3. User clicks button (user gesture)
  * 4. `document.requestStorageAccess()` grants cookie access
- * 5. This function reads cookie and restores localStorage
- * 6. Cookie is cleared (optional but recommended)
+ * 5. This function reads key from cookie, decrypts blob, restores localStorage
+ * 6. Cookie is cleared
  *
+ * @param encryptedBlob - Base64url-encoded encrypted snapshot from URL fragment
  * @param options - Configuration options for restoration
  *
  * @example
@@ -140,11 +188,18 @@ export function snapshotLocalStorageToCookie(options?: SnapshotOptions): void {
  * // In iframe after user gesture
  * const granted = await document.requestStorageAccess();
  * if (granted) {
- *   restoreLocalStorageFromCookie({ clearAfterRestore: true });
+ *   // Extract from URL fragment
+ *   const blob = new URLSearchParams(location.hash.slice(1)).get("kc");
+ *   if (blob) {
+ *     await restoreLocalStorageFromFragment(blob, { clearAfterRestore: true });
+ *   }
  * }
  * ```
  */
-export function restoreLocalStorageFromCookie(options?: RestoreOptions): void {
+export async function restoreLocalStorageFromFragment(
+  encryptedBlob: string,
+  options?: RestoreOptions,
+): Promise<void> {
   const cookieName = options?.cookieName ?? DEFAULT_COOKIE_NAME;
   const cookiePath = options?.cookiePath ?? DEFAULT_COOKIE_PATH;
   const clearAfterRestore = options?.clearAfterRestore ?? true;
@@ -169,29 +224,42 @@ export function restoreLocalStorageFromCookie(options?: RestoreOptions): void {
       return;
     }
 
-    // Extract cookie value
+    // Validate input
+    if (!encryptedBlob || encryptedBlob.length === 0) {
+      console.warn("[storageSnapshot] Empty encrypted blob provided");
+      return;
+    }
+
+    // STEP 1: Read encryption key from cookie
     const cookies = document.cookie.split("; ");
     const targetCookie = cookies.find((cookie) =>
       cookie.startsWith(`${cookieName}=`),
     );
 
     if (!targetCookie) {
-      console.log(`[storageSnapshot] No snapshot cookie found (${cookieName})`);
+      console.warn(
+        `[storageSnapshot] Encryption key cookie not found (${cookieName})`,
+      );
+      console.warn(
+        "[storageSnapshot] Make sure document.requestStorageAccess() was called first",
+      );
       return;
     }
 
-    // Extract value after "cookieName="
-    const encodedValue = targetCookie.substring(cookieName.length + 1);
-    if (!encodedValue) {
-      console.warn("[storageSnapshot] Snapshot cookie is empty");
+    // STEP 2: Extract and decode encryption key from cookie
+    const keyBase64url = targetCookie.substring(cookieName.length + 1);
+    if (!keyBase64url) {
+      console.warn("[storageSnapshot] Encryption key cookie is empty");
       return;
     }
 
-    // Decode and parse JSON
-    const decodedValue = decodeURIComponent(encodedValue);
-    const snapshot: Record<string, string | null> = JSON.parse(decodedValue);
+    const keyBytes = base64urlDecode(keyBase64url);
+    const encryptionKey = await importKey(keyBytes);
 
-    // Restore to localStorage
+    // STEP 3: Decrypt the snapshot
+    const snapshot = await decryptSnapshot(encryptedBlob, encryptionKey);
+
+    // STEP 4: Restore to localStorage
     let restoredCount = 0;
     for (const [key, value] of Object.entries(snapshot)) {
       if (value === null) {
@@ -203,17 +271,48 @@ export function restoreLocalStorageFromCookie(options?: RestoreOptions): void {
     }
 
     console.log(
-      `[storageSnapshot] Restored ${restoredCount} keys from snapshot`,
+      `[storageSnapshot] Restored ${restoredCount} keys from encrypted snapshot`,
     );
 
-    // Clear cookie if requested
+    // STEP 5: Clear cookie if requested
     if (clearAfterRestore) {
       clearSnapshotCookie({ cookieName, cookiePath });
     }
   } catch (error) {
     console.error("[storageSnapshot] Failed to restore from snapshot:", error);
+    if (error instanceof Error) {
+      console.error("[storageSnapshot] Error details:", error.message);
+    }
     // Don't throw - allow application to continue even if restore fails
   }
+}
+
+/**
+ * Legacy function for backward compatibility.
+ * Calls restoreLocalStorageFromFragment after extracting blob from URL fragment.
+ *
+ * @deprecated Use restoreLocalStorageFromFragment directly
+ */
+export async function restoreLocalStorageFromCookie(
+  options?: RestoreOptions,
+): Promise<void> {
+  console.warn(
+    "[storageSnapshot] restoreLocalStorageFromCookie is deprecated, use restoreLocalStorageFromFragment",
+  );
+
+  // Extract blob from URL fragment
+  const hash = window.location.hash.slice(1); // Remove '#'
+  const params = new URLSearchParams(hash);
+  const encryptedBlob = params.get("kc");
+
+  if (!encryptedBlob) {
+    console.warn(
+      "[storageSnapshot] No encrypted blob found in URL fragment (#kc=...)",
+    );
+    return;
+  }
+
+  return restoreLocalStorageFromFragment(encryptedBlob, options);
 }
 
 /**
@@ -235,13 +334,23 @@ export function clearSnapshotCookie(options?: ClearOptions): void {
 
   try {
     // Set cookie with Max-Age=0 to expire it immediately
-    const cookieString = [
+    const cookieAttributes = [
       `${cookieName}=`,
       `Path=${cookiePath}`,
-      "Secure",
-      "SameSite=None",
       "Max-Age=0",
-    ].join("; ");
+    ];
+
+    // Match the same security attributes used when setting the cookie
+    if (
+      typeof window !== "undefined" &&
+      window.location.protocol === "https:"
+    ) {
+      cookieAttributes.push("Secure", "SameSite=None");
+    } else {
+      cookieAttributes.push("SameSite=Lax");
+    }
+
+    const cookieString = cookieAttributes.join("; ");
 
     document.cookie = cookieString;
 
