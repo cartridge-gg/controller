@@ -19,8 +19,6 @@ export function useWebauthnAuthentication() {
         navigator.userAgent,
       );
 
-      console.log("userAgent", navigator.userAgent);
-      console.log("isSafari", isSafari);
       if (isSafari) {
         doPopupFlow(username);
         return;
