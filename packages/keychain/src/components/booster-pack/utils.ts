@@ -157,7 +157,7 @@ export function assetGameTokenImageUrl(assetType: string): string {
     case "NUMS_GAME":
       return `${BASE_URL}/NUMS_GAME.png`;
     case "REALM":
-      return `${BASE_URL}/REALM_1.png`;
+      return `${BASE_URL}/DARK_SHUFFLE_GAME.png`;
     default:
       return `${BASE_URL}/EXPLAINER.png`;
   }
