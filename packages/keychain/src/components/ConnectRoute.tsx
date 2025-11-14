@@ -70,7 +70,10 @@ export function ConnectRoute() {
       try {
         snapshotLocalStorageToCookie();
       } catch (error) {
-        console.error("[ConnectRoute] Failed to create storage snapshot:", error);
+        console.error(
+          "[ConnectRoute] Failed to create storage snapshot:",
+          error,
+        );
         // Continue with redirect even if snapshot fails
       }
       safeRedirect(redirectUrl, true);
@@ -99,7 +102,10 @@ export function ConnectRoute() {
       try {
         snapshotLocalStorageToCookie();
       } catch (error) {
-        console.error("[ConnectRoute] Failed to create storage snapshot:", error);
+        console.error(
+          "[ConnectRoute] Failed to create storage snapshot:",
+          error,
+        );
         // Continue with redirect even if snapshot fails
       }
       safeRedirect(redirectUrl, true);
