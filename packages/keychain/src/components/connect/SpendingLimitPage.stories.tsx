@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { SpendingLimitPage } from "./SpendingLimitPage";
 import { CoinsIcon } from "@cartridge/ui";
 import type { ParsedSessionPolicies } from "@/hooks/session";
-import { ControllerError } from "@/utils/connection";
-import { ResponseCodes } from "@cartridge/controller";
+import type { ControllerError } from "@/utils/connection";
+import { ErrorCode } from "@cartridge/controller-wasm/controller";
 
 const meta = {
   component: SpendingLimitPage,
@@ -121,10 +121,10 @@ export const WithError: Story = {
   args: {
     policies: mockPoliciesWithLimitedAmount,
     isConnecting: false,
-    error: new ControllerError(
-      "Failed to connect to the application",
-      ResponseCodes.NOT_CONNECTED,
-    ),
+    error: {
+      code: ErrorCode.SignError,
+      message: "Failed to connect to the application",
+    } as ControllerError,
     onBack: () => console.log("Back clicked"),
     onConnect: () => console.log("Connect clicked"),
   },
