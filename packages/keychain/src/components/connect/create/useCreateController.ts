@@ -252,6 +252,9 @@ export function useCreateController({
       popupSearchParams.set("action", "signup");
       setPendingUsername(username);
 
+      console.log("window.location.search", window.location.search);
+      console.log("popupSearchParams", popupSearchParams.toString());
+
       PopupCenter(
         `/authenticate?${popupSearchParams.toString()}`,
         "Cartridge Signup",
