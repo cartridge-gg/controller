@@ -47,7 +47,9 @@ function mergeUrlFragment(
 
   // Reconstruct URL with merged fragment
   const mergedFragment = params.toString();
-  return mergedFragment ? `${urlWithoutHash}#${mergedFragment}` : urlWithoutHash;
+  return mergedFragment
+    ? `${urlWithoutHash}#${mergedFragment}`
+    : urlWithoutHash;
 }
 
 const CANCEL_RESPONSE = {
