@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { StandaloneConnect } from "./StandaloneConnect";
-import { MemoryRouter } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const meta = {
   component: StandaloneConnect,
@@ -19,17 +20,33 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+function NavigationWrapper({
+  children,
+  redirectUrl,
+}: {
+  children: React.ReactNode;
+  redirectUrl: string;
+}) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate(`/?redirect_url=${encodeURIComponent(redirectUrl)}`, {
+      replace: true,
+    });
+  }, [navigate, redirectUrl]);
+
+  return <>{children}</>;
+}
+
 export const Default: Story = {
   args: {
     username: "player123",
   },
   decorators: [
     (Story) => (
-      <MemoryRouter
-        initialEntries={["/?redirect_url=https://cartridge.gg/app"]}
-      >
+      <NavigationWrapper redirectUrl="https://cartridge.gg/app">
         <Story />
-      </MemoryRouter>
+      </NavigationWrapper>
     ),
   ],
 };
@@ -40,11 +57,9 @@ export const WithoutUsername: Story = {
   },
   decorators: [
     (Story) => (
-      <MemoryRouter
-        initialEntries={["/?redirect_url=https://cartridge.gg/app"]}
-      >
+      <NavigationWrapper redirectUrl="https://cartridge.gg/app">
         <Story />
-      </MemoryRouter>
+      </NavigationWrapper>
     ),
   ],
 };
@@ -65,11 +80,9 @@ export const UnverifiedApp: Story = {
   },
   decorators: [
     (Story) => (
-      <MemoryRouter
-        initialEntries={["/?redirect_url=https://untrusted-app.com/game"]}
-      >
+      <NavigationWrapper redirectUrl="https://untrusted-app.com/game">
         <Story />
-      </MemoryRouter>
+      </NavigationWrapper>
     ),
   ],
 };
@@ -89,11 +102,9 @@ export const CustomTheme: Story = {
   },
   decorators: [
     (Story) => (
-      <MemoryRouter
-        initialEntries={["/?redirect_url=https://example-game.com/start"]}
-      >
+      <NavigationWrapper redirectUrl="https://example-game.com/start">
         <Story />
-      </MemoryRouter>
+      </NavigationWrapper>
     ),
   ],
 };
