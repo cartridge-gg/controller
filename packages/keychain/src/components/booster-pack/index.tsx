@@ -36,7 +36,7 @@ const ASSET_TO_GAME_MAP: Record<string, { name: string; url: string }> = {
 // Map mystery asset card reward types to their specific game URLs
 const MYSTERY_CARD_GAME_MAP: Partial<Record<RewardType, string>> = {
   // Mystery asset cards
-  [RewardType.LS2_GAME]: "https://ls2.cartridge.gg",
+  [RewardType.LS2_GAME]: "https://lootsurvivor.io",
   [RewardType.NUMS_GAME]: "https://nums.gg",
   [RewardType.DARK_SHUFFLE]: "https://darkshuffle.io",
 };
@@ -117,17 +117,14 @@ export function BoosterPack() {
 
   // Handle claim button click - connects if needed, then claims
   const handleClaim = async () => {
-    // Check if user is logged in first (allow connecting even without asset info)
-    if (!username || !account) {
-      // Not connected - trigger connection flow// Redirect to connect page
-      const currentUrl = window.location.href;
-      const redirectTarget = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect`;
-      window.location.href = redirectTarget;
+    if (!privateKey || !assetInfo || isClaimed || isRevealing || isLoading)
       return;
-    }
 
-    // After login, check conditions for claiming
-    if (!privateKey || !assetInfo || isClaimed || isRevealing || isLoading) {
+    // Check if user is logged in
+    if (!username || !account) {
+      // Not connected - trigger connection flow
+      const currentUrl = window.location.href;
+      window.location.href = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect&needs_session_creation=true`;
       return;
     }
 
@@ -163,8 +160,9 @@ export function BoosterPack() {
 
       // Only show animation for mystery_asset type
       if (
-        assetInfo.type.toLowerCase() === "mystery" ||
-        assetInfo.type.toLowerCase() === "mystery_asset"
+        assetInfo &&
+        (assetInfo.type.toLowerCase() === "mystery" ||
+          assetInfo.type.toLowerCase() === "mystery_asset")
       ) {
         setIsRevealing(true);
 
@@ -258,19 +256,21 @@ export function BoosterPack() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full h-dvh bg-[#0f1410] overflow-hidden font-ld">
+    <div className="relative flex flex-col items-center justify-center w-full min-h-dvh h-full bg-[#0f1410] sm:overflow-hidden font-ld">
       {/* Confetti */}
-      {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          colors={CONFETTI_COLORS}
-          numberOfPieces={numberOfPieces}
-          recycle={false}
-          gravity={0.3}
-          tweenDuration={3000}
-        />
-      )}
+      <div className="z-50">
+        {showConfetti && (
+          <Confetti
+            width={window.innerWidth}
+            height={window.innerHeight}
+            colors={CONFETTI_COLORS}
+            numberOfPieces={numberOfPieces}
+            recycle={false}
+            gravity={0.3}
+            tweenDuration={3000}
+          />
+        )}
+      </div>
 
       {/* Background Gradient with Stars */}
       <div className="absolute inset-0 w-full h-full">
@@ -281,7 +281,7 @@ export function BoosterPack() {
       </div>
 
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 flex items-center justify-between w-full px-4 py-4 md:px-6 md:py-6 z-20">
+      <header className="fixed top-0 left-0 right-0 flex items-center justify-between w-full px-4 py-4 md:px-6 md:py-6 z-20 bg-[#0F1410]">
         {/* Arcade Logo */}
         <button className="flex items-center gap-2 shrink-0 relative">
           <div className="w-6 h-6 md:w-8 md:h-8">
@@ -304,7 +304,7 @@ export function BoosterPack() {
       </header>
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center gap-8 md:gap-12 px-4 py-20 md:pb-24 md:pt-8 w-full">
+      <div className="relative z-10 flex flex-col items-center justify-start sm:justify-center gap-8 md:gap-12 px-4 pb-20 md:pb-24 md:pt-8 w-full">
         {/* Header Text */}
         <div className="backdrop-blur-sm bg-[rgba(0,0,0,0.48)] px-4 py-2 rounded-lg">
           <h1 className="text-white text-xl md:text-2xl font-normal">
@@ -314,7 +314,7 @@ export function BoosterPack() {
 
         {/* Cards Display */}
         {rewardCards.length > 0 ? (
-          <div className="flex gap-4 md:gap-8 flex-wrap justify-center max-w-4xl">
+          <div className="flex gap-6 md:gap-8 pb-12 sm:pb-0 flex-wrap justify-center max-w-4xl">
             {rewardCards.map((card, index) => {
               const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
               const isClickable = isClaimed && !isRevealing;
@@ -358,12 +358,6 @@ export function BoosterPack() {
                         alt={card.name}
                         className="w-full h-full object-cover"
                       />
-                      {/* Name overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3">
-                        <p className="text-white text-sm font-medium text-center">
-                          {card.name}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </button>
@@ -408,77 +402,65 @@ export function BoosterPack() {
           </div>
         )}
 
-        {/* Error Message */}
-        {error ? (
-          <div className="backdrop-blur-sm bg-red-900/80 px-4 py-3 rounded-lg max-w-md text-center">
-            <p className="text-red-200 text-sm">{error}</p>
-          </div>
-        ) : null}
-
         {/* Action Buttons */}
-        {isClaimed && !isRevealing ? (
-          // Show Play and Inventory buttons after successful claim
-          <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-center">
-            {/* Secondary CTA - View in Inventory Button */}
-            <button
-              onClick={() => {
-                if (controller && "openProfile" in controller) {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (controller as any).openProfile("inventory");
-                }
-              }}
-              className="px-6 py-4 rounded-3xl text-sm font-medium uppercase tracking-[2.1px] transition-all hover:bg-white/10"
-              style={{
-                color: STAR_COLOR,
-                backgroundColor: "#1E221F",
-              }}
-            >
-              VIEW IN INVENTORY
-            </button>
-            {/* Primary CTA - Play Game Button */}
-            <button
-              onClick={() => {
-                const gameInfo =
-                  ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
-                if (gameInfo?.url) {
-                  window.open(gameInfo.url, "_blank");
-                }
-              }}
-              className="px-8 py-3 rounded-3xl text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg hover:opacity-90"
-              style={{
-                backgroundColor: STAR_COLOR,
-                color: "#0f1410",
-              }}
-            >
-              PLAY{" "}
-              {ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]?.name ||
-                "GAME"}
-            </button>
+        <div className="flex flex-col gap-1 md:gap-4 items-center justify-center pb-6 pt-2 sm:pb-16 fixed bottom-0 left-0 right-0 bg-[#0F1410] sm:bg-transparent">
+          {/* Error Message */}
+          {error ? (
+            <div className="backdrop-blur-sm bg-red-900/80 px-4 py-3 rounded-lg max-w-md text-center text-xs">
+              <p className="text-red-200 text-sm">{error}</p>
+            </div>
+          ) : null}
+
+          <div>
+            {isClaimed && !isRevealing ? (
+              // Show Play and Inventory buttons after successful claim
+              <div className="flex flex-row gap-3 md:gap-4 items-center w-full sm:w-auto px-4">
+                {/* Primary CTA - Play Game Button */}
+                <button
+                  onClick={() => {
+                    const gameInfo =
+                      ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
+                    if (gameInfo?.url) {
+                      window.open(gameInfo.url, "_blank");
+                    }
+                  }}
+                  className="px-8 py-3 w-full rounded-3xl text-xs sm:text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg hover:opacity-90"
+                  style={{
+                    backgroundColor: STAR_COLOR,
+                    color: "#0f1410",
+                  }}
+                >
+                  PLAY{" "}
+                  {ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]
+                    ?.name || "GAME"}
+                </button>
+              </div>
+            ) : (
+              // Show Claim button before claiming
+              <button
+                onClick={handleClaim}
+                disabled={isClaimed || isLoading}
+                className="px-6 py-3 rounded-3xl text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: isClaimed || isLoading ? "#666" : STAR_COLOR,
+                  color: "#0f1410",
+                }}
+              >
+                {isCheckingAsset
+                  ? "CHECKING..."
+                  : isLoading
+                    ? "CLAIMING..."
+                    : isClaimed
+                      ? isRevealing
+                        ? "REVEALING..."
+                        : "CLAIMED"
+                      : !username || !account
+                        ? "CONNECT"
+                        : "CLAIM"}
+              </button>
+            )}
           </div>
-        ) : (
-          // Show Claim button before claiming
-          <button
-            onClick={handleClaim}
-            disabled={isClaimed || isLoading}
-            className="px-6 py-3 rounded-3xl text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: isClaimed || isLoading ? "#666" : STAR_COLOR,
-              color: "#0f1410",
-            }}
-          >
-            {isCheckingAsset
-              ? "CHECKING..."
-              : isLoading
-                ? "CLAIMING..."
-                : isClaimed
-                  ? isRevealing
-                    ? "REVEALING..."
-                    : "CLAIMED"
-                  : !username || !account
-                    ? "CONNECT"
-                    : "CLAIM"}
-          </button>
-        )}
+        </div>
       </div>
     </div>
   );
