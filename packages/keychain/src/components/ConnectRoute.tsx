@@ -14,6 +14,7 @@ import {
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
 import { StandaloneConnect } from "./connect/StandaloneConnect";
+import { snapshotLocalStorageToCookie } from "@/utils/storageSnapshot";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -66,6 +67,15 @@ export function ConnectRoute() {
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
+      try {
+        snapshotLocalStorageToCookie();
+      } catch (error) {
+        console.error(
+          "[ConnectRoute] Failed to create storage snapshot:",
+          error,
+        );
+        // Continue with redirect even if snapshot fails
+      }
       safeRedirect(redirectUrl, true);
       return;
     }
@@ -89,6 +99,15 @@ export function ConnectRoute() {
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
     if (isStandalone && redirectUrl) {
+      try {
+        snapshotLocalStorageToCookie();
+      } catch (error) {
+        console.error(
+          "[ConnectRoute] Failed to create storage snapshot:",
+          error,
+        );
+        // Continue with redirect even if snapshot fails
+      }
       safeRedirect(redirectUrl, true);
       return;
     }

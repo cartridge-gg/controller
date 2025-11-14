@@ -1,6 +1,7 @@
 import { useConnection } from "@/hooks/connection";
 import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { safeRedirect } from "@/utils/url-validator";
+import { restoreLocalStorageFromCookie } from "@/utils/storageSnapshot";
 import {
   AlertIcon,
   Button,
@@ -51,8 +52,11 @@ export function StandaloneConnect({ username }: { username?: string }) {
       }
 
       console.log(
-        "[Standalone Flow] StandaloneConnect: Storage access granted, notifying parent and redirecting",
+        "[Standalone Flow] StandaloneConnect: Storage access granted, restoring localStorage and redirecting",
       );
+
+      // Restore localStorage from snapshot cookie
+      restoreLocalStorageFromCookie({ clearAfterRestore: true });
 
       // Notify parent controller that storage access was granted
       if (
