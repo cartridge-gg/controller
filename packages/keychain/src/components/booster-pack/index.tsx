@@ -33,6 +33,14 @@ const ASSET_TO_GAME_MAP: Record<string, { name: string; url: string }> = {
   MYSTERY_ASSET: { name: "ARCADE", url: "https://play.cartridge.gg" },
 };
 
+// Map mystery asset card reward types to their specific game URLs
+const MYSTERY_CARD_GAME_MAP: Partial<Record<RewardType, string>> = {
+  // Mystery asset cards
+  [RewardType.LS2_GAME]: "https://ls2.cartridge.gg",
+  [RewardType.NUMS_GAME]: "https://nums.gg",
+  [RewardType.DARK_SHUFFLE]: "https://darkshuffle.io",
+};
+
 export function BoosterPack() {
   const { privateKey } = useParams<{ privateKey: string }>();
   const account = useAccount();
@@ -172,9 +180,9 @@ export function BoosterPack() {
             revealState: RevealState.UNREVEALED,
           },
           {
-            type: RewardType.REALM,
-            name: "Realm NFT",
-            image: assetTokenImageUrl(RewardType.REALM),
+            type: RewardType.DARK_SHUFFLE,
+            name: "Dark Shuffle Game Pass",
+            image: assetGameTokenImageUrl(RewardType.DARK_SHUFFLE),
             revealState: RevealState.UNREVEALED,
           },
         ];
@@ -304,40 +312,60 @@ export function BoosterPack() {
         {/* Cards Display */}
         {rewardCards.length > 0 ? (
           <div className="flex gap-4 md:gap-8 flex-wrap justify-center max-w-4xl">
-            {rewardCards.map((card, index) => (
-              <div
-                key={index}
-                className="relative w-[180px] h-[245px] md:w-[220px] md:h-[300px]"
-              >
-                {/* Card container with fade-up animation */}
-                <div className="relative w-full h-full">
-                  {/* Card Front (revealed with fade-up) */}
-                  <div
-                    className="absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out"
-                    style={{
-                      opacity:
-                        card.revealState === RevealState.UNREVEALED ? 0 : 1,
-                      transform:
-                        card.revealState === RevealState.UNREVEALED
-                          ? "translateY(20px)"
-                          : "translateY(0)",
-                    }}
-                  >
-                    <img
-                      src={card.image}
-                      alt={card.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Name overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3">
-                      <p className="text-white text-sm font-medium text-center">
-                        {card.name}
-                      </p>
+            {rewardCards.map((card, index) => {
+              const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
+              const isClickable = isClaimed && !isRevealing;
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => {
+                    if (isClickable && gameUrl) {
+                      window.open(gameUrl, "_blank");
+                    }
+                  }}
+                  disabled={!isClickable}
+                  className={`relative w-[180px] h-[245px] md:w-[220px] md:h-[300px] ${
+                    isClickable
+                      ? "cursor-pointer hover:scale-105 transition-transform duration-300 ease-out"
+                      : "cursor-default"
+                  }`}
+                  aria-label={isClickable ? `Play ${card.name}` : card.name}
+                >
+                  {/* Card container with fade-up animation */}
+                  <div className="relative w-full h-full">
+                    {/* Card Front (revealed with fade-up) */}
+                    <div
+                      className={`absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out ${
+                        isClickable
+                          ? "hover:shadow-[0px_12px_32px_0px_rgba(251,203,74,0.3)]"
+                          : ""
+                      }`}
+                      style={{
+                        opacity:
+                          card.revealState === RevealState.UNREVEALED ? 0 : 1,
+                        transform:
+                          card.revealState === RevealState.UNREVEALED
+                            ? "translateY(20px)"
+                            : "translateY(0)",
+                      }}
+                    >
+                      <img
+                        src={card.image}
+                        alt={card.name}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Name overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3">
+                        <p className="text-white text-sm font-medium text-center">
+                          {card.name}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </button>
+              );
+            })}
           </div>
         ) : (
           // Placeholder before claim - Show asset card or loading
