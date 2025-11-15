@@ -6,6 +6,7 @@ import { Owner } from "@cartridge/controller-wasm";
 import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
 import { shortString } from "starknet";
+import { safeRedirect } from "@/utils/url-validator";
 
 export function useWebauthnAuthentication() {
   const { origin, rpcUrl, chainId, setController } = useConnection();
@@ -61,6 +62,13 @@ export function useWebauthnAuthentication() {
 
       window.controller = controller;
       setController(controller);
+
+      // Handle redirect_url if present
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlSearchParams.get("redirect_url");
+      if (redirectUrl) {
+        safeRedirect(redirectUrl);
+      }
     },
     [origin, rpcUrl, chainId, setController],
   );
@@ -100,6 +108,13 @@ export function useWebauthnAuthentication() {
 
       window.controller = controller;
       setController(controller);
+
+      // Handle redirect_url if present
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlSearchParams.get("redirect_url");
+      if (redirectUrl) {
+        safeRedirect(redirectUrl);
+      }
     },
     [chainId, rpcUrl, origin, setController],
   );
