@@ -30,7 +30,6 @@ import { Quote } from "@/types/starterpack-types";
 import { Receiving } from "../receiving";
 import { getWallet } from "../wallet/config";
 import { num } from "starknet";
-import { useConnection } from "@/hooks/connection";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -230,7 +229,6 @@ export function OnchainStarterPackInner({
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();
-  const { isMainnet } = useConnection();
   const {
     selectedWallet,
     quantity,
@@ -259,7 +257,9 @@ export function OnchainStarterPackInner({
 
   const onWalletSelect = () => {
     if (disableActions) return;
-    const methods = isMainnet ? "ethereum;base;arbitrum;optimism" : "starknet";
+    //const methods = isMainnet ? "ethereum;base;arbitrum;optimism" : "starknet";
+    // Restrict to Starknet for now until layerswap flow is robust
+    const methods = "starknet";
     navigate(`/purchase/method/${methods}`);
   };
 
