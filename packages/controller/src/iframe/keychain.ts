@@ -8,6 +8,10 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     version?: string;
     ref?: string;
     refGroup?: string;
+    needsSessionCreation?: boolean;
+    username?: string;
+    onSessionCreated?: () => void;
+    encryptedBlob?: string;
   };
 
 export class KeychainIFrame extends IFrame<Keychain> {
@@ -25,6 +29,10 @@ export class KeychainIFrame extends IFrame<Keychain> {
     rpcUrl,
     ref,
     refGroup,
+    needsSessionCreation,
+    username,
+    onSessionCreated,
+    encryptedBlob,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
@@ -61,6 +69,14 @@ export class KeychainIFrame extends IFrame<Keychain> {
       _url.searchParams.set("ref_group", encodeURIComponent(refGroup));
     }
 
+    if (needsSessionCreation) {
+      _url.searchParams.set("needs_session_creation", "true");
+    }
+
+    if (username) {
+      _url.searchParams.set("username", encodeURIComponent(username));
+    }
+
     // Policy precedence logic:
     // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
     // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
@@ -74,11 +90,25 @@ export class KeychainIFrame extends IFrame<Keychain> {
       _url.searchParams.set("preset", preset);
     }
 
+    // Add encrypted blob to URL fragment (hash) if present
+    // This contains the encrypted localStorage snapshot from keychain redirect
+    if (encryptedBlob) {
+      _url.hash = `kc=${encodeURIComponent(encryptedBlob)}`;
+    }
+
     super({
       ...iframeOptions,
       id: "controller-keychain",
       url: _url,
-      methods: walletBridge.getIFrameMethods(),
+      methods: {
+        ...walletBridge.getIFrameMethods(),
+        // Expose callback for keychain to notify parent that session was created and storage access granted
+        onSessionCreated: (_origin: string) => () => {
+          if (onSessionCreated) {
+            onSessionCreated();
+          }
+        },
+      },
     });
 
     this.walletBridge = walletBridge;

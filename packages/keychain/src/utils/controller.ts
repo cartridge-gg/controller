@@ -43,10 +43,6 @@ export default class Controller {
     throw new Error("Initialize with Controller.login or Controller.create");
   }
 
-  appId() {
-    return this.cartridgeMeta.appId();
-  }
-
   address() {
     return this.cartridgeMeta.address();
   }
@@ -88,6 +84,7 @@ export default class Controller {
   }
 
   async createSession(
+    appId: string,
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -98,17 +95,18 @@ export default class Controller {
     }
 
     return await this.cartridge.createSession(
+      appId,
       toWasmPolicies(policies),
       expiresAt,
     );
   }
 
-  async skipSession(policies: ParsedSessionPolicies) {
+  async skipSession(appId: string, policies: ParsedSessionPolicies) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
 
-    await this.cartridge.skipSession(toWasmPolicies(policies));
+    await this.cartridge.skipSession(appId, toWasmPolicies(policies));
   }
 
   async createPasskeySigner(rpId: string) {
@@ -149,6 +147,7 @@ export default class Controller {
   }
 
   async registerSession(
+    appId: string,
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
     publicKey: string,
@@ -159,6 +158,7 @@ export default class Controller {
     }
 
     return await this.cartridge.registerSession(
+      appId,
       toWasmPolicies(policies),
       expiresAt,
       publicKey,
@@ -203,20 +203,33 @@ export default class Controller {
   }
 
   async trySessionExecute(
+    appId: string,
     calls: Call[],
     feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.trySessionExecute(toJsCalls(calls), feeSource);
+    return await this.cartridge.trySessionExecute(
+      appId,
+      toJsCalls(calls),
+      feeSource,
+    );
   }
 
-  async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
-    return await this.cartridge.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
+  async hasAuthorizedPoliciesForCalls(
+    appId: string,
+    calls: Call[],
+  ): Promise<boolean> {
+    return await this.cartridge.hasAuthorizedPoliciesForCalls(
+      appId,
+      toJsCalls(calls),
+    );
   }
 
   async hasAuthorizedPoliciesForMessage(
+    appId: string,
     typedData: TypedData,
   ): Promise<boolean> {
     return await this.cartridge.hasAuthorizedPoliciesForMessage(
+      appId,
       JSON.stringify(typedData),
     );
   }
@@ -231,8 +244,14 @@ export default class Controller {
     );
   }
 
-  async isRequestedSession(policies: ParsedSessionPolicies): Promise<boolean> {
-    return await this.cartridge.hasRequestedSession(toWasmPolicies(policies));
+  async isRequestedSession(
+    appId: string,
+    policies: ParsedSessionPolicies,
+  ): Promise<boolean> {
+    return await this.cartridge.hasRequestedSession(
+      appId,
+      toWasmPolicies(policies),
+    );
   }
 
   async estimateInvokeFee(calls: Call[]): Promise<FeeEstimate> {
@@ -286,14 +305,12 @@ export default class Controller {
   }
 
   static async apiLogin({
-    appId,
     classHash,
     rpcUrl,
     address,
     username,
     owner,
   }: {
-    appId: string;
     classHash: string;
     rpcUrl: string;
     address: string;
@@ -301,7 +318,6 @@ export default class Controller {
     owner: Owner;
   }): Promise<Controller> {
     const accountWithMeta = await ControllerFactory.apiLogin(
-      appId,
       username,
       classHash,
       rpcUrl,
@@ -319,14 +335,12 @@ export default class Controller {
   }
 
   static async create({
-    appId,
     classHash,
     rpcUrl,
     address,
     username,
     owner,
   }: {
-    appId: string;
     classHash: string;
     rpcUrl: string;
     address: string;
@@ -334,7 +348,6 @@ export default class Controller {
     owner: Owner;
   }): Promise<Controller> {
     const accountWithMeta = await CartridgeAccount.new(
-      appId,
       classHash,
       rpcUrl,
       address,
@@ -376,7 +389,6 @@ export default class Controller {
     session: JsRevokableSession;
   }> {
     const loginResult = await ControllerFactory.login(
-      appId,
       username,
       classHash,
       rpcUrl,
@@ -385,6 +397,8 @@ export default class Controller {
       cartridgeApiUrl,
       BigInt(session_expires_at_s),
       isControllerRegistered,
+      true,
+      appId,
     );
 
     const [accountWithMeta, session] = loginResult.intoValues();
@@ -400,9 +414,8 @@ export default class Controller {
     };
   }
 
-  static async fromStore(appId: string): Promise<Controller | undefined> {
+  static async fromStore(): Promise<Controller | undefined> {
     const cartridgeWithMeta = await ControllerFactory.fromStorage(
-      appId,
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
     if (!cartridgeWithMeta) {

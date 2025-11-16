@@ -48,7 +48,7 @@ const RegisterSessionLayout = ({
   publicKey?: string;
 }) => {
   const { policies } = useCreateSession();
-  const { controller, theme } = useConnection();
+  const { controller, theme, origin } = useConnection();
   const [transactions, setTransactions] = useState<Call[] | undefined>(
     undefined,
   );
@@ -84,6 +84,7 @@ const RegisterSessionLayout = ({
       }
 
       const { transaction_hash } = await controller.registerSession(
+        origin,
         expiresAt,
         policies,
         publicKey,
@@ -100,7 +101,7 @@ const RegisterSessionLayout = ({
 
       onConnect(transaction_hash, expiresAt);
     },
-    [controller, expiresAt, policies, publicKey, onConnect],
+    [controller, expiresAt, policies, publicKey, onConnect, origin],
   );
 
   if (!transactions) {

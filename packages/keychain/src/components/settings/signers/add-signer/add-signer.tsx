@@ -290,13 +290,9 @@ const RegularAuths = ({
         kind="passkey"
         onClick={async () => {
           await handleClick("passkey", async () => {
-            if (
-              !controller ||
-              !controller?.username() ||
-              !controller?.appId()
-            ) {
+            if (!controller || !controller?.username()) {
               throw new Error(
-                `Invalid data: username: ${controller?.username()} appId: ${controller?.appId()}`,
+                `Invalid data: username: ${controller?.username()}`,
               );
             }
 

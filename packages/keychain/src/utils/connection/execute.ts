@@ -88,6 +88,7 @@ export function parseControllerError(
 }
 
 export async function executeCore(
+  origin: string,
   transactions: AllowArray<Call>,
   feeSource?: FeeSource,
 ): Promise<InvokeFunctionResponse> {
@@ -98,7 +99,7 @@ export async function executeCore(
   }
 
   const calls = normalizeCalls(transactions);
-  return await controller.trySessionExecute(calls, feeSource);
+  return await controller.trySessionExecute(origin, calls, feeSource);
 }
 
 export function execute({
@@ -109,70 +110,75 @@ export function execute({
     options?: { replace?: boolean; state?: unknown },
   ) => void;
 }) {
-  return async (
-    transactions: AllowArray<Call>,
-    __?: Abi[],
-    ___?: InvocationsDetails,
-    sync?: boolean,
-    feeSource?: FeeSource,
-    error?: ControllerError,
-  ): Promise<InvokeFunctionResponse | ConnectError> => {
-    const calls = normalizeCalls(transactions);
+  return (origin: string) =>
+    async (
+      transactions: AllowArray<Call>,
+      __?: Abi[],
+      ___?: InvocationsDetails,
+      sync?: boolean,
+      feeSource?: FeeSource,
+      error?: ControllerError,
+    ): Promise<InvokeFunctionResponse | ConnectError> => {
+      const calls = normalizeCalls(transactions);
 
-    if (sync) {
-      return await new Promise((resolve, reject) => {
-        const url = createExecuteUrl(toArray(transactions), {
-          error,
-          resolve,
-          reject,
-        });
-
-        navigate(url, { replace: true });
-      });
-    }
-
-    const release = await mutex.obtain();
-    return await new Promise<InvokeFunctionResponse | ConnectError>(
-      // eslint-disable-next-line no-async-promise-executor
-      async (resolve, reject) => {
-        const controller: Controller | undefined = window.controller;
-
-        if (!controller) {
-          return reject({
-            message: "Controller context not available",
-          });
-        }
-
-        // Use trySessionExecute which handles session checks internally
-        try {
-          const { transaction_hash } = await executeCore(calls, feeSource);
-          return resolve({
-            code: ResponseCodes.SUCCESS,
-            transaction_hash,
-          });
-        } catch (e) {
-          const error = e as ControllerError;
-          const parsedError = parseControllerError(error);
-
-          // Check for specific error codes that require user interaction
-          // SessionRefreshRequired and ManualExecutionRequired both need UI
+      if (sync) {
+        return await new Promise((resolve, reject) => {
           const url = createExecuteUrl(toArray(transactions), {
-            error: parsedError,
+            error,
             resolve,
             reject,
           });
-          navigate(url, { replace: true });
 
-          return resolve({
-            code: ResponseCodes.USER_INTERACTION_REQUIRED,
-            message: "User interaction required",
-          });
-        }
-      },
-    ).finally(() => {
-      release();
-    });
-  };
+          navigate(url, { replace: true });
+        });
+      }
+
+      const release = await mutex.obtain();
+      return await new Promise<InvokeFunctionResponse | ConnectError>(
+        // eslint-disable-next-line no-async-promise-executor
+        async (resolve, reject) => {
+          const controller: Controller | undefined = window.controller;
+
+          if (!controller) {
+            return reject({
+              message: "Controller context not available",
+            });
+          }
+
+          // Use trySessionExecute which handles session checks internally
+          try {
+            const { transaction_hash } = await executeCore(
+              origin,
+              calls,
+              feeSource,
+            );
+            return resolve({
+              code: ResponseCodes.SUCCESS,
+              transaction_hash,
+            });
+          } catch (e) {
+            const error = e as ControllerError;
+            const parsedError = parseControllerError(error);
+
+            // Check for specific error codes that require user interaction
+            // SessionRefreshRequired and ManualExecutionRequired both need UI
+            const url = createExecuteUrl(toArray(transactions), {
+              error: parsedError,
+              resolve,
+              reject,
+            });
+            navigate(url, { replace: true });
+
+            return resolve({
+              code: ResponseCodes.USER_INTERACTION_REQUIRED,
+              message: "User interaction required",
+            });
+          }
+        },
+      ).finally(() => {
+        release();
+      });
+    };
 }
 
 export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {

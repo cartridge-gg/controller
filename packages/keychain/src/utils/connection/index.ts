@@ -10,7 +10,7 @@ import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
-import { hasStorageAccessFactory } from "./storage-access";
+import { StarterpackOptions } from "@cartridge/controller";
 
 export type { ControllerError } from "./execute";
 
@@ -35,16 +35,16 @@ export function connectToController<ParentMethods extends object>({
         }),
       ),
       deploy: () => deployFactory({ navigate }),
-      execute: () => execute({ navigate }),
+      execute: normalize(execute({ navigate })),
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),
-      signMessage: () =>
+      signMessage: normalize(
         signMessageFactory({
           navigate,
         }),
+      ),
       openSettings: () => openSettingsFactory(),
       navigate: () => navigateFactory(),
-      hasStorageAccess: () => hasStorageAccessFactory(),
       reset: () => () => {
         // Reset handled by navigation
       },
@@ -66,9 +66,9 @@ export function connectToController<ParentMethods extends object>({
         navigate("/funding", { replace: true });
       },
       openStarterPack:
-        () => (starterpackId: string | number, preimage?: string) => {
+        () => (id: string | number, options?: StarterpackOptions) => {
           navigate(
-            `/purchase/starterpack/${starterpackId}${preimage ? `?preimage=${preimage}` : ""}`,
+            `/purchase/starterpack/${id}${options?.preimage ? `?preimage=${options.preimage}` : ""}`,
             { replace: true },
           );
         },

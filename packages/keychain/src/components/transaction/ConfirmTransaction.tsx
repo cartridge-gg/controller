@@ -35,7 +35,7 @@ export function ConfirmTransaction({
   useEffect(() => {
     if (controller && policies) {
       controller
-        .isRequestedSession(policies)
+        .isRequestedSession(origin, policies)
         .then(setHasSession)
         .finally(() => setLoading(false));
       return;
@@ -44,7 +44,7 @@ export function ConfirmTransaction({
       setHasSession(true);
     }
     setLoading(false);
-  }, [controller, policies]);
+  }, [controller, policies, origin]);
 
   // Check if we have a SessionRefreshRequired error
   useEffect(() => {
@@ -87,7 +87,7 @@ export function ConfirmTransaction({
             setNeedsSessionRefresh(false);
 
             // Retry the execution after session refresh
-            const res = await executeCore(transactions);
+            const res = await executeCore(origin, transactions);
             onComplete(res.transaction_hash);
           } catch (e) {
             const retryError = e as ControllerError;

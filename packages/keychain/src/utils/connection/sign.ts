@@ -123,62 +123,75 @@ export function signMessageFactory({
     options?: { replace?: boolean; state?: unknown },
   ) => void;
 }) {
-  return async (
-    typedData: TypedData,
-    _account: string,
-    async?: boolean,
-  ): Promise<Signature | ConnectError> => {
-    const controller = window.controller;
+  return (origin: string) =>
+    async (
+      typedData: TypedData,
+      _account: string,
+      async?: boolean,
+    ): Promise<Signature | ConnectError> => {
+      const controller = window.controller;
 
-    const showSignMessage = ({ resolve, reject }: SignMessageCallback = {}) => {
-      const url = createSignMessageUrl(typedData, {
+      const showSignMessage = ({
         resolve,
         reject,
-      });
+      }: SignMessageCallback = {}) => {
+        const url = createSignMessageUrl(typedData, {
+          resolve,
+          reject,
+        });
 
-      navigate(url, { replace: true });
-    };
+        navigate(url, { replace: true });
+      };
 
-    if (!async) {
-      return await new Promise((resolve, reject) => {
-        showSignMessage({ resolve, reject });
-      });
-    }
-
-    const release = await mutex.obtain();
-    return await new Promise<Signature | ConnectError>(
-      // eslint-disable-next-line no-async-promise-executor
-      async (resolve, reject) => {
-        if (!controller) {
-          return reject("Controller not connected");
-        }
-
-        // If a session call and there is no session available
-        // fallback to manual apporval flow
-        if (!(await controller.hasAuthorizedPoliciesForMessage(typedData))) {
+      if (!async) {
+        return await new Promise((resolve, reject) => {
           showSignMessage({ resolve, reject });
+        });
+      }
 
-          return resolve({
-            code: ResponseCodes.USER_INTERACTION_REQUIRED,
-            message: "User interaction required",
-          });
-        }
+      const release = await mutex.obtain();
+      return await new Promise<Signature | ConnectError>(
+        // eslint-disable-next-line no-async-promise-executor
+        async (resolve, reject) => {
+          if (!controller) {
+            return reject("Controller not connected");
+          }
 
-        try {
-          const signature = await controller.signMessage(typedData);
-          return resolve(signature);
-        } catch (e) {
-          return resolve({
-            code: ResponseCodes.ERROR,
-            message: (e as Error).message,
-            error: parseControllerError(
-              e as ControllerError & { code: number },
-            ),
-          });
-        }
-      },
-    ).finally(() => {
-      release();
-    });
-  };
+          if (!origin) {
+            return reject("App origin not available");
+          }
+
+          // If a session call and there is no session available
+          // fallback to manual apporval flow
+          if (
+            !(await controller.hasAuthorizedPoliciesForMessage(
+              origin,
+              typedData,
+            ))
+          ) {
+            showSignMessage({ resolve, reject });
+
+            return resolve({
+              code: ResponseCodes.USER_INTERACTION_REQUIRED,
+              message: "User interaction required",
+            });
+          }
+
+          try {
+            const signature = await controller.signMessage(typedData);
+            return resolve(signature);
+          } catch (e) {
+            return resolve({
+              code: ResponseCodes.ERROR,
+              message: (e as Error).message,
+              error: parseControllerError(
+                e as ControllerError & { code: number },
+              ),
+            });
+          }
+        },
+      ).finally(() => {
+        release();
+      });
+    };
 }
