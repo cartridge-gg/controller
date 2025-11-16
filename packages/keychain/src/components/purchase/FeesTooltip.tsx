@@ -15,6 +15,8 @@ export const FeesTooltip = ({
   defaultOpen?: boolean;
   isStripe: boolean;
 }) => {
+  const clientFeePercentage = isStripe ? "8.9%" : "2.5%"; // Combined Stripe + Cartridge or just Cartridge
+
   return (
     <TooltipProvider>
       <Tooltip defaultOpen={defaultOpen}>
@@ -26,13 +28,17 @@ export const FeesTooltip = ({
         >
           <div>Processing Fees:</div>
           <Separator className="bg-background-125" />
-          {isStripe && (
-            <div className="flex flex-row justify-between text-foreground-300">
-              Stripe Processing Fee: <div>3.9%</div>
-            </div>
-          )}
           <div className="flex flex-row justify-between text-foreground-300">
-            Cartridge Processing Fee: <div>{isStripe ? "5%" : "2.5%"}</div>
+            <span>Marketplace Fee:</span>
+            <span>0.00%</span>
+          </div>
+          <div className="flex flex-row justify-between text-foreground-300">
+            <span>Creator Royalties:</span>
+            <span>0.00%</span>
+          </div>
+          <div className="flex flex-row justify-between text-foreground-300">
+            <span>Client Fee:</span>
+            <span>{clientFeePercentage}</span>
           </div>
         </TooltipContent>
       </Tooltip>

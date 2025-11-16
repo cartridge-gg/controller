@@ -1,32 +1,22 @@
 import {
-  ArbitrumIcon,
-  BaseIcon,
-  Card,
   CardContent,
   CreditIcon,
-  EthereumIcon,
   InfoIcon,
-  OptimismIcon,
   Select,
   SelectContent,
   SelectItem,
-  SolanaIcon,
-  StarknetIcon,
   Thumbnail,
   TokenSelectHeader,
 } from "@cartridge/ui";
 import { CostDetails } from "../types";
-import {
-  ExternalPlatform,
-  ExternalWalletType,
-  humanizeString,
-} from "@cartridge/controller";
+import { ExternalWalletType } from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
 import type { Quote } from "@/types/starterpack-types";
 import { useCallback, useMemo, useEffect } from "react";
 import { usePurchaseContext } from "@/context";
 import { num } from "starknet";
+import { TOKEN_ICONS } from "@/constants";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -35,61 +25,52 @@ export const convertCentsToDollars = (cents: number): string => {
   return `$${(cents / 100).toFixed(2)}`;
 };
 
+/**
+ * Fiat/Stripe Cost Breakdown - displays total with fees tooltip
+ */
 export function CostBreakdown({
   rails,
   costDetails,
   walletType,
-  platform,
   paymentUnit,
   openFeesTooltip = false,
 }: {
   rails: PaymentRails;
   costDetails?: CostDetails;
   walletType?: ExternalWalletType;
-  platform?: ExternalPlatform;
   paymentUnit?: PaymentUnit;
   openFeesTooltip?: boolean;
 }) {
   if (rails === "crypto" && !walletType) {
-    return;
+    return null;
   }
 
   if (!costDetails) {
-    return <></>;
+    return null;
   }
 
   return (
-    <Card className="gap-3">
-      {rails === "crypto" && platform && (
-        <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
-          <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
-            Purchase on <Network platform={platform} />
+    <div className="flex flex-row gap-3 h-[40px]">
+      <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+        <div className="flex justify-between text-sm font-medium w-full">
+          <div className="flex flex-row items-center gap-1">
+            <span>Total</span>
+            {costDetails.processingFeeInCents > 0 && (
+              <FeesTooltip
+                trigger={<InfoIcon size="xs" />}
+                isStripe={rails === "stripe"}
+                defaultOpen={openFeesTooltip}
+                costDetails={costDetails}
+              />
+            )}
           </div>
-        </CardContent>
-      )}
-
-      <div className="flex flex-row gap-3 h-[40px]">
-        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
-          <div className="flex justify-between text-sm font-medium w-full">
-            <div className="flex flex-row items-center gap-1">
-              <span>Total</span>
-              {costDetails.processingFeeInCents > 0 && (
-                <FeesTooltip
-                  trigger={<InfoIcon size="xs" />}
-                  isStripe={rails === "stripe"}
-                  defaultOpen={openFeesTooltip}
-                  costDetails={costDetails}
-                />
-              )}
-            </div>
-            <span className="text-foreground-100">
-              {convertCentsToDollars(costDetails.totalInCents)}
-            </span>
-          </div>
-        </CardContent>
-        <PaymentType unit={paymentUnit} />
-      </div>
-    </Card>
+          <span className="text-foreground-100">
+            {convertCentsToDollars(costDetails.totalInCents)}
+          </span>
+        </div>
+      </CardContent>
+      <PaymentType unit={paymentUnit} />
+    </div>
   );
 }
 
@@ -98,12 +79,10 @@ export function CostBreakdown({
  */
 export function OnchainCostBreakdown({
   quote,
-  platform,
   openFeesTooltip = false,
   showTokenSelector = false,
 }: {
   quote: Quote;
-  platform?: ExternalPlatform;
   openFeesTooltip?: boolean;
   showTokenSelector?: boolean;
 }) {
@@ -114,6 +93,11 @@ export function OnchainCostBreakdown({
     convertedPrice,
     isFetchingConversion,
   } = usePurchaseContext();
+
+  // Get token icon from available tokens
+  const paymentTokenIcon = availableTokens.find(
+    (token) => token.address.toLowerCase() === quote.paymentToken.toLowerCase(),
+  )?.icon;
   const { symbol, decimals } = quote.paymentTokenMetadata;
 
   // Get default token (USDC if available) for fallback
@@ -179,152 +163,149 @@ export function OnchainCostBreakdown({
   );
 
   return (
-    <Card className="gap-3">
-      {platform && (
-        <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
-          <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
-            Purchase on <Network platform={platform} />
+    <div className="flex flex-row gap-3 h-[40px]">
+      <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+        <div className="flex justify-between text-sm font-medium w-full">
+          <div className="flex flex-row items-center gap-1">
+            <span>Total</span>
+            <OnchainFeesTooltip
+              trigger={<InfoIcon size="xs" />}
+              defaultOpen={openFeesTooltip}
+              quote={quote}
+            />
           </div>
-        </CardContent>
-      )}
-
-      <div className="flex flex-row gap-3 h-[40px]">
-        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
-          <div className="flex justify-between text-sm font-medium w-full">
-            <div className="flex flex-row items-center gap-1">
-              <span>Total</span>
-              <OnchainFeesTooltip
-                trigger={<InfoIcon size="xs" />}
-                defaultOpen={openFeesTooltip}
-                quote={quote}
-              />
-            </div>
-            <div className="flex items-center gap-1.5">
-              {showTokenSelector ? (
-                <>
-                  <span className="text-foreground-400">
-                    {formatAmount(paymentAmount)} {symbol}
-                  </span>
-                  {!isPaymentTokenSameAsSelected &&
-                    convertedEquivalent !== null &&
-                    displayToken &&
-                    !isFetchingConversion && (
-                      <span className="text-foreground-100">
-                        {formatAmount(convertedEquivalent)}{" "}
-                        {convertedPrice?.tokenMetadata.symbol}
-                      </span>
-                    )}
-                </>
-              ) : (
-                <>
-                  <span className="text-foreground-400">
-                    {formatAmount(paymentAmount)} {symbol}
-                  </span>
-                  {convertedEquivalent !== null && !isFetchingConversion && (
-                    <span className="text-foreground-100">
+          <div className="flex items-center gap-1.5">
+            {showTokenSelector ? (
+              <>
+                {!isPaymentTokenSameAsSelected &&
+                  convertedEquivalent !== null &&
+                  displayToken &&
+                  !isFetchingConversion && (
+                    <span className="text-foreground-400">
                       ${formatAmount(convertedEquivalent)}
                     </span>
                   )}
-                </>
-              )}
-            </div>
+                <span className="text-foreground-100">
+                  {formatAmount(
+                    !isPaymentTokenSameAsSelected &&
+                      convertedEquivalent !== null
+                      ? convertedEquivalent
+                      : paymentAmount,
+                  )}{" "}
+                  {!isPaymentTokenSameAsSelected && convertedEquivalent !== null
+                    ? convertedPrice?.tokenMetadata.symbol
+                    : symbol}
+                </span>
+                <div className="flex items-center gap-1">
+                  {((!isPaymentTokenSameAsSelected &&
+                    convertedPrice?.tokenMetadata.symbol &&
+                    availableTokens.find(
+                      (t) => t.symbol === convertedPrice?.tokenMetadata.symbol,
+                    )?.icon) ||
+                    paymentTokenIcon) && (
+                    <Thumbnail
+                      icon={
+                        (!isPaymentTokenSameAsSelected &&
+                          convertedPrice?.tokenMetadata.symbol &&
+                          availableTokens.find(
+                            (t) =>
+                              t.symbol === convertedPrice?.tokenMetadata.symbol,
+                          )?.icon) ||
+                        paymentTokenIcon
+                      }
+                      rounded
+                      size="xs"
+                      variant="light"
+                    />
+                  )}
+                  <span className="text-xs text-foreground-400">
+                    {!isPaymentTokenSameAsSelected &&
+                    convertedEquivalent !== null
+                      ? convertedPrice?.tokenMetadata.symbol
+                      : symbol}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                {convertedEquivalent !== null && !isFetchingConversion && (
+                  <span className="text-foreground-400">
+                    ${formatAmount(convertedEquivalent)}
+                  </span>
+                )}
+                <span className="text-foreground-100">
+                  {formatAmount(paymentAmount)} {symbol}
+                </span>
+                <div className="flex items-center gap-1">
+                  {paymentTokenIcon && (
+                    <Thumbnail
+                      icon={paymentTokenIcon}
+                      rounded
+                      size="xs"
+                      variant="light"
+                    />
+                  )}
+                  <span className="text-xs text-foreground-400">{symbol}</span>
+                </div>
+              </>
+            )}
           </div>
-        </CardContent>
-        {showTokenSelector && availableTokens.length > 0 && (
-          <Select
-            value={displayToken?.address}
-            onValueChange={handleTokenChange}
-            defaultValue={defaultToken?.address}
-            disabled={availableTokens.length <= 1}
-          >
-            <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2" />
-            <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
-              {availableTokens.map((token) => (
-                <SelectItem
-                  key={token.address}
-                  simplified
-                  value={token.address}
-                  data-active={token.address === displayToken?.address}
-                  className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:hover:bg-background-300 data-[active=true]:text-foreground-100 rounded-none"
-                >
-                  <div className="flex items-center gap-2">
-                    {token.icon ? (
-                      <Thumbnail
-                        icon={token.icon}
-                        rounded
-                        size="sm"
-                        variant="light"
-                        className="group-hover:bg-background-400"
-                      />
-                    ) : (
-                      <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />
-                    )}
-                    <span className="font-medium text-sm">{token.symbol}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
-    </Card>
+        </div>
+      </CardContent>
+      {showTokenSelector && availableTokens.length > 0 && (
+        <Select
+          value={displayToken?.address}
+          onValueChange={handleTokenChange}
+          defaultValue={defaultToken?.address}
+          disabled={availableTokens.length <= 1}
+        >
+          <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2" />
+          <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
+            {availableTokens.map((token) => (
+              <SelectItem
+                key={token.address}
+                simplified
+                value={token.address}
+                data-active={token.address === displayToken?.address}
+                className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:hover:bg-background-300 data-[active=true]:text-foreground-100 rounded-none"
+              >
+                <div className="flex items-center gap-2">
+                  {token.icon ? (
+                    <Thumbnail
+                      icon={token.icon}
+                      rounded
+                      size="sm"
+                      variant="light"
+                      className="group-hover:bg-background-400"
+                    />
+                  ) : (
+                    <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />
+                  )}
+                  <span className="font-medium text-sm">{token.symbol}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </div>
   );
 }
 
 const PaymentType = ({ unit }: { unit?: PaymentUnit }) => {
   if (!unit) {
-    return <></>;
+    return null;
   }
 
   return (
     <CardContent className="flex items-center px-3 bg-background-200 gap-2 rounded-[4px] text-sm font-medium">
       <Thumbnail
         size="sm"
-        icon={
-          unit === "usdc" ? (
-            "https://static.cartridge.gg/tokens/usdc.svg"
-          ) : (
-            <CreditIcon />
-          )
-        }
+        icon={unit === "usdc" ? TOKEN_ICONS.USDC : <CreditIcon />}
         variant="light"
         rounded
       />
       {unit.toUpperCase()}
     </CardContent>
-  );
-};
-
-const Network = ({ platform }: { platform: ExternalPlatform }) => {
-  const getNetworkIconComponent = (platform: ExternalPlatform) => {
-    switch (platform) {
-      case "starknet":
-        return StarknetIcon;
-      case "ethereum":
-        return EthereumIcon;
-      case "solana":
-        return SolanaIcon;
-      case "base":
-        return BaseIcon;
-      case "arbitrum":
-        return ArbitrumIcon;
-      case "optimism":
-        return OptimismIcon;
-      default:
-        return null;
-    }
-  };
-
-  const NetworkIcon = getNetworkIconComponent(platform);
-
-  if (!NetworkIcon) {
-    return <span>{humanizeString(platform)}</span>;
-  }
-
-  return (
-    <>
-      <NetworkIcon size="xs" className="inline-block" />
-      {humanizeString(platform)}
-    </>
   );
 };
