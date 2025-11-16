@@ -28,7 +28,6 @@ import { Settings } from "./settings";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
-import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { PaymentMethod } from "./purchasenew/method";
 import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { Success as PurchaseSuccess } from "./purchasenew/success";
@@ -221,7 +220,7 @@ export function App() {
           />
           <Route
             path="starterpack/:starterpackId"
-            element={<PurchaseStarterpack />}
+            element={<OnchainCheckout />} // Short circuit to checkout for now since we only support Starknet
           />
           <Route path="starterpack/collections" element={<Collections />} />
           <Route path="claim/:keys/:address/:type" element={<Claim />} />

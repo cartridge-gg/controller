@@ -40,6 +40,9 @@ const MockPurchaseProvider = ({ children }: { children: ReactNode }) => {
     swapQuote: null,
     isFetchingConversion: false,
     conversionError: null,
+    quantity: 1,
+    incrementQuantity: () => {},
+    decrementQuantity: () => {},
     setUsdAmount: () => {},
     setDepositAmount: () => {},
     setStarterpackId: () => {},
@@ -276,6 +279,7 @@ export const OnchainPurchaseWithMultipleItems: Story = {
 export const ClaimFreeCredits: Story = {
   render: () => (
     <ClaimPendingInner
+      quantity={1}
       name="Free Starter"
       items={[
         {
@@ -301,6 +305,7 @@ export const ClaimFreeNFT: Story = {
   render: () => (
     <ClaimPendingInner
       name="Airdrop Pack"
+      quantity={1}
       items={[
         {
           title: "Commemorative Badge",
@@ -477,6 +482,7 @@ export const MixedTokensAndCredits: Story = {
   render: () => (
     <ClaimPendingInner
       name="Mixed Reward Pack"
+      quantity={1}
       items={[
         {
           title: "Bonus Credits",

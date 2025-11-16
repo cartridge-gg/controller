@@ -57,13 +57,15 @@ export interface Quote {
   totalCost: bigint;
   paymentToken: string;
   paymentTokenMetadata: TokenMetadata;
-  // Converted price in target token (e.g., USDC)
+  // Converted price in target token
   convertedPrice?: {
     amount: bigint;
     token: string;
     tokenMetadata: TokenMetadata;
     priceImpact: number;
   };
+  // USDC-denominated price (for USD display)
+  usdcPrice?: bigint;
 }
 
 /**
