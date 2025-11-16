@@ -145,9 +145,8 @@ export function OnchainCostBreakdown({
 
   // Format converted equivalent if available and multiply by quantity
   const convertedEquivalent = convertedPrice
-    ? (Number(convertedPrice.amount) /
-        Math.pow(10, convertedPrice.tokenMetadata.decimals)) *
-      quantity
+    ? Number(convertedPrice.amount) /
+      Math.pow(10, convertedPrice.tokenMetadata.decimals)
     : null;
 
   // Helper to format amount, handling small numbers properly
@@ -206,17 +205,21 @@ export function OnchainCostBreakdown({
               <Spinner />
             ) : (
               <div className="flex items-center gap-1.5">
-                <span className="text-foreground-300">
-                  {formatAmount(paymentAmount)}
-                </span>
-                {!isPaymentTokenSameAsSelected &&
-                  convertedEquivalent !== null &&
-                  displayToken &&
-                  !isFetchingConversion && (
-                    <span className="text-foreground-100">
-                      {formatAmount(convertedEquivalent)}
-                    </span>
-                  )}
+                {isPaymentTokenSameAsSelected ? (
+                  <span className="text-foreground-300">
+                    {formatAmount(paymentAmount)}
+                  </span>
+                ) : (
+                  <>
+                    {convertedEquivalent !== null &&
+                      displayToken &&
+                      !isFetchingConversion && (
+                        <span className="text-foreground-100">
+                          {formatAmount(convertedEquivalent)}
+                        </span>
+                      )}
+                  </>
+                )}
               </div>
             )}
           </div>

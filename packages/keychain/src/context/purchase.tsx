@@ -214,6 +214,7 @@ export const PurchaseProvider = ({
   >();
   const [convertedPrice, setConvertedPrice] = useState<{
     amount: bigint;
+    quantity: number;
     tokenMetadata: { symbol: string; decimals: number };
   } | null>(null);
   const [swapQuote, setSwapQuote] = useState<SwapQuote | null>(null);
@@ -361,13 +362,20 @@ export const PurchaseProvider = ({
               setConvertedPrice({
                 amount: convertedPriceFromQuote.amount,
                 tokenMetadata: convertedPriceFromQuote.tokenMetadata,
+                quantity: quantity,
               });
             }
           }
         }
       }
     }
-  }, [starterpackDetails, selectedToken, availableTokens, setSelectedToken]);
+  }, [
+    starterpackDetails,
+    selectedToken,
+    availableTokens,
+    quantity,
+    setSelectedToken,
+  ]);
 
   // Reset token selection and quantity when starterpack changes
   useEffect(() => {
@@ -384,13 +392,13 @@ export const PurchaseProvider = ({
 
     if (!isOnchainStarterpack(starterpackDetails)) return;
     const quote = starterpackDetails.quote;
-    if (!quote) return;
+    if (!quote || quote.totalCost === BigInt(0)) return;
 
     const paymentToken = quote.paymentToken.toLowerCase();
     const targetToken = selectedToken.address.toLowerCase();
 
     // Don't fetch if payment token is the same as selected token
-    if (paymentToken === targetToken) {
+    if (num.toHex(paymentToken) === num.toHex(targetToken)) {
       setConvertedPrice(null);
       setSwapQuote(null);
       setIsFetchingConversion(false);
@@ -402,7 +410,8 @@ export const PurchaseProvider = ({
     if (
       convertedPrice &&
       swapQuote &&
-      convertedPrice.tokenMetadata.symbol === selectedToken.symbol
+      convertedPrice.tokenMetadata.symbol === selectedToken.symbol &&
+      convertedPrice.quantity === quantity
     ) {
       // Already have valid data for this token, no need to refetch
       return;
@@ -415,7 +424,7 @@ export const PurchaseProvider = ({
       try {
         const network = chainIdToEkuboNetwork(controller.chainId());
         const fetchedSwapQuote = await fetchSwapQuote(
-          quote.totalCost,
+          quote.totalCost * BigInt(quantity),
           quote.paymentToken,
           selectedToken.address,
           network,
@@ -429,6 +438,7 @@ export const PurchaseProvider = ({
         // Store both the converted price for display and the full quote for execution
         setConvertedPrice({
           amount: fetchedSwapQuote.total,
+          quantity: quantity,
           tokenMetadata: {
             symbol: tokenMetadata.symbol,
             decimals: tokenMetadata.decimals,
@@ -454,6 +464,7 @@ export const PurchaseProvider = ({
     fetchTokenMetadata,
     convertedPrice,
     swapQuote,
+    quantity,
   ]);
 
   // Detect which source (claimed or onchain) based on starterpack ID

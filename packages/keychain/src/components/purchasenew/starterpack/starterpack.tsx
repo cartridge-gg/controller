@@ -259,8 +259,7 @@ export function OnchainStarterPackInner({
     if (disableActions) return;
     //const methods = isMainnet ? "ethereum;base;arbitrum;optimism" : "starknet";
     // Restrict to Starknet for now until layerswap flow is robust
-    const methods = "starknet";
-    navigate(`/purchase/method/${methods}`);
+    navigate(`/purchase/wallet/starknet`);
   };
 
   const onProceed = () => {

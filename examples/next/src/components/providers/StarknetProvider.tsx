@@ -218,8 +218,8 @@ const controller = new ControllerConnector({
 
 const session = new SessionConnector({
   policies,
-  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA!,
-  chainId: constants.StarknetChainId.SN_SEPOLIA,
+  rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
+  chainId: constants.StarknetChainId.SN_MAIN,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   disconnectRedirectUrl: "whatsapp://",
   keychainUrl: getKeychainUrl(),
@@ -231,7 +231,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={sepolia.id}
+      defaultChainId={mainnet.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}
