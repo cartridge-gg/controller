@@ -19,15 +19,11 @@ import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import { CheckIcon } from "./assets/check";
 import { useMerkleClaim } from "@/hooks/merkle-claim";
-import { useCollection } from "@/hooks/collection";
+import { hash } from "starknet";
 
 const STAR_COLOR = "#FBCB4A";
 
 const CONFETTI_COLORS = generateColorShades(STAR_COLOR);
-
-// LS2 ERC-721 contract address
-const LS2_CONTRACT_ADDRESS =
-  "0x036017e69d21d6d8c13e266eabb73ef1f1d02722d86bdcabe5f168f8e549d3cd";
 
 // Map asset types to game names for Play button
 const ASSET_TO_GAME_MAP: Record<string, { name: string; url: string }> = {
@@ -44,7 +40,7 @@ const MYSTERY_CARD_GAME_MAP: Partial<Record<RewardType, string>> = {
   // Mystery asset cards
   [RewardType.LS2_GAME]:
     "https://tournaments.lootsurvivor.io/survivor/play?id=",
-  [RewardType.NUMS_GAME]: "https://www.nums.gg/35",
+  [RewardType.NUMS_GAME]: "https://www.nums.gg/",
 };
 
 export function BoosterPack() {
@@ -74,14 +70,6 @@ export function BoosterPack() {
   } | null>(null);
   const [isCheckingAsset, setIsCheckingAsset] = useState(true);
   const [assetCardImage, setAssetCardImage] = useState<string | null>(null);
-  const [ls2TokenId, setLs2TokenId] = useState<string | null>(null);
-  const [isFetchingToken, setIsFetchingToken] = useState(false);
-
-  // Fetch LS2 collection for user's tokens
-  const { assets: ls2Assets, refetch: refetchLs2Collection } = useCollection({
-    contractAddress: LS2_CONTRACT_ADDRESS,
-    tokenIds: [],
-  });
 
   useEffect(() => {
     if (controller) {
@@ -173,54 +161,8 @@ export function BoosterPack() {
     checkAsset();
   }, [privateKey, ethereumAddress]);
 
-  // Handle LS2 card click - fetch token and open game
-  const handleLS2CardClick = async () => {
-    // If we already have the token ID cached, use it
-    if (ls2TokenId) {
-      const gameUrl = `${MYSTERY_CARD_GAME_MAP[RewardType.LS2_GAME]}${ls2TokenId}`;
-      window.open(gameUrl, "_blank");
-      return;
-    }
-
-    // Otherwise, fetch the token
-    setIsFetchingToken(true);
-    try {
-      await refetchLs2Collection();
-
-      // Wait a moment for the refetch to complete
-      setTimeout(() => {
-        if (ls2Assets && ls2Assets.length > 0) {
-          // Get the most recent token (last in array)
-          const latestAsset = ls2Assets[ls2Assets.length - 1];
-          const tokenId = latestAsset.tokenId;
-          setLs2TokenId(tokenId);
-
-          // Construct URL and open game
-          const gameUrl = `${MYSTERY_CARD_GAME_MAP[RewardType.LS2_GAME]}${tokenId}`;
-          window.open(gameUrl, "_blank");
-        } else {
-          console.error("No LS2 tokens found");
-        }
-        setIsFetchingToken(false);
-      }, 1000);
-    } catch (error) {
-      console.error("Error fetching LS2 token:", error);
-      setIsFetchingToken(false);
-    }
-  };
-
   // Handle claim button click - connects if needed, then claims
   const handleClaim = async () => {
-    if (
-      !privateKey ||
-      !assetInfo ||
-      isClaimed ||
-      isRevealing ||
-      isLoading ||
-      isLoadingClaims
-    )
-      return;
-
     // Check if user is logged in
     if (!username || !account) {
       // Not connected - trigger connection flow
@@ -228,6 +170,17 @@ export function BoosterPack() {
       window.location.href = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect`;
       return;
     }
+
+    if (
+      !privateKey ||
+      !assetInfo ||
+      isClaimed ||
+      isRevealing ||
+      isLoading ||
+      isLoadingClaims ||
+      !controller
+    )
+      return;
 
     setIsLoading(true);
     setError(null);
@@ -252,7 +205,39 @@ export function BoosterPack() {
         });
       }
 
-      await onSendClaim();
+      const txnHash = await onSendClaim();
+      const receipt = await controller.provider.waitForTransaction(txnHash, {
+        retryInterval: 1000,
+      });
+
+      if (receipt.isError()) {
+        setError("Transaction Failed: " + receipt.value.message);
+        setIsLoading(false);
+        setIsClaimed(false);
+        setIsRevealing(false);
+        return;
+      }
+
+      console.log({ events: receipt.events });
+
+      let ls2TokenId;
+      let numsTokenId;
+      receipt.events.forEach((event) => {
+        if (
+          event.keys[0] === hash.getSelectorFromName("TournamentTicketsClaimed")
+        ) {
+          ls2TokenId = parseInt(event.data[2]);
+          numsTokenId = parseInt(event.data[3]);
+        }
+      });
+
+      if (ls2TokenId === undefined || numsTokenId === undefined) {
+        setError("Failed to determine token IDs. Transaction: " + txnHash);
+        setIsLoading(false);
+        setIsClaimed(false);
+        setIsRevealing(false);
+        return;
+      }
 
       // Success! Mark as claimed
       setIsClaimed(true);
@@ -273,12 +258,14 @@ export function BoosterPack() {
             name: "Loot Survivor 2 Game Pass",
             image: assetGameTokenImageUrl(RewardType.LS2_GAME),
             revealState: RevealState.UNREVEALED,
+            tokenId: ls2TokenId,
           },
           {
             type: RewardType.NUMS_GAME,
             name: "NUMS Game Pass",
             image: assetGameTokenImageUrl(RewardType.NUMS_GAME),
             revealState: RevealState.UNREVEALED,
+            tokenId: numsTokenId,
           },
         ];
 
@@ -411,25 +398,24 @@ export function BoosterPack() {
           <div className="flex gap-6 md:gap-8 pb-12 sm:pb-0 flex-wrap justify-center max-w-4xl">
             {rewardCards.map((card, index) => {
               const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
-              const isClickable = isClaimed && !isRevealing && !isFetchingToken;
-              const isLS2Game = card.type === RewardType.LS2_GAME;
+              const isClickable = isClaimed && !isRevealing;
 
               return (
                 <button
                   key={index}
                   onClick={() => {
-                    if (!isClickable) return;
+                    if (!isClickable || !gameUrl) return;
 
-                    // Handle LS2 game card specially
-                    if (isLS2Game) {
-                      handleLS2CardClick();
-                    } else if (gameUrl) {
-                      window.open(gameUrl, "_blank");
-                    }
+                    // Construct URL with token ID if available
+                    const fullUrl = card.tokenId
+                      ? `${gameUrl}${card.tokenId}`
+                      : gameUrl;
+
+                    window.open(fullUrl, "_blank");
                   }}
-                  disabled={!isClickable || (isLS2Game && isFetchingToken)}
+                  disabled={!isClickable || !gameUrl}
                   className={`relative w-[180px] h-[245px] md:w-[220px] md:h-[300px] ${
-                    isClickable
+                    isClickable && gameUrl
                       ? "cursor-pointer hover:scale-105 transition-transform duration-300 ease-out"
                       : "cursor-default"
                   }`}
