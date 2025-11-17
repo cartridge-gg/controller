@@ -20,24 +20,26 @@ import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import { CheckIcon } from "./assets/check";
 import { useMerkleClaim } from "@/hooks/merkle-claim";
-import { useCollection } from "@/hooks/collection";
+import { hash } from "starknet";
 
 const STAR_COLOR = "#FBCB4A";
 
 const CONFETTI_COLORS = generateColorShades(STAR_COLOR);
 
-// LS2 ERC-721 contract address
-const LS2_CONTRACT_ADDRESS =
-  "0x036017e69d21d6d8c13e266eabb73ef1f1d02722d86bdcabe5f168f8e549d3cd";
-
 // Map asset types to game names for Play button
 const ASSET_TO_GAME_MAP: Record<string, { name: string; url: string }> = {
-  CREDITS: { name: "CARTRIDGE", url: "https://play.cartridge.gg" },
-  SURVIVOR: { name: "LOOT SURVIVOR", url: "https://lootsurvivor.io" },
-  LORDS: { name: "REALMS", url: "https://realms.world" },
-  NUMS: { name: "NUMS", url: "https://nums.gg" },
-  PAPER: { name: "DOPE WARS", url: "https://dopewars.game" },
-  MYSTERY_ASSET: { name: "ARCADE", url: "https://play.cartridge.gg" },
+  CREDITS: {
+    name: "CHECK ARCADE",
+    url: "https://play.cartridge.gg/game/loot-survivor/tab/about",
+  },
+  SURVIVOR: { name: "PLAY LOOT SURVIVOR", url: "https://lootsurvivor.io" },
+  LORDS: { name: "PLAY REALMS", url: "https://realms.world" },
+  NUMS: { name: "PLAY NUMS", url: "https://nums.gg" },
+  PAPER: { name: "PLAY DOPE WARS", url: "https://dopewars.game" },
+  MYSTERY_ASSET: {
+    name: "PLAY LOOT SURVIVOR",
+    url: "https://play.cartridge.gg/game/loot-survivor/tab/about",
+  },
 };
 
 // Map mystery asset card reward types to their specific game URLs
@@ -45,7 +47,7 @@ const MYSTERY_CARD_GAME_MAP: Partial<Record<RewardType, string>> = {
   // Mystery asset cards
   [RewardType.LS2_GAME]:
     "https://tournaments.lootsurvivor.io/survivor/play?id=",
-  [RewardType.NUMS_GAME]: "https://www.nums.gg/35",
+  [RewardType.NUMS_GAME]: "https://www.nums.gg/",
 };
 
 export function BoosterPack() {
@@ -53,12 +55,15 @@ export function BoosterPack() {
   const account = useAccount();
   const { controller } = useConnection();
 
-  // Embla carousel for mobile
-  const [emblaRef] = useEmblaCarousel({
+  // Embla carousel - responsive configuration
+  const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "center",
     containScroll: "trimSnaps",
+    // Disable dragging on desktop, allow multiple slides visible
+    dragFree: false,
   });
 
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [numberOfPieces, setNumberOfPieces] = useState(500);
   const [username, setUsername] = useState<string | null>(null);
@@ -81,20 +86,28 @@ export function BoosterPack() {
   } | null>(null);
   const [isCheckingAsset, setIsCheckingAsset] = useState(true);
   const [assetCardImage, setAssetCardImage] = useState<string | null>(null);
-  const [ls2TokenId, setLs2TokenId] = useState<string | null>(null);
-  const [isFetchingToken, setIsFetchingToken] = useState(false);
-
-  // Fetch LS2 collection for user's tokens
-  const { assets: ls2Assets, refetch: refetchLs2Collection } = useCollection({
-    contractAddress: LS2_CONTRACT_ADDRESS,
-    tokenIds: [],
-  });
 
   useEffect(() => {
     if (controller) {
       setUsername(controller.username());
     }
   }, [controller]);
+
+  // Track carousel slide changes
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    };
+
+    emblaApi.on("select", onSelect);
+    onSelect(); // Set initial selected index
+
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
 
   const ethereumAddress = useMemo(() => {
     if (!privateKey) {
@@ -118,7 +131,11 @@ export function BoosterPack() {
     "booster-pack-survivor-mainnet",
   ].join(";");
 
-  const { claims, isLoading: isLoadingClaims } = useMerkleClaim({
+  const {
+    claims,
+    isLoading: isLoadingClaims,
+    onSendClaim,
+  } = useMerkleClaim({
     keys,
     type: "preimage",
     address: ethereumAddress,
@@ -176,54 +193,8 @@ export function BoosterPack() {
     checkAsset();
   }, [privateKey, ethereumAddress]);
 
-  // Handle LS2 card click - fetch token and open game
-  const handleLS2CardClick = async () => {
-    // If we already have the token ID cached, use it
-    if (ls2TokenId) {
-      const gameUrl = `${MYSTERY_CARD_GAME_MAP[RewardType.LS2_GAME]}${ls2TokenId}`;
-      window.open(gameUrl, "_blank");
-      return;
-    }
-
-    // Otherwise, fetch the token
-    setIsFetchingToken(true);
-    try {
-      await refetchLs2Collection();
-
-      // Wait a moment for the refetch to complete
-      setTimeout(() => {
-        if (ls2Assets && ls2Assets.length > 0) {
-          // Get the most recent token (last in array)
-          const latestAsset = ls2Assets[ls2Assets.length - 1];
-          const tokenId = latestAsset.tokenId;
-          setLs2TokenId(tokenId);
-
-          // Construct URL and open game
-          const gameUrl = `${MYSTERY_CARD_GAME_MAP[RewardType.LS2_GAME]}${tokenId}`;
-          window.open(gameUrl, "_blank");
-        } else {
-          console.error("No LS2 tokens found");
-        }
-        setIsFetchingToken(false);
-      }, 1000);
-    } catch (error) {
-      console.error("Error fetching LS2 token:", error);
-      setIsFetchingToken(false);
-    }
-  };
-
   // Handle claim button click - connects if needed, then claims
   const handleClaim = async () => {
-    if (
-      !privateKey ||
-      !assetInfo ||
-      isClaimed ||
-      isRevealing ||
-      isLoading ||
-      isLoadingClaims
-    )
-      return;
-
     // Check if user is logged in
     if (!username || !account) {
       // Not connected - trigger connection flow
@@ -231,6 +202,17 @@ export function BoosterPack() {
       window.location.href = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect`;
       return;
     }
+
+    if (
+      !privateKey ||
+      !assetInfo ||
+      isClaimed ||
+      isRevealing ||
+      isLoading ||
+      isLoadingClaims ||
+      !controller
+    )
+      return;
 
     setIsLoading(true);
     setError(null);
@@ -255,6 +237,19 @@ export function BoosterPack() {
         });
       }
 
+      const txnHash = await onSendClaim();
+      const receipt = await controller.provider.waitForTransaction(txnHash, {
+        retryInterval: 1000,
+      });
+
+      if (receipt.isError()) {
+        setError("Transaction Failed: " + receipt.value.message);
+        setIsLoading(false);
+        setIsClaimed(false);
+        setIsRevealing(false);
+        return;
+      }
+
       // Success! Mark as claimed
       setIsClaimed(true);
       setIsLoading(false);
@@ -267,6 +262,25 @@ export function BoosterPack() {
       ) {
         setIsRevealing(true);
 
+        let ls2TokenId;
+        let numsTokenId;
+        receipt.events.forEach((event) => {
+          if (
+            event.keys[0] ===
+            hash.getSelectorFromName("TournamentTicketsClaimed")
+          ) {
+            ls2TokenId = parseInt(event.data[2]);
+            numsTokenId = parseInt(event.data[3]);
+          }
+        });
+
+        if (ls2TokenId === undefined || numsTokenId === undefined) {
+          setError("Failed to determine token IDs. Transaction: " + txnHash);
+          setIsLoading(false);
+          setIsRevealing(false);
+          return;
+        }
+
         // Create specific cards for mystery asset reveal
         const mysteryCards = [
           {
@@ -274,12 +288,14 @@ export function BoosterPack() {
             name: "Loot Survivor 2 Game Pass",
             image: assetGameTokenImageUrl(RewardType.LS2_GAME),
             revealState: RevealState.UNREVEALED,
+            tokenId: ls2TokenId,
           },
           {
             type: RewardType.NUMS_GAME,
             name: "NUMS Game Pass",
             image: assetGameTokenImageUrl(RewardType.NUMS_GAME),
             revealState: RevealState.UNREVEALED,
+            tokenId: numsTokenId,
           },
         ];
 
@@ -409,44 +425,52 @@ export function BoosterPack() {
 
         {/* Cards Display */}
         {rewardCards.length > 0 ? (
-          <>
-            {/* Desktop: Flex layout */}
-            <div className="hidden md:flex gap-6 md:gap-8 pb-12 sm:pb-0 flex-wrap justify-center max-w-4xl">
+          <div className="w-full max-w-5xl" ref={emblaRef}>
+            <div className="flex gap-4 md:gap-12 pb-12 sm:pb-0 md:justify-center">
+              {/* Mobile padding */}
+              <div className="md:hidden px-4"></div>
+
               {rewardCards.map((card, index) => {
                 const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
-                const isClickable =
-                  isClaimed && !isRevealing && !isFetchingToken;
-                const isLS2Game = card.type === RewardType.LS2_GAME;
+                const isClickable = isClaimed && !isRevealing;
+                const isSelected = index === selectedIndex;
 
                 return (
                   <button
                     key={index}
                     onClick={() => {
-                      if (!isClickable) return;
+                      if (!isClickable || !gameUrl) return;
 
-                      // Handle LS2 game card specially
-                      if (isLS2Game) {
-                        handleLS2CardClick();
-                      } else if (gameUrl) {
-                        window.open(gameUrl, "_blank");
+                      // If already selected, open the game
+                      if (isSelected) {
+                        const fullUrl = card.tokenId
+                          ? `${gameUrl}${card.tokenId}`
+                          : gameUrl;
+                        window.open(fullUrl, "_blank");
+                      } else {
+                        // Otherwise, select the card
+                        if (emblaApi) {
+                          emblaApi.scrollTo(index);
+                        }
+                        setSelectedIndex(index);
                       }
                     }}
-                    disabled={!isClickable || (isLS2Game && isFetchingToken)}
-                    className={`relative w-[220px] h-[300px] ${
-                      isClickable
-                        ? "cursor-pointer hover:scale-105 transition-transform duration-300 ease-out"
+                    disabled={!isClickable || !gameUrl}
+                    className={`relative flex-[0_0_70%] md:flex-none md:w-[220px] min-w-0 transition-transform duration-300 ease-out ${
+                      isClickable && gameUrl
+                        ? "cursor-pointer"
                         : "cursor-default"
-                    }`}
-                    aria-label={isClickable ? `Play ${card.name}` : card.name}
+                    } ${isSelected ? "scale-100" : "scale-90 md:scale-100"}`}
+                    aria-label={isClickable ? `Select ${card.name}` : card.name}
                   >
                     {/* Card container with fade-up animation */}
-                    <div className="relative w-full h-full">
+                    <div className="relative w-full aspect-[180/245] md:h-[300px] md:aspect-auto">
                       {/* Card Front (revealed with fade-up) */}
                       <div
-                        className={`absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out ${
-                          isClickable
-                            ? "hover:shadow-[0px_12px_32px_0px_rgba(251,203,74,0.3)]"
-                            : ""
+                        className={`absolute inset-0 rounded-lg overflow-hidden flex flex-col transition-all duration-300 ease-out ${
+                          isSelected
+                            ? "shadow-[0px_12px_32px_0px_rgba(251,203,74,0.3)]"
+                            : "shadow-[0px_8px_24px_0px_#000000]"
                         }`}
                         style={{
                           opacity:
@@ -467,68 +491,11 @@ export function BoosterPack() {
                   </button>
                 );
               })}
+
+              {/* Mobile padding */}
+              <div className="md:hidden px-4"></div>
             </div>
-
-            {/* Mobile: Carousel */}
-            <div className="md:hidden w-full" ref={emblaRef}>
-              <div className="flex gap-6">
-                <div className="px-4"></div>
-                {rewardCards.map((card, index) => {
-                  const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
-                  const isClickable = isClaimed && !isRevealing && !isFetchingToken;
-                  const isLS2Game = card.type === RewardType.LS2_GAME;
-
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        if (!isClickable) return;
-
-                        // Handle LS2 game card specially
-                        if (isLS2Game) {
-                          handleLS2CardClick();
-                        } else if (gameUrl) {
-                          window.open(gameUrl, "_blank");
-                        }
-                      }}
-                      disabled={!isClickable || (isLS2Game && isFetchingToken)}
-                      className={`relative flex-[0_0_70%] min-w-0 ${
-                        isClickable
-                          ? "cursor-pointer active:scale-95 transition-transform duration-200"
-                          : "cursor-default"
-                      }`}
-                      aria-label={isClickable ? `Play ${card.name}` : card.name}
-                    >
-                      {/* Card container with fade-up animation */}
-                      <div className="relative w-full aspect-[180/245]">
-                        {/* Card Front (revealed with fade-up) */}
-                        <div
-                          className="absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out"
-                          style={{
-                            opacity:
-                              card.revealState === RevealState.UNREVEALED
-                                ? 0
-                                : 1,
-                            transform:
-                              card.revealState === RevealState.UNREVEALED
-                                ? "translateY(20px)"
-                                : "translateY(0)",
-                          }}
-                        >
-                          <img
-                            src={card.image}
-                            alt={card.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-                <div className="px-4"></div>
-              </div>
-            </div>
-          </>
+          </div>
         ) : (
           // Placeholder before claim - Show asset card or loading
           <div className="relative w-[280px] h-[380px] md:w-[280px] md:h-[380px] rounded-lg overflow-hidden shadow-[0px_4px_16px_0px_#000000]">
@@ -583,10 +550,25 @@ export function BoosterPack() {
                 {/* Primary CTA - Play Game Button */}
                 <button
                   onClick={() => {
-                    const gameInfo =
-                      ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
-                    if (gameInfo?.url) {
-                      window.open(gameInfo.url, "_blank");
+                    const isMystery =
+                      assetInfo?.type.toUpperCase() === "MYSTERY" ||
+                      assetInfo?.type.toUpperCase() === "MYSTERY_ASSET";
+
+                    if (isMystery && rewardCards.length > 0) {
+                      // On mobile, use the currently selected card from carousel
+                      const selectedCard = rewardCards[selectedIndex];
+                      const gameUrl = MYSTERY_CARD_GAME_MAP[selectedCard.type];
+
+                      if (gameUrl && selectedCard.tokenId) {
+                        const fullUrl = `${gameUrl}${selectedCard.tokenId}`;
+                        window.open(fullUrl, "_blank");
+                      }
+                    } else {
+                      const gameInfo =
+                        ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
+                      if (gameInfo?.url) {
+                        window.open(gameInfo.url, "_blank");
+                      }
                     }
                   }}
                   className="px-8 py-3 w-full rounded-3xl text-xs sm:text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg hover:opacity-90"
@@ -595,9 +577,23 @@ export function BoosterPack() {
                     color: "#0f1410",
                   }}
                 >
-                  PLAY{" "}
-                  {ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]
-                    ?.name || "GAME"}
+                  {(() => {
+                    const isMystery =
+                      assetInfo?.type.toUpperCase() === "MYSTERY" ||
+                      assetInfo?.type.toUpperCase() === "MYSTERY_ASSET";
+
+                    if (isMystery && rewardCards.length > 0) {
+                      const selectedCard = rewardCards[selectedIndex];
+                      return selectedCard.type === RewardType.LS2_GAME
+                        ? "PLAY LOOT SURVIVOR 2"
+                        : "PLAY NUMS";
+                    }
+
+                    return (
+                      ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]
+                        ?.name || "PLAY GAME"
+                    );
+                  })()}
                 </button>
               </div>
             ) : (
