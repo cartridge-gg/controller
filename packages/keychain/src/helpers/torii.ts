@@ -132,10 +132,14 @@ export default {
   }> {
     try {
       let balances = await client.getTokenBalances({
-        contract_addresses: contractAddresses,
-        account_addresses: accountAddresses,
+        contract_addresses: contractAddresses.map((addresss) =>
+          addAddressPadding(addresss).toLowerCase(),
+        ),
+        account_addresses: accountAddresses.map((address) =>
+          addAddressPadding(address).toLowerCase(),
+        ),
         token_ids: tokenIds.map((id) =>
-          addAddressPadding(id).replace("0x", ""),
+          addAddressPadding(id).replace("0x", "").toLowerCase(),
         ),
         pagination: {
           cursor: undefined,
@@ -147,9 +151,15 @@ export default {
       const allBalances = [...balances.items];
       while (balances.next_cursor && allBalances.length < count) {
         balances = await client.getTokenBalances({
-          contract_addresses: [],
-          account_addresses: [],
-          token_ids: [],
+          contract_addresses: contractAddresses.map((addresss) =>
+            addAddressPadding(addresss).toLowerCase(),
+          ),
+          account_addresses: accountAddresses.map((address) =>
+            addAddressPadding(address).toLowerCase(),
+          ),
+          token_ids: tokenIds.map((id) =>
+            addAddressPadding(id).replace("0x", "").toLowerCase(),
+          ),
           pagination: {
             limit: BATCH_SIZE,
             cursor: balances.next_cursor,
