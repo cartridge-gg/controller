@@ -27,12 +27,18 @@ const CONFETTI_COLORS = generateColorShades(STAR_COLOR);
 
 // Map asset types to game names for Play button
 const ASSET_TO_GAME_MAP: Record<string, { name: string; url: string }> = {
-  CREDITS: { name: "CARTRIDGE", url: "https://play.cartridge.gg" },
-  SURVIVOR: { name: "LOOT SURVIVOR", url: "https://lootsurvivor.io" },
-  LORDS: { name: "REALMS", url: "https://realms.world" },
-  NUMS: { name: "NUMS", url: "https://nums.gg" },
-  PAPER: { name: "DOPE WARS", url: "https://dopewars.game" },
-  MYSTERY_ASSET: { name: "ARCADE", url: "https://play.cartridge.gg" },
+  CREDITS: {
+    name: "CHECK ARCADE",
+    url: "https://play.cartridge.gg/game/loot-survivor/tab/about",
+  },
+  SURVIVOR: { name: "PLAY LOOT SURVIVOR", url: "https://lootsurvivor.io" },
+  LORDS: { name: "PLAY REALMS", url: "https://realms.world" },
+  NUMS: { name: "PLAY NUMS", url: "https://nums.gg" },
+  PAPER: { name: "PLAY DOPE WARS", url: "https://dopewars.game" },
+  MYSTERY_ASSET: {
+    name: "PLAY LOOT SURVIVOR",
+    url: "https://play.cartridge.gg/game/loot-survivor/tab/about",
+  },
 };
 
 // Map mystery asset card reward types to their specific game URLs
@@ -70,6 +76,7 @@ export function BoosterPack() {
   } | null>(null);
   const [isCheckingAsset, setIsCheckingAsset] = useState(true);
   const [assetCardImage, setAssetCardImage] = useState<string | null>(null);
+  const [ls2TokenId, setLs2TokenId] = useState<number | undefined>();
 
   useEffect(() => {
     if (controller) {
@@ -238,6 +245,9 @@ export function BoosterPack() {
         setIsRevealing(false);
         return;
       }
+
+      // Save token IDs to state
+      setLs2TokenId(ls2TokenId);
 
       // Success! Mark as claimed
       setIsClaimed(true);
@@ -504,10 +514,19 @@ export function BoosterPack() {
                 {/* Primary CTA - Play Game Button */}
                 <button
                   onClick={() => {
-                    const gameInfo =
-                      ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
-                    if (gameInfo?.url) {
-                      window.open(gameInfo.url, "_blank");
+                    const isMystery =
+                      assetInfo?.type.toUpperCase() === "MYSTERY" ||
+                      assetInfo?.type.toUpperCase() === "MYSTERY_ASSET";
+
+                    if (isMystery && ls2TokenId) {
+                      const gameUrl = `${MYSTERY_CARD_GAME_MAP[RewardType.LS2_GAME]}${ls2TokenId}`;
+                      window.open(gameUrl, "_blank");
+                    } else {
+                      const gameInfo =
+                        ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
+                      if (gameInfo?.url) {
+                        window.open(gameInfo.url, "_blank");
+                      }
                     }
                   }}
                   className="px-8 py-3 w-full rounded-3xl text-xs sm:text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg hover:opacity-90"
@@ -516,9 +535,8 @@ export function BoosterPack() {
                     color: "#0f1410",
                   }}
                 >
-                  PLAY{" "}
                   {ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]
-                    ?.name || "GAME"}
+                    ?.name || "PLAY GAME"}
                 </button>
               </div>
             ) : (
