@@ -5,7 +5,7 @@ import {
   isClaimStarterpack,
   isOnchainStarterpack,
 } from "@/context";
-import { Item, ItemType } from "@/context/purchase";
+import { Item } from "@/context/purchase";
 import {
   Button,
   Card,
@@ -14,16 +14,22 @@ import {
   LayoutContent,
   LayoutFooter,
   VerifiedIcon,
-  Spinner,
+  PlusIcon,
+  MinusIcon,
+  Thumbnail,
+  ListIcon,
+  ErrorAlertIcon,
 } from "@cartridge/ui";
 import { useParams, useSearchParams } from "react-router-dom";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { LoadingState } from "../loading";
 import { OnchainCostBreakdown } from "../review/cost";
-import { useConnection } from "@/hooks/connection";
 import { Quote } from "@/types/starterpack-types";
+import { Receiving } from "../receiving";
+import { getWallet } from "../wallet/config";
+import { num } from "starknet";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -37,8 +43,6 @@ export function PurchaseStarterpack() {
     displayError,
     setStarterpackId,
   } = usePurchaseContext();
-
-  const { isMainnet } = useConnection();
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
@@ -112,9 +116,9 @@ export function PurchaseStarterpack() {
       <OnchainStarterPackInner
         name={details.name}
         description={details.description}
+        icon={details.imageUri}
         items={details.items}
         quote={details.quote}
-        isMainnet={isMainnet}
         error={displayError}
       />
     );
@@ -212,79 +216,126 @@ export const StarterpackReceiving = ({
 export function OnchainStarterPackInner({
   name,
   description,
+  icon,
   items,
   quote,
-  isMainnet,
   error,
 }: {
   name: string;
   description: string;
+  icon: string;
   items: Item[];
   quote?: Quote | null;
-  isMainnet?: boolean;
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();
+  const {
+    selectedWallet,
+    quantity,
+    incrementQuantity,
+    decrementQuantity,
+    selectedToken,
+    conversionError,
+    isFetchingConversion,
+  } = usePurchaseContext();
+  const wallet = getWallet(selectedWallet?.type || "controller");
+
+  // Check if we need token conversion (selected token differs from payment token)
+  const needsConversion = useMemo(() => {
+    if (!quote || !selectedToken) return false;
+    return num.toHex(selectedToken.address) !== num.toHex(quote.paymentToken);
+  }, [quote, selectedToken]);
+
+  const disableActions = useMemo(() => {
+    return (
+      !!error ||
+      !quote ||
+      (!!conversionError && needsConversion) ||
+      isFetchingConversion
+    );
+  }, [error, quote, conversionError, needsConversion, isFetchingConversion]);
+
+  const onWalletSelect = () => {
+    if (disableActions) return;
+    //const methods = isMainnet ? "ethereum;base;arbitrum;optimism" : "starknet";
+    // Restrict to Starknet for now until layerswap flow is robust
+    navigate(`/purchase/wallet/starknet`);
+  };
 
   const onProceed = () => {
-    // Onchain starterpacks always use crypto payment (direct to contract)
-    const methods = isMainnet ? "ethereum;base;arbitrum;optimism" : "starknet";
-    navigate(`/purchase/method/${methods}`);
+    if (disableActions) return;
+    navigate(`/purchase/checkout/onchain`);
   };
 
   return (
     <>
       <HeaderInner
         title={name}
-        description={
-          <span className="text-foreground-200 text-xs font-normal">
-            {description}
-          </span>
-        }
+        icon={<Thumbnail icon={icon} rounded={false} />}
         hideIcon
       />
       <LayoutContent>
         <div className="flex flex-col gap-3">
-          {/* Onchain Items Display */}
-          <div className="flex flex-col gap-2">
-            <h1 className="text-xs font-semibold text-foreground-400">
-              You receive
-            </h1>
-            <div className="flex flex-col gap-2">
-              {items.map((item, index) => (
-                <StarterItem
-                  key={index}
-                  type={ItemType.NFT}
-                  title={item.title}
-                  subtitle={item.subtitle}
-                  icon={item.icon}
-                  showPrice={false}
-                />
-              ))}
-            </div>
+          <div className="flex border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2">
+            {description}
           </div>
+          <Receiving title="Includes" items={items} />
         </div>
       </LayoutContent>
       <LayoutFooter>
-        {error ? (
-          <ErrorAlert title="Error" description={error.message} />
-        ) : quote ? (
-          <OnchainCostBreakdown quote={quote} />
-        ) : (
-          <Card className="gap-3">
-            <div className="flex flex-row gap-3 h-[40px]">
-              <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
-                <div className="flex justify-between text-sm font-medium w-full">
-                  <span>Total</span>
-                  <Spinner />
-                </div>
-              </CardContent>
-            </div>
+        {error && <ErrorAlert title="Error" description={error.message} />}
+
+        {/* Insufficient Liquidity Warning - only show if we need conversion */}
+        {conversionError && needsConversion && (
+          <Card className="border-error">
+            <CardContent className="flex flex-row items-center gap-3 p-3 text-error">
+              <ErrorAlertIcon variant="error" size="sm" />
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-semibold">Insufficient Liquidity</p>
+                <p className="text-xs text-foreground-300">
+                  Unable to swap to {selectedToken?.symbol}. Try selecting a
+                  different token.
+                </p>
+              </div>
+            </CardContent>
           </Card>
         )}
-        <Button onClick={onProceed} disabled={!!error || !quote}>
-          Purchase
-        </Button>
+
+        <div
+          className={`flex justify-between border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2 transition-colors ${
+            !disableActions ? "cursor-pointer hover:bg-background-200" : ""
+          }`}
+          onClick={onWalletSelect}
+        >
+          <div className="flex gap-2">
+            {wallet.subIcon} Purchase with {wallet.name}
+          </div>
+          <ListIcon size="xs" variant="solid" />
+        </div>
+        {quote && <OnchainCostBreakdown quote={quote} />}
+        <div className="flex flex-row gap-3">
+          <Button
+            variant="secondary"
+            onClick={decrementQuantity}
+            disabled={quantity <= 1 || disableActions}
+          >
+            <MinusIcon size="xs" />
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={incrementQuantity}
+            disabled={disableActions}
+          >
+            <PlusIcon size="xs" variant="solid" />
+          </Button>
+          <Button
+            className="w-full"
+            onClick={onProceed}
+            disabled={disableActions}
+          >
+            Buy {quantity}
+          </Button>
+        </div>
       </LayoutFooter>
     </>
   );

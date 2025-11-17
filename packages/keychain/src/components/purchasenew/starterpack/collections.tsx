@@ -114,7 +114,7 @@ export const CollectionItem = ({
     <>
       <div className="flex flex-row gap-2">
         {numAvailable !== undefined && (
-          <div className="flex items-center justify-center text-primary text-xs font-semibold rounded bg-background-300 w-[30px]">
+          <div className="flex items-center justify-center text-primary text-xs font-semibold rounded bg-background-300 min-w-[30px] px-2">
             {isLoading ? (
               <Spinner size="sm" className="p-0 m-0" />
             ) : (

@@ -107,6 +107,13 @@ export class TurnkeyWallet {
         throw new Error("Social provider not set");
       }
 
+      console.log("[Turnkey] Starting connect flow:", {
+        isSignup,
+        socialProvider: this.socialProvider,
+        isIframe: isIframe(),
+        userAgent: navigator.userAgent,
+      });
+
       const iframePublicKey = await this.pollIframePublicKey(10_000);
       const nonce = getNonce(iframePublicKey);
 
@@ -155,11 +162,17 @@ export class TurnkeyWallet {
           ? windowUri.origin + windowUri.pathname
           : windowUri.origin;
 
+      console.log("[Turnkey] Auth config:", {
+        redirectUri,
+        connection: Auth0SocialProviderName[this.socialProvider],
+      });
+
       // cases:
       // we are not in an iFrame -> use redirect flow
       // we are in an iFrame and have access to window.open -> normal case, use popup
       // we are in an iFrame but don't have access to window.open -> we are very likely in a native app, developers should use SessionConnector with a native browser instead
       if (!isIframe()) {
+        console.log("[Turnkey] Using redirect flow");
         await auth0Client.loginWithRedirect({
           authorizationParams: {
             connection: Auth0SocialProviderName[this.socialProvider],
@@ -178,9 +191,27 @@ export class TurnkeyWallet {
         return { success: false, wallet: this.type };
       }
 
-      const popup = await openPopup("");
-      if (!popup)
+      console.log("[Turnkey] Using popup flow - opening popup");
+      // Use a known blank page as the initial popup URL instead of empty string
+      // This prevents iOS from navigating to about:blank
+      const popupUrl = isIOS() ? "https://x.cartridge.gg" : "";
+      console.log("[Turnkey] Opening popup with URL:", popupUrl);
+      const popup = openPopup(popupUrl);
+
+      if (!popup) {
+        console.error("[Turnkey] Failed to open popup");
         throw new Error("Should be able to open a popup in an iFrame");
+      }
+
+      console.log(
+        "[Turnkey] Popup opened successfully, location:",
+        popup.location?.href || "unknown",
+      );
+      console.log(
+        "[Turnkey] Calling loginWithPopup with redirectUri:",
+        redirectUri,
+      );
+
       await auth0Client.loginWithPopup(
         {
           authorizationParams: {
@@ -193,13 +224,20 @@ export class TurnkeyWallet {
         },
         { popup },
       );
+
+      console.log("[Turnkey] loginWithPopup completed successfully");
       return await this.finishConnect({
         nonce,
       });
     } catch (error) {
       localStorage.removeItem(URL_PARAMS_KEY);
       localStorage.removeItem(RPC_URL_KEY);
-      console.error(`Error connecting to Turnkey:`, error);
+      console.error("[Turnkey] Error in connect flow:", {
+        message: (error as Error).message,
+        name: (error as Error).name,
+        stack: (error as Error).stack,
+        isIframe: isIframe(),
+      });
       return {
         success: false,
         wallet: this.type,
@@ -519,11 +557,23 @@ export const getIframePublicKey = async (
   return iframePublicKey;
 };
 
+const isIOS = () => {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  ); // iPad on iOS 13+
+};
+
 const openPopup = (url: string) => {
+  console.log("[Turnkey] openPopup called with url:", url || "(empty string)");
   const popup = window.open(
     url,
     "auth0:authorize:popup",
     `resizable,scrollbars=no,status=1`,
+  );
+  console.log(
+    "[Turnkey] window.open result:",
+    popup ? "popup object returned" : "null/undefined",
   );
   return popup;
 };

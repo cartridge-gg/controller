@@ -18,9 +18,7 @@ export function switchChain({
     }
 
     const controller: Controller = window.controller;
-
     const nextController = await Controller.create({
-      appId: controller.appId(),
       classHash: controller.classHash(),
       rpcUrl,
       address: controller.address(),

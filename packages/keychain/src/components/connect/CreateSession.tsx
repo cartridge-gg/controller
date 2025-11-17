@@ -67,7 +67,7 @@ const CreateSessionLayout = ({
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
-  const { controller, theme } = useConnection();
+  const { controller, theme, origin } = useConnection();
 
   const hasTokenApprovals = useMemo(
     () => hasApprovalPolicies(policies),
@@ -104,7 +104,7 @@ const CreateSessionLayout = ({
         setIsConnecting(true);
 
         const processedPolicies = processPolicies(policies, toggleOff);
-        await controller.createSession(expiresAt, processedPolicies);
+        await controller.createSession(origin, expiresAt, processedPolicies);
         successCallback?.();
       } catch (e) {
         setError(e as unknown as Error);
@@ -112,7 +112,7 @@ const CreateSessionLayout = ({
         setIsConnecting(false);
       }
     },
-    [controller, policies, expiresAt],
+    [controller, policies, expiresAt, origin],
   );
 
   const handlePrimaryAction = useCallback(async () => {

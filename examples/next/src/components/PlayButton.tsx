@@ -3,7 +3,7 @@
 import { Button } from "@cartridge/ui";
 import ControllerConnector from "@cartridge/connector/controller";
 import { useConnect } from "@starknet-react/core";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 interface Game {
   name: string;
@@ -14,19 +14,18 @@ interface Game {
 const GAMES: Game[] = [
   {
     name: "Loot Survivor",
-    url: "https://lootsurvivor.io?controller_redirect",
+    url: `${process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL}?redirect_url=https://lootsurvivor.io&preset=loot-survivor`,
     description: "Survive the adventure, earn rewards",
   },
   {
     name: "Nums",
-    url: "https://nums-blond.vercel.app?controller_redirect",
+    url: `${process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL}?redirect_url=https://nums-blond.vercel.app&preset=nums`,
     description: "Survive the adventure, earn rewards",
   },
 ];
 
 export const PlayButton = () => {
   const { connectors } = useConnect();
-  const [isChecking, setIsChecking] = useState(false);
   const controllerConnector = useMemo(
     () => ControllerConnector.fromConnectors(connectors),
     [connectors],
@@ -38,37 +37,14 @@ export const PlayButton = () => {
       return;
     }
 
-    setIsChecking(true);
-    try {
-      // Check if we have first-party storage access
-      const hasAccess =
-        await controllerConnector.controller.hasFirstPartyAccess();
-
-      if (!hasAccess) {
-        // Redirect through standalone auth first to establish first-party storage
-        controllerConnector.controller.open({
-          redirectUrl: game.url,
-        });
-      } else {
-        // Direct navigation - user already authenticated via standalone
-        window.location.href = game.url;
-      }
-    } catch (error) {
-      console.error("Error checking storage access:", error);
-      // Fallback: try direct navigation
-      window.location.href = game.url;
-    } finally {
-      setIsChecking(false);
-    }
+    window.location.href = game.url;
   };
 
   return (
     <div className="border border-border rounded-lg p-6 bg-surface">
       <h2 className="text-2xl font-bold mb-4">Play Games</h2>
       <p className="text-muted mb-6">
-        Launch games with your Cartridge controller. First-time users will be
-        redirected through standalone authentication to enable seamless login
-        across all games.
+        Launch games with your Cartridge controller.
       </p>
       <div className="grid gap-4">
         {GAMES.map((game) => (
@@ -80,12 +56,8 @@ export const PlayButton = () => {
               <h3 className="text-lg font-semibold">{game.name}</h3>
               <p className="text-sm text-muted">{game.description}</p>
             </div>
-            <Button
-              onClick={() => handlePlayGame(game)}
-              disabled={isChecking}
-              className="ml-4"
-            >
-              {isChecking ? "Checking..." : "Play"}
+            <Button onClick={() => handlePlayGame(game)} className="ml-4">
+              Play
             </Button>
           </div>
         ))}

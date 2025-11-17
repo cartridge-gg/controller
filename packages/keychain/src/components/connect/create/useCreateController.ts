@@ -60,6 +60,7 @@ export interface LoginResponse {
 
 const createSession = async ({
   controller,
+  origin,
   policies,
   params,
   handleCompletion,
@@ -67,6 +68,7 @@ const createSession = async ({
   searchParams,
 }: {
   controller: Controller;
+  origin: string;
   policies?: ParsedSessionPolicies;
   params?: ReturnType<typeof parseConnectParams>;
   handleCompletion: () => void;
@@ -121,7 +123,7 @@ const createSession = async ({
     const expiresAt = duration + now();
 
     const processedPolicies = processPolicies(policies, false);
-    await controller.createSession(expiresAt, processedPolicies);
+    await controller.createSession(origin, expiresAt, processedPolicies);
     currentParams.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -198,7 +200,6 @@ export function useCreateController({
           origin
         ) {
           const controller = await Controller.create({
-            appId: origin,
             rpcUrl,
             username,
             classHash: controllerNode.constructorCalldata[0],
@@ -319,13 +320,35 @@ export function useCreateController({
         window.controller = controller;
         setController(controller);
 
-        // Handle session creation for auto-close cases (no policies or verified policies without token approvals)
+        // Check if this is a standalone redirect flow
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlSearchParams.get("redirect_url");
+
+        // if (redirectUrl) {
+        //   // Standalone flow: skip session creation here, redirect immediately
+        //   // Session will be created on the application site after redirect
+        //   const username = controller.username();
+
+        //   // Build redirect URL with username and controller_standalone parameters
+        //   const redirectUrlObj = new URL(redirectUrl);
+        //   redirectUrlObj.searchParams.set("controller_standalone", "1");
+        //   if (username) {
+        //     redirectUrlObj.searchParams.set("username", username);
+        //   }
+
+        //   // Safely redirect to the specified URL with parameters
+        //   safeRedirect(redirectUrlObj.toString());
+        //   return; // Don't continue with session creation
+        // }
+
+        // Normal embedded flow: handle session creation for auto-close cases
         const shouldAutoCreateSession =
           !policies || (policies.verified && !hasApprovalPolicies(policies));
 
         if (shouldAutoCreateSession) {
           await createSession({
             controller,
+            origin,
             policies,
             params,
             handleCompletion,
@@ -334,15 +357,8 @@ export function useCreateController({
           });
         }
 
-        // Only redirect if we auto-created the session
-        // Otherwise, user needs to see consent screen or spending limit screen first
-        if (shouldAutoCreateSession) {
-          const urlSearchParams = new URLSearchParams(window.location.search);
-          const redirectUrl = urlSearchParams.get("redirect_url");
-          if (redirectUrl) {
-            // Safely redirect to the specified URL with lastUsedConnector param
-            safeRedirect(redirectUrl, true);
-          }
+        if (redirectUrl) {
+          safeRedirect(redirectUrl);
         }
       }
     },
@@ -370,9 +386,17 @@ export function useCreateController({
       let signupResponse: SignupResponse | undefined;
       let signer: SignerInput | undefined;
       switch (authenticationMode) {
-        case "webauthn":
+        case "webauthn": {
           await signupWithWebauthn(username, doPopupFlow);
+
+          // Handle redirect_url for webauthn
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          const redirectUrl = urlSearchParams.get("redirect_url");
+          if (redirectUrl) {
+            safeRedirect(redirectUrl);
+          }
           return;
+        }
         case "google":
         case "discord":
           signupResponse = await signupWithSocial(authenticationMode, username);
@@ -517,13 +541,35 @@ export function useCreateController({
       window.controller = loginRet.controller;
       setController(loginRet.controller);
 
-      // Handle session creation for auto-close cases (no policies or verified policies without token approvals)
+      // Check if this is a standalone redirect flow
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlSearchParams.get("redirect_url");
+
+      // if (redirectUrl) {
+      //   // Standalone flow: skip session creation here, redirect immediately
+      //   // Session will be created on the application site after redirect
+      //   const username = loginRet.controller.username();
+
+      //   // Build redirect URL with username and controller_standalone parameters
+      //   const redirectUrlObj = new URL(redirectUrl);
+      //   redirectUrlObj.searchParams.set("controller_standalone", "1");
+      //   if (username) {
+      //     redirectUrlObj.searchParams.set("username", username);
+      //   }
+
+      //   // Safely redirect to the specified URL with parameters
+      //   safeRedirect(redirectUrlObj.toString());
+      //   return; // Don't continue with session creation
+      // }
+
+      // Normal embedded flow: handle session creation for auto-close cases
       const shouldAutoCreateSession =
         !policies || (policies.verified && !hasApprovalPolicies(policies));
 
       if (shouldAutoCreateSession) {
         await createSession({
           controller: loginRet.controller,
+          origin,
           policies,
           params,
           handleCompletion,
@@ -532,15 +578,8 @@ export function useCreateController({
         });
       }
 
-      // Only redirect if we auto-created the session
-      // Otherwise, user needs to see consent screen or spending limit screen first
-      if (shouldAutoCreateSession) {
-        const urlSearchParams = new URLSearchParams(window.location.search);
-        const redirectUrl = urlSearchParams.get("redirect_url");
-        if (redirectUrl) {
-          // Safely redirect to the specified URL with lastUsedConnector param
-          safeRedirect(redirectUrl, true);
-        }
+      if (redirectUrl) {
+        safeRedirect(redirectUrl);
       }
     },
     [
@@ -594,6 +633,13 @@ export function useCreateController({
             },
             !!isSlot,
           );
+
+          // Handle redirect_url for webauthn
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          const redirectUrl = urlSearchParams.get("redirect_url");
+          if (redirectUrl) {
+            safeRedirect(redirectUrl);
+          }
           return;
         }
         case "google":

@@ -44,7 +44,7 @@ export const useMerkleClaim = ({
   preimage,
 }: {
   keys: string;
-  address: string;
+  address?: string;
   type: ExternalWalletType | "controller" | "preimage";
   preimage?: string;
 }) => {
@@ -56,6 +56,10 @@ export const useMerkleClaim = ({
   const checkedClaimsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
+    if (!address) {
+      return;
+    }
+
     setIsLoading(true);
     client
       .request<MerkleClaimsForAddressQuery>(MerkleClaimsForAddressDocument, {
@@ -94,7 +98,7 @@ export const useMerkleClaim = ({
 
   const checkAllClaims = useCallback(
     async (claimsToCheck: MerkleClaim[]) => {
-      if (claimsToCheck.length === 0 || !controller) {
+      if (claimsToCheck.length === 0 || !controller || !address) {
         return;
       }
 
@@ -161,7 +165,13 @@ export const useMerkleClaim = ({
   // TODO: Use ABI to generate the calldata
   const onSendClaim = useCallback(
     async (claimIndices?: number[]) => {
-      if (!merkleTreeKey || !leafData || !controller || !claims.length) {
+      if (
+        !merkleTreeKey ||
+        !leafData ||
+        !controller ||
+        !claims.length ||
+        !address
+      ) {
         const error = new Error("Missing required data");
         setError(error);
         throw error;

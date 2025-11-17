@@ -5,7 +5,6 @@ import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { CreateSession, processPolicies } from "./connect/CreateSession";
-import { StandaloneConnect } from "./connect";
 import { now } from "@/constants";
 import {
   useRouteParams,
@@ -21,7 +20,7 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, verified } = useConnection();
+  const { controller, policies, origin } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
 
   // Parse params and set RPC URL immediately
@@ -50,7 +49,9 @@ export function ConnectRoute() {
     [policies],
   );
 
-  const handleConnect = useCallback(() => {
+  console.log(isStandalone, redirectUrl);
+
+  const handleConnect = useCallback(async () => {
     if (!params || !controller) {
       return;
     }
@@ -65,6 +66,29 @@ export function ConnectRoute() {
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
+    // if (isStandalone && redirectUrl) {
+    //   console.log("redirecting");
+    //   try {
+    //     // Create encrypted snapshot and append to URL fragment
+    //     const encryptedBlob = await snapshotLocalStorageToCookie();
+    //     const redirectWithFragment =
+    //       encryptedBlob && encryptedBlob.length > 0
+    //         ? mergeUrlFragment(redirectUrl, {
+    //             kc: encryptedBlob,
+    //           })
+    //         : redirectUrl;
+    //     safeRedirect(redirectWithFragment, true);
+    //   } catch (error) {
+    //     console.error(
+    //       "[ConnectRoute] Failed to create storage snapshot:",
+    //       error,
+    //     );
+    //     // Continue with redirect even if snapshot fails
+    //     safeRedirect(redirectUrl, true);
+    //   }
+    //   return;
+    // }
+
     if (isStandalone && redirectUrl) {
       safeRedirect(redirectUrl, true);
       return;
@@ -73,7 +97,7 @@ export function ConnectRoute() {
     handleCompletion();
   }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
 
-  const handleSkip = useCallback(() => {
+  const handleSkip = useCallback(async () => {
     if (!params || !controller) {
       return;
     }
@@ -88,6 +112,29 @@ export function ConnectRoute() {
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
+    // if (isStandalone && redirectUrl) {
+    //   console.log("redirecting skip");
+    //   try {
+    //     // Create encrypted snapshot and append to URL fragment
+    //     const encryptedBlob = await snapshotLocalStorageToCookie();
+    //     const redirectWithFragment =
+    //       encryptedBlob && encryptedBlob.length > 0
+    //         ? mergeUrlFragment(redirectUrl, {
+    //             kc: encryptedBlob,
+    //           })
+    //         : redirectUrl;
+    //     safeRedirect(redirectWithFragment, true);
+    //   } catch (error) {
+    //     console.error(
+    //       "[ConnectRoute] Failed to create storage snapshot:",
+    //       error,
+    //     );
+    //     // Continue with redirect even if snapshot fails
+    //     safeRedirect(redirectUrl, true);
+    //   }
+    //   return;
+    // }
+
     if (isStandalone && redirectUrl) {
       safeRedirect(redirectUrl, true);
       return;
@@ -102,11 +149,31 @@ export function ConnectRoute() {
       return;
     }
 
-    // In standalone mode with redirect_url, don't auto-connect
-    // Show UI to let user manually connect
-    if (isStandalone && redirectUrl) {
-      return;
-    }
+    // In standalone mode with redirect_url, redirect immediately
+    // if (isStandalone && redirectUrl) {
+    //   console.log("redirecting effect");
+    //   (async () => {
+    //     try {
+    //       // Create encrypted snapshot and append to URL fragment
+    //       const encryptedBlob = await snapshotLocalStorageToCookie();
+    //       const redirectWithFragment =
+    //         encryptedBlob && encryptedBlob.length > 0
+    //           ? mergeUrlFragment(redirectUrl, {
+    //               kc: encryptedBlob,
+    //             })
+    //           : redirectUrl;
+    //       safeRedirect(redirectWithFragment, true);
+    //     } catch (error) {
+    //       console.error(
+    //         "[ConnectRoute] Failed to create storage snapshot:",
+    //         error,
+    //       );
+    //       // Continue with redirect even if snapshot fails
+    //       safeRedirect(redirectUrl, true);
+    //     }
+    //   })();
+    //   return;
+    // }
 
     // Mark as auto-connected immediately to prevent race conditions
     setHasAutoConnected(true);
@@ -127,7 +194,7 @@ export function ConnectRoute() {
 
     // Bypass session approval screen for verified sessions in embedded mode
     // Note: This is a fallback - main logic is handled in useCreateController
-    if (policies.verified && !isStandalone) {
+    if (policies.verified) {
       if (hasTokenApprovals) {
         return;
       }
@@ -139,7 +206,7 @@ export function ConnectRoute() {
           const expiresAt = duration + now();
 
           const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(expiresAt, processedPolicies);
+          await controller.createSession(origin, expiresAt, processedPolicies);
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
@@ -166,29 +233,12 @@ export function ConnectRoute() {
     redirectUrl,
     hasAutoConnected,
     hasTokenApprovals,
+    origin,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
   if (!controller) {
     return null;
-  }
-
-  // In standalone mode with redirect_url, show connect UI
-  if (isStandalone && redirectUrl) {
-    // If verified session without approvals, show simple connect screen
-    if (!policies || (policies.verified && !hasTokenApprovals)) {
-      return (
-        <StandaloneConnect redirectUrl={redirectUrl} isVerified={verified} />
-      );
-    }
-    // If unverified session with policies, show CreateSession for consent
-    return (
-      <CreateSession
-        policies={policies}
-        onConnect={handleConnect}
-        onSkip={handleSkip}
-      />
-    );
   }
 
   // Embedded mode: No policies and verified policies are handled in useCreateController
@@ -203,7 +253,7 @@ export function ConnectRoute() {
     return null;
   }
 
-  // Show CreateSession for sessions that require approval UI in embedded mode
+  // Show CreateSession for sessions that require approval UI
 
   return (
     <CreateSession

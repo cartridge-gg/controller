@@ -44,7 +44,6 @@ export function useWebauthnAuthentication() {
         return;
 
       const controller = await Controller.create({
-        appId: origin,
         classHash: controllerNode.constructorCalldata[0],
         rpcUrl,
         address: controllerNode.address,
@@ -78,7 +77,6 @@ export function useWebauthnAuthentication() {
       let controller: Controller;
       if (isSlot) {
         controller = await Controller.apiLogin({
-          appId: origin,
           classHash: controllerQuery.constructorCalldata[0],
           rpcUrl,
           address: controllerQuery.address,

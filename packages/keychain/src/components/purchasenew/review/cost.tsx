@@ -11,6 +11,7 @@ import {
   SelectContent,
   SelectItem,
   SolanaIcon,
+  Spinner,
   StarknetIcon,
   Thumbnail,
   TokenSelectHeader,
@@ -100,12 +101,12 @@ export function OnchainCostBreakdown({
   quote,
   platform,
   openFeesTooltip = false,
-  showTokenSelector = false,
+  lockTokenSelection = false,
 }: {
   quote: Quote;
   platform?: ExternalPlatform;
   openFeesTooltip?: boolean;
-  showTokenSelector?: boolean;
+  lockTokenSelection?: boolean;
 }) {
   const {
     availableTokens,
@@ -113,15 +114,14 @@ export function OnchainCostBreakdown({
     setSelectedToken,
     convertedPrice,
     isFetchingConversion,
+    quantity,
   } = usePurchaseContext();
-  const { symbol, decimals } = quote.paymentTokenMetadata;
+  const { decimals } = quote.paymentTokenMetadata;
 
   // Get default token (USDC if available) for fallback
-  const defaultToken = useMemo(() => {
-    if (availableTokens.length === 0) return undefined;
-    const usdc = availableTokens.find((t) => t.symbol === "USDC");
-    return usdc || availableTokens[0];
-  }, [availableTokens]);
+  const defaultToken = availableTokens.find(
+    (t) => t.address.toLowerCase() === quote.paymentToken.toLowerCase(),
+  );
 
   // Use selectedToken or fallback to defaultToken for display
   const displayToken = selectedToken || defaultToken;
@@ -139,10 +139,11 @@ export function OnchainCostBreakdown({
     return num.toHex(quote.paymentToken) === num.toHex(selectedToken.address);
   }, [selectedToken, quote]);
 
-  // Format payment token amount with proper decimals
-  const paymentAmount = Number(quote.totalCost) / Math.pow(10, decimals);
+  // Format payment token amount with proper decimals and multiply by quantity
+  const paymentAmount =
+    (Number(quote.totalCost) / Math.pow(10, decimals)) * quantity;
 
-  // Format converted equivalent if available
+  // Format converted equivalent if available and multiply by quantity
   const convertedEquivalent = convertedPrice
     ? Number(convertedPrice.amount) /
       Math.pow(10, convertedPrice.tokenMetadata.decimals)
@@ -188,8 +189,8 @@ export function OnchainCostBreakdown({
         </CardContent>
       )}
 
-      <div className="flex flex-row gap-3 h-[40px]">
-        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+      <div className="flex flex-row gap-3 h-[40px] text-foreground-300">
+        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs w-full">
           <div className="flex justify-between text-sm font-medium w-full">
             <div className="flex flex-row items-center gap-1">
               <span>Total</span>
@@ -197,75 +198,66 @@ export function OnchainCostBreakdown({
                 trigger={<InfoIcon size="xs" />}
                 defaultOpen={openFeesTooltip}
                 quote={quote}
+                quantity={quantity}
               />
             </div>
-            <div className="flex items-center gap-1.5">
-              {showTokenSelector ? (
-                <>
-                  <span className="text-foreground-400">
-                    {formatAmount(paymentAmount)} {symbol}
+            {isFetchingConversion ? (
+              <Spinner />
+            ) : (
+              <div className="flex items-center gap-1.5">
+                {isPaymentTokenSameAsSelected ? (
+                  <span className="text-foreground-300">
+                    {formatAmount(paymentAmount)}
                   </span>
-                  {!isPaymentTokenSameAsSelected &&
-                    convertedEquivalent !== null &&
-                    displayToken &&
-                    !isFetchingConversion && (
-                      <span className="text-foreground-100">
-                        {formatAmount(convertedEquivalent)}{" "}
-                        {convertedPrice?.tokenMetadata.symbol}
-                      </span>
-                    )}
-                </>
-              ) : (
-                <>
-                  <span className="text-foreground-400">
-                    {formatAmount(paymentAmount)} {symbol}
-                  </span>
-                  {convertedEquivalent !== null && !isFetchingConversion && (
-                    <span className="text-foreground-100">
-                      ${formatAmount(convertedEquivalent)}
-                    </span>
-                  )}
-                </>
-              )}
-            </div>
+                ) : (
+                  <>
+                    {convertedEquivalent !== null &&
+                      displayToken &&
+                      !isFetchingConversion && (
+                        <span className="text-foreground-100">
+                          {formatAmount(convertedEquivalent)}
+                        </span>
+                      )}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
-        {showTokenSelector && availableTokens.length > 0 && (
-          <Select
-            value={displayToken?.address}
-            onValueChange={handleTokenChange}
-            defaultValue={defaultToken?.address}
-            disabled={availableTokens.length <= 1}
-          >
-            <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2" />
-            <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
-              {availableTokens.map((token) => (
-                <SelectItem
-                  key={token.address}
-                  simplified
-                  value={token.address}
-                  data-active={token.address === displayToken?.address}
-                  className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:hover:bg-background-300 data-[active=true]:text-foreground-100 rounded-none"
-                >
-                  <div className="flex items-center gap-2">
-                    {token.icon ? (
-                      <Thumbnail
-                        icon={token.icon}
-                        rounded
-                        size="sm"
-                        variant="light"
-                        className="group-hover:bg-background-400"
-                      />
-                    ) : (
-                      <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />
-                    )}
-                    <span className="font-medium text-sm">{token.symbol}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        <Select
+          value={displayToken?.address}
+          onValueChange={handleTokenChange}
+          defaultValue={defaultToken?.address}
+          disabled={availableTokens.length <= 1 || lockTokenSelection}
+        >
+          <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2" />
+          <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
+            {availableTokens.map((token) => (
+              <SelectItem
+                key={token.address}
+                simplified
+                value={token.address}
+                data-active={token.address === displayToken?.address}
+                className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:hover:bg-background-300 data-[active=true]:text-foreground-100 rounded-none"
+              >
+                <div className="flex items-center gap-2">
+                  {token.icon ? (
+                    <Thumbnail
+                      icon={token.icon}
+                      rounded
+                      size="sm"
+                      variant="light"
+                      className="group-hover:bg-background-400"
+                    />
+                  ) : (
+                    <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />
+                  )}
+                  <span className="font-medium text-sm">{token.symbol}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </Card>
   );

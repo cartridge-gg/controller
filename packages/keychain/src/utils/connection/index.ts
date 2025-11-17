@@ -10,10 +10,6 @@ import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
-import {
-  hasStorageAccessFactory,
-  requestStorageAccessFactory,
-} from "./storage-access";
 import { StarterpackOptions } from "@cartridge/controller";
 
 export type { ControllerError } from "./execute";
@@ -39,17 +35,16 @@ export function connectToController<ParentMethods extends object>({
         }),
       ),
       deploy: () => deployFactory({ navigate }),
-      execute: () => execute({ navigate }),
+      execute: normalize(execute({ navigate })),
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),
-      signMessage: () =>
+      signMessage: normalize(
         signMessageFactory({
           navigate,
         }),
+      ),
       openSettings: () => openSettingsFactory(),
       navigate: () => navigateFactory(),
-      hasStorageAccess: () => hasStorageAccessFactory(),
-      requestStorageAccess: () => requestStorageAccessFactory(),
       reset: () => () => {
         // Reset handled by navigation
       },

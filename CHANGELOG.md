@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.11.2] - 2025-11-14
+
+### ✨ New Features
+- **@cartridge/keychain**: Implemented encrypted localStorage snapshot for Storage Access API using split-key encryption architecture, eliminating Cookie Store API dependency and enabling secure state transfer across third-party iframe boundaries (#2239)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Enhanced iOS popup reliability with retry logic, exponential backoff, and stability checks for improved authentication flow on iOS devices (#2244)
+- **@cartridge/keychain**: Updated booster pack claim flow with improved component structure and better user experience (#2240)
+- **@cartridge/keychain**: Enhanced debug logging with comprehensive Turnkey authentication logs for better troubleshooting (#2241)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed popup error handling by preventing thrown errors on blocked popups, maintaining original flow behavior for mobile compatibility (#2243)
+- **@cartridge/keychain**: Reverted popup error logging to address reliability issues and maintain stable authentication flows (#2242, #2238)
+- **@cartridge/keychain**: Fixed claim pill size display issues for better visual consistency (#2226)
+- **@cartridge/keychain**: Fixed default image handling bug in booster pack components (#2225)
+- **@cartridge/keychain**: Updated game links for improved navigation and user experience (#2224)
+- **@cartridge/keychain**: Enhanced dynamic height CSS for better responsive design (#2233)
+- **@cartridge/keychain**: Improved localStorage and dead-path cookie synchronization for standalone flows (#2232)
+- **@cartridge/keychain**: Removed deprecated controller_redirect functionality to streamline authentication flows (#2230)
+- **@cartridge/keychain**: Simplified storage access request logic for more reliable cross-domain authentication (#2229)
+- **@cartridge/controller**: Refactored session creation to load controller from store for improved session management (#2228)
+- **Development**: Fixed environment variable loading for live environment configuration (#2227)
+
+### 📦 Dependencies
+- **Development**: Added Storybook story for StandaloneConnect component for improved component testing and documentation (#2231)
+
+## [0.11.2-alpha.4] - 2025-11-13
+
+### ✨ New Features
+- **@cartridge/keychain**: Added booster pack claim page for DevConnect rewards, enabling users to claim credits, tokens, and NFTs using private keys from reward URLs with comprehensive signature validation and post-claim actions (#2160)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Refactored session architecture to move app_id from account constructors to session-specific operations, enabling a single shared controller instance to serve multiple applications through app-specific sessions (#2220)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed standalone authentication flow storage access issues by adding debug logging for redirect detection, updating StandaloneConnect UI with generic permission messages, and removing pre-authenticated account display for improved security and clarity (#2217)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Updated to commit df8934d for improved design consistency and functionality (#2218)
+
 ## [0.11.2-alpha.3] - 2025-11-12
 
 ### ✨ New Features
