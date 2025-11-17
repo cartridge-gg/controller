@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Confetti from "react-confetti";
+import useEmblaCarousel from "embla-carousel-react";
 import { BackgroundStars } from "./assets/background-stars";
 import { ArcadeLogo } from "./assets/arcade-logo";
 import { ArcadeIcon } from "./assets/arcade-icon";
@@ -51,6 +52,12 @@ export function BoosterPack() {
   const { privateKey } = useParams<{ privateKey: string }>();
   const account = useAccount();
   const { controller } = useConnection();
+
+  // Embla carousel for mobile
+  const [emblaRef] = useEmblaCarousel({
+    align: "center",
+    containScroll: "trimSnaps",
+  });
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [numberOfPieces, setNumberOfPieces] = useState(500);
@@ -402,62 +409,127 @@ export function BoosterPack() {
 
         {/* Cards Display */}
         {rewardCards.length > 0 ? (
-          <div className="flex gap-6 md:gap-8 pb-12 sm:pb-0 flex-wrap justify-center max-w-4xl">
-            {rewardCards.map((card, index) => {
-              const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
-              const isClickable = isClaimed && !isRevealing && !isFetchingToken;
-              const isLS2Game = card.type === RewardType.LS2_GAME;
+          <>
+            {/* Desktop: Flex layout */}
+            <div className="hidden md:flex gap-6 md:gap-8 pb-12 sm:pb-0 flex-wrap justify-center max-w-4xl">
+              {rewardCards.map((card, index) => {
+                const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
+                const isClickable =
+                  isClaimed && !isRevealing && !isFetchingToken;
+                const isLS2Game = card.type === RewardType.LS2_GAME;
 
-              return (
-                <button
-                  key={index}
-                  onClick={() => {
-                    if (!isClickable) return;
+                return (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      if (!isClickable) return;
 
-                    // Handle LS2 game card specially
-                    if (isLS2Game) {
-                      handleLS2CardClick();
-                    } else if (gameUrl) {
-                      window.open(gameUrl, "_blank");
-                    }
-                  }}
-                  disabled={!isClickable || (isLS2Game && isFetchingToken)}
-                  className={`relative w-[180px] h-[245px] md:w-[220px] md:h-[300px] ${
-                    isClickable
-                      ? "cursor-pointer hover:scale-105 transition-transform duration-300 ease-out"
-                      : "cursor-default"
-                  }`}
-                  aria-label={isClickable ? `Play ${card.name}` : card.name}
-                >
-                  {/* Card container with fade-up animation */}
-                  <div className="relative w-full h-full">
-                    {/* Card Front (revealed with fade-up) */}
-                    <div
-                      className={`absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out ${
-                        isClickable
-                          ? "hover:shadow-[0px_12px_32px_0px_rgba(251,203,74,0.3)]"
-                          : ""
-                      }`}
-                      style={{
-                        opacity:
-                          card.revealState === RevealState.UNREVEALED ? 0 : 1,
-                        transform:
-                          card.revealState === RevealState.UNREVEALED
-                            ? "translateY(20px)"
-                            : "translateY(0)",
-                      }}
-                    >
-                      <img
-                        src={card.image}
-                        alt={card.name}
-                        className="w-full h-full object-cover"
-                      />
+                      // Handle LS2 game card specially
+                      if (isLS2Game) {
+                        handleLS2CardClick();
+                      } else if (gameUrl) {
+                        window.open(gameUrl, "_blank");
+                      }
+                    }}
+                    disabled={!isClickable || (isLS2Game && isFetchingToken)}
+                    className={`relative w-[220px] h-[300px] ${
+                      isClickable
+                        ? "cursor-pointer hover:scale-105 transition-transform duration-300 ease-out"
+                        : "cursor-default"
+                    }`}
+                    aria-label={isClickable ? `Play ${card.name}` : card.name}
+                  >
+                    {/* Card container with fade-up animation */}
+                    <div className="relative w-full h-full">
+                      {/* Card Front (revealed with fade-up) */}
+                      <div
+                        className={`absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out ${
+                          isClickable
+                            ? "hover:shadow-[0px_12px_32px_0px_rgba(251,203,74,0.3)]"
+                            : ""
+                        }`}
+                        style={{
+                          opacity:
+                            card.revealState === RevealState.UNREVEALED ? 0 : 1,
+                          transform:
+                            card.revealState === RevealState.UNREVEALED
+                              ? "translateY(20px)"
+                              : "translateY(0)",
+                        }}
+                      >
+                        <img
+                          src={card.image}
+                          alt={card.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Mobile: Carousel */}
+            <div className="md:hidden w-full" ref={emblaRef}>
+              <div className="flex gap-6">
+                <div className="px-4"></div>
+                {rewardCards.map((card, index) => {
+                  const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
+                  //const isClickable = isClaimed && !isRevealing && !isFetchingToken;
+                  const isClickable = true;
+                  const isLS2Game = card.type === RewardType.LS2_GAME;
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        if (!isClickable) return;
+
+                        // Handle LS2 game card specially
+                        if (isLS2Game) {
+                          handleLS2CardClick();
+                        } else if (gameUrl) {
+                          window.open(gameUrl, "_blank");
+                        }
+                      }}
+                      disabled={!isClickable || (isLS2Game && isFetchingToken)}
+                      className={`relative flex-[0_0_70%] min-w-0 ${
+                        isClickable
+                          ? "cursor-pointer active:scale-95 transition-transform duration-200"
+                          : "cursor-default"
+                      }`}
+                      aria-label={isClickable ? `Play ${card.name}` : card.name}
+                    >
+                      {/* Card container with fade-up animation */}
+                      <div className="relative w-full aspect-[180/245]">
+                        {/* Card Front (revealed with fade-up) */}
+                        <div
+                          className="absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out"
+                          style={{
+                            opacity:
+                              card.revealState === RevealState.UNREVEALED
+                                ? 0
+                                : 1,
+                            transform:
+                              card.revealState === RevealState.UNREVEALED
+                                ? "translateY(20px)"
+                                : "translateY(0)",
+                          }}
+                        >
+                          <img
+                            src={card.image}
+                            alt={card.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+                <div className="px-4"></div>
+              </div>
+            </div>
+          </>
         ) : (
           // Placeholder before claim - Show asset card or loading
           <div className="relative w-[280px] h-[380px] md:w-[280px] md:h-[380px] rounded-lg overflow-hidden shadow-[0px_4px_16px_0px_#000000]">
