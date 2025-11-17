@@ -1790,7 +1790,9 @@ export type InvoiceWhereInput = {
 };
 
 export type KatanaCreateInput = {
+  forkProviderUrl?: InputMaybe<Scalars["String"]>;
   network?: InputMaybe<Scalars["String"]>;
+  optimistic?: InputMaybe<Scalars["Boolean"]>;
   provable?: InputMaybe<Scalars["Boolean"]>;
   saya?: InputMaybe<Scalars["Boolean"]>;
 };

@@ -9,6 +9,9 @@ import { visualizer } from "rollup-plugin-visualizer";
 const externalDeps = [
   "open",
   "starknet",
+  "@cartridge/ui",
+  "react",
+  "react-dom",
 ];
 
 export default defineConfig(({ mode }) => ({
