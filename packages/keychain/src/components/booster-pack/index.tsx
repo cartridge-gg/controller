@@ -225,30 +225,6 @@ export function BoosterPack() {
         return;
       }
 
-      console.log({ events: receipt.events });
-
-      let ls2TokenId;
-      let numsTokenId;
-      receipt.events.forEach((event) => {
-        if (
-          event.keys[0] === hash.getSelectorFromName("TournamentTicketsClaimed")
-        ) {
-          ls2TokenId = parseInt(event.data[2]);
-          numsTokenId = parseInt(event.data[3]);
-        }
-      });
-
-      if (ls2TokenId === undefined || numsTokenId === undefined) {
-        setError("Failed to determine token IDs. Transaction: " + txnHash);
-        setIsLoading(false);
-        setIsClaimed(false);
-        setIsRevealing(false);
-        return;
-      }
-
-      // Save token IDs to state
-      setLs2TokenId(ls2TokenId);
-
       // Success! Mark as claimed
       setIsClaimed(true);
       setIsLoading(false);
@@ -260,6 +236,28 @@ export function BoosterPack() {
           assetInfo.type.toLowerCase() === "mystery_asset")
       ) {
         setIsRevealing(true);
+
+        let ls2TokenId;
+        let numsTokenId;
+        receipt.events.forEach((event) => {
+          if (
+            event.keys[0] ===
+            hash.getSelectorFromName("TournamentTicketsClaimed")
+          ) {
+            ls2TokenId = parseInt(event.data[2]);
+            numsTokenId = parseInt(event.data[3]);
+          }
+        });
+
+        if (ls2TokenId === undefined || numsTokenId === undefined) {
+          setError("Failed to determine token IDs. Transaction: " + txnHash);
+          setIsLoading(false);
+          setIsRevealing(false);
+          return;
+        }
+
+        // Save token IDs to state
+        setLs2TokenId(ls2TokenId);
 
         // Create specific cards for mystery asset reveal
         const mysteryCards = [
