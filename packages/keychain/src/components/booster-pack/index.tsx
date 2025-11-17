@@ -111,7 +111,11 @@ export function BoosterPack() {
     "booster-pack-survivor-mainnet",
   ].join(";");
 
-  const { claims, isLoading: isLoadingClaims } = useMerkleClaim({
+  const {
+    claims,
+    isLoading: isLoadingClaims,
+    onSendClaim,
+  } = useMerkleClaim({
     keys,
     type: "preimage",
     address: ethereumAddress,
@@ -247,6 +251,8 @@ export function BoosterPack() {
           signature,
         });
       }
+
+      await onSendClaim();
 
       // Success! Mark as claimed
       setIsClaimed(true);
