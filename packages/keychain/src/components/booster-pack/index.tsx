@@ -475,8 +475,7 @@ export function BoosterPack() {
                 <div className="px-4"></div>
                 {rewardCards.map((card, index) => {
                   const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
-                  //const isClickable = isClaimed && !isRevealing && !isFetchingToken;
-                  const isClickable = true;
+                  const isClickable = isClaimed && !isRevealing && !isFetchingToken;
                   const isLS2Game = card.type === RewardType.LS2_GAME;
 
                   return (
