@@ -108,6 +108,11 @@ export type ParentMethods = AsyncMethodReturns<{
     txHash: string,
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
+  showToast: (config: {
+    type: "achievement" | "networkSwitch" | "error" | "transaction";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+  }) => Promise<void>;
 }>;
 
 /**
@@ -628,6 +633,10 @@ export function useConnectionValue() {
         externalSwitchChain: iframeMethods.externalSwitchChain(appOrigin),
         externalWaitForTransaction:
           iframeMethods.externalWaitForTransaction(appOrigin),
+        // showToast is not available in standalone mode - toasts work locally
+        showToast: async () => {
+          // In standalone mode, toasts are handled locally by the keychain's own Toaster
+        },
       });
     }
 

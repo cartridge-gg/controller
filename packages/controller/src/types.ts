@@ -168,6 +168,10 @@ export interface Keychain {
   navigate(path: string): Promise<void>;
   hasStorageAccess(): Promise<boolean>;
   requestStorageAccess(): Promise<boolean>;
+  showToast(config: {
+    type: "achievement" | "networkSwitch" | "error" | "transaction";
+    [key: string]: any;
+  }): Promise<void>;
 
   // External wallet methods
   externalDetectWallets(): Promise<ExternalWallet[]>;

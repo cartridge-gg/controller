@@ -1,5 +1,7 @@
 import { AsyncMethodReturns, connectToChild } from "@cartridge/penpal";
 import { Modal } from "../types";
+import { showToast } from "../toast/toast-manager";
+import { injectToaster } from "../toast/toast-injector";
 
 export type IFrameOptions<CallSender> = Omit<
   ConstructorParameters<typeof IFrame>[0],
@@ -44,6 +46,12 @@ export class IFrame<CallSender extends {}> implements Modal {
     meta.content =
       "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content";
     docHead.appendChild(meta);
+
+    // Inject Toaster component for toast notifications
+    // Only inject for keychain iframe
+    if (id === "controller-keychain") {
+      injectToaster();
+    }
 
     const iframe = document.createElement("iframe");
     iframe.src = url.toString();
@@ -140,6 +148,9 @@ export class IFrame<CallSender extends {}> implements Modal {
       methods: {
         close: (_origin: string) => () => this.close(),
         reload: (_origin: string) => () => window.location.reload(),
+        showToast: (_origin: string) => (config: any) => {
+          showToast(config);
+        },
         ...methods,
       },
     }).promise.then((child) => {
