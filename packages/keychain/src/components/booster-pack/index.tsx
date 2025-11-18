@@ -184,10 +184,6 @@ export function BoosterPack() {
         ),
       );
 
-      if (data.ls2TokenId) {
-        setLs2TokenId(data.ls2TokenId);
-      }
-
       // Set claimed status immediately
       setIsClaimed(true);
     } catch (err) {
