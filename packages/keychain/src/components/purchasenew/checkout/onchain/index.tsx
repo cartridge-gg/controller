@@ -21,10 +21,8 @@ import { isOnchainStarterpack } from "@/context";
 import { num, uint256 } from "starknet";
 import { getWallet } from "../../wallet/config";
 import { LoadingState } from "../../loading";
-import { useParams } from "react-router-dom";
 
 export function OnchainCheckout() {
-  const { starterpackId } = useParams();
   const {
     isStarterpackLoading,
     isFetchingConversion,
@@ -39,7 +37,6 @@ export function OnchainCheckout() {
     conversionError,
     incrementQuantity,
     decrementQuantity,
-    setStarterpackId,
     onOnchainPurchase,
     clearError,
   } = usePurchaseContext();
@@ -135,12 +132,6 @@ export function OnchainCheckout() {
       setIsLoading(false);
     }
   }, [hasSufficientBalance, isFree, onOnchainPurchase, navigate, clearError]);
-
-  useEffect(() => {
-    if (!isStarterpackLoading && starterpackId) {
-      setStarterpackId(starterpackId);
-    }
-  }, [starterpackId, isStarterpackLoading, setStarterpackId]);
 
   // Fetch user's token balance
   useEffect(() => {
