@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Confetti from "react-confetti";
+import useEmblaCarousel from "embla-carousel-react";
 import { BackgroundStars } from "./assets/background-stars";
 import { ArcadeLogo } from "./assets/arcade-logo";
 import { ArcadeIcon } from "./assets/arcade-icon";
@@ -54,6 +55,15 @@ export function BoosterPack() {
   const account = useAccount();
   const { controller } = useConnection();
 
+  // Embla carousel - responsive configuration
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "center",
+    containScroll: "trimSnaps",
+    // Disable dragging on desktop, allow multiple slides visible
+    dragFree: false,
+  });
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [numberOfPieces, setNumberOfPieces] = useState(500);
   const [username, setUsername] = useState<string | null>(null);
@@ -76,13 +86,28 @@ export function BoosterPack() {
   } | null>(null);
   const [isCheckingAsset, setIsCheckingAsset] = useState(true);
   const [assetCardImage, setAssetCardImage] = useState<string | null>(null);
-  const [ls2TokenId, setLs2TokenId] = useState<number | undefined>();
 
   useEffect(() => {
     if (controller) {
       setUsername(controller.username());
     }
   }, [controller]);
+
+  // Track carousel slide changes
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    };
+
+    emblaApi.on("select", onSelect);
+    onSelect(); // Set initial selected index
+
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
 
   const ethereumAddress = useMemo(() => {
     if (!privateKey) {
@@ -256,9 +281,6 @@ export function BoosterPack() {
           return;
         }
 
-        // Save token IDs to state
-        setLs2TokenId(ls2TokenId);
-
         // Create specific cards for mystery asset reveal
         const mysteryCards = [
           {
@@ -403,60 +425,76 @@ export function BoosterPack() {
 
         {/* Cards Display */}
         {rewardCards.length > 0 ? (
-          <div className="flex gap-6 md:gap-8 pb-12 sm:pb-0 flex-wrap justify-center max-w-4xl">
-            {rewardCards.map((card, index) => {
-              const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
-              const isClickable = isClaimed && !isRevealing;
+          <div className="w-full max-w-5xl" ref={emblaRef}>
+            <div className="flex gap-4 md:gap-12 pb-12 sm:pb-0 md:justify-center">
+              {/* Mobile padding */}
+              <div className="md:hidden px-4"></div>
 
-              return (
-                <button
-                  key={index}
-                  onClick={() => {
-                    if (!isClickable || !gameUrl) return;
+              {rewardCards.map((card, index) => {
+                const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
+                const isClickable = isClaimed && !isRevealing;
+                const isSelected = index === selectedIndex;
 
-                    // Construct URL with token ID if available
-                    const fullUrl = card.tokenId
-                      ? `${gameUrl}${card.tokenId}`
-                      : gameUrl;
+                return (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      if (!isClickable || !gameUrl) return;
 
-                    window.open(fullUrl, "_blank");
-                  }}
-                  disabled={!isClickable || !gameUrl}
-                  className={`relative w-[180px] h-[245px] md:w-[220px] md:h-[300px] ${
-                    isClickable && gameUrl
-                      ? "cursor-pointer hover:scale-105 transition-transform duration-300 ease-out"
-                      : "cursor-default"
-                  }`}
-                  aria-label={isClickable ? `Play ${card.name}` : card.name}
-                >
-                  {/* Card container with fade-up animation */}
-                  <div className="relative w-full h-full">
-                    {/* Card Front (revealed with fade-up) */}
-                    <div
-                      className={`absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out ${
-                        isClickable
-                          ? "hover:shadow-[0px_12px_32px_0px_rgba(251,203,74,0.3)]"
-                          : ""
-                      }`}
-                      style={{
-                        opacity:
-                          card.revealState === RevealState.UNREVEALED ? 0 : 1,
-                        transform:
-                          card.revealState === RevealState.UNREVEALED
-                            ? "translateY(20px)"
-                            : "translateY(0)",
-                      }}
-                    >
-                      <img
-                        src={card.image}
-                        alt={card.name}
-                        className="w-full h-full object-cover"
-                      />
+                      // If already selected, open the game
+                      if (isSelected) {
+                        const fullUrl = card.tokenId
+                          ? `${gameUrl}${card.tokenId}`
+                          : gameUrl;
+                        window.open(fullUrl, "_blank");
+                      } else {
+                        // Otherwise, select the card
+                        if (emblaApi) {
+                          emblaApi.scrollTo(index);
+                        }
+                        setSelectedIndex(index);
+                      }
+                    }}
+                    disabled={!isClickable || !gameUrl}
+                    className={`relative flex-[0_0_70%] md:flex-none md:w-[220px] min-w-0 transition-transform duration-300 ease-out ${
+                      isClickable && gameUrl
+                        ? "cursor-pointer"
+                        : "cursor-default"
+                    } ${isSelected ? "scale-100" : "scale-90 md:scale-100"}`}
+                    aria-label={isClickable ? `Select ${card.name}` : card.name}
+                  >
+                    {/* Card container with fade-up animation */}
+                    <div className="relative w-full aspect-[180/245] md:h-[300px] md:aspect-auto">
+                      {/* Card Front (revealed with fade-up) */}
+                      <div
+                        className={`absolute inset-0 rounded-lg overflow-hidden flex flex-col transition-all duration-300 ease-out ${
+                          isSelected
+                            ? "shadow-[0px_12px_32px_0px_rgba(251,203,74,0.3)]"
+                            : "shadow-[0px_8px_24px_0px_#000000]"
+                        }`}
+                        style={{
+                          opacity:
+                            card.revealState === RevealState.UNREVEALED ? 0 : 1,
+                          transform:
+                            card.revealState === RevealState.UNREVEALED
+                              ? "translateY(20px)"
+                              : "translateY(0)",
+                        }}
+                      >
+                        <img
+                          src={card.image}
+                          alt={card.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+
+              {/* Mobile padding */}
+              <div className="md:hidden px-4"></div>
+            </div>
           </div>
         ) : (
           // Placeholder before claim - Show asset card or loading
@@ -516,9 +554,15 @@ export function BoosterPack() {
                       assetInfo?.type.toUpperCase() === "MYSTERY" ||
                       assetInfo?.type.toUpperCase() === "MYSTERY_ASSET";
 
-                    if (isMystery && ls2TokenId) {
-                      const gameUrl = `${MYSTERY_CARD_GAME_MAP[RewardType.LS2_GAME]}${ls2TokenId}`;
-                      window.open(gameUrl, "_blank");
+                    if (isMystery && rewardCards.length > 0) {
+                      // On mobile, use the currently selected card from carousel
+                      const selectedCard = rewardCards[selectedIndex];
+                      const gameUrl = MYSTERY_CARD_GAME_MAP[selectedCard.type];
+
+                      if (gameUrl && selectedCard.tokenId) {
+                        const fullUrl = `${gameUrl}${selectedCard.tokenId}`;
+                        window.open(fullUrl, "_blank");
+                      }
                     } else {
                       const gameInfo =
                         ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
@@ -533,8 +577,23 @@ export function BoosterPack() {
                     color: "#0f1410",
                   }}
                 >
-                  {ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]
-                    ?.name || "PLAY GAME"}
+                  {(() => {
+                    const isMystery =
+                      assetInfo?.type.toUpperCase() === "MYSTERY" ||
+                      assetInfo?.type.toUpperCase() === "MYSTERY_ASSET";
+
+                    if (isMystery && rewardCards.length > 0) {
+                      const selectedCard = rewardCards[selectedIndex];
+                      return selectedCard.type === RewardType.LS2_GAME
+                        ? "PLAY LOOT SURVIVOR 2"
+                        : "PLAY NUMS";
+                    }
+
+                    return (
+                      ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]
+                        ?.name || "PLAY GAME"
+                    );
+                  })()}
                 </button>
               </div>
             ) : (
