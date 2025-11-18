@@ -155,6 +155,42 @@ export function BoosterPack() {
     setIsClaimed(claims.every((claim) => claim.claimed));
   }, [claims, isLoadingClaims]);
 
+  // Check localStorage FIRST on mount - immediate source of truth
+  useEffect(() => {
+    if (!ethereumAddress) {
+      return;
+    }
+
+    try {
+      const stored = localStorage.getItem(`booster-pack-${ethereumAddress}`);
+      if (!stored) {
+        return; // No stored data, proceed with normal flow
+      }
+
+      const data = JSON.parse(stored);
+
+      // Immediately restore state - this runs before async operations complete
+      setRewardCards(
+        data.rewardCards.map(
+          (card: {
+            type: RewardType;
+            name: string;
+            image: string;
+            tokenId?: string;
+          }) => ({
+            ...card,
+            revealState: RevealState.REVEALED,
+          }),
+        ),
+      );
+
+      // Set claimed status immediately
+      setIsClaimed(true);
+    } catch (err) {
+      console.error("Failed to restore claim data from localStorage:", err);
+    }
+  }, [ethereumAddress]); // Only depends on address - runs once when available
+
   // Check asset eligibility on first load
   useEffect(() => {
     const checkAsset = async () => {
@@ -298,6 +334,25 @@ export function BoosterPack() {
             tokenId: numsTokenId,
           },
         ];
+
+        // Store revealed card data in localStorage for persistence across navigation
+        try {
+          localStorage.setItem(
+            `booster-pack-${ethereumAddress}`,
+            JSON.stringify({
+              rewardCards: mysteryCards.map((card) => ({
+                type: card.type,
+                name: card.name,
+                image: card.image,
+                tokenId: card.tokenId,
+              })),
+              ls2TokenId,
+              numsTokenId,
+            }),
+          );
+        } catch (err) {
+          console.error("Failed to store claim data in localStorage:", err);
+        }
 
         // Wait 2 seconds before showing cards and starting reveal
         setTimeout(() => {
