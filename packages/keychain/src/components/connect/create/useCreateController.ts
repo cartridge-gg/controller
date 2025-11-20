@@ -386,9 +386,17 @@ export function useCreateController({
       let signupResponse: SignupResponse | undefined;
       let signer: SignerInput | undefined;
       switch (authenticationMode) {
-        case "webauthn":
+        case "webauthn": {
           await signupWithWebauthn(username, doPopupFlow);
+
+          // Handle redirect_url for webauthn
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          const redirectUrl = urlSearchParams.get("redirect_url");
+          if (redirectUrl) {
+            safeRedirect(redirectUrl);
+          }
           return;
+        }
         case "google":
         case "discord":
           signupResponse = await signupWithSocial(authenticationMode, username);
@@ -625,6 +633,13 @@ export function useCreateController({
             },
             !!isSlot,
           );
+
+          // Handle redirect_url for webauthn
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          const redirectUrl = urlSearchParams.get("redirect_url");
+          if (redirectUrl) {
+            safeRedirect(redirectUrl);
+          }
           return;
         }
         case "google":

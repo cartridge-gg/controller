@@ -28,7 +28,6 @@ import { Settings } from "./settings";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
-import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { PaymentMethod } from "./purchasenew/method";
 import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { Success as PurchaseSuccess } from "./purchasenew/success";
@@ -62,6 +61,7 @@ import { useEffect } from "react";
 import { StandaloneSessionCreation } from "./connect/StandaloneSessionCreation";
 import { StandaloneConnect } from "./connect/StandaloneConnect";
 import { hasApprovalPolicies } from "@/hooks/session";
+import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 
 function DefaultRoute() {
   const account = useAccount();

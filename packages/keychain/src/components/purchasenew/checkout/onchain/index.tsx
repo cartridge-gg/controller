@@ -8,6 +8,9 @@ import {
   ErrorAlertIcon,
   Card,
   CardContent,
+  ListIcon,
+  PlusIcon,
+  MinusIcon,
 } from "@cartridge/ui";
 import { Receiving } from "../../receiving";
 import { OnchainCostBreakdown } from "../../review/cost";
@@ -16,20 +19,26 @@ import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import { isOnchainStarterpack } from "@/context";
 import { num, uint256 } from "starknet";
+import { getWallet } from "../../wallet/config";
+import { LoadingState } from "../../loading";
 
 export function OnchainCheckout() {
   const {
+    isStarterpackLoading,
+    isFetchingConversion,
     purchaseItems,
+    quantity,
     displayError,
     starterpackDetails,
     selectedWallet,
     walletAddress,
-    onOnchainPurchase,
-    clearError,
     selectedToken,
     convertedPrice,
-    isFetchingConversion,
     conversionError,
+    incrementQuantity,
+    decrementQuantity,
+    onOnchainPurchase,
+    clearError,
   } = usePurchaseContext();
   const { navigate } = useNavigation();
   const { controller } = useConnection();
@@ -37,6 +46,7 @@ export function OnchainCheckout() {
   const [balance, setBalance] = useState<bigint | null>(null);
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const wallet = getWallet(selectedWallet?.type || "controller");
 
   // Extract quote from onchain starterpack
   const quote = useMemo(() => {
@@ -71,29 +81,13 @@ export function OnchainCheckout() {
     };
   }, [quote, selectedToken, convertedPrice]);
 
-  // Determine if we're still loading balance/conversion data
+  // Determine if we're still loading balance data
   const isLoadingBalance = useMemo(() => {
     // If there's a balance error, stop showing loading state
     if (balanceError) return false;
 
-    // If there's a conversion error and we need conversion, stop showing loading state
-    if (conversionError && tokenToCheck?.needsConversion) return false;
-
-    return (
-      isChecking ||
-      (isFetchingConversion && tokenToCheck?.needsConversion) ||
-      balance === null ||
-      tokenToCheck === null ||
-      tokenToCheck.requiredAmount === null
-    );
-  }, [
-    isChecking,
-    isFetchingConversion,
-    balance,
-    tokenToCheck,
-    conversionError,
-    balanceError,
-  ]);
+    return isChecking || balance === null || tokenToCheck === null;
+  }, [isChecking, balance, tokenToCheck, balanceError]);
 
   // Check if user has sufficient balance (only when not loading)
   const hasSufficientBalance = useMemo(() => {
@@ -105,8 +99,39 @@ export function OnchainCheckout() {
     ) {
       return false;
     }
-    return balance >= tokenToCheck.requiredAmount;
-  }, [balance, tokenToCheck, isLoadingBalance]);
+
+    if (tokenToCheck.needsConversion) {
+      return balance >= tokenToCheck.requiredAmount;
+    }
+
+    return balance >= tokenToCheck.requiredAmount * BigInt(quantity);
+  }, [balance, tokenToCheck, isLoadingBalance, quantity]);
+
+  // Check if we need token conversion (selected token differs from payment token)
+  const needsConversion = useMemo(() => {
+    if (!quote || !selectedToken) return false;
+    return num.toHex(selectedToken.address) !== num.toHex(quote.paymentToken);
+  }, [quote, selectedToken]);
+
+  const isFree = useMemo(() => {
+    return quote?.totalCost === BigInt(0);
+  }, [quote]);
+
+  const onPurchase = useCallback(async () => {
+    if (!hasSufficientBalance && !isFree) return;
+
+    setIsLoading(true);
+    clearError();
+    try {
+      await onOnchainPurchase();
+      navigate("/purchase/pending", { reset: true });
+    } catch (error) {
+      console.error("Purchase failed:", error);
+      // Error will be displayed via displayError in the UI
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hasSufficientBalance, isFree, onOnchainPurchase, navigate, clearError]);
 
   // Fetch user's token balance
   useEffect(() => {
@@ -179,32 +204,15 @@ export function OnchainCheckout() {
     checkBalance();
   }, [controller, tokenToCheck, selectedWallet, walletAddress]);
 
-  const onPurchase = useCallback(async () => {
-    if (!hasSufficientBalance) return;
-
-    setIsLoading(true);
-    try {
-      await onOnchainPurchase();
-      navigate("/purchase/pending", { reset: true });
-    } catch (error) {
-      console.error("Purchase failed:", error);
-      // Error will be displayed via displayError in the UI
-    } finally {
-      setIsLoading(false);
-    }
-  }, [hasSufficientBalance, onOnchainPurchase, navigate]);
+  const onWalletSelect = () => navigate(`/purchase/wallet/starknet`);
 
   useEffect(() => {
     clearError();
     return () => clearError();
   }, [clearError]);
 
-  if (!quote) {
-    return (
-      <ControllerErrorAlert
-        error={new Error("Invalid starterpack configuration")}
-      />
-    );
+  if (isStarterpackLoading || !quote) {
+    return <LoadingState />;
   }
 
   const tokenSymbol = tokenToCheck?.symbol ?? quote.paymentTokenMetadata.symbol;
@@ -212,80 +220,119 @@ export function OnchainCheckout() {
   return (
     <>
       <HeaderInner
-        title="Review Purchase"
+        title={isFree ? "Claim" : "Review Purchase"}
         icon={<GiftIcon variant="solid" />}
       />
       <LayoutContent>
-        <Receiving title="Receiving" items={purchaseItems} />
+        <Receiving
+          title={`Receiving ${quantity > 1 ? `(${quantity})` : ""}`}
+          items={purchaseItems}
+        />
       </LayoutContent>
       <LayoutFooter>
-        {/* Balance Retrieval Error */}
-        {balanceError && (
-          <Card className="border-error">
-            <CardContent className="flex flex-row items-center gap-3 p-3 text-error">
-              <ErrorAlertIcon variant="error" size="sm" />
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-semibold">Balance Check Failed</p>
-                <p className="text-xs text-foreground-300">{balanceError}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Insufficient Balance Warning */}
-        {!isLoadingBalance &&
-          !hasSufficientBalance &&
-          !balanceError &&
-          !(conversionError && tokenToCheck?.needsConversion) && (
-            <Card className="border-warning">
-              <CardContent className="flex flex-row items-center gap-3 p-3 text-warning">
-                <ErrorAlertIcon variant="warning" size="sm" />
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold">Insufficient Balance</p>
-                  <p className="text-xs text-foreground-300">
-                    You need more {tokenSymbol} to complete this purchase.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-        {/* Conversion Error Warning - only show if we actually need conversion */}
-        {conversionError && tokenToCheck?.needsConversion && (
-          <Card className="border-error">
-            <CardContent className="flex flex-row items-center gap-3 p-3 text-error">
-              <ErrorAlertIcon variant="error" size="sm" />
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-semibold">Insufficient Liquidity</p>
-                <p className="text-xs text-foreground-300">
-                  Unable to convert to {tokenSymbol}. Try selecting a different
-                  token.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <OnchainCostBreakdown quote={quote} showTokenSelector />
         {displayError && <ControllerErrorAlert error={displayError} />}
-        <Button
-          onClick={onPurchase}
-          isLoading={isLoading || isLoadingBalance}
-          disabled={
-            !hasSufficientBalance ||
-            isLoadingBalance ||
-            !!balanceError ||
-            (!!conversionError && tokenToCheck?.needsConversion)
-          }
-        >
-          {balanceError
-            ? "Balance Check Failed"
-            : conversionError && tokenToCheck?.needsConversion
-              ? "Insufficient Liquidity"
-              : !hasSufficientBalance && !isLoadingBalance
-                ? "Insufficient Balance"
-                : "Confirm"}
-        </Button>
+        {!isFree ? (
+          <>
+            {balanceError && (
+              <Card className="border-error">
+                <CardContent className="flex flex-row items-center gap-3 p-3 text-error">
+                  <ErrorAlertIcon variant="error" size="sm" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-semibold">
+                      Balance Check Failed
+                    </p>
+                    <p className="text-xs text-foreground-300">
+                      {balanceError}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            {!isLoadingBalance && !hasSufficientBalance && !balanceError && (
+              <Card className="border-warning">
+                <CardContent className="flex flex-row items-center gap-3 p-3 text-warning">
+                  <ErrorAlertIcon variant="warning" size="sm" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-semibold">
+                      Insufficient Balance
+                    </p>
+                    <p className="text-xs text-foreground-300">
+                      You need more {tokenSymbol} to complete this purchase.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            {conversionError && needsConversion && (
+              <Card className="border-error">
+                <CardContent className="flex flex-row items-center gap-3 p-3 text-error">
+                  <ErrorAlertIcon variant="error" size="sm" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-semibold">
+                      Insufficient Liquidity
+                    </p>
+                    <p className="text-xs text-foreground-300">
+                      Unable to swap to {selectedToken?.symbol}. Try selecting a
+                      different token.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            <div
+              className={`flex justify-between border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2 transition-colors cursor-pointer hover:bg-background-200`}
+              onClick={onWalletSelect}
+            >
+              <div className="flex gap-2">
+                {wallet.subIcon} Purchase with {wallet.name}
+              </div>
+              <ListIcon size="xs" variant="solid" />
+            </div>
+
+            <OnchainCostBreakdown quote={quote} />
+
+            <div className="flex flex-row gap-3">
+              <Button
+                variant="secondary"
+                onClick={decrementQuantity}
+                disabled={
+                  quantity <= 1 ||
+                  isLoadingBalance ||
+                  !!balanceError ||
+                  isFetchingConversion
+                }
+              >
+                <MinusIcon size="xs" />
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={incrementQuantity}
+                disabled={
+                  isLoadingBalance || !!balanceError || isFetchingConversion
+                }
+              >
+                <PlusIcon size="xs" variant="solid" />
+              </Button>
+              <Button
+                className="w-full"
+                isLoading={isLoading}
+                disabled={
+                  !hasSufficientBalance ||
+                  isLoadingBalance ||
+                  !!balanceError ||
+                  isFetchingConversion
+                }
+                onClick={onPurchase}
+              >
+                Buy {quantity}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <Button className="w-full" isLoading={isLoading} onClick={onPurchase}>
+            Claim
+          </Button>
+        )}
       </LayoutFooter>
     </>
   );

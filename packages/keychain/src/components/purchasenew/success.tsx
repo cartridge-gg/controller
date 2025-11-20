@@ -7,7 +7,7 @@ import {
 } from "@cartridge/ui";
 import { Receiving } from "./receiving";
 import { useConnection } from "@/hooks/connection";
-import { usePurchaseContext } from "@/context";
+import { useNavigation, usePurchaseContext } from "@/context";
 import { useMemo } from "react";
 import { Item } from "@/context/purchase";
 import { ConfirmingTransaction } from "./pending";
@@ -44,7 +44,11 @@ export function PurchaseSuccessInner({
   type: StarterpackType;
   transactionHash?: string;
 }) {
+  const { quantity } = usePurchaseContext();
   const { closeModal, isMainnet } = useConnection();
+  const { navigateToRoot } = useNavigation();
+  const quantityText = quantity > 1 ? `(${quantity})` : "";
+
   return (
     <>
       <HeaderInner
@@ -53,7 +57,7 @@ export function PurchaseSuccessInner({
       />
       <LayoutContent>
         <Receiving
-          title="You Received"
+          title={`You Received ${quantityText}`}
           items={items}
           isLoading={false}
           showPrice={true}
@@ -69,8 +73,13 @@ export function PurchaseSuccessInner({
             isLoading={false}
           />
         )}
-        <Button variant="secondary" onClick={closeModal}>
-          Close
+        <Button
+          onClick={() => {
+            closeModal?.();
+            navigateToRoot();
+          }}
+        >
+          Play
         </Button>
       </LayoutFooter>
     </>
