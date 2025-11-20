@@ -229,7 +229,7 @@ describe("ConnectRoute", () => {
     it("auto-connects for verified session with redirect_url", async () => {
       const mockHandleCompletion = vi.fn();
       mockUseRouteCompletion.mockReturnValue(mockHandleCompletion);
-      
+
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
@@ -258,7 +258,7 @@ describe("ConnectRoute", () => {
     it("auto-creates session for verified policies with redirect_url", async () => {
       const mockHandleCompletion = vi.fn();
       mockUseRouteCompletion.mockReturnValue(mockHandleCompletion);
-      
+
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: {
@@ -314,7 +314,7 @@ describe("ConnectRoute", () => {
     it("auto-connects for unverified app with redirect_url", async () => {
       const mockHandleCompletion = vi.fn();
       mockUseRouteCompletion.mockReturnValue(mockHandleCompletion);
-      
+
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
