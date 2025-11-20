@@ -41,10 +41,11 @@ vi.mock("@/utils/connection/connect", () => ({
   parseConnectParams: (...args: unknown[]) => mockParseConnectParams(...args),
 }));
 
-const mockSnapshotLocalStorageToCookie = vi.fn();
-vi.mock("@/utils/storageSnapshot", () => ({
-  snapshotLocalStorageToCookie: () => mockSnapshotLocalStorageToCookie(),
-}));
+// Snapshot functionality removed in commit 66db7db5
+// const mockSnapshotLocalStorageToCookie = vi.fn();
+// vi.mock("@/utils/storageSnapshot", () => ({
+//   snapshotLocalStorageToCookie: () => mockSnapshotLocalStorageToCookie(),
+// }));
 
 const mockUseRouteParams = vi.fn();
 const mockUseRouteCompletion = vi.fn();
@@ -83,7 +84,7 @@ describe("ConnectRoute", () => {
     mockUseRouteParams.mockReturnValue(mockParams);
     mockUseRouteCompletion.mockReturnValue(vi.fn());
     mockLocation.search = "";
-    mockSnapshotLocalStorageToCookie.mockResolvedValue("mock-encrypted-blob");
+    // mockSnapshotLocalStorageToCookie.mockResolvedValue("mock-encrypted-blob");
 
     mockUseConnection.mockReturnValue({
       controller: mockController,
@@ -225,7 +226,10 @@ describe("ConnectRoute", () => {
       mockLocation.search = "?redirect_url=https://example.com/callback";
     });
 
-    it("immediately redirects for verified session with redirect_url", async () => {
+    it("auto-connects for verified session with redirect_url", async () => {
+      const mockHandleCompletion = vi.fn();
+      mockUseRouteCompletion.mockReturnValue(mockHandleCompletion);
+      
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
@@ -241,15 +245,20 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
+      // Should call handleCompletion (which would trigger redirect in real app)
       await waitFor(() => {
-        expect(mockSafeRedirect).toHaveBeenCalled();
+        expect(mockHandleCompletion).toHaveBeenCalled();
       });
-      const redirectUrl = mockSafeRedirect.mock.calls[0][0];
-      expect(redirectUrl).toMatch(/^https:\/\/example\.com\/callback#kc=/);
-      expect(mockSafeRedirect.mock.calls[0][1]).toBe(true);
+      expect(mockParams.resolve).toHaveBeenCalledWith({
+        code: ResponseCodes.SUCCESS,
+        address: "0x123456789abcdef",
+      });
     });
 
-    it("immediately redirects for verified policies with redirect_url", async () => {
+    it("auto-creates session for verified policies with redirect_url", async () => {
+      const mockHandleCompletion = vi.fn();
+      mockUseRouteCompletion.mockReturnValue(mockHandleCompletion);
+      
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: {
@@ -269,15 +278,14 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
+      // Should auto-create session and call handleCompletion
       await waitFor(() => {
-        expect(mockSafeRedirect).toHaveBeenCalled();
+        expect(mockController.createSession).toHaveBeenCalled();
+        expect(mockHandleCompletion).toHaveBeenCalled();
       });
-      const redirectUrl = mockSafeRedirect.mock.calls[0][0];
-      expect(redirectUrl).toMatch(/^https:\/\/example\.com\/callback#kc=/);
-      expect(mockSafeRedirect.mock.calls[0][1]).toBe(true);
     });
 
-    it("immediately redirects for unverified policies with redirect_url", async () => {
+    it("shows session UI for unverified policies with redirect_url", async () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: {
@@ -297,15 +305,16 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      await waitFor(() => {
-        expect(mockSafeRedirect).toHaveBeenCalled();
-      });
-      const redirectUrl = mockSafeRedirect.mock.calls[0][0];
-      expect(redirectUrl).toMatch(/^https:\/\/example\.com\/callback#kc=/);
-      expect(mockSafeRedirect.mock.calls[0][1]).toBe(true);
+      // Should show CreateSession UI instead of redirecting immediately
+      expect(screen.getByText("Create Session")).toBeInTheDocument();
+      // No immediate redirect for unverified policies
+      expect(mockSafeRedirect).not.toHaveBeenCalled();
     });
 
-    it("immediately redirects for unverified app with redirect_url", async () => {
+    it("auto-connects for unverified app with redirect_url", async () => {
+      const mockHandleCompletion = vi.fn();
+      mockUseRouteCompletion.mockReturnValue(mockHandleCompletion);
+      
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
@@ -321,12 +330,14 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
+      // Should call handleCompletion (which would trigger redirect in real app)
       await waitFor(() => {
-        expect(mockSafeRedirect).toHaveBeenCalled();
+        expect(mockHandleCompletion).toHaveBeenCalled();
       });
-      const redirectUrl = mockSafeRedirect.mock.calls[0][0];
-      expect(redirectUrl).toMatch(/^https:\/\/example\.com\/callback#kc=/);
-      expect(mockSafeRedirect.mock.calls[0][1]).toBe(true);
+      expect(mockParams.resolve).toHaveBeenCalledWith({
+        code: ResponseCodes.SUCCESS,
+        address: "0x123456789abcdef",
+      });
     });
 
     it("auto-connects when no redirect_url present", async () => {
