@@ -34,7 +34,48 @@ import {
   showTransactionToast,
 } from "@cartridge/ui";
 
+/**
+ * Get the toast function from the injected CartridgeToaster if available,
+ * otherwise fall back to the imported toast function.
+ */
+function getToastFunction(): typeof toast {
+  if (
+    typeof window !== "undefined" &&
+    (window as any).CartridgeToaster?.toast
+  ) {
+    return (window as any).CartridgeToaster.toast;
+  }
+  return toast;
+}
+
+/**
+ * Get the toast helper functions from the injected CartridgeToaster if available,
+ * otherwise fall back to the imported functions.
+ */
+function getToastHelpers() {
+  if (typeof window !== "undefined" && (window as any).CartridgeToaster) {
+    const CartridgeToaster = (window as any).CartridgeToaster;
+    return {
+      showAchievementToast:
+        CartridgeToaster.showAchievementToast || showAchievementToast,
+      showNetworkSwitchToast:
+        CartridgeToaster.showNetworkSwitchToast || showNetworkSwitchToast,
+      showErrorToast: CartridgeToaster.showErrorToast || showErrorToast,
+      showTransactionToast:
+        CartridgeToaster.showTransactionToast || showTransactionToast,
+    };
+  }
+  return {
+    showAchievementToast,
+    showNetworkSwitchToast,
+    showErrorToast,
+    showTransactionToast,
+  };
+}
+
 export function showToast(config: ToastConfig): void {
+  const toastFn = getToastFunction();
+  const helpers = getToastHelpers();
   let toastConfig: any;
 
   switch (config.type) {
@@ -50,7 +91,7 @@ export function showToast(config: ToastConfig): void {
         achievementConfig.progress = config.progress;
       if (config.duration !== undefined)
         achievementConfig.duration = config.duration;
-      toastConfig = showAchievementToast(achievementConfig);
+      toastConfig = helpers.showAchievementToast(achievementConfig);
       break;
     }
     case "networkSwitch": {
@@ -61,11 +102,11 @@ export function showToast(config: ToastConfig): void {
         networkConfig.networkIcon = config.networkIcon;
       if (config.duration !== undefined)
         networkConfig.duration = config.duration;
-      toastConfig = showNetworkSwitchToast(networkConfig);
+      toastConfig = helpers.showNetworkSwitchToast(networkConfig);
       break;
     }
     case "error":
-      toastConfig = showErrorToast({
+      toastConfig = helpers.showErrorToast({
         message: config.message,
         duration: config.duration,
       });
@@ -77,10 +118,10 @@ export function showToast(config: ToastConfig): void {
       if (config.status !== undefined) transactionConfig.status = config.status;
       if (config.duration !== undefined)
         transactionConfig.duration = config.duration;
-      toastConfig = showTransactionToast(transactionConfig);
+      toastConfig = helpers.showTransactionToast(transactionConfig);
       break;
     }
   }
 
-  toast(toastConfig);
+  toastFn(toastConfig);
 }
