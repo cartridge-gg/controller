@@ -56,6 +56,7 @@ export const useSpecializedToast = (): SpecializedToastHandlers => {
       // Fallback for standalone mode
       toast(
         showNetworkSwitchToast({
+          networkIcon: props.networkName.split("")[0].toUpperCase(),
           ...props,
         }),
       );

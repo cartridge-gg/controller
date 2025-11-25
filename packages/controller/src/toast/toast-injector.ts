@@ -35,8 +35,8 @@ export async function injectToaster() {
 
       const toasterRoot = Object.assign(document.createElement("div"), {
         id: "controller-toaster-root",
-        style: "z-index:10001;position:fixed;pointer-events:none;top:0;left:0;",
       });
+
       document.body.appendChild(toasterRoot);
 
       injectToastStyles();
@@ -64,6 +64,25 @@ function injectToastStyles() {
   const style = document.createElement("style");
   style.id = styleId;
   style.textContent = `
+    #controller-toaster-root {
+      z-index: 10001;
+      position: fixed;
+      pointer-events: none;
+    }
+    @media (min-width: 640px) {
+      #controller-toaster-root {
+        right: 0;
+        bottom: 0;
+        top: auto;
+        flex-direction: column;
+      }
+    }
+    @media (min-width: 768px) {
+      #controller-toaster-root {
+        align-items: flex-end;
+        max-width: 420px;
+      }
+    }
      #controller-toaster-root [role="region"],
      #controller-toaster-root [role="region"] > ol,
      #controller-toaster-root [data-sonner-toast] {

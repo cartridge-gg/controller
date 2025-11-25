@@ -28,6 +28,7 @@ import {
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
+import { showToast } from "./toast/toast-manager";
 
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
@@ -293,6 +294,11 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     this.emitNetworkChanged(chainId);
+
+    showToast({
+      type: "networkSwitch",
+      networkName: shortString.decodeShortString(chainId),
+    });
     return true;
   }
 

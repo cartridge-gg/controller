@@ -1,7 +1,5 @@
 import { ResponseCodes } from "@cartridge/controller";
 import Controller from "../controller";
-import { toast, showNetworkSwitchToast } from "@cartridge/ui";
-import { shortString } from "starknet";
 
 export function switchChain({
   setController,
@@ -29,16 +27,6 @@ export function switchChain({
     setRpcUrl(rpcUrl);
     setController(nextController);
     window.controller = nextController;
-
-    const chainId = nextController.chainId();
-    const chainDisplay = shortString.decodeShortString(chainId);
-
-    toast(
-      showNetworkSwitchToast({
-        networkName: chainDisplay,
-        duration: 3000,
-      }),
-    );
 
     return Promise.resolve();
   };
