@@ -3,74 +3,77 @@
  * This allows toast notifications to be displayed on the parent page when
  * triggered from the iframe.
  */
-export async function injectToaster() {
-  if (typeof document === "undefined" || typeof window === "undefined") {
-    return;
-  }
+let loading: Promise<void> | null = null;
 
-  // Check if Toaster is already injected
+export async function injectToaster() {
+  if (typeof document === "undefined" || typeof window === "undefined") return;
+
   if (document.getElementById("controller-toaster-root")) {
     console.log("Toaster already initialized");
     return;
   }
 
-  try {
-    // Load React and ReactDOM if not already available
-    if (!(window as any).React || !(window as any).ReactDOM) {
+  if (loading) return loading;
+
+  loading = (async () => {
+    try {
+      if (!(window as any).React || !(window as any).ReactDOM) {
+        await loadScript(
+          "https://unpkg.com/react@18/umd/react.production.min.js",
+          "React",
+        );
+        await loadScript(
+          "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
+          "ReactDOM",
+        );
+      }
+
       await loadScript(
-        "https://unpkg.com/react@18/umd/react.production.min.js",
-        "React",
+        "https://r2.quddus.my/toaster.umd.cjs",
+        "CartridgeToaster",
       );
-      await loadScript(
-        "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
-        "ReactDOM",
-      );
+
+      const toasterRoot = Object.assign(document.createElement("div"), {
+        id: "controller-toaster-root",
+        style: "z-index:10001;position:fixed;pointer-events:none;top:0;left:0;",
+      });
+      document.body.appendChild(toasterRoot);
+
+      injectToastStyles();
+
+      const { Toaster } = (window as any).CartridgeToaster;
+      const root = (window as any).ReactDOM.createRoot(toasterRoot);
+      root.render((window as any).React.createElement(Toaster));
+
+      console.log("✅ Toaster initialized successfully");
+    } catch (err) {
+      console.error("❌ Failed to inject Toaster:", err);
+      throw err;
+    } finally {
+      loading = null;
     }
+  })();
 
-    await loadScript(
-      "https://r2.quddus.my/toaster.umd.cjs",
-      "CartridgeToaster",
-    );
+  return loading;
+}
 
-    // 4. Create a root div for the Toaster
-    const toasterRoot = document.createElement("div");
-    toasterRoot.id = "controller-toaster-root";
-    toasterRoot.style.zIndex = "10001";
-    toasterRoot.style.position = "fixed";
-    toasterRoot.style.pointerEvents = "none";
-    document.body.appendChild(toasterRoot);
+function injectToastStyles() {
+  const styleId = "controller-toast-styles";
+  if (document.getElementById(styleId)) return;
 
-    // 5. Inject custom styles
-    const styleId = "controller-toast-styles";
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement("style");
-      style.id = styleId;
-      style.textContent = `
-        #controller-toaster-root [role="region"] {
-          z-index: 10001 !important;
-        }
-        #controller-toaster-root [role="region"] > ol {
-          z-index: 10001 !important;
-        }
-        #controller-toaster-root [data-sonner-toast] {
-          z-index: 10001 !important;
-        }
-        #controller-toaster-root * {
-          pointer-events: auto;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
-    // 6. Render the Toaster component
-    const { Toaster } = (window as any).CartridgeToaster;
-    const root = (window as any).ReactDOM.createRoot(toasterRoot);
-    root.render((window as any).React.createElement(Toaster));
-
-    console.log("Toaster initialized successfully");
-  } catch (error) {
-    console.error("Failed to inject Toaster:", error);
-  }
+  const style = document.createElement("style");
+  style.id = styleId;
+  style.textContent = `
+     #controller-toaster-root [role="region"],
+     #controller-toaster-root [role="region"] > ol,
+     #controller-toaster-root [data-sonner-toast] {
+       z-index: 10001 !important;
+     }
+     #controller-toaster-root * {
+       pointer-events: auto;
+     }
+   `;
+  document.head.appendChild(style);
 }
 
 /**

@@ -1,3 +1,9 @@
+import { injectToaster } from "./toast-injector";
+
+// ====================
+// Types
+// ====================
+
 export type ToastConfig =
   | {
       type: "achievement";
@@ -17,111 +23,115 @@ export type ToastConfig =
   | {
       type: "error";
       message: string;
+      progress?: number;
       duration?: number;
     }
   | {
       type: "transaction";
-      label: string;
       status?: "confirming" | "confirmed";
+      isExpanded?: boolean;
+      label?: string;
+      progress?: number;
       duration?: number;
     };
 
-import {
-  toast,
-  showAchievementToast,
-  showNetworkSwitchToast,
-  showErrorToast,
-  showTransactionToast,
-} from "@cartridge/ui";
-
-/**
- * Get the toast function from the injected CartridgeToaster if available,
- * otherwise fall back to the imported toast function.
- */
-function getToastFunction(): typeof toast {
-  if (
-    typeof window !== "undefined" &&
-    (window as any).CartridgeToaster?.toast
-  ) {
-    return (window as any).CartridgeToaster.toast;
-  }
-  return toast;
+interface CartridgeToasterGlobal {
+  toast?: (config: any) => void;
+  showAchievementToast?: (props: any) => any;
+  showNetworkSwitchToast?: (props: any) => any;
+  showErrorToast?: (props: any) => any;
+  showTransactionToast?: (props: any) => any;
 }
 
-/**
- * Get the toast helper functions from the injected CartridgeToaster if available,
- * otherwise fall back to the imported functions.
- */
-function getToastHelpers() {
-  if (typeof window !== "undefined" && (window as any).CartridgeToaster) {
-    const CartridgeToaster = (window as any).CartridgeToaster;
-    return {
-      showAchievementToast:
-        CartridgeToaster.showAchievementToast || showAchievementToast,
-      showNetworkSwitchToast:
-        CartridgeToaster.showNetworkSwitchToast || showNetworkSwitchToast,
-      showErrorToast: CartridgeToaster.showErrorToast || showErrorToast,
-      showTransactionToast:
-        CartridgeToaster.showTransactionToast || showTransactionToast,
-    };
+declare global {
+  interface Window {
+    CartridgeToaster?: CartridgeToasterGlobal;
   }
-  return {
+}
+
+// ====================
+// Helpers
+// ====================
+
+async function ensureToasterLoaded(): Promise<CartridgeToasterGlobal> {
+  if (window.CartridgeToaster?.toast) return window.CartridgeToaster;
+
+  await injectToaster();
+
+  for (let i = 0; i < 20; i++) {
+    if (window.CartridgeToaster?.toast) return window.CartridgeToaster;
+    await new Promise((r) => setTimeout(r, 50));
+  }
+
+  throw new Error("CartridgeToaster failed to load");
+}
+
+// ====================
+// Main showToast logic (corrected mapping)
+// ====================
+
+export async function showToast(config: ToastConfig): Promise<void> {
+  const api = await ensureToasterLoaded();
+
+  const {
+    toast,
     showAchievementToast,
     showNetworkSwitchToast,
     showErrorToast,
     showTransactionToast,
-  };
-}
+  } = api;
 
-export function showToast(config: ToastConfig): void {
-  const toastFn = getToastFunction();
-  const helpers = getToastHelpers();
+  if (!toast) throw new Error("CartridgeToaster.toast() not found");
+
   let toastConfig: any;
 
   switch (config.type) {
-    case "achievement": {
-      const achievementConfig: any = {
+    case "achievement":
+      if (!showAchievementToast)
+        throw new Error("showAchievementToast missing from CartridgeToaster");
+      toastConfig = showAchievementToast({
         title: config.title,
+        subtitle: config.subtitle,
         xpAmount: config.xpAmount ?? 0,
+        progress: config.progress ?? 100,
         isDraft: config.isDraft ?? false,
-      };
-      if (config.subtitle !== undefined)
-        achievementConfig.subtitle = config.subtitle;
-      if (config.progress !== undefined)
-        achievementConfig.progress = config.progress;
-      if (config.duration !== undefined)
-        achievementConfig.duration = config.duration;
-      toastConfig = helpers.showAchievementToast(achievementConfig);
-      break;
-    }
-    case "networkSwitch": {
-      const networkConfig: any = {
-        networkName: config.networkName,
-      };
-      if (config.networkIcon !== undefined)
-        networkConfig.networkIcon = config.networkIcon;
-      if (config.duration !== undefined)
-        networkConfig.duration = config.duration;
-      toastConfig = helpers.showNetworkSwitchToast(networkConfig);
-      break;
-    }
-    case "error":
-      toastConfig = helpers.showErrorToast({
-        message: config.message,
-        duration: config.duration,
+        duration: config.duration ?? 4000,
       });
       break;
-    case "transaction": {
-      const transactionConfig: any = {
-        label: config.label,
-      };
-      if (config.status !== undefined) transactionConfig.status = config.status;
-      if (config.duration !== undefined)
-        transactionConfig.duration = config.duration;
-      toastConfig = helpers.showTransactionToast(transactionConfig);
+
+    case "networkSwitch":
+      if (!showNetworkSwitchToast)
+        throw new Error("showNetworkSwitchToast missing from CartridgeToaster");
+      toastConfig = showNetworkSwitchToast({
+        networkName: config.networkName,
+        networkIcon: config.networkIcon,
+        duration: config.duration ?? 5000,
+      });
       break;
-    }
+
+    case "error":
+      if (!showErrorToast)
+        throw new Error("showErrorToast missing from CartridgeToaster");
+      toastConfig = showErrorToast({
+        message: config.message,
+        progress: config.progress ?? 25,
+        duration: config.duration ?? 8000,
+      });
+      break;
+
+    case "transaction":
+      if (!showTransactionToast)
+        throw new Error("showTransactionToast missing from CartridgeToaster");
+      toastConfig = showTransactionToast({
+        status: config.status ?? "confirming",
+        isExpanded: config.isExpanded ?? true,
+        label: config.label ?? "Transaction",
+        progress: config.progress ?? 50,
+        duration: config.duration ?? 6000,
+      });
+      break;
   }
 
-  toastFn(toastConfig);
+  // Finally, call the toast() function to show it
+  toast(toastConfig);
 }
