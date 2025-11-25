@@ -2980,6 +2980,8 @@ export type PaymasterPolicy = Node & {
   /** If set, this policy only applies to requests from the specified katana project (e.g., 'myproject' for /x/myproject/katana) */
   requiredKatanaProject?: Maybe<Scalars["String"]>;
   selector: Scalars["String"];
+  /** Trigger configuration - policy only applies if this call exists in the multicall */
+  trigger?: Maybe<PolicyTrigger>;
   updatedAt: Scalars["Time"];
 };
 
@@ -3391,6 +3393,7 @@ export type PolicyInput = {
   contractAddress: Scalars["String"];
   entryPoint: Scalars["String"];
   predicate?: InputMaybe<PolicyPredicateInput>;
+  trigger?: InputMaybe<PolicyTriggerInput>;
 };
 
 export type PolicyPredicate = {
@@ -3400,6 +3403,17 @@ export type PolicyPredicate = {
 };
 
 export type PolicyPredicateInput = {
+  address: Scalars["String"];
+  entrypoint: Scalars["String"];
+};
+
+export type PolicyTrigger = {
+  __typename?: "PolicyTrigger";
+  contractAddress: Scalars["String"];
+  entryPoint: Scalars["String"];
+};
+
+export type PolicyTriggerInput = {
   address: Scalars["String"];
   entrypoint: Scalars["String"];
 };

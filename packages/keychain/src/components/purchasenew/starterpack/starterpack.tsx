@@ -68,6 +68,15 @@ export function PurchaseStarterpack() {
         replace: true,
       });
     }
+
+    // TEMP: Short circuit to checkout if onchain starterpack
+    if (
+      !isStarterpackLoading &&
+      isOnchainStarterpack(details) &&
+      !displayError
+    ) {
+      navigate(`/purchase/checkout/onchain`, { replace: true });
+    }
   }, [isStarterpackLoading, details, preimage, displayError, navigate]);
 
   if (isStarterpackLoading || preimage) {

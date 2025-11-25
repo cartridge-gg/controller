@@ -9,7 +9,6 @@ export enum RewardType {
   // Games
   LS2_GAME = "LS2_GAME",
   NUMS_GAME = "NUMS_GAME",
-  DARK_SHUFFLE = "DARK_SHUFFLE",
 
   // Special
   MYSTERY_ASSET = "MYSTERY_ASSET",

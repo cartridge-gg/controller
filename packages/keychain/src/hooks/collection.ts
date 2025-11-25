@@ -245,7 +245,7 @@ export function useCollections(): UseCollectionsResponse {
           const asset = collection.items[0];
           let metadata: { name?: string; image?: string } = {};
           try {
-            metadata = JSON.parse(collection.items[0].metadata);
+            metadata = JSON.parse(collection.items[0].metadata || "{}");
           } catch (error) {
             console.error(error);
           }

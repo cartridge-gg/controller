@@ -1,9 +1,5 @@
 import { injectToaster } from "./toast-injector";
 
-// ====================
-// Types
-// ====================
-
 export type ToastConfig =
   | {
       type: "achievement";
@@ -49,10 +45,6 @@ declare global {
   }
 }
 
-// ====================
-// Helpers
-// ====================
-
 async function ensureToasterLoaded(): Promise<CartridgeToasterGlobal> {
   if (window.CartridgeToaster?.toast) return window.CartridgeToaster;
 
@@ -65,10 +57,6 @@ async function ensureToasterLoaded(): Promise<CartridgeToasterGlobal> {
 
   throw new Error("CartridgeToaster failed to load");
 }
-
-// ====================
-// Main showToast logic (corrected mapping)
-// ====================
 
 export async function showToast(config: ToastConfig): Promise<void> {
   const api = await ensureToasterLoaded();
@@ -132,6 +120,5 @@ export async function showToast(config: ToastConfig): Promise<void> {
       break;
   }
 
-  // Finally, call the toast() function to show it
   toast(toastConfig);
 }

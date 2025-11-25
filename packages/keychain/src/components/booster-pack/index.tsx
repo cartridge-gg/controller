@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Confetti from "react-confetti";
+import useEmblaCarousel from "embla-carousel-react";
 import { BackgroundStars } from "./assets/background-stars";
 import { ArcadeLogo } from "./assets/arcade-logo";
 import { ArcadeIcon } from "./assets/arcade-icon";
@@ -19,6 +20,7 @@ import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import { CheckIcon } from "./assets/check";
 import { useMerkleClaim } from "@/hooks/merkle-claim";
+import { hash } from "starknet";
 
 const STAR_COLOR = "#FBCB4A";
 
@@ -26,27 +28,42 @@ const CONFETTI_COLORS = generateColorShades(STAR_COLOR);
 
 // Map asset types to game names for Play button
 const ASSET_TO_GAME_MAP: Record<string, { name: string; url: string }> = {
-  CREDITS: { name: "CARTRIDGE", url: "https://play.cartridge.gg" },
-  SURVIVOR: { name: "LOOT SURVIVOR", url: "https://lootsurvivor.io" },
-  LORDS: { name: "REALMS", url: "https://realms.world" },
-  NUMS: { name: "NUMS", url: "https://nums.gg" },
-  PAPER: { name: "DOPE WARS", url: "https://dopewars.game" },
-  MYSTERY_ASSET: { name: "ARCADE", url: "https://play.cartridge.gg" },
+  CREDITS: {
+    name: "CHECK ARCADE",
+    url: "https://play.cartridge.gg/game/loot-survivor/tab/about",
+  },
+  SURVIVOR: { name: "PLAY LOOT SURVIVOR", url: "https://lootsurvivor.io" },
+  LORDS: { name: "PLAY REALMS", url: "https://realms.world" },
+  NUMS: { name: "PLAY NUMS", url: "https://nums.gg" },
+  PAPER: { name: "PLAY DOPE WARS", url: "https://dopewars.game" },
+  MYSTERY_ASSET: {
+    name: "PLAY LOOT SURVIVOR",
+    url: "https://play.cartridge.gg/game/loot-survivor/tab/about",
+  },
 };
 
 // Map mystery asset card reward types to their specific game URLs
 const MYSTERY_CARD_GAME_MAP: Partial<Record<RewardType, string>> = {
   // Mystery asset cards
-  [RewardType.LS2_GAME]: "https://lootsurvivor.io",
-  [RewardType.NUMS_GAME]: "https://nums.gg",
-  [RewardType.DARK_SHUFFLE]: "https://darkshuffle.io",
+  [RewardType.LS2_GAME]:
+    "https://tournaments.lootsurvivor.io/survivor/play?id=",
+  [RewardType.NUMS_GAME]: "https://www.nums.gg/",
 };
 
 export function BoosterPack() {
   const { privateKey } = useParams<{ privateKey: string }>();
   const account = useAccount();
-  const { controller, isMainnet } = useConnection();
+  const { controller } = useConnection();
 
+  // Embla carousel - responsive configuration
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "center",
+    containScroll: "trimSnaps",
+    // Disable dragging on desktop, allow multiple slides visible
+    dragFree: false,
+  });
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [numberOfPieces, setNumberOfPieces] = useState(500);
   const [username, setUsername] = useState<string | null>(null);
@@ -56,6 +73,7 @@ export function BoosterPack() {
       name: string;
       image: string;
       revealState: RevealState;
+      tokenId?: string;
     }[]
   >([]);
   const [isClaimed, setIsClaimed] = useState(false);
@@ -74,6 +92,22 @@ export function BoosterPack() {
       setUsername(controller.username());
     }
   }, [controller]);
+
+  // Track carousel slide changes
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    };
+
+    emblaApi.on("select", onSelect);
+    onSelect(); // Set initial selected index
+
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
 
   const ethereumAddress = useMemo(() => {
     if (!privateKey) {
@@ -121,6 +155,42 @@ export function BoosterPack() {
     setIsClaimed(claims.every((claim) => claim.claimed));
   }, [claims, isLoadingClaims]);
 
+  // Check localStorage FIRST on mount - immediate source of truth
+  useEffect(() => {
+    if (!ethereumAddress) {
+      return;
+    }
+
+    try {
+      const stored = localStorage.getItem(`booster-pack-${ethereumAddress}`);
+      if (!stored) {
+        return; // No stored data, proceed with normal flow
+      }
+
+      const data = JSON.parse(stored);
+
+      // Immediately restore state - this runs before async operations complete
+      setRewardCards(
+        data.rewardCards.map(
+          (card: {
+            type: RewardType;
+            name: string;
+            image: string;
+            tokenId?: string;
+          }) => ({
+            ...card,
+            revealState: RevealState.REVEALED,
+          }),
+        ),
+      );
+
+      // Set claimed status immediately
+      setIsClaimed(true);
+    } catch (err) {
+      console.error("Failed to restore claim data from localStorage:", err);
+    }
+  }, [ethereumAddress]); // Only depends on address - runs once when available
+
   // Check asset eligibility on first load
   useEffect(() => {
     const checkAsset = async () => {
@@ -161,16 +231,6 @@ export function BoosterPack() {
 
   // Handle claim button click - connects if needed, then claims
   const handleClaim = async () => {
-    if (
-      !privateKey ||
-      !assetInfo ||
-      isClaimed ||
-      isRevealing ||
-      isLoading ||
-      isLoadingClaims
-    )
-      return;
-
     // Check if user is logged in
     if (!username || !account) {
       // Not connected - trigger connection flow
@@ -178,6 +238,17 @@ export function BoosterPack() {
       window.location.href = `/connect?redirect_url=${encodeURIComponent(currentUrl)}&preset=booster-pack-devconnect`;
       return;
     }
+
+    if (
+      !privateKey ||
+      !assetInfo ||
+      isClaimed ||
+      isRevealing ||
+      isLoading ||
+      isLoadingClaims ||
+      !controller
+    )
+      return;
 
     setIsLoading(true);
     setError(null);
@@ -202,8 +273,18 @@ export function BoosterPack() {
         });
       }
 
-      const claimHash = await onSendClaim();
-      console.log({ claimHash, isMainnet });
+      const txnHash = await onSendClaim();
+      const receipt = await controller.provider.waitForTransaction(txnHash, {
+        retryInterval: 1000,
+      });
+
+      if (receipt.isError()) {
+        setError("Transaction Failed: " + receipt.value.message);
+        setIsLoading(false);
+        setIsClaimed(false);
+        setIsRevealing(false);
+        return;
+      }
 
       // Success! Mark as claimed
       setIsClaimed(true);
@@ -217,27 +298,61 @@ export function BoosterPack() {
       ) {
         setIsRevealing(true);
 
+        let ls2TokenId;
+        let numsTokenId;
+        receipt.events.forEach((event) => {
+          if (
+            event.keys[0] ===
+            hash.getSelectorFromName("TournamentTicketsClaimed")
+          ) {
+            ls2TokenId = parseInt(event.data[2]);
+            numsTokenId = parseInt(event.data[3]);
+          }
+        });
+
+        if (ls2TokenId === undefined || numsTokenId === undefined) {
+          setError("Failed to determine token IDs. Transaction: " + txnHash);
+          setIsLoading(false);
+          setIsRevealing(false);
+          return;
+        }
+
         // Create specific cards for mystery asset reveal
         const mysteryCards = [
           {
             type: RewardType.LS2_GAME,
-            name: "LS2 Game Pass",
+            name: "Loot Survivor 2 Game Pass",
             image: assetGameTokenImageUrl(RewardType.LS2_GAME),
             revealState: RevealState.UNREVEALED,
+            tokenId: ls2TokenId,
           },
           {
             type: RewardType.NUMS_GAME,
             name: "NUMS Game Pass",
             image: assetGameTokenImageUrl(RewardType.NUMS_GAME),
             revealState: RevealState.UNREVEALED,
-          },
-          {
-            type: RewardType.DARK_SHUFFLE,
-            name: "Dark Shuffle Game Pass",
-            image: assetGameTokenImageUrl(RewardType.DARK_SHUFFLE),
-            revealState: RevealState.UNREVEALED,
+            tokenId: numsTokenId,
           },
         ];
+
+        // Store revealed card data in localStorage for persistence across navigation
+        try {
+          localStorage.setItem(
+            `booster-pack-${ethereumAddress}`,
+            JSON.stringify({
+              rewardCards: mysteryCards.map((card) => ({
+                type: card.type,
+                name: card.name,
+                image: card.image,
+                tokenId: card.tokenId,
+              })),
+              ls2TokenId,
+              numsTokenId,
+            }),
+          );
+        } catch (err) {
+          console.error("Failed to store claim data in localStorage:", err);
+        }
 
         // Wait 2 seconds before showing cards and starting reveal
         setTimeout(() => {
@@ -365,55 +480,76 @@ export function BoosterPack() {
 
         {/* Cards Display */}
         {rewardCards.length > 0 ? (
-          <div className="flex gap-6 md:gap-8 pb-12 sm:pb-0 flex-wrap justify-center max-w-4xl">
-            {rewardCards.map((card, index) => {
-              const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
-              const isClickable = isClaimed && !isRevealing;
+          <div className="w-full max-w-5xl" ref={emblaRef}>
+            <div className="flex gap-4 md:gap-12 pb-12 sm:pb-0 md:justify-center">
+              {/* Mobile padding */}
+              <div className="md:hidden px-4"></div>
 
-              return (
-                <button
-                  key={index}
-                  onClick={() => {
-                    if (isClickable && gameUrl) {
-                      window.open(gameUrl, "_blank");
-                    }
-                  }}
-                  disabled={!isClickable}
-                  className={`relative w-[180px] h-[245px] md:w-[220px] md:h-[300px] ${
-                    isClickable
-                      ? "cursor-pointer hover:scale-105 transition-transform duration-300 ease-out"
-                      : "cursor-default"
-                  }`}
-                  aria-label={isClickable ? `Play ${card.name}` : card.name}
-                >
-                  {/* Card container with fade-up animation */}
-                  <div className="relative w-full h-full">
-                    {/* Card Front (revealed with fade-up) */}
-                    <div
-                      className={`absolute inset-0 rounded-lg overflow-hidden shadow-[0px_8px_24px_0px_#000000] flex flex-col transition-all duration-600 ease-out ${
-                        isClickable
-                          ? "hover:shadow-[0px_12px_32px_0px_rgba(251,203,74,0.3)]"
-                          : ""
-                      }`}
-                      style={{
-                        opacity:
-                          card.revealState === RevealState.UNREVEALED ? 0 : 1,
-                        transform:
-                          card.revealState === RevealState.UNREVEALED
-                            ? "translateY(20px)"
-                            : "translateY(0)",
-                      }}
-                    >
-                      <img
-                        src={card.image}
-                        alt={card.name}
-                        className="w-full h-full object-cover"
-                      />
+              {rewardCards.map((card, index) => {
+                const gameUrl = MYSTERY_CARD_GAME_MAP[card.type];
+                const isClickable = isClaimed && !isRevealing;
+                const isSelected = index === selectedIndex;
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      if (!isClickable || !gameUrl) return;
+
+                      // If already selected, open the game
+                      if (isSelected) {
+                        const fullUrl = card.tokenId
+                          ? `${gameUrl}${card.tokenId}`
+                          : gameUrl;
+                        window.open(fullUrl, "_blank");
+                      } else {
+                        // Otherwise, select the card
+                        if (emblaApi) {
+                          emblaApi.scrollTo(index);
+                        }
+                        setSelectedIndex(index);
+                      }
+                    }}
+                    disabled={!isClickable || !gameUrl}
+                    className={`relative flex-[0_0_70%] md:flex-none md:w-[220px] min-w-0 transition-transform duration-300 ease-out ${
+                      isClickable && gameUrl
+                        ? "cursor-pointer"
+                        : "cursor-default"
+                    } ${isSelected ? "scale-100" : "scale-90 md:scale-100"}`}
+                    aria-label={isClickable ? `Select ${card.name}` : card.name}
+                  >
+                    {/* Card container with fade-up animation */}
+                    <div className="relative w-full aspect-[180/245] md:h-[300px] md:aspect-auto">
+                      {/* Card Front (revealed with fade-up) */}
+                      <div
+                        className={`absolute inset-0 rounded-lg overflow-hidden flex flex-col transition-all duration-300 ease-out ${
+                          isSelected
+                            ? "shadow-[0px_12px_32px_0px_rgba(251,203,74,0.3)]"
+                            : "shadow-[0px_8px_24px_0px_#000000]"
+                        }`}
+                        style={{
+                          opacity:
+                            card.revealState === RevealState.UNREVEALED ? 0 : 1,
+                          transform:
+                            card.revealState === RevealState.UNREVEALED
+                              ? "translateY(20px)"
+                              : "translateY(0)",
+                        }}
+                      >
+                        <img
+                          src={card.image}
+                          alt={card.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+
+              {/* Mobile padding */}
+              <div className="md:hidden px-4"></div>
+            </div>
           </div>
         ) : (
           // Placeholder before claim - Show asset card or loading
@@ -469,10 +605,25 @@ export function BoosterPack() {
                 {/* Primary CTA - Play Game Button */}
                 <button
                   onClick={() => {
-                    const gameInfo =
-                      ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
-                    if (gameInfo?.url) {
-                      window.open(gameInfo.url, "_blank");
+                    const isMystery =
+                      assetInfo?.type.toUpperCase() === "MYSTERY" ||
+                      assetInfo?.type.toUpperCase() === "MYSTERY_ASSET";
+
+                    if (isMystery && rewardCards.length > 0) {
+                      // On mobile, use the currently selected card from carousel
+                      const selectedCard = rewardCards[selectedIndex];
+                      const gameUrl = MYSTERY_CARD_GAME_MAP[selectedCard.type];
+
+                      if (gameUrl && selectedCard.tokenId) {
+                        const fullUrl = `${gameUrl}${selectedCard.tokenId}`;
+                        window.open(fullUrl, "_blank");
+                      }
+                    } else {
+                      const gameInfo =
+                        ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""];
+                      if (gameInfo?.url) {
+                        window.open(gameInfo.url, "_blank");
+                      }
                     }
                   }}
                   className="px-8 py-3 w-full rounded-3xl text-xs sm:text-sm font-bold uppercase tracking-[2.1px] transition-all shadow-lg hover:opacity-90"
@@ -481,9 +632,23 @@ export function BoosterPack() {
                     color: "#0f1410",
                   }}
                 >
-                  PLAY{" "}
-                  {ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]
-                    ?.name || "GAME"}
+                  {(() => {
+                    const isMystery =
+                      assetInfo?.type.toUpperCase() === "MYSTERY" ||
+                      assetInfo?.type.toUpperCase() === "MYSTERY_ASSET";
+
+                    if (isMystery && rewardCards.length > 0) {
+                      const selectedCard = rewardCards[selectedIndex];
+                      return selectedCard.type === RewardType.LS2_GAME
+                        ? "PLAY LOOT SURVIVOR 2"
+                        : "PLAY NUMS";
+                    }
+
+                    return (
+                      ASSET_TO_GAME_MAP[assetInfo?.type.toUpperCase() || ""]
+                        ?.name || "PLAY GAME"
+                    );
+                  })()}
                 </button>
               </div>
             ) : (

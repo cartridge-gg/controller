@@ -8,6 +8,7 @@ import {
   ReactNode,
 } from "react";
 import {
+  erc20Metadata,
   ExternalPlatform,
   ExternalWallet,
   ExternalWalletType,
@@ -54,6 +55,7 @@ import {
   StarterpackDetails,
   detectStarterpackType,
 } from "@/types/starterpack-types";
+import makeBlockie from "ethereum-blockies-base64";
 
 export interface CostDetails {
   baseCostInCents: number;
@@ -303,12 +305,17 @@ export const PurchaseProvider = ({
         );
 
         if (!isAlreadyIncluded) {
+          const icon =
+            erc20Metadata.find(
+              (token) =>
+                BigInt(token.l2_token_address) === BigInt(paymentTokenAddress),
+            )?.logo_url || makeBlockie(getChecksumAddress(paymentTokenAddress));
           tokenMetadata.push({
             address: paymentTokenAddress,
             name: quote.paymentTokenMetadata.symbol,
             symbol: quote.paymentTokenMetadata.symbol,
             decimals: quote.paymentTokenMetadata.decimals,
-            icon: "", // No icon for now, as mentioned by user
+            icon: icon,
           });
         }
       }

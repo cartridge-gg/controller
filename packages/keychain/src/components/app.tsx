@@ -61,6 +61,7 @@ import { useEffect } from "react";
 import { StandaloneSessionCreation } from "./connect/StandaloneSessionCreation";
 import { StandaloneConnect } from "./connect/StandaloneConnect";
 import { hasApprovalPolicies } from "@/hooks/session";
+import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -220,7 +221,7 @@ export function App() {
           />
           <Route
             path="starterpack/:starterpackId"
-            element={<OnchainCheckout />} // Short circuit to checkout for now since we only support Starknet
+            element={<PurchaseStarterpack />}
           />
           <Route path="starterpack/collections" element={<Collections />} />
           <Route path="claim/:keys/:address/:type" element={<Claim />} />
