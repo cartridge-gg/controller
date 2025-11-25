@@ -13,7 +13,7 @@ export type ToastConfig =
   | {
       type: "networkSwitch";
       networkName: string;
-      networkIcon?: any;
+      networkIcon?: string;
       duration?: number;
     }
   | {

@@ -6,22 +6,25 @@ import dts from "vite-plugin-dts";
 import { visualizer } from "rollup-plugin-visualizer";
 
 // List peer dependencies, prevents bundling into library
-const externalDeps = ["open", "starknet"];
+const externalDeps = [
+  "open",
+  "starknet",
+];
 
 export default defineConfig(({ mode }) => ({
   plugins: [
     wasm(),
     topLevelAwait(),
     dts({
-      entryRoot: "src",
+      entryRoot: 'src',
       insertTypesEntry: true,
       include: ["src/**/*.ts"],
       exclude: ["src/**/*.test.ts"],
     }),
     mode === "production" &&
       visualizer({
-        open: false,
-        filename: "dist/stats.html",
+        open: false, 
+        filename: "dist/stats.html", 
         gzipSize: true,
         brotliSize: true,
       }),
@@ -63,7 +66,7 @@ export default defineConfig(({ mode }) => ({
         }
 
         return externalDeps.some(
-          (dep) => id === dep || id.startsWith(`${dep}/`),
+          (dep) => id === dep || id.startsWith(`${dep}/`)
         );
       },
     },
@@ -71,7 +74,7 @@ export default defineConfig(({ mode }) => ({
     minify: mode === "production" ? "esbuild" : false,
   },
   test: {
-    environment: "jsdom",
+    environment: "jsdom", 
     globals: true,
   },
 }));
