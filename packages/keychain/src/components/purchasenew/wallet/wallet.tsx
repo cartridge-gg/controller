@@ -117,7 +117,7 @@ export function SelectWallet() {
       return;
     }
 
-    navigate(`/purchase/checkout/onchain`);
+    navigate(`/purchase/checkout/onchain`, { reset: true });
     return;
   }, [navigate, starterpackDetails, controller]);
 
@@ -154,7 +154,7 @@ export function SelectWallet() {
           return;
         }
 
-        navigate(`/purchase/checkout/onchain`);
+        navigate(`/purchase/checkout/onchain` , { reset: true });
       } catch (e) {
         setError(e as Error);
       } finally {

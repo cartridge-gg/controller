@@ -21,6 +21,7 @@ import { isOnchainStarterpack } from "@/context";
 import { num, uint256 } from "starknet";
 import { getWallet } from "../../wallet/config";
 import { LoadingState } from "../../loading";
+import { humanizeString } from "@cartridge/controller";
 
 export function OnchainCheckout() {
   const {
@@ -35,6 +36,7 @@ export function OnchainCheckout() {
     selectedToken,
     convertedPrice,
     conversionError,
+    selectedPlatform,
     incrementQuantity,
     decrementQuantity,
     onOnchainPurchase,
@@ -116,6 +118,14 @@ export function OnchainCheckout() {
   const isFree = useMemo(() => {
     return quote?.totalCost === BigInt(0);
   }, [quote]);
+
+  const needsBridge = useMemo(() => {
+    if (selectedPlatform && selectedPlatform !== "starknet") {
+      return `(${humanizeString(selectedPlatform)})`
+    }
+
+    return null;
+  }, [selectedPlatform])
 
   const onPurchase = useCallback(async () => {
     if (!hasSufficientBalance && !isFree) return;
@@ -204,7 +214,7 @@ export function OnchainCheckout() {
     checkBalance();
   }, [controller, tokenToCheck, selectedWallet, walletAddress]);
 
-  const onWalletSelect = () => navigate(`/purchase/wallet/starknet`);
+  const onWalletSelect = () => navigate(`/purchase/network/starknet;arbitrum`);
 
   useEffect(() => {
     clearError();
@@ -284,7 +294,7 @@ export function OnchainCheckout() {
               onClick={onWalletSelect}
             >
               <div className="flex gap-2">
-                {wallet.subIcon} Purchase with {wallet.name}
+                {wallet.subIcon} Purchase with {wallet.name} {needsBridge}
               </div>
               <ListIcon size="xs" variant="solid" />
             </div>

@@ -196,12 +196,11 @@ export const PurchaseProvider = ({
   const [swapId, setSwapId] = useState<string | undefined>();
   const [explorer, setExplorer] = useState<Explorer | undefined>();
   const [transactionHash, setTransactionHash] = useState<string | undefined>();
-  const [walletAddress, setWalletAddress] = useState<string>();
-  const [walletType, setWalletType] = useState<ExternalWalletType>();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
   const [displayError, setDisplayError] = useState<Error | undefined>();
   const [isFetchingFees, setIsFetchingFees] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string>();
   const [selectedWallet, setSelectedWallet] = useState<
     ExternalWallet | undefined
   >();
@@ -650,7 +649,7 @@ export const PurchaseProvider = ({
       !controller ||
       !selectedPlatform ||
       !walletAddress ||
-      !walletType ||
+      !selectedWallet?.type ||
       !layerswapFees ||
       !swapInput
     )
@@ -665,7 +664,7 @@ export const PurchaseProvider = ({
       const { swapId, transactionHash } = await sendDeposit(
         swapInput,
         walletAddress,
-        walletType,
+        selectedWallet.type,
         selectedPlatform,
         (explorer) => {
           setExplorer(explorer);
@@ -681,7 +680,7 @@ export const PurchaseProvider = ({
     controller,
     selectedPlatform,
     walletAddress,
-    walletType,
+    selectedWallet,
     swapInput,
     layerswapFees,
     sendDeposit,
@@ -905,7 +904,6 @@ export const PurchaseProvider = ({
         }
 
         setWalletAddress(res.account);
-        setWalletType(wallet.type);
 
         if (chainId) {
           // WORKAROUND: Braavos doesn't support switching chains api so we remain on whatever chain is current
