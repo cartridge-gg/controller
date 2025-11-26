@@ -27,8 +27,7 @@ function getTargetDocument(): Document | null {
         return window.parent.document;
       }
     } catch (e) {
-      // Cross-origin iframe, can't access parent document directly
-      // Will use postMessage instead
+      console.warn("Failed to access parent document:", e);
       return null;
     }
   }
