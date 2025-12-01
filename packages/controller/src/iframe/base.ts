@@ -55,7 +55,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.sandbox.add("allow-scripts");
     iframe.sandbox.add("allow-same-origin");
     iframe.allow =
-      "publickey-credentials-create *; publickey-credentials-get *; clipboard-write";
+      "publickey-credentials-create *; publickey-credentials-get *; clipboard-write; local-network-access *";
     iframe.style.scrollbarWidth = "none";
     iframe.style.setProperty("-ms-overflow-style", "none");
     iframe.style.setProperty("-webkit-scrollbar", "none");
