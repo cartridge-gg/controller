@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.11.3-alpha.1] - 2025-12-01
+
+### ✨ New Features
+- **@cartridge/keychain**: Added DevConnect booster pack claim integration with Merkle claim functionality, enabling users to claim DevConnect rewards through preimage-derived EVM addresses (#2249)
+- **@cartridge/keychain**: Streamlined onchain starterpack purchase flow with direct checkout navigation, removing intermediate screens and defaulting to controller wallet for faster transactions (#2200)
+- **@cartridge/keychain**: Added horizontal carousel for booster pack cards on mobile devices, providing swipeable navigation and improved touch experience (#2253)
+- **@cartridge/keychain**: Added localStorage availability check for booster packs to ensure proper functionality across different environments (#2259)
+- **@cartridge/keychain**: Added tournament game links integration for enhanced gaming navigation (#2252)
+- **@cartridge/keychain**: Implemented token IDs retrieval from claim transactions for better transaction tracking (#2255)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Simplified redirect logic in ConnectRoute for more streamlined authentication flows (#2248)
+- **@cartridge/keychain**: Enhanced claim interactions for mystery assets with improved user feedback (#2257)
+- **@cartridge/keychain**: Restored claim call functionality for improved transaction processing (#2254)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed iframe local network access by adding `local-network-access *` to iframe allow attribute, enabling proper local development (#2266)
+- **@cartridge/keychain**: Fixed merkle claim UI stuck issue preventing users from completing claim flows (#2261)
+- **@cartridge/keychain**: Fixed token icon retrieval from presets for consistent token display (#2258)
+- **@cartridge/keychain**: Added redirect URL support for WebAuthn authentication, improving authentication flow reliability (#2250)
+- **@cartridge/keychain**: Fixed Turnkey popup navigation to keychain for better authentication routing (#2247)
+- **@cartridge/keychain**: Updated ConnectRoute tests to match simplified redirect logic for improved test reliability (#2263)
+- **@cartridge/keychain**: Fixed input format issues for better form validation (#2251)
+- **@cartridge/keychain**: Fixed event parsing to only handle mystery item events properly (#2256)
+
 ## [0.11.2] - 2025-11-14
 
 ### ✨ New Features
