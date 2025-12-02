@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { CostBreakdown } from "./cost";
-import { PurchaseProvider } from "@/context";
+import { StarterpackProviders } from "@/context";
 import { WalletType } from "@cartridge/ui";
 
 const meta: Meta<typeof CostBreakdown> = {
@@ -11,11 +11,11 @@ const meta: Meta<typeof CostBreakdown> = {
   },
   decorators: [
     (Story) => (
-      <PurchaseProvider>
+      <StarterpackProviders>
         <div className="w-[400px]">
           <Story />
         </div>
-      </PurchaseProvider>
+      </StarterpackProviders>
     ),
   ],
 };

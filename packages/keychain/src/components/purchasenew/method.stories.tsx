@@ -1,15 +1,15 @@
 import type { Meta, StoryObj, StoryFn } from "@storybook/react";
 import { PaymentMethod } from "./method";
-import { NavigationProvider, PurchaseProvider } from "@/context";
+import { NavigationProvider, StarterpackProviders } from "@/context";
 
 const meta = {
   component: PaymentMethod,
   decorators: [
     (Story: StoryFn) => (
       <NavigationProvider>
-        <PurchaseProvider>
+        <StarterpackProviders>
           <Story />
-        </PurchaseProvider>
+        </StarterpackProviders>
       </NavigationProvider>
     ),
   ],

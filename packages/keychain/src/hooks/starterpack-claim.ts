@@ -6,7 +6,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useController } from "./controller";
-import { Item, ItemType } from "@/context/purchase";
+import { Item, ItemType } from "@/context";
 
 export interface MerkleDrop {
   key: string;

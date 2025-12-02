@@ -20,7 +20,7 @@ import {
   ETH_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
 import { getCurrentReferral } from "@/utils/referral";
-import { Quote } from "@/types/starterpack-types";
+import { Quote } from "@/context";
 
 interface TokenMetadata {
   symbol: string;

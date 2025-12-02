@@ -1,4 +1,8 @@
-import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  useNavigation,
+  useStarterpackContext,
+  useCreditPurchaseContext,
+} from "@/context";
 import {
   CreditCardIcon,
   DepositIcon,
@@ -15,7 +19,8 @@ import { useParams } from "react-router-dom";
 export function PaymentMethod() {
   const { platforms } = useParams();
   const { navigate } = useNavigation();
-  const { onCreditCardPurchase, displayError } = usePurchaseContext();
+  const { displayError } = useStarterpackContext();
+  const { onCreditCardPurchase } = useCreditPurchaseContext();
   const [isLoading, setIsLoading] = useState(false);
   const showCreditCard = false;
 

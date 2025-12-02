@@ -8,7 +8,11 @@ import {
   WalletIcon,
 } from "@cartridge/ui";
 import { networkWalletData, evmNetworks } from "./config";
-import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  useNavigation,
+  useStarterpackContext,
+  useOnchainPurchaseContext,
+} from "@/context";
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
@@ -20,12 +24,9 @@ export function SelectWallet() {
   const { navigate, goBack } = useNavigation();
   const { platforms } = useParams();
   const { controller, isMainnet, externalDetectWallets } = useConnection();
-  const {
-    starterpackDetails,
-    onExternalConnect,
-    clearError,
-    clearSelectedWallet,
-  } = usePurchaseContext();
+  const { starterpackDetails, clearError } = useStarterpackContext();
+  const { onExternalConnect, clearSelectedWallet } =
+    useOnchainPurchaseContext();
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [chainIds, setChainIds] = useState<Map<string, string>>(new Map());
@@ -154,7 +155,7 @@ export function SelectWallet() {
           return;
         }
 
-        navigate(`/purchase/checkout/onchain` , { reset: true });
+        navigate(`/purchase/checkout/onchain`, { reset: true });
       } catch (e) {
         setError(e as Error);
       } finally {

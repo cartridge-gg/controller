@@ -8,7 +8,7 @@ import {
   Thumbnail,
 } from "@cartridge/ui";
 import { ReceivingProps } from "./types";
-import { ItemType } from "@/context/purchase";
+import { ItemType } from "@/context";
 
 // Helper function to format price display
 const formatPrice = (value: number | undefined, showPrice: boolean): string => {

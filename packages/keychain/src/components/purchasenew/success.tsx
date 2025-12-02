@@ -7,16 +7,22 @@ import {
 } from "@cartridge/ui";
 import { Receiving } from "./receiving";
 import { useConnection } from "@/hooks/connection";
-import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  useNavigation,
+  useStarterpackContext,
+  useOnchainPurchaseContext,
+  useClaimContext,
+  Item,
+} from "@/context";
 import { useMemo } from "react";
-import { Item } from "@/context/purchase";
 import { ConfirmingTransaction } from "./pending";
 import { getExplorer } from "@/hooks/payments/crypto";
-import { StarterpackType } from "@/types/starterpack-types";
+import { StarterpackType } from "@/context";
 
 export function Success() {
-  const { purchaseItems, claimItems, starterpackDetails, transactionHash } =
-    usePurchaseContext();
+  const { starterpackDetails, transactionHash } = useStarterpackContext();
+  const { purchaseItems } = useOnchainPurchaseContext();
+  const { claimItems } = useClaimContext();
 
   const items = useMemo(() => {
     if (starterpackDetails?.type === "claimed") {
@@ -44,7 +50,7 @@ export function PurchaseSuccessInner({
   type: StarterpackType;
   transactionHash?: string;
 }) {
-  const { quantity } = usePurchaseContext();
+  const { quantity } = useOnchainPurchaseContext();
   const { closeModal, isMainnet } = useConnection();
   const { navigateToRoot } = useNavigation();
   const quantityText = quantity > 1 ? `(${quantity})` : "";

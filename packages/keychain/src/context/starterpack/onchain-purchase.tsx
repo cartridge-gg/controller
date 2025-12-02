@@ -11,7 +11,6 @@ import {
   erc20Metadata,
   ExternalPlatform,
   ExternalWallet,
-  ExternalWalletType,
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
@@ -24,7 +23,7 @@ import {
   shortString,
   getChecksumAddress,
 } from "starknet";
-import { isOnchainStarterpack } from "@/types/starterpack-types";
+import { isOnchainStarterpack } from "./types";
 import { getCurrentReferral } from "@/utils/referral";
 import { ERC20 as ERC20Contract } from "@cartridge/ui/utils";
 import {
@@ -39,52 +38,14 @@ import {
   EKUBO_ROUTER_ADDRESSES,
   type SwapQuote,
 } from "@/utils/ekubo";
-import type { TokenMetadata } from "@/types/starterpack-types";
-
-import useStripePayment from "@/hooks/payments/stripe";
-import { usdToCredits } from "@/hooks/tokens";
-import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
-import { Stripe } from "@stripe/stripe-js";
+import type { TokenMetadata } from "./types";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useLayerswapDeposit } from "@/hooks/payments/crypto";
-import { useClaimStarterpack } from "@/hooks/starterpack-claim";
-import { useOnchainStarterpack } from "@/hooks/starterpack-onchain";
 import { depositToLayerswapInput } from "@/utils/payments";
 import { CreateLayerswapDepositInput } from "@cartridge/ui/utils/api/cartridge";
-import {
-  StarterpackDetails,
-  detectStarterpackType,
-} from "@/types/starterpack-types";
 import makeBlockie from "ethereum-blockies-base64";
-
-export interface CostDetails {
-  baseCostInCents: number;
-  processingFeeInCents: number;
-  totalInCents: number;
-}
-
-export interface Network {
-  id: string;
-  name: string;
-  icon: React.ReactElement;
-}
-
-export enum ItemType {
-  CREDIT = "CREDIT",
-  ERC20 = "ERC20",
-  NFT = "NFT",
-}
-
-export type Item = {
-  title: string;
-  subtitle?: string;
-  icon: string | React.ReactNode;
-  value?: number;
-  quantity?: number;
-  type: ItemType;
-};
-
-export type PaymentMethod = "stripe" | "crypto";
+import { Item } from "./types";
+import { useStarterpackContext } from "./starterpack";
 
 export interface TokenOption {
   name: string;
@@ -95,121 +56,87 @@ export interface TokenOption {
   contract: ERC20Contract;
 }
 
-export interface PurchaseContextType {
-  // Purchase details
-  usdAmount: number;
-  starterpackDetails?: StarterpackDetails;
-  quantity: number;
-
-  teamId?: string;
+export interface OnchainPurchaseContextType {
+  // Purchase items
   purchaseItems: Item[];
-  claimItems: Item[];
-  layerswapFees?: string;
-  isFetchingFees: boolean;
 
-  // Payment state
-  paymentMethod?: PaymentMethod;
-  selectedWallet?: ExternalWallet;
-  selectedPlatform?: ExternalPlatform;
-  walletAddress?: string;
-  wallets?: ExternalWallet[];
-  transactionHash?: string;
-  swapId?: string;
-  explorer?: Explorer;
+  // Quantity management
+  quantity: number;
+  incrementQuantity: () => void;
+  decrementQuantity: () => void;
 
-  // Stripe state
-  clientSecret?: string;
-  costDetails?: CostDetails;
-  stripePromise: Promise<Stripe | null>;
-
-  // Loading states
-  isStripeLoading: boolean;
-  isDepositLoading: boolean;
-  isStarterpackLoading: boolean;
-
-  // Error state
-  displayError?: Error;
-  clearError: () => void;
-
-  // Wallet management
+  // Wallet state
+  selectedWallet: ExternalWallet | undefined;
+  selectedPlatform: ExternalPlatform | undefined;
+  walletAddress: string | undefined;
   clearSelectedWallet: () => void;
 
-  // Token selection (for onchain purchases)
+  // Token selection
   availableTokens: TokenOption[];
-  selectedToken?: TokenOption;
+  selectedToken: TokenOption | undefined;
   setSelectedToken: (token: TokenOption | undefined) => void;
   convertedPrice: {
     amount: bigint;
     tokenMetadata: { symbol: string; decimals: number };
   } | null;
-  swapQuote: SwapQuote | null; // Full swap quote for executing the swap
+  swapQuote: SwapQuote | null;
   isFetchingConversion: boolean;
+  isTokenSelectionLocked: boolean;
   conversionError: Error | null;
 
-  // Actions
-  setUsdAmount: (amount: number) => void;
-  setDepositAmount: (amount: number) => void;
-  setStarterpackId: (starterpackId: string | number) => void;
-  setTransactionHash: (hash: string) => void;
-  setClaimItems: (items: Item[]) => void;
-  incrementQuantity: () => void;
-  decrementQuantity: () => void;
+  // USD amount (derived from quote)
+  usdAmount: number;
 
-  // Payment actions
-  onCreditCardPurchase: () => Promise<void>;
-  onBackendCryptoPurchase: () => Promise<void>;
+  // Layerswap state (for future use)
+  layerswapFees: string | undefined;
+  isFetchingFees: boolean;
+  swapId: string | undefined;
+  explorer: Explorer | undefined;
+  depositAmount: number | undefined;
+  setDepositAmount: (amount: number) => void;
+
+  // Actions
   onOnchainPurchase: () => Promise<void>;
   onExternalConnect: (
     wallet: ExternalWallet,
     platform: ExternalPlatform,
     chainId?: string,
   ) => Promise<string | undefined>;
+  onBackendCryptoPurchase: () => Promise<void>;
   waitForDeposit: (swapId: string) => Promise<boolean>;
   fetchFees: () => Promise<void>;
 }
 
-export const PurchaseContext = createContext<PurchaseContextType | undefined>(
-  undefined,
-);
+export const OnchainPurchaseContext = createContext<
+  OnchainPurchaseContextType | undefined
+>(undefined);
 
-export interface PurchaseProviderProps {
+export interface OnchainPurchaseProviderProps {
   children: ReactNode;
-  isSlot?: boolean;
 }
 
-export const PurchaseProvider = ({
+export const OnchainPurchaseProvider = ({
   children,
-  isSlot = false,
-}: PurchaseProviderProps) => {
+}: OnchainPurchaseProviderProps) => {
   const { controller, isMainnet, origin, externalSendTransaction } =
     useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
-  const [starterpackId, setStarterpackId] = useState<string | number>();
-  const [starterpackDetails, setStarterpackDetails] = useState<
-    StarterpackDetails | undefined
-  >();
-  const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
-  const [depositAmount, setDepositAmount] = useState<number | undefined>();
-  const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
+  const {
+    starterpackId,
+    starterpackDetails,
+    setTransactionHash,
+    setDisplayError,
+  } = useStarterpackContext();
+
   const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
-  const [claimItemsState, setClaimItemsState] = useState<Item[]>([]);
-  const [swapId, setSwapId] = useState<string | undefined>();
-  const [explorer, setExplorer] = useState<Explorer | undefined>();
-  const [transactionHash, setTransactionHash] = useState<string | undefined>();
-  const [clientSecret, setClientSecret] = useState<string | undefined>();
-  const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
-  const [displayError, setDisplayError] = useState<Error | undefined>();
-  const [isFetchingFees, setIsFetchingFees] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string>();
+  const [quantity, setQuantity] = useState(1);
   const [selectedWallet, setSelectedWallet] = useState<
     ExternalWallet | undefined
   >();
   const [selectedPlatform, setSelectedPlatform] = useState<
     ExternalPlatform | undefined
   >();
-  const [paymentMethod, setPaymentMethod] = useState<
-    PaymentMethod | undefined
-  >();
+  const [walletAddress, setWalletAddress] = useState<string | undefined>();
   const [selectedToken, setSelectedTokenState] = useState<
     TokenOption | undefined
   >();
@@ -221,9 +148,24 @@ export const PurchaseProvider = ({
   const [swapQuote, setSwapQuote] = useState<SwapQuote | null>(null);
   const [isFetchingConversion, setIsFetchingConversion] = useState(false);
   const [conversionError, setConversionError] = useState<Error | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [usdAmount, setUsdAmount] = useState(0);
 
-  // Wrapper for setSelectedToken that ensures we always have a valid token
+  // Layerswap state
+  const [depositAmount, setDepositAmount] = useState<number | undefined>();
+  const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
+  const [swapId, setSwapId] = useState<string | undefined>();
+  const [explorer, setExplorer] = useState<Explorer | undefined>();
+  const [isFetchingFees, setIsFetchingFees] = useState(false);
+  const [swapInput, setSwapInput] = useState<CreateLayerswapDepositInput>();
+
+  const {
+    error: depositError,
+    sendDeposit,
+    estimateLayerswapFees,
+    waitForDeposit,
+  } = useLayerswapDeposit();
+
+  // Wrapper for setSelectedToken
   const setSelectedToken = useCallback((token: TokenOption | undefined) => {
     setSelectedTokenState(token);
   }, []);
@@ -236,20 +178,9 @@ export const PurchaseProvider = ({
     setQuantity((prev) => Math.max(prev - 1, 1));
   }, []);
 
-  const {
-    stripePromise,
-    isLoading: isStripeLoading,
-    error: stripeError,
-    createPaymentIntent,
-  } = useStripePayment({ isSlot });
-
-  const {
-    error: depositError,
-    isLoading: isDepositLoading,
-    sendDeposit,
-    estimateLayerswapFees,
-    waitForDeposit,
-  } = useLayerswapDeposit();
+  const clearSelectedWallet = useCallback(() => {
+    setSelectedWallet(undefined);
+  }, []);
 
   // Helper function to fetch token metadata
   const fetchTokenMetadata = useCallback(
@@ -278,11 +209,10 @@ export const PurchaseProvider = ({
     [],
   );
 
-  // Available tokens for onchain purchases (ETH, STRK, USDC, and payment token if different)
+  // Available tokens for onchain purchases
   const availableTokens = useMemo(() => {
     if (!controller) return [];
 
-    // Use DEFAULT_TOKENS from provider and add network-specific USDC
     const tokenMetadata: ERC20Metadata[] = [
       ...DEFAULT_TOKENS,
       {
@@ -294,7 +224,7 @@ export const PurchaseProvider = ({
       },
     ];
 
-    // Add payment token from quote if it's not already in the list
+    // Add payment token from quote if not already in list
     if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
       const quote = starterpackDetails.quote;
       if (quote) {
@@ -359,7 +289,7 @@ export const PurchaseProvider = ({
           }
         }
 
-        // Initialize convertedPrice from quote if available and matches selected token
+        // Initialize convertedPrice from quote if available
         if (selectedToken) {
           const convertedPriceFromQuote = quote.convertedPrice;
           if (convertedPriceFromQuote) {
@@ -383,14 +313,48 @@ export const PurchaseProvider = ({
     setSelectedToken,
   ]);
 
-  // Reset token selection and quantity when starterpack changes
+  // Reset state when starterpack changes
   useEffect(() => {
     setSelectedToken(undefined);
     setConvertedPrice(null);
     setSwapQuote(null);
     setConversionError(null);
     setQuantity(1);
+    setPurchaseItems([]);
   }, [starterpackId, setSelectedToken]);
+
+  // Update purchase items and USD amount when starterpack details change
+  useEffect(() => {
+    if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
+      setPurchaseItems(starterpackDetails.items);
+      const totalUsd = starterpackDetails.quote
+        ? usdcToUsd(starterpackDetails.quote.totalCost)
+        : 0;
+      setUsdAmount(totalUsd);
+    }
+  }, [starterpackDetails]);
+
+  // Token selection is locked when using Layerswap
+  const isTokenSelectionLocked = useMemo(() => {
+    return selectedPlatform !== undefined && selectedPlatform !== "starknet";
+  }, [selectedPlatform]);
+
+  // Auto-select USDC when using Layerswap
+  useEffect(() => {
+    if (isTokenSelectionLocked && availableTokens.length > 0) {
+      const usdcToken = availableTokens.find(
+        (token) => token.symbol === "USDC",
+      );
+      if (usdcToken && selectedToken?.symbol !== "USDC") {
+        setSelectedToken(usdcToken);
+      }
+    }
+  }, [
+    isTokenSelectionLocked,
+    availableTokens,
+    selectedToken,
+    setSelectedToken,
+  ]);
 
   // Fetch conversion price when selected token or quote changes
   useEffect(() => {
@@ -412,21 +376,19 @@ export const PurchaseProvider = ({
       return;
     }
 
-    // Check if we already have a valid swap quote and converted price for this token
+    // Check if we already have valid data
     if (
       convertedPrice &&
       swapQuote &&
       convertedPrice.tokenMetadata.symbol === selectedToken.symbol &&
       convertedPrice.quantity === quantity
     ) {
-      // Already have valid data for this token, no need to refetch
       return;
     }
 
-    // Fetch new conversion price (we need the full swap quote for execution)
     const fetchConversion = async () => {
       setIsFetchingConversion(true);
-      setConversionError(null); // Clear previous errors
+      setConversionError(null);
       try {
         const network = chainIdToEkuboNetwork(controller.chainId());
         const fetchedSwapQuote = await fetchSwapQuote(
@@ -441,7 +403,6 @@ export const PurchaseProvider = ({
           controller.provider,
         );
 
-        // Store both the converted price for display and the full quote for execution
         setConvertedPrice({
           amount: fetchedSwapQuote.total,
           quantity: quantity,
@@ -473,47 +434,7 @@ export const PurchaseProvider = ({
     quantity,
   ]);
 
-  // Detect which source (claimed or onchain) based on starterpack ID
-  const type = detectStarterpackType(starterpackId);
-
-  // Claim hook (GraphQL) - only run if claimed source
-  const {
-    name: claimName,
-    items: claimItemsFromHook,
-    merkleDrops,
-    isLoading: isClaimLoading,
-    error: claimError,
-  } = useClaimStarterpack(
-    type === "claimed" && starterpackId !== undefined
-      ? String(starterpackId)
-      : undefined,
-  );
-
-  // Use manually set claimItems if available, otherwise use items from hook
-  const claimItems = useMemo(() => {
-    return claimItemsState.length > 0 ? claimItemsState : claimItemsFromHook;
-  }, [claimItemsState, claimItemsFromHook]);
-
-  // Onchain hook (Smart contract) - only run if onchain source
-  const {
-    metadata: onchainMetadata,
-    quote: onchainQuote,
-    isLoading: isOnchainLoading,
-    isQuoteLoading: isOnchainQuoteLoading,
-    error: onchainError,
-  } = useOnchainStarterpack(
-    type === "onchain" && starterpackId !== undefined
-      ? Number(starterpackId)
-      : undefined,
-  );
-
-  // Unified loading and error state
-  const isStarterpackLoading =
-    type === "claimed" ? isClaimLoading : isOnchainLoading;
-  const starterpackError = type === "claimed" ? claimError : onchainError;
-
-  const [swapInput, setSwapInput] = useState<CreateLayerswapDepositInput>();
-
+  // Compute swap input for Layerswap
   useEffect(() => {
     const getSwapInput = () => {
       if (!controller || starterpackId === undefined || !selectedPlatform) {
@@ -521,16 +442,7 @@ export const PurchaseProvider = ({
         return;
       }
 
-      if (type === "claimed") {
-        setSwapInput(undefined);
-        return;
-      }
-
-      if (
-        type === "onchain" &&
-        selectedPlatform !== "starknet" &&
-        depositAmount
-      ) {
+      if (selectedPlatform !== "starknet" && depositAmount) {
         const input = depositToLayerswapInput(
           depositAmount,
           Number(layerswapFees || 0),
@@ -549,142 +461,17 @@ export const PurchaseProvider = ({
     starterpackId,
     selectedPlatform,
     isMainnet,
-    type,
   ]);
 
-  // Transform data based on source (claimed vs onchain)
+  // Sync errors
   useEffect(() => {
-    if (starterpackId === undefined) return;
-
-    if (type === "claimed") {
-      setStarterpackDetails({
-        type: "claimed",
-        id: String(starterpackId),
-        name: claimName,
-        items: claimItems,
-        merkleDrops,
-      });
-    } else if (type === "onchain" && onchainMetadata) {
-      // Onchain flow (new) - show metadata as soon as it's available
-      const purchaseItems: Item[] = onchainMetadata.items.map((item) => {
-        // TODO: Calculate price per item if needed
-        return {
-          title: item.name,
-          subtitle: item.description,
-          icon: item.imageUri,
-          value: 0, // Will be calculated from quote
-          type: ItemType.NFT,
-        };
-      });
-
-      // Convert total cost from USDC (6 decimals) to USD if quote is available
-      const totalUsd = onchainQuote ? usdcToUsd(onchainQuote.totalCost) : 0;
-
-      setPurchaseItems(purchaseItems);
-      setUsdAmount(totalUsd);
-
-      setStarterpackDetails({
-        type: "onchain",
-        id: Number(starterpackId),
-        name: onchainMetadata.name,
-        description: onchainMetadata.description,
-        imageUri: onchainMetadata.imageUri,
-        items: purchaseItems,
-        quote: onchainQuote,
-        isQuoteLoading: isOnchainQuoteLoading,
-      });
+    if (walletError) {
+      setDisplayError(walletError);
     }
-  }, [
-    starterpackId,
-    type,
-    // Claim dependencies
-    claimName,
-    claimItems,
-    merkleDrops,
-    // Onchain dependencies
-    onchainMetadata,
-    onchainQuote,
-    isOnchainQuoteLoading,
-  ]);
-
-  useEffect(() => {
-    setDisplayError(
-      stripeError ||
-        walletError ||
-        depositError ||
-        starterpackError ||
-        undefined,
-    );
-  }, [stripeError, walletError, depositError, starterpackError]);
-
-  const clearError = useCallback(() => {
-    setDisplayError(undefined);
-  }, []);
-
-  const clearSelectedWallet = useCallback(() => {
-    setSelectedWallet(undefined);
-  }, []);
-
-  const onCreditCardPurchase = useCallback(async () => {
-    if (!controller) return;
-
-    try {
-      setPaymentMethod("stripe");
-      const paymentIntent = await createPaymentIntent(
-        usdToCredits(usdAmount),
-        controller.username(),
-        undefined,
-        typeof starterpackId == "string" ? starterpackId : undefined,
-      );
-      setClientSecret(paymentIntent.clientSecret);
-      setCostDetails(paymentIntent.pricing);
-    } catch (e) {
-      setDisplayError(e as Error);
-      throw e;
+    if (depositError) {
+      setDisplayError(depositError);
     }
-  }, [usdAmount, controller, starterpackId, createPaymentIntent]);
-
-  const onBackendCryptoPurchase = useCallback(async () => {
-    if (
-      !controller ||
-      !selectedPlatform ||
-      !walletAddress ||
-      !selectedWallet?.type ||
-      !layerswapFees ||
-      !swapInput
-    )
-      return;
-
-    try {
-      setPaymentMethod("crypto");
-
-      swapInput.layerswapFees = layerswapFees;
-
-      // Use existing payment method
-      const { swapId, transactionHash } = await sendDeposit(
-        swapInput,
-        walletAddress,
-        selectedWallet.type,
-        selectedPlatform,
-        (explorer) => {
-          setExplorer(explorer);
-        },
-      );
-      setSwapId(swapId);
-      setTransactionHash(transactionHash);
-    } catch (e) {
-      setDisplayError(e as Error);
-      throw e;
-    }
-  }, [
-    controller,
-    selectedPlatform,
-    walletAddress,
-    selectedWallet,
-    swapInput,
-    layerswapFees,
-    sendDeposit,
-  ]);
+  }, [walletError, depositError, setDisplayError]);
 
   const onOnchainPurchase = useCallback(async () => {
     if (!controller || !starterpackDetails) return;
@@ -693,7 +480,7 @@ export const PurchaseProvider = ({
       throw new Error("Not an onchain starterpack");
     }
 
-    const { quote, id: starterpackId } = starterpackDetails;
+    const { quote, id: packId } = starterpackDetails;
 
     if (!quote) {
       throw new Error("Quote not loaded yet");
@@ -704,24 +491,20 @@ export const PurchaseProvider = ({
         .VITE_STARTERPACK_REGISTRY_CONTRACT;
       const recipient = controller.address();
 
-      // Determine wallet type for execution
       const walletType =
         selectedWallet?.type === "argent" || selectedWallet?.type === "braavos"
           ? selectedWallet.type
           : "controller";
 
-      // Check if we need to swap tokens (selected token is different from payment token)
       const needsSwap =
         selectedToken &&
         num.toHex(selectedToken.address) !== num.toHex(quote.paymentToken);
 
-      // Calculate total cost with quantity
       const totalCostWithQuantity = quote.totalCost * BigInt(quantity);
 
-      // Build all transaction calls
       let allCalls: Call[] = [];
 
-      // Step 0: Add swap calls if needed (swap from selectedToken to paymentToken)
+      // Add swap calls if needed
       if (needsSwap && selectedToken) {
         try {
           if (!swapQuote) {
@@ -730,8 +513,6 @@ export const PurchaseProvider = ({
 
           const network = chainIdToEkuboNetwork(controller.chainId());
 
-          // Scale the swap quote by quantity
-          // swapQuote is for quantity 1, so we need to scale it for the actual quantity
           const scaledSwapQuote: SwapQuote = {
             impact: swapQuote.impact,
             total: swapQuote.total * BigInt(quantity),
@@ -743,8 +524,6 @@ export const PurchaseProvider = ({
             })),
           };
 
-          // Generate swap calls
-          // scaledSwapQuote.total is the amount of selectedToken we need to spend
           const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
           const swapAmount =
             scaledSwapQuote.total < 0n
@@ -756,28 +535,25 @@ export const PurchaseProvider = ({
               ? doubledTotal
               : swapAmount + BigInt(1e19);
 
-          // Step 0a: Approve selected token for router
           const approveSelectedTokenAmount = uint256.bnToUint256(totalQuoteSum);
           const approveSelectedTokenCall: Call = {
             contractAddress: selectedToken.address,
             entrypoint: "approve",
             calldata: [
-              routerAddress, // spender
+              routerAddress,
               approveSelectedTokenAmount.low,
               approveSelectedTokenAmount.high,
             ],
           };
 
-          // Generate swap calls (includes transfer + clear calls)
           const swapCallsWithoutApprove = generateSwapCalls(
-            selectedToken.address, // purchaseToken (selected token)
-            quote.paymentToken, // targetToken (payment token)
-            totalCostWithQuantity, // minimumAmount (minimum payment token to receive)
+            selectedToken.address,
+            quote.paymentToken,
+            totalCostWithQuantity,
             scaledSwapQuote,
             network,
           );
 
-          // Add swap calls to the beginning
           allCalls = [approveSelectedTokenCall, ...swapCallsWithoutApprove];
         } catch (error) {
           console.error("Failed to generate swap calls:", error);
@@ -787,32 +563,23 @@ export const PurchaseProvider = ({
         }
       }
 
-      // Convert totalCost to u256 (low, high) with quantity
       const amount256 = uint256.bnToUint256(totalCostWithQuantity);
 
-      // Step 1: Approve payment token for the exact transfer amount
       const approvePaymentTokenCall: Call = {
         contractAddress: quote.paymentToken,
         entrypoint: "approve",
-        calldata: [
-          registryContract, // spender
-          amount256.low, // amount low
-          amount256.high, // amount high
-        ],
+        calldata: [registryContract, amount256.low, amount256.high],
       };
 
-      // Get referral data for the current game
       const referralData = getCurrentReferral(origin);
 
-      // Step 2: Issue the starterpack
-      // issue(recipient, starterpack_id, quantity, referrer: Option<ContractAddress>, referrer_group: Option<felt252>)
       const issueCall: Call = {
         contractAddress: registryContract,
         entrypoint: "issue",
         calldata: [
-          recipient, // recipient
-          starterpackId, // starterpack_id: u32
-          quantity, // quantity: u32
+          recipient,
+          packId,
+          quantity,
           ...(referralData?.refAddress
             ? [0x0, num.toHex(referralData.refAddress)]
             : [0x1]),
@@ -822,24 +589,20 @@ export const PurchaseProvider = ({
         ],
       };
 
-      // Combine all calls: [swap calls (if needed)] + approve payment token + issue
       allCalls = [...allCalls, approvePaymentTokenCall, issueCall];
 
-      // Execute all calls in a single multicall using appropriate wallet
       let purchaseTransactionHash: string;
 
       if (walletType === "controller") {
         const result = await controller.execute(allCalls);
         purchaseTransactionHash = result.transaction_hash;
       } else {
-        // Use external wallet - convert calls to snake_case format expected by Argent/Braavos
         if (!externalSendTransaction) {
           throw new Error(
             "externalSendTransaction is required for external wallet type",
           );
         }
 
-        // Convert Call[] to format expected by external wallets (snake_case)
         const externalCalls = allCalls.map((call) => ({
           contract_address: call.contractAddress,
           entry_point: call.entrypoint,
@@ -882,6 +645,8 @@ export const PurchaseProvider = ({
     selectedWallet,
     quantity,
     externalSendTransaction,
+    setTransactionHash,
+    setDisplayError,
   ]);
 
   const onExternalConnect = useCallback(
@@ -906,7 +671,6 @@ export const PurchaseProvider = ({
         setWalletAddress(res.account);
 
         if (chainId) {
-          // WORKAROUND: Braavos doesn't support switching chains api so we remain on whatever chain is current
           if (wallet.type === "braavos") {
             console.warn(
               "Braavos does not support `wallet_switchStarknetChain`",
@@ -928,8 +692,51 @@ export const PurchaseProvider = ({
         throw e;
       }
     },
-    [controller, connectWallet, switchChain],
+    [controller, connectWallet, switchChain, setDisplayError],
   );
+
+  const onBackendCryptoPurchase = useCallback(async () => {
+    if (
+      !controller ||
+      !selectedPlatform ||
+      !walletAddress ||
+      !selectedWallet?.type ||
+      !layerswapFees ||
+      !swapInput
+    )
+      return;
+
+    try {
+      swapInput.layerswapFees = layerswapFees;
+
+      const result = await sendDeposit(
+        swapInput,
+        walletAddress,
+        selectedWallet.type,
+        selectedPlatform,
+        (explorer) => {
+          setExplorer(explorer);
+        },
+      );
+      setSwapId(result.swapId);
+      if (result.transactionHash) {
+        setTransactionHash(result.transactionHash);
+      }
+    } catch (e) {
+      setDisplayError(e as Error);
+      throw e;
+    }
+  }, [
+    controller,
+    selectedPlatform,
+    walletAddress,
+    selectedWallet,
+    swapInput,
+    layerswapFees,
+    sendDeposit,
+    setTransactionHash,
+    setDisplayError,
+  ]);
 
   const fetchFees = useCallback(async () => {
     if (!swapInput) return;
@@ -938,98 +745,59 @@ export const PurchaseProvider = ({
       setIsFetchingFees(true);
 
       const quote = await estimateLayerswapFees(swapInput);
-      const amountInCents = usdAmount / 1e4;
-      const layerswapFeesInCents = Number(quote.totalFees) / 1e4;
-      const totalInCents = amountInCents + layerswapFeesInCents;
-
       setLayerswapFees(quote.totalFees);
-      setCostDetails({
-        baseCostInCents: amountInCents,
-        processingFeeInCents: layerswapFeesInCents,
-        totalInCents,
-      });
     } catch (e) {
       setDisplayError(e as Error);
       throw e;
     } finally {
       setIsFetchingFees(false);
     }
-  }, [swapInput, usdAmount, estimateLayerswapFees]);
+  }, [swapInput, estimateLayerswapFees, setDisplayError]);
 
-  const contextValue: PurchaseContextType = {
-    // Purchase details
-    usdAmount,
-    starterpackDetails,
-    quantity,
+  const contextValue: OnchainPurchaseContextType = {
     purchaseItems,
-    claimItems,
-    layerswapFees,
-    isFetchingFees,
-
-    // Payment state
-    paymentMethod,
+    quantity,
+    incrementQuantity,
+    decrementQuantity,
     selectedWallet,
     selectedPlatform,
     walletAddress,
-    transactionHash,
-    swapId,
-    explorer,
-
-    // Stripe state
-    clientSecret,
-    costDetails,
-    stripePromise,
-
-    // Loading states
-    isStripeLoading,
-    isDepositLoading,
-    isStarterpackLoading,
-
-    // Error state
-    displayError,
-    clearError,
-
-    // Wallet management
     clearSelectedWallet,
-
-    // Token selection (for onchain purchases)
     availableTokens,
     selectedToken,
     setSelectedToken,
     convertedPrice,
     swapQuote,
     isFetchingConversion,
+    isTokenSelectionLocked,
     conversionError,
-
-    // Setters
-    setUsdAmount,
+    usdAmount,
+    layerswapFees,
+    isFetchingFees,
+    swapId,
+    explorer,
+    depositAmount,
     setDepositAmount,
-    setStarterpackId,
-    setTransactionHash,
-    setClaimItems: setClaimItemsState,
-    incrementQuantity,
-    decrementQuantity,
-
-    // Actions
-    onCreditCardPurchase,
-    onBackendCryptoPurchase,
     onOnchainPurchase,
     onExternalConnect,
+    onBackendCryptoPurchase,
     waitForDeposit,
     fetchFees,
   };
 
   return (
-    <PurchaseContext.Provider value={contextValue}>
+    <OnchainPurchaseContext.Provider value={contextValue}>
       {children}
-    </PurchaseContext.Provider>
+    </OnchainPurchaseContext.Provider>
   );
 };
 
-export const usePurchaseContext = () => {
-  const context = useContext(PurchaseContext);
+export const useOnchainPurchaseContext = () => {
+  const context = useContext(OnchainPurchaseContext);
   if (!context) {
-    throw new Error("usePurchaseContext must be used within PurchaseProvider");
+    throw new Error(
+      "useOnchainPurchaseContext must be used within OnchainPurchaseProvider",
+    );
   }
   return context;
 };

@@ -1,4 +1,8 @@
-import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  useNavigation,
+  useStarterpackContext,
+  useOnchainPurchaseContext,
+} from "@/context";
 import {
   Button,
   GiftIcon,
@@ -24,13 +28,12 @@ import { LoadingState } from "../../loading";
 import { humanizeString } from "@cartridge/controller";
 
 export function OnchainCheckout() {
+  const { isStarterpackLoading, starterpackDetails, displayError, clearError } =
+    useStarterpackContext();
   const {
-    isStarterpackLoading,
     isFetchingConversion,
     purchaseItems,
     quantity,
-    displayError,
-    starterpackDetails,
     selectedWallet,
     walletAddress,
     selectedToken,
@@ -40,8 +43,7 @@ export function OnchainCheckout() {
     incrementQuantity,
     decrementQuantity,
     onOnchainPurchase,
-    clearError,
-  } = usePurchaseContext();
+  } = useOnchainPurchaseContext();
   const { navigate } = useNavigation();
   const { controller } = useConnection();
   const [isChecking, setIsChecking] = useState(true);
@@ -121,11 +123,11 @@ export function OnchainCheckout() {
 
   const needsBridge = useMemo(() => {
     if (selectedPlatform && selectedPlatform !== "starknet") {
-      return `(${humanizeString(selectedPlatform)})`
+      return `(${humanizeString(selectedPlatform)})`;
     }
 
     return null;
-  }, [selectedPlatform])
+  }, [selectedPlatform]);
 
   const onPurchase = useCallback(async () => {
     if (!hasSufficientBalance && !isFree) return;
@@ -214,7 +216,7 @@ export function OnchainCheckout() {
     checkBalance();
   }, [controller, tokenToCheck, selectedWallet, walletAddress]);
 
-  const onWalletSelect = () => navigate(`/purchase/network/starknet;arbitrum`);
+  const onWalletSelect = () => navigate(`/purchase/network/starknet`);
 
   useEffect(() => {
     clearError();
