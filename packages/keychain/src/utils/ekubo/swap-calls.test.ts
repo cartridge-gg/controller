@@ -6,6 +6,11 @@ import {
 } from "./index";
 import { uint256 } from "starknet";
 
+// Must match SLIPPAGE_PERCENTAGE in index.ts
+const SLIPPAGE_PERCENTAGE = 5n;
+const applySlippage = (amount: bigint) =>
+  amount + (amount * SLIPPAGE_PERCENTAGE) / 100n;
+
 // Real token addresses (Sepolia)
 const ETH_ADDRESS =
   "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -113,7 +118,7 @@ describe("prepareSwapCalls", () => {
       });
 
       // Expected: 64702977162095 * 1.05 = 67938126020199 (5% slippage buffer)
-      const expectedApproveAmount = (REAL_EKUBO_RESPONSE.total * 105n) / 100n;
+      const expectedApproveAmount = applySlippage(REAL_EKUBO_RESPONSE.total);
       expect(approvedAmount).toBe(expectedApproveAmount);
 
       // Verify swap calls are generated (transfer + swap + clear calls)
@@ -142,11 +147,12 @@ describe("prepareSwapCalls", () => {
       });
 
       // CORRECT: ~0.0000679 ETH (64702977162095 * 1.05 buffer)
-      const correctApproveAmount = (REAL_EKUBO_RESPONSE.total * 105n) / 100n;
+      const correctApproveAmount = applySlippage(REAL_EKUBO_RESPONSE.total);
 
       // WRONG (bug): If double-scaled, it would be ~0.000136 ETH (64702977162095 * 2 * 1.05)
-      const wrongDoubleScaledAmount =
-        (REAL_EKUBO_RESPONSE.total * BigInt(quantity) * 105n) / 100n;
+      const wrongDoubleScaledAmount = applySlippage(
+        REAL_EKUBO_RESPONSE.total * BigInt(quantity),
+      );
 
       expect(approvedAmount).toBe(correctApproveAmount);
       expect(approvedAmount).not.toBe(wrongDoubleScaledAmount);
@@ -185,7 +191,7 @@ describe("prepareSwapCalls", () => {
 
       // The approved amount should be based on swapTotalForQuantity3 (with 5% buffer)
       // NOT swapTotalForQuantity3 * 3 (which would be incorrect double-scaling)
-      const expectedApproveAmount = (swapTotalForQuantity3 * 105n) / 100n;
+      const expectedApproveAmount = applySlippage(swapTotalForQuantity3);
       expect(approvedAmount).toBe(expectedApproveAmount);
     });
 
@@ -218,9 +224,10 @@ describe("prepareSwapCalls", () => {
 
       // CORRECT: Approved amount should be ~0.2625 ETH (0.25 * 1.05 buffer)
       // WRONG (bug): If double-scaled, it would be ~1.3125 ETH (0.25 * 5 * 1.05 buffer)
-      const correctApproveAmount = (swapTotalForQuantity * 105n) / 100n;
-      const wrongDoubleScaledAmount =
-        (swapTotalForQuantity * BigInt(quantity) * 105n) / 100n;
+      const correctApproveAmount = applySlippage(swapTotalForQuantity);
+      const wrongDoubleScaledAmount = applySlippage(
+        swapTotalForQuantity * BigInt(quantity),
+      );
 
       expect(approvedAmount).toBe(correctApproveAmount);
       expect(approvedAmount).not.toBe(wrongDoubleScaledAmount);
@@ -249,7 +256,7 @@ describe("prepareSwapCalls", () => {
       });
 
       // 5% buffer: 10 ETH * 1.05 = 10.5 ETH
-      const expected = (largeSwapTotal * 105n) / 100n;
+      const expected = applySlippage(largeSwapTotal);
       expect(approvedAmount).toBe(expected);
     });
   });

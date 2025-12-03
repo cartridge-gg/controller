@@ -208,6 +208,8 @@ export function useTokenSelection({
                 tokenMetadata: convertedPriceFromQuote.tokenMetadata,
                 quantity: quantity,
               });
+
+              setSwapQuote(null);
             }
           }
         }

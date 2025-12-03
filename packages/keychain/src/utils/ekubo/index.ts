@@ -41,6 +41,11 @@ export const USDC_ADDRESSES = {
 } as const;
 
 /**
+ * Slippage buffer percentage for swap amounts
+ */
+const SLIPPAGE_PERCENTAGE = 5n;
+
+/**
  * Ekubo API Types
  */
 export interface PoolKey {
@@ -342,8 +347,9 @@ export function prepareSwapCalls(params: SwapCallsParams): SwapCallsResult {
 
   const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
 
-  // Add 5% buffer for slippage (swapQuote.total is already absolute value)
-  const totalQuoteSum = (swapQuote.total * 105n) / 100n;
+  // Add slippage buffer (swapQuote.total is already absolute value)
+  const totalQuoteSum =
+    swapQuote.total + (swapQuote.total * SLIPPAGE_PERCENTAGE) / 100n;
 
   const approveAmount = uint256.bnToUint256(totalQuoteSum);
   const approveCall: Call = {
@@ -380,7 +386,7 @@ export function prepareSwapCalls(params: SwapCallsParams): SwapCallsResult {
  * @param network - Network to use (mainnet or sepolia)
  * @returns Array of calls to execute the swap
  */
-export function generateSwapCalls(
+function generateSwapCalls(
   purchaseToken: string,
   targetToken: string,
   minimumAmount: bigint,
@@ -388,8 +394,9 @@ export function generateSwapCalls(
   network: EkuboNetwork = "mainnet",
 ): Call[] {
   const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
-  // Add 5% buffer for slippage (quote.total is already absolute value)
-  const totalQuoteSum = (quote.total * 105n) / 100n;
+  // Add slippage buffer (quote.total is already absolute value)
+  const totalQuoteSum =
+    quote.total + (quote.total * SLIPPAGE_PERCENTAGE) / 100n;
 
   // Transfer tokens to router
   const transferCall: Call = {

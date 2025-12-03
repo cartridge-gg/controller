@@ -64,7 +64,7 @@ export function useClaimStarterpack(starterpack: string | undefined) {
           if (Number(details.bonusCredits.amount) > 0) {
             const factor = 10 ** details.bonusCredits.decimals;
             items.push({
-              title: `${details.bonusCredits} Credits`,
+              title: `${details.bonusCredits.amount} Credits`,
               subtitle: "Credits cover service fee(s).",
               icon: "/ERC-20-Icon.svg",
               type: ItemType.CREDIT,
