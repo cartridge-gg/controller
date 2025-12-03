@@ -98,36 +98,21 @@ function showToastOnDocument(
   const duration = options.duration ?? DEFAULT_DURATION;
   const isInfiniteDuration = !isFinite(duration) || duration <= 0;
 
-  // Add progress bar for variants that support it
-  if (options.variant === "error") {
-    // Add progress bar to error toast (8px border-radius)
+  // Add progress bar to all variants except network-switch
+  if (options.variant !== "network-switch") {
+    // Determine border radius based on variant
+    const borderRadius =
+      options.variant === "error" || options.variant === "transaction" ? 8 : 4;
+
     if (isInfiniteDuration) {
       // Show static progress bar for infinite duration (no animation, no auto-dismiss)
-      addProgressBarToToast(toastElement, Infinity, () => {}, 8);
+      addProgressBarToToast(toastElement, Infinity, () => {}, borderRadius);
     } else {
       // Animated progress bar with auto-dismiss
-      addProgressBarToToast(toastElement, duration, dismiss, 8);
-    }
-  } else if (options.variant === "marketplace") {
-    // Add progress bar to marketplace toast (4px border-radius)
-    if (isInfiniteDuration) {
-      // Show static progress bar for infinite duration (no animation, no auto-dismiss)
-      addProgressBarToToast(toastElement, Infinity, () => {}, 4);
-    } else {
-      // Animated progress bar with auto-dismiss
-      addProgressBarToToast(toastElement, duration, dismiss, 4);
-    }
-  } else if (options.variant === "achievement") {
-    // Add progress bar to achievement toast (4px border-radius)
-    if (isInfiniteDuration) {
-      // Show static progress bar for infinite duration (no animation, no auto-dismiss)
-      addProgressBarToToast(toastElement, Infinity, () => {}, 4);
-    } else {
-      // Animated progress bar with auto-dismiss
-      addProgressBarToToast(toastElement, duration, dismiss, 4);
+      addProgressBarToToast(toastElement, duration, dismiss, borderRadius);
     }
   } else if (!isInfiniteDuration) {
-    // Use setTimeout for other variants
+    // Network-switch variant uses setTimeout instead of progress bar
     timeoutId = setTimeout(dismiss, duration);
   }
 
@@ -235,11 +220,13 @@ export function toast(options: ToastOptions): () => void {
     const targetDoc = getTargetDocument();
 
     if (targetDoc) {
+      console.log("showing on targetdoc");
       // Same-origin iframe, can access parent document directly
       return showToastOnDocument(targetDoc, options);
     } else {
       // Cross-origin iframe, use postMessage
       try {
+        console.log("showing on postmessage");
         if (window.parent) {
           window.parent.postMessage(
             {
