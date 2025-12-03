@@ -3,7 +3,7 @@ import {
   useStarterpackContext,
   type BackendStarterpackDetails,
 } from "@/context";
-import { MerkleDrop } from "@/hooks/starterpack-claim";
+import { MerkleDrop } from "@/hooks/starterpack";
 import { humanizeString } from "@cartridge/controller";
 import {
   ArbitrumIcon,

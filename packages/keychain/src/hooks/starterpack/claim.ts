@@ -5,7 +5,7 @@ import {
   StarterPackQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
-import { useController } from "./controller";
+import { useController } from "@/hooks/controller";
 import { Item, ItemType } from "@/context";
 
 export interface MerkleDrop {

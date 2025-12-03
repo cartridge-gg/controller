@@ -6,8 +6,10 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { useClaimStarterpack } from "@/hooks/starterpack-claim";
-import { useOnchainStarterpack } from "@/hooks/starterpack-onchain";
+import {
+  useClaimStarterpack,
+  useOnchainStarterpack,
+} from "@/hooks/starterpack";
 import {
   StarterpackDetails,
   detectStarterpackType,
@@ -23,6 +25,10 @@ export interface StarterpackContextType {
   // Starterpack details (loaded from backend or onchain)
   starterpackDetails: StarterpackDetails | undefined;
   isStarterpackLoading: boolean;
+
+  // Claim items (can be enriched with quantities for display)
+  claimItems: Item[];
+  setClaimItems: (items: Item[]) => void;
 
   // Transaction state
   transactionHash: string | undefined;
@@ -49,6 +55,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   >();
   const [transactionHash, setTransactionHash] = useState<string | undefined>();
   const [displayError, setDisplayError] = useState<Error | undefined>();
+  const [claimItemsState, setClaimItemsState] = useState<Item[]>([]);
 
   // Detect which source (claimed or onchain) based on starterpack ID
   const type = detectStarterpackType(starterpackId);
@@ -56,7 +63,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   // Claim hook (GraphQL) - only run if claimed source
   const {
     name: claimName,
-    items: claimItems,
+    items: claimHookItems,
     merkleDrops,
     isLoading: isClaimLoading,
     error: claimError,
@@ -93,7 +100,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
         type: "claimed",
         id: String(starterpackId),
         name: claimName,
-        items: claimItems,
+        items: claimHookItems,
         merkleDrops,
       });
     } else if (type === "onchain" && onchainMetadata) {
@@ -122,7 +129,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     type,
     // Claim dependencies
     claimName,
-    claimItems,
+    claimHookItems,
     merkleDrops,
     // Onchain dependencies
     onchainMetadata,
@@ -141,11 +148,23 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     setDisplayError(undefined);
   }, []);
 
+  // Claim items: use enriched state if set, otherwise fall back to starterpack items
+  const claimItems =
+    claimItemsState.length > 0
+      ? claimItemsState
+      : (starterpackDetails?.items ?? []);
+
+  const setClaimItems = useCallback((items: Item[]) => {
+    setClaimItemsState(items);
+  }, []);
+
   const contextValue: StarterpackContextType = {
     starterpackId,
     setStarterpackId,
     starterpackDetails,
     isStarterpackLoading,
+    claimItems,
+    setClaimItems,
     transactionHash,
     setTransactionHash,
     displayError,

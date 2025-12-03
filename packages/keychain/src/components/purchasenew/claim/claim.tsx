@@ -14,7 +14,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMerkleClaim, MerkleClaim } from "@/hooks/merkle-claim";
-import { useStarterpackContext, useClaimContext } from "@/context";
+import { useStarterpackContext } from "@/context";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
 import { StarterpackReceiving } from "../starterpack/starterpack";
@@ -30,8 +30,8 @@ export function Claim() {
   const { keys, address, type } = useParams();
   const { closeModal } = useConnection();
   const { goBack, navigate } = useNavigation();
-  const { starterpackDetails } = useStarterpackContext();
-  const { setClaimItems, setTransactionHash } = useClaimContext();
+  const { starterpackDetails, setClaimItems, setTransactionHash } =
+    useStarterpackContext();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);

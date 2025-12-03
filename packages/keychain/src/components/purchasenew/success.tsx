@@ -11,7 +11,6 @@ import {
   useNavigation,
   useStarterpackContext,
   useOnchainPurchaseContext,
-  useClaimContext,
   Item,
 } from "@/context";
 import { useMemo } from "react";
@@ -20,9 +19,9 @@ import { getExplorer } from "@/hooks/payments/crypto";
 import { StarterpackType } from "@/context";
 
 export function Success() {
-  const { starterpackDetails, transactionHash } = useStarterpackContext();
+  const { starterpackDetails, transactionHash, claimItems } =
+    useStarterpackContext();
   const { purchaseItems } = useOnchainPurchaseContext();
-  const { claimItems } = useClaimContext();
 
   const items = useMemo(() => {
     if (starterpackDetails?.type === "claimed") {

@@ -12,7 +12,6 @@ import { Receiving } from "./receiving";
 import {
   useStarterpackContext,
   useOnchainPurchaseContext,
-  useClaimContext,
   Item,
   PaymentMethod,
 } from "@/context";
@@ -63,10 +62,10 @@ async function retryWithBackoff<T>(
 }
 
 export function Pending() {
-  const { starterpackDetails, transactionHash } = useStarterpackContext();
+  const { starterpackDetails, transactionHash, claimItems } =
+    useStarterpackContext();
   const { purchaseItems, explorer, selectedWallet, swapId, quantity } =
     useOnchainPurchaseContext();
-  const { claimItems } = useClaimContext();
 
   // For now, paymentMethod is only used for crypto bridging which isn't active
   // TODO: Move paymentMethod to onchain context when layerswap is reintegrated
