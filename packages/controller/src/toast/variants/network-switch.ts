@@ -1,3 +1,4 @@
+import { sanitizeImageSrc } from "../../utils";
 import { NetworkSwitchToastOptions } from "../types";
 
 // Inject network switch toast specific styles
@@ -43,7 +44,7 @@ export function createNetworkSwitchToast(
   icon.style.height = "24px";
   icon.style.aspectRatio = "1/1";
   if (options.networkIcon) {
-    (icon as HTMLImageElement).src = options.networkIcon;
+    (icon as HTMLImageElement).src = sanitizeImageSrc(options.networkIcon);
     (icon as HTMLImageElement).alt = options.networkName;
   } else {
     (icon as HTMLDivElement).style.backgroundColor = "#161A17";

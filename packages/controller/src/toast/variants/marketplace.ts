@@ -1,5 +1,6 @@
 import { MarketplaceToastOptions } from "../types";
 import { CloseButton } from "../components/close-button";
+import { sanitizeImageSrc } from "../../utils";
 
 // Inject marketplace toast specific styles
 export function injectMarketplaceStyles(targetDoc: Document): void {
@@ -106,7 +107,7 @@ export function createMarketplaceToast(
 
   const image = document.createElement("img");
   image.className = "image";
-  image.src = options.itemImage;
+  image.src = sanitizeImageSrc(options.itemImage);
   image.alt = options.itemName;
   imageContainer.appendChild(image);
 
