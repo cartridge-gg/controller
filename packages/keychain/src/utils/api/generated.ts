@@ -1868,6 +1868,8 @@ export enum LayerswapStatus {
   Expired = "EXPIRED",
   Failed = "FAILED",
   Pending = "PENDING",
+  PendingLsTransfer = "PENDING_LS_TRANSFER",
+  PendingUserTransfer = "PENDING_USER_TRANSFER",
 }
 
 export type Lock = Node & {

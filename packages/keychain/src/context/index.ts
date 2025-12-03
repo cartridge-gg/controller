@@ -1,20 +1,32 @@
 export { NavigationProvider, useNavigation } from "./navigation";
-export { PurchaseProvider, usePurchaseContext } from "./purchase";
-export { ItemType } from "./purchase";
-export type {
-  PurchaseContextType,
-  CostDetails,
-  Network,
-  TokenOption,
-  Item,
-} from "./purchase";
-export type {
-  StarterpackDetails,
-  BackendStarterpackDetails,
-  OnchainStarterpackDetails,
-} from "../types/starterpack-types";
+
+// Starterpack contexts (all flow-specific contexts)
 export {
   isClaimStarterpack,
   isOnchainStarterpack,
   detectStarterpackType,
-} from "../types/starterpack-types";
+  ItemType,
+  StarterpackProviders,
+  StarterpackProvider,
+  useStarterpackContext,
+  OnchainPurchaseProvider,
+  useOnchainPurchaseContext,
+  CreditPurchaseProvider,
+  useCreditPurchaseContext,
+} from "./starterpack";
+export type {
+  StarterpackDetails,
+  BackendStarterpackDetails,
+  OnchainStarterpackDetails,
+  Item,
+  Quote,
+  TokenMetadata,
+  MerkleDrop,
+  StarterpackType,
+  PaymentMethod,
+  StarterpackContextType,
+  OnchainPurchaseContextType,
+  TokenOption,
+  CreditPurchaseContextType,
+  CostDetails,
+} from "./starterpack";

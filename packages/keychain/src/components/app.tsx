@@ -53,7 +53,7 @@ import { useUpgrade } from "./provider/upgrade";
 import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
 import { Disconnect } from "./disconnect";
-import { PurchaseProvider } from "@/context";
+import { StarterpackProviders } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
 import { BoosterPack } from "./booster-pack";
@@ -210,9 +210,9 @@ export function App() {
         <Route
           path="/purchase"
           element={
-            <PurchaseProvider>
+            <StarterpackProviders>
               <Outlet />
-            </PurchaseProvider>
+            </StarterpackProviders>
           }
         >
           <Route

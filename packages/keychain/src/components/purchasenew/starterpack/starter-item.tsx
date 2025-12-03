@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Card, CardContent, CardDescription, Thumbnail } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { Item, ItemType } from "@/context/purchase";
+import { Item, ItemType } from "@/context";
 
 interface Props {
   containerClassName?: string;

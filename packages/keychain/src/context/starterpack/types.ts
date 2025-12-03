@@ -1,5 +1,30 @@
-import { Item } from "@/context";
 import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
+
+/**
+ * Item types for starterpack items
+ */
+export enum ItemType {
+  CREDIT = "CREDIT",
+  ERC20 = "ERC20",
+  NFT = "NFT",
+}
+
+/**
+ * Item in a starterpack
+ */
+export type Item = {
+  title: string;
+  subtitle?: string;
+  icon: string | React.ReactNode;
+  value?: number;
+  quantity?: number;
+  type: ItemType;
+};
+
+/**
+ * Payment method type
+ */
+export type PaymentMethod = "stripe" | "crypto";
 
 /**
  * Discriminated union for starterpack sources

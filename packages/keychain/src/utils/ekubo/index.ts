@@ -1,4 +1,10 @@
-import { Call, num, InvokeFunctionResponse, constants } from "starknet";
+import {
+  Call,
+  num,
+  InvokeFunctionResponse,
+  constants,
+  uint256,
+} from "starknet";
 import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
 import {
   ExternalWalletResponse,
@@ -35,6 +41,11 @@ export const USDC_ADDRESSES = {
 } as const;
 
 /**
+ * Slippage buffer percentage for swap amounts
+ */
+const SLIPPAGE_PERCENTAGE = 5n;
+
+/**
  * Ekubo API Types
  */
 export interface PoolKey {
@@ -60,6 +71,20 @@ export interface SwapQuote {
   impact: number;
   total: bigint;
   splits: SwapSplit[];
+}
+
+export interface SwapCallsParams {
+  selectedTokenAddress: string;
+  paymentToken: string;
+  totalCostWithQuantity: bigint;
+  swapQuote: SwapQuote;
+  network: EkuboNetwork;
+}
+
+export interface SwapCallsResult {
+  approveCall: Call;
+  swapCalls: Call[];
+  allCalls: Call[];
 }
 
 interface SwapQuoteResponse {
@@ -306,6 +331,49 @@ export async function fetchSwapQuoteInUsdc(
 }
 
 /**
+ * Prepares the swap calls for a token swap via Ekubo router.
+ *
+ * @param params - The swap parameters
+ * @returns The approval call and swap calls
+ */
+export function prepareSwapCalls(params: SwapCallsParams): SwapCallsResult {
+  const {
+    selectedTokenAddress,
+    paymentToken,
+    totalCostWithQuantity,
+    swapQuote,
+    network,
+  } = params;
+
+  const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
+
+  // Add slippage buffer (swapQuote.total is already absolute value)
+  const totalQuoteSum =
+    swapQuote.total + (swapQuote.total * SLIPPAGE_PERCENTAGE) / 100n;
+
+  const approveAmount = uint256.bnToUint256(totalQuoteSum);
+  const approveCall: Call = {
+    contractAddress: selectedTokenAddress,
+    entrypoint: "approve",
+    calldata: [routerAddress, approveAmount.low, approveAmount.high],
+  };
+
+  const swapCalls = generateSwapCalls(
+    selectedTokenAddress,
+    paymentToken,
+    totalCostWithQuantity,
+    swapQuote,
+    network,
+  );
+
+  return {
+    approveCall,
+    swapCalls,
+    allCalls: [approveCall, ...swapCalls],
+  };
+}
+
+/**
  * Generate swap calls for Ekubo router
  *
  * Based on implementation from Provable Games:
@@ -318,7 +386,7 @@ export async function fetchSwapQuoteInUsdc(
  * @param network - Network to use (mainnet or sepolia)
  * @returns Array of calls to execute the swap
  */
-export function generateSwapCalls(
+function generateSwapCalls(
   purchaseToken: string,
   targetToken: string,
   minimumAmount: bigint,
@@ -326,13 +394,9 @@ export function generateSwapCalls(
   network: EkuboNetwork = "mainnet",
 ): Call[] {
   const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
-  // Calculate total amount with slippage buffer
-  let totalQuoteSum = quote.total < 0n ? -quote.total : quote.total;
-  const doubledTotal = totalQuoteSum * 2n;
-  totalQuoteSum =
-    doubledTotal < totalQuoteSum + BigInt(1e19)
-      ? doubledTotal
-      : totalQuoteSum + BigInt(1e19);
+  // Add slippage buffer (quote.total is already absolute value)
+  const totalQuoteSum =
+    quote.total + (quote.total * SLIPPAGE_PERCENTAGE) / 100n;
 
   // Transfer tokens to router
   const transferCall: Call = {

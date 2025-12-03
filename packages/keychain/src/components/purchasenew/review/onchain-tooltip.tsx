@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@cartridge/ui";
-import type { Quote } from "@/types/starterpack-types";
+import type { Quote } from "@/context";
 
 /**
  * Format bigint token amount with symbol

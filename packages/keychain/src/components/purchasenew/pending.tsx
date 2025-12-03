@@ -9,7 +9,12 @@ import {
   Spinner,
 } from "@cartridge/ui";
 import { Receiving } from "./receiving";
-import { PaymentMethod, Item, usePurchaseContext } from "@/context/purchase";
+import {
+  useStarterpackContext,
+  useOnchainPurchaseContext,
+  Item,
+  PaymentMethod,
+} from "@/context";
 import { Explorer, getExplorer } from "@/hooks/payments/crypto";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useEffect, useState } from "react";
@@ -57,17 +62,14 @@ async function retryWithBackoff<T>(
 }
 
 export function Pending() {
-  const {
-    starterpackDetails,
-    purchaseItems,
-    claimItems,
-    explorer,
-    paymentMethod,
-    selectedWallet,
-    swapId,
-    transactionHash,
-    quantity,
-  } = usePurchaseContext();
+  const { starterpackDetails, transactionHash, claimItems } =
+    useStarterpackContext();
+  const { purchaseItems, explorer, selectedWallet, swapId, quantity } =
+    useOnchainPurchaseContext();
+
+  // For now, paymentMethod is only used for crypto bridging which isn't active
+  // TODO: Move paymentMethod to onchain context when layerswap is reintegrated
+  const paymentMethod: PaymentMethod | undefined = undefined;
 
   if (starterpackDetails?.type === "claimed") {
     return (
@@ -112,6 +114,8 @@ export function PurchasePendingInner({
   transactionHash,
   explorer,
   wallet,
+  selectedPlatform: selectedPlatformProp,
+  waitForDeposit: waitForDepositProp,
 }: {
   name: string;
   items: Item[];
@@ -120,10 +124,17 @@ export function PurchasePendingInner({
   swapId?: string;
   explorer?: Explorer;
   wallet?: ExternalWallet;
+  selectedPlatform?: string;
+  waitForDeposit?: (swapId: string) => Promise<boolean>;
 }) {
   const { navigate } = useNavigation();
-  const { waitForDeposit, selectedPlatform } = usePurchaseContext();
+  const onchainContext = useOnchainPurchaseContext();
   const { externalWaitForTransaction } = useConnection();
+
+  // Use props if provided (for stories), otherwise use context
+  const selectedPlatform =
+    selectedPlatformProp ?? onchainContext.selectedPlatform;
+  const waitForDeposit = waitForDepositProp ?? onchainContext.waitForDeposit;
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [depositCompleted, setDepositCompleted] = useState(false);
   const [showBridging, setShowBridging] = useState(false);

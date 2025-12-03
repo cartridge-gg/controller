@@ -5,8 +5,8 @@ import {
   StarterPackQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
-import { useController } from "./controller";
-import { Item, ItemType } from "@/context/purchase";
+import { useController } from "@/hooks/controller";
+import { Item, ItemType } from "@/context";
 
 export interface MerkleDrop {
   key: string;
@@ -64,7 +64,7 @@ export function useClaimStarterpack(starterpack: string | undefined) {
           if (Number(details.bonusCredits.amount) > 0) {
             const factor = 10 ** details.bonusCredits.decimals;
             items.push({
-              title: `${details.bonusCredits} Credits`,
+              title: `${details.bonusCredits.amount} Credits`,
               subtitle: "Credits cover service fee(s).",
               icon: "/ERC-20-Icon.svg",
               type: ItemType.CREDIT,

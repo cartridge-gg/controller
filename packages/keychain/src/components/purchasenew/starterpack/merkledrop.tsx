@@ -1,4 +1,4 @@
-import { type MerkleDrop } from "@/hooks/starterpack-claim";
+import { type MerkleDrop } from "@/hooks/starterpack";
 import {
   ArbitrumColorIcon,
   BaseColorIcon,

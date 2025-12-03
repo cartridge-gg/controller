@@ -1,12 +1,75 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { OnchainCostBreakdown } from "./cost";
+import {
+  OnchainPurchaseContext,
+  OnchainPurchaseContextType,
+  TokenOption,
+} from "@/context/starterpack/onchain-purchase";
+import { ReactNode } from "react";
 
 // USDC address with leading zeros (tests normalization)
 const USDC_ADDRESS =
   "0x053C91253BC9682c04929cA02ED00b3E423f6710D2ee7e0D5EBB06F3eCF368A8";
 
+// Mock token for stories (minimal mock for display purposes)
+const mockUsdcToken = {
+  address: USDC_ADDRESS,
+  name: "USD Coin",
+  symbol: "USDC",
+  decimals: 6,
+  icon: "https://static.cartridge.gg/tokens/usdc.svg",
+  contract: {} as TokenOption["contract"],
+} satisfies TokenOption;
+
+// Mock provider for stories
+const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
+  const mockValue: OnchainPurchaseContextType = {
+    purchaseItems: [],
+    quantity: 1,
+    incrementQuantity: () => {},
+    decrementQuantity: () => {},
+    selectedWallet: undefined,
+    selectedPlatform: undefined,
+    walletAddress: undefined,
+    clearSelectedWallet: () => {},
+    availableTokens: [mockUsdcToken],
+    selectedToken: mockUsdcToken,
+    setSelectedToken: () => {},
+    convertedPrice: null,
+    swapQuote: null,
+    isFetchingConversion: false,
+    isTokenSelectionLocked: false,
+    conversionError: null,
+    usdAmount: 0,
+    layerswapFees: undefined,
+    isFetchingFees: false,
+    swapId: undefined,
+    explorer: undefined,
+    depositAmount: undefined,
+    setDepositAmount: () => {},
+    onOnchainPurchase: async () => {},
+    onExternalConnect: async () => undefined,
+    onBackendCryptoPurchase: async () => {},
+    waitForDeposit: async () => false,
+    fetchFees: async () => {},
+  };
+
+  return (
+    <OnchainPurchaseContext.Provider value={mockValue}>
+      {children}
+    </OnchainPurchaseContext.Provider>
+  );
+};
+
 const meta = {
   component: OnchainCostBreakdown,
+  decorators: [
+    (Story) => (
+      <MockOnchainPurchaseProvider>
+        <Story />
+      </MockOnchainPurchaseProvider>
+    ),
+  ],
   argTypes: {
     quote: {
       control: false, // Disable controls for BigInt serialization
