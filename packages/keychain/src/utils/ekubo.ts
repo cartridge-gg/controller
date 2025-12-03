@@ -76,8 +76,8 @@ interface SwapQuoteErrorResponse {
  * Configuration for retry/backoff behavior
  */
 const RETRY_CONFIG = {
-  maxRetries: 5,
-  baseBackoff: 500, // ms
+  maxRetries: 3,
+  baseBackoff: 1000, // ms
   maxBackoffDelay: 5000, // ms
   timeout: 10000, // ms
 };
@@ -241,7 +241,7 @@ export async function fetchSwapQuote(
         throw new Error(`Failed to fetch swap quote: 404 Not Found`);
       }
 
-      // Rate limited - retry with backoff
+      // Rate limited - retry with backoff (silently, as 429s are expected)
       if (response.status === 429) {
         // Don't retry on last attempt
         if (attempt === RETRY_CONFIG.maxRetries - 1) {
@@ -250,10 +250,6 @@ export async function fetchSwapQuote(
 
         const retryAfter = response.headers.get("Retry-After");
         const delay = calculateBackoffDelay(attempt, retryAfter);
-
-        console.warn(
-          `Rate limited (429), retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries})`,
-        );
 
         await sleep(delay);
         continue;
@@ -279,12 +275,8 @@ export async function fetchSwapQuote(
         break;
       }
 
-      // For network errors, use exponential backoff
+      // For network errors, use exponential backoff (silently, as retries are expected)
       const delay = calculateBackoffDelay(attempt, null);
-      console.warn(
-        `Request failed, retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries})`,
-        error,
-      );
 
       await sleep(delay);
     }
