@@ -234,22 +234,11 @@ export const OnchainPurchaseProvider = ({
 
         const network = chainIdToEkuboNetwork(controller.chainId());
 
-        const scaledSwapQuote: SwapQuote = {
-          impact: swapQuote.impact,
-          total: swapQuote.total * BigInt(quantity),
-          splits: swapQuote.splits.map((split) => ({
-            ...split,
-            amount_specified: (
-              BigInt(split.amount_specified) * BigInt(quantity)
-            ).toString(),
-          })),
-        };
-
+        // Note: swapQuote is already fetched with quantity applied in useTokenSelection,
+        // so we use it directly without additional scaling
         const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
         const swapAmount =
-          scaledSwapQuote.total < 0n
-            ? -scaledSwapQuote.total
-            : scaledSwapQuote.total;
+          swapQuote.total < 0n ? -swapQuote.total : swapQuote.total;
         const doubledTotal = swapAmount * 2n;
         const totalQuoteSum =
           doubledTotal < swapAmount + BigInt(1e19)
@@ -271,7 +260,7 @@ export const OnchainPurchaseProvider = ({
           selectedToken.address,
           quote.paymentToken,
           totalCostWithQuantity,
-          scaledSwapQuote,
+          swapQuote,
           network,
         );
 
