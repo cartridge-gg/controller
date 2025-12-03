@@ -1,4 +1,10 @@
-import { Call, num, InvokeFunctionResponse, constants } from "starknet";
+import {
+  Call,
+  num,
+  InvokeFunctionResponse,
+  constants,
+  uint256,
+} from "starknet";
 import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
 import {
   ExternalWalletResponse,
@@ -60,6 +66,20 @@ export interface SwapQuote {
   impact: number;
   total: bigint;
   splits: SwapSplit[];
+}
+
+export interface SwapCallsParams {
+  selectedTokenAddress: string;
+  paymentToken: string;
+  totalCostWithQuantity: bigint;
+  swapQuote: SwapQuote;
+  network: EkuboNetwork;
+}
+
+export interface SwapCallsResult {
+  approveCall: Call;
+  swapCalls: Call[];
+  allCalls: Call[];
 }
 
 interface SwapQuoteResponse {
@@ -306,6 +326,48 @@ export async function fetchSwapQuoteInUsdc(
 }
 
 /**
+ * Prepares the swap calls for a token swap via Ekubo router.
+ *
+ * @param params - The swap parameters
+ * @returns The approval call and swap calls
+ */
+export function prepareSwapCalls(params: SwapCallsParams): SwapCallsResult {
+  const {
+    selectedTokenAddress,
+    paymentToken,
+    totalCostWithQuantity,
+    swapQuote,
+    network,
+  } = params;
+
+  const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
+
+  // Add 5% buffer for slippage (swapQuote.total is already absolute value)
+  const totalQuoteSum = (swapQuote.total * 105n) / 100n;
+
+  const approveAmount = uint256.bnToUint256(totalQuoteSum);
+  const approveCall: Call = {
+    contractAddress: selectedTokenAddress,
+    entrypoint: "approve",
+    calldata: [routerAddress, approveAmount.low, approveAmount.high],
+  };
+
+  const swapCalls = generateSwapCalls(
+    selectedTokenAddress,
+    paymentToken,
+    totalCostWithQuantity,
+    swapQuote,
+    network,
+  );
+
+  return {
+    approveCall,
+    swapCalls,
+    allCalls: [approveCall, ...swapCalls],
+  };
+}
+
+/**
  * Generate swap calls for Ekubo router
  *
  * Based on implementation from Provable Games:
@@ -326,13 +388,8 @@ export function generateSwapCalls(
   network: EkuboNetwork = "mainnet",
 ): Call[] {
   const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
-  // Calculate total amount with slippage buffer
-  let totalQuoteSum = quote.total < 0n ? -quote.total : quote.total;
-  const doubledTotal = totalQuoteSum * 2n;
-  totalQuoteSum =
-    doubledTotal < totalQuoteSum + BigInt(1e19)
-      ? doubledTotal
-      : totalQuoteSum + BigInt(1e19);
+  // Add 5% buffer for slippage (quote.total is already absolute value)
+  const totalQuoteSum = (quote.total * 105n) / 100n;
 
   // Transfer tokens to router
   const transferCall: Call = {

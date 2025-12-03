@@ -13,9 +13,8 @@ import { uint256, Call, num, cairo } from "starknet";
 import { isOnchainStarterpack } from "./types";
 import { getCurrentReferral } from "@/utils/referral";
 import {
-  generateSwapCalls,
   chainIdToEkuboNetwork,
-  EKUBO_ROUTER_ADDRESSES,
+  prepareSwapCalls,
   type SwapQuote,
 } from "@/utils/ekubo";
 import { Item } from "./types";
@@ -235,36 +234,16 @@ export const OnchainPurchaseProvider = ({
         const network = chainIdToEkuboNetwork(controller.chainId());
 
         // Note: swapQuote is already fetched with quantity applied in useTokenSelection,
-        // so we use it directly without additional scaling
-        const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
-        const swapAmount =
-          swapQuote.total < 0n ? -swapQuote.total : swapQuote.total;
-        const doubledTotal = swapAmount * 2n;
-        const totalQuoteSum =
-          doubledTotal < swapAmount + BigInt(1e19)
-            ? doubledTotal
-            : swapAmount + BigInt(1e19);
-
-        const approveSelectedTokenAmount = uint256.bnToUint256(totalQuoteSum);
-        const approveSelectedTokenCall: Call = {
-          contractAddress: selectedToken.address,
-          entrypoint: "approve",
-          calldata: [
-            routerAddress,
-            approveSelectedTokenAmount.low,
-            approveSelectedTokenAmount.high,
-          ],
-        };
-
-        const swapCallsWithoutApprove = generateSwapCalls(
-          selectedToken.address,
-          quote.paymentToken,
+        // so prepareSwapCalls uses it directly without additional scaling
+        const { allCalls: swapCalls } = prepareSwapCalls({
+          selectedTokenAddress: selectedToken.address,
+          paymentToken: quote.paymentToken,
           totalCostWithQuantity,
           swapQuote,
           network,
-        );
+        });
 
-        allCalls = [approveSelectedTokenCall, ...swapCallsWithoutApprove];
+        allCalls = swapCalls;
       }
 
       const amount256 = uint256.bnToUint256(totalCostWithQuantity);
