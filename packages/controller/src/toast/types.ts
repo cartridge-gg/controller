@@ -21,10 +21,9 @@ export interface ErrorToastOptions extends BaseToastOptions {
 // Transaction Toast
 export interface TransactionToastOptions extends BaseToastOptions {
   variant: "transaction";
-  hash: string;
-  status: "pending" | "success" | "failed";
-  amount?: string;
-  token?: string;
+  status: "confirming" | "confirmed";
+  isExpanded?: boolean;
+  label?: string;
 }
 
 // Network Switch Toast

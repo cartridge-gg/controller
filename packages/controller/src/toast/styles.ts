@@ -140,10 +140,3 @@ function getCommonStyles(): string {
     }
   `;
 }
-
-// Helper to create SVG icon
-export function createSVGIcon(path: string, color: string): string {
-  return `<svg viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="color: ${color}">
-    ${path}
-  </svg>`;
-}
