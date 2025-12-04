@@ -119,30 +119,35 @@ export class TurnkeyWallet {
 
       const auth0Client = await this.getAuth0Client(10_000);
 
-      // In the case of a signup, we definitely want to user to choose an account on its social provider
-      // If it's a login, it means we are already authed via the cookies
+      // For login flows, try to use cached Auth0 session if available
       if (!isSignup && (await auth0Client.isAuthenticated())) {
-        // Skip the authentication to the social provider and get directly the turnkey accounts
-        try {
-          const connectResult = await this.finishConnect({
-            nonce,
-          });
-          // If no account is specified this is a typical login flow, continue with the redirect
-          // If an account is specified and we're connected to the right account, return now
-          // otherwise continue the flow
-          if (this.account && this.account === connectResult.account) {
-            return connectResult;
-          }
-        } catch (error) {
-          // If we get an invalid OIDC token, the cached token may be invalid
-          // Force logout and continue with fresh authentication
-          if ((error as Error).message?.includes(OIDC_INVALID_TOKEN_ERROR)) {
-            console.info(
-              "[Turnkey] Cached Auth0 session invalid, forcing logout to obtain fresh token",
-            );
-            await auth0Client.logout({ openUrl: false });
-          } else {
-            throw error;
+        const tokenClaims = await auth0Client.getIdTokenClaims();
+        const cachedNonce = tokenClaims?.tknonce as string | undefined;
+
+        if (cachedNonce !== nonce) {
+          // Cached token has stale nonce from old iframe key, clear it
+          console.info(
+            "[Turnkey] Cached token nonce doesn't match iframe, clearing session",
+          );
+          await auth0Client.logout({ openUrl: false });
+        } else {
+          // Token nonce matches, try the fast path
+          try {
+            const connectResult = await this.finishConnect({ nonce });
+            // If account matches expectation, return early without OAuth redirect
+            if (this.account && this.account === connectResult.account) {
+              return connectResult;
+            }
+          } catch (error) {
+            // If token validation fails for other reasons, clear and continue
+            if ((error as Error).message?.includes(OIDC_INVALID_TOKEN_ERROR)) {
+              console.info(
+                "[Turnkey] Cached Auth0 session invalid, forcing logout",
+              );
+              await auth0Client.logout({ openUrl: false });
+            } else {
+              throw error;
+            }
           }
         }
       }
