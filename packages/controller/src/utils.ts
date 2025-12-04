@@ -214,3 +214,18 @@ export function isMobile() {
     navigator.maxTouchPoints > 0
   );
 }
+
+// Sanitize image src to prevent XSS
+export function sanitizeImageSrc(src: string): string {
+  // Allow only http/https URLs (absolute)
+  try {
+    const url = new URL(src, window.location.origin);
+    if (url.protocol === "http:" || url.protocol === "https:") {
+      return url.href;
+    }
+  } catch (_) {
+    // If invalid, fall through to fallback src below
+  }
+  // Fallback image (transparent pixel or default)
+  return "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+}
