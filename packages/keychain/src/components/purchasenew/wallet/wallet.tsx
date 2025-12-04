@@ -29,6 +29,7 @@ export function SelectWallet() {
     useOnchainPurchaseContext();
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(true);
   const [chainIds, setChainIds] = useState<Map<string, string>>(new Map());
   const [availableWallets, setAvailableWallets] = useState<
     Map<string, ExternalWallet[]>
@@ -62,10 +63,12 @@ export function SelectWallet() {
   useEffect(() => {
     if (!selectedNetworks.length) {
       setAvailableWallets(new Map());
+      setIsDetecting(false);
       return;
     }
 
     const getWallets = async () => {
+      setIsDetecting(true);
       const newAvailableWallets = new Map<string, ExternalWallet[]>();
       const newChainIds = new Map<string, string>();
       const wallets = await externalDetectWallets();
@@ -97,9 +100,13 @@ export function SelectWallet() {
 
       setChainIds(newChainIds);
       setAvailableWallets(newAvailableWallets);
+      setIsDetecting(false);
     };
 
-    getWallets().catch((e) => setError(e as Error));
+    getWallets().catch((e) => {
+      setError(e as Error);
+      setIsDetecting(false);
+    });
   }, [externalDetectWallets, isMainnet, selectedNetworks]);
 
   useEffect(() => {
@@ -192,6 +199,10 @@ export function SelectWallet() {
     const wallets = availableWallets.get(network.platform);
     return wallets && wallets.length > 0;
   });
+
+  if (isDetecting) {
+    return <></>;
+  }
 
   return (
     <>
