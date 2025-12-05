@@ -239,7 +239,7 @@ const CreateSessionLayout = ({
         {!policies?.verified && (
           <div
             className={cn(
-              "flex items-center p-2 mb-3 mt-3 gap-2 border border-solid-primary rounded-md cursor-pointer text-destructive-100 bg-background-100",
+              "flex items-center p-2 mt-3 gap-2 border border-solid-primary rounded-md cursor-pointer text-destructive-100 bg-background-100",
               isConsent ? "border-background-200" : "border-destructive-100",
             )}
             onClick={() => !isConnecting && setIsConsent(!isConsent)}
@@ -295,7 +295,7 @@ const CreateSessionLayout = ({
               void handlePrimaryAction();
             }}
           >
-            {isUpdate ? "update" : "create"} session
+            {isUpdate ? "update session" : "continue"}
           </Button>
         </div>
 
