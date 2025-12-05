@@ -383,12 +383,8 @@ export function useConnectionValue() {
     })();
   }, [controller?.username, chainId, controller]);
 
-  // Handle controller initialization
   useEffect(() => {
-    setIsMainnet(
-      import.meta.env.PROD &&
-        controller?.chainId() === constants.StarknetChainId.SN_MAIN,
-    );
+    setIsMainnet(controller?.chainId() === constants.StarknetChainId.SN_MAIN);
   }, [controller]);
 
   // Load config when preset is provided
