@@ -24,13 +24,20 @@ export const OnchainFeesTooltip = ({
   defaultOpen,
   quote,
   quantity = 1,
+  layerswapFees,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
   quote: Quote;
   quantity?: number;
+  layerswapFees?: string;
 }) => {
   const { decimals, symbol } = quote.paymentTokenMetadata;
+
+  // Format layerswap fees in USDC (6 decimals)
+  const formattedBridgeFee = layerswapFees
+    ? `${(Number(layerswapFees) / Math.pow(10, 6)).toFixed(2)} USDC`
+    : null;
 
   return (
     <TooltipProvider>
@@ -51,7 +58,6 @@ export const OnchainFeesTooltip = ({
               )}
             </span>
           </div>
-          <Separator className="bg-background-125" />
           <div className="flex flex-row justify-between text-foreground-300">
             <span>Protocol Fee:</span>
             <span>
@@ -63,16 +69,22 @@ export const OnchainFeesTooltip = ({
             </span>
           </div>
           {quote.referralFee > 0n && (
+            <div className="flex flex-row justify-between text-foreground-300">
+              <span>Referral Fee:</span>
+              <span>
+                {formatTokenAmount(
+                  quote.referralFee * BigInt(quantity),
+                  decimals,
+                  symbol,
+                )}
+              </span>
+            </div>
+          )}
+          {formattedBridgeFee && (
             <>
               <div className="flex flex-row justify-between text-foreground-300">
-                <span>Referral Fee:</span>
-                <span>
-                  {formatTokenAmount(
-                    quote.referralFee * BigInt(quantity),
-                    decimals,
-                    symbol,
-                  )}
-                </span>
+                <span>Bridge Fee:</span>
+                <span>{formattedBridgeFee}</span>
               </div>
             </>
           )}

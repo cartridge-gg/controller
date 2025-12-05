@@ -5,7 +5,6 @@ import {
   constants,
   uint256,
 } from "starknet";
-import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
 import {
   ExternalWalletResponse,
   ExternalWalletType,
@@ -36,7 +35,7 @@ export const EKUBO_ROUTER_ADDRESSES = {
  * USDC contract addresses by network
  */
 export const USDC_ADDRESSES = {
-  mainnet: USDC_CONTRACT_ADDRESS,
+  mainnet: "0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
   sepolia: "0x053b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080",
 } as const;
 

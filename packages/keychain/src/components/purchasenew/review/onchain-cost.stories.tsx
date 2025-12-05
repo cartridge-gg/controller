@@ -45,13 +45,13 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     isFetchingFees: false,
     swapId: undefined,
     explorer: undefined,
+    requestedAmount: undefined,
+    setRequestedAmount: () => {},
     depositAmount: undefined,
-    setDepositAmount: () => {},
     onOnchainPurchase: async () => {},
     onExternalConnect: async () => undefined,
-    onBackendCryptoPurchase: async () => {},
+    onSendDeposit: async () => {},
     waitForDeposit: async () => false,
-    fetchFees: async () => {},
   };
 
   return (

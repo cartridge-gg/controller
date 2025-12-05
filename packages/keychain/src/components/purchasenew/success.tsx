@@ -15,7 +15,7 @@ import {
 } from "@/context";
 import { useMemo } from "react";
 import { ConfirmingTransaction } from "./pending";
-import { getExplorer } from "@/hooks/payments/crypto";
+import { getExplorer } from "@/hooks/starterpack/layerswap";
 import { StarterpackType } from "@/context";
 
 export function Success() {

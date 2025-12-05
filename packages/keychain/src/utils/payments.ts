@@ -5,7 +5,7 @@ import {
   LayerswapDestinationNetwork,
   PurchaseType,
 } from "@cartridge/ui/utils/api/cartridge";
-import { mapPlatformToLayerswapSourceNetwork } from "@/hooks/payments/crypto";
+import { mapPlatformToLayerswapSourceNetwork } from "@/hooks/starterpack/layerswap";
 
 /**
  * Converts a deposit amount to a CreateLayerswapDepositInput object.

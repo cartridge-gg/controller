@@ -49,6 +49,7 @@ export function OnchainCheckout() {
   const [isChecking, setIsChecking] = useState(true);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [balanceError, setBalanceError] = useState<string | null>(null);
+  const [bridgeFrom, setBridgeFrom] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const wallet = getWallet(selectedWallet?.type || "controller");
 
@@ -121,14 +122,6 @@ export function OnchainCheckout() {
     return quote?.totalCost === BigInt(0);
   }, [quote]);
 
-  const needsBridge = useMemo(() => {
-    if (selectedPlatform && selectedPlatform !== "starknet") {
-      return `(${humanizeString(selectedPlatform)})`;
-    }
-
-    return null;
-  }, [selectedPlatform]);
-
   const onPurchase = useCallback(async () => {
     if (!hasSufficientBalance && !isFree) return;
 
@@ -147,6 +140,11 @@ export function OnchainCheckout() {
 
   // Fetch user's token balance
   useEffect(() => {
+    if (selectedPlatform && selectedPlatform !== "starknet") {
+      setBridgeFrom(`(${humanizeString(selectedPlatform)})`);
+      return;
+    }
+
     // Reset balance when wallet selection or token selection changes
     setBalance(null);
     setBalanceError(null);
@@ -214,9 +212,18 @@ export function OnchainCheckout() {
     };
 
     checkBalance();
-  }, [controller, tokenToCheck, selectedWallet, walletAddress]);
+  }, [
+    controller,
+    tokenToCheck,
+    selectedWallet,
+    walletAddress,
+    selectedPlatform,
+  ]);
 
-  const onWalletSelect = () => navigate(`/purchase/network/starknet`);
+  const onWalletSelect = () => {
+    const methods = "starknet;ethereum;base;arbitrum;optimism";
+    navigate(`/purchase/network/${methods}`);
+  };
 
   useEffect(() => {
     clearError();
@@ -296,7 +303,7 @@ export function OnchainCheckout() {
               onClick={onWalletSelect}
             >
               <div className="flex gap-2">
-                {wallet.subIcon} Purchase with {wallet.name} {needsBridge}
+                {wallet.subIcon} Purchase with {wallet.name} {bridgeFrom}
               </div>
               <ListIcon size="xs" variant="solid" />
             </div>
