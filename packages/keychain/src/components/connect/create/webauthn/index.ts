@@ -84,6 +84,9 @@ export function useWebauthnAuthentication() {
           owner: webauthnsSigner,
         });
       } else {
+        // Detect if we're on the /session route to skip wildcard session creation
+        const isRegisterSessionFlow = window.location.pathname === "/session";
+
         const { controller: loginController } = await Controller.login({
           appId: origin,
           classHash: controllerQuery.constructorCalldata[0],
@@ -94,6 +97,7 @@ export function useWebauthnAuthentication() {
           cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
           session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
           isControllerRegistered: true,
+          skipSession: isRegisterSessionFlow,
         });
         controller = loginController;
       }

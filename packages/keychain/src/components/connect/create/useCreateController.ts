@@ -524,6 +524,9 @@ export function useCreateController({
         }
       }
 
+      // Detect if we're on the /session route to skip wildcard session creation
+      const isRegisterSessionFlow = window.location.pathname === "/session";
+
       const loginRet = await Controller.login({
         appId: origin,
         rpcUrl,
@@ -536,6 +539,7 @@ export function useCreateController({
         cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
         session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
         isControllerRegistered: true,
+        skipSession: isRegisterSessionFlow,
       });
 
       window.controller = loginRet.controller;
