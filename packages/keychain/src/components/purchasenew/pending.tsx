@@ -15,7 +15,7 @@ import {
   Item,
   PaymentMethod,
 } from "@/context";
-import { Explorer, getExplorer } from "@/hooks/payments/crypto";
+import { Explorer, getExplorer } from "@/hooks/starterpack/layerswap";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@/context";
