@@ -64,11 +64,12 @@ export interface OnchainPurchaseContextType {
   // Layerswap state (for future use)
   layerswapFees: string | undefined;
   isFetchingFees: boolean;
+  isSendingDeposit: boolean;
   swapId: string | undefined;
   explorer: Explorer | undefined;
   requestedAmount: number | undefined;
-  setRequestedAmount: (amount: number) => void;
   depositAmount: number | undefined; // Computed: requestedAmount + fees
+  setRequestedAmount: (amount: number) => void;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -151,11 +152,12 @@ export const OnchainPurchaseProvider = ({
     depositAmount,
     layerswapFees,
     isFetchingFees,
+    isSendingDeposit,
     swapId,
     explorer,
+    depositError,
     onSendDeposit,
     waitForDeposit,
-    depositError,
   } = useLayerswap({
     controller,
     isMainnet,
@@ -365,6 +367,7 @@ export const OnchainPurchaseProvider = ({
     usdAmount,
     layerswapFees,
     isFetchingFees,
+    isSendingDeposit,
     swapId,
     explorer,
     requestedAmount,

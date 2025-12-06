@@ -466,10 +466,10 @@ export function useLayerswap({
       return;
 
     try {
-      swapInput.layerswapFees = layerswapFees;
+      const inputWithFees = { ...swapInput, layerswapFees };
 
       const result = await sendDeposit(
-        swapInput,
+        inputWithFees,
         walletAddress,
         selectedWallet.type,
         selectedPlatform,

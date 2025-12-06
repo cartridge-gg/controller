@@ -24,3 +24,11 @@ export type {
   UseTokenSelectionOptions,
   UseTokenSelectionReturn,
 } from "./token-selection";
+
+export { useTokenBalance } from "./token-balance";
+export type {
+  WalletInfo,
+  ConvertedPriceInfo,
+  UseTokenBalanceOptions,
+  UseTokenBalanceReturn,
+} from "./token-balance";

@@ -231,6 +231,13 @@ function parseGraphQLErrorMessage(
         };
       }
     } else if (code === "InvalidArgument") {
+      if (description.includes("Amount is below minimum")) {
+        return {
+          raw: raw || message,
+          summary: "Bridge amount is too low for this network",
+          details,
+        };
+      }
       return {
         raw: raw || message,
         summary: "Invalid request parameters",

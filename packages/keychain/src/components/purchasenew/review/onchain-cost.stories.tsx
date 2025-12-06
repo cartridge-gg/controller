@@ -39,6 +39,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     swapQuote: null,
     isFetchingConversion: false,
     isTokenSelectionLocked: false,
+    isSendingDeposit: false,
     conversionError: null,
     usdAmount: 0,
     layerswapFees: undefined,

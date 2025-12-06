@@ -705,6 +705,189 @@ export type BalanceEdge = {
   node: Balance;
 };
 
+export type CoinbaseAmount = {
+  __typename?: "CoinbaseAmount";
+  /** The amount value as a string. */
+  amount: Scalars["String"];
+  /** The currency code (e.g., "USD", "USDC"). */
+  currency: Scalars["String"];
+};
+
+export enum CoinbaseNetwork {
+  Arbitrum = "ARBITRUM",
+  Base = "BASE",
+  Ethereum = "ETHEREUM",
+  Optimism = "OPTIMISM",
+  Polygon = "POLYGON",
+  Solana = "SOLANA",
+}
+
+export type CoinbaseOnrampFee = {
+  __typename?: "CoinbaseOnrampFee";
+  /** The fee amount. */
+  amount: Scalars["String"];
+  /** The currency of the fee. */
+  currency: Scalars["String"];
+  /** The type of fee (FEE_TYPE_NETWORK or FEE_TYPE_EXCHANGE). */
+  type: Scalars["String"];
+};
+
+export type CoinbaseOnrampOrder = {
+  __typename?: "CoinbaseOnrampOrder";
+  /** When the order was created. */
+  createdAt: Scalars["Time"];
+  /** The destination address for the crypto. */
+  destinationAddress: Scalars["String"];
+  /** The destination network. */
+  destinationNetwork: Scalars["String"];
+  /** The exchange rate used for the conversion. */
+  exchangeRate: Scalars["String"];
+  /** Fees associated with the order. */
+  fees: Array<CoinbaseOnrampFee>;
+  /** The unique order ID. */
+  orderId: Scalars["String"];
+  /** The fiat currency used for payment. */
+  paymentCurrency: Scalars["String"];
+  /**
+   * The payment link URL for Apple Pay checkout.
+   * Append &useApplePaySandbox=true for testing on localhost.
+   */
+  paymentLink: Scalars["String"];
+  /** The type of payment link. */
+  paymentLinkType: Scalars["String"];
+  /** Payment amount before fees. */
+  paymentSubtotal: Scalars["String"];
+  /** Total payment amount including fees. */
+  paymentTotal: Scalars["String"];
+  /** The amount of crypto to be purchased. */
+  purchaseAmount: Scalars["String"];
+  /** The crypto currency being purchased (always USDC). */
+  purchaseCurrency: Scalars["String"];
+  /** Current status of the order. */
+  status: CoinbaseOnrampStatus;
+  /** Transaction hash (only available after crypto is sent). */
+  txHash?: Maybe<Scalars["String"]>;
+  /** When the order was last updated. */
+  updatedAt: Scalars["Time"];
+};
+
+export type CoinbaseOnrampQuote = {
+  __typename?: "CoinbaseOnrampQuote";
+  /** Fee charged by Coinbase. */
+  coinbaseFee: CoinbaseAmount;
+  /** Network fee for sending the crypto. */
+  networkFee: CoinbaseAmount;
+  /** Ready-to-use one-click-buy URL. Only returned when destinationAddress is provided. */
+  onrampUrl?: Maybe<Scalars["String"]>;
+  /** Payment amount before fees (cost of crypto). */
+  paymentSubtotal: CoinbaseAmount;
+  /** Total payment amount including fees. */
+  paymentTotal: CoinbaseAmount;
+  /** The amount of crypto to be purchased. */
+  purchaseAmount: CoinbaseAmount;
+  /** Quote ID that can be used when launching the Coinbase Onramp widget. */
+  quoteId: Scalars["String"];
+};
+
+export type CoinbaseOnrampQuoteInput = {
+  /** The client's IP address. Required by Coinbase for compliance. */
+  clientIP: Scalars["String"];
+  /** ISO 3166-1 two-digit country code (e.g., "US"). */
+  country: Scalars["String"];
+  /** Optional destination wallet address. If provided, the response will include a one-click-buy URL. */
+  destinationAddress?: InputMaybe<Scalars["String"]>;
+  /** The destination network for the USDC purchase. */
+  destinationNetwork: CoinbaseNetwork;
+  /** The amount of fiat currency to pay (e.g., "100.00" for $100 USD). */
+  paymentAmount: Scalars["String"];
+  /** The fiat currency to pay with (e.g., "USD"). */
+  paymentCurrency: Scalars["String"];
+  /** ISO 3166-2 subdivision code (e.g., "NY"). Required for US users. */
+  subdivision?: InputMaybe<Scalars["String"]>;
+};
+
+export type CoinbaseOnrampSession = {
+  __typename?: "CoinbaseOnrampSession";
+  /** The single-use Coinbase onramp URL. This URL can only be used once. */
+  onrampUrl: Scalars["String"];
+  /** The session token (for reference, already embedded in the URL). */
+  sessionToken: Scalars["String"];
+};
+
+export enum CoinbaseOnrampStatus {
+  Completed = "COMPLETED",
+  Failed = "FAILED",
+  PendingAuth = "PENDING_AUTH",
+  PendingPayment = "PENDING_PAYMENT",
+  Processing = "PROCESSING",
+}
+
+export type CoinbaseTransaction = {
+  __typename?: "CoinbaseTransaction";
+  /** Coinbase fee amount. */
+  coinbaseFee: CoinbaseAmount;
+  /** Country of the user. */
+  country: Scalars["String"];
+  /** When the transaction was created. */
+  createdAt: Scalars["String"];
+  /** Exchange rate for the transaction. */
+  exchangeRate: CoinbaseAmount;
+  /** Network fee amount. */
+  networkFee: CoinbaseAmount;
+  /** Payment method used. */
+  paymentMethod: Scalars["String"];
+  /** Fiat payment amount before fees. */
+  paymentSubtotal: CoinbaseAmount;
+  /** Total fiat payment amount. */
+  paymentTotal: CoinbaseAmount;
+  /** Amount of crypto being purchased. */
+  purchaseAmount: CoinbaseAmount;
+  /** Crypto currency being purchased. */
+  purchaseCurrency: Scalars["String"];
+  /** Network used to deliver crypto. */
+  purchaseNetwork: Scalars["String"];
+  /** Status of the transaction. */
+  status: CoinbaseTransactionStatus;
+  /** Unique identifier for the transaction. */
+  transactionId: Scalars["String"];
+  /** Transaction hash on the blockchain. */
+  txHash?: Maybe<Scalars["String"]>;
+  /** Type of transaction. */
+  type?: Maybe<Scalars["String"]>;
+  /** Wallet address the transaction was sent to. */
+  walletAddress?: Maybe<Scalars["String"]>;
+};
+
+export enum CoinbaseTransactionStatus {
+  Failed = "FAILED",
+  InProgress = "IN_PROGRESS",
+  Success = "SUCCESS",
+}
+
+export type CoinbaseTransactionsInput = {
+  /** Reference to the next page of transactions (from previous response). */
+  pageKey?: InputMaybe<Scalars["String"]>;
+  /** Number of transactions to return per page. Default is 1. */
+  pageSize?: InputMaybe<Scalars["Int"]>;
+  /**
+   * The partner user reference ID to get transactions for.
+   * This should match the partnerUserRef used when creating orders.
+   */
+  partnerUserRef: Scalars["String"];
+  /** If true, prepend "sandbox-" to partnerUserRef to query sandbox transactions. */
+  sandbox?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type CoinbaseTransactionsResponse = {
+  __typename?: "CoinbaseTransactionsResponse";
+  /** Reference to the next page of transactions. */
+  nextPageKey?: Maybe<Scalars["String"]>;
+  /** Total number of transactions for this user. */
+  totalCount?: Maybe<Scalars["String"]>;
+  /** List of transactions in reverse chronological order. */
+  transactions: Array<CoinbaseTransaction>;
+};
+
 export type Collectible = {
   __typename?: "Collectible";
   assets: Array<AssetEdge>;
@@ -891,6 +1074,66 @@ export type ControllerWhereInput = {
   updatedAtLTE?: InputMaybe<Scalars["Time"]>;
   updatedAtNEQ?: InputMaybe<Scalars["Time"]>;
   updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+};
+
+export type CreateCoinbaseOnrampOrderInput = {
+  /** The IP address of the end user (required for compliance). */
+  clientIp?: InputMaybe<Scalars["String"]>;
+  /** The destination wallet address on Base to receive the USDC. */
+  destinationAddress: Scalars["String"];
+  /**
+   * The domain where the Apple Pay button will be rendered.
+   * Required when embedding the payment link in an iframe.
+   */
+  domain?: InputMaybe<Scalars["String"]>;
+  /** The user's verified email address. */
+  email: Scalars["String"];
+  /** Optional partner order reference ID. */
+  partnerOrderRef?: InputMaybe<Scalars["String"]>;
+  /**
+   * A unique identifier for the user in your app.
+   * Prefix with "sandbox-" for test transactions.
+   */
+  partnerUserRef: Scalars["String"];
+  /**
+   * The amount of fiat currency to pay (e.g., "100.00" for $100 USD).
+   * Either paymentAmount or purchaseAmount must be provided.
+   */
+  paymentAmount?: InputMaybe<Scalars["String"]>;
+  /** The fiat currency to pay with. Currently only "USD" is supported. */
+  paymentCurrency: Scalars["String"];
+  /**
+   * The user's phone number in E.164 format (e.g., "+12055555555").
+   * Must be verified via OTP before use.
+   */
+  phoneNumber: Scalars["String"];
+  /** Timestamp of when the user's phone number was verified via OTP. */
+  phoneNumberVerifiedAt: Scalars["Time"];
+  /**
+   * The amount of USDC to purchase (e.g., "100.000000" for 100 USDC).
+   * Either paymentAmount or purchaseAmount must be provided.
+   */
+  purchaseAmount?: InputMaybe<Scalars["String"]>;
+  /** If true, use sandbox mode for testing (no real charges). */
+  sandbox?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type CreateCoinbaseOnrampSessionInput = {
+  /** The IP address of the end user (required for compliance). */
+  clientIp: Scalars["String"];
+  /** The destination wallet address to receive the crypto. */
+  destinationAddress: Scalars["String"];
+  /** The destination network (e.g., "base", "ethereum"). */
+  destinationNetwork: CoinbaseNetwork;
+  /**
+   * The amount of fiat currency to pay (e.g., "100.00" for $100 USD).
+   * Optional - if provided, creates a one-click buy URL.
+   */
+  paymentAmount?: InputMaybe<Scalars["String"]>;
+  /** The fiat currency to pay with (e.g., "USD"). Required if paymentAmount is provided. */
+  paymentCurrency?: InputMaybe<Scalars["String"]>;
+  /** URL to redirect the user after completing the purchase. */
+  redirectUrl?: InputMaybe<Scalars["String"]>;
 };
 
 export type CreateCryptoPaymentInput = {
@@ -2338,6 +2581,17 @@ export type Mutation = {
   beginLogin: Scalars["JSON"];
   beginRegistration: Scalars["JSON"];
   claimFreeStarterpack: Scalars["String"];
+  /**
+   * Create a Coinbase onramp order for purchasing USDC via Apple Pay.
+   * Returns a payment link URL that can be used to complete the purchase.
+   */
+  createCoinbaseOnrampOrder: CoinbaseOnrampOrder;
+  /**
+   * Create a Coinbase onramp session with a single-use URL.
+   * This is the recommended approach for integrating Coinbase onramp.
+   * Returns a session token and URL that can be used once to complete a purchase.
+   */
+  createCoinbaseOnrampSession: CoinbaseOnrampSession;
   createCryptoPayment: CryptoPayment;
   createDeployment: Deployment;
   createLayerswapDeposit: LayerswapPayment;
@@ -2401,6 +2655,14 @@ export type MutationBeginRegistrationArgs = {
 
 export type MutationClaimFreeStarterpackArgs = {
   input: StarterpackInput;
+};
+
+export type MutationCreateCoinbaseOnrampOrderArgs = {
+  input: CreateCoinbaseOnrampOrderInput;
+};
+
+export type MutationCreateCoinbaseOnrampSessionArgs = {
+  input: CreateCoinbaseOnrampSessionInput;
 };
 
 export type MutationCreateCryptoPaymentArgs = {
@@ -3448,6 +3710,16 @@ export type Query = {
   activities: ActivityResult;
   balance: Balance;
   balances: BalanceConnection;
+  /**
+   * Get a quote for a Coinbase onramp purchase without creating a transaction.
+   * This is an estimate only and does not guarantee the final price.
+   */
+  coinbaseOnrampQuote: CoinbaseOnrampQuote;
+  /**
+   * Get the status and history of Coinbase onramp transactions for a user.
+   * Returns a paginated list of transactions in reverse chronological order.
+   */
+  coinbaseOnrampTransactions: CoinbaseTransactionsResponse;
   collectible: Collectible;
   collectibles: CollectibleConnection;
   collection: Collection;
@@ -3533,6 +3805,14 @@ export type QueryBalancesArgs = {
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
   projects?: InputMaybe<Array<Scalars["String"]>>;
+};
+
+export type QueryCoinbaseOnrampQuoteArgs = {
+  input: CoinbaseOnrampQuoteInput;
+};
+
+export type QueryCoinbaseOnrampTransactionsArgs = {
+  input: CoinbaseTransactionsInput;
 };
 
 export type QueryCollectibleArgs = {
