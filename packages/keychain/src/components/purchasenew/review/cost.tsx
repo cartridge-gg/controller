@@ -26,7 +26,7 @@ import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
 import type { Quote } from "@/context";
 import { useCallback, useMemo, useEffect } from "react";
-import { useOnchainPurchaseContext } from "@/context";
+import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
 import { num } from "starknet";
 
 type PaymentRails = "stripe" | "crypto";
@@ -118,6 +118,7 @@ export function OnchainCostBreakdown({
     isFetchingConversion,
     quantity,
   } = useOnchainPurchaseContext();
+  const { displayError } = useStarterpackContext();
   const { decimals } = quote.paymentTokenMetadata;
 
   // Get default token (USDC if available) for fallback
@@ -214,31 +215,35 @@ export function OnchainCostBreakdown({
                 layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
               />
             </div>
-            {isFetchingConversion ? (
-              <Spinner />
-            ) : (
-              <div className="flex items-center gap-1.5">
-                {isPaymentTokenSameAsSelected ? (
-                  <span className="text-foreground-300">
-                    {formatAmount(paymentAmount)}
-                  </span>
-                ) : isUsingLayerswap ? (
-                  layerswapTotal !== null && displayToken ? (
-                    <span className="text-foreground-100">
-                      {formatAmount(layerswapTotal)}
-                    </span>
-                  ) : (
-                    <Spinner />
-                  )
+            {!displayError && (
+              <>
+                {isFetchingConversion ? (
+                  <Spinner />
                 ) : (
-                  convertedEquivalent !== null &&
-                  displayToken && (
-                    <span className="text-foreground-100">
-                      {formatAmount(convertedEquivalent)}
-                    </span>
-                  )
+                  <div className="flex items-center gap-1.5">
+                    {isPaymentTokenSameAsSelected ? (
+                      <span className="text-foreground-300">
+                        {formatAmount(paymentAmount)}
+                      </span>
+                    ) : isUsingLayerswap ? (
+                      layerswapTotal !== null && displayToken ? (
+                        <span className="text-foreground-100">
+                          {formatAmount(layerswapTotal)}
+                        </span>
+                      ) : (
+                        <Spinner />
+                      )
+                    ) : (
+                      convertedEquivalent !== null &&
+                      displayToken && (
+                        <span className="text-foreground-100">
+                          {formatAmount(convertedEquivalent)}
+                        </span>
+                      )
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         </CardContent>
