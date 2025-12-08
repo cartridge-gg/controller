@@ -19,7 +19,7 @@ export const ProgressBar = (options: ProgressBarOptions): HTMLDivElement => {
   container.style.overflow = "hidden";
   container.style.borderBottomLeftRadius = `${borderRadius}px`;
   container.style.borderBottomRightRadius = `${borderRadius}px`;
-  container.style.backgroundColor = "rgba(0, 0, 0, 0.08)";
+  container.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
 
   const inside = document.createElement("div");
   inside.className = "cartridge-toast-progress-bar-fill";
@@ -27,7 +27,7 @@ export const ProgressBar = (options: ProgressBarOptions): HTMLDivElement => {
   inside.style.bottom = "0";
   inside.style.left = "0";
   inside.style.height = "100%";
-  inside.style.backgroundColor = "rgba(0, 0, 0, 0.48)";
+  inside.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
   inside.style.borderBottomLeftRadius = `${borderRadius}px`;
 
   if (isInfiniteDuration) {
