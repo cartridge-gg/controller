@@ -298,8 +298,6 @@ const CreateSessionLayout = ({
             {isUpdate ? "update session" : "continue"}
           </Button>
         </div>
-
-        {!error && <div className="flex flex-col" />}
       </LayoutFooter>
     </>
   );
