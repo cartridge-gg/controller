@@ -8,7 +8,6 @@
   "sideEffects": false,
   "scripts": {
     "build:deps": "tsup --dts-resolve",
-    "build:compat": "tsup --dts-resolve",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },

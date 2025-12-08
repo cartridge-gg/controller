@@ -7,7 +7,6 @@
     "dev": "env-cmd -f .env.dev vite",
     "dev:live": "env-cmd -f .env.live vite",
     "build": "tsc -b && vite build",
-    "build:compat": "tsc -b && vite build",
     "preview": "vite preview --port 3001",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

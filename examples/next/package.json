@@ -6,7 +6,6 @@
     "dev": "env-cmd -f .env.dev next dev --webpack -p 3002",
     "dev:live": "env-cmd -f .env.live next dev --webpack -p 3002",
     "build": "next build --webpack",
-    "build:compat": "npm pkg set dependencies[@cartridge/controller]=0.9.0 dependencies[@cartridge/connector]=0.9.0 && next build && npm pkg set dependencies[@cartridge/controller]='workspace:*' dependencies[@cartridge/connector]='workspace:*'",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "start": "next start -p 3002",
@@ -29,8 +28,6 @@
     "starknet": "^8.5.4"
   },
   "devDependencies": {
-    "@cartridge/connector-published": "npm:@cartridge/connector@0.9.0",
-    "@cartridge/controller-published": "npm:@cartridge/controller@0.9.0",
     "@cartridge/eslint": "workspace:*",
     "@cartridge/tsconfig": "workspace:*",
     "@playwright/test": "^1.46.0",
