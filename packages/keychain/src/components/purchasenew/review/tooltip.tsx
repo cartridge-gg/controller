@@ -1,4 +1,4 @@
-import { CostDetails, usePurchaseContext } from "@/context";
+import { CostDetails, useOnchainPurchaseContext } from "@/context";
 import {
   Separator,
   Tooltip,
@@ -22,7 +22,7 @@ export const FeesTooltip = ({
   isStripe: boolean;
   costDetails: CostDetails;
 }) => {
-  const { layerswapFees } = usePurchaseContext();
+  const { layerswapFees } = useOnchainPurchaseContext();
 
   const cartridgeFeeInCents = useMemo(() => {
     const percent = isStripe ? 0.05 : 0.025;

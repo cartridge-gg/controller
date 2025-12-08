@@ -1,11 +1,12 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import {
   useNavigation,
-  usePurchaseContext,
+  useStarterpackContext,
+  useOnchainPurchaseContext,
   isClaimStarterpack,
   isOnchainStarterpack,
+  Item,
 } from "@/context";
-import { Item } from "@/context/purchase";
 import {
   Button,
   Card,
@@ -26,7 +27,7 @@ import { Supply } from "./supply";
 import { useEffect, useMemo } from "react";
 import { LoadingState } from "../loading";
 import { OnchainCostBreakdown } from "../review/cost";
-import { Quote } from "@/types/starterpack-types";
+import { Quote } from "@/context";
 import { Receiving } from "../receiving";
 import { getWallet } from "../wallet/config";
 import { num } from "starknet";
@@ -42,7 +43,7 @@ export function PurchaseStarterpack() {
     starterpackDetails: details,
     displayError,
     setStarterpackId,
-  } = usePurchaseContext();
+  } = useStarterpackContext();
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
@@ -246,7 +247,7 @@ export function OnchainStarterPackInner({
     selectedToken,
     conversionError,
     isFetchingConversion,
-  } = usePurchaseContext();
+  } = useOnchainPurchaseContext();
   const wallet = getWallet(selectedWallet?.type || "controller");
 
   // Check if we need token conversion (selected token differs from payment token)

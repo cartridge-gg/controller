@@ -1,7 +1,7 @@
 {
   "name": "@cartridge/controller-example-next",
   "private": true,
-  "version": "0.11.2",
+  "version": "0.11.3-alpha.1",
   "scripts": {
     "dev": "env-cmd -f .env.dev next dev -p 3002",
     "dev:live": "env-cmd -f .env.live next dev -p 3002",
@@ -21,7 +21,7 @@
     "@cartridge/ui": "catalog:",
     "@starknet-react/chains": "catalog:",
     "@starknet-react/core": "^5.0.1",
-    "next": "^15.1.5",
+    "next": "15.3.6",
     "next-themes": "^0.3.0",
     "prettier": "catalog:",
     "react": "catalog:",

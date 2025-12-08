@@ -1,31 +1,18 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { useController } from "./controller";
-import { useConnection } from "./connection";
-import {
-  CairoByteArray,
-  Call,
-  constants,
-  RpcProvider,
-  shortString,
-  uint256,
-} from "starknet";
+import { useController } from "@/hooks/controller";
+import { useConnection } from "@/hooks/connection";
+import { CairoByteArray, Call, constants, uint256 } from "starknet";
 import {
   fetchSwapQuote,
   USDC_ADDRESSES,
   type EkuboNetwork,
 } from "@/utils/ekubo";
-import {
-  USDT_CONTRACT_ADDRESS,
-  STRK_CONTRACT_ADDRESS,
-  ETH_CONTRACT_ADDRESS,
-} from "@cartridge/ui/utils";
 import { getCurrentReferral } from "@/utils/referral";
-import { Quote } from "@/types/starterpack-types";
-
-interface TokenMetadata {
-  symbol: string;
-  decimals: number;
-}
+import { Quote } from "@/context";
+import {
+  fetchTokenMetadata,
+  getCachedTokenMetadata,
+} from "@/utils/token-metadata";
 
 // Raw JSON from contract (snake_case)
 interface ItemOnchainRaw {
@@ -68,73 +55,6 @@ function convertMetadata(
       description: item.description,
       imageUri: item.image_uri,
     })),
-  };
-}
-
-/**
- * Cached token metadata to avoid RPC calls for common tokens
- */
-const CACHED_TOKEN_METADATA: Record<string, TokenMetadata> = {
-  // USDC on mainnet
-  [USDC_ADDRESSES.mainnet.toLowerCase()]: {
-    symbol: "USDC",
-    decimals: 6,
-  },
-  // USDC on sepolia
-  [USDC_ADDRESSES.sepolia.toLowerCase()]: {
-    symbol: "USDC",
-    decimals: 6,
-  },
-  [USDT_CONTRACT_ADDRESS.toLowerCase()]: {
-    symbol: "USDT",
-    decimals: 6,
-  },
-  [STRK_CONTRACT_ADDRESS.toLowerCase()]: {
-    symbol: "STRK",
-    decimals: 18,
-  },
-  [ETH_CONTRACT_ADDRESS.toLowerCase()]: {
-    symbol: "ETH",
-    decimals: 18,
-  },
-};
-
-/**
- * Get cached token metadata without RPC calls, or null if not cached
- */
-function getCachedTokenMetadata(tokenAddress: string): TokenMetadata | null {
-  const normalized = tokenAddress.toLowerCase();
-  return CACHED_TOKEN_METADATA[normalized] || null;
-}
-
-/**
- * Fetch token metadata via RPC calls
- */
-async function fetchTokenMetadata(
-  tokenAddress: string,
-  provider: RpcProvider,
-): Promise<TokenMetadata> {
-  const [symbolRes, decimalsRes] = await Promise.all([
-    provider.callContract({
-      contractAddress: tokenAddress,
-      entrypoint: "symbol",
-      calldata: [],
-    } as Call),
-    provider.callContract({
-      contractAddress: tokenAddress,
-      entrypoint: "decimals",
-      calldata: [],
-    } as Call),
-  ]);
-
-  let symbol = shortString.decodeShortString(symbolRes[0]);
-  if (symbolRes.length > 1) {
-    symbol = shortString.decodeShortString(symbolRes[1]);
-  }
-
-  return {
-    symbol,
-    decimals: Number(decimalsRes[0]),
   };
 }
 

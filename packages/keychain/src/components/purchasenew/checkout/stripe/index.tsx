@@ -1,12 +1,17 @@
 import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import CheckoutForm from "./form";
-import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  useNavigation,
+  useStarterpackContext,
+  useCreditPurchaseContext,
+} from "@/context";
 import { useEffect } from "react";
 
 export function StripeCheckout() {
-  const { stripePromise, clientSecret, costDetails, clearError } =
-    usePurchaseContext();
+  const { clearError } = useStarterpackContext();
+  const { stripePromise, clientSecret, costDetails } =
+    useCreditPurchaseContext();
   const { navigate } = useNavigation();
 
   useEffect(() => {

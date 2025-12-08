@@ -1,4 +1,4 @@
-import { Item } from "@/context/purchase";
+import { Item } from "@/context";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 
 export interface Wallet {

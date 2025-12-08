@@ -254,7 +254,12 @@ export function TokensProvider({
               quote: "USDC",
             };
           } catch (error) {
-            console.error(`Failed to fetch price for ${address}:`, error);
+            // Only log non-429 errors (rate limiting is expected)
+            const is429 =
+              error instanceof Error && error.message.includes("429");
+            if (!is429) {
+              console.error(`Failed to fetch price for ${address}:`, error);
+            }
             return null;
           }
         }),
@@ -271,7 +276,7 @@ export function TokensProvider({
     {
       refetchInterval,
       enabled: debouncedAddresses.length > 0,
-      staleTime: 30000,
+      staleTime: 60000, // 1 minute - reduce Ekubo API calls
     },
   );
 

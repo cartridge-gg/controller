@@ -24,9 +24,9 @@ import {
 } from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
-import type { Quote } from "@/types/starterpack-types";
+import type { Quote } from "@/context";
 import { useCallback, useMemo, useEffect } from "react";
-import { usePurchaseContext } from "@/context";
+import { useOnchainPurchaseContext } from "@/context";
 import { num } from "starknet";
 
 type PaymentRails = "stripe" | "crypto";
@@ -101,21 +101,20 @@ export function OnchainCostBreakdown({
   quote,
   platform,
   openFeesTooltip = false,
-  lockTokenSelection = false,
 }: {
   quote: Quote;
   platform?: ExternalPlatform;
   openFeesTooltip?: boolean;
-  lockTokenSelection?: boolean;
 }) {
   const {
     availableTokens,
     selectedToken,
     setSelectedToken,
     convertedPrice,
+    isTokenSelectionLocked,
     isFetchingConversion,
     quantity,
-  } = usePurchaseContext();
+  } = useOnchainPurchaseContext();
   const { decimals } = quote.paymentTokenMetadata;
 
   // Get default token (USDC if available) for fallback
@@ -228,7 +227,7 @@ export function OnchainCostBreakdown({
           value={displayToken?.address}
           onValueChange={handleTokenChange}
           defaultValue={defaultToken?.address}
-          disabled={availableTokens.length <= 1 || lockTokenSelection}
+          disabled={availableTokens.length <= 1 || isTokenSelectionLocked}
         >
           <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2" />
           <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">

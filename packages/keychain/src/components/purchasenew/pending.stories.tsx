@@ -5,12 +5,7 @@ import {
   ClaimPendingInner,
 } from "./pending";
 import { CreditIcon } from "@cartridge/ui";
-import {
-  ItemType,
-  PurchaseContext,
-  PurchaseContextType,
-} from "@/context/purchase";
-import { ReactNode } from "react";
+import { ItemType, StarterpackProviders } from "@/context";
 import { ExternalWalletType } from "@cartridge/controller";
 
 const TOKEN_ICONS = {
@@ -21,58 +16,15 @@ const TOKEN_ICONS = {
     "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/a3bfe959-50c4-4f89-0aef-b19207d82a00/logo",
 };
 
-const MockPurchaseProvider = ({ children }: { children: ReactNode }) => {
-  const mockContext: PurchaseContextType = {
-    usdAmount: 100,
-    purchaseItems: [],
-    claimItems: [],
-    layerswapFees: undefined,
-    isFetchingFees: false,
-    selectedPlatform: "ethereum",
-    stripePromise: Promise.resolve(null),
-    isStripeLoading: false,
-    isDepositLoading: false,
-    isStarterpackLoading: false,
-    clearError: () => {},
-    clearSelectedWallet: () => {},
-    availableTokens: [],
-    convertedPrice: null,
-    swapQuote: null,
-    isFetchingConversion: false,
-    conversionError: null,
-    quantity: 1,
-    incrementQuantity: () => {},
-    decrementQuantity: () => {},
-    setUsdAmount: () => {},
-    setDepositAmount: () => {},
-    setStarterpackId: () => {},
-    setTransactionHash: () => {},
-    setSelectedToken: () => {},
-    setClaimItems: () => {},
-    onCreditCardPurchase: async () => {},
-    onBackendCryptoPurchase: async () => {},
-    onOnchainPurchase: async () => {},
-    onExternalConnect: async () => undefined,
-    waitForDeposit: async () => true,
-    fetchFees: async () => {},
-  };
-
-  return (
-    <PurchaseContext.Provider value={mockContext}>
-      {children}
-    </PurchaseContext.Provider>
-  );
-};
-
 // Main component meta
 const meta = {
   decorators: [
     (Story) => (
-      <MockPurchaseProvider>
+      <StarterpackProviders>
         <div className="w-full max-w-md mx-auto">
           <Story />
         </div>
-      </MockPurchaseProvider>
+      </StarterpackProviders>
     ),
   ],
 } satisfies Meta;
@@ -104,6 +56,8 @@ export const CryptoPurchaseWithCredits: Story = {
       paymentMethod="crypto"
       swapId="payment_123"
       transactionHash="0x1234567890abcdef"
+      selectedPlatform="ethereum"
+      waitForDeposit={async () => true}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0x1234567890abcdef",
@@ -146,6 +100,8 @@ export const CryptoPurchaseWithNFT: Story = {
       paymentMethod="crypto"
       swapId="payment_456"
       transactionHash="0xabcdef1234567890"
+      selectedPlatform="solana"
+      waitForDeposit={async () => true}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0xabcdef1234567890",
@@ -182,6 +138,8 @@ export const CryptoPurchaseWithoutWallet: Story = {
       ]}
       paymentMethod="crypto"
       swapId="payment_789"
+      selectedPlatform="starknet"
+      waitForDeposit={async () => true}
     />
   ),
 };
@@ -212,6 +170,8 @@ export const StripePurchase: Story = {
       ]}
       paymentMethod="stripe"
       swapId="pi_stripe123"
+      selectedPlatform="starknet"
+      waitForDeposit={async () => true}
     />
   ),
 };
@@ -347,6 +307,8 @@ export const CryptoPurchaseLoading: Story = {
       paymentMethod="crypto"
       swapId="payment_loading"
       transactionHash="0x0000000000000000"
+      selectedPlatform="starknet"
+      waitForDeposit={async () => true}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0x0000000000000000",
@@ -386,6 +348,8 @@ export const TokenPurchaseSmallAmount: Story = {
       paymentMethod="crypto"
       swapId="payment_small_tokens"
       transactionHash="0xabc123def456"
+      selectedPlatform="ethereum"
+      waitForDeposit={async () => true}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0xabc123def456",
@@ -431,6 +395,8 @@ export const TokenPurchaseLargeAmount: Story = {
       paymentMethod="crypto"
       swapId="payment_large_tokens"
       transactionHash="0xdef789abc012"
+      selectedPlatform="ethereum"
+      waitForDeposit={async () => true}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0xdef789abc012",

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { OnchainStarterPackInner } from "./starterpack";
-import { ItemType, PurchaseProvider } from "@/context";
+import { ItemType, StarterpackProviders } from "@/context";
 
 const meta = {
   component: OnchainStarterPackInner,
@@ -11,9 +11,9 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <PurchaseProvider>
+      <StarterpackProviders>
         <Story />
-      </PurchaseProvider>
+      </StarterpackProviders>
     ),
   ],
 } satisfies Meta<typeof OnchainStarterPackInner>;

@@ -1,9 +1,9 @@
 import {
   useNavigation,
-  usePurchaseContext,
+  useStarterpackContext,
   type BackendStarterpackDetails,
 } from "@/context";
-import { MerkleDrop } from "@/hooks/starterpack-claim";
+import { MerkleDrop } from "@/hooks/starterpack";
 import { humanizeString } from "@cartridge/controller";
 import {
   ArbitrumIcon,
@@ -26,7 +26,7 @@ import { useCallback } from "react";
 
 export const Collections = () => {
   const { isStarterpackLoading, starterpackDetails: detailsRaw } =
-    usePurchaseContext();
+    useStarterpackContext();
 
   // MerkleDrops are backend-only (part of claims), so we can safely cast
   const details = detailsRaw as BackendStarterpackDetails | undefined;
