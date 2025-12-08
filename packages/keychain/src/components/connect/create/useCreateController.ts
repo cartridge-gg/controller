@@ -422,9 +422,8 @@ export function useCreateController({
           };
           break;
         case "metamask":
-        case "phantom":
-        case "argent":
         case "rabby":
+        case "phantom-evm":
           signupResponse = await signupWithExternalWallet(authenticationMode);
           signer = {
             type: SignerType.Eip191,
@@ -652,7 +651,8 @@ export function useCreateController({
           break;
         }
         case "rabby":
-        case "metamask": {
+        case "metamask":
+        case "phantom-evm": {
           setWaitingForConfirmation(true);
           loginResponse = await loginWithExternalWallet(authenticationMethod);
           break;
