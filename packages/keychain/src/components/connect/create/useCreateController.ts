@@ -42,6 +42,7 @@ import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { ParsedSessionPolicies, hasApprovalPolicies } from "@/hooks/session";
 import { safeRedirect } from "@/utils/url-validator";
+import { isRegisterSessionFlow } from "@/utils/routes";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -524,9 +525,6 @@ export function useCreateController({
         }
       }
 
-      // Detect if we're on the /session route to skip wildcard session creation
-      const isRegisterSessionFlow = window.location.pathname === "/session";
-
       const loginRet = await Controller.login({
         appId: origin,
         rpcUrl,
@@ -539,7 +537,7 @@ export function useCreateController({
         cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
         session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
         isControllerRegistered: true,
-        skipSession: isRegisterSessionFlow,
+        skipSession: isRegisterSessionFlow(),
       });
 
       window.controller = loginRet.controller;
