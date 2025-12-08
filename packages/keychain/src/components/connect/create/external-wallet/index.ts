@@ -51,7 +51,11 @@ export const useExternalWalletAuthentication = () => {
 };
 
 const walletToSigner = (wallet: ExternalWalletResponse) => {
-  if (wallet.wallet !== "metamask" && wallet.wallet !== "rabby") {
+  if (
+    wallet.wallet !== "metamask" &&
+    wallet.wallet !== "rabby" &&
+    wallet.wallet !== "phantom-evm"
+  ) {
     throw new Error("Unsupported wallet");
   }
   return {

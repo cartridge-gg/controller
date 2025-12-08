@@ -52,6 +52,7 @@ export function getAuthMethodIcon(
     case "rabby":
       return RabbyColorIcon;
     case "phantom":
+    case "phantom-evm":
       return PhantomColorIcon;
     case "argent":
       return ArgentColorIcon;
