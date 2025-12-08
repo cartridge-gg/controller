@@ -21,7 +21,7 @@
     "@cartridge/ui": "catalog:",
     "@starknet-react/chains": "catalog:",
     "@starknet-react/core": "^5.0.1",
-    "next": "^15.1.5",
+    "next": "15.3.6",
     "next-themes": "^0.3.0",
     "prettier": "catalog:",
     "react": "catalog:",
