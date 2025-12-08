@@ -6,7 +6,6 @@
     "preinstall": "npx only-allow pnpm",
     "build:deps": "turbo build:deps",
     "build": "turbo build:deps build && pnpm graphql:gen",
-    "build:compat": "turbo build:deps build:compat",
     "dev": "turbo build:deps dev",
     "dev:live": "turbo build:deps dev:live",
     "storybook": "pnpm turbo build:deps storybook",
