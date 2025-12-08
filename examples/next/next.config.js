@@ -5,6 +5,9 @@ const nextConfig = {
   experimental: {
     externalDir: true,
   },
+  // Explicitly use webpack for WebAssembly support
+  // Turbopack doesn't yet support asyncWebAssembly experimental feature
+  turbopack: {},
   webpack: (config, { isServer, dev }) => {
     config.output.environment = {
       ...config.output.environment,

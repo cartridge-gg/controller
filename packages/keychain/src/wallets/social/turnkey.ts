@@ -1,3 +1,4 @@
+import { ROUTES } from "@/utils/routes";
 import { Auth0Client, createAuth0Client } from "@auth0/auth0-spa-js";
 import {
   ExternalPlatform,
@@ -163,7 +164,7 @@ export class TurnkeyWallet {
       localStorage.setItem(RPC_URL_KEY, this.rpcUrl);
 
       const redirectUri =
-        windowUri.pathname === "/session"
+        windowUri.pathname === ROUTES.SESSION
           ? windowUri.origin + windowUri.pathname
           : windowUri.origin;
 
