@@ -34,7 +34,7 @@ export abstract class EthereumWalletBase implements WalletAdapter {
     return this.provider;
   }
 
-  protected getEthereumProvider(): any {
+  private getEthereumProvider(): any {
     const provider = this.getProvider();
     if (provider) {
       return provider.provider;
@@ -49,28 +49,12 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       return (window as any).ethereum;
     }
 
-    // Fallback for Phantom when not announced via EIP-6963
-    if (this.rdns === "app.phantom" && typeof window !== "undefined") {
-      const phantomProvider = (window as any).phantom?.ethereum;
-      if (phantomProvider) {
-        return phantomProvider;
-      }
-      // Also check if window.ethereum is Phantom
-      if ((window as any).ethereum?.isPhantom) {
-        return (window as any).ethereum;
-      }
-    }
-
     return null;
   }
 
   private initializeIfAvailable(): void {
     const provider = this.getProvider();
     if (provider && !this.initialized) {
-      this.initialized = true;
-      this.initializeProvider();
-    } else if (!this.initialized && this.getEthereumProvider()) {
-      // Initialize with fallback provider if available
       this.initialized = true;
       this.initializeProvider();
     }
@@ -80,13 +64,9 @@ export abstract class EthereumWalletBase implements WalletAdapter {
 
   private initializeProvider(): void {
     const provider = this.getProvider();
-    const ethereumProvider = this.getEthereumProvider();
+    if (!provider) return;
 
-    if (!provider && !ethereumProvider) return;
-
-    const providerToUse = provider?.provider || ethereumProvider;
-
-    providerToUse
+    provider.provider
       .request({
         method: "eth_accounts",
       })
@@ -98,7 +78,7 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       })
       .catch(console.error);
 
-    providerToUse
+    provider.provider
       .request({
         method: "eth_chainId",
       })
@@ -107,11 +87,11 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       })
       .catch(console.error);
 
-    providerToUse?.on("chainChanged", (chainId: string) => {
+    provider.provider?.on("chainChanged", (chainId: string) => {
       this.platform = chainIdToPlatform(chainId);
     });
 
-    providerToUse?.on("accountsChanged", (accounts: string[]) => {
+    provider.provider?.on("accountsChanged", (accounts: string[]) => {
       if (accounts) {
         this.connectedAccounts = accounts.map((account) => getAddress(account));
         this.account =
@@ -136,18 +116,6 @@ export abstract class EthereumWalletBase implements WalletAdapter {
     ) {
       // MetaMask might be available via window.ethereum even if not announced via EIP-6963 yet
       return !!(window as any).ethereum?.isMetaMask;
-    }
-
-    // Also check for Phantom via window.phantom.ethereum as a fallback
-    if (
-      !provider &&
-      this.rdns === "app.phantom" &&
-      typeof window !== "undefined"
-    ) {
-      // Phantom might be available via window.phantom.ethereum or window.ethereum.isPhantom
-      const phantomProvider = (window as any).phantom?.ethereum;
-      const isPhantom = (window as any).ethereum?.isPhantom;
-      return !!(phantomProvider || isPhantom);
     }
 
     // Initialize if we just found the provider
@@ -201,14 +169,6 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       ) {
         // Fallback for MetaMask when not announced via EIP-6963
         ethereum = (window as any).ethereum;
-      } else if (this.rdns === "app.phantom") {
-        // Fallback for Phantom when not announced via EIP-6963
-        const phantomProvider = (window as any).phantom?.ethereum;
-        if (phantomProvider) {
-          ethereum = phantomProvider;
-        } else if ((window as any).ethereum?.isPhantom) {
-          ethereum = (window as any).ethereum;
-        }
       }
 
       if (!ethereum) {
@@ -224,32 +184,18 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         this.connectedAccounts = accounts.map(getAddress);
 
         // If we used the fallback, store the ethereum provider for future use
-        if (!provider) {
-          if (this.rdns === "io.metamask") {
-            // Create a mock EIP6963ProviderDetail for consistency
-            this.provider = {
-              info: {
-                uuid: "metamask-fallback",
-                name: "MetaMask",
-                icon: "data:image/svg+xml;base64,",
-                rdns: "io.metamask",
-              },
-              provider: ethereum,
-            } as EIP6963ProviderDetail;
-            this.initializeIfAvailable();
-          } else if (this.rdns === "app.phantom") {
-            // Create a mock EIP6963ProviderDetail for Phantom
-            this.provider = {
-              info: {
-                uuid: "phantom-fallback",
-                name: "Phantom",
-                icon: "data:image/svg+xml;base64,",
-                rdns: "app.phantom",
-              },
-              provider: ethereum,
-            } as EIP6963ProviderDetail;
-            this.initializeIfAvailable();
-          }
+        if (!provider && this.rdns === "io.metamask") {
+          // Create a mock EIP6963ProviderDetail for consistency
+          this.provider = {
+            info: {
+              uuid: "metamask-fallback",
+              name: "MetaMask",
+              icon: "data:image/svg+xml;base64,",
+              rdns: "io.metamask",
+            },
+            provider: ethereum,
+          } as EIP6963ProviderDetail;
+          this.initializeIfAvailable();
         }
 
         return { success: true, wallet: this.type, account: this.account };
