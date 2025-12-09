@@ -84,16 +84,10 @@ export class WalletBridge {
   }
 
   async detectWallets(): Promise<ExternalWallet[]> {
-    const wallets = Array.from(this.walletAdapters.values()).map((adapter) => {
-      const info = adapter.getInfo();
-      console.log(
-        `[WalletBridge] ${adapter.type} - available: ${info.available}`,
-        info,
-      );
-      return info;
-    }) as ExternalWallet[];
+    const wallets = Array.from(this.walletAdapters.values()).map(
+      (adapter) => adapter.getInfo(),
+    ) as ExternalWallet[];
 
-    console.log("[WalletBridge] All detected wallets:", wallets);
     return wallets;
   }
 

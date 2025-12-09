@@ -186,27 +186,16 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
     [wallets],
   );
 
-  const supportedWalletsForAuth: AuthExternalWallet[] = useMemo(() => {
-    console.log("[WalletsProvider] Computing supportedWalletsForAuth");
-    console.log(
-      "  All wallets:",
-      wallets.map((w) => w.type),
-    );
-    console.log("  AUTH_EXTERNAL_WALLETS:", AUTH_EXTERNAL_WALLETS);
-    const supported = [
+  const supportedWalletsForAuth: AuthExternalWallet[] = useMemo(
+    () => [
       ...(wallets
         .map((wallet) => wallet.type)
-        .filter((x) => {
-          const included = AUTH_EXTERNAL_WALLETS.includes(
-            x as AuthExternalWallet,
-          );
-          console.log(`  ${x} included:`, included);
-          return included;
-        }) as AuthExternalWallet[]),
-    ];
-    console.log("  Supported for auth:", supported);
-    return supported;
-  }, [wallets]);
+        .filter((x) =>
+          AUTH_EXTERNAL_WALLETS.includes(x as AuthExternalWallet),
+        ) as AuthExternalWallet[]),
+    ],
+    [wallets],
+  );
 
   const value = useMemo(
     () => ({
