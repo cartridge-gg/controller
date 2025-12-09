@@ -1,6 +1,6 @@
-// src/CloseButton.ts
 export const CloseButton = (translucent = false): HTMLDivElement => {
   const container = document.createElement("div");
+  container.id = "close-button";
   container.style.display = "flex";
   container.style.alignItems = "center";
   container.style.justifyContent = "center";
