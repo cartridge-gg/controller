@@ -50,10 +50,7 @@ export abstract class EthereumWalletBase implements WalletAdapter {
     }
 
     // Fallback for Phantom when not announced via EIP-6963
-    if (
-      this.rdns === "app.phantom" &&
-      typeof window !== "undefined"
-    ) {
+    if (this.rdns === "app.phantom" && typeof window !== "undefined") {
       const phantomProvider = (window as any).phantom?.ethereum;
       if (phantomProvider) {
         return phantomProvider;
