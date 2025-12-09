@@ -5,6 +5,7 @@ export * from "./bridge";
 export * from "./ethereum-base";
 export * from "./metamask";
 export * from "./phantom";
+export * from "./phantom-evm";
 export * from "./rabby";
 export * from "./types";
 export * from "./platform";

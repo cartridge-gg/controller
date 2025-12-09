@@ -5,6 +5,7 @@ export const AUTH_METHODS_LABELS: Record<AuthOption, string> = {
   braavos: "Braavos",
   webauthn: "Passkey",
   phantom: "Phantom",
+  "phantom-evm": "Phantom",
   rabby: "Rabby",
   metamask: "MetaMask",
   discord: "Discord",

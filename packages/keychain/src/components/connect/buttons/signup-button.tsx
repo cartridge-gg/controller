@@ -57,6 +57,11 @@ const OPTIONS: Partial<
     Icon: PhantomColorIcon,
     label: AUTH_METHODS_LABELS.phantom,
   },
+  "phantom-evm": {
+    variant: "secondary",
+    Icon: PhantomColorIcon,
+    label: AUTH_METHODS_LABELS["phantom-evm"],
+  },
   discord: {
     variant: "secondary",
     Icon: DiscordColorIcon,

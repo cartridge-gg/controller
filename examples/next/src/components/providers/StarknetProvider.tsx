@@ -191,7 +191,8 @@ const signupOptions: AuthOptions = [
   "walletconnect",
   "metamask",
   "password",
-  // "rabby",
+  "rabby",
+  "phantom-evm",
 ];
 
 const controller = new ControllerConnector({

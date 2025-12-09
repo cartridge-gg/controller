@@ -3,6 +3,7 @@ import { ArgentWallet } from "./argent";
 import { BaseWallet } from "./base";
 import { MetaMaskWallet } from "./metamask";
 import { PhantomWallet } from "./phantom";
+import { PhantomEVMWallet } from "./phantom-evm";
 import { RabbyWallet } from "./rabby";
 import {
   ExternalWallet,
@@ -27,6 +28,9 @@ export class WalletBridge {
 
     const phantom = new PhantomWallet();
     this.walletAdapters.set("phantom", phantom);
+
+    const phantomEvm = new PhantomEVMWallet();
+    this.walletAdapters.set("phantom-evm", phantomEvm);
 
     const argent = new ArgentWallet();
     this.walletAdapters.set("argent", argent);
