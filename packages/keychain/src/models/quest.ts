@@ -7,11 +7,95 @@ export const QUEST_ASSOCIATION = "QuestAssociation";
 export const QUEST_CONDITION = "QuestCondition";
 export const QUEST_CREATION = "QuestCreation";
 export const QUEST_PROGRESSION = "QuestProgression";
+export const QUEST_UNLOCKED = "QuestUnlocked";
+export const QUEST_COMPLETED = "QuestCompleted";
+export const QUEST_CLAIMED = "QuestClaimed";
 
 export interface RawReward {
   name: string;
   description: string;
   icon: string;
+}
+
+export interface RawUnlocked {
+  player_id: {
+    type: "primitive";
+    type_name: "felt252";
+    value: string;
+    key: boolean;
+  };
+  quest_id: {
+    type: "primitive";
+    type_name: "felt252";
+    value: string;
+    key: boolean;
+  };
+  interval_id: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
+  time: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
+}
+
+export interface RawCompleted {
+  player_id: {
+    type: "primitive";
+    type_name: "felt252";
+    value: string;
+    key: boolean;
+  };
+  quest_id: {
+    type: "primitive";
+    type_name: "felt252";
+    value: string;
+    key: boolean;
+  };
+  interval_id: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
+  time: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
+}
+
+export interface RawClaimed {
+  player_id: {
+    type: "primitive";
+    type_name: "felt252";
+    value: string;
+    key: boolean;
+  };
+  quest_id: {
+    type: "primitive";
+    type_name: "felt252";
+    value: string;
+    key: boolean;
+  };
+  interval_id: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
+  time: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
 }
 
 export interface RawMetadata {
@@ -812,6 +896,171 @@ export class QuestMetadata {
             t.name === item.name &&
             t.description === item.description &&
             t.icon === item.icon,
+        ),
+    );
+  }
+}
+
+export class QuestUnlocked {
+  player_id: string;
+  quest_id: string;
+  interval_id: number;
+  time: number;
+
+  constructor(
+    player_id: string,
+    quest_id: string,
+    interval_id: number,
+    time: number,
+  ) {
+    this.player_id = player_id;
+    this.quest_id = quest_id;
+    this.interval_id = interval_id;
+    this.time = time;
+  }
+
+  static from(data: RawUnlocked): QuestUnlocked {
+    return QuestUnlocked.parse(data);
+  }
+
+  static parse(data: RawUnlocked): QuestUnlocked {
+    const props = {
+      player_id: getChecksumAddress(
+        `0x${BigInt(data.player_id.value).toString(16)}`,
+      ),
+      quest_id: shortString.decodeShortString(
+        `0x${BigInt(data.quest_id.value).toString(16)}`,
+      ),
+      interval_id: parseInt(data.interval_id.value),
+      time: parseInt(data.time.value),
+    };
+    return new QuestUnlocked(
+      props.player_id,
+      props.quest_id,
+      props.interval_id,
+      props.time,
+    );
+  }
+
+  static deduplicate(items: QuestUnlocked[]): QuestUnlocked[] {
+    return items.filter(
+      (item, index, self) =>
+        index ===
+        self.findIndex(
+          (t) =>
+            t.player_id === item.player_id &&
+            t.quest_id === item.quest_id &&
+            t.interval_id === item.interval_id,
+        ),
+    );
+  }
+}
+
+export class QuestCompleted {
+  player_id: string;
+  quest_id: string;
+  interval_id: number;
+  time: number;
+
+  constructor(
+    player_id: string,
+    quest_id: string,
+    interval_id: number,
+    time: number,
+  ) {
+    this.player_id = player_id;
+    this.quest_id = quest_id;
+    this.interval_id = interval_id;
+    this.time = time;
+  }
+
+  static from(data: RawCompleted): QuestCompleted {
+    return QuestCompleted.parse(data);
+  }
+
+  static parse(data: RawCompleted): QuestCompleted {
+    const props = {
+      player_id: getChecksumAddress(
+        `0x${BigInt(data.player_id.value).toString(16)}`,
+      ),
+      quest_id: shortString.decodeShortString(
+        `0x${BigInt(data.quest_id.value).toString(16)}`,
+      ),
+      interval_id: parseInt(data.interval_id.value),
+      time: parseInt(data.time.value),
+    };
+    return new QuestCompleted(
+      props.player_id,
+      props.quest_id,
+      props.interval_id,
+      props.time,
+    );
+  }
+
+  static deduplicate(items: QuestCompleted[]): QuestCompleted[] {
+    return items.filter(
+      (item, index, self) =>
+        index ===
+        self.findIndex(
+          (t) =>
+            t.player_id === item.player_id &&
+            t.quest_id === item.quest_id &&
+            t.interval_id === item.interval_id,
+        ),
+    );
+  }
+}
+
+export class QuestClaimed {
+  player_id: string;
+  quest_id: string;
+  interval_id: number;
+  time: number;
+
+  constructor(
+    player_id: string,
+    quest_id: string,
+    interval_id: number,
+    time: number,
+  ) {
+    this.player_id = player_id;
+    this.quest_id = quest_id;
+    this.interval_id = interval_id;
+    this.time = time;
+  }
+
+  static from(data: RawClaimed): QuestClaimed {
+    return QuestClaimed.parse(data);
+  }
+
+  static parse(data: RawClaimed): QuestClaimed {
+    const props = {
+      player_id: getChecksumAddress(
+        `0x${BigInt(data.player_id.value).toString(16)}`,
+      ),
+      quest_id: shortString.decodeShortString(
+        `0x${BigInt(data.quest_id.value).toString(16)}`,
+      ),
+      interval_id: parseInt(data.interval_id.value),
+      time: parseInt(data.time.value),
+    };
+    return new QuestClaimed(
+      props.player_id,
+      props.quest_id,
+      props.interval_id,
+      props.time,
+    );
+  }
+
+  static deduplicate(items: QuestClaimed[]): QuestClaimed[] {
+    return items.filter(
+      (item, index, self) =>
+        index ===
+        self.findIndex(
+          (t) =>
+            t.player_id === item.player_id &&
+            t.quest_id === item.quest_id &&
+            t.interval_id === item.interval_id,
         ),
     );
   }

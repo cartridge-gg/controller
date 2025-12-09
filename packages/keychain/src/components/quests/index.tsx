@@ -1,6 +1,6 @@
 import { useNavigation } from "@/context";
+import { useQuestContext, type QuestProps } from "@/context/quest";
 import { useAccount } from "@/hooks/account";
-import { QuestProps, useQuests } from "@/hooks/quests";
 import {
   LayoutContent,
   Empty,
@@ -15,7 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function Quests() {
   const account = useAccount();
-  const { quests, status } = useQuests();
+  const { quests, status } = useQuestContext();
   const { navigate } = useNavigation();
 
   const filteredQuests = useMemo(() => {
