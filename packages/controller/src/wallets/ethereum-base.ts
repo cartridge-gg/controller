@@ -34,7 +34,7 @@ export abstract class EthereumWalletBase implements WalletAdapter {
     return this.provider;
   }
 
-  private getEthereumProvider(): any {
+  protected getEthereumProvider(): any {
     const provider = this.getProvider();
     if (provider) {
       return provider.provider;
@@ -47,6 +47,21 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       (window as any).ethereum?.isMetaMask
     ) {
       return (window as any).ethereum;
+    }
+
+    // Fallback for Phantom when not announced via EIP-6963
+    if (
+      this.rdns === "app.phantom" &&
+      typeof window !== "undefined"
+    ) {
+      const phantomProvider = (window as any).phantom?.ethereum;
+      if (phantomProvider) {
+        return phantomProvider;
+      }
+      // Also check if window.ethereum is Phantom
+      if ((window as any).ethereum?.isPhantom) {
+        return (window as any).ethereum;
+      }
     }
 
     return null;
@@ -118,6 +133,18 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       return !!(window as any).ethereum?.isMetaMask;
     }
 
+    // Also check for Phantom via window.phantom.ethereum as a fallback
+    if (
+      !provider &&
+      this.rdns === "app.phantom" &&
+      typeof window !== "undefined"
+    ) {
+      // Phantom might be available via window.phantom.ethereum or window.ethereum.isPhantom
+      const phantomProvider = (window as any).phantom?.ethereum;
+      const isPhantom = (window as any).ethereum?.isPhantom;
+      return !!(phantomProvider || isPhantom);
+    }
+
     // Initialize if we just found the provider
     if (provider && !this.initialized) {
       this.initializeIfAvailable();
@@ -169,6 +196,14 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       ) {
         // Fallback for MetaMask when not announced via EIP-6963
         ethereum = (window as any).ethereum;
+      } else if (this.rdns === "app.phantom") {
+        // Fallback for Phantom when not announced via EIP-6963
+        const phantomProvider = (window as any).phantom?.ethereum;
+        if (phantomProvider) {
+          ethereum = phantomProvider;
+        } else if ((window as any).ethereum?.isPhantom) {
+          ethereum = (window as any).ethereum;
+        }
       }
 
       if (!ethereum) {
@@ -184,18 +219,32 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         this.connectedAccounts = accounts.map(getAddress);
 
         // If we used the fallback, store the ethereum provider for future use
-        if (!provider && this.rdns === "io.metamask") {
-          // Create a mock EIP6963ProviderDetail for consistency
-          this.provider = {
-            info: {
-              uuid: "metamask-fallback",
-              name: "MetaMask",
-              icon: "data:image/svg+xml;base64,",
-              rdns: "io.metamask",
-            },
-            provider: ethereum,
-          } as EIP6963ProviderDetail;
-          this.initializeIfAvailable();
+        if (!provider) {
+          if (this.rdns === "io.metamask") {
+            // Create a mock EIP6963ProviderDetail for consistency
+            this.provider = {
+              info: {
+                uuid: "metamask-fallback",
+                name: "MetaMask",
+                icon: "data:image/svg+xml;base64,",
+                rdns: "io.metamask",
+              },
+              provider: ethereum,
+            } as EIP6963ProviderDetail;
+            this.initializeIfAvailable();
+          } else if (this.rdns === "app.phantom") {
+            // Create a mock EIP6963ProviderDetail for Phantom
+            this.provider = {
+              info: {
+                uuid: "phantom-fallback",
+                name: "Phantom",
+                icon: "data:image/svg+xml;base64,",
+                rdns: "app.phantom",
+              },
+              provider: ethereum,
+            } as EIP6963ProviderDetail;
+            this.initializeIfAvailable();
+          }
         }
 
         return { success: true, wallet: this.type, account: this.account };
