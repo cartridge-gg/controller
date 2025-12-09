@@ -82,34 +82,4 @@ export default defineConfig(({ mode }) => ({
     global: "globalThis",
     __PACKAGE_VERSION__: JSON.stringify(process.env.npm_package_version),
   },
-  test: {
-    environment: "jsdom",
-    setupFiles: ["./src/test/setup.ts"],
-    globals: true,
-    server: {
-      deps: {
-        inline: ["@cartridge/ui", "@cartridge/controller-wasm"],
-      },
-    },
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "lcov"],
-      exclude: [
-        "node_modules/**",
-        "src/test/**",
-        "**/*.test.{ts,tsx}",
-        "**/*.spec.{ts,tsx}",
-        "**/*.stories.{ts,tsx}",
-        "src/**/__mocks__/**",
-      ],
-    },
-    // Reduce parallelism to lower memory usage
-    pool: "threads",
-    poolOptions: {
-      threads: {
-        maxThreads: 2,
-        minThreads: 1,
-      },
-    },
-  },
 }));

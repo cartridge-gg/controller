@@ -1,4 +1,5 @@
-import { useNavigation, useQuestContext, QuestProps } from "@/context";
+import { useNavigation } from "@/context";
+import { useQuestContext, type QuestProps } from "@/context/quest";
 import { useAccount } from "@/hooks/account";
 import {
   LayoutContent,
