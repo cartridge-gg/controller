@@ -11,7 +11,6 @@
     "build:browser": "vite build",
     "build:node": "tsup --config tsup.node.config.ts",
     "build": "pnpm build:browser && pnpm build:node",
-    "build:compat": "pnpm build:browser && pnpm build:node",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",
