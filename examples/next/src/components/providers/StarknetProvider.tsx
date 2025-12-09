@@ -192,7 +192,7 @@ const signupOptions: AuthOptions = [
   "metamask",
   "password",
   "rabby",
-  "phantom-evm"
+  "phantom-evm",
 ];
 
 const controller = new ControllerConnector({
