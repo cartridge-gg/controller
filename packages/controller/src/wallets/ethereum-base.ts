@@ -122,11 +122,13 @@ export abstract class EthereumWalletBase implements WalletAdapter {
 
   isAvailable(): boolean {
     if (isMobile()) {
+      console.log(`[${this.type}] isAvailable: false (mobile)`);
       return false;
     }
 
     // Check dynamically each time, as the provider might be announced after instantiation
     const provider = this.getProvider();
+    console.log(`[${this.type}] EIP-6963 provider found:`, !!provider);
 
     // Also check for MetaMask via window.ethereum as a fallback for MetaMask specifically
     if (
@@ -135,7 +137,9 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       typeof window !== "undefined"
     ) {
       // MetaMask might be available via window.ethereum even if not announced via EIP-6963 yet
-      return !!(window as any).ethereum?.isMetaMask;
+      const available = !!(window as any).ethereum?.isMetaMask;
+      console.log(`[${this.type}] MetaMask fallback available:`, available);
+      return available;
     }
 
     // Also check for Phantom via window.phantom.ethereum as a fallback
@@ -147,7 +151,14 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       // Phantom might be available via window.phantom.ethereum or window.ethereum.isPhantom
       const phantomProvider = (window as any).phantom?.ethereum;
       const isPhantom = (window as any).ethereum?.isPhantom;
-      return !!(phantomProvider || isPhantom);
+      const available = !!(phantomProvider || isPhantom);
+      console.log(`[${this.type}] Phantom fallback check:`, {
+        phantomProvider: !!phantomProvider,
+        isPhantom: !!isPhantom,
+        available,
+        windowPhantom: !!(window as any).phantom,
+      });
+      return available;
     }
 
     // Initialize if we just found the provider
@@ -155,7 +166,9 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       this.initializeIfAvailable();
     }
 
-    return typeof window !== "undefined" && !!provider;
+    const finalAvailable = typeof window !== "undefined" && !!provider;
+    console.log(`[${this.type}] Final isAvailable:`, finalAvailable);
+    return finalAvailable;
   }
 
   getInfo(): ExternalWallet {

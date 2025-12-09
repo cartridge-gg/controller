@@ -8,7 +8,7 @@ export class PhantomEVMWallet extends EthereumWalletBase {
 
   isAvailable(): boolean {
     const available = super.isAvailable();
-    console.log('[PhantomEVM] isAvailable check:', {
+    console.log("[PhantomEVM] isAvailable check:", {
       available,
       hasPhantomGlobal: !!(window as any).phantom,
       hasPhantomEthereum: !!(window as any).phantom?.ethereum,
