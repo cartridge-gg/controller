@@ -75,9 +75,7 @@ export function Profile() {
       <h2>Toast Demo</h2>
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap gap-1">
-          <Button onClick={handleToastDemo}>
-            Run demo
-          </Button>
+          <Button onClick={handleToastDemo}>Run demo</Button>
         </div>
       </div>
 
