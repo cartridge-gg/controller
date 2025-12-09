@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@cartridge/arcade':
-      specifier: 0.3.5
-      version: 0.3.5
+      specifier: 0.3.7
+      version: 0.3.7
     '@cartridge/controller-wasm':
       specifier: 0.8.0
       version: 0.8.0
@@ -150,9 +150,9 @@ overrides:
   typescript: ^5.7.3
   '@noble/curves': ^1.9.0
   '@noble/hashes': ^1.8.0
-  '@dojoengine/core': ^1.8.3
-  '@dojoengine/torii-wasm': ^1.8.2
-  '@dojoengine/sdk': ^1.8.4
+  '@dojoengine/core': 1.8.3
+  '@dojoengine/torii-wasm': 1.8.2
+  '@dojoengine/sdk': 1.8.4
   '@starknet-react/core': ^5.0.1
   '@starknet-react/chains': ^5.0.1
   '@starknet-io/types-js': ^0.8.4
@@ -214,8 +214,13 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@8.5.4)(typescript@5.8.3)(utf-8-validate@5.0.10)
       next:
+<<<<<<< HEAD
         specifier: ^16.0.7
         version: 16.0.7(@babel/core@7.28.5)(@playwright/test@1.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+=======
+        specifier: ^15.1.5
+        version: 15.3.1(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+>>>>>>> be1528b31 (feat: quests)
       next-themes:
         specifier: ^0.3.0
         version: 0.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -509,7 +514,7 @@ importers:
         version: 2.1.3
       '@cartridge/arcade':
         specifier: 'catalog:'
-        version: 0.3.5(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)
+        version: 0.3.7(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)
       '@cartridge/controller':
         specifier: workspace:*
         version: link:../controller
@@ -522,8 +527,11 @@ importers:
       '@cartridge/ui':
         specifier: 'catalog:'
         version: https://codeload.github.com/cartridge-gg/ui/tar.gz/df8934d(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
+      '@dojoengine/sdk':
+        specifier: 1.8.4
+        version: 1.8.4(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)
       '@dojoengine/torii-wasm':
-        specifier: ^1.8.2
+        specifier: 1.8.2
         version: 1.8.2
       '@noble/hashes':
         specifier: ^1.8.0
@@ -548,7 +556,11 @@ importers:
         version: 4.1.0(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@turnkey/sdk-react':
         specifier: ^4.2.1
+<<<<<<< HEAD
         version: 4.2.4(@babel/core@7.28.5)(@playwright/test@1.52.0)(@types/react@18.3.20)(babel-plugin-macros@3.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+=======
+        version: 4.2.4(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(@types/react@18.3.20)(babel-plugin-macros@3.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+>>>>>>> be1528b31 (feat: quests)
       '@walletconnect/ethereum-provider':
         specifier: ^2.20.0
         version: 2.20.1(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
@@ -1209,8 +1221,10 @@ packages:
   '@bufbuild/protoplugin@2.8.0':
     resolution: {integrity: sha512-kwZeZAz6jmDC571Wf/f5cDX02IjvPmtdspdxW/hbLS+bnZHkXMW4StaW+irGd4TkykvHD4fFgBnPG/O1x8OgXw==}
 
-  '@cartridge/arcade@0.3.5':
-    resolution: {integrity: sha512-tAhZlUJRrHArQPkPjeHFTWGBEKWdDdMduBS23/TrdDQl/dnKEx98BfI8GN1+TgLzQXhsHIeBsOEkrkrKkVsjJg==}
+  '@cartridge/arcade@0.3.7':
+    resolution: {integrity: sha512-5rCSTbLE6P+8DlsYnW3qZDdltSDtT2v9nm5IAzt+nxLzLUXX2wMDUN1HQZXNIoC+lxnDq0OBuju67RRdJTy83w==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0-0
 
   '@cartridge/controller-wasm@0.8.0':
     resolution: {integrity: sha512-wxwrIMceVX/xyfv8z43sF+hCGunQZ6kV/h+VlZn8beDP3rlAEMTaSpjBox1YhKp+xImT4KvxuCSR6+3vVDJFMA==}
@@ -1307,8 +1321,8 @@ packages:
     resolution: {integrity: sha512-BZ0UgmJ6TIIJRjMR3RvwQif9/uT9TNmyIQoIcaAXM7HEMrhbyAr8UvL/4tEiLkwSQUxPfesPsqNIOt/7QSeCQQ==}
     hasBin: true
 
-  '@dojoengine/grpc@1.7.2':
-    resolution: {integrity: sha512-BkRsNLXSqChVbphv22fZwVZbJmbOfkQ3dyqmSb5yC6ukmiHqR7EzvSRfeGY0bN2fiopw1oOZm2aqRUtO5EGHBg==}
+  '@dojoengine/grpc@1.7.4':
+    resolution: {integrity: sha512-m4RGPMyaw7Ls0grdFCh6fea2c8RJ4wPoXjWboYhidi57VA3OURqJpwztzHWC7g5h9hAQJGZRib73tjk2TKqstA==}
 
   '@dojoengine/grpc@1.8.3':
     resolution: {integrity: sha512-9NuJzETqrzfnqKDhmfQ0QE1egK9VkLZWimPf9gg8z0qPyQ4xxfPzmMoQY0i811ITT+cnMVccxGFCmf+HksqzQA==}
@@ -1332,8 +1346,8 @@ packages:
     peerDependencies:
       starknet: ^8.1.2
 
-  '@dojoengine/torii-client@1.7.2':
-    resolution: {integrity: sha512-aOMzL4JbGrtUZSTlLZi+S2yS37j4Xidzj0fpZpCPA/TnyTZZ9GVEOEJptIBLa5hrCxO+s7DpIvWPljNuAc4xAQ==}
+  '@dojoengine/torii-client@1.7.3':
+    resolution: {integrity: sha512-7dyp8OpOjjbADE2p+HIY67umrqIqQPmE6AQ6c1SXDPz9axUP8WBZoEr+imrlWv38L//6l8fHTVBMYmLj30bVog==}
 
   '@dojoengine/torii-client@1.8.2':
     resolution: {integrity: sha512-A1aJFkBXgEcr5oObIMeiYsfkPd2VOFHdSARZ6D2IIc0BARz7rMa395yPbj5s4ZkTvhmdsovna/IJvSk0r4pFUA==}
@@ -2557,6 +2571,21 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
+<<<<<<< HEAD
+=======
+  '@nolyfill/is-core-module@1.0.39':
+    resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
+    engines: {node: '>=12.4.0'}
+
+  '@opentelemetry/api@1.9.0':
+    resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
+    engines: {node: '>=8.0.0'}
+
+  '@paulmillr/qr@0.2.1':
+    resolution: {integrity: sha512-IHnV6A+zxU7XwmKFinmYjUcwlyK9+xkG3/s9KcQhI9BjQKycrJ1JRO+FbNYPwZiPKW3je/DR0k7w8/gLa5eaxQ==}
+    deprecated: 'The package is now available as "qr": npm install qr'
+
+>>>>>>> be1528b31 (feat: quests)
   '@peculiar/asn1-schema@2.5.0':
     resolution: {integrity: sha512-YM/nFfskFJSlHqv59ed6dZlLZqtZQwjRVJ4bBAiWV08Oc+1rSd5lDZcBEx0lGDHfSoH3UziI2pXt2UM33KerPQ==}
 
@@ -5593,8 +5622,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  effect@3.17.3:
-    resolution: {integrity: sha512-FbFMr6xBXPII5Od8QJnkHz+2GTmQgq+8NPQev6C2k9cf1lcUjQ4vpw1kjbMc2X0UkjIkIWe0EtNK2RV6bl34UQ==}
+  effect@3.19.8:
+    resolution: {integrity: sha512-OmLw8EfH02vdmyU2fO4uY9He/wepwKI5E/JNpE2pseaWWUbaYOK9UlxIiKP20ZEqQr+S/jSqRDGmpiqD/2DeCQ==}
 
   ejs@3.1.10:
     resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
@@ -10562,15 +10591,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@cartridge/arcade@0.3.5(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@cartridge/arcade@0.3.7(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
       '@dojoengine/core': 1.8.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@dojoengine/grpc': 1.7.2
+      '@dojoengine/grpc': 1.7.4
       '@dojoengine/sdk': 1.8.4(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)
-      '@dojoengine/torii-client': 1.7.2
+      '@dojoengine/torii-client': 1.7.3
       '@dojoengine/torii-wasm': 1.8.2
       '@starknet-io/types-js': 0.8.4
       eventemitter3: 5.0.1
+      react: 18.3.1
       starknet: 8.5.4
     transitivePeerDependencies:
       - '@tanstack/react-query'
@@ -10578,7 +10608,6 @@ snapshots:
       - '@types/react-dom'
       - bufferutil
       - get-starknet-core
-      - react
       - react-dom
       - supports-color
       - typescript
@@ -10744,14 +10773,14 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@dojoengine/grpc@1.7.2':
+  '@dojoengine/grpc@1.7.4':
     dependencies:
       '@grpc/grpc-js': 1.13.4
       '@protobuf-ts/grpcweb-transport': 2.11.1
       '@protobuf-ts/plugin': 2.11.1
       '@protobuf-ts/runtime': 2.11.1
       '@protobuf-ts/runtime-rpc': 2.11.1
-      effect: 3.17.3
+      effect: 3.19.8
       google-protobuf: 3.21.4
       grpc-web: 1.5.0
     transitivePeerDependencies:
@@ -10764,7 +10793,7 @@ snapshots:
       '@protobuf-ts/plugin': 2.11.1
       '@protobuf-ts/runtime': 2.11.1
       '@protobuf-ts/runtime-rpc': 2.11.1
-      effect: 3.17.3
+      effect: 3.19.8
       google-protobuf: 3.21.4
       grpc-web: 1.5.0
       starknet: 8.5.4
@@ -10796,7 +10825,7 @@ snapshots:
       '@tanstack/react-query': 5.75.0(react@18.3.1)
       '@types/react': 18.3.20
       '@types/react-dom': 18.3.7(@types/react@18.3.20)
-      effect: 3.17.3
+      effect: 3.19.8
       immer: 10.1.1
       neverthrow: 8.2.0
       react: 18.3.1
@@ -10828,7 +10857,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/torii-client@1.7.2':
+  '@dojoengine/torii-client@1.7.3':
     dependencies:
       '@dojoengine/torii-wasm': 1.8.2
 
@@ -12265,6 +12294,16 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
 
+<<<<<<< HEAD
+=======
+  '@nolyfill/is-core-module@1.0.39': {}
+
+  '@opentelemetry/api@1.9.0':
+    optional: true
+
+  '@paulmillr/qr@0.2.1': {}
+
+>>>>>>> be1528b31 (feat: quests)
   '@peculiar/asn1-schema@2.5.0':
     dependencies:
       asn1js: 3.0.6
@@ -14041,7 +14080,11 @@ snapshots:
       - utf-8-validate
       - zod
 
+<<<<<<< HEAD
   '@turnkey/sdk-react@4.2.4(@babel/core@7.28.5)(@playwright/test@1.52.0)(@types/react@18.3.20)(babel-plugin-macros@3.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+=======
+  '@turnkey/sdk-react@4.2.4(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(@types/react@18.3.20)(babel-plugin-macros@3.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+>>>>>>> be1528b31 (feat: quests)
     dependencies:
       '@emotion/react': 11.14.0(@types/react@18.3.20)(react@18.3.1)
       '@emotion/styled': 11.14.0(@emotion/react@11.14.0(@types/react@18.3.20)(react@18.3.1))(@types/react@18.3.20)(react@18.3.1)
@@ -14052,11 +14095,19 @@ snapshots:
       '@react-oauth/google': 0.12.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@turnkey/crypto': 2.3.1
       '@turnkey/sdk-browser': 4.1.0(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+<<<<<<< HEAD
       '@turnkey/sdk-server': 3.1.0(@babel/core@7.28.5)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@turnkey/wallet-stamper': 1.0.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@types/react': 18.3.20
       libphonenumber-js: 1.12.7
       next: 15.5.7(@babel/core@7.28.5)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+=======
+      '@turnkey/sdk-server': 3.1.0(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@turnkey/wallet-stamper': 1.0.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@types/react': 18.3.20
+      libphonenumber-js: 1.12.7
+      next: 15.3.1(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+>>>>>>> be1528b31 (feat: quests)
       react: 18.3.1
       react-apple-login: 1.1.6(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-international-phone: 4.5.0(react@18.3.1)
@@ -14078,14 +14129,22 @@ snapshots:
       - utf-8-validate
       - zod
 
+<<<<<<< HEAD
   '@turnkey/sdk-server@3.1.0(@babel/core@7.28.5)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+=======
+  '@turnkey/sdk-server@3.1.0(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+>>>>>>> be1528b31 (feat: quests)
     dependencies:
       '@turnkey/api-key-stamper': 0.4.4
       '@turnkey/http': 3.1.0(encoding@0.1.13)
       '@turnkey/wallet-stamper': 1.0.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       buffer: 6.0.3
       cross-fetch: 3.2.0(encoding@0.1.13)
+<<<<<<< HEAD
       next: 15.5.7(@babel/core@7.28.5)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+=======
+      next: 15.3.1(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+>>>>>>> be1528b31 (feat: quests)
     transitivePeerDependencies:
       - '@babel/core'
       - '@opentelemetry/api'
@@ -14140,7 +14199,15 @@ snapshots:
 
   '@types/babel__traverse@7.20.7':
     dependencies:
+<<<<<<< HEAD
       '@babel/types': 7.28.5
+=======
+      '@babel/types': 7.28.4
+
+  '@types/connect@3.4.38':
+    dependencies:
+      '@types/node': 22.15.3
+>>>>>>> be1528b31 (feat: quests)
 
   '@types/cookie@0.6.0': {}
 
@@ -14243,6 +14310,13 @@ snapshots:
     dependencies:
       '@types/node': 22.15.3
 
+<<<<<<< HEAD
+=======
+  '@types/ws@7.4.7':
+    dependencies:
+      '@types/node': 22.15.3
+
+>>>>>>> be1528b31 (feat: quests)
   '@types/ws@8.18.1':
     dependencies:
       '@types/node': 22.15.3
@@ -16433,7 +16507,7 @@ snapshots:
       signal-exit: 4.0.2
       time-span: 4.0.0
 
-  effect@3.17.3:
+  effect@3.19.8:
     dependencies:
       '@standard-schema/spec': 1.0.0
       fast-check: 3.23.2
@@ -18728,7 +18802,11 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
+<<<<<<< HEAD
   next@15.5.7(@babel/core@7.28.5)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+=======
+  next@15.3.1(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+>>>>>>> be1528b31 (feat: quests)
     dependencies:
       '@next/env': 15.5.7
       '@swc/helpers': 0.5.15
@@ -18738,6 +18816,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       styled-jsx: 5.1.6(@babel/core@7.28.5)(babel-plugin-macros@3.1.0)(react@18.3.1)
     optionalDependencies:
+<<<<<<< HEAD
       '@next/swc-darwin-arm64': 15.5.7
       '@next/swc-darwin-x64': 15.5.7
       '@next/swc-linux-arm64-gnu': 15.5.7
@@ -18746,6 +18825,17 @@ snapshots:
       '@next/swc-linux-x64-musl': 15.5.7
       '@next/swc-win32-arm64-msvc': 15.5.7
       '@next/swc-win32-x64-msvc': 15.5.7
+=======
+      '@next/swc-darwin-arm64': 15.3.1
+      '@next/swc-darwin-x64': 15.3.1
+      '@next/swc-linux-arm64-gnu': 15.3.1
+      '@next/swc-linux-arm64-musl': 15.3.1
+      '@next/swc-linux-x64-gnu': 15.3.1
+      '@next/swc-linux-x64-musl': 15.3.1
+      '@next/swc-win32-arm64-msvc': 15.3.1
+      '@next/swc-win32-x64-msvc': 15.3.1
+      '@opentelemetry/api': 1.9.0
+>>>>>>> be1528b31 (feat: quests)
       '@playwright/test': 1.52.0
       sharp: 0.34.5
     transitivePeerDependencies:
