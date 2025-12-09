@@ -50,6 +50,7 @@
     "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",
+    "@dojoengine/sdk": "catalog:",
     "@dojoengine/torii-wasm": "catalog:",
     "@noble/hashes": "catalog:",
     "@starknet-io/types-js": "catalog:",
