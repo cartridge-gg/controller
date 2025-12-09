@@ -1,4 +1,4 @@
-import { ProgressBar, ProgressBarOptions } from "../components/progress-bar";
+import { ProgressBar } from "../components/progress-bar";
 
 /**
  * Add a progress bar to a toast element
