@@ -69,6 +69,10 @@ export abstract class EthereumWalletBase implements WalletAdapter {
     if (provider && !this.initialized) {
       this.initialized = true;
       this.initializeProvider();
+    } else if (!this.initialized && this.getEthereumProvider()) {
+      // Initialize with fallback provider if available
+      this.initialized = true;
+      this.initializeProvider();
     }
   }
 
@@ -76,9 +80,13 @@ export abstract class EthereumWalletBase implements WalletAdapter {
 
   private initializeProvider(): void {
     const provider = this.getProvider();
-    if (!provider) return;
+    const ethereumProvider = this.getEthereumProvider();
 
-    provider.provider
+    if (!provider && !ethereumProvider) return;
+
+    const providerToUse = provider?.provider || ethereumProvider;
+
+    providerToUse
       .request({
         method: "eth_accounts",
       })
@@ -90,7 +98,7 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       })
       .catch(console.error);
 
-    provider.provider
+    providerToUse
       .request({
         method: "eth_chainId",
       })
@@ -99,11 +107,11 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       })
       .catch(console.error);
 
-    provider.provider?.on("chainChanged", (chainId: string) => {
+    providerToUse?.on("chainChanged", (chainId: string) => {
       this.platform = chainIdToPlatform(chainId);
     });
 
-    provider.provider?.on("accountsChanged", (accounts: string[]) => {
+    providerToUse?.on("accountsChanged", (accounts: string[]) => {
       if (accounts) {
         this.connectedAccounts = accounts.map((account) => getAddress(account));
         this.account =
