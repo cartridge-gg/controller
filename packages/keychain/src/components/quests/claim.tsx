@@ -1,7 +1,6 @@
-import { useNavigation } from "@/context";
+import { useNavigation, useQuestContext } from "@/context";
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
-import { useQuests } from "@/hooks/quests";
 import {
   LayoutContent,
   Empty,
@@ -10,14 +9,21 @@ import {
   Thumbnail,
 } from "@cartridge/ui";
 import { useCallback, useMemo } from "react";
-import { toast } from "sonner";
-import { AllowArray, Call, CallData, FeeEstimate, shortString } from "starknet";
+import {
+  AllowArray,
+  Call,
+  CallData,
+  FeeEstimate,
+  shortString,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
 import { ExecutionContainer } from "../ExecutionContainer";
 import { useParams } from "react-router-dom";
 import { Receiving } from "../purchasenew/receiving";
 
 export function QuestClaim() {
-  const { quests, status } = useQuests();
+  const { quests, status } = useQuestContext();
   const { id: questId } = useParams();
   const account = useAccount();
   const { controller } = useConnection();
@@ -47,18 +53,21 @@ export function QuestClaim() {
       if (!maxFee || !buildTransactions || !controller) {
         return;
       }
-
       try {
-        await controller.execute(buildTransactions, maxFee);
-
-        toast.success("Quest claimed successfully!", {
-          duration: 10000,
+        const { transaction_hash } = await controller.execute(
+          buildTransactions,
+          maxFee,
+        );
+        await controller.provider.waitForTransaction(transaction_hash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
         });
-
         goBack();
       } catch (error) {
         console.error(error);
-        toast.error("Failed to claim quest");
         throw error;
       }
     },

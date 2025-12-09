@@ -49,12 +49,20 @@ export function Profile() {
 
     setTimeout(() => {
       toast({
+        variant: "quest",
+        title: "First Quest!",
+        subtitle: "Claimed!",
+      });
+    }, 4000);
+
+    setTimeout(() => {
+      toast({
         variant: "marketplace",
         action: "purchased",
         itemName: "Cool NFT #123",
         itemImage: "https://picsum.photos/seed/adventurer/200/200",
       });
-    }, 4000);
+    }, 5000);
   };
 
   if (!account) {

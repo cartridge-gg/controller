@@ -1,28 +1,46 @@
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ClauseBuilder,
   type SubscriptionCallbackArgs,
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as torii from "@dojoengine/torii-wasm";
 import { useConnection } from "@/hooks/connection";
 import {
   QuestAdvancement,
   QuestCompletion,
   QuestDefinition,
+  QuestCreation,
+  QuestUnlocked,
+  QuestCompleted,
+  QuestClaimed,
   RawAdvancement,
   RawCompletion,
   RawDefinition,
+  RawCreation,
+  RawUnlocked,
+  RawCompleted,
+  RawClaimed,
   QUEST_DEFINITION,
   QUEST_COMPLETION,
   QUEST_ADVANCEMENT,
   QUEST_CREATION,
-  QuestCreation,
-  RawCreation,
+  QUEST_UNLOCKED,
+  QUEST_COMPLETED,
+  QUEST_CLAIMED,
 } from "@/models/quest";
 import { getChecksumAddress } from "starknet";
-import { useAccount } from "./account";
-import { Item, ItemType } from "@/context";
+import { useAccount } from "@/hooks/account";
+import { Item, ItemType } from "@/context/starterpack";
+import { useToast } from "@/context/toast";
 
 export type QuestProps = {
   id: string;
@@ -41,6 +59,14 @@ export type QuestProps = {
     count: bigint;
   }[];
 };
+
+interface QuestContextType {
+  quests: QuestProps[];
+  status: "loading" | "error" | "success";
+  refresh: () => Promise<void>;
+}
+
+const QuestContext = createContext<QuestContextType | undefined>(undefined);
 
 const getQuestEntityQuery = (namespace: string) => {
   const definition: `${string}-${string}` = `${namespace}-${QUEST_DEFINITION}`;
@@ -62,7 +88,7 @@ const getQuestEventQuery = (namespace: string) => {
     .includeHashedKeys();
 };
 
-const getProgressEntityQuery = (namespace: string, playerId: string) => {
+const getPlayerEntityQuery = (namespace: string, playerId: string) => {
   const completion: `${string}-${string}` = `${namespace}-${QUEST_COMPLETION}`;
   const advancement: `${string}-${string}` = `${namespace}-${QUEST_ADVANCEMENT}`;
   const key = getChecksumAddress(BigInt(playerId)).toLowerCase();
@@ -76,10 +102,27 @@ const getProgressEntityQuery = (namespace: string, playerId: string) => {
     .includeHashedKeys();
 };
 
-export const useQuests = () => {
+const getPlayerEventQuery = (namespace: string, playerId: string) => {
+  const unlocked: `${string}-${string}` = `${namespace}-${QUEST_UNLOCKED}`;
+  const completed: `${string}-${string}` = `${namespace}-${QUEST_COMPLETED}`;
+  const claimed: `${string}-${string}` = `${namespace}-${QUEST_CLAIMED}`;
+  const key = getChecksumAddress(BigInt(playerId)).toLowerCase();
+  const clauses = new ClauseBuilder().keys(
+    [unlocked, completed, claimed],
+    [key],
+    "VariableLen",
+  );
+  return new ToriiQueryBuilder()
+    .withClause(clauses.build())
+    .includeHashedKeys();
+};
+
+export function QuestProvider({ children }: { children: React.ReactNode }) {
   const account = useAccount();
+  const { addToast } = useToast();
   const [client, setClient] = useState<torii.ToriiClient>();
-  const subscriptionRef = useRef<torii.Subscription | null>(null);
+  const entitySubscriptionRef = useRef<torii.Subscription | null>(null);
+  const eventSubscriptionRef = useRef<torii.Subscription | null>(null);
   const { namespace, project } = useConnection();
   const [definitions, setDefinitions] = useState<QuestDefinition[]>([]);
   const [completions, setCompletions] = useState<QuestCompletion[]>([]);
@@ -88,10 +131,10 @@ export const useQuests = () => {
   const [status, setStatus] = useState<"loading" | "error" | "success">(
     "loading",
   );
-  // const [progressions, setProgressions] = useState<QuestProgression[]>([]);
 
+  // Initialize Torii client
   useEffect(() => {
-    if (!namespace) return;
+    if (!namespace || !project) return;
     const getClient = async () => {
       const client = await new torii.ToriiClient({
         toriiUrl: `https://api.cartridge.gg/x/${project}/torii`,
@@ -102,7 +145,8 @@ export const useQuests = () => {
     getClient();
   }, [project, namespace]);
 
-  const onUpdate = useCallback(
+  // Handler for entity updates (definitions, completions, advancements, creations)
+  const onEntityUpdate = useCallback(
     (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
       if (!data || data.error) return;
       (data.data || [data] || []).forEach((entity) => {
@@ -147,44 +191,125 @@ export const useQuests = () => {
             QuestCreation.deduplicate([QuestCreation.parse(model), ...prev]),
           );
         }
-        // if (entity.models[`${namespace}-${QUEST_PROGRESSION}`]) {
-        //   const model = entity.models[`${namespace}-${QUEST_PROGRESSION}`] as unknown as RawProgression;
-        //   setProgressions((prev) => QuestProgression.deduplicate([...prev, QuestProgression.parse(model)]));
-        // }
       });
     },
     [namespace],
   );
 
+  // Handler for quest events (unlocked, completed, claimed) - triggers toasts
+  const onQuestEvent = useCallback(
+    (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
+      if (!data || data.error) return;
+      (data.data || [data] || []).forEach((entity) => {
+        if (entity.models[`${namespace}-${QUEST_UNLOCKED}`]) {
+          const model = entity.models[
+            `${namespace}-${QUEST_UNLOCKED}`
+          ] as unknown as RawUnlocked;
+          const event = QuestUnlocked.parse(model);
+          const quest = creations.find(
+            (creation) => creation.definition.id === event.quest_id,
+          );
+          if (quest) {
+            addToast({
+              variant: "quest",
+              title: quest.metadata.name,
+              subtitle: "New quest unlocked!",
+            });
+          }
+        }
+        if (entity.models[`${namespace}-${QUEST_COMPLETED}`]) {
+          const model = entity.models[
+            `${namespace}-${QUEST_COMPLETED}`
+          ] as unknown as RawCompleted;
+          const event = QuestCompleted.parse(model);
+          const quest = creations.find(
+            (creation) => creation.definition.id === event.quest_id,
+          );
+          if (quest) {
+            addToast({
+              variant: "quest",
+              title: quest.metadata.name,
+              subtitle: "Quest completed!",
+            });
+          }
+        }
+        if (entity.models[`${namespace}-${QUEST_CLAIMED}`]) {
+          const model = entity.models[
+            `${namespace}-${QUEST_CLAIMED}`
+          ] as unknown as RawClaimed;
+          const event = QuestClaimed.parse(model);
+          const quest = creations.find(
+            (creation) => creation.definition.id === event.quest_id,
+          );
+          if (quest) {
+            addToast({
+              variant: "quest",
+              title: quest.metadata.name,
+              subtitle: "Quest claimed!",
+            });
+          }
+        }
+      });
+    },
+    [namespace, addToast, creations],
+  );
+
+  // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
     if (!namespace || !client || !account) return;
-    if (subscriptionRef.current) {
-      subscriptionRef.current = null;
+
+    // Cancel existing subscriptions
+    if (entitySubscriptionRef.current) {
+      entitySubscriptionRef.current = null;
     }
+    if (eventSubscriptionRef.current) {
+      eventSubscriptionRef.current = null;
+    }
+
     // Create queries
     const questEntityQuery = getQuestEntityQuery(namespace);
     const questEventQuery = getQuestEventQuery(namespace);
-    const progressEntityQuery = getProgressEntityQuery(
-      namespace,
-      account.address,
-    );
-    // Perform subscriptions
-    client
-      .onEntityUpdated(progressEntityQuery.build().clause, [], onUpdate)
-      .then((reponse) => (subscriptionRef.current = reponse));
-    // Perform fetches
-    client
-      .getEntities(questEntityQuery.build())
-      .then((result) => onUpdate({ data: result.items, error: undefined }));
-    client
-      .getEventMessages(questEventQuery.build())
-      .then((result) => onUpdate({ data: result.items, error: undefined }));
-    client
-      .getEntities(progressEntityQuery.build())
-      .then((result) => onUpdate({ data: result.items, error: undefined }));
-  }, [namespace, client, account, onUpdate]);
+    const playerEventQuery = getPlayerEventQuery(namespace, account.address);
+    const playerEntityQuery = getPlayerEntityQuery(namespace, account.address);
 
+    // Fetch initial data
+    await Promise.all([
+      client
+        .getEntities(questEntityQuery.build())
+        .then((result) =>
+          onEntityUpdate({ data: result.items, error: undefined }),
+        ),
+      client
+        .getEventMessages(questEventQuery.build())
+        .then((result) =>
+          onEntityUpdate({ data: result.items, error: undefined }),
+        ),
+      client
+        .getEntities(playerEntityQuery.build())
+        .then((result) =>
+          onEntityUpdate({ data: result.items, error: undefined }),
+        ),
+    ]);
+
+    // Subscribe to entity and event updates
+    if (!creations.length) return;
+    client
+      .onEventMessageUpdated(playerEventQuery.build().clause, [], onQuestEvent)
+      .then((response) => (eventSubscriptionRef.current = response));
+    client
+      .onEntityUpdated(playerEntityQuery.build().clause, [], onEntityUpdate)
+      .then((response) => (entitySubscriptionRef.current = response));
+  }, [namespace, client, account, onEntityUpdate, onQuestEvent, creations]);
+
+  // Initial fetch and subscription setup
   useEffect(() => {
+    if (
+      !namespace ||
+      !project ||
+      entitySubscriptionRef.current ||
+      eventSubscriptionRef.current
+    )
+      return;
     setStatus("loading");
     refresh()
       .then(() => {
@@ -194,15 +319,20 @@ export const useQuests = () => {
         console.error(error);
         setStatus("error");
       });
+
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
+      if (entitySubscriptionRef.current) {
+        entitySubscriptionRef.current.cancel();
+      }
+      if (eventSubscriptionRef.current) {
+        eventSubscriptionRef.current.cancel();
       }
     };
-  }, [client, namespace, project, subscriptionRef, refresh, setStatus]);
+  }, [refresh, namespace, project]);
 
+  // Compute quests from the raw data
   const quests: QuestProps[] = useMemo(() => {
-    const quests = definitions.map((definition) => {
+    const questList = definitions.map((definition) => {
       const intervalId = definition.getIntervalId();
       const creation = creations.find(
         (creation) => creation.definition.id === definition.id,
@@ -244,11 +374,12 @@ export const useQuests = () => {
         }),
       };
     });
-    return quests
+
+    return questList
       .map((quest) => {
         const unlocked =
           quest.conditions.every(
-            (quest) => quests.find((q) => q.id === quest)?.completed,
+            (questId) => questList.find((q) => q.id === questId)?.completed,
           ) || false;
         return {
           ...quest,
@@ -266,11 +397,21 @@ export const useQuests = () => {
       .sort((a, b) => (a.completed && !b.completed ? -1 : 1));
   }, [definitions, completions, advancements, creations]);
 
-  console.log({ status });
-
-  return {
-    quests: quests,
+  const value: QuestContextType = {
+    quests,
     status,
     refresh,
   };
-};
+
+  return (
+    <QuestContext.Provider value={value}>{children}</QuestContext.Provider>
+  );
+}
+
+export function useQuestContext() {
+  const context = useContext(QuestContext);
+  if (!context) {
+    throw new Error("useQuestContext must be used within a QuestProvider");
+  }
+  return context;
+}

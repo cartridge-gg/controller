@@ -42,6 +42,13 @@ export interface AchievementToastOptions extends BaseToastOptions {
   isDraft?: boolean;
 }
 
+// Quest Toast
+export interface QuestToastOptions extends BaseToastOptions {
+  variant: "quest";
+  title: string;
+  subtitle: string;
+}
+
 // Marketplace Toast
 export interface MarketplaceToastOptions extends BaseToastOptions {
   variant: "marketplace";
@@ -56,4 +63,5 @@ export type ToastOptions =
   | TransactionToastOptions
   | NetworkSwitchToastOptions
   | AchievementToastOptions
+  | QuestToastOptions
   | MarketplaceToastOptions;

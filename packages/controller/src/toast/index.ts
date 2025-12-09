@@ -18,6 +18,8 @@ import {
   createNetworkSwitchToast,
   injectAchievementStyles,
   createAchievementToast,
+  injectQuestStyles,
+  createQuestToast,
   injectMarketplaceStyles,
   createMarketplaceToast,
 } from "./variants";
@@ -34,6 +36,8 @@ function createToastElement(options: ToastOptions): HTMLElement {
       return createNetworkSwitchToast(options);
     case "achievement":
       return createAchievementToast(options);
+    case "quest":
+      return createQuestToast(options);
     case "marketplace":
       return createMarketplaceToast(options);
   }
@@ -56,6 +60,9 @@ function injectVariantStyles(
       break;
     case "achievement":
       injectAchievementStyles(targetDoc);
+      break;
+    case "quest":
+      injectQuestStyles(targetDoc);
       break;
     case "marketplace":
       injectMarketplaceStyles(targetDoc);
@@ -220,13 +227,11 @@ export function toast(options: ToastOptions): () => void {
     const targetDoc = getTargetDocument();
 
     if (targetDoc) {
-      console.log("showing on targetdoc");
       // Same-origin iframe, can access parent document directly
       return showToastOnDocument(targetDoc, options);
     } else {
       // Cross-origin iframe, use postMessage
       try {
-        console.log("showing on postmessage");
         if (window.parent) {
           window.parent.postMessage(
             {
