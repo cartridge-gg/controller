@@ -26,7 +26,7 @@ import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
 import type { Quote } from "@/context";
 import { useCallback, useMemo, useEffect } from "react";
-import { useOnchainPurchaseContext } from "@/context";
+import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
 import { num } from "starknet";
 
 type PaymentRails = "stripe" | "crypto";
@@ -107,7 +107,10 @@ export function OnchainCostBreakdown({
   openFeesTooltip?: boolean;
 }) {
   const {
+    depositAmount: layerswapDepositAmount,
+    layerswapFees,
     availableTokens,
+    selectedPlatform,
     selectedToken,
     setSelectedToken,
     convertedPrice,
@@ -115,6 +118,7 @@ export function OnchainCostBreakdown({
     isFetchingConversion,
     quantity,
   } = useOnchainPurchaseContext();
+  const { displayError } = useStarterpackContext();
   const { decimals } = quote.paymentTokenMetadata;
 
   // Get default token (USDC if available) for fallback
@@ -147,6 +151,16 @@ export function OnchainCostBreakdown({
     ? Number(convertedPrice.amount) /
       Math.pow(10, convertedPrice.tokenMetadata.decimals)
     : null;
+
+  // Check if using Layerswap (non-starknet platform)
+  const isUsingLayerswap = selectedPlatform && selectedPlatform !== "starknet";
+
+  // Format layerswap deposit amount (includes fees)
+  const layerswapTotal =
+    isUsingLayerswap && layerswapDepositAmount && convertedPrice
+      ? layerswapDepositAmount /
+        Math.pow(10, convertedPrice.tokenMetadata.decimals)
+      : null;
 
   // Helper to format amount, handling small numbers properly
   const formatAmount = (amount: number): string => {
@@ -198,28 +212,38 @@ export function OnchainCostBreakdown({
                 defaultOpen={openFeesTooltip}
                 quote={quote}
                 quantity={quantity}
+                layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
               />
             </div>
-            {isFetchingConversion ? (
-              <Spinner />
-            ) : (
-              <div className="flex items-center gap-1.5">
-                {isPaymentTokenSameAsSelected ? (
-                  <span className="text-foreground-300">
-                    {formatAmount(paymentAmount)}
-                  </span>
+            {!displayError && (
+              <>
+                {isFetchingConversion ? (
+                  <Spinner />
                 ) : (
-                  <>
-                    {convertedEquivalent !== null &&
-                      displayToken &&
-                      !isFetchingConversion && (
+                  <div className="flex items-center gap-1.5">
+                    {isPaymentTokenSameAsSelected ? (
+                      <span className="text-foreground-300">
+                        {formatAmount(paymentAmount)}
+                      </span>
+                    ) : isUsingLayerswap ? (
+                      layerswapTotal !== null && displayToken ? (
+                        <span className="text-foreground-100">
+                          {formatAmount(layerswapTotal)}
+                        </span>
+                      ) : (
+                        <Spinner />
+                      )
+                    ) : (
+                      convertedEquivalent !== null &&
+                      displayToken && (
                         <span className="text-foreground-100">
                           {formatAmount(convertedEquivalent)}
                         </span>
-                      )}
-                  </>
+                      )
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         </CardContent>

@@ -26,7 +26,7 @@ import {
   useTokenSelection,
   type TokenOption,
 } from "@/hooks/starterpack";
-import { Explorer } from "@/hooks/payments/crypto";
+import { Explorer } from "@/hooks/starterpack/layerswap";
 
 export type { TokenOption } from "@/hooks/starterpack";
 
@@ -64,10 +64,12 @@ export interface OnchainPurchaseContextType {
   // Layerswap state (for future use)
   layerswapFees: string | undefined;
   isFetchingFees: boolean;
+  isSendingDeposit: boolean;
   swapId: string | undefined;
   explorer: Explorer | undefined;
-  depositAmount: number | undefined;
-  setDepositAmount: (amount: number) => void;
+  requestedAmount: number | undefined;
+  depositAmount: number | undefined; // Computed: requestedAmount + fees
+  setRequestedAmount: (amount: number) => void;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -76,9 +78,8 @@ export interface OnchainPurchaseContextType {
     platform: ExternalPlatform,
     chainId?: string,
   ) => Promise<string | undefined>;
-  onBackendCryptoPurchase: () => Promise<void>;
+  onSendDeposit: () => Promise<void>;
   waitForDeposit: (swapId: string) => Promise<boolean>;
-  fetchFees: () => Promise<void>;
 }
 
 export const OnchainPurchaseContext = createContext<
@@ -146,16 +147,17 @@ export const OnchainPurchaseProvider = ({
   });
 
   const {
+    requestedAmount,
+    setRequestedAmount,
     depositAmount,
-    setDepositAmount,
     layerswapFees,
     isFetchingFees,
+    isSendingDeposit,
     swapId,
     explorer,
-    onBackendCryptoPurchase,
-    waitForDeposit,
-    fetchFees,
     depositError,
+    onSendDeposit,
+    waitForDeposit,
   } = useLayerswap({
     controller,
     isMainnet,
@@ -193,6 +195,19 @@ export const OnchainPurchaseProvider = ({
       setDisplayError(depositError);
     }
   }, [walletError, depositError, setDisplayError]);
+
+  // When network is not starknet, retrieve layerswap deposit amount
+  useEffect(() => {
+    if (
+      !selectedPlatform ||
+      selectedPlatform === "starknet" ||
+      !convertedPrice
+    ) {
+      return;
+    }
+
+    setRequestedAmount(Number(convertedPrice.amount));
+  }, [selectedPlatform, convertedPrice, setRequestedAmount]);
 
   const onOnchainPurchase = useCallback(async () => {
     if (!controller || !starterpackDetails) return;
@@ -352,15 +367,16 @@ export const OnchainPurchaseProvider = ({
     usdAmount,
     layerswapFees,
     isFetchingFees,
+    isSendingDeposit,
     swapId,
     explorer,
+    requestedAmount,
+    setRequestedAmount,
     depositAmount,
-    setDepositAmount,
     onOnchainPurchase,
     onExternalConnect,
-    onBackendCryptoPurchase,
+    onSendDeposit,
     waitForDeposit,
-    fetchFees,
   };
 
   return (

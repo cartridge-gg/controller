@@ -41,19 +41,20 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   swapQuote: null,
   isFetchingConversion: false,
   isTokenSelectionLocked: false,
+  isSendingDeposit: false,
   conversionError: null,
   usdAmount: 0,
   layerswapFees: undefined,
   isFetchingFees: false,
   swapId: undefined,
   explorer: undefined,
+  requestedAmount: undefined,
+  setRequestedAmount: () => {},
   depositAmount: undefined,
-  setDepositAmount: () => {},
   onOnchainPurchase: async () => {},
   onExternalConnect: async () => undefined,
-  onBackendCryptoPurchase: async () => {},
+  onSendDeposit: async () => {},
   waitForDeposit: async () => false,
-  fetchFees: async () => {},
 };
 
 // Component that navigates to the correct route on mount
