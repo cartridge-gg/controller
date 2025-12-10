@@ -59,7 +59,7 @@ export function Profile() {
       toast({
         variant: "marketplace",
         action: "purchased",
-        itemName: "Cool NFT #124",
+        itemName: "Cool NFT #123",
         itemImage: "https://picsum.photos/seed/adventurer/200/200",
       });
     }, 5000);

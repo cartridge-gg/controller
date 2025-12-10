@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.11.3] - 2025-12-10
+
+### ✨ New Features
+- **@cartridge/keychain**: Added Layerswap cross-chain deposit integration for onchain checkout with balance checks, bridging actions, and UI for conversion/liquidity errors (#2273)
+- **@cartridge/controller**: Added Phantom EVM wallet authentication method extending EthereumWalletBase, enabling login and signup with Phantom's EVM-compatible mode (#2278)
+- **@cartridge/controller**: Added toast notification API with ToastType and ToastOptions interfaces, enabling toast creation from the controller SDK (#2265)
+- **@cartridge/keychain**: Added quests functionality for enhanced gaming features (#2280)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Enhanced onchain purchase flow with multi-network wallet selection, improved cost breakdown displaying Layerswap fees, and streamlined navigation (#2273)
+- **@cartridge/keychain**: Improved purchase context architecture by splitting into flow-specific contexts (StarterpackContext, OnchainPurchaseContext, CreditPurchaseContext) for better maintainability (#2270)
+- **@cartridge/keychain**: Enhanced authentication flows to skip wildcard session creation during register session login, reducing friction from two signatures to one (#2275)
+- **@cartridge/keychain**: Reverted controller iframe dismiss behavior to prevent accidental closure when clicking outside (#2277)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed network selection flicker by adding detection state to suppress empty UI while detecting external wallets (#2272)
+- **@cartridge/keychain**: Fixed Turnkey nonce mismatch errors by clearing cached Auth0 tokens before nonce generation, ensuring fresh tokens with correct nonces (#2271)
+- **@cartridge/controller**: Added payment permission to iframe allow attribute for proper Stripe Payment Request API access, enabling Apple Pay and Google Pay support (#2269)
+- **@cartridge/keychain**: Reduced Ekubo API console noise by removing verbose 429 logging and adjusting retry/backoff configurations for better rate limit handling (#2268)
+
+### 🔧 Refactoring
+- **Development**: Removed build:compat infrastructure and associated dependencies, simplifying build configuration across packages (#2279)
+
 ## [0.11.3-alpha.2] - 2025-12-10
 
 ### ✨ New Features
