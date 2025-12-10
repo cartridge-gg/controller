@@ -1,4 +1,9 @@
 export { NavigationProvider, useNavigation } from "./navigation";
+export { ToastProvider, useToast } from "./toast";
+// Quest context must be imported directly from "@/context/quest" to avoid
+// WASM loading issues in tests. Do not re-export from barrel.
+// export { QuestProvider, useQuestContext } from "./quest";
+// export type { QuestProps } from "./quest";
 
 // Starterpack contexts (all flow-specific contexts)
 export {

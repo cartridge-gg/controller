@@ -1,4 +1,8 @@
-export const AUTH_EXTERNAL_WALLETS = ["metamask", "rabby"] as const;
+export const AUTH_EXTERNAL_WALLETS = [
+  "metamask",
+  "rabby",
+  "phantom-evm",
+] as const;
 export type AuthExternalWallet = (typeof AUTH_EXTERNAL_WALLETS)[number];
 
 export const EXTRA_EXTERNAL_WALLETS = [

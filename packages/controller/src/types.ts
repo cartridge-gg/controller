@@ -253,6 +253,7 @@ export type ProfileContextTypeVariant =
   | "inventory"
   | "trophies"
   | "achievements"
+  | "quests"
   | "leaderboard"
   | "activity";
 
