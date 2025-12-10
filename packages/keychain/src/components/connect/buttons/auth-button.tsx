@@ -97,7 +97,7 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
     { waitingForConfirmation, validation, username, signupOptions, ...props },
     ref,
   ) => {
-    const { isExtensionMissing } = useWallets();
+    const { wallets, isExtensionMissing } = useWallets();
 
     const { isLoading, disabled, ...restProps } = props;
 
@@ -115,10 +115,10 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
         }
       }
 
-      // Signup flow: if single signer configured and username entered (new account)
+      // Signup flow: if single signer configured and username entered (confirmed new account)
       if (
         username &&
-        !validation.exists &&
+        validation.exists === false &&
         signupOptions &&
         signupOptions.length === 1
       ) {
@@ -132,11 +132,25 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       if (!option?.isExtension) {
         return false;
       }
-      if (!validation.signers) {
-        return false;
+
+      // Login flow: check existing signers
+      if (validation.signers && validation.signers.length > 0) {
+        return validation.signers.every((signer) => isExtensionMissing(signer));
       }
-      return validation.signers.every((signer) => isExtensionMissing(signer));
-    }, [isExtensionMissing, validation.signers, option?.isExtension]);
+
+      // Signup flow: check if single signup option's extension is missing
+      if (signupOptions && signupOptions.length === 1) {
+        return !wallets.some((wallet) => wallet.type === signupOptions[0]);
+      }
+
+      return false;
+    }, [
+      isExtensionMissing,
+      validation.signers,
+      option?.isExtension,
+      signupOptions,
+      wallets,
+    ]);
 
     const icon = useMemo(() => {
       if (isLoading || waitingForConfirmation) {
