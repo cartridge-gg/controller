@@ -103,7 +103,11 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
 
     const option = useMemo(() => {
       // Login flow: use existing signers (only when account exists)
-      if (validation.exists && validation.signers && validation.signers.length > 0) {
+      if (
+        validation.exists &&
+        validation.signers &&
+        validation.signers.length > 0
+      ) {
         if (allUseSameAuth(validation.signers)) {
           return OPTIONS[credentialToAuth(validation.signers[0])];
         } else {
@@ -112,7 +116,12 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       }
 
       // Signup flow: if single signer configured and username entered (new account)
-      if (username && !validation.exists && signupOptions && signupOptions.length === 1) {
+      if (
+        username &&
+        !validation.exists &&
+        signupOptions &&
+        signupOptions.length === 1
+      ) {
         return OPTIONS[signupOptions[0]];
       }
 
@@ -158,7 +167,12 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       const isLogin = validation.exists || !username;
 
       // Single signer login: show branded text only when username exists
-      if (isLogin && validation.exists && isSingleSignerLogin && option?.label) {
+      if (
+        isLogin &&
+        validation.exists &&
+        isSingleSignerLogin &&
+        option?.label
+      ) {
         return `log in with ${option.label}`;
       }
 
