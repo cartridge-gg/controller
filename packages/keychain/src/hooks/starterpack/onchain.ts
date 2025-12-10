@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useController } from "@/hooks/controller";
 import { useConnection } from "@/hooks/connection";
-import { CairoByteArray, Call, constants, uint256 } from "starknet";
+import { CairoByteArray, Call, uint256 } from "starknet";
 import {
+  chainIdToEkuboNetwork,
   fetchSwapQuote,
   USDC_ADDRESSES,
-  type EkuboNetwork,
 } from "@/utils/ekubo";
 import { getCurrentReferral } from "@/utils/referral";
 import { Quote } from "@/context";
@@ -56,21 +56,6 @@ function convertMetadata(
       imageUri: item.image_uri,
     })),
   };
-}
-
-/**
- * Convert chainId to Ekubo network type
- */
-function chainIdToEkuboNetwork(chainId: string): EkuboNetwork {
-  switch (chainId) {
-    case constants.StarknetChainId.SN_MAIN:
-      return "mainnet";
-    case constants.StarknetChainId.SN_SEPOLIA:
-      return "sepolia";
-    default:
-      console.warn(`Unknown chainId ${chainId}, defaulting to mainnet`);
-      return "mainnet";
-  }
 }
 
 export const useOnchainStarterpack = (

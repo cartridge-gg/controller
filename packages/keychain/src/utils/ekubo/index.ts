@@ -552,7 +552,7 @@ export function chainIdToEkuboNetwork(chainId: string): EkuboNetwork {
     case constants.StarknetChainId.SN_SEPOLIA:
       return "sepolia";
     default:
-      console.warn(`Unknown chainId ${chainId}, defaulting to mainnet`);
+      //console.warn(`Unknown chainId ${chainId}, defaulting to mainnet`);
       return "mainnet";
   }
 }
