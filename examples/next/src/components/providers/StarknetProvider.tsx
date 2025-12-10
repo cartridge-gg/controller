@@ -185,13 +185,13 @@ if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
 // }
 
 const signupOptions: AuthOptions = [
-  "google",
-  "webauthn",
-  "discord",
-  "walletconnect",
-  "metamask",
-  "password",
-  "rabby",
+  // "google",
+  // "webauthn",
+  // "discord",
+  // "walletconnect",
+  // "metamask",
+  // "password",
+  // "rabby",
   "phantom-evm",
 ];
 

@@ -61,7 +61,7 @@ interface CreateControllerViewProps {
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
-  "setAuthenticationStep" | "authOptions"
+  "setAuthenticationStep"
 >;
 
 function getIOSVersion(userAgentString: string) {
@@ -91,6 +91,7 @@ function CreateControllerForm({
   submitButtonRef,
   isDropdownOpen,
   onDropdownOpenChange,
+  authOptions,
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
   const { isOpen: keyboardIsOpen, viewportHeight } = useDetectKeyboardOpen();
@@ -267,6 +268,7 @@ function CreateControllerForm({
             validation={validation}
             waitingForConfirmation={waitingForConfirmation}
             username={usernameField.value}
+            signupOptions={authOptions}
             onMouseDown={() => {
               if (keyboardIsOpen) {
                 // If keyboard is open, mark for pending submit after it closes
@@ -348,6 +350,7 @@ export function CreateControllerView({
           submitButtonRef={submitButtonRef}
           isDropdownOpen={isDropdownOpen}
           onDropdownOpenChange={onDropdownOpenChange}
+          authOptions={authOptions}
         />
         <ChooseSignupMethodForm
           isLoading={isLoading}
