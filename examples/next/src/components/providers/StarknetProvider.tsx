@@ -91,9 +91,9 @@ const policies: SessionPolicies = {
 let localKatanaChain: Chain | undefined = undefined;
 if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
   localKatanaChain = {
-    id: num.toBigInt(shortString.encodeShortString("WP_SLOT")),
-    network: "Slot",
-    name: "Slot",
+    id: num.toBigInt(shortString.encodeShortString("KATANA")),
+    network: "Katana",
+    name: "Katana",
     rpcUrls: {
       default: {
         http: [process.env.NEXT_PUBLIC_RPC_LOCAL],
@@ -129,6 +129,7 @@ const provider = jsonRpcProvider({
       chain.id === localKatanaChain.id &&
       process.env.NEXT_PUBLIC_RPC_LOCAL
     ) {
+      console.log("nodeUrl", process.env.NEXT_PUBLIC_RPC_LOCAL);
       return { nodeUrl: process.env.NEXT_PUBLIC_RPC_LOCAL };
     }
     return null;
@@ -178,11 +179,14 @@ if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
     rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
   });
 }
-// if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
-//   controllerConnectorChains.unshift({
-//     rpcUrl: process.env.NEXT_PUBLIC_RPC_LOCAL,
-//   });
-// }
+if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
+  controllerConnectorChains.unshift({
+    rpcUrl: process.env.NEXT_PUBLIC_RPC_LOCAL,
+  });
+}
+
+console.log("controllerConnectorChains", controllerConnectorChains);
+console.log("starknetConfigChains", starknetConfigChains);
 
 const signupOptions: AuthOptions = [
   "google",
@@ -232,7 +236,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={mainnet.id}
+      defaultChainId={sepolia.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}
