@@ -4,7 +4,7 @@ import {
   type SwapCallsParams,
   type SwapQuote,
 } from "./index";
-import { uint256 } from "starknet";
+import { uint256, constants } from "starknet";
 
 // Must match SLIPPAGE_PERCENTAGE in index.ts
 const SLIPPAGE_PERCENTAGE = 5n;
@@ -101,7 +101,7 @@ describe("prepareSwapCalls", () => {
         paymentToken: STRK_ADDRESS,
         totalCostWithQuantity: 2100000000000000000n, // 2.1 STRK (18 decimals)
         swapQuote: REAL_EKUBO_RESPONSE,
-        network: "sepolia",
+        chainId: constants.StarknetChainId.SN_SEPOLIA,
       };
 
       const result = prepareSwapCalls(params);
@@ -136,7 +136,7 @@ describe("prepareSwapCalls", () => {
         paymentToken: STRK_ADDRESS,
         totalCostWithQuantity: 2100000000000000000n, // 2.1 STRK
         swapQuote: REAL_EKUBO_RESPONSE,
-        network: "sepolia",
+        chainId: constants.StarknetChainId.SN_SEPOLIA,
       };
 
       const result = prepareSwapCalls(params);
@@ -174,7 +174,7 @@ describe("prepareSwapCalls", () => {
         paymentToken: STRK_ADDRESS,
         totalCostWithQuantity: 300000000n, // 300 USDC (for 3 items)
         swapQuote,
-        network: "mainnet",
+        chainId: constants.StarknetChainId.SN_MAIN,
       };
 
       const result = prepareSwapCalls(params);
@@ -212,7 +212,7 @@ describe("prepareSwapCalls", () => {
         paymentToken: STRK_ADDRESS,
         totalCostWithQuantity: totalCost,
         swapQuote,
-        network: "mainnet",
+        chainId: constants.StarknetChainId.SN_MAIN,
       };
 
       const result = prepareSwapCalls(params);
@@ -245,7 +245,7 @@ describe("prepareSwapCalls", () => {
         paymentToken: STRK_ADDRESS,
         totalCostWithQuantity: 10000000000n, // 10000 USDC
         swapQuote,
-        network: "mainnet",
+        chainId: constants.StarknetChainId.SN_MAIN,
       };
 
       const result = prepareSwapCalls(params);
@@ -273,7 +273,7 @@ describe("prepareSwapCalls", () => {
         paymentToken: STRK_ADDRESS,
         totalCostWithQuantity: 100000000n,
         swapQuote,
-        network: "mainnet",
+        chainId: constants.StarknetChainId.SN_MAIN,
       };
 
       const result = prepareSwapCalls(params);
@@ -293,7 +293,7 @@ describe("prepareSwapCalls", () => {
         paymentToken: STRK_ADDRESS,
         totalCostWithQuantity: 100000000n,
         swapQuote,
-        network: "mainnet",
+        chainId: constants.StarknetChainId.SN_MAIN,
       };
 
       const result = prepareSwapCalls(params);

@@ -12,11 +12,7 @@ import { usdcToUsd } from "@/utils/starterpack";
 import { uint256, Call, num, cairo } from "starknet";
 import { isOnchainStarterpack } from "./types";
 import { getCurrentReferral } from "@/utils/referral";
-import {
-  chainIdToEkuboNetwork,
-  prepareSwapCalls,
-  type SwapQuote,
-} from "@/utils/ekubo";
+import { prepareSwapCalls, type SwapQuote } from "@/utils/ekubo";
 import { Item } from "./types";
 import { useStarterpackContext } from "./starterpack";
 import {
@@ -140,7 +136,6 @@ export const OnchainPurchaseProvider = ({
     resetTokenSelection,
   } = useTokenSelection({
     controller,
-    isMainnet,
     starterpackDetails: onchainDetails,
     quantity,
     selectedPlatform,
@@ -246,8 +241,6 @@ export const OnchainPurchaseProvider = ({
           throw new Error("No swap quote found");
         }
 
-        const network = chainIdToEkuboNetwork(controller.chainId());
-
         // Note: swapQuote is already fetched with quantity applied in useTokenSelection,
         // so prepareSwapCalls uses it directly without additional scaling
         const { allCalls: swapCalls } = prepareSwapCalls({
@@ -255,7 +248,7 @@ export const OnchainPurchaseProvider = ({
           paymentToken: quote.paymentToken,
           totalCostWithQuantity,
           swapQuote,
-          network,
+          chainId: controller.chainId(),
         });
 
         allCalls = swapCalls;

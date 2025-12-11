@@ -2,11 +2,7 @@ import { useCallback, useEffect, useState, useMemo } from "react";
 import { useController } from "@/hooks/controller";
 import { useConnection } from "@/hooks/connection";
 import { CairoByteArray, Call, uint256 } from "starknet";
-import {
-  chainIdToEkuboNetwork,
-  fetchSwapQuote,
-  USDC_ADDRESSES,
-} from "@/utils/ekubo";
+import { fetchSwapQuote, USDC_ADDRESSES } from "@/utils/ekubo";
 import { getCurrentReferral } from "@/utils/referral";
 import { Quote } from "@/context";
 import {
@@ -185,15 +181,18 @@ export const useOnchainStarterpack = (
         };
 
         // Convert price to target token if specified and different from payment token
-        const network = chainIdToEkuboNetwork(controller.chainId());
-        const targetTokenAddress = targetToken || USDC_ADDRESSES[network];
-        if (paymentToken.toLowerCase() !== targetTokenAddress.toLowerCase()) {
+        const chainId = controller.chainId();
+        const targetTokenAddress = targetToken || USDC_ADDRESSES[chainId];
+        if (
+          targetTokenAddress &&
+          paymentToken.toLowerCase() !== targetTokenAddress.toLowerCase()
+        ) {
           try {
             const swapQuote = await fetchSwapQuote(
               totalCost,
               paymentToken,
               targetTokenAddress,
-              network,
+              chainId,
             );
 
             // Get target token metadata (use cache or fetch via RPC)
