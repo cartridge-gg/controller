@@ -184,7 +184,11 @@ function parseTotalCalculated(totalCalculated: string | number): bigint {
  * Get the Ekubo API base URL for a given network
  */
 function getEkuboApiUrl(network: EkuboNetwork): string {
-  return `https://starknet-${network}-quoter-api.ekubo.org`;
+  const chainId =
+    network === "mainnet"
+      ? num.toBigInt(constants.StarknetChainId.SN_MAIN)
+      : num.toBigInt(constants.StarknetChainId.SN_SEPOLIA);
+  return `https://prod-api-quoter.ekubo.org/${chainId}`;
 }
 
 /**
