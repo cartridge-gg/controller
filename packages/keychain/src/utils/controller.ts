@@ -374,7 +374,6 @@ export default class Controller {
     cartridgeApiUrl,
     session_expires_at_s,
     isControllerRegistered,
-    skipSession = false,
   }: {
     appId: string;
     classHash: string;
@@ -385,10 +384,9 @@ export default class Controller {
     cartridgeApiUrl: string;
     session_expires_at_s: number;
     isControllerRegistered: boolean;
-    skipSession?: boolean;
   }): Promise<{
     controller: Controller;
-    session: JsRevokableSession | undefined;
+    session: JsRevokableSession;
   }> {
     const loginResult = await ControllerFactory.login(
       username,
@@ -399,7 +397,7 @@ export default class Controller {
       cartridgeApiUrl,
       BigInt(session_expires_at_s),
       isControllerRegistered,
-      !skipSession,
+      true,
       appId,
     );
 

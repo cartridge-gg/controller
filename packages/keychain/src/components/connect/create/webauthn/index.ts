@@ -2,7 +2,6 @@ import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
-import { isRegisterSessionFlow } from "@/utils/routes";
 import { Owner } from "@cartridge/controller-wasm";
 import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
@@ -95,7 +94,6 @@ export function useWebauthnAuthentication() {
           cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
           session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
           isControllerRegistered: true,
-          skipSession: isRegisterSessionFlow(),
         });
         controller = loginController;
       }
