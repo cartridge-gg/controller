@@ -1,16 +1,13 @@
 import { useWallets } from "@/hooks/wallets";
 import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
 import { allUseSameAuth } from "@/utils/controller";
-import { AuthOption } from "@cartridge/controller";
 import {
   ArgentIcon,
   Button,
   DiscordIcon,
   GoogleColorIcon,
   IconProps,
-  LockIcon,
   MetaMaskIcon,
-  PasskeyIcon,
   PhantomIcon,
   RabbyIcon,
   Spinner,
@@ -25,7 +22,6 @@ interface AuthButtonProps extends React.ComponentProps<typeof Button> {
   waitingForConfirmation: boolean;
   validation: ReturnType<typeof useUsernameValidation>;
   username: string | undefined;
-  signupOptions?: AuthOption[];
 }
 
 export type LoginAuthConfig = {
@@ -37,7 +33,6 @@ export type LoginAuthConfig = {
 
 const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
   webauthn: {
-    Icon: PasskeyIcon,
     label: AUTH_METHODS_LABELS.webauthn,
   },
   metamask: {
@@ -64,12 +59,6 @@ const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
     label: AUTH_METHODS_LABELS.phantom,
     isExtension: true,
   },
-  "phantom-evm": {
-    Icon: PhantomIcon,
-    bgColor: "bg-wallet-theme-100",
-    label: AUTH_METHODS_LABELS["phantom-evm"],
-    isExtension: true,
-  },
   discord: {
     Icon: DiscordIcon,
     bgColor: "bg-wallet-theme-500",
@@ -85,72 +74,35 @@ const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
     bgColor: "bg-foreground-100",
     label: AUTH_METHODS_LABELS.google,
   },
-  password: {
-    Icon: LockIcon,
-    bgColor: "bg-background-300",
-    label: AUTH_METHODS_LABELS.password,
-  },
 };
 
 export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
-  (
-    { waitingForConfirmation, validation, username, signupOptions, ...props },
-    ref,
-  ) => {
-    const { wallets, isExtensionMissing } = useWallets();
+  ({ waitingForConfirmation, validation, username, ...props }, ref) => {
+    const { isExtensionMissing } = useWallets();
 
     const { isLoading, disabled, ...restProps } = props;
 
     const option = useMemo(() => {
-      // Login flow: use existing signers (only when account exists)
-      if (
-        validation.exists &&
-        validation.signers &&
-        validation.signers.length > 0
-      ) {
-        if (allUseSameAuth(validation.signers)) {
-          return OPTIONS[credentialToAuth(validation.signers[0])];
-        } else {
-          return OPTIONS["webauthn"];
-        }
+      if (!validation.signers || validation.signers.length === 0) {
+        return;
       }
 
-      // Signup flow: if single signer configured and username entered (confirmed new account)
-      if (
-        username &&
-        validation.exists === false &&
-        signupOptions &&
-        signupOptions.length === 1
-      ) {
-        return OPTIONS[signupOptions[0]];
+      if (allUseSameAuth(validation.signers)) {
+        return OPTIONS[credentialToAuth(validation.signers[0])];
+      } else {
+        return OPTIONS["webauthn"];
       }
-
-      return undefined;
-    }, [validation.signers, validation.exists, signupOptions, username]);
+    }, [validation.signers]);
 
     const extensionsMissingForAllSigners = useMemo(() => {
       if (!option?.isExtension) {
         return false;
       }
-
-      // Login flow: check existing signers
-      if (validation.signers && validation.signers.length > 0) {
-        return validation.signers.every((signer) => isExtensionMissing(signer));
+      if (!validation.signers) {
+        return false;
       }
-
-      // Signup flow: check if single signup option's extension is missing
-      if (signupOptions && signupOptions.length === 1) {
-        return !wallets.some((wallet) => wallet.type === signupOptions[0]);
-      }
-
-      return false;
-    }, [
-      isExtensionMissing,
-      validation.signers,
-      option?.isExtension,
-      signupOptions,
-      wallets,
-    ]);
+      return validation.signers.every((signer) => isExtensionMissing(signer));
+    }, [isExtensionMissing, validation.signers, option?.isExtension]);
 
     const icon = useMemo(() => {
       if (isLoading || waitingForConfirmation) {
@@ -160,16 +112,6 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       return IconComponent ? <IconComponent size="sm" /> : null;
     }, [isLoading, waitingForConfirmation, option]);
 
-    // Check if login has single signer (or all same auth type)
-    const isSingleSignerLogin = useMemo(() => {
-      if (!validation.signers || validation.signers.length === 0) {
-        return false;
-      }
-      return (
-        validation.signers.length === 1 || allUseSameAuth(validation.signers)
-      );
-    }, [validation.signers]);
-
     const text = useMemo(() => {
       if (waitingForConfirmation) {
         return `Waiting for ${option?.label} confirmation`;
@@ -177,33 +119,13 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       if (isLoading) {
         return null;
       }
-
-      const isLogin = validation.exists || !username;
-
-      // Single signer login: show branded text only when username exists
-      if (
-        isLogin &&
-        validation.exists &&
-        isSingleSignerLogin &&
-        option?.label
-      ) {
-        return `log in with ${option.label}`;
-      }
-
-      // Single signer signup: show branded text
-      if (!isLogin && signupOptions?.length === 1 && option?.label) {
-        return `sign up with ${option.label}`;
-      }
-
-      return isLogin ? "log in" : "sign up";
+      return validation.exists || !username ? "log in" : "sign up";
     }, [
       option?.label,
       isLoading,
       waitingForConfirmation,
       validation.exists,
       username,
-      signupOptions,
-      isSingleSignerLogin,
     ]);
 
     return (
