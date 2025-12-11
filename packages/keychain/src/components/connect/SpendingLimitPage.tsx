@@ -63,8 +63,6 @@ export function SpendingLimitPage({
             Back
           </Button>
         </div>
-
-        {!error && <div className="flex flex-col" />}
       </LayoutFooter>
     </>
   );
