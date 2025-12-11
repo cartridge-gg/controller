@@ -14,7 +14,7 @@ import {
 import { Price } from "@cartridge/ui/utils/api/cartridge";
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
-import { fetchSwapQuoteInUsdc, chainIdToEkuboNetwork } from "@/utils/ekubo";
+import { fetchSwapQuoteInUsdc } from "@/utils/ekubo";
 
 export const DEFAULT_TOKENS = [
   {
@@ -217,7 +217,6 @@ export function TokensProvider({
     async () => {
       if (debouncedAddresses.length === 0 || !chainId) return [];
 
-      const network = chainIdToEkuboNetwork(chainId);
       const USDC_DECIMALS = 6;
       const ONE_USDC = BigInt(10 ** USDC_DECIMALS); // 1 USDC
 
@@ -244,7 +243,7 @@ export function TokensProvider({
             const tokenAmount = await fetchSwapQuoteInUsdc(
               address,
               BigInt(10 ** (tokenDecimals + 1)),
-              network,
+              chainId,
             );
 
             return {

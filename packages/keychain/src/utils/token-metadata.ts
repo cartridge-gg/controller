@@ -1,4 +1,4 @@
-import { Call, RpcProvider, shortString } from "starknet";
+import { Call, RpcProvider, shortString, constants } from "starknet";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import {
   USDT_CONTRACT_ADDRESS,
@@ -16,12 +16,12 @@ export interface TokenMetadata {
  */
 const CACHED_TOKEN_METADATA: Record<string, TokenMetadata> = {
   // USDC on mainnet
-  [USDC_ADDRESSES.mainnet.toLowerCase()]: {
+  [USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN].toLowerCase()]: {
     symbol: "USDC",
     decimals: 6,
   },
   // USDC on sepolia
-  [USDC_ADDRESSES.sepolia.toLowerCase()]: {
+  [USDC_ADDRESSES[constants.StarknetChainId.SN_SEPOLIA].toLowerCase()]: {
     symbol: "USDC",
     decimals: 6,
   },

@@ -12,11 +12,6 @@ import {
 import Controller from "@/utils/controller";
 
 /**
- * Supported networks for Ekubo quotes
- */
-export type EkuboNetwork = "mainnet" | "sepolia";
-
-/**
  * Extended Error type with retry control
  */
 interface ExtendedError extends Error {
@@ -24,20 +19,24 @@ interface ExtendedError extends Error {
 }
 
 /**
- * Ekubo Router contract addresses
+ * Ekubo Router contract addresses by chain ID
  */
-export const EKUBO_ROUTER_ADDRESSES = {
-  mainnet: "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
-  sepolia: "0x0045f933adf0607292468ad1c1dedaa74d5ad166392590e72676a34d01d7b763",
-} as const;
+export const EKUBO_ROUTER_ADDRESSES: Record<string, string> = {
+  [constants.StarknetChainId.SN_MAIN]:
+    "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
+  [constants.StarknetChainId.SN_SEPOLIA]:
+    "0x0045f933adf0607292468ad1c1dedaa74d5ad166392590e72676a34d01d7b763",
+};
 
 /**
- * USDC contract addresses by network
+ * USDC contract addresses by chain ID
  */
-export const USDC_ADDRESSES = {
-  mainnet: "0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
-  sepolia: "0x053b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080",
-} as const;
+export const USDC_ADDRESSES: Record<string, string> = {
+  [constants.StarknetChainId.SN_MAIN]:
+    "0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
+  [constants.StarknetChainId.SN_SEPOLIA]:
+    "0x053b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080",
+};
 
 /**
  * Slippage buffer percentage for swap amounts
@@ -77,7 +76,7 @@ export interface SwapCallsParams {
   paymentToken: string;
   totalCostWithQuantity: bigint;
   swapQuote: SwapQuote;
-  network: EkuboNetwork;
+  chainId: string;
 }
 
 export interface SwapCallsResult {
@@ -181,14 +180,10 @@ function parseTotalCalculated(totalCalculated: string | number): bigint {
 }
 
 /**
- * Get the Ekubo API base URL for a given network
+ * Get the Ekubo API base URL for a given chain ID
  */
-function getEkuboApiUrl(network: EkuboNetwork): string {
-  const chainId =
-    network === "mainnet"
-      ? num.toBigInt(constants.StarknetChainId.SN_MAIN)
-      : num.toBigInt(constants.StarknetChainId.SN_SEPOLIA);
-  return `https://prod-api-quoter.ekubo.org/${chainId}`;
+function getEkuboApiUrl(chainId: string): string {
+  return `https://prod-api-quoter.ekubo.org/${num.toBigInt(chainId)}`;
 }
 
 /**
@@ -198,12 +193,12 @@ export async function fetchSwapQuote(
   amount: bigint,
   tokenFrom: string,
   tokenTo: string,
-  network: EkuboNetwork = "mainnet",
+  chainId: string = constants.StarknetChainId.SN_MAIN,
   abortSignal?: AbortSignal,
 ): Promise<SwapQuote> {
   // Negative amount to specify exact amount received
   const receivedAmount = `-${amount.toString()}`;
-  const baseUrl = getEkuboApiUrl(network);
+  const baseUrl = getEkuboApiUrl(chainId);
 
   // Normalize addresses to hex format (handles leading zeros properly)
   const normalizedTokenFrom = num.toHex(tokenFrom);
@@ -319,15 +314,18 @@ export async function fetchSwapQuote(
 export async function fetchSwapQuoteInUsdc(
   tokenAddress: string,
   amount: bigint,
-  network: EkuboNetwork = "mainnet",
+  chainId: string = constants.StarknetChainId.SN_MAIN,
   abortSignal?: AbortSignal,
 ): Promise<bigint> {
-  const usdcAddress = USDC_ADDRESSES[network];
+  const usdcAddress = USDC_ADDRESSES[chainId];
+  if (!usdcAddress) {
+    throw new Error(`USDC address not found for chain ID: ${chainId}`);
+  }
   const quote = await fetchSwapQuote(
     amount,
     tokenAddress,
     usdcAddress,
-    network,
+    chainId,
     abortSignal,
   );
   return quote.total;
@@ -345,10 +343,13 @@ export function prepareSwapCalls(params: SwapCallsParams): SwapCallsResult {
     paymentToken,
     totalCostWithQuantity,
     swapQuote,
-    network,
+    chainId,
   } = params;
 
-  const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
+  const routerAddress = EKUBO_ROUTER_ADDRESSES[chainId];
+  if (!routerAddress) {
+    throw new Error(`Router address not found for chain ID: ${chainId}`);
+  }
 
   // Add slippage buffer (swapQuote.total is already absolute value)
   const totalQuoteSum =
@@ -366,7 +367,7 @@ export function prepareSwapCalls(params: SwapCallsParams): SwapCallsResult {
     paymentToken,
     totalCostWithQuantity,
     swapQuote,
-    network,
+    chainId,
   );
 
   return {
@@ -386,7 +387,7 @@ export function prepareSwapCalls(params: SwapCallsParams): SwapCallsResult {
  * @param targetToken - Token being bought
  * @param minimumAmount - Minimum amount of target token to receive
  * @param quote - Quote from Ekubo API
- * @param network - Network to use (mainnet or sepolia)
+ * @param chainId - Chain ID (SN_MAIN or SN_SEPOLIA)
  * @returns Array of calls to execute the swap
  */
 function generateSwapCalls(
@@ -394,9 +395,12 @@ function generateSwapCalls(
   targetToken: string,
   minimumAmount: bigint,
   quote: SwapQuote,
-  network: EkuboNetwork = "mainnet",
+  chainId: string = constants.StarknetChainId.SN_MAIN,
 ): Call[] {
-  const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
+  const routerAddress = EKUBO_ROUTER_ADDRESSES[chainId];
+  if (!routerAddress) {
+    throw new Error(`Router address not found for chain ID: ${chainId}`);
+  }
   // Add slippage buffer (quote.total is already absolute value)
   const totalQuoteSum =
     quote.total + (quote.total * SLIPPAGE_PERCENTAGE) / 100n;
@@ -544,21 +548,6 @@ function generateSwapCalls(
   }
 
   return [transferCall, ...swapCalls, clearCall];
-}
-
-/**
- * Determine Ekubo network from Starknet chain ID
- */
-export function chainIdToEkuboNetwork(chainId: string): EkuboNetwork {
-  switch (chainId) {
-    case constants.StarknetChainId.SN_MAIN:
-      return "mainnet";
-    case constants.StarknetChainId.SN_SEPOLIA:
-      return "sepolia";
-    default:
-      //console.warn(`Unknown chainId ${chainId}, defaulting to mainnet`);
-      return "mainnet";
-  }
 }
 
 /**
