@@ -218,9 +218,8 @@ export async function fetchSwapQuote(
       const response = await fetch(url, {
         method: "GET",
         signal: abortSignal,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        mode: "cors",
+        credentials: "omit",
       });
 
       // Success case
