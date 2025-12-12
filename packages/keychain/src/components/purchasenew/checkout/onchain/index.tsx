@@ -42,7 +42,7 @@ export function OnchainCheckout() {
     incrementQuantity,
     decrementQuantity,
     onOnchainPurchase,
-    onSendDeposit,
+    //onSendDeposit,
   } = useOnchainPurchaseContext();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -195,16 +195,26 @@ export function OnchainCheckout() {
 
             <QuantityControls
               quantity={quantity}
-              isLoading={isLoading}
               isSendingDeposit={isSendingDeposit}
               globalDisabled={globalDisabled}
               hasSufficientBalance={hasSufficientBalance}
-              bridgeFrom={bridgeFrom}
               onIncrement={incrementQuantity}
               onDecrement={decrementQuantity}
-              onPurchase={handlePurchase}
-              onBridge={onSendDeposit}
-            />
+            >
+              <iframe
+                src="https://pay.coinbase.com/v2/api-onramp/apple-pay?sessionToken=MWYwZDc4YzYtYzRjOC02NzNlLWFiOWQtNmEyMzg1ODBlYzg2&useApplePaySandbox=true"
+                className="w-full h-12 border-0"
+                allow="payment"
+              />
+              {/* <Button
+                className="w-full"
+                isLoading={isLoading || isSendingDeposit}
+                disabled={globalDisabled}
+                onClick={bridgeFrom !== null ? onSendDeposit : handlePurchase}
+              >
+                {bridgeFrom ? "Bridge" : `Buy ${quantity}`}
+              </Button> */}
+            </QuantityControls>
           </>
         )}
       </LayoutFooter>
