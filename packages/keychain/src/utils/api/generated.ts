@@ -35,11 +35,15 @@ export type Account = Node & {
   credentials: Credentials;
   credits: Credits;
   creditsPlain: Scalars["Int"];
-  /** Optional email for account, required for slot billing */
+  /** Optional email for account, required for slot billing and coinbase onramp */
   email?: Maybe<Scalars["String"]>;
   id: Scalars["ID"];
   membership: AccountTeamConnection;
   name?: Maybe<Scalars["String"]>;
+  /** Optional phone number, required for coinbase onramp */
+  phoneNumber?: Maybe<Scalars["String"]>;
+  /** Timestamp of when the phone number was verified via OTP */
+  phoneNumberVerifiedAt?: Maybe<Scalars["String"]>;
   /** If true, the account is billed for paid slot deployments */
   slotBilling: Scalars["Boolean"];
   starterpackMint: StarterpackMintConnection;
@@ -265,6 +269,38 @@ export type AccountWhereInput = {
   nameNotNil?: InputMaybe<Scalars["Boolean"]>;
   not?: InputMaybe<AccountWhereInput>;
   or?: InputMaybe<Array<AccountWhereInput>>;
+  /** phone_number field predicates */
+  phoneNumber?: InputMaybe<Scalars["String"]>;
+  phoneNumberContains?: InputMaybe<Scalars["String"]>;
+  phoneNumberContainsFold?: InputMaybe<Scalars["String"]>;
+  phoneNumberEqualFold?: InputMaybe<Scalars["String"]>;
+  phoneNumberGT?: InputMaybe<Scalars["String"]>;
+  phoneNumberGTE?: InputMaybe<Scalars["String"]>;
+  phoneNumberHasPrefix?: InputMaybe<Scalars["String"]>;
+  phoneNumberHasSuffix?: InputMaybe<Scalars["String"]>;
+  phoneNumberIn?: InputMaybe<Array<Scalars["String"]>>;
+  phoneNumberIsNil?: InputMaybe<Scalars["Boolean"]>;
+  phoneNumberLT?: InputMaybe<Scalars["String"]>;
+  phoneNumberLTE?: InputMaybe<Scalars["String"]>;
+  phoneNumberNEQ?: InputMaybe<Scalars["String"]>;
+  phoneNumberNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  phoneNumberNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** phone_number_verified_at field predicates */
+  phoneNumberVerifiedAt?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtContains?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtContainsFold?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtEqualFold?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtGT?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtGTE?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtHasPrefix?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtHasSuffix?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtIn?: InputMaybe<Array<Scalars["String"]>>;
+  phoneNumberVerifiedAtIsNil?: InputMaybe<Scalars["Boolean"]>;
+  phoneNumberVerifiedAtLT?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtLTE?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtNEQ?: InputMaybe<Scalars["String"]>;
+  phoneNumberVerifiedAtNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  phoneNumberVerifiedAtNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** slot_billing field predicates */
   slotBilling?: InputMaybe<Scalars["Boolean"]>;
   slotBillingNEQ?: InputMaybe<Scalars["Boolean"]>;
@@ -806,6 +842,17 @@ export type CoinbaseOnrampQuoteInput = {
   subdivision?: InputMaybe<Scalars["String"]>;
 };
 
+/** Indicates what user information is required for Coinbase onramp. */
+export type CoinbaseOnrampRequirements = {
+  __typename?: "CoinbaseOnrampRequirements";
+  /** True if the user needs to provide an email address. */
+  needsEmail: Scalars["Boolean"];
+  /** True if the user needs to provide a valid US phone number. */
+  needsPhoneNumber: Scalars["Boolean"];
+  /** True if the user's phone number needs to be (re)verified. */
+  needsPhoneVerification: Scalars["Boolean"];
+};
+
 export type CoinbaseOnrampSession = {
   __typename?: "CoinbaseOnrampSession";
   /** The single-use Coinbase onramp URL. This URL can only be used once. */
@@ -1086,15 +1133,8 @@ export type CreateCoinbaseOnrampOrderInput = {
    * Required when embedding the payment link in an iframe.
    */
   domain?: InputMaybe<Scalars["String"]>;
-  /** The user's verified email address. */
-  email: Scalars["String"];
   /** Optional partner order reference ID. */
   partnerOrderRef?: InputMaybe<Scalars["String"]>;
-  /**
-   * A unique identifier for the user in your app.
-   * Prefix with "sandbox-" for test transactions.
-   */
-  partnerUserRef: Scalars["String"];
   /**
    * The amount of fiat currency to pay (e.g., "100.00" for $100 USD).
    * Either paymentAmount or purchaseAmount must be provided.
@@ -1103,19 +1143,14 @@ export type CreateCoinbaseOnrampOrderInput = {
   /** The fiat currency to pay with. Currently only "USD" is supported. */
   paymentCurrency: Scalars["String"];
   /**
-   * The user's phone number in E.164 format (e.g., "+12055555555").
-   * Must be verified via OTP before use.
-   */
-  phoneNumber: Scalars["String"];
-  /** Timestamp of when the user's phone number was verified via OTP. */
-  phoneNumberVerifiedAt: Scalars["Time"];
-  /**
    * The amount of USDC to purchase (e.g., "100.000000" for 100 USDC).
    * Either paymentAmount or purchaseAmount must be provided.
    */
   purchaseAmount?: InputMaybe<Scalars["String"]>;
   /** If true, use sandbox mode for testing (no real charges). */
   sandbox?: InputMaybe<Scalars["Boolean"]>;
+  /** The controller username to create the onramp order for. */
+  username: Scalars["String"];
 };
 
 export type CreateCoinbaseOnrampSessionInput = {
@@ -3716,6 +3751,12 @@ export type Query = {
    */
   coinbaseOnrampQuote: CoinbaseOnrampQuote;
   /**
+   * Check if a user has the required information for Coinbase onramp.
+   * Returns flags indicating what information is missing or needs to be updated.
+   * Does not expose any user data.
+   */
+  coinbaseOnrampRequirements: CoinbaseOnrampRequirements;
+  /**
    * Get the status and history of Coinbase onramp transactions for a user.
    * Returns a paginated list of transactions in reverse chronological order.
    */
@@ -3809,6 +3850,10 @@ export type QueryBalancesArgs = {
 
 export type QueryCoinbaseOnrampQuoteArgs = {
   input: CoinbaseOnrampQuoteInput;
+};
+
+export type QueryCoinbaseOnrampRequirementsArgs = {
+  username: Scalars["String"];
 };
 
 export type QueryCoinbaseOnrampTransactionsArgs = {
