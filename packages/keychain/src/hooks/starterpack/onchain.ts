@@ -22,6 +22,7 @@ interface StarterPackMetadataOnchainRaw {
   description: string;
   image_uri: string;
   items: ItemOnchainRaw[];
+  additional_payment_tokens?: string[];
 }
 
 // TypeScript interface (camelCase)
@@ -36,6 +37,7 @@ interface StarterPackMetadataOnchain {
   description: string;
   imageUri: string;
   items: ItemOnchain[];
+  additionalPaymentTokens?: string[];
 }
 
 // Convert snake_case JSON from contract to camelCase TypeScript
@@ -51,6 +53,7 @@ function convertMetadata(
       description: item.description,
       imageUri: item.image_uri,
     })),
+    additionalPaymentTokens: raw.additional_payment_tokens,
   };
 }
 

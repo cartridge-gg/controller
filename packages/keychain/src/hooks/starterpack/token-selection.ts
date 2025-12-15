@@ -92,6 +92,7 @@ export function useTokenSelection({
   const availableTokens = useMemo(() => {
     if (!controller) return [];
 
+    // Always start with default tokens (ETH, STRK, USDC)
     const usdcAddress =
       USDC_ADDRESSES[controller.chainId()] ||
       USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN];
@@ -106,21 +107,60 @@ export function useTokenSelection({
       },
     ];
 
-    // Add payment token from quote if not already in list
-    if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
+    // Helper to check if token is already in list
+    const isAlreadyIncluded = (address: string) =>
+      tokenMetadata.some(
+        (token) =>
+          BigInt(getChecksumAddress(token.address)) ===
+          BigInt(getChecksumAddress(address)),
+      );
+
+    // If starterpack specifies additional payment tokens, add those
+    if (
+      starterpackDetails &&
+      isOnchainStarterpack(starterpackDetails) &&
+      starterpackDetails.additionalPaymentTokens &&
+      starterpackDetails.additionalPaymentTokens.length > 0
+    ) {
+      for (const tokenAddress of starterpackDetails.additionalPaymentTokens) {
+        if (isAlreadyIncluded(tokenAddress)) continue;
+
+        const checksumAddress = getChecksumAddress(tokenAddress);
+        const metadata = erc20Metadata.find(
+          (m) => BigInt(m.l2_token_address) === BigInt(checksumAddress),
+        );
+
+        if (metadata) {
+          // Found in erc20Metadata - use its info
+          tokenMetadata.push({
+            address: checksumAddress,
+            name: metadata.name,
+            symbol: metadata.symbol,
+            decimals: metadata.decimals,
+            icon: metadata.logo_url || makeBlockie(checksumAddress),
+          });
+        } else {
+          // Not in erc20Metadata - use blockie and placeholder metadata
+          tokenMetadata.push({
+            address: checksumAddress,
+            name: "Unknown Token",
+            symbol: "???",
+            decimals: 18,
+            icon: makeBlockie(checksumAddress),
+          });
+        }
+      }
+    } else if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
+      // No payment tokens specified - add payment token from quote if not already in list
       const quote = starterpackDetails.quote;
       if (quote) {
         const paymentTokenAddress = getChecksumAddress(quote.paymentToken);
-        const isAlreadyIncluded = tokenMetadata.some(
-          (token) => getChecksumAddress(token.address) === paymentTokenAddress,
-        );
-
-        if (!isAlreadyIncluded) {
+        if (!isAlreadyIncluded(paymentTokenAddress)) {
           const icon =
             erc20Metadata.find(
               (token) =>
                 BigInt(token.l2_token_address) === BigInt(paymentTokenAddress),
-            )?.logo_url || makeBlockie(getChecksumAddress(paymentTokenAddress));
+            )?.logo_url || makeBlockie(paymentTokenAddress);
           tokenMetadata.push({
             address: paymentTokenAddress,
             name: quote.paymentTokenMetadata.symbol,
