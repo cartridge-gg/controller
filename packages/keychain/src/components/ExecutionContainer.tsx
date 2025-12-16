@@ -230,7 +230,6 @@ export function ExecutionContainer({
               // Paymaster not available, fallback to user pays flow
               return (
                 <>
-                  <ControllerErrorAlert error={ctrlError} />
                   <Fees isLoading={isEstimating} maxFee={maxFee} />
                   <Button
                     onClick={handleSubmit}
@@ -238,7 +237,7 @@ export function ExecutionContainer({
                     disabled={
                       isEstimating ||
                       !transactions ||
-                      !!(maxFee === null && transactions?.length)
+                      !!(maxFee === undefined && transactions?.length)
                     }
                   >
                     {buttonText}
@@ -254,7 +253,7 @@ export function ExecutionContainer({
                     isLoading={isLoading}
                     disabled={
                       !transactions ||
-                      !!(maxFee === null && transactions?.length)
+                      !!(maxFee === undefined && transactions?.length)
                     }
                   >
                     {buttonText}
@@ -275,7 +274,7 @@ export function ExecutionContainer({
                       isEstimating ||
                       !!ctrlError ||
                       !transactions ||
-                      !!(maxFee === null && transactions?.length)
+                      !!(maxFee === undefined && transactions?.length)
                     }
                   >
                     {buttonText}
