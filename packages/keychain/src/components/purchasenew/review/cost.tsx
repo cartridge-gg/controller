@@ -248,9 +248,8 @@ export function OnchainCostBreakdown({
           </div>
         </CardContent>
         <Select
-          value={displayToken?.address}
+          value={displayToken?.address ?? ""}
           onValueChange={handleTokenChange}
-          defaultValue={defaultToken?.address}
           disabled={availableTokens.length <= 1 || isTokenSelectionLocked}
         >
           <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2" />
