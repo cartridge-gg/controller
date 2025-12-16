@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useController } from "@/hooks/controller";
 import { useConnection } from "@/hooks/connection";
-import { CairoByteArray, Call, uint256 } from "starknet";
+import { CairoByteArray, Call, getChecksumAddress, uint256 } from "starknet";
 import { fetchSwapQuote, USDC_ADDRESSES } from "@/utils/ekubo";
 import { getCurrentReferral } from "@/utils/referral";
 import { Quote } from "@/context";
@@ -53,7 +53,7 @@ function convertMetadata(
       description: item.description,
       imageUri: item.image_uri,
     })),
-    additionalPaymentTokens: raw.additional_payment_tokens,
+    additionalPaymentTokens: raw.additional_payment_tokens?.map((token) => getChecksumAddress(`0x${BigInt(token).toString(16)}`)),
   };
 }
 
