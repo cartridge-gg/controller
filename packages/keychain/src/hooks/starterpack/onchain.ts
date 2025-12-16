@@ -53,7 +53,9 @@ function convertMetadata(
       description: item.description,
       imageUri: item.image_uri,
     })),
-    additionalPaymentTokens: raw.additional_payment_tokens?.map((token) => getChecksumAddress(`0x${BigInt(token).toString(16)}`)),
+    additionalPaymentTokens: raw.additional_payment_tokens?.map((token) =>
+      getChecksumAddress(`0x${BigInt(token).toString(16)}`),
+    ),
   };
 }
 
