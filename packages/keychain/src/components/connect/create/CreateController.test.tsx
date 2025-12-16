@@ -321,7 +321,7 @@ describe("CreateController", () => {
     // Simulate dropdown being open by triggering focus on input
     fireEvent.focus(input);
 
-    const submitButton = screen.getByText("sign up");
+    const submitButton = screen.getByText("sign up with Passkey");
     fireEvent.click(submitButton);
 
     // Form submission should be prevented when dropdown is open
@@ -463,7 +463,7 @@ describe("CreateController", () => {
       const input = screen.getByPlaceholderText("Username");
       fireEvent.change(input, { target: { value: "testuser" } });
 
-      expect(screen.getByText("sign up")).toBeInTheDocument();
+      expect(screen.getByText("sign up with Passkey")).toBeInTheDocument();
       expect(screen.queryByText(/not supported/)).not.toBeInTheDocument();
     });
 
@@ -480,7 +480,7 @@ describe("CreateController", () => {
       const input = screen.getByPlaceholderText("Username");
       fireEvent.change(input, { target: { value: "testuser" } });
 
-      expect(screen.getByText("sign up")).toBeInTheDocument();
+      expect(screen.getByText("sign up with Passkey")).toBeInTheDocument();
       expect(screen.queryByText(/not supported/)).not.toBeInTheDocument();
     });
 
@@ -508,7 +508,7 @@ describe("CreateController", () => {
       ).toBeInTheDocument();
 
       // Should still show auth button (but it may be disabled or handle redirect)
-      expect(screen.getByText("sign up")).toBeInTheDocument();
+      expect(screen.getByText("sign up with Passkey")).toBeInTheDocument();
     });
   });
 });
