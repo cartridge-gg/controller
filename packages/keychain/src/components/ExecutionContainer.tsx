@@ -219,6 +219,31 @@ export function ExecutionContainer({
                   </Button>
                 </>
               );
+            case ErrorCode.PaymasterExecutionTimeNotReached:
+            case ErrorCode.PaymasterExecutionTimePassed:
+            case ErrorCode.PaymasterInvalidCaller:
+            case ErrorCode.PaymasterRateLimitExceeded:
+            case ErrorCode.PaymasterNotSupported:
+            case ErrorCode.PaymasterHttp:
+            case ErrorCode.PaymasterExcecution:
+            case ErrorCode.PaymasterSerialization:
+              // Paymaster not available, fallback to user pays flow
+              return (
+                <>
+                  <Fees isLoading={isEstimating} maxFee={maxFee} />
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    disabled={
+                      isEstimating ||
+                      !transactions ||
+                      !!(maxFee === undefined && transactions?.length)
+                    }
+                  >
+                    {buttonText}
+                  </Button>
+                </>
+              );
             default:
               // Workaround until we can get same fee token address on provable katana
               if (buttonText.toLowerCase() === "upgrade") {
@@ -228,7 +253,7 @@ export function ExecutionContainer({
                     isLoading={isLoading}
                     disabled={
                       !transactions ||
-                      !!(maxFee === null && transactions?.length)
+                      !!(maxFee === undefined && transactions?.length)
                     }
                   >
                     {buttonText}
@@ -249,7 +274,7 @@ export function ExecutionContainer({
                       isEstimating ||
                       !!ctrlError ||
                       !transactions ||
-                      !!(maxFee === null && transactions?.length)
+                      !!(maxFee === undefined && transactions?.length)
                     }
                   >
                     {buttonText}
