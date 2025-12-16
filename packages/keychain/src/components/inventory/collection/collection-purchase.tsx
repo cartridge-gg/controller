@@ -26,11 +26,7 @@ import {
 } from "starknet";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  useCollection,
-  useToriiCollection,
-  useToriiCollections,
-} from "@/hooks/collection";
+import { useCollection, useToriiCollection } from "@/hooks/collection";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useTokens } from "@/hooks/token";
@@ -76,14 +72,9 @@ export function CollectionPurchase() {
     tokenIds: tokenId ? [tokenId] : [],
   });
 
-  const { collections, status: collectionStatus } = useToriiCollections();
-
-  const collection = useMemo(() => {
-    if (!project || !collections || !contractAddress) return;
-    const projectCollections = collections[project];
-    if (!projectCollections) return;
-    return projectCollections[getChecksumAddress(contractAddress)];
-  }, [collections, contractAddress, project]);
+  const { collection, status: collectionStatus } = useCollection({
+    contractAddress,
+  });
 
   const { tokens: assets, status: assetsStatus } = useToriiCollection({
     contractAddress: contractAddress || "",
@@ -117,7 +108,7 @@ export function CollectionPurchase() {
           images: [newImage, oldImage],
           name: asset.name,
           collection: collection.name,
-          collectionAddress: collection.contract_address,
+          collectionAddress: contractAddress,
           price: order.price,
           tokenId: asset.token_id ?? "",
         };

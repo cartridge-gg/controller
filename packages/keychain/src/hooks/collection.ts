@@ -314,7 +314,7 @@ export function useToriiCollections(): UseToriiCollectionsResponse {
     if (!project) return;
     const getClients = async () => {
       const url = `https://api.cartridge.gg/x/${project}/torii`;
-      const client = provider.getToriiClient(url);
+      const client = await provider.getToriiClient(url);
       setClient(client);
     };
     getClients();
@@ -356,7 +356,7 @@ export function useToriiCollection({
     if (!project) return;
     const getClient = async () => {
       const url = `https://api.cartridge.gg/x/${project}/torii`;
-      const client = provider.getToriiClient(url);
+      const client = await provider.getToriiClient(url);
       setClient(client);
     };
     getClient();
