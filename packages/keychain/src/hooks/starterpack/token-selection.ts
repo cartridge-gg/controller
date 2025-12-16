@@ -7,7 +7,10 @@ import {
   type ERC20Metadata,
 } from "@/components/provider/tokens";
 import { fetchSwapQuote, USDC_ADDRESSES, type SwapQuote } from "@/utils/ekubo";
-import { fetchTokenMetadata, type TokenMetadata } from "@/utils/token-metadata";
+import {
+  fetchTokenMetadata,
+  type TokenMetadata as FullTokenMetadata,
+} from "@/utils/token-metadata";
 import makeBlockie from "ethereum-blockies-base64";
 import {
   isOnchainStarterpack,
@@ -24,10 +27,16 @@ export interface TokenOption {
   contract: ERC20Contract;
 }
 
+// Minimal token metadata for price display
+interface PriceTokenMetadata {
+  symbol: string;
+  decimals: number;
+}
+
 export interface ConvertedPrice {
   amount: bigint;
   quantity: number;
-  tokenMetadata: TokenMetadata;
+  tokenMetadata: PriceTokenMetadata;
 }
 
 export interface UseTokenSelectionOptions {
@@ -76,6 +85,9 @@ export function useTokenSelection({
   const [swapQuote, setSwapQuote] = useState<SwapQuote | null>(null);
   const [isFetchingConversion, setIsFetchingConversion] = useState(false);
   const [conversionError, setConversionError] = useState<Error | null>(null);
+  const [fetchedTokenMetadata, setFetchedTokenMetadata] = useState<
+    Record<string, FullTokenMetadata>
+  >({});
 
   const setSelectedToken = useCallback((token: TokenOption | undefined) => {
     setSelectedTokenState(token);
@@ -92,7 +104,6 @@ export function useTokenSelection({
   const availableTokens = useMemo(() => {
     if (!controller) return [];
 
-    // Always start with default tokens (ETH, STRK, USDC)
     const usdcAddress =
       USDC_ADDRESSES[controller.chainId()] ||
       USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN];
@@ -107,47 +118,53 @@ export function useTokenSelection({
       },
     ];
 
-    // Helper to check if token is already in list
     const isAlreadyIncluded = (address: string) =>
       tokenMetadata.some(
         (token) =>
-          BigInt(getChecksumAddress(token.address)) ===
-          BigInt(getChecksumAddress(address)),
+          getChecksumAddress(token.address) === getChecksumAddress(address),
       );
 
-    // If starterpack specifies additional payment tokens, add those
-    if (
-      starterpackDetails &&
-      isOnchainStarterpack(starterpackDetails) &&
-      starterpackDetails.additionalPaymentTokens &&
-      starterpackDetails.additionalPaymentTokens.length > 0
-    ) {
+    if (starterpackDetails?.additionalPaymentTokens) {
       for (const tokenAddress of starterpackDetails.additionalPaymentTokens) {
         if (isAlreadyIncluded(tokenAddress)) continue;
 
         const checksumAddress = getChecksumAddress(tokenAddress);
-        const metadata = erc20Metadata.find(
-          (m) => BigInt(m.l2_token_address) === BigInt(checksumAddress),
+        const presetMetadata = erc20Metadata.find(
+          (m) =>
+            getChecksumAddress(m.l2_token_address) ===
+            getChecksumAddress(checksumAddress),
         );
 
-        if (metadata) {
+        if (presetMetadata) {
           // Found in erc20Metadata - use its info
           tokenMetadata.push({
             address: checksumAddress,
-            name: metadata.name,
-            symbol: metadata.symbol,
-            decimals: metadata.decimals,
-            icon: metadata.logo_url || makeBlockie(checksumAddress),
+            name: presetMetadata.name,
+            symbol: presetMetadata.symbol,
+            decimals: presetMetadata.decimals,
+            icon: presetMetadata.logo_url || makeBlockie(checksumAddress),
           });
         } else {
-          // Not in erc20Metadata - use blockie and placeholder metadata
-          tokenMetadata.push({
-            address: checksumAddress,
-            name: "Unknown Token",
-            symbol: "???",
-            decimals: 18,
-            icon: makeBlockie(checksumAddress),
-          });
+          // Check if we've fetched metadata for this token
+          const fetched = fetchedTokenMetadata[checksumAddress];
+          if (fetched) {
+            tokenMetadata.push({
+              address: checksumAddress,
+              name: fetched.name,
+              symbol: fetched.symbol,
+              decimals: fetched.decimals,
+              icon: makeBlockie(checksumAddress),
+            });
+          } else {
+            // Not in erc20Metadata and not fetched yet - use placeholder
+            tokenMetadata.push({
+              address: checksumAddress,
+              name: "Loading...",
+              symbol: "...",
+              decimals: 18,
+              icon: makeBlockie(checksumAddress),
+            });
+          }
         }
       }
     } else if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
@@ -185,7 +202,62 @@ export function useTokenSelection({
     }));
 
     return tokens;
-  }, [controller, starterpackDetails]);
+  }, [controller, starterpackDetails, fetchedTokenMetadata]);
+
+  // Fetch metadata for tokens not in erc20Metadata
+  useEffect(() => {
+    if (!controller || !starterpackDetails?.additionalPaymentTokens) return;
+
+    const fetchUnknownTokenMetadata = async () => {
+      const unknownTokens = starterpackDetails.additionalPaymentTokens!.filter(
+        (tokenAddress) => {
+          const checksumAddress = getChecksumAddress(tokenAddress);
+          // Skip if already in erc20Metadata
+          const inPresets = erc20Metadata.some(
+            (m) =>
+              getChecksumAddress(m.l2_token_address) ===
+              getChecksumAddress(checksumAddress),
+          );
+          if (inPresets) return false;
+          // Skip if already fetched
+          if (fetchedTokenMetadata[checksumAddress]) return false;
+          return true;
+        },
+      );
+
+      if (unknownTokens.length === 0) return;
+
+      // Fetch metadata for all unknown tokens in parallel
+      const results = await Promise.allSettled(
+        unknownTokens.map(async (tokenAddress) => {
+          const checksumAddress = getChecksumAddress(tokenAddress);
+          const metadata = await fetchTokenMetadata(
+            checksumAddress,
+            controller.provider,
+          );
+          return { address: checksumAddress, metadata };
+        }),
+      );
+
+      // Update state with fetched metadata
+      const newMetadata: Record<string, FullTokenMetadata> = {};
+      results.forEach((result) => {
+        if (result.status === "fulfilled") {
+          newMetadata[result.value.address] = result.value.metadata;
+        }
+      });
+
+      if (Object.keys(newMetadata).length > 0) {
+        setFetchedTokenMetadata((prev) => ({ ...prev, ...newMetadata }));
+      }
+    };
+
+    fetchUnknownTokenMetadata();
+  }, [
+    controller,
+    starterpackDetails?.additionalPaymentTokens,
+    fetchedTokenMetadata,
+  ]);
 
   // Token selection is locked when using Layerswap (non-Starknet platforms)
   const isTokenSelectionLocked = useMemo(() => {

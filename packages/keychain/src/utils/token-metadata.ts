@@ -7,6 +7,7 @@ import {
 } from "@cartridge/ui/utils";
 
 export interface TokenMetadata {
+  name: string;
   symbol: string;
   decimals: number;
 }
@@ -17,23 +18,28 @@ export interface TokenMetadata {
 const CACHED_TOKEN_METADATA: Record<string, TokenMetadata> = {
   // USDC on mainnet
   [USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN].toLowerCase()]: {
+    name: "USD Coin",
     symbol: "USDC",
     decimals: 6,
   },
   // USDC on sepolia
   [USDC_ADDRESSES[constants.StarknetChainId.SN_SEPOLIA].toLowerCase()]: {
+    name: "USD Coin",
     symbol: "USDC",
     decimals: 6,
   },
   [USDT_CONTRACT_ADDRESS.toLowerCase()]: {
+    name: "Tether USD",
     symbol: "USDT",
     decimals: 6,
   },
   [STRK_CONTRACT_ADDRESS.toLowerCase()]: {
+    name: "Starknet Token",
     symbol: "STRK",
     decimals: 18,
   },
   [ETH_CONTRACT_ADDRESS.toLowerCase()]: {
+    name: "Ether",
     symbol: "ETH",
     decimals: 18,
   },
@@ -62,7 +68,12 @@ export async function fetchTokenMetadata(
     return cached;
   }
 
-  const [symbolRes, decimalsRes] = await Promise.all([
+  const [nameRes, symbolRes, decimalsRes] = await Promise.all([
+    provider.callContract({
+      contractAddress: tokenAddress,
+      entrypoint: "name",
+      calldata: [],
+    } as Call),
     provider.callContract({
       contractAddress: tokenAddress,
       entrypoint: "symbol",
@@ -76,12 +87,18 @@ export async function fetchTokenMetadata(
   ]);
 
   // Handle both short string and Cairo byte array responses
+  let name = shortString.decodeShortString(nameRes[0]);
+  if (nameRes.length > 1) {
+    name = shortString.decodeShortString(nameRes[1]);
+  }
+
   let symbol = shortString.decodeShortString(symbolRes[0]);
   if (symbolRes.length > 1) {
     symbol = shortString.decodeShortString(symbolRes[1]);
   }
 
   return {
+    name,
     symbol,
     decimals: Number(decimalsRes[0]),
   };
