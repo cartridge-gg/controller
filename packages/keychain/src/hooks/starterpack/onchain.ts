@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useController } from "@/hooks/controller";
 import { useConnection } from "@/hooks/connection";
-import { CairoByteArray, Call, uint256 } from "starknet";
+import { CairoByteArray, Call, getChecksumAddress, uint256 } from "starknet";
 import { fetchSwapQuote, USDC_ADDRESSES } from "@/utils/ekubo";
 import { getCurrentReferral } from "@/utils/referral";
 import { Quote } from "@/context";
@@ -22,6 +22,7 @@ interface StarterPackMetadataOnchainRaw {
   description: string;
   image_uri: string;
   items: ItemOnchainRaw[];
+  additional_payment_tokens?: string[];
 }
 
 // TypeScript interface (camelCase)
@@ -36,6 +37,7 @@ interface StarterPackMetadataOnchain {
   description: string;
   imageUri: string;
   items: ItemOnchain[];
+  additionalPaymentTokens?: string[];
 }
 
 // Convert snake_case JSON from contract to camelCase TypeScript
@@ -51,6 +53,9 @@ function convertMetadata(
       description: item.description,
       imageUri: item.image_uri,
     })),
+    additionalPaymentTokens: raw.additional_payment_tokens?.map((token) =>
+      getChecksumAddress(`0x${BigInt(token).toString(16)}`),
+    ),
   };
 }
 

@@ -122,6 +122,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
         items: purchaseItems,
         quote: onchainQuote,
         isQuoteLoading: isOnchainQuoteLoading,
+        additionalPaymentTokens: onchainMetadata.additionalPaymentTokens,
       });
     }
   }, [
