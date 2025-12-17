@@ -32,3 +32,13 @@ export type {
   UseTokenBalanceOptions,
   UseTokenBalanceReturn,
 } from "./token-balance";
+
+export { useCoinbase } from "./coinbase";
+export type {
+  CreateOrderInput,
+  UseCoinbaseOptions,
+  UseCoinbaseReturn,
+  CoinbaseOrderResult,
+  CoinbaseTransactionResult,
+  CoinbaseRequirementsResult,
+} from "./coinbase";

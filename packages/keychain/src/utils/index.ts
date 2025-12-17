@@ -63,3 +63,6 @@ export {
   signMessageWithPrivateKey,
   getAddressFromPrivateKey,
 } from "./eth-signing";
+
+// IP utilities
+export { getClientIp } from "./ip";
