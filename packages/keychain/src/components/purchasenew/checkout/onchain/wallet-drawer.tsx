@@ -79,6 +79,7 @@ export function WalletSelectionDrawer({
       setStep("network");
       setSelectedNetwork(null);
       setError(null);
+      setIsConnecting(false);
     }
   }, [isOpen]);
 
