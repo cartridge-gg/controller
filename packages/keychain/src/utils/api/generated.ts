@@ -916,13 +916,10 @@ export type CoinbaseTransactionsInput = {
   pageKey?: InputMaybe<Scalars["String"]>;
   /** Number of transactions to return per page. Default is 1. */
   pageSize?: InputMaybe<Scalars["Int"]>;
-  /**
-   * The partner user reference ID to get transactions for.
-   * This should match the partnerUserRef used when creating orders.
-   */
-  partnerUserRef: Scalars["String"];
-  /** If true, prepend "sandbox-" to partnerUserRef to query sandbox transactions. */
+  /** If true, use sandbox mode to query sandbox transactions. */
   sandbox?: InputMaybe<Scalars["Boolean"]>;
+  /** The controller username to get transactions for. */
+  username: Scalars["String"];
 };
 
 export type CoinbaseTransactionsResponse = {
