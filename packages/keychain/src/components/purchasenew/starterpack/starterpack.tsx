@@ -80,7 +80,10 @@ export function PurchaseStarterpack() {
     }
   }, [isStarterpackLoading, details, preimage, displayError, navigate]);
 
-  if (isStarterpackLoading || preimage) {
+  if (
+    (isStarterpackLoading || isOnchainStarterpack(details) || preimage) &&
+    !displayError
+  ) {
     return <LoadingState />;
   }
 
@@ -104,12 +107,6 @@ export function PurchaseStarterpack() {
     );
   }
 
-  // If no details and no error, keep showing loading (shouldn't happen)
-  if (!details) {
-    return <LoadingState />;
-  }
-
-  // Handle backend starterpacks (GraphQL)
   if (isClaimStarterpack(details)) {
     return (
       <ClaimStarterPackInner
@@ -120,21 +117,6 @@ export function PurchaseStarterpack() {
     );
   }
 
-  // Handle onchain starterpacks (Smart contract)
-  if (isOnchainStarterpack(details)) {
-    return (
-      <OnchainStarterPackInner
-        name={details.name}
-        description={details.description}
-        icon={details.imageUri}
-        items={details.items}
-        quote={details.quote}
-        error={displayError}
-      />
-    );
-  }
-
-  // Fallback (should never reach here with proper types)
   return <LoadingState />;
 }
 
