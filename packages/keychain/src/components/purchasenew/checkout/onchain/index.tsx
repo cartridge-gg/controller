@@ -22,6 +22,7 @@ import { getWallet } from "../../wallet/config";
 import { ErrorCard } from "./error";
 import { WalletSelector } from "./selector";
 import { QuantityControls } from "./quantity";
+import { WalletSelectionDrawer } from "./wallet-drawer";
 
 export function OnchainCheckout() {
   const { navigate } = useNavigation();
@@ -46,6 +47,7 @@ export function OnchainCheckout() {
   } = useOnchainPurchaseContext();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const quote = useMemo(() => {
     if (!starterpackDetails || !isOnchainStarterpack(starterpackDetails)) {
@@ -103,10 +105,8 @@ export function OnchainCheckout() {
   const showConversionError = conversionError && needsConversion;
 
   const handleWalletSelect = useCallback(() => {
-    //const methods = "starknet;ethereum;base;arbitrum;optimism";
-    const methods = "starknet";
-    navigate(`/purchase/network/${methods}`);
-  }, [navigate]);
+    setIsDrawerOpen(true);
+  }, []);
 
   const handlePurchase = useCallback(async () => {
     if (!hasSufficientBalance && !isFree) return;
@@ -208,6 +208,11 @@ export function OnchainCheckout() {
           </>
         )}
       </LayoutFooter>
+
+      <WalletSelectionDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </>
   );
 }
