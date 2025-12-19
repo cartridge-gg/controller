@@ -40,6 +40,7 @@ export function OnchainCheckout() {
     convertedPrice,
     conversionError,
     selectedPlatform,
+    feeEstimationError,
     incrementQuantity,
     decrementQuantity,
     onOnchainPurchase,
@@ -83,6 +84,9 @@ export function OnchainCheckout() {
   });
 
   const globalDisabled = useMemo(() => {
+    // Disable if there's a fee estimation error (e.g., bridge amount too low)
+    if (feeEstimationError) return true;
+
     if (bridgeFrom !== null) return false;
 
     return (
@@ -92,6 +96,7 @@ export function OnchainCheckout() {
       isFetchingConversion
     );
   }, [
+    feeEstimationError,
     bridgeFrom,
     hasSufficientBalance,
     isLoadingBalance,
@@ -100,9 +105,12 @@ export function OnchainCheckout() {
   ]);
 
   const showInsufficientBalance =
-    !isLoadingBalance && !hasSufficientBalance && !balanceError;
+    !isLoadingBalance && !hasSufficientBalance && !balanceError && !bridgeFrom;
 
   const showConversionError = conversionError && needsConversion;
+
+  const showBridgeAmountTooLow =
+    feeEstimationError?.message?.includes("too low") ?? false;
 
   const handleWalletSelect = useCallback(() => {
     setIsDrawerOpen(true);
@@ -123,6 +131,17 @@ export function OnchainCheckout() {
       setIsLoading(false);
     }
   }, [hasSufficientBalance, isFree, onOnchainPurchase, navigate, clearError]);
+
+  const handleBridge = useCallback(async () => {
+    clearError();
+
+    try {
+      await onSendDeposit();
+      navigate("/purchase/pending", { reset: true });
+    } catch (error) {
+      console.error("Bridge deposit failed:", error);
+    }
+  }, [onSendDeposit, navigate, clearError]);
 
   useEffect(() => {
     clearError();
@@ -148,7 +167,9 @@ export function OnchainCheckout() {
       </LayoutContent>
 
       <LayoutFooter>
-        {displayError && <ControllerErrorAlert error={displayError} />}
+        {displayError && !showBridgeAmountTooLow && (
+          <ControllerErrorAlert error={displayError} />
+        )}
 
         {isFree ? (
           <Button
@@ -184,6 +205,14 @@ export function OnchainCheckout() {
               />
             )}
 
+            {showBridgeAmountTooLow && (
+              <ErrorCard
+                variant="warning"
+                title="Amount Too Low"
+                message="Bridge amount is too low for this network. Try increasing quantity or selecting a different network."
+              />
+            )}
+
             <WalletSelector
               walletName={wallet.name}
               walletIcon={wallet.subIcon}
@@ -203,7 +232,7 @@ export function OnchainCheckout() {
               onIncrement={incrementQuantity}
               onDecrement={decrementQuantity}
               onPurchase={handlePurchase}
-              onBridge={onSendDeposit}
+              onBridge={handleBridge}
             />
           </>
         )}

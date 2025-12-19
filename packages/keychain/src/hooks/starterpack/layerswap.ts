@@ -75,6 +75,7 @@ export interface UseLayerswapReturn {
 
   // Errors
   depositError: Error | null;
+  feeEstimationError: Error | null;
 }
 
 async function pollForFinalization(
@@ -369,6 +370,9 @@ export function useLayerswap({
   const [isFetchingFees, setIsFetchingFees] = useState(false);
   const [swapInput, setSwapInput] = useState<CreateLayerswapDepositInput>();
   const [depositError, setDepositError] = useState<Error | null>(null);
+  const [feeEstimationError, setFeeEstimationError] = useState<Error | null>(
+    null,
+  );
   const [isSendingDeposit, setIsSendingDeposit] = useState<boolean>(false);
 
   // Compute depositAmount = requestedAmount + fees
@@ -522,19 +526,32 @@ export function useLayerswap({
   useEffect(() => {
     if (!swapInput) return;
 
+    let isCurrent = true;
+
     const fetchFees = async () => {
       try {
         setIsFetchingFees(true);
+        setFeeEstimationError(null);
         const quote = await estimateLayerswapFees(swapInput);
-        setLayerswapFees(quote.totalFees);
+        if (isCurrent) {
+          setLayerswapFees(quote.totalFees);
+        }
       } catch (e) {
-        onError?.(e as Error);
+        if (isCurrent) {
+          setFeeEstimationError(e as Error);
+        }
       } finally {
-        setIsFetchingFees(false);
+        if (isCurrent) {
+          setIsFetchingFees(false);
+        }
       }
     };
 
     fetchFees();
+
+    return () => {
+      isCurrent = false;
+    };
   }, [swapInput, onError]);
 
   return {
@@ -546,6 +563,7 @@ export function useLayerswap({
     swapId,
     explorer,
     depositError,
+    feeEstimationError,
     onSendDeposit,
     waitForDeposit,
     setRequestedAmount,
