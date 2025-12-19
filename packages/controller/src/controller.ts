@@ -14,6 +14,7 @@ import { NotReadyToConnect } from "./errors";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
 import {
+  AuthOptions,
   Chain,
   ConnectError,
   ConnectReply,
@@ -224,7 +225,9 @@ export default class ControllerProvider extends BaseProvider {
     return this.account;
   }
 
-  async connect(): Promise<WalletAccount | undefined> {
+  async connect(
+    signupOptions?: AuthOptions,
+  ): Promise<WalletAccount | undefined> {
     if (!this.iframes) {
       return;
     }
@@ -248,7 +251,9 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.open();
 
     try {
-      let response = await this.keychain.connect(this.options.signupOptions);
+      // Use connect() parameter if provided, otherwise fall back to constructor options
+      const effectiveOptions = signupOptions ?? this.options.signupOptions;
+      let response = await this.keychain.connect(effectiveOptions);
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }

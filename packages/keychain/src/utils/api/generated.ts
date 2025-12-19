@@ -916,13 +916,10 @@ export type CoinbaseTransactionsInput = {
   pageKey?: InputMaybe<Scalars["String"]>;
   /** Number of transactions to return per page. Default is 1. */
   pageSize?: InputMaybe<Scalars["Int"]>;
-  /**
-   * The partner user reference ID to get transactions for.
-   * This should match the partnerUserRef used when creating orders.
-   */
-  partnerUserRef: Scalars["String"];
-  /** If true, prepend "sandbox-" to partnerUserRef to query sandbox transactions. */
+  /** If true, use sandbox mode to query sandbox transactions. */
   sandbox?: InputMaybe<Scalars["Boolean"]>;
+  /** The controller username to get transactions for. */
+  username: Scalars["String"];
 };
 
 export type CoinbaseTransactionsResponse = {
@@ -1133,8 +1130,6 @@ export type CreateCoinbaseOnrampOrderInput = {
    * Required when embedding the payment link in an iframe.
    */
   domain?: InputMaybe<Scalars["String"]>;
-  /** Optional partner order reference ID. */
-  partnerOrderRef?: InputMaybe<Scalars["String"]>;
   /**
    * The amount of fiat currency to pay (e.g., "100.00" for $100 USD).
    * Either paymentAmount or purchaseAmount must be provided.

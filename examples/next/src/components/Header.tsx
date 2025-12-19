@@ -196,6 +196,14 @@ const Header = () => {
           >
             {isControllerReady ? "Connect" : "Waiting for keychain..."}
           </Button>
+          <Button
+            onClick={() => {
+              controllerConnector.connectWithSignupOptions(["phantom-evm"]);
+            }}
+            disabled={!isControllerReady}
+          >
+            Connect (Phantom)
+          </Button>
           {sessionConnector && (
             <Button
               onClick={() => connect({ connector: sessionConnector })}

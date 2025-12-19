@@ -1,4 +1,7 @@
-import ControllerProvider, { ControllerOptions } from "@cartridge/controller";
+import ControllerProvider, {
+  AuthOptions,
+  ControllerOptions,
+} from "@cartridge/controller";
 import { Connector, InjectedConnector } from "@starknet-react/core";
 
 import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
@@ -34,6 +37,10 @@ export default class ControllerConnector extends InjectedConnector {
 
   async delegateAccount() {
     return await this.controller.delegateAccount();
+  }
+
+  async connectWithSignupOptions(signupOptions?: AuthOptions) {
+    return await this.controller.connect(signupOptions);
   }
 
   static fromConnectors(connectors: Connector[]): ControllerConnector {
