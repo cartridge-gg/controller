@@ -115,18 +115,14 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
         }
       }
 
-      // Signup flow: if single signer configured and username entered (confirmed new account)
-      if (
-        username &&
-        validation.exists === false &&
-        signupOptions &&
-        signupOptions.length === 1
-      ) {
+      // Signup flow: if single signer configured
+      // Show branded button immediately, even before username is entered
+      if (signupOptions && signupOptions.length === 1) {
         return OPTIONS[signupOptions[0]];
       }
 
       return undefined;
-    }, [validation.signers, validation.exists, signupOptions, username]);
+    }, [validation.signers, validation.exists, signupOptions]);
 
     const extensionsMissingForAllSigners = useMemo(() => {
       if (!option?.isExtension) {
@@ -180,7 +176,7 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
 
       const isLogin = validation.exists || !username;
 
-      // Single signer login: show branded text only when username exists
+      // Single signer login: show branded text when existing account found
       if (
         isLogin &&
         validation.exists &&
@@ -190,9 +186,11 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
         return `log in with ${option.label}`;
       }
 
-      // Single signer signup: show branded text
-      if (!isLogin && signupOptions?.length === 1 && option?.label) {
-        return `sign up with ${option.label}`;
+      // Single signer signup/initial: show branded text immediately
+      if (signupOptions?.length === 1 && option?.label) {
+        return isLogin
+          ? `log in with ${option.label}`
+          : `sign up with ${option.label}`;
       }
 
       return isLogin ? "log in" : "sign up";
