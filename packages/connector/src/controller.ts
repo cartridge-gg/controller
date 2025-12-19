@@ -39,8 +39,9 @@ export default class ControllerConnector extends InjectedConnector {
     return await this.controller.delegateAccount();
   }
 
-  async connectWithSignupOptions(signupOptions?: AuthOptions) {
-    return await this.controller.connect(signupOptions);
+  async connect(args?: { chainIdHint?: bigint; signupOptions?: AuthOptions }) {
+    await this.controller.connect(args?.signupOptions);
+    return super.connect({ chainIdHint: args?.chainIdHint });
   }
 
   static fromConnectors(connectors: Connector[]): ControllerConnector {

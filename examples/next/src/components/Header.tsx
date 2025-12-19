@@ -198,7 +198,9 @@ const Header = () => {
           </Button>
           <Button
             onClick={() => {
-              controllerConnector.connectWithSignupOptions(["phantom-evm"]);
+              controllerConnector.connect({
+                signupOptions: ["phantom-evm"],
+              });
             }}
             disabled={!isControllerReady}
             className="bg-[#AB9FF2] hover:bg-[#9B8FE2] text-white"
