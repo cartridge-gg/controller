@@ -40,7 +40,10 @@ export default class ControllerConnector extends InjectedConnector {
   }
 
   async connect(args?: { chainIdHint?: bigint; signupOptions?: AuthOptions }) {
-    await this.controller.connect(args?.signupOptions);
+    const account = await this.controller.connect(args?.signupOptions);
+    if (!account) {
+      throw new Error("Failed to connect controller");
+    }
     return super.connect({ chainIdHint: args?.chainIdHint });
   }
 
