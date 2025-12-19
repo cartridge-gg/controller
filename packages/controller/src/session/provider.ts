@@ -306,7 +306,7 @@ export default class SessionProvider extends BaseProvider {
       const params = new URLSearchParams(window.location.search);
       const session = params.get("startapp");
       if (session) {
-        const possibleNewSession: SessionRegistration = JSON.parse(
+        const possibleNewSession: Partial<SessionRegistration> = JSON.parse(
           atob(session),
         );
 
@@ -314,7 +314,18 @@ export default class SessionProvider extends BaseProvider {
           Number(possibleNewSession.expiresAt) !==
           Number(sessionRegistration?.expiresAt)
         ) {
-          sessionRegistration = possibleNewSession;
+          // Merge the redirect response with locally generated session fields
+          sessionRegistration = {
+            username: possibleNewSession.username!,
+            address: possibleNewSession.address!,
+            ownerGuid: possibleNewSession.ownerGuid!,
+            transactionHash: possibleNewSession.transactionHash,
+            expiresAt: possibleNewSession.expiresAt!,
+            guardianKeyGuid: possibleNewSession.guardianKeyGuid ?? "0x0",
+            metadataHash: possibleNewSession.metadataHash ?? "0x0",
+            sessionKeyGuid:
+              possibleNewSession.sessionKeyGuid ?? this._sessionKeyGuid,
+          };
           localStorage.setItem("session", JSON.stringify(sessionRegistration));
         }
 
@@ -329,6 +340,17 @@ export default class SessionProvider extends BaseProvider {
     }
 
     if (!sessionRegistration || !signer) {
+      return;
+    }
+
+    // Validate required session fields exist
+    if (
+      !sessionRegistration.sessionKeyGuid ||
+      !sessionRegistration.address ||
+      !sessionRegistration.ownerGuid ||
+      !sessionRegistration.expiresAt
+    ) {
+      this.clearStoredSession();
       return;
     }
 
