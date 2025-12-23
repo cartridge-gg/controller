@@ -50,4 +50,3 @@ export function useIntersectionObserver({
 
   return { elementRef: setRef, isIntersecting, hasIntersected };
 }
-
