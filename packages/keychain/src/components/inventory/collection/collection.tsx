@@ -18,11 +18,12 @@ import {
 
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useMemo, useEffect, useState } from "react";
-import { useCollection } from "@/hooks/collection";
+import { useCollection, Asset } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { CollectionHeader } from "./header";
 import { useControllerTheme } from "@/hooks/connection";
 import { useMarketplace } from "@/hooks/marketplace";
+import { useIntersectionObserver } from "@/hooks/intersection";
 
 export function Collection() {
   const { address: contractAddress } = useParams();
@@ -123,42 +124,18 @@ export function Collection() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 place-items-center">
-              {assets.map((asset) => {
-                const isSelected = selectedTokenIds.includes(asset.tokenId);
-                const tokenId = BigInt(asset.tokenId).toString();
-                const listingCount = orders[tokenId]?.length || undefined;
-                return (
-                  <Link
-                    className="w-full select-none"
-                    draggable={false}
-                    to={`token/${asset.tokenId}?${searchParams.toString()}`}
-                    state={location.state}
-                    key={asset.tokenId}
-                    onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      if (selection) {
-                        e.preventDefault();
-                        handleSelect(asset.tokenId);
-                      }
-                    }}
-                  >
-                    <CollectibleCard
-                      title={
-                        asset.name.includes(
-                          `${parseInt(BigInt(asset.tokenId).toString())}`,
-                        )
-                          ? asset.name
-                          : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
-                      }
-                      images={[...asset.imageUrls, placeholder]}
-                      selectable
-                      selected={isSelected}
-                      listingCount={listingCount}
-                      onSelect={() => handleSelect(asset.tokenId)}
-                      className="rounded overflow-hidden"
-                    />
-                  </Link>
-                );
-              })}
+              {assets.map((asset) => (
+                <LazyAsset
+                  key={asset.tokenId}
+                  asset={asset}
+                  isSelected={selectedTokenIds.includes(asset.tokenId)}
+                  orders={orders}
+                  searchParams={searchParams}
+                  location={location}
+                  selection={selection}
+                  onSelect={handleSelect}
+                />
+              ))}
             </div>
           </LayoutContent>
 
@@ -230,3 +207,69 @@ const EmptyState = () => {
     </LayoutContent>
   );
 };
+
+type LazyAssetProps = {
+  asset: Asset;
+  isSelected: boolean;
+  orders: Record<string, unknown[]>;
+  searchParams: URLSearchParams;
+  location: ReturnType<typeof useLocation>;
+  selection: boolean;
+  onSelect: (tokenId: string) => void;
+};
+
+function LazyAsset({
+  asset,
+  isSelected,
+  orders,
+  searchParams,
+  location,
+  selection,
+  onSelect,
+}: LazyAssetProps) {
+  const { elementRef, hasIntersected } = useIntersectionObserver({
+    threshold: 0,
+    rootMargin: "200px", // Start loading 200px before the element is visible
+    enabled: true,
+  });
+
+  const tokenId = BigInt(asset.tokenId).toString();
+  const listingCount = orders[tokenId]?.length || undefined;
+
+  return (
+    <div ref={elementRef} className="w-full">
+      {hasIntersected ? (
+        <Link
+          className="w-full select-none"
+          draggable={false}
+          to={`token/${asset.tokenId}?${searchParams.toString()}`}
+          state={location.state}
+          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+            if (selection) {
+              e.preventDefault();
+              onSelect(asset.tokenId);
+            }
+          }}
+        >
+          <CollectibleCard
+            title={
+              asset.name.includes(
+                `${parseInt(BigInt(asset.tokenId).toString())}`,
+              )
+                ? asset.name
+                : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
+            }
+            images={[...asset.imageUrls, placeholder]}
+            selectable
+            selected={isSelected}
+            listingCount={listingCount}
+            onSelect={() => onSelect(asset.tokenId)}
+            className="rounded overflow-hidden"
+          />
+        </Link>
+      ) : (
+        <Skeleton className="min-h-[168px] w-full rounded border-2 border-transparent" />
+      )}
+    </div>
+  );
+}
