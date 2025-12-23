@@ -19,12 +19,15 @@ export function UnverifiedSessionSummary({
 }) {
   const { isEditable } = useCreateSession();
   const formattedContracts = useMemo(() => {
-    const formattedContracts = Object.entries(contracts ?? {})
+    const _formattedContracts = Object.entries(contracts ?? {})
+      .filter(([, contract]) => {
+        // Filter out contracts that have approve methods since they're shown on spending limit page
+        const methods = toArray(contract.methods);
+        return !methods.some((method) => method.entrypoint === "approve");
+      })
       .map(([address, contract]) => {
-        // Filter out approve methods since they're shown on spending limit page
-        const methods = toArray(contract.methods).filter(
-          (method) => method.entrypoint !== "approve",
-        );
+        const methods = toArray(contract.methods);
+
         const title = !contract.meta?.name ? "Contract" : contract.meta.name;
         const icon = contract.meta?.icon;
 
@@ -34,11 +37,9 @@ export function UnverifiedSessionSummary({
           icon,
           methods,
         };
-      })
-      // Filter out contracts that only had approve methods
-      .filter((contract) => contract.methods.length > 0);
+      });
 
-    return formattedContracts;
+    return _formattedContracts;
   }, [contracts]);
 
   return (
