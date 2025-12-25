@@ -67,6 +67,7 @@ const CreateSessionLayout = ({
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
+
   const { controller, theme, origin } = useConnection();
 
   const hasTokenApprovals = useMemo(
@@ -203,7 +204,9 @@ const CreateSessionLayout = ({
     <>
       <HeaderInner
         className="pb-0"
-        title={!isUpdate ? "Create Session" : "Update Session"}
+        title={
+          !isUpdate ? (theme ? theme.name : "Create Session") : "Update Session"
+        }
         description={isUpdate ? "The policies were updated" : undefined}
         right={
           !isEditable ? (
@@ -230,6 +233,7 @@ const CreateSessionLayout = ({
           />
         ) : (
           <UnverifiedSessionSummary
+            game={theme.name}
             contracts={policies.contracts}
             messages={policies.messages}
           />
