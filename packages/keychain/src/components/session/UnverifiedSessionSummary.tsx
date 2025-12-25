@@ -1,71 +1,53 @@
-import {
-  useCreateSession,
-  type SessionContracts,
-  type SessionMessages,
-} from "@/hooks/session";
+import { type SessionContracts, type SessionMessages } from "@/hooks/session";
 import { toArray } from "@cartridge/controller";
-
-import { ContractCard } from "./ContractCard";
-import { MessageCard } from "./MessageCard";
 import { useMemo } from "react";
-import { cn } from "@cartridge/ui";
+import { CodeIcon } from "@cartridge/ui";
+import { AggregateCard } from "./AggregateCard";
 
 export function UnverifiedSessionSummary({
+  game,
   contracts,
   messages,
 }: {
+  game: string;
   contracts?: SessionContracts;
   messages?: SessionMessages;
 }) {
-  const { isEditable } = useCreateSession();
-  const formattedContracts = useMemo(() => {
-    const _formattedContracts = Object.entries(contracts ?? {})
+  const aggregate = useMemo(() => {
+    const allContracts = Object.entries(contracts ?? {})
+      // Filter out contracts that have approve methods since they're shown on spending limit page
       .filter(([, contract]) => {
-        // Filter out contracts that have approve methods since they're shown on spending limit page
         const methods = toArray(contract.methods);
         return !methods.some((method) => method.entrypoint === "approve");
       })
       .map(([address, contract]) => {
         const methods = toArray(contract.methods);
-
-        const title = !contract.meta?.name ? "Contract" : contract.meta.name;
-        const icon = contract.meta?.icon;
-
-        return {
+        return [
           address,
-          title,
-          icon,
-          methods,
-        };
+          {
+            name: contract.meta?.name ?? "Contract",
+            methods,
+          },
+        ] as const;
       });
 
-    return _formattedContracts;
-  }, [contracts]);
+    return {
+      contracts: Object.fromEntries(allContracts),
+      messages,
+    };
+  }, [contracts, messages]);
 
   return (
     <div className="flex flex-col gap-4">
       {/* Render other contracts first */}
       <div className="space-y-px">
-        {formattedContracts.map((e) => (
-          <ContractCard
-            key={e.address}
-            address={e.address}
-            title={e.title}
-            icon={e.icon}
-            methods={e.methods}
-            isExpanded={isEditable}
-            className={cn(
-              "rounded-none first:rounded-t",
-              messages && messages.length > 0 && "last:rounded-b-none",
-            )}
-          />
-        ))}
-        {messages && messages.length > 0 && (
-          <MessageCard
-            className={cn(formattedContracts && "rounded-t-none")}
-            messages={messages}
-          />
-        )}
+        <AggregateCard
+          title={game}
+          icon={<CodeIcon variant="solid" />}
+          contracts={aggregate.contracts}
+          messages={messages}
+          className="rounded"
+        />
       </div>
     </div>
   );
