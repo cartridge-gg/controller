@@ -90,6 +90,7 @@ export class Transaction {
     // Build transaction using micro-sol-signer
     if (this._transaction) {
       // If we have a decoded transaction, re-serialize it
+      console.log("[Transaction.serialize] Re-encoding existing transaction");
       return Buffer.from(sol.Transaction.encode(this._transaction));
     }
 
@@ -98,13 +99,38 @@ export class Transaction {
       throw new Error("Transaction requires feePayer and recentBlockhash");
     }
 
-    const txHex = sol.createTxComplex(
+    console.log(
+      "[Transaction.serialize] Building new transaction with",
+      this._instructions.length,
+      "instructions",
+    );
+    console.log("[Transaction.serialize] feePayer:", this.feePayer.toString());
+    console.log(
+      "[Transaction.serialize] recentBlockhash:",
+      this.recentBlockhash,
+    );
+
+    // Use createTxComplex which returns a base64-encoded transaction with empty signatures
+    const txBase64 = sol.createTxComplex(
       this.feePayer.toString(),
       this._instructions,
       this.recentBlockhash,
     );
 
-    return Buffer.from(txHex, "hex");
+    console.log(
+      "[Transaction.serialize] createTxComplex returned base64 length:",
+      txBase64.length,
+    );
+
+    // Decode the base64 string to get the transaction bytes
+    const buffer = Buffer.from(txBase64, "base64");
+    console.log("[Transaction.serialize] Final buffer length:", buffer.length);
+    console.log(
+      "[Transaction.serialize] First 32 bytes:",
+      Array.from(buffer.slice(0, 32)),
+    );
+
+    return buffer;
   }
 
   serializeMessage(): Buffer {
