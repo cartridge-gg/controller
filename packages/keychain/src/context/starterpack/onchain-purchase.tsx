@@ -66,6 +66,7 @@ export interface OnchainPurchaseContextType {
   requestedAmount: number | undefined;
   depositAmount: number | undefined; // Computed: requestedAmount + fees
   setRequestedAmount: (amount: number) => void;
+  feeEstimationError: Error | null;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -151,7 +152,8 @@ export const OnchainPurchaseProvider = ({
     swapId,
     explorer,
     depositError,
-    onSendDeposit,
+    feeEstimationError,
+    onSendDeposit: onSendDepositInternal,
     waitForDeposit,
   } = useLayerswap({
     controller,
@@ -190,6 +192,17 @@ export const OnchainPurchaseProvider = ({
       setDisplayError(depositError);
     }
   }, [walletError, depositError, setDisplayError]);
+
+  // Clear errors when token or wallet selection changes
+  useEffect(() => {
+    setDisplayError(undefined);
+  }, [selectedToken, selectedWallet, setDisplayError]);
+
+  // Wrap onSendDeposit to clear errors before sending
+  const onSendDeposit = useCallback(async () => {
+    setDisplayError(undefined);
+    await onSendDepositInternal();
+  }, [onSendDepositInternal, setDisplayError]);
 
   // When network is not starknet, retrieve layerswap deposit amount
   useEffect(() => {
@@ -366,6 +379,7 @@ export const OnchainPurchaseProvider = ({
     requestedAmount,
     setRequestedAmount,
     depositAmount,
+    feeEstimationError,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,
