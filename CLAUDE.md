@@ -7,10 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Core Development
 
 -   `pnpm dev` - Starts all development servers in parallel:
-    -   localhost:3002 (Next.js example)
-    -   localhost:5174 (Svelte example) 
     -   localhost:3001 (Keychain)
-    -   localhost:3003 (Profile)
+    -   localhost:3002 (Next.js example)
+    -   localhost:5174 (Svelte example)
 -   `pnpm build` - Builds all packages and dependencies
 -   `pnpm storybook` - Launches Storybook for component development
 
@@ -46,7 +45,6 @@ This is a **monorepo** using **pnpm workspaces** and **Turbo** for build orchest
 
 -   **`controller/`** - Main SDK implementing StarkNet account interfaces. Implements account abstractions and communicates with embedded keychain iframe for secure operations.
 -   **`keychain/`** - Sandboxed React app (<https://x.cartridge.gg/>) responsible for sensitive operations like transaction signing, user authentication, and key management.
--   **`profile/`** - React app (<https://profile.cartridge.gg/>) for displaying account state, balances, activities, and achievements.
 -   **`connector/`** - Lightweight connector interface for easy integration with StarkNet React applications.
 
 **Supporting Packages:**
@@ -115,7 +113,7 @@ The project uses an **iframe-based security model** where:
 **Adding New Features:**
 
 -   Check existing patterns in `packages/controller/src/` for SDK features
--   For UI changes, update both keychain (`packages/keychain/`) and profile (`packages/profile/`) as needed
+-   For UI changes, update keychain (`packages/keychain/`) as needed
 -   Test integration with examples in `examples/next/` or `examples/svelte/`
 
 **Debugging Integration Issues:**
@@ -127,7 +125,7 @@ The project uses an **iframe-based security model** where:
 **Monorepo Navigation:**
 
 -   Use `pnpm --filter <package-name>` to run commands in specific packages
--   Common filters: `@cartridge/controller`, `@cartridge/keychain`, `@cartridge/profile`, `@cartridge/connector`
+-   Common filters: `@cartridge/controller`, `@cartridge/keychain`, `@cartridge/connector`
 -   Dependencies are automatically linked via workspace protocol
 
 ### Testing Strategy
