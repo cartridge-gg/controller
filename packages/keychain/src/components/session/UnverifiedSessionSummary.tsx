@@ -1,8 +1,14 @@
-import { type SessionContracts, type SessionMessages } from "@/hooks/session";
+import {
+  type SessionContracts,
+  type SessionMessages,
+  type ParsedSessionPolicies,
+} from "@/hooks/session";
 import { toArray } from "@cartridge/controller";
 import { useMemo } from "react";
 import { CodeIcon } from "@cartridge/ui";
 import { AggregateCard } from "./AggregateCard";
+import { TokenConsent } from "../connect/token-consent";
+import { SpendingLimitCard } from "../connect/SpendingLimitCard";
 
 export function UnverifiedSessionSummary({
   game,
@@ -13,14 +19,33 @@ export function UnverifiedSessionSummary({
   contracts?: SessionContracts;
   messages?: SessionMessages;
 }) {
-  const aggregate = useMemo(() => {
-    const allContracts = Object.entries(contracts ?? {})
-      // Filter out contracts that have approve methods since they're shown on spending limit page
-      .filter(([, contract]) => {
-        const methods = toArray(contract.methods);
-        return !methods.some((method) => method.entrypoint === "approve");
-      })
-      .map(([address, contract]) => {
+  const { aggregate, approvePolicies } = useMemo(() => {
+    // Separate contracts with approve methods from other contracts
+    const approveContracts: SessionContracts = {};
+    const otherContracts: SessionContracts = {};
+
+    Object.entries(contracts ?? {}).forEach(([address, contract]) => {
+      const methods = toArray(contract.methods);
+      const hasApprove = methods.some(
+        (method) => method.entrypoint === "approve",
+      );
+
+      if (hasApprove) {
+        approveContracts[address] = contract;
+      } else {
+        otherContracts[address] = contract;
+      }
+    });
+
+    // Create policies object for SpendingLimitCard
+    const policies: ParsedSessionPolicies = {
+      verified: false,
+      contracts: approveContracts,
+    };
+
+    // Create aggregate for other contracts
+    const aggregateContracts = Object.entries(otherContracts).map(
+      ([address, contract]) => {
         const methods = toArray(contract.methods);
         return [
           address,
@@ -29,26 +54,29 @@ export function UnverifiedSessionSummary({
             methods,
           },
         ] as const;
-      });
+      },
+    );
 
     return {
-      contracts: Object.fromEntries(allContracts),
-      messages,
+      aggregate: {
+        contracts: Object.fromEntries(aggregateContracts),
+        messages,
+      },
+      approvePolicies: policies,
     };
   }, [contracts, messages]);
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Render other contracts first */}
-      <div className="space-y-px">
-        <AggregateCard
-          title={game}
-          icon={<CodeIcon variant="solid" />}
-          contracts={aggregate.contracts}
-          messages={messages}
-          className="rounded"
-        />
-      </div>
+      <AggregateCard
+        title={game}
+        icon={<CodeIcon variant="solid" />}
+        contracts={aggregate.contracts}
+        messages={messages}
+        className="rounded"
+      />
+      <TokenConsent />
+      <SpendingLimitCard policies={approvePolicies} />
     </div>
   );
 }
