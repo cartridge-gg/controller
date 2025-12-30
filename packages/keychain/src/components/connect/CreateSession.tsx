@@ -76,6 +76,7 @@ const CreateSessionLayout = ({
   );
 
   const defaultStep = useMemo<"summary" | "spending-limit">(() => {
+    // Only show spending limit page for verified sessions with token approvals
     return policies?.verified && hasTokenApprovals
       ? "spending-limit"
       : "summary";
@@ -126,7 +127,8 @@ const CreateSessionLayout = ({
       return;
     }
 
-    if (hasTokenApprovals && step === "summary") {
+    // Only transition to spending limit page for VERIFIED sessions with token approvals
+    if (policies.verified && hasTokenApprovals && step === "summary") {
       setStep("spending-limit");
       return;
     }
@@ -186,7 +188,8 @@ const CreateSessionLayout = ({
     return null;
   }
 
-  if (hasTokenApprovals && step === "spending-limit") {
+  // Show SpendingLimitPage only for VERIFIED sessions with token approvals
+  if (policies.verified && hasTokenApprovals && step === "spending-limit") {
     return (
       <SpendingLimitPage
         policies={policies}
