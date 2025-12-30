@@ -236,7 +236,7 @@ const CreateSessionLayout = ({
           />
         ) : (
           <UnverifiedSessionSummary
-            game={theme.name}
+            game={theme?.name}
             contracts={policies.contracts}
             messages={policies.messages}
           />

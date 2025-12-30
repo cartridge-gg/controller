@@ -15,7 +15,7 @@ export function UnverifiedSessionSummary({
   contracts,
   messages,
 }: {
-  game: string;
+  game?: string;
   contracts?: SessionContracts;
   messages?: SessionMessages;
 }) {
@@ -69,7 +69,7 @@ export function UnverifiedSessionSummary({
   return (
     <div className="flex flex-col gap-4">
       <AggregateCard
-        title={game}
+        title={game || "Game"}
         icon={<CodeIcon variant="solid" />}
         contracts={aggregate.contracts}
         messages={messages}
