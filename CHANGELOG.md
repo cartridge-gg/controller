@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.11.4-alpha.1] - 2025-12-31
+
+### ✨ New Features
+- **@cartridge/controller**: Added dynamic `signupOptions` to `connect()` method, enabling developers to override constructor configuration per connection and create multiple branded authentication flows (e.g., "Login with Phantom", "Login with Google") using a single Controller instance (#2298)
+- **@cartridge/keychain**: Added wallet selection drawer for onchain checkout, replacing navigation-based flow with inline slide-up drawer for more seamless UX (#2294)
+- **@cartridge/keychain**: Added Coinbase onramp integration with `useCoinbase` hook for order creation, transaction queries, and requirement checks with automatic client IP detection (#2296)
+- **@cartridge/keychain**: Added support for additional payment tokens in starterpack metadata, allowing creators to specify custom payment options beyond default ETH, STRK, and USDC (#2292)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced paymaster error handling with graceful fallback to user-pays flow when paymaster is unavailable due to rate limits, execution timing, or other conditions (#2291)
+- **@cartridge/keychain**: Improved authentication flows with branded button text for single-signer configurations and configurable signup authentication methods (#2290, #1b4423c3)
+- **@cartridge/keychain**: Enhanced session management by restoring wildcard session creation during login flows for better user experience (#2302, #637faa12)
+- **@cartridge/keychain**: Updated Ekubo integration to use new chain ID-based API format for improved swap functionality (#2287)
+- **@cartridge/keychain**: Improved session footer styling with proper padding and button text updates from "Create Session" to "Continue" (#2274)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Restored `propagateSessionErrors` functionality for contract execution, ensuring errors are properly propagated back to callers instead of showing manual approval modal when enabled (#2305)
+- **@cartridge/keychain**: Fixed starterpack loading flicker by showing proper loading states during loading/onchain/preimage states (#2297)
+- **@cartridge/keychain**: Fixed collection pagination issues for better user experience (#2301)
+- **@cartridge/keychain**: Fixed controlled Select component warnings in cost breakdown by using proper value handling (#2294)
+- **@cartridge/keychain**: Fixed Ekubo API CORS issues by specifying proper CORS headers and credentials handling (#2288)
+
+### 🔧 Refactoring
+- **Development**: Multiple UI component updates and dependency management improvements (#2295, #2260)
+- **@cartridge/keychain**: Simplified authentication flows by removing complex route-based session skipping logic in favor of consistent wildcard session creation (#2286, #2285)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Updated to latest commits for improved design consistency and React 19 peer dependency support
+
 ## [0.11.3] - 2025-12-10
 
 ### ✨ New Features
