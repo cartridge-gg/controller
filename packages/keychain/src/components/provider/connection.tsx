@@ -21,6 +21,7 @@ export type ConnectionContextValue = {
   rpcUrl: string;
   project: string | null;
   namespace: string | null;
+  propagateError: boolean;
   tokens?: string[];
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;

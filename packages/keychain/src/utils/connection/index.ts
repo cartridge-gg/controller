@@ -18,6 +18,7 @@ export function connectToController<ParentMethods extends object>({
   setRpcUrl,
   setController,
   navigate,
+  propagateError,
 }: {
   setRpcUrl: (url: string) => void;
   setController: (controller?: Controller) => void;
@@ -25,6 +26,7 @@ export function connectToController<ParentMethods extends object>({
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
   ) => void;
+  propagateError?: boolean;
 }) {
   return connectToParent<ParentMethods>({
     methods: {
@@ -35,7 +37,7 @@ export function connectToController<ParentMethods extends object>({
         }),
       ),
       deploy: () => deployFactory({ navigate }),
-      execute: normalize(execute({ navigate })),
+      execute: normalize(execute({ navigate, propagateError })),
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),
       signMessage: normalize(

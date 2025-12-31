@@ -230,6 +230,7 @@ export function useConnectionValue() {
     tokens: string[];
     ref: string | null;
     refGroup: string | null;
+    propagateError: boolean;
   }>();
 
   const urlParams = useMemo(() => {
@@ -245,6 +246,8 @@ export function useConnectionValue() {
     const namespace = urlParams.get("ns");
     const ref = urlParams.get("ref");
     const refGroup = urlParams.get("ref_group");
+    const propagateError = urlParams.get("propagate_error") === "true";
+
     const erc20Param = urlParams.get("erc20");
     const tokens = erc20Param
       ? decodeURIComponent(erc20Param)
@@ -274,6 +277,8 @@ export function useConnectionValue() {
       tokens: erc20Param ? tokens : urlParamsRef.current?.tokens || tokens,
       ref: ref || urlParamsRef.current?.ref || null,
       refGroup: refGroup || urlParamsRef.current?.refGroup || null,
+      propagateError:
+        propagateError || urlParamsRef.current?.propagateError || false,
     };
 
     // Store the new params for future reference
@@ -579,6 +584,7 @@ export function useConnectionValue() {
         setRpcUrl,
         setController,
         navigate,
+        propagateError: urlParams.propagateError,
       });
 
       connection.promise
@@ -763,6 +769,7 @@ export function useConnectionValue() {
     project: urlParams.project,
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
+    propagateError: urlParams.propagateError,
     isConfigLoading,
     isMainnet,
     verified,
