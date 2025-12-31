@@ -104,11 +104,13 @@ export async function executeCore(
 
 export function execute({
   navigate,
+  propagateError,
 }: {
   navigate: (
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
   ) => void;
+  propagateError?: boolean;
 }) {
   return (origin: string) =>
     async (
@@ -159,6 +161,18 @@ export function execute({
           } catch (e) {
             const error = e as ControllerError;
             const parsedError = parseControllerError(error);
+
+            if (
+              propagateError &&
+              parsedError.code !== ErrorCode.SessionRefreshRequired &&
+              parsedError.code !== ErrorCode.ManualExecutionRequired
+            ) {
+              return resolve({
+                code: ResponseCodes.ERROR,
+                message: parsedError.message,
+                error: parsedError,
+              });
+            }
 
             // Check for specific error codes that require user interaction
             // SessionRefreshRequired and ManualExecutionRequired both need UI
