@@ -20,27 +20,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            code:
+              - '**/*.ts'
+              - '**/*.tsx'
+              - '**/*.js'
+              - '**/*.jsx'
+              - '!**/package.json'
+
+      - name: Skip for version-only changes
+        if: steps.changes.outputs.code != 'true'
+        run: echo "Only version changes detected, skipping tests"
+
       - uses: actions/setup-node@v4
+        if: steps.changes.outputs.code == 'true'
         with:
           node-version: 20.x
       - uses: actions/cache@v4
+        if: steps.changes.outputs.code == 'true'
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
       - uses: pnpm/action-setup@v4
+        if: steps.changes.outputs.code == 'true'
         with:
           run_install: |
             - args: [--frozen-lockfile]
       - name: Clean iframe dist directory
+        if: steps.changes.outputs.code == 'true'
         run: rm -rf packages/controller/dist
       - run: pnpm build
+        if: steps.changes.outputs.code == 'true'
       - name: Run tests with coverage
+        if: steps.changes.outputs.code == 'true'
         run: pnpm test:ci --coverage
         env:
           NODE_OPTIONS: --max-old-space-size=16384
       - uses: codecov/codecov-action@v3
+        if: steps.changes.outputs.code == 'true'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/lcov.info
@@ -72,10 +95,20 @@ jobs:
             ui:
               - '.github/workflows/test.yml'
               - 'packages/keychain/**'
-              - '**/package.json'
               - '**/pnpm-lock.yaml'
+            code:
+              - '**/*.ts'
+              - '**/*.tsx'
+              - '**/*.js'
+              - '**/*.jsx'
+              - '**/*.css'
+              - '!**/package.json'
 
-      - if: steps.changes.outputs.ui == 'true'
+      - name: Skip for version-only changes
+        if: steps.changes.outputs.code != 'true'
+        run: echo "Only version changes detected, skipping storybook tests"
+
+      - if: steps.changes.outputs.code == 'true' && steps.changes.outputs.ui == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -89,12 +122,16 @@ jobs:
             ${{ runner.os }}-storybook-
 
       - run: pnpm i --frozen-lockfile
+        if: steps.changes.outputs.code == 'true'
       - run: pnpm build
+        if: steps.changes.outputs.code == 'true'
       - run: pnpm test:storybook:update
+        if: steps.changes.outputs.code == 'true'
         id: test-storybook
         continue-on-error: true
 
       - name: Update and commit snapshots
+        if: steps.changes.outputs.code == 'true'
         id: update-snapshots
         run: |
           # Check if there are any changes to commit
@@ -260,7 +297,7 @@ jobs:
 
       # Modify the final check step to handle different failure types
       - name: Check for failures
-        if: always() # Run this step even if previous steps failed
+        if: always() && steps.changes.outputs.code == 'true'
         run: |
           echo "Test Storybook Outcome: ${{ steps.test-storybook.outcome }}"
           echo "Snapshot Failed (changes detected in PR diff): ${{ env.snapshot_failed }}"
