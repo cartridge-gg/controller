@@ -20,7 +20,7 @@ import { networkWalletData } from "../../wallet/config";
 import { Network } from "../../types";
 
 // Configure supported platforms here for testing
-const SUPPORTED_PLATFORMS = "starknet"; //starknet;ethereum;base;arbitrum;optimism
+const SUPPORTED_PLATFORMS = "starknet;ethereum;base;arbitrum;optimism";
 const APPLE_PAY_SUPPORT = false;
 
 type DrawerStep = "network" | "wallet";
