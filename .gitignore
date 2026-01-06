@@ -187,3 +187,6 @@ lcov.info
 
 account.json
 keystore.json
+
+# Claude Code local settings
+.claude/settings.local.json
