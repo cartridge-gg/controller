@@ -16,10 +16,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Testing
 
--   `pnpm test` - Runs keychain test suite
+-   `pnpm test` - Runs keychain test suite (Vitest)
 -   `pnpm test:ci` - Runs tests in CI mode
 -   `pnpm test:storybook` - Runs Storybook visual regression tests
--   `pnpm e2e` - Runs end-to-end tests with Playwright
+-   `pnpm test:storybook:update` - Updates Storybook snapshots (requires Docker)
+-   `pnpm e2e` - Runs end-to-end tests with Playwright (currently disabled in CI)
 -   `pnpm e2e:ui` - Runs E2E tests with UI
 
 ### Code Quality
@@ -62,11 +63,11 @@ This is a **monorepo** using **pnpm workspaces** and **Turbo** for build orchest
 
 ### Technology Stack
 
--   **Frontend**: React, TypeScript, Next.js, Svelte, TailwindCSS, Vite
--   **Blockchain**: StarkNet, starknet.js
--   **Testing**: Jest, Playwright, Storybook
--   **Build**: Turbo, pnpm workspaces
--   **Authentication**: WebAuthn/Passkeys, Session Tokens
+-   **Frontend**: React 18, TypeScript 5.7, Next.js 15.3, Svelte, TailwindCSS 3.4, Vite 6.0
+-   **Blockchain**: StarkNet 8.5.4, starknet.js, @starknet-react/core 5.0.1
+-   **Testing**: Vitest 2.1.8, Jest 29, Playwright, Storybook 8.5
+-   **Build**: Turbo, tsup, pnpm workspaces (v10) with catalog for deps
+-   **Authentication**: WebAuthn/Passkeys, Session Tokens, Auth0, Turnkey
 
 ### Security Architecture
 
@@ -131,14 +132,24 @@ The project uses an **iframe-based security model** where:
 
 ### Testing Strategy
 
--   **Unit tests** in individual packages (Jest)
--   **Visual regression** via Storybook snapshots
--   **E2E testing** with Playwright for full user flows
+-   **Unit tests** in individual packages (Vitest for keychain, Jest for others)
+-   **Visual regression** via Storybook snapshots (Docker-based in CI)
+-   **E2E testing** with Playwright for full user flows (Note: currently disabled in CI)
 -   **Integration testing** via example applications
+-   **Pre-commit hooks** enforce formatting and linting (Husky)
 
 ### Key Files to Check When Making Changes
 
 -   `packages/controller/src/index.ts` - Main SDK exports
--   `packages/keychain/src/components/` - UI components for wallet operations  
--   `turbo.json` - Build dependencies and caching
+-   `packages/keychain/src/components/` - UI components for wallet operations
+-   `packages/keychain/src/utils/api/codegen.yaml` - GraphQL codegen configuration
+-   `turbo.json` - Build dependencies and caching configuration
 -   `pnpm-workspace.yaml` - Package workspace configuration
+-   `.husky/pre-commit` - Pre-commit hooks for code quality
+
+### Build Process Notes
+
+-   **WASM Dependencies**: controller-wasm and session-wasm built via `build:deps` task
+-   **Dual Builds**: Controller package has separate browser (Vite) and Node.js (tsup) builds
+-   **GraphQL Codegen**: Automatically runs during keychain build
+-   **Turbo Caching**: Aggressive caching for faster builds, use `pnpm clean` if issues arise
