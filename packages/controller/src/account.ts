@@ -85,8 +85,14 @@ class ControllerAccount extends WalletAccount {
       const errorDisplayMode = this.options?.errorDisplayMode || "modal";
       const error = (sessionExecute as ConnectError).error;
 
+      // Exception: USER_INTERACTION_REQUIRED always shows modal UI
+      // (SessionRefreshRequired and ManualExecutionRequired)
+      const requiresUI =
+        sessionExecute.code === ResponseCodes.USER_INTERACTION_REQUIRED;
+
       // Silent mode - no UI, just reject
-      if (errorDisplayMode === "silent") {
+      // Exception: USER_INTERACTION_REQUIRED goes to modal
+      if (errorDisplayMode === "silent" && !requiresUI) {
         console.warn(
           "[Cartridge Controller] Transaction failed silently:",
           error,
@@ -96,7 +102,8 @@ class ControllerAccount extends WalletAccount {
       }
 
       // Notification mode - show clickable toast
-      if (errorDisplayMode === "notification") {
+      // Exception: USER_INTERACTION_REQUIRED goes directly to modal
+      if (errorDisplayMode === "notification" && !requiresUI) {
         const { toast } = await import("./toast");
 
         let isHandled = false;
