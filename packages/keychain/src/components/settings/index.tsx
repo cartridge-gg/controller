@@ -1,5 +1,6 @@
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
+import { useFeatures } from "@/hooks/features";
 import { processControllerQuery } from "@/utils/signers";
 import {
   Button,
@@ -50,18 +51,19 @@ const registeredAccounts: RegisteredAccount[] = [
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
   const { navigate } = useNavigation();
+  const { isFeatureEnabled } = useFeatures();
 
-  // Feature flags - can be moved to environment variables or API config later
+  // Feature flags - connections can be toggled via /feature/connections/enable or /feature/connections/disable
   const featureFlags = useMemo<FeatureFlags>(
     () => ({
       signers: true,
-      connections: true,
+      connections: isFeatureEnabled("connections"),
       registeredAccounts: false,
       currency: false,
       recovery: false,
       delegate: true,
     }),
-    [],
+    [isFeatureEnabled],
   );
 
   const controllerQuery = useControllerQuery(
