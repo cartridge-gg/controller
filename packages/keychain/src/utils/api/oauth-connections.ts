@@ -27,10 +27,6 @@ export interface OAuthConnectionData {
   oauthConnection: OAuthConnection | null;
 }
 
-export interface InitiateTikTokOAuthData {
-  initiateTikTokOAuth: string;
-}
-
 export interface DisconnectOAuthData {
   disconnectOAuth: boolean;
 }
@@ -71,14 +67,22 @@ export const GET_OAUTH_CONNECTION = gql`
   }
 `;
 
-export const INITIATE_TIKTOK_OAUTH = gql`
-  mutation InitiateTikTokOAuth($username: String!) {
-    initiateTikTokOAuth(username: $username)
+// Note: OAuth initiation is done via direct URL, not GraphQL
+// See getTikTokAuthUrl() below
+
+export const DISCONNECT_OAUTH = gql`
+  mutation DisconnectOAuth($provider: OAuthProvider!) {
+    disconnectOAuth(provider: $provider)
   }
 `;
 
-export const DISCONNECT_OAUTH = gql`
-  mutation DisconnectOAuth($username: String!, $provider: OAuthProvider!) {
-    disconnectOAuth(username: $username, provider: $provider)
-  }
-`;
+/**
+ * Get the URL to initiate TikTok OAuth flow.
+ * This opens a direct URL to the API which generates the encrypted state
+ * and redirects to TikTok for authorization.
+ */
+export function getTikTokAuthUrl(username: string): string {
+  const baseUrl =
+    import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
+  return `${baseUrl}/tiktok/init?username=${encodeURIComponent(username)}`;
+}

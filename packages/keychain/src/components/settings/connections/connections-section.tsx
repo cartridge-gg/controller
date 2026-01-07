@@ -1,34 +1,29 @@
-import { Button, Skeleton, SpinnerIcon } from "@cartridge/ui";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { SiTiktok } from "@icons-pack/react-simple-icons";
+import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
+import { useQuery, useQueryClient, useMutation } from "react-query";
 import { SectionHeader } from "../section-header";
 import { ConnectionCard } from "./connection-card";
 import { useConnection } from "@/hooks/connection";
+import { useNavigation } from "@/context/navigation";
 import { useFetchData } from "@/utils/api/fetcher";
 import {
   type OAuthConnection,
   type OAuthConnectionsData,
-  type InitiateTikTokOAuthData,
   type DisconnectOAuthData,
   GET_OAUTH_CONNECTIONS,
-  INITIATE_TIKTOK_OAUTH,
   DISCONNECT_OAUTH,
 } from "@/utils/api/oauth-connections";
 
 export const ConnectionsSection = () => {
   const { controller } = useConnection();
+  const { navigate } = useNavigation();
   const queryClient = useQueryClient();
   const fetchConnections = useFetchData<
     OAuthConnectionsData,
     { username: string }
   >(GET_OAUTH_CONNECTIONS);
-  const fetchInitiateTikTok = useFetchData<
-    InitiateTikTokOAuthData,
-    { username: string }
-  >(INITIATE_TIKTOK_OAUTH);
   const fetchDisconnect = useFetchData<
     DisconnectOAuthData,
-    { username: string; provider: string }
+    { provider: string }
   >(DISCONNECT_OAUTH);
 
   const username = controller?.username();
@@ -45,32 +40,9 @@ export const ConnectionsSection = () => {
     },
   );
 
-  const connectTikTok = useMutation<string, Error>(
-    async () => {
-      if (!username) throw new Error("No username");
-      const result = await fetchInitiateTikTok({ username });
-      return result.initiateTikTokOAuth;
-    },
-    {
-      onSuccess: (authUrl) => {
-        // Open TikTok OAuth in a popup window
-        const width = 600;
-        const height = 700;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
-        window.open(
-          authUrl,
-          "tiktok-oauth",
-          `width=${width},height=${height},left=${left},top=${top}`,
-        );
-      },
-    },
-  );
-
   const disconnectMutation = useMutation<boolean, Error, string>(
     async (provider: string) => {
-      if (!username) throw new Error("No username");
-      const result = await fetchDisconnect({ username, provider });
+      const result = await fetchDisconnect({ provider });
       return result.disconnectOAuth;
     },
     {
@@ -80,7 +52,7 @@ export const ConnectionsSection = () => {
     },
   );
 
-  const tiktokConnection = data?.find((c) => c.provider === "TIKTOK");
+  const hasConnections = data && data.length > 0;
 
   return (
     <section className="space-y-4">
@@ -97,34 +69,31 @@ export const ConnectionsSection = () => {
           </div>
         ) : (
           <>
-            {tiktokConnection ? (
+            {data?.map((connection) => (
               <ConnectionCard
-                connection={tiktokConnection}
+                key={connection.id}
+                connection={connection}
                 onDisconnect={async () => {
-                  await disconnectMutation.mutateAsync("TIKTOK");
+                  await disconnectMutation.mutateAsync(connection.provider);
                 }}
               />
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                className="bg-background-100 text-foreground-300 gap-2 w-full px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200"
-                onClick={() => connectTikTok.mutate()}
-                disabled={connectTikTok.isLoading}
-              >
-                {connectTikTok.isLoading ? (
-                  <SpinnerIcon className="animate-spin" size="sm" />
-                ) : (
-                  <SiTiktok size={16} />
-                )}
-                <span className="normal-case font-normal font-sans text-sm">
-                  Connect TikTok
-                </span>
-              </Button>
-            )}
+            ))}
           </>
         )}
       </div>
+      {!hasConnections && (
+        <Button
+          type="button"
+          variant="outline"
+          className="bg-background-100 text-foreground-300 gap-1 w-fit px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200 hover:border-background-200"
+          onClick={() => navigate("/settings/add-connection")}
+        >
+          <PlusIcon size="sm" variant="line" />
+          <span className="normal-case font-normal font-sans text-sm">
+            Connect Socials
+          </span>
+        </Button>
+      )}
     </section>
   );
 };
