@@ -72,13 +72,13 @@ export const GET_OAUTH_CONNECTION = gql`
 `;
 
 export const INITIATE_TIKTOK_OAUTH = gql`
-  mutation InitiateTikTokOAuth {
-    initiateTikTokOAuth
+  mutation InitiateTikTokOAuth($username: String!) {
+    initiateTikTokOAuth(username: $username)
   }
 `;
 
 export const DISCONNECT_OAUTH = gql`
-  mutation DisconnectOAuth($provider: OAuthProvider!) {
-    disconnectOAuth(provider: $provider)
+  mutation DisconnectOAuth($username: String!, $provider: OAuthProvider!) {
+    disconnectOAuth(username: $username, provider: $provider)
   }
 `;

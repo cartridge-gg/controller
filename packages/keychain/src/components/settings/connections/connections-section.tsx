@@ -22,12 +22,13 @@ export const ConnectionsSection = () => {
     OAuthConnectionsData,
     { username: string }
   >(GET_OAUTH_CONNECTIONS);
-  const fetchInitiateTikTok = useFetchData<InitiateTikTokOAuthData, undefined>(
-    INITIATE_TIKTOK_OAUTH,
-  );
+  const fetchInitiateTikTok = useFetchData<
+    InitiateTikTokOAuthData,
+    { username: string }
+  >(INITIATE_TIKTOK_OAUTH);
   const fetchDisconnect = useFetchData<
     DisconnectOAuthData,
-    { provider: string }
+    { username: string; provider: string }
   >(DISCONNECT_OAUTH);
 
   const username = controller?.username();
@@ -46,7 +47,8 @@ export const ConnectionsSection = () => {
 
   const connectTikTok = useMutation<string, Error>(
     async () => {
-      const result = await fetchInitiateTikTok();
+      if (!username) throw new Error("No username");
+      const result = await fetchInitiateTikTok({ username });
       return result.initiateTikTokOAuth;
     },
     {
@@ -67,7 +69,8 @@ export const ConnectionsSection = () => {
 
   const disconnectMutation = useMutation<boolean, Error, string>(
     async (provider: string) => {
-      const result = await fetchDisconnect({ provider });
+      if (!username) throw new Error("No username");
+      const result = await fetchDisconnect({ username, provider });
       return result.disconnectOAuth;
     },
     {
