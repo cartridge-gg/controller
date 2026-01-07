@@ -99,11 +99,18 @@ class ControllerAccount extends WalletAccount {
       if (errorDisplayMode === "notification") {
         const { toast } = await import("./toast");
 
-        toast({
+        let isHandled = false;
+        let dismissFn: (() => void) | undefined;
+
+        dismissFn = toast({
           variant: "error",
           message: error?.message || "Transaction failed",
           duration: 10000,
           onClick: () => {
+            // Mark as handled and dismiss toast to prevent duplicate clicks
+            isHandled = true;
+            if (dismissFn) dismissFn();
+
             // Open modal when notification is clicked
             this.modal.open();
             this.keychain
@@ -119,7 +126,14 @@ class ControllerAccount extends WalletAccount {
           },
         });
 
-        reject(error);
+        // If toast auto-dismisses without being clicked, reject the promise
+        // Set timeout slightly longer than toast duration to allow for completion
+        setTimeout(() => {
+          if (!isHandled) {
+            reject(error);
+          }
+        }, 10100);
+
         return;
       }
 
