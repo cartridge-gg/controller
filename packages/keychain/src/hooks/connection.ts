@@ -247,6 +247,11 @@ export function useConnectionValue() {
     const ref = urlParams.get("ref");
     const refGroup = urlParams.get("ref_group");
     const propagateError = urlParams.get("propagate_error") === "true";
+    const errorDisplayMode = urlParams.get("error_display_mode") as
+      | "modal"
+      | "notification"
+      | "silent"
+      | null;
 
     const erc20Param = urlParams.get("erc20");
     const tokens = erc20Param
@@ -279,6 +284,8 @@ export function useConnectionValue() {
       refGroup: refGroup || urlParamsRef.current?.refGroup || null,
       propagateError:
         propagateError || urlParamsRef.current?.propagateError || false,
+      errorDisplayMode:
+        errorDisplayMode || urlParamsRef.current?.errorDisplayMode || undefined,
     };
 
     // Store the new params for future reference
@@ -585,6 +592,7 @@ export function useConnectionValue() {
         setController,
         navigate,
         propagateError: urlParams.propagateError,
+        errorDisplayMode: urlParams.errorDisplayMode,
       });
 
       connection.promise

@@ -105,13 +105,17 @@ export async function executeCore(
 export function execute({
   navigate,
   propagateError,
+  errorDisplayMode, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: {
   navigate: (
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
   ) => void;
   propagateError?: boolean;
+  errorDisplayMode?: "modal" | "notification" | "silent";
 }) {
+  // Note: errorDisplayMode is primarily handled on controller side (account.ts)
+  // It's included here for API consistency and potential future use
   return (origin: string) =>
     async (
       transactions: AllowArray<Call>,

@@ -81,6 +81,49 @@ class ControllerAccount extends WalletAccount {
         return;
       }
 
+      // Handle errorDisplayMode
+      const errorDisplayMode = this.options?.errorDisplayMode || "modal";
+      const error = (sessionExecute as ConnectError).error;
+
+      // Silent mode - no UI, just reject
+      if (errorDisplayMode === "silent") {
+        console.warn(
+          "[Cartridge Controller] Transaction failed silently:",
+          error,
+        );
+        reject(error);
+        return;
+      }
+
+      // Notification mode - show clickable toast
+      if (errorDisplayMode === "notification") {
+        const { toast } = await import("./toast");
+
+        toast({
+          variant: "error",
+          message: error?.message || "Transaction failed",
+          duration: 10000,
+          onClick: () => {
+            // Open modal when notification is clicked
+            this.modal.open();
+            this.keychain
+              .execute(calls, undefined, undefined, true, error)
+              .then((manualExecute) => {
+                if (manualExecute.code === ResponseCodes.SUCCESS) {
+                  resolve(manualExecute as InvokeFunctionResponse);
+                  this.modal.close();
+                } else {
+                  reject((manualExecute as ConnectError).error);
+                }
+              });
+          },
+        });
+
+        reject(error);
+        return;
+      }
+
+      // Default modal mode - existing behavior
       // Session call or Paymaster flow failed.
       // Session not avaialble, manual flow fallback
       this.modal.open();
@@ -89,7 +132,7 @@ class ControllerAccount extends WalletAccount {
         undefined,
         undefined,
         true,
-        (sessionExecute as ConnectError).error,
+        error,
       );
 
       // Manual call succeeded
