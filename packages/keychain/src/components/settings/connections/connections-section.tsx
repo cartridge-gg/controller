@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { SiTiktok } from "@icons-pack/react-simple-icons";
 import { SectionHeader } from "../section-header";
 import { ConnectionCard } from "./connection-card";
-import { request } from "@/utils/graphql";
+import { useFetchData } from "@/utils/api/fetcher";
 import {
   type OAuthConnection,
   type OAuthConnectionsData,
@@ -16,20 +16,28 @@ import {
 
 export const ConnectionsSection = () => {
   const queryClient = useQueryClient();
+  const fetchConnections = useFetchData<OAuthConnectionsData, undefined>(
+    GET_OAUTH_CONNECTIONS,
+  );
+  const fetchInitiateTikTok = useFetchData<InitiateTikTokOAuthData, undefined>(
+    INITIATE_TIKTOK_OAUTH,
+  );
+  const fetchDisconnect = useFetchData<
+    DisconnectOAuthData,
+    { provider: string }
+  >(DISCONNECT_OAUTH);
 
   const { data, isLoading, isError } = useQuery<OAuthConnection[]>(
     "oauthConnections",
     async () => {
-      const result = await request<OAuthConnectionsData>(GET_OAUTH_CONNECTIONS);
+      const result = await fetchConnections();
       return result.me?.oauthConnections ?? [];
     },
   );
 
   const connectTikTok = useMutation<string, Error>(
     async () => {
-      const result = await request<InitiateTikTokOAuthData>(
-        INITIATE_TIKTOK_OAUTH,
-      );
+      const result = await fetchInitiateTikTok();
       return result.initiateTikTokOAuth;
     },
     {
@@ -50,9 +58,7 @@ export const ConnectionsSection = () => {
 
   const disconnectMutation = useMutation<boolean, Error, string>(
     async (provider: string) => {
-      const result = await request<DisconnectOAuthData>(DISCONNECT_OAUTH, {
-        provider,
-      });
+      const result = await fetchDisconnect({ provider });
       return result.disconnectOAuth;
     },
     {
