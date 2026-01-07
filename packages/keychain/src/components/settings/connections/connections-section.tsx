@@ -27,8 +27,9 @@ export const ConnectionsSection = () => {
 
   const connectTikTok = useMutation<string, Error>(
     async () => {
-      const result =
-        await request<InitiateTikTokOAuthData>(INITIATE_TIKTOK_OAUTH);
+      const result = await request<InitiateTikTokOAuthData>(
+        INITIATE_TIKTOK_OAUTH,
+      );
       return result.initiateTikTokOAuth;
     },
     {
@@ -81,7 +82,9 @@ export const ConnectionsSection = () => {
             {tiktokConnection ? (
               <ConnectionCard
                 connection={tiktokConnection}
-                onDisconnect={() => disconnectMutation.mutateAsync("TIKTOK")}
+                onDisconnect={async () => {
+                  await disconnectMutation.mutateAsync("TIKTOK");
+                }}
               />
             ) : (
               <Button

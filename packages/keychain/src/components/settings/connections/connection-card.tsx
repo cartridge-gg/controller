@@ -12,7 +12,10 @@ import {
 import { cn } from "@cartridge/ui/utils";
 import React, { useState } from "react";
 import { SiTiktok } from "@icons-pack/react-simple-icons";
-import type { OAuthConnection, OAuthProvider } from "@/utils/api/oauth-connections";
+import type {
+  OAuthConnection,
+  OAuthProvider,
+} from "@/utils/api/oauth-connections";
 
 export interface ConnectionCardProps {
   connection: OAuthConnection;
