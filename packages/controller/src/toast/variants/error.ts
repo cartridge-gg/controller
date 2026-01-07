@@ -20,6 +20,17 @@ export function injectErrorStyles(targetDoc: Document): void {
       position: relative;
       overflow: hidden;
       box-sizing: border-box;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    /* Clickable state */
+    .cartridge-toast.error[style*="cursor: pointer"]:hover {
+      background-color: #D85555;
+      transform: translateY(-2px);
+    }
+
+    .cartridge-toast.error[style*="cursor: pointer"]:active {
+      transform: translateY(0);
     }
 
     .cartridge-toast.error .label-bar {
