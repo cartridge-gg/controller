@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { SiTiktok } from "@icons-pack/react-simple-icons";
 import { SectionHeader } from "../section-header";
 import { ConnectionCard } from "./connection-card";
+import { useConnection } from "@/hooks/connection";
 import { useFetchData } from "@/utils/api/fetcher";
 import {
   type OAuthConnection,
@@ -15,10 +16,12 @@ import {
 } from "@/utils/api/oauth-connections";
 
 export const ConnectionsSection = () => {
+  const { controller } = useConnection();
   const queryClient = useQueryClient();
-  const fetchConnections = useFetchData<OAuthConnectionsData, undefined>(
-    GET_OAUTH_CONNECTIONS,
-  );
+  const fetchConnections = useFetchData<
+    OAuthConnectionsData,
+    { username: string }
+  >(GET_OAUTH_CONNECTIONS);
   const fetchInitiateTikTok = useFetchData<InitiateTikTokOAuthData, undefined>(
     INITIATE_TIKTOK_OAUTH,
   );
@@ -27,11 +30,17 @@ export const ConnectionsSection = () => {
     { provider: string }
   >(DISCONNECT_OAUTH);
 
+  const username = controller?.username();
+
   const { data, isLoading, isError } = useQuery<OAuthConnection[]>(
-    "oauthConnections",
+    ["oauthConnections", username],
     async () => {
-      const result = await fetchConnections();
-      return result.me?.oauthConnections ?? [];
+      if (!username) return [];
+      const result = await fetchConnections({ username });
+      return result.account?.oauthConnections ?? [];
+    },
+    {
+      enabled: !!username,
     },
   );
 

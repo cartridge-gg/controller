@@ -18,7 +18,7 @@ export interface OAuthConnection {
 }
 
 export interface OAuthConnectionsData {
-  me: {
+  account: {
     oauthConnections: OAuthConnection[];
   } | null;
 }
@@ -36,8 +36,8 @@ export interface DisconnectOAuthData {
 }
 
 export const GET_OAUTH_CONNECTIONS = gql`
-  query GetOAuthConnections {
-    me {
+  query GetOAuthConnections($username: String!) {
+    account(username: $username) {
       oauthConnections {
         id
         provider
