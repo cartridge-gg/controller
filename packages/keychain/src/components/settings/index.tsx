@@ -28,10 +28,12 @@ import {
 import { SectionHeader } from "./section-header";
 import { SessionsSection } from "./sessions/sessions-section";
 import { SignersSection } from "./signers/signers-section";
+import { ConnectionsSection } from "./connections/connections-section";
 
 // Feature flag configuration
 interface FeatureFlags {
   signers: boolean;
+  connections: boolean;
   registeredAccounts: boolean;
   currency: boolean;
   recovery: boolean;
@@ -53,6 +55,7 @@ export function Settings() {
   const featureFlags = useMemo<FeatureFlags>(
     () => ({
       signers: true,
+      connections: true,
       registeredAccounts: false,
       currency: false,
       recovery: false,
@@ -89,6 +92,8 @@ export function Settings() {
         {featureFlags.signers && (
           <SignersSection controllerQuery={controllerQuery} />
         )}
+
+        {featureFlags.connections && <ConnectionsSection />}
 
         {featureFlags.recovery && (
           <section className="space-y-4">
