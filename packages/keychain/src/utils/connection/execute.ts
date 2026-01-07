@@ -105,7 +105,8 @@ export async function executeCore(
 export function execute({
   navigate,
   propagateError,
-  errorDisplayMode, // eslint-disable-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  errorDisplayMode,
 }: {
   navigate: (
     to: string | number,

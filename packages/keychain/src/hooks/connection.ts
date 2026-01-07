@@ -231,6 +231,7 @@ export function useConnectionValue() {
     ref: string | null;
     refGroup: string | null;
     propagateError: boolean;
+    errorDisplayMode?: "modal" | "notification" | "silent";
   }>();
 
   const urlParams = useMemo(() => {
