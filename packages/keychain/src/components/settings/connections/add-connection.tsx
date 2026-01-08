@@ -12,6 +12,7 @@ import {
 } from "@cartridge/ui";
 import { SiTiktok } from "@icons-pack/react-simple-icons";
 import { useCallback, useEffect, useState } from "react";
+import { useQueryClient } from "react-query";
 
 type ConnectionPending = {
   provider: "TIKTOK";
@@ -21,6 +22,7 @@ type ConnectionPending = {
 
 export function AddConnection({ username }: { username?: string }) {
   const { navigate } = useNavigation();
+  const queryClient = useQueryClient();
   const [connectionPending, setConnectionPending] =
     useState<ConnectionPending | null>(null);
   const [headerIcon, setHeaderIcon] = useState<React.ReactElement>(
@@ -80,6 +82,8 @@ export function AddConnection({ username }: { username?: string }) {
             provider: "TIKTOK",
             inProgress: false,
           });
+          // Invalidate the connections query so settings page shows updated data
+          queryClient.invalidateQueries("oauthConnections");
         } else {
           setHeaderIcon(<AlertIcon size="lg" />);
           setConnectionPending({
@@ -122,7 +126,7 @@ export function AddConnection({ username }: { username?: string }) {
         error: errorMessage,
       });
     }
-  }, [username]);
+  }, [username, queryClient]);
 
   // Navigate back to settings after successful connection
   useEffect(() => {
