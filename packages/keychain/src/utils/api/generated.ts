@@ -2648,6 +2648,16 @@ export type Mutation = {
   removePaymaster: Scalars["Boolean"];
   removePolicy: Scalars["Boolean"];
   revokeSessions: Scalars["Boolean"];
+  /**
+   * Send a verification code via email to the specified email address.
+   * The code expires after 10 minutes.
+   */
+  sendEmailVerification: SendVerificationResponse;
+  /**
+   * Send a verification code via SMS to the specified phone number.
+   * The code expires after 10 minutes.
+   */
+  sendPhoneVerification: SendVerificationResponse;
   transfer: TransferResponse;
   transferDeployment: Scalars["Boolean"];
   updateDeployment: Deployment;
@@ -2656,6 +2666,16 @@ export type Mutation = {
   updateRpcApiKey: RpcApiKey;
   updateRpcCorsDomain: RpcCorsDomain;
   updateTeam: Team;
+  /**
+   * Verify an email address using the code sent via email.
+   * Updates the user's email and verification timestamp on success.
+   */
+  verifyEmail: VerifyResponse;
+  /**
+   * Verify a phone number using the code sent via SMS.
+   * Updates the user's phone number and verification timestamp on success.
+   */
+  verifyPhone: VerifyResponse;
 };
 
 export type MutationAddOwnerArgs = {
@@ -2835,6 +2855,14 @@ export type MutationRevokeSessionsArgs = {
   sessions: Array<RevokeSessionInput>;
 };
 
+export type MutationSendEmailVerificationArgs = {
+  input: SendEmailVerificationInput;
+};
+
+export type MutationSendPhoneVerificationArgs = {
+  input: SendPhoneVerificationInput;
+};
+
 export type MutationTransferArgs = {
   data: TransferInput;
 };
@@ -2877,6 +2905,14 @@ export type MutationUpdateRpcCorsDomainArgs = {
 export type MutationUpdateTeamArgs = {
   name: Scalars["String"];
   update: TeamInput;
+};
+
+export type MutationVerifyEmailArgs = {
+  input: VerifyEmailInput;
+};
+
+export type MutationVerifyPhoneArgs = {
+  input: VerifyPhoneInput;
 };
 
 export enum Network {
@@ -4656,6 +4692,27 @@ export type SiwsCredentials = {
   siws?: Maybe<Array<SiwsCredential>>;
 };
 
+export type SendEmailVerificationInput = {
+  /** The email address to send the verification code to. */
+  email: Scalars["String"];
+};
+
+export type SendPhoneVerificationInput = {
+  /**
+   * The phone number to send the verification code to.
+   * Must be in E.164 format (e.g., +14155551234).
+   */
+  phoneNumber: Scalars["String"];
+};
+
+export type SendVerificationResponse = {
+  __typename?: "SendVerificationResponse";
+  /** Human-readable message about the verification status. */
+  message: Scalars["String"];
+  /** Whether the verification code was sent successfully. */
+  success: Scalars["Boolean"];
+};
+
 export type Service = Node & {
   __typename?: "Service";
   createdAt: Scalars["Time"];
@@ -6247,6 +6304,36 @@ export type UpdateServiceInput = {
   torii?: InputMaybe<ToriiUpdateInput>;
   type: DeploymentService;
   version?: InputMaybe<Scalars["String"]>;
+};
+
+export type VerifyEmailInput = {
+  /** The 6-digit verification code received via email. */
+  code: Scalars["String"];
+  /**
+   * The email address that was sent the verification code.
+   * Must match the email used in sendEmailVerification.
+   */
+  email: Scalars["String"];
+};
+
+export type VerifyPhoneInput = {
+  /** The 6-digit verification code received via SMS. */
+  code: Scalars["String"];
+  /**
+   * The phone number that was sent the verification code.
+   * Must match the phone number used in sendPhoneVerification.
+   */
+  phoneNumber: Scalars["String"];
+};
+
+export type VerifyResponse = {
+  __typename?: "VerifyResponse";
+  /** Human-readable message about the verification result. */
+  message: Scalars["String"];
+  /** Whether the verification was successful. */
+  success: Scalars["Boolean"];
+  /** The verified value (phone number or email) if verification succeeded. */
+  verifiedValue?: Maybe<Scalars["String"]>;
 };
 
 export type WebauthnCredential = {
