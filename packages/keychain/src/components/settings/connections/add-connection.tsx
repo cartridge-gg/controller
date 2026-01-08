@@ -59,14 +59,48 @@ export function AddConnection({ username }: { username?: string }) {
         `width=${width},height=${height},left=${left},top=${top}`,
       );
 
-      // Poll for popup closure
-      const pollTimer = setInterval(() => {
-        if (!popup || popup.closed) {
-          clearInterval(pollTimer);
+      // Listen for OAuth completion message from popup
+      const handleMessage = (event: MessageEvent) => {
+        // Verify origin for security
+        if (!event.origin.includes("cartridge.gg")) return;
+        if (event.data?.type !== "tiktok-oauth") return;
+
+        window.removeEventListener("message", handleMessage);
+
+        if (event.data.status === "connected") {
           setHeaderIcon(<CheckIcon size="lg" />);
           setConnectionPending({
             provider: "TIKTOK",
             inProgress: false,
+          });
+        } else {
+          setHeaderIcon(<AlertIcon size="lg" />);
+          setConnectionPending({
+            provider: "TIKTOK",
+            inProgress: false,
+            error: event.data.error || "Connection failed",
+          });
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      // Also poll for popup closure as fallback (e.g., user closes popup manually)
+      const pollTimer = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(pollTimer);
+          window.removeEventListener("message", handleMessage);
+          // Only update if still in progress (message handler didn't fire)
+          setConnectionPending((current) => {
+            if (current?.inProgress) {
+              setHeaderIcon(<AlertIcon size="lg" />);
+              return {
+                provider: "TIKTOK",
+                inProgress: false,
+                error: "Popup closed before completing authorization",
+              };
+            }
+            return current;
           });
         }
       }, 500);
