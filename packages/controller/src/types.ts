@@ -131,7 +131,11 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(signupOptions?: AuthOptions): Promise<ConnectReply | ConnectError>;
+  connect(
+    signupOptions?: AuthOptions,
+    username?: string,
+    credentials?: HeadlessCredentialData,
+  ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -249,6 +253,8 @@ export type KeychainOptions = IFrameOptions & {
   tokens?: Tokens;
   /** When true, defer iframe mounting until connect() is called. Reduces initial load and resource fetching. */
   lazyload?: boolean;
+  /** Headless mode options - when provided, authentication happens without UI */
+  headless?: HeadlessOptions;
 };
 
 export type ProfileContextTypeVariant =
@@ -274,3 +280,48 @@ export type StarterpackOptions = {
   /** The preimage to use */
   preimage?: string;
 };
+
+// Headless mode types
+export type HeadlessCredentialType = 'webauthn' | 'password' | 'google' | 'discord' |
+  'metamask' | 'rabby' | 'phantom-evm' | 'argent' | 'braavos' | 'siws';
+
+// Credential data interfaces (discriminated union for type safety)
+export interface HeadlessPasswordCredentials {
+  type: 'password';
+  password: string;
+}
+
+export interface HeadlessWebAuthnCredentials {
+  type: 'webauthn';
+  credentialId: string;
+  publicKey: string;
+}
+
+export interface HeadlessEIP191Credentials {
+  type: 'google' | 'discord' | 'metamask' | 'rabby' | 'phantom-evm';
+  address: string;
+}
+
+export interface HeadlessStarknetCredentials {
+  type: 'argent' | 'braavos';
+  address: string;
+}
+
+export interface HeadlessSIWSCredentials {
+  type: 'siws';
+  address: string;
+  signature: string;
+}
+
+export type HeadlessCredentialData =
+  | HeadlessPasswordCredentials
+  | HeadlessWebAuthnCredentials
+  | HeadlessEIP191Credentials
+  | HeadlessStarknetCredentials
+  | HeadlessSIWSCredentials;
+
+// Headless options
+export interface HeadlessOptions {
+  username: string;
+  credentials: HeadlessCredentialData;
+}
