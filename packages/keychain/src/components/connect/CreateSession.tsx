@@ -1,5 +1,4 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
-import { SessionConsent } from "@/components/connect";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { now } from "@/constants";
@@ -227,7 +226,6 @@ const CreateSessionLayout = ({
         }
       />
       <LayoutContent className="pb-0">
-        <SessionConsent isVerified={policies.verified} />
         {policies.verified ? (
           <VerifiedSessionSummary
             game={theme.name}
