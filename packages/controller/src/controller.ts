@@ -228,6 +228,8 @@ export default class ControllerProvider extends BaseProvider {
   async connect(
     signupOptions?: AuthOptions,
   ): Promise<WalletAccount | undefined> {
+    const headlessOptions = this.options.headless;
+
     if (!this.iframes) {
       return;
     }
@@ -248,12 +250,22 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    this.iframes.keychain.open();
+    // Only open modal if NOT headless
+    if (!headlessOptions) {
+      this.iframes.keychain.open();
+    }
 
     try {
       // Use connect() parameter if provided, otherwise fall back to constructor options
       const effectiveOptions = signupOptions ?? this.options.signupOptions;
-      let response = await this.keychain.connect(effectiveOptions);
+
+      // Pass username and credentials to keychain (it handles headless mode internally)
+      let response = await this.keychain.connect(
+        effectiveOptions,
+        headlessOptions?.username,
+        headlessOptions?.credentials,
+      );
+
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -272,7 +284,10 @@ export default class ControllerProvider extends BaseProvider {
     } catch (e) {
       console.log(e);
     } finally {
-      this.iframes.keychain.close();
+      // Only close modal if it was opened (not headless)
+      if (!headlessOptions) {
+        this.iframes.keychain.close();
+      }
     }
   }
 
