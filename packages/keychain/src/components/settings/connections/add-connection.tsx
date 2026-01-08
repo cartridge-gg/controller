@@ -61,8 +61,15 @@ export function AddConnection({ username }: { username?: string }) {
 
       // Listen for OAuth completion message from popup
       const handleMessage = (event: MessageEvent) => {
-        // Verify origin for security
-        if (!event.origin.includes("cartridge.gg")) return;
+        // Verify origin for security - must be cartridge.gg or a subdomain
+        try {
+          const hostname = new URL(event.origin).hostname;
+          const isValidOrigin =
+            hostname === "cartridge.gg" || hostname.endsWith(".cartridge.gg");
+          if (!isValidOrigin) return;
+        } catch {
+          return; // Invalid origin URL
+        }
         if (event.data?.type !== "tiktok-oauth") return;
 
         window.removeEventListener("message", handleMessage);
