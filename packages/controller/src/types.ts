@@ -282,33 +282,42 @@ export type StarterpackOptions = {
 };
 
 // Headless mode types
-export type HeadlessCredentialType = 'webauthn' | 'password' | 'google' | 'discord' |
-  'metamask' | 'rabby' | 'phantom-evm' | 'argent' | 'braavos' | 'siws';
+export type HeadlessCredentialType =
+  | "webauthn"
+  | "password"
+  | "google"
+  | "discord"
+  | "metamask"
+  | "rabby"
+  | "phantom-evm"
+  | "argent"
+  | "braavos"
+  | "siws";
 
 // Credential data interfaces (discriminated union for type safety)
 export interface HeadlessPasswordCredentials {
-  type: 'password';
+  type: "password";
   password: string;
 }
 
 export interface HeadlessWebAuthnCredentials {
-  type: 'webauthn';
+  type: "webauthn";
   credentialId: string;
   publicKey: string;
 }
 
 export interface HeadlessEIP191Credentials {
-  type: 'google' | 'discord' | 'metamask' | 'rabby' | 'phantom-evm';
+  type: "google" | "discord" | "metamask" | "rabby" | "phantom-evm";
   address: string;
 }
 
 export interface HeadlessStarknetCredentials {
-  type: 'argent' | 'braavos';
+  type: "argent" | "braavos";
   address: string;
 }
 
 export interface HeadlessSIWSCredentials {
-  type: 'siws';
+  type: "siws";
   address: string;
   signature: string;
 }
