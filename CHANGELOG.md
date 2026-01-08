@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.12.1] - 2026-01-07
+
+### ✨ New Features
+- **@cartridge/controller**: Added configurable error display modes with `errorDisplayMode` option, enabling developers to control how transaction errors are presented to users with three modes: `modal` (default), `notification` (clickable toast), and `silent` (console only) (#2312)
+
+### 🚀 Improvements  
+- **Development**: Enhanced Claude Code integration with structured skill guides for code review, PR management, testing, Storybook snapshots, and release workflows (#2311, #2310)
+- **Documentation**: Expanded CLAUDE.md with detailed technology stack versions, build process explanations, and comprehensive development workflow guidance (#2310)
+
+### 🔧 Development
+- **Build**: Added .worktrees to .gitignore for improved Git worktree support (#2311)
+- **Claude Integration**: Added comprehensive permissions configuration and skill documentation for streamlined AI-assisted development (#2311, #2310)
+
 ## [0.12.0] - 2026-01-01
 
 ### ✨ New Features
