@@ -178,7 +178,16 @@ export function connect({
       // Check if headless mode
       if (headless?.username && headless?.credentials) {
         // Perform headless authentication without UI
-        return authenticateHeadless(headless.username, headless.credentials);
+        return authenticateHeadless(
+          headless.username,
+          headless.credentials,
+        ).then((result) => {
+          if ("address" in result) {
+            return result;
+          } else {
+            throw new Error(result.message);
+          }
+        });
       }
 
       return new Promise<ConnectReply>((resolve, reject) => {
