@@ -4,48 +4,76 @@ import { useState } from "react";
 import { constants } from "starknet";
 import Controller from "@cartridge/controller";
 
+type AuthMethod = "passkey" | "metamask";
+
+// Extend window type for MetaMask
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: {
+        method: string;
+        params?: unknown[];
+      }) => Promise<unknown>;
+      isMetaMask?: boolean;
+    };
+  }
+}
+
 export function HeadlessLogin() {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<AuthMethod | null>(null);
   const [result, setResult] = useState<{
     success: boolean;
     message: string;
     address?: string;
   } | null>(null);
 
-  const handleHeadlessLogin = async () => {
-    if (!username || !password) {
+  const handlePasskeyLogin = async () => {
+    if (!username) {
       setResult({
         success: false,
-        message: "Please provide both username and password",
+        message: "Please provide a username",
       });
       return;
     }
 
-    setLoading(true);
+    setLoading("passkey");
     setResult(null);
 
     try {
-      // Create controller with headless mode
+      // For passkey auth, you would need to get these from a previous registration
+      // This is a placeholder - in real usage, you'd retrieve these from storage
+      const credentialId = process.env.NEXT_PUBLIC_WEBAUTHN_CREDENTIAL_ID || "";
+      const publicKey = process.env.NEXT_PUBLIC_WEBAUTHN_PUBLIC_KEY || "";
+
+      if (!credentialId || !publicKey) {
+        setResult({
+          success: false,
+          message:
+            "WebAuthn credentials not configured. Set NEXT_PUBLIC_WEBAUTHN_CREDENTIAL_ID and NEXT_PUBLIC_WEBAUTHN_PUBLIC_KEY",
+        });
+        setLoading(null);
+        return;
+      }
+
       const controller = new Controller({
         defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
         headless: {
           username,
           credentials: {
-            type: "password",
-            password,
+            type: "webauthn",
+            credentialId,
+            publicKey,
           },
         },
       });
 
-      // Attempt to connect without UI
       const account = await controller.connect();
 
       if (account) {
         setResult({
           success: true,
-          message: "Successfully authenticated!",
+          message: "Successfully authenticated with Passkey!",
           address: account.address,
         });
       } else {
@@ -57,22 +85,97 @@ export function HeadlessLogin() {
     } catch (error: unknown) {
       setResult({
         success: false,
-        message: (error as Error)?.message || "Authentication failed",
+        message: (error as Error)?.message || "Passkey authentication failed",
       });
     } finally {
-      setLoading(false);
+      setLoading(null);
+    }
+  };
+
+  const handleMetaMaskLogin = async () => {
+    if (!username) {
+      setResult({
+        success: false,
+        message: "Please provide a username",
+      });
+      return;
+    }
+
+    setLoading("metamask");
+    setResult(null);
+
+    try {
+      // Check if MetaMask is installed
+      if (typeof window.ethereum === "undefined") {
+        setResult({
+          success: false,
+          message: "MetaMask is not installed",
+        });
+        setLoading(null);
+        return;
+      }
+
+      // Request account access
+      const accounts = (await window.ethereum.request({
+        method: "eth_requestAccounts",
+      })) as string[];
+
+      if (!accounts || accounts.length === 0) {
+        setResult({
+          success: false,
+          message: "No MetaMask accounts found",
+        });
+        setLoading(null);
+        return;
+      }
+
+      const address = accounts[0];
+
+      const controller = new Controller({
+        defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+        headless: {
+          username,
+          credentials: {
+            type: "metamask",
+            address,
+          },
+        },
+      });
+
+      const account = await controller.connect();
+
+      if (account) {
+        setResult({
+          success: true,
+          message: "Successfully authenticated with MetaMask!",
+          address: account.address,
+        });
+      } else {
+        setResult({
+          success: false,
+          message: "Authentication failed - no account returned",
+        });
+      }
+    } catch (error: unknown) {
+      setResult({
+        success: false,
+        message: (error as Error)?.message || "MetaMask authentication failed",
+      });
+    } finally {
+      setLoading(null);
     }
   };
 
   return (
     <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-        Headless Login (Password)
+        Headless Login
       </h3>
 
       <p className="text-sm text-gray-600 dark:text-gray-400">
         Test programmatic authentication without UI. This demonstrates the
-        headless mode feature for server-side or automated authentication.
+        headless mode feature for automated authentication with Passkey or
+        MetaMask.
       </p>
 
       <div className="space-y-3">
@@ -90,35 +193,29 @@ export function HeadlessLogin() {
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Enter username"
             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
-            disabled={loading}
+            disabled={loading !== null}
           />
         </div>
 
-        <div>
-          <label
-            htmlFor="headless-password"
-            className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+        <div className="flex gap-3">
+          <button
+            onClick={handlePasskeyLogin}
+            disabled={loading !== null || !username}
+            className="flex-1 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-500 dark:hover:bg-purple-600"
           >
-            Password
-          </label>
-          <input
-            id="headless-password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
-            disabled={loading}
-          />
-        </div>
+            {loading === "passkey" ? "Authenticating..." : "Login with Passkey"}
+          </button>
 
-        <button
-          onClick={handleHeadlessLogin}
-          disabled={loading || !username || !password}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
-        >
-          {loading ? "Authenticating..." : "Test Headless Login"}
-        </button>
+          <button
+            onClick={handleMetaMaskLogin}
+            disabled={loading !== null || !username}
+            className="flex-1 rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-orange-500 dark:hover:bg-orange-600"
+          >
+            {loading === "metamask"
+              ? "Authenticating..."
+              : "Login with MetaMask"}
+          </button>
+        </div>
       </div>
 
       {result && (
@@ -141,12 +238,22 @@ export function HeadlessLogin() {
         </div>
       )}
 
-      <div className="mt-4 rounded-md bg-blue-50 p-4 dark:bg-blue-900/20">
+      <div className="mt-4 space-y-2 rounded-md bg-blue-50 p-4 dark:bg-blue-900/20">
         <p className="text-xs text-blue-800 dark:text-blue-400">
-          <strong>Note:</strong> Password authentication in headless mode is now
-          fully implemented. WebAuthn and OAuth methods (Google, Discord,
-          MetaMask, etc.) are also supported. Argent, Braavos, and SIWS
-          authentication methods are planned for a future release.
+          <strong>Passkey Authentication:</strong> Requires WebAuthn credentials
+          (credentialId and publicKey) to be configured via environment
+          variables NEXT_PUBLIC_WEBAUTHN_CREDENTIAL_ID and
+          NEXT_PUBLIC_WEBAUTHN_PUBLIC_KEY.
+        </p>
+        <p className="text-xs text-blue-800 dark:text-blue-400">
+          <strong>MetaMask Authentication:</strong> Requires MetaMask browser
+          extension to be installed. Will prompt for account connection when
+          clicked.
+        </p>
+        <p className="text-xs text-blue-800 dark:text-blue-400">
+          <strong>Note:</strong> Headless mode supports Password, WebAuthn, and
+          OAuth methods (Google, Discord, MetaMask, Rabby, Phantom). Argent,
+          Braavos, and SIWS are planned for a future release.
         </p>
       </div>
     </div>
