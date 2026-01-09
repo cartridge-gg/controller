@@ -57,8 +57,7 @@ export function HeadlessLogin() {
     } catch (error: unknown) {
       setResult({
         success: false,
-        message:
-          (error as Error)?.message || "Authentication failed",
+        message: (error as Error)?.message || "Authentication failed",
       });
     } finally {
       setLoading(false);
@@ -142,12 +141,12 @@ export function HeadlessLogin() {
         </div>
       )}
 
-      <div className="mt-4 rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
-        <p className="text-xs text-yellow-800 dark:text-yellow-400">
-          <strong>Note:</strong> Headless mode is currently in development. The
-          keychain backend integration is not yet complete, so authentication
-          will return a &quot;not yet implemented&quot; error. This component
-          demonstrates the API and client-side integration.
+      <div className="mt-4 rounded-md bg-blue-50 p-4 dark:bg-blue-900/20">
+        <p className="text-xs text-blue-800 dark:text-blue-400">
+          <strong>Note:</strong> Password authentication in headless mode is now
+          fully implemented. WebAuthn and OAuth methods (Google, Discord,
+          MetaMask, etc.) are also supported. Argent, Braavos, and SIWS
+          authentication methods are planned for a future release.
         </p>
       </div>
     </div>

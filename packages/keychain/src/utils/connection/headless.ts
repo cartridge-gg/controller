@@ -2,7 +2,14 @@ import {
   HeadlessCredentialData,
   ConnectReply,
   ConnectError,
+  ResponseCodes,
 } from "@cartridge/controller";
+import { fetchController } from "@/components/connect/create/utils";
+import { decryptPrivateKey } from "@/components/connect/create/password/crypto";
+import { Signer } from "@cartridge/controller-wasm";
+import Controller from "@/utils/controller";
+import { constants } from "starknet";
+import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 
 /**
  * Authenticates a user in headless mode without showing UI.
@@ -15,7 +22,7 @@ import {
  *
  * @param username - The username to authenticate
  * @param credentials - The credentials for authentication
- * @param chainId - The chain ID to use
+ * @param chainId - The chain ID to use (defaults to mainnet)
  * @returns Promise resolving to ConnectReply on success
  */
 export async function authenticateHeadless(
@@ -24,65 +31,53 @@ export async function authenticateHeadless(
   chainId?: string,
 ): Promise<ConnectReply | ConnectError> {
   try {
-    // TODO: Implement headless authentication flow
-    // This requires:
-    // 1. Fetching user's controller data from backend API
-    // 2. Handling different credential types (password, webauthn, oauth, etc.)
-    // 3. Creating a Controller instance with the authenticated signer
-    // 4. Storing the controller in window.controller
-    // 5. Returning the account address
+    // Default to mainnet if no chain ID provided
+    const effectiveChainId = chainId || constants.StarknetChainId.SN_MAIN;
 
     switch (credentials.type) {
       case "password":
         return await authenticateWithPassword(
           username,
           credentials.password,
-          chainId,
+          effectiveChainId,
         );
 
       case "webauthn":
-        // TODO: Implement WebAuthn authentication
-        return {
-          code: "ERROR",
-          message: "WebAuthn authentication not yet implemented",
-        } as ConnectError;
+        return await authenticateWithWebAuthn(
+          username,
+          credentials,
+          effectiveChainId,
+        );
 
       case "google":
       case "discord":
       case "metamask":
       case "rabby":
       case "phantom-evm":
-        // TODO: Implement EIP-191 authentication
-        return {
-          code: "ERROR",
-          message: `${credentials.type} authentication not yet implemented`,
-        } as ConnectError;
+        return await authenticateWithEIP191(
+          username,
+          credentials,
+          effectiveChainId,
+        );
 
       case "argent":
       case "braavos":
-        // TODO: Implement StarkNet wallet authentication
-        return {
-          code: "ERROR",
-          message: `${credentials.type} authentication not yet implemented`,
-        } as ConnectError;
-
       case "siws":
-        // TODO: Implement SIWS authentication
         return {
-          code: "ERROR",
-          message: "SIWS authentication not yet implemented",
+          code: ResponseCodes.ERROR,
+          message: `${credentials.type} authentication not yet implemented in headless mode`,
         } as ConnectError;
 
       default:
         return {
-          code: "ERROR",
+          code: ResponseCodes.ERROR,
           message: "Unknown credential type",
         } as ConnectError;
     }
   } catch (error) {
     console.error("Headless authentication failed:", error);
     return {
-      code: "ERROR",
+      code: ResponseCodes.ERROR,
       message: error instanceof Error ? error.message : "Authentication failed",
     } as ConnectError;
   }
@@ -91,49 +86,271 @@ export async function authenticateHeadless(
 /**
  * Authenticates with password credentials
  *
- * TODO: Implement password authentication
- * Steps required:
- * 1. Fetch controller data from backend using fetchController(chainId, username)
- * 2. Extract encrypted private key from controller data
- * 3. Use decryptPrivateKey from @/components/connect/create/password/crypto to decrypt
- * 4. Create a Signer with the private key
- * 5. Create or load Controller instance with the signer
- * 6. Store in window.controller
- * 7. Return the account address
+ * @param username - The username to authenticate
+ * @param password - The password to decrypt the private key
+ * @param chainId - The chain ID to use
+ * @returns Promise resolving to ConnectReply on success
  */
 async function authenticateWithPassword(
   username: string,
   password: string,
-  chainId?: string,
+  chainId: string,
 ): Promise<ConnectReply | ConnectError> {
-  console.log("Attempting password authentication for:", username, chainId);
-  console.log("Password provided:", !!password);
+  try {
+    // 1. Fetch controller data from backend
+    const controllerData = await fetchController(chainId, username);
+    if (!controllerData?.controller) {
+      return {
+        code: ResponseCodes.ERROR,
+        message: `Controller not found for username: ${username}`,
+      } as ConnectError;
+    }
 
-  return {
-    code: "ERROR",
-    message: "Password authentication requires backend API integration",
-  } as ConnectError;
+    const controller = controllerData.controller;
+
+    // 2. Find the password signer from the controller's signers
+    const passwordSigners = controller.signers?.filter(
+      (signer) =>
+        (signer.metadata as { __typename?: string }).__typename ===
+        "PasswordCredentials",
+    );
+
+    if (!passwordSigners || passwordSigners.length === 0) {
+      return {
+        code: ResponseCodes.ERROR,
+        message: "Password authentication not available for this account",
+      } as ConnectError;
+    }
+
+    // 3. Extract the encrypted private key from metadata
+    const passwordMetadata = passwordSigners[0].metadata as {
+      __typename: string;
+      password?: Array<{
+        encryptedPrivateKey: string;
+        publicKey: string;
+      }>;
+    };
+
+    const encryptedPrivateKey =
+      passwordMetadata.password?.[0]?.encryptedPrivateKey;
+
+    if (!encryptedPrivateKey) {
+      return {
+        code: ResponseCodes.ERROR,
+        message: "Encrypted private key not found",
+      } as ConnectError;
+    }
+
+    // 4. Decrypt the private key using the password
+    let privateKey: string;
+    try {
+      privateKey = await decryptPrivateKey(encryptedPrivateKey, password);
+    } catch {
+      return {
+        code: ResponseCodes.ERROR,
+        message: "Invalid password or corrupted key",
+      } as ConnectError;
+    }
+
+    // 5. Create a signer with the decrypted private key
+    const signer: Signer = {
+      starknet: {
+        privateKey,
+      },
+    };
+
+    // 6. Get RPC URL for the chain
+    const rpcUrl = getRpcUrlForChain(chainId);
+
+    // 7. Login to create controller instance
+    const loginResult = await Controller.login({
+      appId: "headless",
+      rpcUrl,
+      username: controller.accountID,
+      classHash: controller.constructorCalldata[0],
+      address: controller.address,
+      owner: {
+        signer,
+      },
+      cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
+      session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
+      isControllerRegistered: true,
+    });
+
+    // 8. Store the controller
+    window.controller = loginResult.controller;
+
+    // 9. Return success with address
+    return {
+      code: ResponseCodes.SUCCESS,
+      address: loginResult.controller.address(),
+    } as ConnectReply;
+  } catch (error) {
+    console.error("Password authentication error:", error);
+    return {
+      code: ResponseCodes.ERROR,
+      message: error instanceof Error ? error.message : "Authentication failed",
+    } as ConnectError;
+  }
 }
 
 /**
- * Helper to create and store a Controller instance
+ * Authenticates with WebAuthn credentials
  *
- * @param _username - The username
- * @param _signer - The signer to use
- * @param _address - The account address
- * @param _chainId - The chain ID
+ * @param username - The username to authenticate
+ * @param credentials - The WebAuthn credentials
+ * @param chainId - The chain ID to use
+ * @returns Promise resolving to ConnectReply on success
  */
-// async function createAndStoreController(
-//   _username: string,
-//   _signer: Signer,
-//   _address: string,
-//   _chainId: string,
-// ): Promise<Controller> {
-//   // TODO: Implement controller creation and storage
-//   // This should:
-//   // 1. Create a new Controller instance
-//   // 2. Store it in window.controller
-//   // 3. Store it in indexedDB for persistence
-//   // 4. Return the controller instance
-//   throw new Error("Controller creation not yet implemented");
-// }
+async function authenticateWithWebAuthn(
+  username: string,
+  credentials: Extract<HeadlessCredentialData, { type: "webauthn" }>,
+  chainId: string,
+): Promise<ConnectReply | ConnectError> {
+  try {
+    // 1. Fetch controller data from backend
+    const controllerData = await fetchController(chainId, username);
+    if (!controllerData?.controller) {
+      return {
+        code: ResponseCodes.ERROR,
+        message: `Controller not found for username: ${username}`,
+      } as ConnectError;
+    }
+
+    const controller = controllerData.controller;
+
+    // 2. Create signer with WebAuthn credentials
+    const signer: Signer = {
+      webauthn: {
+        rpId: import.meta.env.VITE_RP_ID,
+        credentialId: credentials.credentialId,
+        publicKey: credentials.publicKey,
+      },
+    };
+
+    // 3. Get RPC URL for the chain
+    const rpcUrl = getRpcUrlForChain(chainId);
+
+    // 4. Login to create controller instance
+    const loginResult = await Controller.login({
+      appId: "headless",
+      rpcUrl,
+      username: controller.accountID,
+      classHash: controller.constructorCalldata[0],
+      address: controller.address,
+      owner: {
+        signer,
+      },
+      cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
+      session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
+      isControllerRegistered: true,
+    });
+
+    // 5. Store the controller
+    window.controller = loginResult.controller;
+
+    // 6. Return success with address
+    return {
+      code: ResponseCodes.SUCCESS,
+      address: loginResult.controller.address(),
+    } as ConnectReply;
+  } catch (error) {
+    console.error("WebAuthn authentication error:", error);
+    return {
+      code: ResponseCodes.ERROR,
+      message: error instanceof Error ? error.message : "Authentication failed",
+    } as ConnectError;
+  }
+}
+
+/**
+ * Authenticates with EIP-191 credentials (Google, Discord, MetaMask, etc.)
+ *
+ * @param username - The username to authenticate
+ * @param credentials - The EIP-191 credentials
+ * @param chainId - The chain ID to use
+ * @returns Promise resolving to ConnectReply on success
+ */
+async function authenticateWithEIP191(
+  username: string,
+  credentials: Extract<
+    HeadlessCredentialData,
+    | { type: "google" }
+    | { type: "discord" }
+    | { type: "metamask" }
+    | { type: "rabby" }
+    | { type: "phantom-evm" }
+  >,
+  chainId: string,
+): Promise<ConnectReply | ConnectError> {
+  try {
+    // 1. Fetch controller data from backend
+    const controllerData = await fetchController(chainId, username);
+    if (!controllerData?.controller) {
+      return {
+        code: ResponseCodes.ERROR,
+        message: `Controller not found for username: ${username}`,
+      } as ConnectError;
+    }
+
+    const controller = controllerData.controller;
+
+    // 2. Create signer with EIP-191 credentials
+    const signer: Signer = {
+      eip191: {
+        address: credentials.address,
+      },
+    };
+
+    // 3. Get RPC URL for the chain
+    const rpcUrl = getRpcUrlForChain(chainId);
+
+    // 4. Login to create controller instance
+    const loginResult = await Controller.login({
+      appId: "headless",
+      rpcUrl,
+      username: controller.accountID,
+      classHash: controller.constructorCalldata[0],
+      address: controller.address,
+      owner: {
+        signer,
+      },
+      cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
+      session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
+      isControllerRegistered: true,
+    });
+
+    // 5. Store the controller
+    window.controller = loginResult.controller;
+
+    // 6. Return success with address
+    return {
+      code: ResponseCodes.SUCCESS,
+      address: loginResult.controller.address(),
+    } as ConnectReply;
+  } catch (error) {
+    console.error(`${credentials.type} authentication error:`, error);
+    return {
+      code: ResponseCodes.ERROR,
+      message: error instanceof Error ? error.message : "Authentication failed",
+    } as ConnectError;
+  }
+}
+
+/**
+ * Helper function to get RPC URL for a given chain ID
+ *
+ * @param chainId - The chain ID
+ * @returns The RPC URL for the chain
+ */
+function getRpcUrlForChain(chainId: string): string {
+  switch (chainId) {
+    case constants.StarknetChainId.SN_MAIN:
+      return "https://api.cartridge.gg/x/starknet/mainnet";
+    case constants.StarknetChainId.SN_SEPOLIA:
+      return "https://api.cartridge.gg/x/starknet/sepolia";
+    default:
+      // Default to mainnet if unknown chain ID
+      return "https://api.cartridge.gg/x/starknet/mainnet";
+  }
+}
