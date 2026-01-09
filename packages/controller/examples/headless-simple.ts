@@ -444,7 +444,8 @@ class AuthenticationService {
     const existingController = this.controllers.get(username);
     if (existingController) {
       console.log("  Using existing session");
-      return username;
+      // Return the account address, not the username
+      return existingController.address;
     }
 
     // Create new controller with headless mode

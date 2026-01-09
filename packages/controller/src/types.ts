@@ -131,11 +131,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(
-    signupOptions?: AuthOptions,
-    username?: string,
-    credentials?: HeadlessCredentialData,
-  ): Promise<ConnectReply | ConnectError>;
+  connect(options?: ConnectOptions): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -333,4 +329,10 @@ export type HeadlessCredentialData =
 export interface HeadlessOptions {
   username: string;
   credentials: HeadlessCredentialData;
+}
+
+// Connect options
+export interface ConnectOptions {
+  signupOptions?: AuthOptions;
+  headless?: HeadlessOptions;
 }

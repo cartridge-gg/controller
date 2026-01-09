@@ -259,12 +259,11 @@ export default class ControllerProvider extends BaseProvider {
       // Use connect() parameter if provided, otherwise fall back to constructor options
       const effectiveOptions = signupOptions ?? this.options.signupOptions;
 
-      // Pass username and credentials to keychain (it handles headless mode internally)
-      let response = await this.keychain.connect(
-        effectiveOptions,
-        headlessOptions?.username,
-        headlessOptions?.credentials,
-      );
+      // Pass options to keychain (it handles headless mode internally)
+      let response = await this.keychain.connect({
+        signupOptions: effectiveOptions,
+        headless: headlessOptions,
+      });
 
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
