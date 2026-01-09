@@ -228,6 +228,8 @@ export default class ControllerProvider extends BaseProvider {
   async connect(
     signupOptions?: AuthOptions,
   ): Promise<WalletAccount | undefined> {
+    const headlessOptions = this.options.headless;
+
     if (!this.iframes) {
       return;
     }
@@ -239,21 +241,31 @@ export default class ControllerProvider extends BaseProvider {
     // Ensure iframe is created if using lazy loading
     if (!this.iframes.keychain) {
       this.iframes.keychain = this.createKeychainIframe();
-      // Wait for the keychain to be ready
-      await this.waitForKeychain();
     }
+
+    // Always wait for the keychain connection to be established
+    await this.waitForKeychain();
 
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    this.iframes.keychain.open();
+    // Only open modal if NOT headless
+    if (!headlessOptions) {
+      this.iframes.keychain.open();
+    }
 
     try {
       // Use connect() parameter if provided, otherwise fall back to constructor options
       const effectiveOptions = signupOptions ?? this.options.signupOptions;
-      let response = await this.keychain.connect(effectiveOptions);
+
+      // Pass options to keychain (it handles headless mode internally)
+      let response = await this.keychain.connect({
+        signupOptions: effectiveOptions,
+        headless: headlessOptions,
+      });
+
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -272,7 +284,10 @@ export default class ControllerProvider extends BaseProvider {
     } catch (e) {
       console.log(e);
     } finally {
-      this.iframes.keychain.close();
+      // Only close modal if it was opened (not headless)
+      if (!headlessOptions) {
+        this.iframes.keychain.close();
+      }
     }
   }
 
