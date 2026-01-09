@@ -6,17 +6,9 @@ import Controller from "@cartridge/controller";
 
 type AuthMethod = "passkey" | "metamask";
 
-// Extend window type for MetaMask
-declare global {
-  interface Window {
-    ethereum?: {
-      request: (args: {
-        method: string;
-        params?: unknown[];
-      }) => Promise<unknown>;
-      isMetaMask?: boolean;
-    };
-  }
+interface EthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  isMetaMask?: boolean;
 }
 
 export function HeadlessLogin() {
@@ -106,7 +98,8 @@ export function HeadlessLogin() {
 
     try {
       // Check if MetaMask is installed
-      if (typeof window.ethereum === "undefined") {
+      const ethereum = (window as { ethereum?: EthereumProvider }).ethereum;
+      if (!ethereum) {
         setResult({
           success: false,
           message: "MetaMask is not installed",
@@ -116,7 +109,7 @@ export function HeadlessLogin() {
       }
 
       // Request account access
-      const accounts = (await window.ethereum.request({
+      const accounts = (await ethereum.request({
         method: "eth_requestAccounts",
       })) as string[];
 
