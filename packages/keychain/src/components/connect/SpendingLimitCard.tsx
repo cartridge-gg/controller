@@ -64,7 +64,7 @@ export function SpendingLimitCard({
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between h-10">
-        <CardTitle className="normal-case font-semibold text-xs">
+        <CardTitle className="normal-case font-semibold text-xs text-foreground-300">
           Spending Limit
         </CardTitle>
       </CardHeader>

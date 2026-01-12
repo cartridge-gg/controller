@@ -214,13 +214,10 @@ const CreateSessionLayout = ({
           !isEditable ? (
             <Button
               variant="icon"
-              className="size-10 relative bg-background-200 hover:bg-background-300"
+              className="bg-background-150 hover:bg-background-200 w-auto h-auto p-1.5"
               onClick={onToggleEditable}
             >
-              <SliderIcon
-                color="white"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              />
+              <SliderIcon className="text-foreground-300 hover:text-foreground !w-5 !h-5" />
             </Button>
           ) : undefined
         }
