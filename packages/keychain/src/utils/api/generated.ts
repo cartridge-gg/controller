@@ -2940,7 +2940,6 @@ export type OAuthConnectionProfile = {
 
 /** OAuthConnectionProvider is enum for the field provider */
 export enum OAuthConnectionProvider {
-  Instagram = "INSTAGRAM",
   Tiktok = "TIKTOK",
 }
 
@@ -3072,7 +3071,6 @@ export type OAuthConnectionWhereInput = {
 };
 
 export enum OAuthProvider {
-  Instagram = "INSTAGRAM",
   Tiktok = "TIKTOK",
 }
 

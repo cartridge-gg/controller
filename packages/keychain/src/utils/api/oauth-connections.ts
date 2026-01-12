@@ -2,7 +2,7 @@ import { gql } from "graphql-request";
 
 // Local types until backend is deployed and codegen updated
 // These match the backend schema definitions
-export type OAuthProvider = "TIKTOK" | "INSTAGRAM";
+export type OAuthProvider = "TIKTOK" | "INSTAGRAM" | "TWITTER";
 
 export interface OAuthConnectionProfile {
   providerUserId: string;
@@ -98,4 +98,15 @@ export function getInstagramAuthUrl(username: string): string {
   const baseUrl =
     import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
   return `${baseUrl}/instagram/init?username=${encodeURIComponent(username)}`;
+}
+
+/**
+ * Get the URL to initiate Twitter OAuth flow.
+ * This opens a direct URL to the API which generates the encrypted state
+ * and redirects to Twitter for authorization.
+ */
+export function getTwitterAuthUrl(username: string): string {
+  const baseUrl =
+    import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
+  return `${baseUrl}/twitter/init?username=${encodeURIComponent(username)}`;
 }

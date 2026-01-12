@@ -2,6 +2,7 @@ import { useNavigation } from "@/context/navigation";
 import {
   getInstagramAuthUrl,
   getTikTokAuthUrl,
+  getTwitterAuthUrl,
   type OAuthProvider,
 } from "@/utils/api/oauth-connections";
 import {
@@ -14,7 +15,7 @@ import {
   LayoutFooter,
   SpinnerIcon,
 } from "@cartridge/ui";
-import { SiInstagram, SiTiktok } from "@icons-pack/react-simple-icons";
+import { SiInstagram, SiTiktok, SiX } from "@icons-pack/react-simple-icons";
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 
@@ -231,6 +232,105 @@ export function AddConnection({ username }: { username?: string }) {
     }
   }, [username, queryClient]);
 
+  const handleTwitterConnect = useCallback(() => {
+    if (!username) {
+      setConnectionPending({
+        provider: "TWITTER",
+        inProgress: false,
+        error: "No username available",
+      });
+      return;
+    }
+
+    try {
+      setConnectionPending({
+        provider: "TWITTER",
+        inProgress: true,
+      });
+
+      setHeaderIcon(<SpinnerIcon className="animate-spin" size="lg" />);
+
+      // Get the auth URL for Twitter OAuth
+      const authUrl = getTwitterAuthUrl(username);
+
+      // Open Twitter OAuth in a popup window
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      const popup = window.open(
+        authUrl,
+        "twitter-oauth",
+        `width=${width},height=${height},left=${left},top=${top}`,
+      );
+
+      // Listen for OAuth completion message from popup
+      const handleMessage = (event: MessageEvent) => {
+        // Verify origin for security - must be cartridge.gg or a subdomain
+        try {
+          const hostname = new URL(event.origin).hostname;
+          const isValidOrigin =
+            hostname === "cartridge.gg" || hostname.endsWith(".cartridge.gg");
+          if (!isValidOrigin) return;
+        } catch {
+          return; // Invalid origin URL
+        }
+        if (event.data?.type !== "twitter-oauth") return;
+
+        window.removeEventListener("message", handleMessage);
+
+        if (event.data.status === "connected") {
+          setHeaderIcon(<CheckIcon size="lg" />);
+          setConnectionPending({
+            provider: "TWITTER",
+            inProgress: false,
+          });
+          // Invalidate the connections query so settings page shows updated data
+          queryClient.invalidateQueries("oauthConnections");
+        } else {
+          setHeaderIcon(<AlertIcon size="lg" />);
+          setConnectionPending({
+            provider: "TWITTER",
+            inProgress: false,
+            error: event.data.error || "Connection failed",
+          });
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      // Also poll for popup closure as fallback (e.g., user closes popup manually)
+      const pollTimer = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(pollTimer);
+          window.removeEventListener("message", handleMessage);
+          // Only update if still in progress (message handler didn't fire)
+          setConnectionPending((current) => {
+            if (current?.inProgress) {
+              setHeaderIcon(<AlertIcon size="lg" />);
+              return {
+                provider: "TWITTER",
+                inProgress: false,
+                error: "Popup closed before completing authorization",
+              };
+            }
+            return current;
+          });
+        }
+      }, 500);
+    } catch (error) {
+      console.error(error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      setHeaderIcon(<AlertIcon size="lg" />);
+      setConnectionPending({
+        provider: "TWITTER",
+        inProgress: false,
+        error: errorMessage,
+      });
+    }
+  }, [username, queryClient]);
+
   // Navigate back to settings after successful connection
   useEffect(() => {
     if (
@@ -270,6 +370,10 @@ export function AddConnection({ username }: { username?: string }) {
               provider="INSTAGRAM"
               onClick={handleInstagramConnect}
             />
+            <ConnectionMethod
+              provider="TWITTER"
+              onClick={handleTwitterConnect}
+            />
           </>
         )}
       </LayoutContent>
@@ -306,16 +410,19 @@ function ConnectionMethod({
   const icons: Record<OAuthProvider, React.ReactNode> = {
     TIKTOK: <SiTiktok size={20} />,
     INSTAGRAM: <SiInstagram size={20} />,
+    TWITTER: <SiX size={20} />,
   };
 
   const labels: Record<OAuthProvider, string> = {
     TIKTOK: "TikTok",
     INSTAGRAM: "Instagram",
+    TWITTER: "X",
   };
 
   const descriptions: Record<OAuthProvider, string> = {
     TIKTOK: "Connect to enable video publishing",
     INSTAGRAM: "Connect to enable content publishing",
+    TWITTER: "Connect to enable tweet publishing",
   };
 
   return (
@@ -351,11 +458,13 @@ function ConnectionPendingCard({
   const icons: Record<OAuthProvider, React.ReactNode> = {
     TIKTOK: <SiTiktok size={20} />,
     INSTAGRAM: <SiInstagram size={20} />,
+    TWITTER: <SiX size={20} />,
   };
 
   const labels: Record<OAuthProvider, string> = {
     TIKTOK: "TikTok",
     INSTAGRAM: "Instagram",
+    TWITTER: "X",
   };
 
   return (
