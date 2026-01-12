@@ -2,8 +2,8 @@ import { useNavigation } from "@/context/navigation";
 import {
   getInstagramAuthUrl,
   getTikTokAuthUrl,
+  type OAuthProvider,
 } from "@/utils/api/oauth-connections";
-import type { OAuthProvider } from "@/utils/api/oauth-connections";
 import {
   AddUserIcon,
   AlertIcon,

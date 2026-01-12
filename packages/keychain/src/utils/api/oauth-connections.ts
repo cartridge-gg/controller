@@ -1,5 +1,7 @@
 import { gql } from "graphql-request";
 
+// Local types until backend is deployed and codegen updated
+// These match the backend schema definitions
 export type OAuthProvider = "TIKTOK" | "INSTAGRAM";
 
 export interface OAuthConnectionProfile {
