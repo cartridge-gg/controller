@@ -90,9 +90,9 @@ export function convertTokenAmountToUSD(
   // Convert to decimal for display, handling the price decimals
   const valueInUsd = Number(valueInBaseUnits) / 10 ** price.decimals;
 
-  // Handle zero amount - include cents per request
+  // Handle zero amount
   if (valueInUsd === 0) {
-    return "$0.00";
+    return "$0";
   }
 
   // For small numbers (< 0.01), show 3 decimal places
@@ -114,9 +114,9 @@ export function convertTokenAmountToUSD(
   const isWhole = valueInUsd % 1 === 0;
 
   if (isWhole) {
-    // For whole numbers, format with .00 to always include cents
+    // For whole numbers, format without decimal places
     const formatted = Math.floor(valueInUsd).toLocaleString("en-US");
-    return `$${formatted}.00`;
+    return `$${formatted}`;
   } else {
     // For non-whole numbers, format with exactly 2 decimal places
     const formatted = valueInUsd.toLocaleString("en-US", {
