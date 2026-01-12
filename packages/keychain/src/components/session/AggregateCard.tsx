@@ -72,7 +72,7 @@ export function AggregateCard({
         >
           <Thumbnail
             variant={isOpened ? "light" : "ghost"}
-            size="xs"
+            size="sm"
             icon={icon ?? <CodeIcon variant="solid" />}
             centered={true}
           />
