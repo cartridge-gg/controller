@@ -121,10 +121,11 @@ export function OnchainCostBreakdown({
   const { displayError } = useStarterpackContext();
   const { decimals } = quote.paymentTokenMetadata;
 
-  // Get default token (USDC if available) for fallback
-  const defaultToken = availableTokens.find(
-    (t) => t.address.toLowerCase() === quote.paymentToken.toLowerCase(),
-  );
+  // Get default token (matching quote if available) or fallback to the first available token
+  const defaultToken =
+    availableTokens.find(
+      (t) => t.address.toLowerCase() === quote.paymentToken.toLowerCase(),
+    ) || availableTokens[0];
 
   // Use selectedToken or fallback to defaultToken for display
   const displayToken = selectedToken || defaultToken;

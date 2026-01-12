@@ -159,7 +159,6 @@ export function useTokenSelection({
       USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN];
 
     const tokens: ERC20Metadata[] = [
-      ...DEFAULT_TOKENS,
       {
         address: usdcAddress,
         name: "USD Coin",
@@ -167,6 +166,7 @@ export function useTokenSelection({
         decimals: 6,
         icon: "https://static.cartridge.gg/tokens/usdc.svg",
       },
+      ...DEFAULT_TOKENS,
     ];
 
     const isIncluded = (address: string) =>
@@ -309,10 +309,11 @@ export function useTokenSelection({
 
         // Set selected token to payment token if not set
         if (!selectedToken) {
-          const paymentToken = availableTokens.find(
-            (token: TokenOption) =>
-              token.address.toLowerCase() === paymentTokenAddress,
-          );
+          const paymentToken =
+            availableTokens.find(
+              (token: TokenOption) =>
+                token.address.toLowerCase() === paymentTokenAddress,
+            ) || availableTokens[0];
           if (paymentToken) {
             setSelectedToken(paymentToken);
           }
