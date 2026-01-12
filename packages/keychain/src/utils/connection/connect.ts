@@ -177,6 +177,9 @@ export function connect({
 
       // Check if headless mode
       if (headless?.username && headless?.credentials) {
+        console.log(
+          `[HEADLESS] Detected headless mode - username: ${headless.username}, credentialType: ${headless.credentials.type}`,
+        );
         // Perform headless authentication without UI
         return authenticateHeadless(
           headless.username,
