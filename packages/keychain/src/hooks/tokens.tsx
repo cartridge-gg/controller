@@ -114,12 +114,21 @@ export function convertTokenAmountToUSD(
     return `$${valueInUsd.toFixed(3)}`;
   }
 
-  // Format with exactly 2 decimal places for non-whole numbers
-  const formatted = valueInUsd.toFixed(2);
-  const isWhole = formatted.endsWith(".00");
+  // Format with thousands separators
+  const isWhole = valueInUsd % 1 === 0;
 
-  // Return whole numbers without decimals, otherwise show exactly 2 decimal places
-  return "$" + (isWhole ? Math.floor(valueInUsd).toString() : formatted);
+  if (isWhole) {
+    // For whole numbers, format without decimal places
+    const formatted = Math.floor(valueInUsd).toLocaleString("en-US");
+    return `$${formatted}`;
+  } else {
+    // For non-whole numbers, format with exactly 2 decimal places
+    const formatted = valueInUsd.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return `$${formatted}`;
+  }
 }
 
 export function convertUSDToTokenAmount(
