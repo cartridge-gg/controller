@@ -1,5 +1,9 @@
 import { useNavigation } from "@/context/navigation";
-import { getTikTokAuthUrl } from "@/utils/api/oauth-connections";
+import {
+  getInstagramAuthUrl,
+  getTikTokAuthUrl,
+} from "@/utils/api/oauth-connections";
+import type { OAuthProvider } from "@/utils/api/oauth-connections";
 import {
   AddUserIcon,
   AlertIcon,
@@ -10,12 +14,12 @@ import {
   LayoutFooter,
   SpinnerIcon,
 } from "@cartridge/ui";
-import { SiTiktok } from "@icons-pack/react-simple-icons";
+import { SiInstagram, SiTiktok } from "@icons-pack/react-simple-icons";
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 
 type ConnectionPending = {
-  provider: "TIKTOK";
+  provider: OAuthProvider;
   inProgress: boolean;
   error?: string;
 };
@@ -128,6 +132,105 @@ export function AddConnection({ username }: { username?: string }) {
     }
   }, [username, queryClient]);
 
+  const handleInstagramConnect = useCallback(() => {
+    if (!username) {
+      setConnectionPending({
+        provider: "INSTAGRAM",
+        inProgress: false,
+        error: "No username available",
+      });
+      return;
+    }
+
+    try {
+      setConnectionPending({
+        provider: "INSTAGRAM",
+        inProgress: true,
+      });
+
+      setHeaderIcon(<SpinnerIcon className="animate-spin" size="lg" />);
+
+      // Get the auth URL for Instagram OAuth
+      const authUrl = getInstagramAuthUrl(username);
+
+      // Open Instagram OAuth in a popup window
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      const popup = window.open(
+        authUrl,
+        "instagram-oauth",
+        `width=${width},height=${height},left=${left},top=${top}`,
+      );
+
+      // Listen for OAuth completion message from popup
+      const handleMessage = (event: MessageEvent) => {
+        // Verify origin for security - must be cartridge.gg or a subdomain
+        try {
+          const hostname = new URL(event.origin).hostname;
+          const isValidOrigin =
+            hostname === "cartridge.gg" || hostname.endsWith(".cartridge.gg");
+          if (!isValidOrigin) return;
+        } catch {
+          return; // Invalid origin URL
+        }
+        if (event.data?.type !== "instagram-oauth") return;
+
+        window.removeEventListener("message", handleMessage);
+
+        if (event.data.status === "connected") {
+          setHeaderIcon(<CheckIcon size="lg" />);
+          setConnectionPending({
+            provider: "INSTAGRAM",
+            inProgress: false,
+          });
+          // Invalidate the connections query so settings page shows updated data
+          queryClient.invalidateQueries("oauthConnections");
+        } else {
+          setHeaderIcon(<AlertIcon size="lg" />);
+          setConnectionPending({
+            provider: "INSTAGRAM",
+            inProgress: false,
+            error: event.data.error || "Connection failed",
+          });
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      // Also poll for popup closure as fallback (e.g., user closes popup manually)
+      const pollTimer = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(pollTimer);
+          window.removeEventListener("message", handleMessage);
+          // Only update if still in progress (message handler didn't fire)
+          setConnectionPending((current) => {
+            if (current?.inProgress) {
+              setHeaderIcon(<AlertIcon size="lg" />);
+              return {
+                provider: "INSTAGRAM",
+                inProgress: false,
+                error: "Popup closed before completing authorization",
+              };
+            }
+            return current;
+          });
+        }
+      }, 500);
+    } catch (error) {
+      console.error(error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      setHeaderIcon(<AlertIcon size="lg" />);
+      setConnectionPending({
+        provider: "INSTAGRAM",
+        inProgress: false,
+        error: errorMessage,
+      });
+    }
+  }, [username, queryClient]);
+
   // Navigate back to settings after successful connection
   useEffect(() => {
     if (
@@ -161,7 +264,13 @@ export function AddConnection({ username }: { username?: string }) {
             error={connectionPending.error}
           />
         ) : (
-          <ConnectionMethod provider="TIKTOK" onClick={handleTikTokConnect} />
+          <>
+            <ConnectionMethod provider="TIKTOK" onClick={handleTikTokConnect} />
+            <ConnectionMethod
+              provider="INSTAGRAM"
+              onClick={handleInstagramConnect}
+            />
+          </>
         )}
       </LayoutContent>
 
@@ -191,15 +300,22 @@ function ConnectionMethod({
   provider,
   onClick,
 }: {
-  provider: "TIKTOK";
+  provider: OAuthProvider;
   onClick: () => void;
 }) {
-  const icons = {
+  const icons: Record<OAuthProvider, React.ReactNode> = {
     TIKTOK: <SiTiktok size={20} />,
+    INSTAGRAM: <SiInstagram size={20} />,
   };
 
-  const labels = {
+  const labels: Record<OAuthProvider, string> = {
     TIKTOK: "TikTok",
+    INSTAGRAM: "Instagram",
+  };
+
+  const descriptions: Record<OAuthProvider, string> = {
+    TIKTOK: "Connect to enable video publishing",
+    INSTAGRAM: "Connect to enable content publishing",
   };
 
   return (
@@ -216,7 +332,7 @@ function ConnectionMethod({
           {labels[provider]}
         </span>
         <span className="text-foreground-400 text-sm">
-          Connect to enable video publishing
+          {descriptions[provider]}
         </span>
       </div>
     </button>
@@ -228,16 +344,18 @@ function ConnectionPendingCard({
   inProgress,
   error,
 }: {
-  provider: "TIKTOK";
+  provider: OAuthProvider;
   inProgress: boolean;
   error?: string;
 }) {
-  const icons = {
+  const icons: Record<OAuthProvider, React.ReactNode> = {
     TIKTOK: <SiTiktok size={20} />,
+    INSTAGRAM: <SiInstagram size={20} />,
   };
 
-  const labels = {
+  const labels: Record<OAuthProvider, string> = {
     TIKTOK: "TikTok",
+    INSTAGRAM: "Instagram",
   };
 
   return (
