@@ -4,6 +4,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  Skeleton,
   Thumbnail,
 } from "@cartridge/ui";
 import {
@@ -104,7 +105,13 @@ export function SpendingLimitCard({
             <div className="flex flex-col w-full">
               <div className="w-full flex flex-row items-center justify-between text-sm font-medium text-foreground-100">
                 <p>{name}</p>
-                {showCost && usdValue ? <p>{usdValue}</p> : null}
+                {showCost && !isUnlimited ? (
+                  usdValue ? (
+                    <p>{usdValue}</p>
+                  ) : (
+                    <Skeleton className="w-16 h-5" />
+                  )
+                ) : null}
               </div>
               <p className="text-foreground-400 text-xs font-medium">
                 {isUnlimited ? "Unlimited" : `${formattedAmount} ${symbol}`}
