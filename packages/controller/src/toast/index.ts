@@ -94,10 +94,26 @@ function showToastOnDocument(
   // Add to container
   container.appendChild(toastElement);
 
+  // Setup click handler if provided
+  if (options.onClick) {
+    toastElement.style.cursor = "pointer";
+    toastElement.addEventListener("click", (e) => {
+      // Don't trigger onClick if clicking close button
+      const target = e.target as HTMLElement;
+      const isCloseButton = target.closest("#close-button");
+      if (!isCloseButton && options.onClick) {
+        options.onClick();
+      }
+    });
+  }
+
   // Setup close button
   const closeButton = toastElement.querySelector("#close-button");
   if (closeButton) {
-    closeButton.addEventListener("click", dismiss);
+    closeButton.addEventListener("click", (e) => {
+      e.stopPropagation(); // Prevent onClick from firing
+      dismiss();
+    });
   }
 
   // Handle duration and progress bar

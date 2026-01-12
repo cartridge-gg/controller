@@ -10,6 +10,7 @@ export type ToastPosition =
 export interface BaseToastOptions {
   duration?: number; // in milliseconds, 0 means persistent
   position?: ToastPosition;
+  onClick?: () => void; // Optional click handler for the entire toast
 }
 
 // Error Toast
