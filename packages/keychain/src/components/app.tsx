@@ -28,6 +28,7 @@ import { Settings } from "./settings";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
+import { AddConnectionRoute } from "./settings/AddConnectionRoute";
 import { PaymentMethod } from "./purchasenew/method";
 import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { Success as PurchaseSuccess } from "./purchasenew/success";
@@ -200,6 +201,10 @@ export function App() {
         <Route path="/settings/recovery" element={<Recovery />} />
         <Route path="/settings/delegate" element={<Delegate />} />
         <Route path="/settings/add-signer" element={<AddSignerRoute />} />
+        <Route
+          path="/settings/add-connection"
+          element={<AddConnectionRoute />}
+        />
         <Route path="session" element={<Session />} />
         <Route path="slot" element={<Outlet />}>
           <Route index element={<Auth />} />

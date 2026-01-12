@@ -1,4 +1,4 @@
-name: claude
+name: Claude Code
 
 on:
   issue_comment:
@@ -11,7 +11,7 @@ on:
     types: [submitted]
 
 jobs:
-  code:
+  claude:
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
@@ -19,69 +19,32 @@ jobs:
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
+      contents: read
+      pull-requests: read
+      issues: read
       id-token: write
-      actions: write
+      actions: read # Required for Claude to read CI results on PRs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup environment
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Install jq for workspace.json parsing
-          sudo apt-get update && sudo apt-get install -y jq
-
-          # Configure git for Claude operations with authentication
-          git config --global user.name "Claude Code Bot"
-          git config --global user.email "claude-code@anthropic.com"
-          git config --global init.defaultBranch main
-          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install ast-grep
-        run: |
-          npm install -g @ast-grep/cli
-          ast-grep --version
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@beta
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
-          # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
-          # model: "claude-opus-4-20250514"
+          # This is an optional setting that allows Claude to read CI results on PRs
+          additional_permissions: |
+            actions: read
 
-          # Optional: Customize the trigger phrase (default: @claude)
-          # trigger_phrase: "/claude"
+          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
+          # prompt: 'Update the pull request description to include a summary of changes.'
 
-          # Optional: Trigger when specific user is assigned to an issue
-          assignee_trigger: "claude-bot"
+          # Optional: Add claude_args to customize behavior and configuration
+          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          # or https://code.claude.com/docs/en/cli-reference for available options
+          # claude_args: '--allowed-tools Bash(gh pr:*)'
 
-          # Customize allowed tools and commands for your repository
-          allowed_tools: "mcp__github__create_pending_pull_request_review,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff,mcp__github__create_issue,mcp__github__create_pull_request,mcp__github__list_repositories,mcp__github__get_repository,mcp__github__get_repository_content,mcp__github__create_or_update_file_contents,mcp__github__create_or_update_file,mcp__github__delete_file,mcp__github__create_or_update_file,mcp__github__push_files,mcp__github__create_branch,mcp__github__search_code,mcp__github__get_commit,mcp__github__get_file_contents,Bash,Glob,Grep,LS,Read,Edit,MultiEdit,Write"
-
-          # Add custom instructions specific to your codebase
-          custom_instructions: |
-            Always review the instructions in the CLAUDE.md file before proceeding.
-
-            IMPORTANT: When you make changes to files, you must create a Pull Request:
-            1. Use mcp__github__create_pull_request to create a PR
-            2. If responding to an issue, include "Closes #[ISSUE_NUMBER]" in the PR description
-            3. Provide a clear title and description explaining what was changed and why
-
-            Never commit directly to main branch. Always create PRs for changes.

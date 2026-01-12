@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/keychain",
-  "version": "0.11.3",
+  "version": "0.12.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -52,6 +52,7 @@
     "@cartridge/ui": "catalog:",
     "@dojoengine/sdk": "catalog:",
     "@dojoengine/torii-wasm": "catalog:",
+    "@icons-pack/react-simple-icons": "^13.8.0",
     "@noble/hashes": "catalog:",
     "@starknet-io/types-js": "catalog:",
     "@starknet-react/chains": "4.0.1-beta.3",

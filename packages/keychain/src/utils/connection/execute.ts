@@ -104,12 +104,17 @@ export async function executeCore(
 
 export function execute({
   navigate,
+  propagateError,
 }: {
   navigate: (
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
   ) => void;
+  propagateError?: boolean;
+  errorDisplayMode?: "modal" | "notification" | "silent"; // Available for potential future use
 }) {
+  // Note: errorDisplayMode is primarily handled on controller side (account.ts)
+  // It's included in the type signature for API consistency and potential future use
   return (origin: string) =>
     async (
       transactions: AllowArray<Call>,
@@ -159,6 +164,18 @@ export function execute({
           } catch (e) {
             const error = e as ControllerError;
             const parsedError = parseControllerError(error);
+
+            if (
+              propagateError &&
+              parsedError.code !== ErrorCode.SessionRefreshRequired &&
+              parsedError.code !== ErrorCode.ManualExecutionRequired
+            ) {
+              return resolve({
+                code: ResponseCodes.ERROR,
+                message: parsedError.message,
+                error: parsedError,
+              });
+            }
 
             // Check for specific error codes that require user interaction
             // SessionRefreshRequired and ManualExecutionRequired both need UI

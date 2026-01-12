@@ -233,6 +233,8 @@ export type KeychainOptions = IFrameOptions & {
   rpcUrl?: string;
   /** Propagate transaction errors back to caller instead of showing modal */
   propagateSessionErrors?: boolean;
+  /** How to display transaction/execution errors to the user ('modal' | 'notification' | 'silent'). Defaults to 'modal'. */
+  errorDisplayMode?: "modal" | "notification" | "silent";
   /** The fee source to use for execute from outside */
   feeSource?: FeeSource;
   /** Signup options (the order of the options is reflected in the UI. It's recommended to group socials and wallets together ) */

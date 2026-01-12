@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Write",
+      "Read",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm:test)",
+      "Bash(pnpm:test:*)",
+      "Bash(pnpm:build)",
+      "Bash(pnpm:dev)",
+      "Bash(pnpm:lint)",
+      "Bash(pnpm:format)",
+      "Bash(pnpm:clean)",
+      "Bash(pnpm:codegen)",
+      "Bash(pnpm:storybook:*)",
+      "Bash(pnpm:e2e:*)",
+      "Bash(pnpm:--filter:*)",
+      "Bash(git:status)",
+      "Bash(git:diff)",
+      "Bash(git:log)",
+      "WebFetch"
+    ]
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
+  }
+}

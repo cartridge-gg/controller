@@ -33,10 +33,20 @@ export class KeychainIFrame extends IFrame<Keychain> {
     username,
     onSessionCreated,
     encryptedBlob,
+    propagateSessionErrors,
+    errorDisplayMode,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
     const walletBridge = new WalletBridge();
+
+    if (propagateSessionErrors) {
+      _url.searchParams.set("propagate_error", "true");
+    }
+
+    if (errorDisplayMode) {
+      _url.searchParams.set("error_display_mode", errorDisplayMode);
+    }
 
     if (version) {
       _url.searchParams.set("v", encodeURIComponent(version));
