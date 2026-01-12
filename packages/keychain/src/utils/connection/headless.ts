@@ -284,15 +284,33 @@ async function authenticateWithEIP191(
   chainId: string,
 ): Promise<ConnectReply | ConnectError> {
   try {
+    console.log(
+      `[HEADLESS] Starting EIP191 auth for ${username} with address ${credentials.address}`,
+    );
+
     // 1. Fetch controller data from backend
+    console.log(
+      `[HEADLESS] Fetching controller data for ${username} on chain ${chainId}...`,
+    );
+    const fetchStart = Date.now();
     const controllerData = await fetchController(chainId, username);
+    console.log(
+      `[HEADLESS] fetchController completed in ${Date.now() - fetchStart}ms`,
+    );
+
     if (!controllerData?.controller) {
+      console.error(
+        `[HEADLESS] Controller not found for username: ${username}`,
+      );
       return {
         code: ResponseCodes.ERROR,
         message: `Controller not found for username: ${username}`,
       } as ConnectError;
     }
 
+    console.log(
+      `[HEADLESS] Controller found: ${controllerData.controller.address}`,
+    );
     const controller = controllerData.controller;
 
     // 2. Create signer with EIP-191 credentials
@@ -306,6 +324,10 @@ async function authenticateWithEIP191(
     const rpcUrl = getRpcUrlForChain(chainId);
 
     // 4. Login to create controller instance
+    console.log(
+      `[HEADLESS] Calling Controller.login with appId: headless, username: ${controller.accountID}, address: ${controller.address}`,
+    );
+    const loginStart = Date.now();
     const loginResult = await Controller.login({
       appId: "headless",
       rpcUrl,
@@ -320,6 +342,10 @@ async function authenticateWithEIP191(
       isControllerRegistered: true,
     });
 
+    console.log(
+      `[HEADLESS] Controller.login completed in ${Date.now() - loginStart}ms, address: ${loginResult.controller.address()}`,
+    );
+
     // 5. Store the controller
     window.controller = loginResult.controller;
 
@@ -329,7 +355,19 @@ async function authenticateWithEIP191(
       address: loginResult.controller.address(),
     } as ConnectReply;
   } catch (error) {
-    console.error(`${credentials.type} authentication error:`, error);
+    console.error(
+      `[HEADLESS] ${credentials.type} authentication error:`,
+      error,
+    );
+    console.error(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      `[HEADLESS] Error details - Type: ${(error as any)?.constructor?.name}, Message: ${(error as any)?.message}`,
+    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((error as any)?.stack) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      console.error(`[HEADLESS] Stack trace:`, (error as any).stack);
+    }
     return {
       code: ResponseCodes.ERROR,
       message: error instanceof Error ? error.message : "Authentication failed",
