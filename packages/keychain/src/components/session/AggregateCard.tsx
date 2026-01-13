@@ -67,7 +67,7 @@ export function AggregateCard({
       <AccordionItem value="item">
         <AccordionTrigger
           parentClassName="h-11 p-3"
-          className="flex items-center text-xs font-medium text-foreground-100 gap-1.5"
+          className="flex items-center text-sm font-medium text-foreground-100 gap-1.5"
           color={cn(isOpened ? "text-foreground-100" : "text-foreground-400")}
         >
           <Thumbnail
