@@ -128,7 +128,7 @@ export function SpendingLimitCard({
             <div className="w-full flex flex-row items-center justify-between text-sm font-medium">
               <p className="text-foreground-100">{token.name}</p>
               {showCost ? (
-                token.price ? (
+                token.isUnlimited || token.price ? (
                   <div className="flex flex-row items-center gap-1">
                     <Thumbnail
                       className={cn(!token.isUnlimited && "hidden")}
