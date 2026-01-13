@@ -11,7 +11,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import React, { useState } from "react";
-import { SiTiktok } from "@icons-pack/react-simple-icons";
+import { SiInstagram, SiTiktok } from "@icons-pack/react-simple-icons";
 import type {
   OAuthConnection,
   OAuthProvider,
@@ -146,6 +146,8 @@ const ConnectionIcon = ({
   switch (provider) {
     case "TIKTOK":
       return <SiTiktok size={iconSize} />;
+    case "INSTAGRAM":
+      return <SiInstagram size={iconSize} />;
     default:
       return null;
   }
@@ -155,6 +157,8 @@ const getProviderDisplayName = (provider: OAuthProvider): string => {
   switch (provider) {
     case "TIKTOK":
       return "TikTok";
+    case "INSTAGRAM":
+      return "Instagram";
     default:
       return provider;
   }

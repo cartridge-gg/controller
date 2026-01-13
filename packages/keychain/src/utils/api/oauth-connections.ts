@@ -1,6 +1,8 @@
 import { gql } from "graphql-request";
 
-export type OAuthProvider = "TIKTOK";
+// Local types until backend is deployed and codegen updated
+// These match the backend schema definitions
+export type OAuthProvider = "TIKTOK" | "INSTAGRAM";
 
 export interface OAuthConnectionProfile {
   providerUserId: string;
@@ -85,4 +87,15 @@ export function getTikTokAuthUrl(username: string): string {
   const baseUrl =
     import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
   return `${baseUrl}/tiktok/init?username=${encodeURIComponent(username)}`;
+}
+
+/**
+ * Get the URL to initiate Instagram OAuth flow.
+ * This opens a direct URL to the API which generates the encrypted state
+ * and redirects to Instagram for authorization.
+ */
+export function getInstagramAuthUrl(username: string): string {
+  const baseUrl =
+    import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
+  return `${baseUrl}/instagram/init?username=${encodeURIComponent(username)}`;
 }
