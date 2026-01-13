@@ -1,6 +1,12 @@
-import { AuthOptions, ConnectError, ConnectReply } from "@cartridge/controller";
+import {
+  AuthOptions,
+  ConnectError,
+  ConnectReply,
+  ConnectOptions,
+} from "@cartridge/controller";
 import { SessionPolicies } from "@cartridge/presets";
 import { generateCallbackId, storeCallbacks, getCallbacks } from "./callbacks";
+import { authenticateHeadless } from "./headless";
 
 export interface ConnectParams {
   id: string;
@@ -130,29 +136,61 @@ export function connect({
   return () => {
     // Support both old and new signatures for backwards compatibility
     // Old: connect(policies: SessionPolicies, rpcUrl: string, signupOptions?: AuthOptions)
-    // New: connect(signupOptions?: AuthOptions)
+    // New: connect(options?: ConnectOptions)
     return (
-      policiesOrSigners?: SessionPolicies | AuthOptions,
+      policiesOrOptions?: SessionPolicies | AuthOptions | ConnectOptions,
       rpcUrl?: string,
       signupOptions?: AuthOptions,
     ): Promise<ConnectReply> => {
       let signers: AuthOptions | undefined;
+      let headless: ConnectOptions["headless"] | undefined;
 
       // Detect which signature is being used
-      if (rpcUrl !== undefined) {
+      // Check if it's the old 3-parameter signature (policies, rpcUrl, signupOptions)
+      if (
+        rpcUrl !== undefined &&
+        typeof rpcUrl === "string" &&
+        (rpcUrl.startsWith("http://") || rpcUrl.startsWith("https://"))
+      ) {
         // Old signature: connect(policies, rpcUrl, signupOptions)
-        // In the old signature, the first arg is policies (not used in new flow)
-        // and the third arg is signupOptions
         signers = signupOptions;
-        // Set the RPC URL for backwards compatibility
         setRpcUrl(rpcUrl);
+      } else if (
+        policiesOrOptions &&
+        typeof policiesOrOptions === "object" &&
+        !Array.isArray(policiesOrOptions) &&
+        ("signupOptions" in policiesOrOptions ||
+          "headless" in policiesOrOptions)
+      ) {
+        // New signature: connect(options: ConnectOptions)
+        const options = policiesOrOptions as ConnectOptions;
+        signers = options.signupOptions;
+        headless = options.headless;
       } else {
-        // New signature: connect(signupOptions)
-        signers = policiesOrSigners as AuthOptions | undefined;
+        // Assume it's just AuthOptions passed directly (backwards compatibility)
+        signers = policiesOrOptions as AuthOptions | undefined;
       }
 
       if (signers && signers.length === 0) {
         throw new Error("If defined, signup options cannot be empty");
+      }
+
+      // Check if headless mode
+      if (headless?.username && headless?.credentials) {
+        console.log(
+          `[HEADLESS] Detected headless mode - username: ${headless.username}, credentialType: ${headless.credentials.type}`,
+        );
+        // Perform headless authentication without UI
+        return authenticateHeadless(
+          headless.username,
+          headless.credentials,
+        ).then((result) => {
+          if ("address" in result) {
+            return result;
+          } else {
+            throw new Error(result.message);
+          }
+        });
       }
 
       return new Promise<ConnectReply>((resolve, reject) => {
