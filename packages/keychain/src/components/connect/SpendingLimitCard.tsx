@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef } from "react";
 import {
+  AlertIcon,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  cn,
   Skeleton,
   Thumbnail,
 } from "@cartridge/ui";
@@ -17,8 +19,7 @@ import { getChecksumAddress } from "starknet";
 import makeBlockie from "ethereum-blockies-base64";
 
 // Maximum value for uint256
-const MAX_UINT256 =
-  "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+const UNLIMITED_VALUE = "0xffffffffffffffffffffffffffffffff";
 
 interface SpendingLimitCardProps {
   className?: string;
@@ -73,6 +74,7 @@ export function SpendingLimitCard({
         const amount =
           contract.methods.find((m) => m.entrypoint === "approve")?.amount ??
           "0";
+        console.log("amount1: ", amount);
 
         const checksumAddress = getChecksumAddress(address);
         const token = tokens[checksumAddress];
@@ -86,7 +88,7 @@ export function SpendingLimitCard({
         const name =
           token?.name || contract.name || contract.meta?.name || "Contract";
 
-        const isUnlimited = BigInt(amount) >= BigInt(MAX_UINT256);
+        const isUnlimited = BigInt(amount) >= BigInt(UNLIMITED_VALUE);
 
         // Format the token amount
         const formattedAmount = isUnlimited
@@ -97,24 +99,44 @@ export function SpendingLimitCard({
         const usdValue =
           !isUnlimited && price
             ? convertTokenAmountToUSD(BigInt(amount), decimals, price)
-            : null;
+            : "Unlimited";
 
         return (
           <CardContent key={address} className="flex flex-row gap-3 p-3 w-full">
             <Thumbnail icon={icon} size="md" variant="lighter" rounded />
             <div className="flex flex-col w-full">
-              <div className="w-full flex flex-row items-center justify-between text-sm font-medium text-foreground-100">
-                <p>{name}</p>
-                {showCost && !isUnlimited ? (
+              <div className="w-full flex flex-row items-center justify-between text-sm font-medium">
+                <p className="text-foreground-100">{name}</p>
+                {showCost ? (
                   usdValue ? (
-                    <p>{usdValue}</p>
+                    <div className="flex flex-row items-center gap-1">
+                      <Thumbnail
+                        className={cn(!isUnlimited && "hidden")}
+                        size="xs"
+                        icon={
+                          <AlertIcon className="!w-4 !h-4 text-destructive-100" />
+                        }
+                        centered={true}
+                      />
+                      <p
+                        className={cn(
+                          isUnlimited
+                            ? "text-destructive-100"
+                            : "text-foreground-100",
+                        )}
+                      >
+                        {usdValue}
+                      </p>
+                    </div>
                   ) : (
                     <Skeleton className="w-16 h-5" />
                   )
                 ) : null}
               </div>
               <p className="text-foreground-400 text-xs font-medium">
-                {isUnlimited ? "Unlimited" : `${formattedAmount} ${symbol}`}
+                {isUnlimited
+                  ? `Unlimited ${symbol}`
+                  : `${formattedAmount} ${symbol}`}
               </p>
             </div>
           </CardContent>
