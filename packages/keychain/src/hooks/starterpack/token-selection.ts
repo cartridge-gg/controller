@@ -303,16 +303,12 @@ export function useTokenSelection({
     ) {
       const quote = starterpackDetails.quote;
       if (quote) {
-        const paymentTokenAddress = getChecksumAddress(
-          quote.paymentToken,
-        ).toLowerCase();
-
         // Set selected token to payment token if not set
         if (!selectedToken) {
           const paymentToken =
             availableTokens.find(
               (token: TokenOption) =>
-                token.address.toLowerCase() === paymentTokenAddress,
+                num.toHex(token.address) === num.toHex(quote.paymentToken),
             ) || availableTokens[0];
           if (paymentToken) {
             setSelectedToken(paymentToken);

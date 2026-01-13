@@ -124,7 +124,7 @@ export function OnchainCostBreakdown({
   // Get default token (matching quote if available) or fallback to the first available token
   const defaultToken =
     availableTokens.find(
-      (t) => t.address.toLowerCase() === quote.paymentToken.toLowerCase(),
+      (t) => num.toHex(t.address) === num.toHex(quote.paymentToken),
     ) || availableTokens[0];
 
   // Use selectedToken or fallback to defaultToken for display
