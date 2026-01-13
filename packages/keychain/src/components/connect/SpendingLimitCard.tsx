@@ -35,17 +35,65 @@ export function SpendingLimitCard({
   const { tokens, registerPair } = useTokens();
   const registeredAddresses = useRef<Set<string>>(new Set());
 
-  const tokenContracts = useMemo(() => {
+  const processedTokens = useMemo(() => {
     if (!policies?.contracts) return [];
 
-    return Object.entries(policies.contracts).filter(([, contract]) => {
-      return contract.methods.some((method) => method.entrypoint === "approve");
-    });
-  }, [policies]);
+    const result = Object.entries(policies.contracts)
+      .map(([address, contract]) => {
+        const approveMethod = contract.methods.find(
+          (m) => m.entrypoint === "approve",
+        );
+
+        if (!approveMethod) return null;
+
+        const amount = approveMethod.amount ?? "0";
+        const checksumAddress = getChecksumAddress(address);
+        const token = tokens[checksumAddress];
+
+        // Pre-compute all values
+        const decimals = token?.decimals ?? contract.meta?.decimals ?? 18;
+        const price = token?.price;
+        const icon = token?.icon || contract.meta?.icon || makeBlockie(address);
+        const symbol =
+          token?.symbol || contract.meta?.symbol || contract.name || "";
+        const name =
+          token?.name || contract.name || contract.meta?.name || "Contract";
+
+        const amountBigInt = BigInt(amount);
+        const isUnlimited = amountBigInt >= BigInt(UNLIMITED_VALUE);
+
+        // Pre-compute formatted values
+        const formattedAmount = isUnlimited
+          ? "Unlimited"
+          : formatBalance(amountBigInt, decimals);
+
+        const usdValue =
+          !isUnlimited && price
+            ? convertTokenAmountToUSD(amountBigInt, decimals, price)
+            : "Unlimited";
+
+        return {
+          address: checksumAddress,
+          icon,
+          name,
+          symbol,
+          decimals,
+          price,
+          isUnlimited,
+          formattedAmount,
+          usdValue,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+
+    return result;
+  }, [policies?.contracts, tokens]);
 
   // Register any tokens from policies that aren't in the TokensProvider
   useEffect(() => {
-    tokenContracts.forEach(([address]) => {
+    if (!policies?.contracts) return;
+
+    Object.keys(policies.contracts).forEach((address) => {
       const checksumAddress = getChecksumAddress(address);
       // Only register if we haven't already tried and it's not in tokens
       if (
@@ -56,9 +104,9 @@ export function SpendingLimitCard({
         registerPair(checksumAddress);
       }
     });
-  }, [tokenContracts, tokens, registerPair]);
+  }, [policies?.contracts, tokens, registerPair]);
 
-  if (tokenContracts.length === 0) {
+  if (processedTokens.length === 0) {
     return null;
   }
 
@@ -70,78 +118,49 @@ export function SpendingLimitCard({
         </CardTitle>
       </CardHeader>
 
-      {tokenContracts.map(([address, contract]) => {
-        const amount =
-          contract.methods.find((m) => m.entrypoint === "approve")?.amount ??
-          "0";
-        console.log("amount1: ", amount);
-
-        const checksumAddress = getChecksumAddress(address);
-        const token = tokens[checksumAddress];
-
-        // Use decimals and price from TokensProvider, with fallbacks to metadata
-        const decimals = token?.decimals ?? contract.meta?.decimals ?? 18;
-        const price = token?.price;
-        const icon = token?.icon || contract.meta?.icon || makeBlockie(address);
-        const symbol =
-          token?.symbol || contract.meta?.symbol || contract.name || "";
-        const name =
-          token?.name || contract.name || contract.meta?.name || "Contract";
-
-        const isUnlimited = BigInt(amount) >= BigInt(UNLIMITED_VALUE);
-
-        // Format the token amount
-        const formattedAmount = isUnlimited
-          ? "Unlimited"
-          : formatBalance(BigInt(amount), decimals);
-
-        // Calculate USD value if price is available
-        const usdValue =
-          !isUnlimited && price
-            ? convertTokenAmountToUSD(BigInt(amount), decimals, price)
-            : "Unlimited";
-
-        return (
-          <CardContent key={address} className="flex flex-row gap-3 p-3 w-full">
-            <Thumbnail icon={icon} size="md" variant="lighter" rounded />
-            <div className="flex flex-col w-full">
-              <div className="w-full flex flex-row items-center justify-between text-sm font-medium">
-                <p className="text-foreground-100">{name}</p>
-                {showCost ? (
-                  usdValue ? (
-                    <div className="flex flex-row items-center gap-1">
-                      <Thumbnail
-                        className={cn(!isUnlimited && "hidden")}
-                        size="xs"
-                        icon={
-                          <AlertIcon className="!w-4 !h-4 text-destructive-100" />
-                        }
-                        centered={true}
-                      />
-                      <p
-                        className={cn(
-                          isUnlimited
-                            ? "text-destructive-100"
-                            : "text-foreground-100",
-                        )}
-                      >
-                        {usdValue}
-                      </p>
-                    </div>
-                  ) : (
-                    <Skeleton className="w-16 h-5" />
-                  )
-                ) : null}
-              </div>
-              <p className="text-foreground-400 text-xs font-medium">
-                {isUnlimited
-                  ? `Unlimited ${symbol}`
-                  : `${formattedAmount} ${symbol}`}
-              </p>
+      {processedTokens.map((token) => (
+        <CardContent
+          key={token.address}
+          className="flex flex-row gap-3 p-3 w-full"
+        >
+          <Thumbnail icon={token.icon} size="md" variant="lighter" rounded />
+          <div className="flex flex-col w-full">
+            <div className="w-full flex flex-row items-center justify-between text-sm font-medium">
+              <p className="text-foreground-100">{token.name}</p>
+              {showCost ? (
+                token.price ? (
+                  <div className="flex flex-row items-center gap-1">
+                    <Thumbnail
+                      className={cn(!token.isUnlimited && "hidden")}
+                      size="xs"
+                      icon={
+                        <AlertIcon className="!w-4 !h-4 text-destructive-100" />
+                      }
+                      centered={true}
+                    />
+                    <p
+                      className={cn(
+                        token.isUnlimited
+                          ? "text-destructive-100"
+                          : "text-foreground-100",
+                      )}
+                    >
+                      {token.usdValue}
+                    </p>
+                  </div>
+                ) : (
+                  <Skeleton className="w-16 h-5" />
+                )
+              ) : null}
             </div>
-          </CardContent>
-        );
-      })}
+            <p className="text-foreground-400 text-xs font-medium">
+              {token.isUnlimited
+                ? `Unlimited ${token.symbol}`
+                : `${token.formattedAmount} ${token.symbol}`}
+            </p>
+          </div>
+        </CardContent>
+      ))}
     </Card>
   );
 }
