@@ -4,7 +4,7 @@ packages:
   - examples/svelte
   - packages/*
 catalog:
-  "@cartridge/arcade": "0.3.11"
+  "@cartridge/arcade": "0.3.12"
   "@cartridge/controller-wasm": "0.9.1"
   "@cartridge/penpal": "^6.2.4"
   "@cartridge/ui": "github:cartridge-gg/ui#146eec3"

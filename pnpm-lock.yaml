@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@cartridge/arcade':
-      specifier: 0.3.11
-      version: 0.3.11
+      specifier: 0.3.12
+      version: 0.3.12
     '@cartridge/controller-wasm':
       specifier: 0.9.1
       version: 0.9.1
@@ -512,7 +512,7 @@ importers:
         version: 2.1.3
       '@cartridge/arcade':
         specifier: 'catalog:'
-        version: 0.3.11(@effect/platform@0.93.8(effect@3.19.8))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.6.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)
+        version: 0.3.12(@effect/platform@0.93.8(effect@3.19.8))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.6.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)
       '@cartridge/controller':
         specifier: workspace:*
         version: link:../controller
@@ -1187,8 +1187,8 @@ packages:
   '@bufbuild/protoplugin@2.8.0':
     resolution: {integrity: sha512-kwZeZAz6jmDC571Wf/f5cDX02IjvPmtdspdxW/hbLS+bnZHkXMW4StaW+irGd4TkykvHD4fFgBnPG/O1x8OgXw==}
 
-  '@cartridge/arcade@0.3.11':
-    resolution: {integrity: sha512-cjZuujJGacyqMhDs0jESLgMELE+gktwcfVP5MBIoZ/STDxqc+vYBs4u/BYv+XWpFSeQrKsEFLI5QyVk8N3CLXQ==}
+  '@cartridge/arcade@0.3.12':
+    resolution: {integrity: sha512-sC0ywtn4GFICmuL1Jy/GbTAW5LvwzeszeNYwCrjjX67i6XWSg/Elz2iiG5Y1S5wGPWzAOXl5UXTNTxLjSRficg==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0-0
 
@@ -10837,7 +10837,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@cartridge/arcade@0.3.11(@effect/platform@0.93.8(effect@3.19.8))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.6.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@cartridge/arcade@0.3.12(@effect/platform@0.93.8(effect@3.19.8))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.6.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
       '@dojoengine/core': 1.8.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@dojoengine/grpc': 1.8.7(@effect/platform@0.93.8(effect@3.19.8))(@opentelemetry/semantic-conventions@1.38.0)
