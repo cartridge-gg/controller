@@ -15,6 +15,7 @@ import { getCurrentReferral } from "@/utils/referral";
 import { prepareSwapCalls, type SwapQuote } from "@/utils/ekubo";
 import { Item } from "./types";
 import { useStarterpackContext } from "./starterpack";
+import { ExternalWalletError } from "@/utils/errors";
 import {
   useQuantity,
   useExternalWallet,
@@ -318,17 +319,19 @@ export const OnchainPurchaseProvider = ({
           externalCalls,
         );
         if (!response.success) {
-          throw new Error(
+          throw new ExternalWalletError(
             response.error || `Failed to execute purchase with ${walletType}`,
           );
         }
         if (!response.result) {
-          throw new Error(`No transaction hash returned from ${walletType}`);
+          throw new ExternalWalletError(
+            `No transaction hash returned from ${walletType}`,
+          );
         }
         const result = response.result as { transaction_hash?: string };
         const transactionHash = result.transaction_hash;
         if (!transactionHash) {
-          throw new Error(
+          throw new ExternalWalletError(
             `Invalid response format from ${walletType}: missing transaction_hash`,
           );
         }

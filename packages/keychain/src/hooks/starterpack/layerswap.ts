@@ -33,6 +33,7 @@ import { ethers } from "ethers";
 import erc20abi from "./erc20abi.json" assert { type: "json" };
 import { depositToLayerswapInput } from "@/utils/payments";
 import Controller from "@/utils/controller";
+import { ExternalWalletError } from "@/utils/errors";
 
 const DEPOSIT_MAX_WAIT_TIME = 10 * 60 * 1000; // 10 minutes
 const DEPOSIT_POLL_INTERVAL = 3000; // 3 seconds
@@ -234,7 +235,7 @@ const requestPhantomPayment = async (
     new Uint8Array(serializedTxn),
   );
   if (!res.success) {
-    throw new Error(res.error);
+    throw new ExternalWalletError(res.error);
   }
 
   const { signature } = res.result as { signature: string };
@@ -277,19 +278,23 @@ const requestEvmDeposit = async (
   });
 
   if (!success) {
-    throw new Error(error);
+    throw new ExternalWalletError(error);
   }
 
-  return hash as string;
+  if (!hash || typeof hash !== "string") {
+    throw new ExternalWalletError("No transaction hash received from wallet");
+  }
+
+  return hash;
 };
 
 export const getExplorer = (
   platform: ExternalPlatform,
   txHash: string,
   isMainnet?: boolean,
-): Explorer => {
+): Explorer | undefined => {
   if (!txHash) {
-    throw new Error("Transaction hash is required");
+    return undefined;
   }
 
   switch (platform) {
@@ -432,7 +437,10 @@ export function useLayerswap({
               parseInt(tokenAmount),
               tokenAddress,
             );
-            onSubmitted?.(getExplorer(platform, hash, isMainnet) as Explorer);
+            const explorer = getExplorer(platform, hash, isMainnet);
+            if (explorer) {
+              onSubmitted?.(explorer);
+            }
             transactionHash = hash;
             break;
           }
@@ -447,10 +455,12 @@ export function useLayerswap({
                 isMainnet,
               );
 
-            onSubmitted?.(
-              getExplorer(platform, signature, isMainnet) as Explorer,
-            );
+            const explorer = getExplorer(platform, signature, isMainnet);
+            if (explorer) {
+              onSubmitted?.(explorer);
+            }
             await confirmTransaction();
+            transactionHash = signature;
             break;
           }
           default: {

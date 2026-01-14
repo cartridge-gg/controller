@@ -10,6 +10,7 @@ import {
   ExternalWalletType,
 } from "@cartridge/controller";
 import Controller from "@/utils/controller";
+import { ExternalWalletError } from "@/utils/errors";
 
 /**
  * Extended Error type with retry control
@@ -604,13 +605,15 @@ export async function executeSwap(
       );
 
       if (!response.success) {
-        throw new Error(
+        throw new ExternalWalletError(
           response.error || `Failed to execute swap with ${walletType}`,
         );
       }
 
       if (!response.result) {
-        throw new Error(`No transaction hash returned from ${walletType}`);
+        throw new ExternalWalletError(
+          `No transaction hash returned from ${walletType}`,
+        );
       }
 
       // Extract transaction hash from response
@@ -620,15 +623,22 @@ export async function executeSwap(
       const transactionHash = result.transaction_hash;
 
       if (!transactionHash) {
-        throw new Error(
-          `Invalid response format from ${walletType}: missing transaction_hash. Result: ${JSON.stringify(result)}`,
+        throw new ExternalWalletError(
+          `Invalid response format from ${walletType}: missing transaction_hash. Result: ${JSON.stringify(
+            result,
+          )}`,
         );
       }
 
       return transactionHash;
     } catch (error) {
+      if (error instanceof ExternalWalletError) {
+        throw error;
+      }
       throw new Error(
-        `Failed to execute swap with ${walletType}: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to execute swap with ${walletType}: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
       );
     }
   }

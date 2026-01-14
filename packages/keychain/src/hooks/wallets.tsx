@@ -9,6 +9,7 @@ import {
 } from "@cartridge/controller";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers/address";
+import { ExternalWalletError } from "@/utils/errors";
 import React, {
   createContext,
   PropsWithChildren,
@@ -139,7 +140,11 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       try {
         const response = await parent.externalConnectWallet(identifier);
         if (!response.success) {
-          setError(new Error(response.error || "Failed to connect wallet."));
+          setError(
+            new ExternalWalletError(
+              response.error || "Failed to connect wallet.",
+            ),
+          );
           return response; // Return response even on failure
         }
         // Optionally re-detect wallets or update state based on response
@@ -285,7 +290,7 @@ export class KeychainWallets {
       // --- Embedded Wallet Path ---
       const response = await embeddedWallet.signMessage?.(message);
       if (!response?.success) {
-        throw new Error(
+        throw new ExternalWalletError(
           `Failed to sign message with embedded wallet. ${response?.error}`,
         );
       }
@@ -315,7 +320,7 @@ export class KeychainWallets {
               "KeychainWallets: Parent response result is not a string:",
               response.result,
             );
-            throw new Error(
+            throw new ExternalWalletError(
               "Invalid signature format received from wallet bridge.",
             );
           }
@@ -325,7 +330,7 @@ export class KeychainWallets {
           console.error(
             `KeychainWallets: Error from parent bridge: ${errorMsg}`,
           );
-          throw new Error(errorMsg);
+          throw new ExternalWalletError(errorMsg);
         }
       } catch (error) {
         console.error(
@@ -333,7 +338,12 @@ export class KeychainWallets {
           error,
         );
         // Re-throw the error to be caught by the WASM caller
-        throw error instanceof Error ? error : new Error(String(error));
+        if (error instanceof ExternalWalletError) {
+          throw error;
+        }
+        throw error instanceof Error
+          ? new ExternalWalletError(error.message)
+          : new ExternalWalletError(String(error));
       }
     }
   }
