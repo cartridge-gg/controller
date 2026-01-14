@@ -28,6 +28,7 @@ export default defineConfig(({ mode }) => ({
     port: mode === "development" ? 3001 : undefined,
   },
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: {
       "@": "/src",
       ...(mode === "production"
@@ -49,6 +50,11 @@ export default defineConfig(({ mode }) => ({
             return "commonjs";
           }
           if (id.includes("node_modules")) {
+            // NOTE: @cartridge/arcade bundles React hooks (createContext) in its main entry.
+            // It must be in the same chunk as React to ensure React is initialized first.
+            if (id.includes("react") || id.includes("@cartridge/arcade")) {
+              return "react-vendor";
+            }
             return "vendor";
           }
         },
