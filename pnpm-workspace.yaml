@@ -4,15 +4,15 @@ packages:
   - examples/svelte
   - packages/*
 catalog:
-  "@cartridge/arcade": "0.3.7"
-  "@cartridge/controller-wasm": "0.9.0"
+  "@cartridge/arcade": "0.3.11"
+  "@cartridge/controller-wasm": "0.9.1"
   "@cartridge/penpal": "^6.2.4"
   "@cartridge/ui": "github:cartridge-gg/ui#79e5d28"
   "@eslint/js": "^9.18.0"
   "@noble/curves": "^1.9.0"
   "@noble/hashes": "^1.8.0"
-  "@dojoengine/core": 1.8.3
-  "@dojoengine/sdk": 1.8.4
+  "@dojoengine/core": 1.8.8
+  "@dojoengine/sdk": 1.8.12
   "@dojoengine/react": 1.8.7
   "@dojoengine/torii-wasm": 1.8.2
   "@effect-atom/atom": "^0.1.22"

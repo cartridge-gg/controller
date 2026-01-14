@@ -2942,7 +2942,6 @@ export type OAuthConnectionProfile = {
 export enum OAuthConnectionProvider {
   Instagram = "INSTAGRAM",
   Tiktok = "TIKTOK",
-  Twitter = "TWITTER",
 }
 
 /**
@@ -3075,7 +3074,6 @@ export type OAuthConnectionWhereInput = {
 export enum OAuthProvider {
   Instagram = "INSTAGRAM",
   Tiktok = "TIKTOK",
-  Twitter = "TWITTER",
 }
 
 export enum Order {
