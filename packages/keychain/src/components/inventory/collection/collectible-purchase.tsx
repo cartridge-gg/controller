@@ -24,13 +24,10 @@ import {
   FeeEstimate,
 } from "starknet";
 import { useConnection } from "@/hooks/connection";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useToriiCollection, useToriiCollections } from "@/hooks/collection";
-import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useTokens } from "@/hooks/token";
-import { useQuery } from "react-query";
-import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
 import { useCollection } from "@/hooks/collection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
@@ -39,27 +36,38 @@ import {
   CLIENT_FEE_DENOMINATOR,
   CLIENT_FEE_RECEIVER,
 } from "@/constants";
-
-const FEE_ENTRYPOINT = "royalty_info";
+import {
+  useMarketplaceCollectionOrders,
+  useMarketplaceFees,
+  useMarketplaceRoyaltyFee,
+} from "@cartridge/arcade/marketplace/react";
+import { StatusType } from "@cartridge/arcade";
+import { ArcadeContext } from "@/context/arcade";
 
 export function CollectiblePurchase() {
   const { address: contractAddress, tokenId } = useParams();
   const { project, controller } = useConnection();
   const { goBack } = useNavigation();
   const { tokens } = useTokens();
-  const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
-  const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
-  const { provider, orders, marketplaceFee, setAmount } = useMarketplace();
+  const [royalties, setRoyalties] = useState<{ [orderId: number]: bigint }>({});
+  const [amount, setAmount] = useState<number>(0);
+  const arcadeContext = useContext(ArcadeContext);
+  const provider = arcadeContext?.provider;
+
+  const { data: marketplaceFeeConfig } = useMarketplaceFees();
+
+  const { data: allOrders } = useMarketplaceCollectionOrders(
+    { collection: contractAddress || "", status: StatusType.Placed },
+    !!contractAddress,
+  );
 
   const [searchParams] = useSearchParams();
   const tokenOrders = useMemo(() => {
     const paramsOrders =
       searchParams.get("orders")?.split(",").map(Number) || [];
-    const allOrders = Object.values(orders).flatMap((orders) =>
-      Object.values(orders).flatMap((orders) => Object.values(orders)),
-    );
+    if (!allOrders) return [];
     return allOrders.filter((order) => paramsOrders.includes(order.id));
-  }, [orders, searchParams]);
+  }, [allOrders, searchParams]);
 
   const tokenIds = useMemo(() => {
     return tokenOrders.map((order) =>
@@ -98,14 +106,22 @@ export function CollectiblePurchase() {
     );
   }, [tokens, tokenOrders]);
 
+  const marketplaceFee = useMemo(() => {
+    if (!marketplaceFeeConfig || !amount) return 0;
+    return (
+      (marketplaceFeeConfig.feeNum * amount) /
+      marketplaceFeeConfig.feeDenominator
+    );
+  }, [marketplaceFeeConfig, amount]);
+
   const { total, fees } = useMemo(() => {
     const price = tokenOrders.reduce(
-      (acc, order) => acc + Number(order?.price),
+      (acc: number, order) => acc + Number(order?.price),
       0,
     );
     const royaltyFee = Object.values(royalties).reduce(
-      (acc, royalty) => acc + royalty,
-      0,
+      (acc: bigint, royalty) => acc + royalty,
+      BigInt(0),
     );
     const formattedMarketplaceFee =
       marketplaceFee / Math.pow(10, token?.metadata.decimals || 0);
@@ -113,7 +129,7 @@ export function CollectiblePurchase() {
       (price * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR)) /
       Math.pow(10, token?.metadata.decimals || 0);
     const formattedRoyaltyFee =
-      royaltyFee / Math.pow(10, token?.metadata.decimals || 0);
+      Number(royaltyFee) / Math.pow(10, token?.metadata.decimals || 0);
     const total = formattedMarketplaceFee + formattedRoyaltyFee;
     const fees = [
       {
@@ -172,18 +188,22 @@ export function CollectiblePurchase() {
   }, [tokenOrders, token?.metadata.decimals]);
 
   const addRoyalties = useCallback(
-    (orderId: number, royaltyFee: number) => {
-      setRoyalties((prev) => ({ ...prev, [orderId]: royaltyFee }));
+    (orderId: number, royaltyFee: bigint) => {
+      setRoyalties((prev) => {
+        const next: { [orderId: number]: bigint } = { ...prev };
+        next[orderId] = royaltyFee;
+        return next;
+      });
     },
     [setRoyalties],
   );
 
   // Memoize marketplace address
   const marketplaceAddress = useMemo(() => {
-    return provider.manifest.contracts.find((c: { tag: string }) =>
+    return provider?.manifest.contracts.find((c: { tag: string }) =>
       c.tag?.includes("Marketplace"),
     )?.address;
-  }, [provider.manifest.contracts]);
+  }, [provider?.manifest.contracts]);
 
   // Build transactions
   const buildTransactions = useMemo(() => {
@@ -313,7 +333,6 @@ export function CollectiblePurchase() {
                       collectionAddress={args.collectionAddress ?? ""}
                       price={args.price}
                       token={token}
-                      entrypoints={entrypoints}
                       tokenId={args.tokenId ?? ""}
                       addRoyalties={addRoyalties}
                     />
@@ -369,7 +388,6 @@ const Order = ({
   collectionAddress,
   price,
   token,
-  entrypoints,
   tokenId,
   addRoyalties,
 }: {
@@ -380,40 +398,16 @@ const Order = ({
   collectionAddress: string;
   price: number;
   token: Token;
-  entrypoints: string[];
   tokenId: string;
-  addRoyalties: (orderId: number, royaltyFee: number) => void;
+  addRoyalties: (orderId: number, royaltyFee: bigint) => void;
 }) => {
-  // Removed unused: const { project } = useConnection();
-  const { provider } = useMarketplace();
-  const { data: royaltyInfo } = useQuery(
-    ["royalty", collectionAddress, tokenId, price],
-    async () => {
-      if (!entrypoints.includes(FEE_ENTRYPOINT)) return;
-      try {
-        const response = await provider.provider.callContract({
-          contractAddress: collectionAddress,
-          entrypoint: FEE_ENTRYPOINT,
-          calldata: CallData.compile({
-            token_id: cairo.uint256(tokenId),
-            sale_price: cairo.uint256(price),
-          }),
-        });
-        const [[receiver], [fee]] = response;
-        const royaltyFee = Number(fee);
-        if (royaltyFee > 0) {
-          return { receiver, royaltyFee };
-        }
-        return undefined;
-      } catch (error) {
-        console.error("Error fetching royalty info:", error);
-        return undefined;
-      }
-    },
+  const { data: royaltyInfo } = useMarketplaceRoyaltyFee(
     {
-      enabled: !!collectionAddress && !!tokenId && !!price,
-      refetchOnWindowFocus: false,
+      collection: collectionAddress,
+      tokenId: tokenId,
+      amount: BigInt(price),
     },
+    !!collectionAddress && !!tokenId && !!price,
   );
 
   const finalPrice = useMemo(() => {
@@ -425,8 +419,8 @@ const Order = ({
   }, [price, token]);
 
   useEffect(() => {
-    if (royaltyInfo?.royaltyFee) {
-      addRoyalties(orderId, royaltyInfo.royaltyFee);
+    if (royaltyInfo?.amount) {
+      addRoyalties(orderId, royaltyInfo.amount);
     }
   }, [royaltyInfo, orderId, addRoyalties]);
 
