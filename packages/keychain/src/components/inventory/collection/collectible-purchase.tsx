@@ -57,7 +57,12 @@ export function CollectiblePurchase() {
   const { data: marketplaceFeeConfig } = useMarketplaceFees();
 
   const { data: allOrders } = useMarketplaceCollectionOrders(
-    { collection: contractAddress || "", status: StatusType.Placed },
+    {
+      collection: contractAddress || "",
+      status: StatusType.Placed,
+      limit: 10000,
+      tokenId,
+    },
     !!contractAddress,
   );
 

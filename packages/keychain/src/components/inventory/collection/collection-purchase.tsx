@@ -59,6 +59,7 @@ export function CollectionPurchase() {
       collection: contractAddress || "",
       status: StatusType.Placed,
       tokenId,
+      limit: 10000,
     },
     !!contractAddress,
   );
