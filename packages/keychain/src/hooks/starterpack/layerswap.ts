@@ -10,6 +10,7 @@ import {
   CreateLayerswapDepositMutationVariables,
   LayerswapStatusQuery,
   LayerswapStatusDocument,
+  LayerswapStatusQueryVariables,
 } from "@cartridge/ui/utils/api/cartridge";
 import { request } from "@/utils/graphql";
 import { useConnection } from "../connection";
@@ -131,21 +132,24 @@ const estimateLayerswapFees = async (input: CreateLayerswapDepositInput) => {
   return result.layerswapQuote;
 };
 
-const waitForDeposit = async (swapId: string): Promise<boolean> => {
+const waitForDeposit = async (
+  swapId: string,
+  isMainnet?: boolean,
+): Promise<boolean> => {
   const startTime = Date.now();
 
   while (Date.now() - startTime < DEPOSIT_MAX_WAIT_TIME) {
-    const result = await request<LayerswapStatusQuery>(
-      LayerswapStatusDocument,
-      { id: swapId },
-    );
+    const result = await request<
+      LayerswapStatusQuery,
+      LayerswapStatusQueryVariables
+    >(LayerswapStatusDocument, { swapId, isMainnet });
 
     const status = result.layerswapStatus;
     if (!status) {
       throw new Error("Swap not found");
     }
 
-    switch (status) {
+    switch (status as string) {
       case "CONFIRMED":
         return true;
       case "FAILED":
@@ -153,6 +157,13 @@ const waitForDeposit = async (swapId: string): Promise<boolean> => {
       case "EXPIRED":
         throw new Error(`Deposit expired, swap id: ${swapId}`);
       case "PENDING":
+      case "PENDING_LS_TRANSFER":
+      case "PENDING_USER_TRANSFER":
+        await new Promise((resolve) =>
+          setTimeout(resolve, DEPOSIT_POLL_INTERVAL),
+        );
+        break;
+      default:
         await new Promise((resolve) =>
           setTimeout(resolve, DEPOSIT_POLL_INTERVAL),
         );
@@ -471,7 +482,6 @@ export function useLayerswap({
 
     try {
       const inputWithFees = { ...swapInput, layerswapFees };
-
       const result = await sendDeposit(
         inputWithFees,
         walletAddress,
@@ -554,6 +564,13 @@ export function useLayerswap({
     };
   }, [swapInput, onError]);
 
+  const onWaitForDeposit = useCallback(
+    async (swapId: string) => {
+      return waitForDeposit(swapId, isMainnet);
+    },
+    [isMainnet],
+  );
+
   return {
     requestedAmount,
     depositAmount,
@@ -565,7 +582,7 @@ export function useLayerswap({
     depositError,
     feeEstimationError,
     onSendDeposit,
-    waitForDeposit,
+    waitForDeposit: onWaitForDeposit,
     setRequestedAmount,
   };
 }

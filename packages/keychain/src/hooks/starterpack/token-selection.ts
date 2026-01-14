@@ -318,32 +318,9 @@ export function useTokenSelection({
             setSelectedToken(paymentToken);
           }
         }
-
-        // Initialize convertedPrice from quote if available
-        if (selectedToken) {
-          const convertedPriceFromQuote = quote.convertedPrice;
-          if (convertedPriceFromQuote) {
-            const targetToken = selectedToken.address.toLowerCase();
-            if (convertedPriceFromQuote.token.toLowerCase() === targetToken) {
-              setConvertedPrice({
-                amount: convertedPriceFromQuote.amount,
-                tokenMetadata: convertedPriceFromQuote.tokenMetadata,
-                quantity: quantity,
-              });
-
-              setSwapQuote(null);
-            }
-          }
-        }
       }
     }
-  }, [
-    starterpackDetails,
-    selectedToken,
-    availableTokens,
-    quantity,
-    setSelectedToken,
-  ]);
+  }, [starterpackDetails, selectedToken, availableTokens, setSelectedToken]);
 
   // Fetch conversion price when selected token or quote changes
   useEffect(() => {
@@ -356,21 +333,61 @@ export function useTokenSelection({
     const paymentToken = quote.paymentToken.toLowerCase();
     const targetToken = selectedToken.address.toLowerCase();
 
-    // Don't fetch if payment token is the same as selected token
-    if (num.toHex(paymentToken) === num.toHex(targetToken)) {
-      setConvertedPrice(null);
+    // 1. Check if tokens match (No swap needed)
+    const isMatchingToken = num.toHex(paymentToken) === num.toHex(targetToken);
+    if (isMatchingToken) {
+      const expectedAmount = quote.totalCost * BigInt(quantity);
+      if (
+        convertedPrice?.amount === expectedAmount &&
+        convertedPrice?.quantity === quantity &&
+        swapQuote === null
+      ) {
+        return;
+      }
+
+      setConvertedPrice({
+        amount: expectedAmount,
+        quantity: quantity,
+        tokenMetadata: quote.paymentTokenMetadata,
+      });
       setSwapQuote(null);
       setIsFetchingConversion(false);
       setConversionError(null);
       return;
     }
 
-    // Check if we already have valid data
+    // 2. Check if backend provided a pre-calculated conversion for this token
+    const convertedPriceFromQuote = quote.convertedPrice;
+    if (
+      convertedPriceFromQuote &&
+      convertedPriceFromQuote.token.toLowerCase() === targetToken
+    ) {
+      if (
+        convertedPrice?.amount === convertedPriceFromQuote.amount &&
+        convertedPrice?.quantity === quantity &&
+        swapQuote === null
+      ) {
+        return;
+      }
+
+      setConvertedPrice({
+        amount: convertedPriceFromQuote.amount,
+        tokenMetadata: convertedPriceFromQuote.tokenMetadata,
+        quantity: quantity,
+      });
+      setSwapQuote(null);
+      setIsFetchingConversion(false);
+      setConversionError(null);
+      return;
+    }
+
+    // 3. Otherwise, fetch from Ekubo (if not already valid)
     if (
       convertedPrice &&
       swapQuote &&
       convertedPrice.tokenMetadata.symbol === selectedToken.symbol &&
-      convertedPrice.quantity === quantity
+      convertedPrice.quantity === quantity &&
+      convertedPrice.amount === swapQuote.total
     ) {
       return;
     }
@@ -412,14 +429,8 @@ export function useTokenSelection({
     };
 
     fetchConversion();
-  }, [
-    controller,
-    selectedToken,
-    starterpackDetails,
-    convertedPrice,
-    swapQuote,
-    quantity,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controller, selectedToken, starterpackDetails, quantity]);
 
   return {
     availableTokens,
