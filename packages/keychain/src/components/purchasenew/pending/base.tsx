@@ -80,7 +80,9 @@ export function TransactionPendingBase({
       <LayoutFooter>
         <ConfirmingTransaction
           title={confirmingTitle}
-          externalLink={getExplorer("starknet", transactionHash, isMainnet).url}
+          externalLink={
+            getExplorer("starknet", transactionHash, isMainnet)?.url
+          }
           isLoading={isPending}
         />
         <Button className="w-full" variant="primary" disabled={true}>

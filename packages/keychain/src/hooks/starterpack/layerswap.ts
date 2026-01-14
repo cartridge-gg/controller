@@ -235,7 +235,7 @@ const requestPhantomPayment = async (
     new Uint8Array(serializedTxn),
   );
   if (!res.success) {
-    throw new ExternalWalletError(res.error);
+    throw new ExternalWalletError(res.error || "Failed to send transaction");
   }
 
   const { signature } = res.result as { signature: string };
@@ -278,7 +278,7 @@ const requestEvmDeposit = async (
   });
 
   if (!success) {
-    throw new ExternalWalletError(error);
+    throw new ExternalWalletError(error || "Failed to send transaction");
   }
 
   if (!hash || typeof hash !== "string") {
