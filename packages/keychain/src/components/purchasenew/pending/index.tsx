@@ -21,8 +21,14 @@ export type { TransactionPendingBaseProps } from "./base";
 export function Pending() {
   const { starterpackDetails, transactionHash, claimItems } =
     useStarterpackContext();
-  const { purchaseItems, explorer, selectedWallet, swapId, quantity } =
-    useOnchainPurchaseContext();
+  const {
+    purchaseItems,
+    explorer,
+    selectedWallet,
+    swapId,
+    quantity,
+    selectedPlatform,
+  } = useOnchainPurchaseContext();
 
   // Claim flow (merkle drop)
   if (starterpackDetails?.type === "claimed") {
@@ -36,8 +42,8 @@ export function Pending() {
     );
   }
 
-  // Bridge flow - detected by presence of swapId
-  if (swapId) {
+  // Bridge flow - detected by presence of swapId or if the platform is not Starknet
+  if (swapId || (selectedPlatform && selectedPlatform !== "starknet")) {
     return (
       <BridgePending
         name={starterpackDetails?.name || "Items"}
@@ -47,6 +53,7 @@ export function Pending() {
         paymentMethod="crypto"
         explorer={explorer}
         wallet={selectedWallet}
+        selectedPlatform={selectedPlatform}
       />
     );
   }

@@ -21,6 +21,7 @@ export function PurchasePending({
       items={items}
       transactionHash={transactionHash}
       confirmingTitle="Confirming on Starknet"
+      completedTitle="Confirmed on Starknet"
       buttonText="Play"
     />
   );

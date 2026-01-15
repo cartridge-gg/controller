@@ -45,6 +45,8 @@ export function OnchainCheckout() {
     decrementQuantity,
     onOnchainPurchase,
     onSendDeposit,
+    isFetchingFees,
+    layerswapFees,
   } = useOnchainPurchaseContext();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -87,7 +89,10 @@ export function OnchainCheckout() {
     // Disable if there's a fee estimation error (e.g., bridge amount too low)
     if (feeEstimationError) return true;
 
-    if (bridgeFrom !== null) return false;
+    if (bridgeFrom !== null) {
+      // If bridging, wait for fees to be loaded
+      return isFetchingFees || !layerswapFees;
+    }
 
     return (
       !hasSufficientBalance ||
@@ -102,6 +107,8 @@ export function OnchainCheckout() {
     isLoadingBalance,
     balanceError,
     isFetchingConversion,
+    isFetchingFees,
+    layerswapFees,
   ]);
 
   const showInsufficientBalance =
@@ -140,6 +147,13 @@ export function OnchainCheckout() {
       navigate("/purchase/pending", { reset: true });
     } catch (error) {
       console.error("Bridge deposit failed:", error);
+      // Ensure the error is displayed to the user
+      // If the error message is "Fees not loaded", it might be transient or require user action
+      if ((error as Error).message === "Fees not loaded") {
+        // Force a re-render or state update if needed, though displayError should handle it if passed up
+        // Currently onSendDeposit errors are caught here.
+        // We should set the display error if it's not automatically handled by the context
+      }
     }
   }, [onSendDeposit, navigate, clearError]);
 
@@ -224,7 +238,7 @@ export function OnchainCheckout() {
 
             <QuantityControls
               quantity={quantity}
-              isLoading={isLoading}
+              isLoading={isLoading || (bridgeFrom !== null && isFetchingFees)}
               isSendingDeposit={isSendingDeposit}
               globalDisabled={globalDisabled}
               hasSufficientBalance={hasSufficientBalance}

@@ -12,7 +12,11 @@ import { usdcToUsd } from "@/utils/starterpack";
 import { uint256, Call, num, cairo } from "starknet";
 import { isOnchainStarterpack } from "./types";
 import { getCurrentReferral } from "@/utils/referral";
-import { prepareSwapCalls, type SwapQuote } from "@/utils/ekubo";
+import {
+  prepareSwapCalls,
+  fetchSwapQuote,
+  type SwapQuote,
+} from "@/utils/ekubo";
 import { Item } from "./types";
 import { useStarterpackContext } from "./starterpack";
 import { ExternalWalletError } from "@/utils/errors";
@@ -192,7 +196,10 @@ export const OnchainPurchaseProvider = ({
     if (depositError) {
       setDisplayError(depositError);
     }
-  }, [walletError, depositError, setDisplayError]);
+    if (feeEstimationError) {
+      setDisplayError(feeEstimationError);
+    }
+  }, [walletError, depositError, feeEstimationError, setDisplayError]);
 
   // Clear errors when token or wallet selection changes
   useEffect(() => {
@@ -202,7 +209,12 @@ export const OnchainPurchaseProvider = ({
   // Wrap onSendDeposit to clear errors before sending
   const onSendDeposit = useCallback(async () => {
     setDisplayError(undefined);
-    await onSendDepositInternal();
+    try {
+      await onSendDepositInternal();
+    } catch (error) {
+      setDisplayError(error as Error);
+      throw error;
+    }
   }, [onSendDepositInternal, setDisplayError]);
 
   // When network is not starknet, retrieve layerswap deposit amount
@@ -251,7 +263,25 @@ export const OnchainPurchaseProvider = ({
 
       // Add swap calls if needed
       if (needsSwap && selectedToken) {
-        if (!swapQuote) {
+        let finalSwapQuote = swapQuote;
+
+        // If swap quote is missing but needed (e.g. bridging flow where token is locked to USDC but target is different),
+        // try to fetch it just-in-time
+        if (!finalSwapQuote) {
+          try {
+            finalSwapQuote = await fetchSwapQuote(
+              totalCostWithQuantity,
+              quote.paymentToken,
+              selectedToken.address,
+              controller.chainId(),
+            );
+          } catch (err) {
+            console.error("JIT swap quote fetch failed:", err);
+            // Will throw "No swap quote found" below if this fails
+          }
+        }
+
+        if (!finalSwapQuote) {
           throw new Error("No swap quote found");
         }
 
@@ -261,7 +291,7 @@ export const OnchainPurchaseProvider = ({
           selectedTokenAddress: selectedToken.address,
           paymentToken: quote.paymentToken,
           totalCostWithQuantity,
-          swapQuote,
+          swapQuote: finalSwapQuote,
           chainId: controller.chainId(),
         });
 

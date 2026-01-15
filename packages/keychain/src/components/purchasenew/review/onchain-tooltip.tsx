@@ -93,7 +93,8 @@ export const OnchainFeesTooltip = ({
             <span>Total:</span>
             <span>
               {formatTokenAmount(
-                quote.totalCost * BigInt(quantity),
+                quote.totalCost * BigInt(quantity) +
+                  (layerswapFees ? BigInt(layerswapFees) : 0n),
                 decimals,
                 symbol,
               )}

@@ -220,11 +220,7 @@ export function OnchainCostBreakdown({
               <Spinner />
             ) : (
               <div className="flex items-center gap-1.5">
-                {isPaymentTokenSameAsSelected ? (
-                  <span className="text-foreground-300">
-                    {formatAmount(paymentAmount)}
-                  </span>
-                ) : isUsingLayerswap ? (
+                {isUsingLayerswap ? (
                   feeEstimationError ? (
                     <span className="text-foreground-400">—</span>
                   ) : layerswapTotal !== null && displayToken ? (
@@ -234,6 +230,10 @@ export function OnchainCostBreakdown({
                   ) : (
                     <Spinner />
                   )
+                ) : isPaymentTokenSameAsSelected ? (
+                  <span className="text-foreground-300">
+                    {formatAmount(paymentAmount)}
+                  </span>
                 ) : (
                   convertedEquivalent !== null &&
                   displayToken && (

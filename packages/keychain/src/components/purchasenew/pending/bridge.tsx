@@ -6,14 +6,42 @@ import {
 } from "@cartridge/ui";
 import { Receiving } from "../receiving";
 import { ConfirmingTransaction } from "./confirming-transaction";
-import { useOnchainPurchaseContext, Item, PaymentMethod } from "@/context";
-import { Explorer } from "@/hooks/starterpack/layerswap";
+import {
+  useOnchainPurchaseContext,
+  useStarterpackContext,
+  Item,
+  PaymentMethod,
+} from "@/context";
+import { Explorer, getExplorer } from "@/hooks/starterpack/layerswap";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { retryWithBackoff } from "@/utils/retry";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
+import { TransactionFinalityStatus } from "starknet";
+
+interface TransitionStepProps {
+  isVisible: boolean;
+  className?: string;
+  children: React.ReactNode;
+}
+
+function TransitionStep({
+  isVisible,
+  className = "",
+  children,
+}: TransitionStepProps) {
+  return (
+    <div
+      className={`transition-all duration-500 ease-in-out ${
+        isVisible ? "opacity-100 max-h-20" : "opacity-0 max-h-0 overflow-hidden"
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 export interface BridgePendingProps {
   name: string;
@@ -37,30 +65,50 @@ export function BridgePending({
   name,
   items,
   paymentMethod,
-  transactionHash,
+  transactionHash: bridgeTxHash,
   swapId,
   explorer,
   wallet,
   selectedPlatform: selectedPlatformProp,
   waitForDeposit: waitForDepositProp,
 }: BridgePendingProps) {
-  const { navigate } = useNavigation();
+  const { navigateToRoot } = useNavigation();
   const onchainContext = useOnchainPurchaseContext();
-  const { externalWaitForTransaction } = useConnection();
+  const { transactionHash: currentTxHash } = useStarterpackContext();
+  const { externalWaitForTransaction, controller, isMainnet, closeModal } =
+    useConnection();
 
   // Use props if provided (for stories), otherwise use context
   const selectedPlatform =
     selectedPlatformProp ?? onchainContext.selectedPlatform;
   const waitForDeposit = waitForDepositProp ?? onchainContext.waitForDeposit;
+  const onOnchainPurchase = onchainContext.onOnchainPurchase;
+
+  const [initialBridgeHash, setInitialBridgeHash] = useState(bridgeTxHash);
+
+  // Capture the first valid bridge hash we receive
+  useEffect(() => {
+    if (!initialBridgeHash && bridgeTxHash) {
+      setInitialBridgeHash(bridgeTxHash);
+    }
+  }, [bridgeTxHash, initialBridgeHash]);
+
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [depositCompleted, setDepositCompleted] = useState(false);
   const [showBridging, setShowBridging] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [purchaseTxHash, setPurchaseTxHash] = useState<string | undefined>();
+  const [purchaseCompleted, setPurchaseCompleted] = useState(false);
+  const [showPurchasing, setShowPurchasing] = useState(false);
+
+  const purchaseTriggered = useRef(false);
+
   useEffect(() => {
-    if (wallet && transactionHash) {
+    if (wallet && initialBridgeHash) {
       retryWithBackoff(() =>
-        externalWaitForTransaction(wallet.type, transactionHash),
+        externalWaitForTransaction(wallet.type, initialBridgeHash),
       )
         .then(() => setDepositCompleted(true))
         .catch((err) => {
@@ -71,7 +119,7 @@ export function BridgePending({
           setError(err as Error);
         });
     }
-  }, [wallet, transactionHash, externalWaitForTransaction, navigate]);
+  }, [wallet, initialBridgeHash, externalWaitForTransaction]);
 
   useEffect(() => {
     if (swapId) {
@@ -91,11 +139,48 @@ export function BridgePending({
     }
   }, [depositCompleted]);
 
+  // Auto-trigger purchase after bridge is completed
   useEffect(() => {
-    if (paymentCompleted && depositCompleted) {
-      setTimeout(() => navigate("/purchase/success", { reset: true }), 1000);
+    if (paymentCompleted && !purchaseTriggered.current) {
+      purchaseTriggered.current = true;
+      setIsPurchasing(true);
+      onOnchainPurchase().catch((err) => {
+        console.error("Auto-purchase failed:", err);
+        setError(err as Error);
+        setIsPurchasing(false);
+      });
     }
-  }, [paymentCompleted, depositCompleted, navigate]);
+  }, [paymentCompleted, onOnchainPurchase]);
+
+  // Detect purchase transaction hash from context
+  useEffect(() => {
+    if (isPurchasing) {
+      setShowPurchasing(true);
+    }
+    if (isPurchasing && currentTxHash && currentTxHash !== initialBridgeHash) {
+      setPurchaseTxHash(currentTxHash);
+    }
+  }, [isPurchasing, currentTxHash, initialBridgeHash]);
+
+  // Wait for Starknet purchase transaction
+  useEffect(() => {
+    if (purchaseTxHash && controller) {
+      retryWithBackoff(() =>
+        controller.provider.waitForTransaction(purchaseTxHash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionFinalityStatus.PRE_CONFIRMED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        }),
+      )
+        .then(() => setPurchaseCompleted(true))
+        .catch((err) => {
+          console.error("Purchase confirmation failed:", err);
+          setError(err as Error);
+        });
+    }
+  }, [purchaseTxHash, controller]);
 
   return (
     <>
@@ -113,27 +198,52 @@ export function BridgePending({
               }`}
             >
               <ConfirmingTransaction
-                title={`Confirming on ${humanizeString(selectedPlatform!)}`}
+                title={
+                  depositCompleted
+                    ? `Confirmed on ${humanizeString(selectedPlatform!)}`
+                    : `Confirming on ${humanizeString(selectedPlatform!)}`
+                }
                 externalLink={explorer?.url}
                 isLoading={!depositCompleted}
               />
             </div>
-            <div
-              className={`transition-all duration-500 ease-in-out ${
-                showBridging
-                  ? "opacity-100 max-h-20"
-                  : "opacity-0 max-h-0 overflow-hidden"
-              }`}
-            >
+            <TransitionStep isVisible={showBridging}>
               <ConfirmingTransaction
-                title="Bridging to Starknet"
-                externalLink={`https://layerswap.io/explorer/${transactionHash}`}
+                title={
+                  paymentCompleted
+                    ? "Bridged to Starknet"
+                    : "Bridging to Starknet"
+                }
+                externalLink={`https://layerswap.io/explorer/${initialBridgeHash}`}
                 isLoading={!paymentCompleted}
               />
-            </div>
+            </TransitionStep>
+            <TransitionStep isVisible={showPurchasing}>
+              <ConfirmingTransaction
+                title={
+                  purchaseCompleted
+                    ? "Purchased on Starknet"
+                    : "Purchasing on Starknet"
+                }
+                externalLink={
+                  purchaseTxHash
+                    ? getExplorer("starknet", purchaseTxHash, isMainnet)?.url
+                    : undefined
+                }
+                isLoading={!purchaseCompleted}
+              />
+            </TransitionStep>
           </div>
         )}
-        <Button className="w-full" variant="primary" disabled={true}>
+        <Button
+          className="w-full"
+          variant="primary"
+          disabled={!purchaseCompleted}
+          onClick={() => {
+            closeModal?.();
+            navigateToRoot();
+          }}
+        >
           Play
         </Button>
       </LayoutFooter>
