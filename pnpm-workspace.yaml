@@ -7,7 +7,7 @@ catalog:
   "@cartridge/arcade": "0.3.11"
   "@cartridge/controller-wasm": "0.9.1"
   "@cartridge/penpal": "^6.2.4"
-  "@cartridge/ui": "github:cartridge-gg/ui#79e5d28"
+  "@cartridge/ui": "github:cartridge-gg/ui#1d42129"
   "@eslint/js": "^9.18.0"
   "@noble/curves": "^1.9.0"
   "@noble/hashes": "^1.8.0"
