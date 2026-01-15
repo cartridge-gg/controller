@@ -1,31 +1,25 @@
 import { Button, MinusIcon, PlusIcon } from "@cartridge/ui";
+import { ReactNode } from "react";
 
 interface QuantityControlsProps {
   quantity: number;
-  isLoading: boolean;
   isSendingDeposit: boolean;
   globalDisabled: boolean;
   hasSufficientBalance: boolean;
-  bridgeFrom: string | null;
   onIncrement: () => void;
   onDecrement: () => void;
-  onPurchase: () => void;
-  onBridge: () => void;
+  children: ReactNode;
 }
 
 export function QuantityControls({
   quantity,
-  isLoading,
   isSendingDeposit,
   globalDisabled,
   hasSufficientBalance,
-  bridgeFrom,
   onIncrement,
   onDecrement,
-  onPurchase,
-  onBridge,
+  children,
 }: QuantityControlsProps) {
-  const purchaseLabel = bridgeFrom ? "Bridge" : `Buy ${quantity}`;
   const isQuantityDisabled =
     (globalDisabled && hasSufficientBalance) || isSendingDeposit;
 
@@ -45,14 +39,7 @@ export function QuantityControls({
       >
         <PlusIcon size="xs" variant="solid" />
       </Button>
-      <Button
-        className="w-full"
-        isLoading={isLoading || isSendingDeposit}
-        disabled={globalDisabled}
-        onClick={bridgeFrom !== null ? onBridge : onPurchase}
-      >
-        {purchaseLabel}
-      </Button>
+      {children}
     </div>
   );
 }
