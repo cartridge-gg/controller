@@ -25,6 +25,7 @@ export function ClaimPending({
       items={items}
       transactionHash={transactionHash}
       confirmingTitle="Claiming"
+      completedTitle="Claimed"
       buttonText="Claiming"
       quantityText={quantityText}
     />

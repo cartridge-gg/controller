@@ -331,6 +331,13 @@ export const getExplorer = (
           ? `https://basescan.org/tx/${txHash}`
           : `https://sepolia.basescan.org/tx/${txHash}`,
       };
+    case "optimism":
+      return {
+        name: "Optimism Explorer",
+        url: isMainnet
+          ? `https://optimistic.etherscan.io/tx/${txHash}`
+          : `https://sepolia-optimism.etherscan.io/tx/${txHash}`,
+      };
     default:
       throw new Error(`Unsupported platform: ${platform}`);
   }
@@ -422,6 +429,9 @@ export function useLayerswap({
           tokenAddress,
         } = await createLayerswapDeposit(input);
 
+        // Don't set swapId immediately to avoid premature navigation to pending screen
+        // setSwapId(swapId);
+
         let transactionHash: string | undefined;
 
         switch (platform) {
@@ -480,15 +490,12 @@ export function useLayerswap({
   );
 
   const onSendDeposit = useCallback(async () => {
-    if (
-      !controller ||
-      !selectedPlatform ||
-      !walletAddress ||
-      !selectedWallet?.type ||
-      !layerswapFees ||
-      !swapInput
-    )
-      return;
+    if (!controller) throw new Error("Controller not connected");
+    if (!selectedPlatform) throw new Error("No platform selected");
+    if (!walletAddress) throw new Error("No wallet address");
+    if (!selectedWallet?.type) throw new Error("No wallet type");
+    if (!swapInput) throw new Error("Swap input not ready");
+    if (!layerswapFees) throw new Error("Fees not loaded");
 
     try {
       const inputWithFees = { ...swapInput, layerswapFees };
@@ -547,22 +554,31 @@ export function useLayerswap({
     if (!swapInput) return;
 
     let isCurrent = true;
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
 
     const fetchFees = async () => {
       try {
-        setIsFetchingFees(true);
-        setFeeEstimationError(null);
+        if (isCurrent) {
+          setIsFetchingFees(true);
+          setFeeEstimationError(null);
+        }
         const quote = await estimateLayerswapFees(swapInput);
         if (isCurrent) {
           setLayerswapFees(quote.totalFees);
+          setIsFetchingFees(false);
         }
       } catch (e) {
         if (isCurrent) {
-          setFeeEstimationError(e as Error);
-        }
-      } finally {
-        if (isCurrent) {
-          setIsFetchingFees(false);
+          if (retryCount < MAX_RETRIES) {
+            retryCount++;
+            console.log(`Retrying fee fetch (${retryCount}/${MAX_RETRIES})...`);
+            setTimeout(fetchFees, 1000 * retryCount); // Backoff
+          } else {
+            console.error("Fee fetch failed after retries:", e);
+            setFeeEstimationError(e as Error);
+            setIsFetchingFees(false);
+          }
         }
       }
     };

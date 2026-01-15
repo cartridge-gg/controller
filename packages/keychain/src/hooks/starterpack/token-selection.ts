@@ -283,8 +283,12 @@ export function useTokenSelection({
       const usdcToken = availableTokens.find(
         (token) => token.symbol === "USDC",
       );
-      if (usdcToken && selectedToken?.symbol !== "USDC") {
-        setSelectedToken(usdcToken);
+      if (usdcToken) {
+        // Only override if not already set to USDC (avoid infinite loop)
+        // AND ensure we trigger the conversion logic by setting it
+        if (selectedToken?.symbol !== "USDC") {
+          setSelectedToken(usdcToken);
+        }
       }
     }
   }, [
@@ -352,32 +356,7 @@ export function useTokenSelection({
       return;
     }
 
-    // 2. Check if backend provided a pre-calculated conversion for this token
-    const convertedPriceFromQuote = quote.convertedPrice;
-    if (
-      convertedPriceFromQuote &&
-      convertedPriceFromQuote.token.toLowerCase() === targetToken
-    ) {
-      if (
-        convertedPrice?.amount === convertedPriceFromQuote.amount &&
-        convertedPrice?.quantity === quantity &&
-        swapQuote === null
-      ) {
-        return;
-      }
-
-      setConvertedPrice({
-        amount: convertedPriceFromQuote.amount,
-        tokenMetadata: convertedPriceFromQuote.tokenMetadata,
-        quantity: quantity,
-      });
-      setSwapQuote(null);
-      setIsFetchingConversion(false);
-      setConversionError(null);
-      return;
-    }
-
-    // 3. Otherwise, fetch from Ekubo (if not already valid)
+    // 2. Otherwise, fetch from Ekubo (if not already valid)
     if (
       convertedPrice &&
       swapQuote &&
@@ -389,27 +368,27 @@ export function useTokenSelection({
     }
 
     const fetchConversion = async () => {
+      // Use the token from availableTokens to ensure we have the latest metadata
+      const activeToken =
+        availableTokens.find((t) => t.address === selectedToken.address) ||
+        selectedToken;
+
       setIsFetchingConversion(true);
       setConversionError(null);
       try {
         const fetchedSwapQuote = await fetchSwapQuote(
           quote.totalCost * BigInt(quantity),
           quote.paymentToken,
-          selectedToken.address,
+          activeToken.address,
           controller.chainId(),
-        );
-
-        const tokenMetadata = await fetchTokenMetadata(
-          selectedToken.address,
-          controller.provider,
         );
 
         setConvertedPrice({
           amount: fetchedSwapQuote.total,
           quantity: quantity,
           tokenMetadata: {
-            symbol: tokenMetadata.symbol,
-            decimals: tokenMetadata.decimals,
+            symbol: activeToken.symbol,
+            decimals: activeToken.decimals,
           },
         });
         setSwapQuote(fetchedSwapQuote);
