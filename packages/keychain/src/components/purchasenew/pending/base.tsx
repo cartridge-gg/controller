@@ -41,8 +41,8 @@ export function TransactionPendingBase({
   buttonText,
   quantityText,
 }: TransactionPendingBaseProps) {
-  const { isMainnet, controller } = useConnection();
-  const { navigate } = useNavigation();
+  const { isMainnet, controller, closeModal } = useConnection();
+  const { navigateToRoot } = useNavigation();
   const [isPending, setIsPending] = useState(true);
 
   useEffect(() => {
@@ -58,14 +58,13 @@ export function TransactionPendingBase({
       )
         .then(() => {
           setIsPending(false);
-          navigate("/purchase/success", { reset: true });
         })
         .catch((error) => {
           console.error("Failed to wait for transaction after retries:", error);
           // Could set an error state here if needed
         });
     }
-  }, [controller, transactionHash, navigate]);
+  }, [controller, transactionHash]);
 
   const receivingTitle = quantityText
     ? `Receiving ${quantityText}`
@@ -85,7 +84,15 @@ export function TransactionPendingBase({
           }
           isLoading={isPending}
         />
-        <Button className="w-full" variant="primary" disabled={true}>
+        <Button
+          className="w-full"
+          variant="primary"
+          disabled={isPending}
+          onClick={() => {
+            closeModal?.();
+            navigateToRoot();
+          }}
+        >
           {buttonText}
         </Button>
       </LayoutFooter>

@@ -192,7 +192,10 @@ export const OnchainPurchaseProvider = ({
     if (depositError) {
       setDisplayError(depositError);
     }
-  }, [walletError, depositError, setDisplayError]);
+    if (feeEstimationError) {
+      setDisplayError(feeEstimationError);
+    }
+  }, [walletError, depositError, feeEstimationError, setDisplayError]);
 
   // Clear errors when token or wallet selection changes
   useEffect(() => {
@@ -202,7 +205,12 @@ export const OnchainPurchaseProvider = ({
   // Wrap onSendDeposit to clear errors before sending
   const onSendDeposit = useCallback(async () => {
     setDisplayError(undefined);
-    await onSendDepositInternal();
+    try {
+      await onSendDepositInternal();
+    } catch (error) {
+      setDisplayError(error as Error);
+      throw error;
+    }
   }, [onSendDepositInternal, setDisplayError]);
 
   // When network is not starknet, retrieve layerswap deposit amount

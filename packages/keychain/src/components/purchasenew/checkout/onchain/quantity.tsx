@@ -25,7 +25,7 @@ export function QuantityControls({
   onPurchase,
   onBridge,
 }: QuantityControlsProps) {
-  const purchaseLabel = bridgeFrom ? "Bridge" : `Buy ${quantity}`;
+  const purchaseLabel = "Buy";
   const isQuantityDisabled =
     (globalDisabled && hasSufficientBalance) || isSendingDeposit;
 
