@@ -9,6 +9,7 @@ import {
   type OAuthConnection,
   type OAuthConnectionsData,
   type DisconnectOAuthData,
+  type OAuthProvider,
   GET_OAUTH_CONNECTIONS,
   DISCONNECT_OAUTH,
 } from "@/utils/api/oauth-connections";
@@ -52,7 +53,11 @@ export const ConnectionsSection = () => {
     },
   );
 
-  const hasConnections = data && data.length > 0;
+  const ALL_PROVIDERS: OAuthProvider[] = ["TIKTOK", "INSTAGRAM", "TWITTER"];
+  const connectedProviders = data?.map((c) => c.provider) ?? [];
+  const hasAllConnections = ALL_PROVIDERS.every((p) =>
+    connectedProviders.includes(p),
+  );
 
   return (
     <section className="space-y-4">
@@ -81,7 +86,7 @@ export const ConnectionsSection = () => {
           </>
         )}
       </div>
-      {!hasConnections && (
+      {!hasAllConnections && (
         <Button
           type="button"
           variant="outline"
