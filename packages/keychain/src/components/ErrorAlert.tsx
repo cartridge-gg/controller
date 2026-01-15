@@ -3,6 +3,7 @@ import {
   parseExecutionError,
   parseValidationError,
   parseGraphQLError,
+  ExternalWalletError,
   type GraphQLErrorDetails,
   type ErrorWithGraphQL,
 } from "@/utils/errors";
@@ -207,6 +208,9 @@ export function ControllerErrorAlert({
       description = parsed.details.rpcError
         ? parsed.details.rpcError.replace(/^\w+:\s*/, "") // Remove the code prefix like "Internal: "
         : error.message;
+    } else if (error instanceof ExternalWalletError) {
+      title = "External Wallet Error";
+      description = error.message;
     } else {
       title = "Unknown error";
       description = error.message;

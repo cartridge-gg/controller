@@ -1,9 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import {
-  PurchasePendingInner,
-  OnchainPurchasePendingInner,
-  ClaimPendingInner,
-} from "./pending";
+import { BridgePending, PurchasePending, ClaimPending } from "./index";
 import { CreditIcon } from "@cartridge/ui";
 import { ItemType, StarterpackProviders } from "@/context";
 import { ExternalWalletType } from "@cartridge/controller";
@@ -33,10 +29,10 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// Stories for PurchasePendingInner (Crypto payments)
+// Stories for BridgePending (Crypto bridging payments)
 export const CryptoPurchaseWithCredits: Story = {
   render: () => (
-    <PurchasePendingInner
+    <BridgePending
       name="Village Kit"
       items={[
         {
@@ -75,7 +71,7 @@ export const CryptoPurchaseWithCredits: Story = {
 
 export const CryptoPurchaseWithNFT: Story = {
   render: () => (
-    <PurchasePendingInner
+    <BridgePending
       name="Adventure Pack"
       items={[
         {
@@ -119,7 +115,7 @@ export const CryptoPurchaseWithNFT: Story = {
 
 export const CryptoPurchaseWithoutWallet: Story = {
   render: () => (
-    <PurchasePendingInner
+    <BridgePending
       name="Starter Pack"
       items={[
         {
@@ -146,7 +142,7 @@ export const CryptoPurchaseWithoutWallet: Story = {
 
 export const StripePurchase: Story = {
   render: () => (
-    <PurchasePendingInner
+    <BridgePending
       name="Premium Pack"
       items={[
         {
@@ -176,10 +172,10 @@ export const StripePurchase: Story = {
   ),
 };
 
-// Stories for OnchainPurchasePendingInner
+// Stories for PurchasePending (Onchain Starknet purchases)
 export const OnchainPurchaseWithCredits: Story = {
   render: () => (
-    <OnchainPurchasePendingInner
+    <PurchasePending
       name="Onchain Pack"
       items={[
         {
@@ -203,7 +199,7 @@ export const OnchainPurchaseWithCredits: Story = {
 
 export const OnchainPurchaseWithMultipleItems: Story = {
   render: () => (
-    <OnchainPurchasePendingInner
+    <PurchasePending
       name="Mega Pack"
       items={[
         {
@@ -235,10 +231,10 @@ export const OnchainPurchaseWithMultipleItems: Story = {
   ),
 };
 
-// Stories for ClaimPendingInner
+// Stories for ClaimPending
 export const ClaimFreeCredits: Story = {
   render: () => (
-    <ClaimPendingInner
+    <ClaimPending
       quantity={1}
       name="Free Starter"
       items={[
@@ -263,7 +259,7 @@ export const ClaimFreeCredits: Story = {
 
 export const ClaimFreeNFT: Story = {
   render: () => (
-    <ClaimPendingInner
+    <ClaimPending
       name="Airdrop Pack"
       quantity={1}
       items={[
@@ -294,7 +290,7 @@ export const ClaimFreeNFT: Story = {
 // Loading states
 export const CryptoPurchaseLoading: Story = {
   render: () => (
-    <PurchasePendingInner
+    <BridgePending
       name="Loading Pack"
       items={[
         {
@@ -327,7 +323,7 @@ export const CryptoPurchaseLoading: Story = {
 // Token-focused stories to showcase pricing
 export const TokenPurchaseSmallAmount: Story = {
   render: () => (
-    <PurchasePendingInner
+    <BridgePending
       name="Small Token Pack"
       items={[
         {
@@ -367,7 +363,7 @@ export const TokenPurchaseSmallAmount: Story = {
 
 export const TokenPurchaseLargeAmount: Story = {
   render: () => (
-    <PurchasePendingInner
+    <BridgePending
       name="High Value Token Pack"
       items={[
         {
@@ -414,7 +410,7 @@ export const TokenPurchaseLargeAmount: Story = {
 
 export const OnchainTokensWithPrices: Story = {
   render: () => (
-    <OnchainPurchasePendingInner
+    <PurchasePending
       name="DeFi Token Bundle"
       items={[
         {
@@ -446,7 +442,7 @@ export const OnchainTokensWithPrices: Story = {
 
 export const MixedTokensAndCredits: Story = {
   render: () => (
-    <ClaimPendingInner
+    <ClaimPending
       name="Mixed Reward Pack"
       quantity={1}
       items={[

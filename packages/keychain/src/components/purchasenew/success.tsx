@@ -73,7 +73,7 @@ export function PurchaseSuccessInner({
           <ConfirmingTransaction
             title={`${type === "claimed" ? "Claimed" : "Confirmed"} on Starknet`}
             externalLink={
-              getExplorer("starknet", transactionHash, isMainnet).url
+              getExplorer("starknet", transactionHash, isMainnet)?.url
             }
             isLoading={false}
           />

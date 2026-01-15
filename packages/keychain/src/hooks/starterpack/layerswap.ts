@@ -10,6 +10,7 @@ import {
   CreateLayerswapDepositMutationVariables,
   LayerswapStatusQuery,
   LayerswapStatusDocument,
+  LayerswapStatusQueryVariables,
 } from "@cartridge/ui/utils/api/cartridge";
 import { request } from "@/utils/graphql";
 import { useConnection } from "../connection";
@@ -32,6 +33,7 @@ import { ethers } from "ethers";
 import erc20abi from "./erc20abi.json" assert { type: "json" };
 import { depositToLayerswapInput } from "@/utils/payments";
 import Controller from "@/utils/controller";
+import { ExternalWalletError } from "@/utils/errors";
 
 const DEPOSIT_MAX_WAIT_TIME = 10 * 60 * 1000; // 10 minutes
 const DEPOSIT_POLL_INTERVAL = 3000; // 3 seconds
@@ -75,6 +77,7 @@ export interface UseLayerswapReturn {
 
   // Errors
   depositError: Error | null;
+  feeEstimationError: Error | null;
 }
 
 async function pollForFinalization(
@@ -130,21 +133,24 @@ const estimateLayerswapFees = async (input: CreateLayerswapDepositInput) => {
   return result.layerswapQuote;
 };
 
-const waitForDeposit = async (swapId: string): Promise<boolean> => {
+const waitForDeposit = async (
+  swapId: string,
+  isMainnet?: boolean,
+): Promise<boolean> => {
   const startTime = Date.now();
 
   while (Date.now() - startTime < DEPOSIT_MAX_WAIT_TIME) {
-    const result = await request<LayerswapStatusQuery>(
-      LayerswapStatusDocument,
-      { id: swapId },
-    );
+    const result = await request<
+      LayerswapStatusQuery,
+      LayerswapStatusQueryVariables
+    >(LayerswapStatusDocument, { swapId, isMainnet });
 
     const status = result.layerswapStatus;
     if (!status) {
       throw new Error("Swap not found");
     }
 
-    switch (status) {
+    switch (status as string) {
       case "CONFIRMED":
         return true;
       case "FAILED":
@@ -152,6 +158,13 @@ const waitForDeposit = async (swapId: string): Promise<boolean> => {
       case "EXPIRED":
         throw new Error(`Deposit expired, swap id: ${swapId}`);
       case "PENDING":
+      case "PENDING_LS_TRANSFER":
+      case "PENDING_USER_TRANSFER":
+        await new Promise((resolve) =>
+          setTimeout(resolve, DEPOSIT_POLL_INTERVAL),
+        );
+        break;
+      default:
         await new Promise((resolve) =>
           setTimeout(resolve, DEPOSIT_POLL_INTERVAL),
         );
@@ -222,7 +235,7 @@ const requestPhantomPayment = async (
     new Uint8Array(serializedTxn),
   );
   if (!res.success) {
-    throw new Error(res.error);
+    throw new ExternalWalletError(res.error || "Failed to send transaction");
   }
 
   const { signature } = res.result as { signature: string };
@@ -265,19 +278,23 @@ const requestEvmDeposit = async (
   });
 
   if (!success) {
-    throw new Error(error);
+    throw new ExternalWalletError(error || "Failed to send transaction");
   }
 
-  return hash as string;
+  if (!hash || typeof hash !== "string") {
+    throw new ExternalWalletError("No transaction hash received from wallet");
+  }
+
+  return hash;
 };
 
 export const getExplorer = (
   platform: ExternalPlatform,
   txHash: string,
   isMainnet?: boolean,
-): Explorer => {
+): Explorer | undefined => {
   if (!txHash) {
-    throw new Error("Transaction hash is required");
+    return undefined;
   }
 
   switch (platform) {
@@ -369,6 +386,9 @@ export function useLayerswap({
   const [isFetchingFees, setIsFetchingFees] = useState(false);
   const [swapInput, setSwapInput] = useState<CreateLayerswapDepositInput>();
   const [depositError, setDepositError] = useState<Error | null>(null);
+  const [feeEstimationError, setFeeEstimationError] = useState<Error | null>(
+    null,
+  );
   const [isSendingDeposit, setIsSendingDeposit] = useState<boolean>(false);
 
   // Compute depositAmount = requestedAmount + fees
@@ -417,7 +437,10 @@ export function useLayerswap({
               parseInt(tokenAmount),
               tokenAddress,
             );
-            onSubmitted?.(getExplorer(platform, hash, isMainnet) as Explorer);
+            const explorer = getExplorer(platform, hash, isMainnet);
+            if (explorer) {
+              onSubmitted?.(explorer);
+            }
             transactionHash = hash;
             break;
           }
@@ -432,10 +455,12 @@ export function useLayerswap({
                 isMainnet,
               );
 
-            onSubmitted?.(
-              getExplorer(platform, signature, isMainnet) as Explorer,
-            );
+            const explorer = getExplorer(platform, signature, isMainnet);
+            if (explorer) {
+              onSubmitted?.(explorer);
+            }
             await confirmTransaction();
+            transactionHash = signature;
             break;
           }
           default: {
@@ -467,7 +492,6 @@ export function useLayerswap({
 
     try {
       const inputWithFees = { ...swapInput, layerswapFees };
-
       const result = await sendDeposit(
         inputWithFees,
         walletAddress,
@@ -522,20 +546,40 @@ export function useLayerswap({
   useEffect(() => {
     if (!swapInput) return;
 
+    let isCurrent = true;
+
     const fetchFees = async () => {
       try {
         setIsFetchingFees(true);
+        setFeeEstimationError(null);
         const quote = await estimateLayerswapFees(swapInput);
-        setLayerswapFees(quote.totalFees);
+        if (isCurrent) {
+          setLayerswapFees(quote.totalFees);
+        }
       } catch (e) {
-        onError?.(e as Error);
+        if (isCurrent) {
+          setFeeEstimationError(e as Error);
+        }
       } finally {
-        setIsFetchingFees(false);
+        if (isCurrent) {
+          setIsFetchingFees(false);
+        }
       }
     };
 
     fetchFees();
+
+    return () => {
+      isCurrent = false;
+    };
   }, [swapInput, onError]);
+
+  const onWaitForDeposit = useCallback(
+    async (swapId: string) => {
+      return waitForDeposit(swapId, isMainnet);
+    },
+    [isMainnet],
+  );
 
   return {
     requestedAmount,
@@ -546,8 +590,9 @@ export function useLayerswap({
     swapId,
     explorer,
     depositError,
+    feeEstimationError,
     onSendDeposit,
-    waitForDeposit,
+    waitForDeposit: onWaitForDeposit,
     setRequestedAmount,
   };
 }

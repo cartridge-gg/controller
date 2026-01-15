@@ -402,6 +402,13 @@ export interface ErrorWithGraphQL extends Error {
   graphqlError?: GraphQLErrorDetails;
 }
 
+export class ExternalWalletError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ExternalWalletError";
+  }
+}
+
 function capitalizeFirstLetter(str: string): string {
   if (!str) return str;
   return str.charAt(0).toUpperCase() + str.slice(1);

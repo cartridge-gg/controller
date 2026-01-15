@@ -16,12 +16,9 @@ import {
 import { ExternalWallet } from "@cartridge/controller";
 import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
 import { useConnection } from "@/hooks/connection";
+import { useFeature } from "@/hooks/features";
 import { networkWalletData } from "../../wallet/config";
 import { Network } from "../../types";
-
-// Configure supported platforms here for testing
-const SUPPORTED_PLATFORMS = "starknet"; //starknet;ethereum;base;arbitrum;optimism
-const APPLE_PAY_SUPPORT = false;
 
 type DrawerStep = "network" | "wallet";
 
@@ -34,6 +31,9 @@ export function WalletSelectionDrawer({
   isOpen,
   onClose,
 }: WalletSelectionDrawerProps) {
+  const isSupportedPlatformsEnabled = useFeature("supported-platforms");
+  const isApplePayEnabled = useFeature("apple-pay-support");
+
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
   const { onExternalConnect, clearSelectedWallet } =
@@ -50,8 +50,13 @@ export function WalletSelectionDrawer({
   >(new Map());
 
   const selectedNetworks = useMemo(() => {
+    const platforms = isSupportedPlatformsEnabled
+      ? "starknet;ethereum;base;arbitrum;optimism"
+      : "starknet";
+
     let networks =
-      SUPPORTED_PLATFORMS?.split(";")
+      platforms
+        ?.split(";")
         .map((platform) =>
           networkWalletData.networks.find((n) => n.platform === platform),
         )
@@ -71,7 +76,7 @@ export function WalletSelectionDrawer({
     }
 
     return networks as Network[];
-  }, [starterpackDetails]);
+  }, [starterpackDetails, isSupportedPlatformsEnabled]);
 
   // Reset state when drawer closes
   useEffect(() => {
@@ -257,7 +262,7 @@ export function WalletSelectionDrawer({
           {step === "network" ? (
             // Network selection step
             <>
-              {APPLE_PAY_SUPPORT && (
+              {isApplePayEnabled && (
                 <PurchaseCard
                   key="apple-pay"
                   text="Apple Pay"

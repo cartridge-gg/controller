@@ -15,6 +15,7 @@ import { getCurrentReferral } from "@/utils/referral";
 import { prepareSwapCalls, type SwapQuote } from "@/utils/ekubo";
 import { Item } from "./types";
 import { useStarterpackContext } from "./starterpack";
+import { ExternalWalletError } from "@/utils/errors";
 import {
   useQuantity,
   useExternalWallet,
@@ -66,6 +67,7 @@ export interface OnchainPurchaseContextType {
   requestedAmount: number | undefined;
   depositAmount: number | undefined; // Computed: requestedAmount + fees
   setRequestedAmount: (amount: number) => void;
+  feeEstimationError: Error | null;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -151,7 +153,8 @@ export const OnchainPurchaseProvider = ({
     swapId,
     explorer,
     depositError,
-    onSendDeposit,
+    feeEstimationError,
+    onSendDeposit: onSendDepositInternal,
     waitForDeposit,
   } = useLayerswap({
     controller,
@@ -190,6 +193,17 @@ export const OnchainPurchaseProvider = ({
       setDisplayError(depositError);
     }
   }, [walletError, depositError, setDisplayError]);
+
+  // Clear errors when token or wallet selection changes
+  useEffect(() => {
+    setDisplayError(undefined);
+  }, [selectedToken, selectedWallet, setDisplayError]);
+
+  // Wrap onSendDeposit to clear errors before sending
+  const onSendDeposit = useCallback(async () => {
+    setDisplayError(undefined);
+    await onSendDepositInternal();
+  }, [onSendDepositInternal, setDisplayError]);
 
   // When network is not starknet, retrieve layerswap deposit amount
   useEffect(() => {
@@ -305,17 +319,19 @@ export const OnchainPurchaseProvider = ({
           externalCalls,
         );
         if (!response.success) {
-          throw new Error(
+          throw new ExternalWalletError(
             response.error || `Failed to execute purchase with ${walletType}`,
           );
         }
         if (!response.result) {
-          throw new Error(`No transaction hash returned from ${walletType}`);
+          throw new ExternalWalletError(
+            `No transaction hash returned from ${walletType}`,
+          );
         }
         const result = response.result as { transaction_hash?: string };
         const transactionHash = result.transaction_hash;
         if (!transactionHash) {
-          throw new Error(
+          throw new ExternalWalletError(
             `Invalid response format from ${walletType}: missing transaction_hash`,
           );
         }
@@ -366,6 +382,7 @@ export const OnchainPurchaseProvider = ({
     requestedAmount,
     setRequestedAmount,
     depositAmount,
+    feeEstimationError,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,
