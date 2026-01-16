@@ -33,7 +33,7 @@ type Step =
 
 interface VerificationStepViewProps {
   title: string;
-  icon: React.ReactNode;
+  icon: React.ReactElement;
   label: string;
   value: string;
   placeholder: string;
@@ -95,7 +95,7 @@ const VerificationStepView = ({
 
 interface CodeStepViewProps {
   title: string;
-  icon: React.ReactNode;
+  icon: React.ReactElement;
   target: string;
   onVerify: () => void;
   onResend: (type: "email" | "phone") => void;
