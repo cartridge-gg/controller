@@ -30,6 +30,7 @@ import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
 import { AddConnectionRoute } from "./settings/AddConnectionRoute";
 import { PaymentMethod } from "./purchasenew/method";
+import { Verification } from "./purchasenew/verification";
 import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { Success as PurchaseSuccess } from "./purchasenew/success";
 import { Pending as PurchasePending } from "./purchasenew/pending";
@@ -235,6 +236,7 @@ export function App() {
           <Route path="method/:platforms" element={<PaymentMethod />} />
           <Route path="network/:platforms" element={<ChooseNetwork />} />
           <Route path="wallet/:platforms" element={<SelectWallet />} />
+          <Route path="verification" element={<Verification />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/onchain" element={<OnchainCheckout />} />
           <Route path="review" element={<></>} />
