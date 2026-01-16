@@ -54,25 +54,28 @@ export function CollectionPurchase() {
   const arcadeContext = useContext(ArcadeContext);
   const provider = arcadeContext?.provider;
 
+  const [searchParams] = useSearchParams();
+
+  const orderIds = useMemo(
+    () => searchParams.get("orders")?.split(",").map(Number) || [],
+    [searchParams],
+  );
   const { data: allOrders } = useMarketplaceCollectionOrders(
     {
       collection: contractAddress || "",
       status: StatusType.Placed,
       tokenId,
-      limit: 10000,
+      orderIds,
     },
     !!contractAddress,
   );
 
   const { data: marketplaceFeeConfig } = useMarketplaceFees();
 
-  const [searchParams] = useSearchParams();
   const tokenOrders = useMemo(() => {
-    const paramsOrders =
-      searchParams.get("orders")?.split(",").map(Number) || [];
     if (!allOrders) return [];
-    return allOrders.filter((order) => paramsOrders.includes(order.id));
-  }, [allOrders, searchParams]);
+    return allOrders.filter((order) => orderIds.includes(order.id));
+  }, [allOrders, orderIds]);
 
   const tokenIds = useMemo(() => {
     return tokenOrders.map((order) =>
