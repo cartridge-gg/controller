@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AppleIcon,
@@ -13,6 +14,7 @@ import {
   TimesIcon,
   WalletIcon,
 } from "@cartridge/ui";
+import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import { ExternalWallet } from "@cartridge/controller";
 import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
 import { useConnection } from "@/hooks/connection";
@@ -31,6 +33,7 @@ export function WalletSelectionDrawer({
   isOpen,
   onClose,
 }: WalletSelectionDrawerProps) {
+  const navigate = useNavigate();
   const isSupportedPlatformsEnabled = useFeature("supported-platforms");
   const isApplePayEnabled = useFeature("apple-pay-support");
 
@@ -43,7 +46,10 @@ export function WalletSelectionDrawer({
   const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isApplePayLoading, setIsApplePayLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
   const [chainIds, setChainIds] = useState<Map<string, string>>(new Map());
   const [availableWallets, setAvailableWallets] = useState<
     Map<string, ExternalWallet[]>
@@ -85,6 +91,7 @@ export function WalletSelectionDrawer({
       setSelectedNetwork(null);
       setError(null);
       setIsConnecting(false);
+      setIsApplePayLoading(false);
     }
   }, [isOpen]);
 
@@ -140,6 +147,26 @@ export function WalletSelectionDrawer({
     setSelectedNetwork(network);
     setStep("wallet");
   }, []);
+
+  const handleApplePaySelect = useCallback(async () => {
+    setIsApplePayLoading(true);
+    setError(null);
+
+    try {
+      const { data } = await refetchMe();
+      const me = data?.me;
+      const needsVerification =
+        !me?.email || !me?.phoneNumber || !me?.phoneNumberVerifiedAt;
+
+      if (needsVerification) {
+        navigate("/purchase/verification");
+      }
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setIsApplePayLoading(false);
+    }
+  }, [refetchMe, navigate]);
 
   const onControllerWalletSelect = useCallback(() => {
     clearSelectedWallet();
@@ -263,13 +290,30 @@ export function WalletSelectionDrawer({
             // Network selection step
             <>
               {isApplePayEnabled && (
-                <PurchaseCard
+                <div
                   key="apple-pay"
-                  text="Apple Pay"
-                  icon={<AppleIcon />}
-                  onClick={() => {}}
-                  className="rounded-lg"
-                />
+                  onClick={handleApplePaySelect}
+                  className={cn(
+                    "group flex flex-row gap-2 bg-background-200 hover:bg-background-300 rounded-lg p-3 justify-between cursor-pointer",
+                    "rounded-lg",
+                    isApplePayLoading && "opacity-50 pointer-events-none",
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <Thumbnail
+                      icon={<AppleIcon />}
+                      size="md"
+                      className="bg-background-300 group-hover:bg-background-400"
+                      rounded
+                    />
+                    <span>Apple Pay</span>
+                  </div>
+                  {isApplePayLoading && (
+                    <div className="flex items-center">
+                      <SpinnerIcon className="animate-spin" size="sm" />
+                    </div>
+                  )}
+                </div>
               )}
               {selectedNetworks.length > 0 ? (
                 selectedNetworks.map((network) => (
@@ -278,7 +322,10 @@ export function WalletSelectionDrawer({
                     text={network.name}
                     icon={network.icon}
                     onClick={() => handleNetworkSelect(network)}
-                    className="rounded-lg"
+                    className={cn(
+                      "rounded-lg",
+                      isApplePayLoading && "opacity-50 pointer-events-none",
+                    )}
                   />
                 ))
               ) : (

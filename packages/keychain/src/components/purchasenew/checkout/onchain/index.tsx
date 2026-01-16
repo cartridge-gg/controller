@@ -27,8 +27,13 @@ import { WalletSelectionDrawer } from "./wallet-drawer";
 export function OnchainCheckout() {
   const { navigate } = useNavigation();
   const { controller } = useConnection();
-  const { isStarterpackLoading, starterpackDetails, displayError, clearError } =
-    useStarterpackContext();
+  const {
+    isStarterpackLoading,
+    starterpackDetails,
+    displayError,
+    clearError,
+    setDisplayError,
+  } = useStarterpackContext();
   const {
     isFetchingConversion,
     isSendingDeposit,
@@ -146,16 +151,9 @@ export function OnchainCheckout() {
       await onSendDeposit();
       navigate("/purchase/pending", { reset: true });
     } catch (error) {
-      console.error("Bridge deposit failed:", error);
-      // Ensure the error is displayed to the user
-      // If the error message is "Fees not loaded", it might be transient or require user action
-      if ((error as Error).message === "Fees not loaded") {
-        // Force a re-render or state update if needed, though displayError should handle it if passed up
-        // Currently onSendDeposit errors are caught here.
-        // We should set the display error if it's not automatically handled by the context
-      }
+      setDisplayError(error as Error);
     }
-  }, [onSendDeposit, navigate, clearError]);
+  }, [onSendDeposit, navigate, clearError, setDisplayError]);
 
   useEffect(() => {
     clearError();
