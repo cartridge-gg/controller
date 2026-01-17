@@ -268,6 +268,7 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
           />
         ) : (
           <UnverifiedSessionSummary
+            game={theme?.name}
             contracts={policies.contracts}
             messages={policies.messages}
           />
