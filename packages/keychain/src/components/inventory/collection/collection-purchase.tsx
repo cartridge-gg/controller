@@ -46,8 +46,8 @@ import { ArcadeContext } from "@/context/arcade";
 
 export function CollectionPurchase() {
   const { address: contractAddress, tokenId } = useParams();
-  const { project, controller } = useConnection();
-  const { goBack } = useNavigation();
+  const { project, controller, closeModal } = useConnection();
+  const { goBack, canGoBack } = useNavigation();
   const { tokens } = useTokens();
   const [royalties, setRoyalties] = useState<{ [orderId: number]: bigint }>({});
   const [amount, setAmount] = useState<number>(0);
@@ -350,6 +350,7 @@ export function CollectionPurchase() {
               }
               transactions={buildTransactions}
               onSubmit={onSubmitPurchase}
+              onCancel={canGoBack ? goBack : closeModal}
               buttonText="Confirm"
             >
               <div className="p-4 pb-0 flex flex-col gap-4 overflow-hidden h-full select-none">
