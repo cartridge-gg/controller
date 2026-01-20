@@ -109,6 +109,22 @@ export function CollectionPurchase() {
     );
   }, [tokens, tokenOrders]);
 
+  const tokenData = useMemo(
+    () => ({
+      tokens: !token
+        ? []
+        : tokenOrders.map((order) => ({
+            balance: (
+              Number(order.price) / Math.pow(10, token.metadata.decimals)
+            ).toString(),
+            address: token.metadata.address,
+          })),
+    }),
+    [tokenOrders, token],
+  );
+
+  const { countervalues } = useCountervalue(tokenData);
+
   const props = useMemo(() => {
     if (!assets || !collection || !tokenOrders) return [];
     return tokenOrders
@@ -133,10 +149,18 @@ export function CollectionPurchase() {
           collectionAddress: contractAddress,
           price: order.price,
           tokenId: asset.token_id ?? "",
+          finalPrice: order.price / Math.pow(10, token?.metadata.decimals || 0),
         };
       })
       .filter((value) => value !== undefined);
-  }, [assets, collection, tokenOrders, contractAddress, project]);
+  }, [
+    assets,
+    collection,
+    tokenOrders,
+    contractAddress,
+    project,
+    token?.metadata.decimals,
+  ]);
 
   const { totalPrice, floatPrice, fixedValue } = useMemo(() => {
     const total = tokenOrders.reduce(
@@ -344,7 +368,7 @@ export function CollectionPurchase() {
                       )}
                     >{`${props.length} total`}</p>
                   </div>
-                  {props.map((args) => (
+                  {props.map((args, i) => (
                     <Order
                       key={args.orderId}
                       orderId={args.orderId}
@@ -356,7 +380,8 @@ export function CollectionPurchase() {
                       token={token}
                       tokenId={args.tokenId}
                       addRoyalties={addRoyalties}
-                      fixedValue={Math.max(2, fixedValue)}
+                      finalPrice={args.finalPrice.toFixed(fixedValue)}
+                      counterValue={countervalues[i]?.current?.value}
                     />
                   ))}
                 </div>
@@ -406,7 +431,8 @@ const Order = ({
   token,
   tokenId,
   addRoyalties,
-  fixedValue,
+  finalPrice,
+  counterValue,
 }: {
   orderId: number;
   image: string;
@@ -417,7 +443,8 @@ const Order = ({
   token: Token;
   tokenId: string;
   addRoyalties: (orderId: number, royaltyFee: bigint) => void;
-  fixedValue: number;
+  finalPrice: string;
+  counterValue: number | undefined;
 }) => {
   const { data: royaltyInfo } = useMarketplaceRoyaltyFee(
     {
@@ -428,42 +455,17 @@ const Order = ({
     !!collectionAddress && !!tokenId && !!price,
   );
 
-  const finalPrice = useMemo(() => {
-    const formattedPrice = price / Math.pow(10, token.metadata.decimals);
-    return {
-      amount: formattedPrice.toFixed(fixedValue),
-      token: token.metadata.symbol,
-    };
-  }, [price, token, fixedValue]);
-
-  const countervalue = useCountervalue({
-    tokens: [
-      {
-        balance: finalPrice.amount,
-        address: token.metadata.address,
-      },
-    ],
-  });
-  // Simplified type handling for countervalue
-  const priceDollar = (() => {
-    try {
-      if (countervalue && typeof countervalue === "object") {
-        const cv = countervalue as {
-          countervalues?: Array<{ value?: number | string }>;
-        };
-        return cv.countervalues?.[0]?.value?.toString() || "";
-      }
-      return "";
-    } catch {
-      return "";
-    }
-  })();
-
   useEffect(() => {
     if (royaltyInfo?.amount) {
       addRoyalties(orderId, royaltyInfo.amount);
     }
   }, [royaltyInfo, orderId, addRoyalties]);
+
+  const usdPrice = useMemo(
+    () =>
+      `$${counterValue?.toLocaleString(undefined, { maximumFractionDigits: 2 }) ?? "?"}`,
+    [counterValue],
+  );
 
   return (
     <div className="h-16 flex items-center justify-between bg-background-200 px-4 py-3 gap-3">
@@ -478,12 +480,12 @@ const Order = ({
           <p>{name}</p>
           <div className="flex items-center gap-1">
             <Thumbnail icon={token.metadata.image || ""} size="sm" />
-            <p>{finalPrice.amount}</p>
+            <p>{finalPrice}</p>
           </div>
         </div>
         <div className="flex items-center gap-1 justify-between text-xs text-foreground-300">
           <p className="truncate">{collection}</p>
-          <p>{priceDollar}</p>
+          <p>{usdPrice}</p>
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
   InfoIcon,
 } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
   addAddressPadding,
   AllowArray,
@@ -159,6 +159,22 @@ export function CollectiblePurchase() {
     return { total, fees };
   }, [marketplaceFee, royalties, token, tokenOrders]);
 
+  const tokenData = useMemo(
+    () => ({
+      tokens: !token
+        ? []
+        : tokenOrders.map((order) => ({
+            balance: (
+              Number(order.price) / Math.pow(10, token.metadata.decimals)
+            ).toString(),
+            address: token.metadata.address,
+          })),
+    }),
+    [tokenOrders, token],
+  );
+
+  const { countervalues } = useCountervalue(tokenData);
+
   const props = useMemo(() => {
     if (!assets || !collection || !tokenOrders) return [];
     return tokenOrders
@@ -183,12 +199,20 @@ export function CollectiblePurchase() {
           collectionAddress: contractAddress,
           price: order.price,
           tokenId: asset.token_id,
+          finalPrice: order.price / Math.pow(10, token?.metadata.decimals || 0),
         };
       })
       .filter((value) => value !== undefined);
-  }, [assets, collection, tokenOrders, contractAddress, project]);
+  }, [
+    assets,
+    collection,
+    tokenOrders,
+    contractAddress,
+    project,
+    token?.metadata.decimals,
+  ]);
 
-  const { totalPrice, floatPrice } = useMemo(() => {
+  const { totalPrice, floatPrice, fixedValue } = useMemo(() => {
     const total = tokenOrders.reduce(
       (acc, order) => acc + Number(order?.price),
       0,
@@ -198,7 +222,21 @@ export function CollectiblePurchase() {
     );
     const formatted =
       (total + fees) / Math.pow(10, token?.metadata.decimals || 0);
-    return { totalPrice: total + fees, floatPrice: formatted, fees };
+    // Figure out the index of the highest digit from the price, e.g 1.00 is 0, 0.01 is 2, 0.1 is 1, etc.
+    const dotPosition = formatted
+      .toString()
+      .split("")
+      .findIndex((char) => char === ".");
+    const digitPosition = formatted
+      .toString()
+      .split("")
+      .findIndex((char) => char !== "0" && char !== ".");
+    return {
+      totalPrice: total + fees,
+      floatPrice: formatted,
+      fees,
+      fixedValue: Math.max(0, digitPosition - dotPosition),
+    };
   }, [tokenOrders, token?.metadata.decimals]);
 
   const addRoyalties = useCallback(
@@ -337,7 +375,7 @@ export function CollectiblePurchase() {
                       )}
                     >{`${props.length} total`}</p>
                   </div>
-                  {props.map((args) => (
+                  {props.map((args, i) => (
                     <Order
                       key={args.orderId}
                       orderId={args.orderId}
@@ -349,6 +387,8 @@ export function CollectiblePurchase() {
                       token={token}
                       tokenId={args.tokenId ?? ""}
                       addRoyalties={addRoyalties}
+                      finalPrice={args.finalPrice.toFixed(fixedValue)}
+                      counterValue={countervalues[i]?.current?.value}
                     />
                   ))}
                 </div>
@@ -404,6 +444,8 @@ const Order = ({
   token,
   tokenId,
   addRoyalties,
+  finalPrice,
+  counterValue,
 }: {
   orderId: number;
   image: string;
@@ -414,6 +456,8 @@ const Order = ({
   token: Token;
   tokenId: string;
   addRoyalties: (orderId: number, royaltyFee: bigint) => void;
+  finalPrice: string;
+  counterValue: number | undefined;
 }) => {
   const { data: royaltyInfo } = useMarketplaceRoyaltyFee(
     {
@@ -424,19 +468,17 @@ const Order = ({
     !!collectionAddress && !!tokenId && !!price,
   );
 
-  const finalPrice = useMemo(() => {
-    const formattedPrice = price / Math.pow(10, token.metadata.decimals);
-    return {
-      amount: formattedPrice.toFixed(2),
-      token: token.metadata.symbol,
-    };
-  }, [price, token]);
-
   useEffect(() => {
     if (royaltyInfo?.amount) {
       addRoyalties(orderId, royaltyInfo.amount);
     }
   }, [royaltyInfo, orderId, addRoyalties]);
+
+  const usdPrice = useMemo(
+    () =>
+      `$${counterValue?.toLocaleString(undefined, { maximumFractionDigits: 2 }) ?? "?"}`,
+    [counterValue],
+  );
 
   return (
     <div className="h-16 flex items-center justify-between bg-background-200 px-4 py-3 gap-3">
@@ -451,12 +493,12 @@ const Order = ({
           <p>{name}</p>
           <div className="flex items-center gap-1">
             <Thumbnail icon={token.metadata.image || ""} size="sm" />
-            <p>{finalPrice.amount}</p>
+            <p>{finalPrice}</p>
           </div>
         </div>
         <div className="flex items-center gap-1 justify-between text-xs text-foreground-300">
           <p className="truncate">{collection}</p>
-          <p></p>
+          <p>{usdPrice}</p>
         </div>
       </div>
     </div>
