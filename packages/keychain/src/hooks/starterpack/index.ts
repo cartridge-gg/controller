@@ -40,5 +40,4 @@ export type {
   UseCoinbaseReturn,
   CoinbaseOrderResult,
   CoinbaseTransactionResult,
-  CoinbaseRequirementsResult,
 } from "./coinbase";
