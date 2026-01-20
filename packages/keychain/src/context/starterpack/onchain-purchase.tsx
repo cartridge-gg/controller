@@ -445,12 +445,20 @@ export const OnchainPurchaseProvider = ({
       throw new Error("Quote not loaded yet");
     }
 
+    if (isCreatingOrder || paymentLink) return;
+
     const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
 
     await createCoinbaseOrder({
       purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
     });
-  }, [onchainDetails, quantity, createCoinbaseOrder]);
+  }, [
+    onchainDetails,
+    quantity,
+    isCreatingOrder,
+    paymentLink,
+    createCoinbaseOrder,
+  ]);
 
   const contextValue: OnchainPurchaseContextType = {
     purchaseItems,

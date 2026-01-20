@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   HeaderInner,
   LayoutContent,
@@ -12,9 +12,15 @@ import {
 import { useOnchainPurchaseContext } from "@/context";
 
 export function CoinbaseCheckout() {
-  const { paymentLink } = useOnchainPurchaseContext();
+  const { paymentLink, onCreateCoinbaseOrder } = useOnchainPurchaseContext();
   const [isLoaded, setIsLoaded] = useState(false);
   const [showPolicies, setShowPolicies] = useState(true);
+
+  useEffect(() => {
+    if (!paymentLink) {
+      onCreateCoinbaseOrder();
+    }
+  }, [paymentLink, onCreateCoinbaseOrder]);
 
   return (
     <>

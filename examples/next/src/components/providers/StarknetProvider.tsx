@@ -232,7 +232,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={sepolia.id}
+      defaultChainId={mainnet.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}

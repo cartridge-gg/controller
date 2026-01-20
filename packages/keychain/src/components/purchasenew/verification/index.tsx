@@ -160,10 +160,14 @@ const CodeStepView = ({
 );
 
 export function Verification() {
-  const { navigate } = useNavigation();
+  const { navigate, setShowClose } = useNavigation();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const method = searchParams.get("method");
+
+  useEffect(() => {
+    setShowClose(true);
+  }, [setShowClose]);
   const {
     data: meData,
     isLoading: isMeLoading,
@@ -215,10 +219,14 @@ export function Verification() {
 
     if (step === "SUCCESS" && method && isVerified && !isTransientSuccess) {
       const timer = setTimeout(() => {
-        navigate(
-          `/purchase/checkout/onchain${method ? `?method=${method}` : ""}`,
-        );
-      }, 2000);
+        if (method === "apple-pay") {
+          navigate("/purchase/checkout/coinbase");
+        } else {
+          navigate(
+            `/purchase/checkout/onchain${method ? `?method=${method}` : ""}`,
+          );
+        }
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [step, method, navigate, meData, isTransientSuccess]);
@@ -265,7 +273,7 @@ export function Verification() {
             setPhone(updatedMe?.me?.phoneNumber || "");
           }
           setIsTransientSuccess(false);
-        }, 3000);
+        }, 1500);
       } else {
         setError(res.verifyEmail.message);
       }
