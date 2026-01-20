@@ -22,6 +22,7 @@ import {
   HeaderInner,
 } from "@cartridge/ui";
 import { useNavigation } from "@/context";
+import { useLocation } from "react-router-dom";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
 type Step =
@@ -160,6 +161,9 @@ const CodeStepView = ({
 
 export function Verification() {
   const { navigate } = useNavigation();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const method = searchParams.get("method");
   const {
     data: meData,
     isLoading: isMeLoading,
@@ -202,6 +206,22 @@ export function Verification() {
       return () => clearTimeout(timer);
     }
   }, [resendCooldown]);
+
+  useEffect(() => {
+    const isVerified =
+      meData?.me?.email &&
+      meData?.me?.phoneNumber &&
+      meData?.me?.phoneNumberVerifiedAt;
+
+    if (step === "SUCCESS" && method && isVerified && !isTransientSuccess) {
+      const timer = setTimeout(() => {
+        navigate(
+          `/purchase/checkout/onchain${method ? `?method=${method}` : ""}`,
+        );
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, method, navigate, meData, isTransientSuccess]);
 
   const handleSendEmail = async () => {
     setError(null);
@@ -429,17 +449,7 @@ export function Verification() {
               </CardContent>
             </Card>
           </LayoutContent>
-          <LayoutFooter>
-            {!isTransientSuccess && (
-              <Button
-                variant="primary"
-                className="w-full"
-                onClick={() => navigate("/purchase/checkout/onchain")}
-              >
-                BACK TO CHECKOUT
-              </Button>
-            )}
-          </LayoutFooter>
+          <LayoutFooter />
         </>
       );
     default:

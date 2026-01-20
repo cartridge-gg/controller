@@ -75,14 +75,20 @@ export function BridgePending({
   const { navigateToRoot } = useNavigation();
   const onchainContext = useOnchainPurchaseContext();
   const { transactionHash: currentTxHash } = useStarterpackContext();
-  const { externalWaitForTransaction, controller, isMainnet, closeModal } =
-    useConnection();
+  const {
+    externalWaitForTransaction,
+    controller,
+    isMainnet,
+    closeModal,
+    account,
+  } = useConnection();
 
   // Use props if provided (for stories), otherwise use context
   const selectedPlatform =
     selectedPlatformProp ?? onchainContext.selectedPlatform;
   const waitForDeposit = waitForDepositProp ?? onchainContext.waitForDeposit;
   const onOnchainPurchase = onchainContext.onOnchainPurchase;
+  const getCoinbaseTransactions = onchainContext.getTransactions;
 
   const [initialBridgeHash, setInitialBridgeHash] = useState(bridgeTxHash);
 
@@ -104,6 +110,39 @@ export function BridgePending({
   const [showPurchasing, setShowPurchasing] = useState(false);
 
   const purchaseTriggered = useRef(false);
+
+  // Handle Apple Pay (Coinbase) polling
+  useEffect(() => {
+    if (
+      paymentMethod === "apple-pay" &&
+      account?.username &&
+      !paymentCompleted
+    ) {
+      const pollCoinbase = async () => {
+        try {
+          const transactions = await getCoinbaseTransactions(account.username);
+          const completedTx = transactions.find(
+            (tx) => tx.status === "ONRAMP_TRANSACTION_STATUS_SUCCESS",
+          );
+
+          if (completedTx) {
+            setDepositCompleted(true);
+            setPaymentCompleted(true);
+          }
+        } catch (err) {
+          console.error("Failed to poll Coinbase transactions:", err);
+        }
+      };
+
+      const interval = setInterval(pollCoinbase, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [
+    paymentMethod,
+    account?.username,
+    getCoinbaseTransactions,
+    paymentCompleted,
+  ]);
 
   useEffect(() => {
     if (wallet && initialBridgeHash) {
@@ -190,51 +229,62 @@ export function BridgePending({
       </LayoutContent>
       <LayoutFooter>
         {error && <ControllerErrorAlert error={error} />}
-        {paymentMethod === "crypto" && !error && (
-          <div className="relative space-y-2">
-            <div
-              className={`transition-transform duration-500 ease-in-out ${
-                depositCompleted ? "-translate-y-1" : "translate-y-0"
-              }`}
-            >
-              <ConfirmingTransaction
-                title={
-                  depositCompleted
-                    ? `Confirmed on ${humanizeString(selectedPlatform!)}`
-                    : `Confirming on ${humanizeString(selectedPlatform!)}`
-                }
-                externalLink={explorer?.url}
-                isLoading={!depositCompleted}
-              />
+        {(paymentMethod === "crypto" || paymentMethod === "apple-pay") &&
+          !error && (
+            <div className="relative space-y-2">
+              <div
+                className={`transition-transform duration-500 ease-in-out ${
+                  depositCompleted ? "-translate-y-1" : "translate-y-0"
+                }`}
+              >
+                <ConfirmingTransaction
+                  title={
+                    depositCompleted
+                      ? paymentMethod === "apple-pay"
+                        ? "Confirmed on Coinbase"
+                        : `Confirmed on ${humanizeString(selectedPlatform!)}`
+                      : paymentMethod === "apple-pay"
+                        ? "Confirming on Coinbase"
+                        : `Confirming on ${humanizeString(selectedPlatform!)}`
+                  }
+                  externalLink={explorer?.url}
+                  isLoading={!depositCompleted}
+                />
+              </div>
+              <TransitionStep
+                isVisible={showBridging || paymentMethod === "apple-pay"}
+              >
+                <ConfirmingTransaction
+                  title={
+                    paymentCompleted
+                      ? "Bridged to Starknet"
+                      : "Bridging to Starknet"
+                  }
+                  externalLink={
+                    initialBridgeHash
+                      ? `https://layerswap.io/explorer/${initialBridgeHash}`
+                      : undefined
+                  }
+                  isLoading={!paymentCompleted}
+                />
+              </TransitionStep>
+              <TransitionStep isVisible={showPurchasing}>
+                <ConfirmingTransaction
+                  title={
+                    purchaseCompleted
+                      ? "Purchased on Starknet"
+                      : "Purchasing on Starknet"
+                  }
+                  externalLink={
+                    purchaseTxHash
+                      ? getExplorer("starknet", purchaseTxHash, isMainnet)?.url
+                      : undefined
+                  }
+                  isLoading={!purchaseCompleted}
+                />
+              </TransitionStep>
             </div>
-            <TransitionStep isVisible={showBridging}>
-              <ConfirmingTransaction
-                title={
-                  paymentCompleted
-                    ? "Bridged to Starknet"
-                    : "Bridging to Starknet"
-                }
-                externalLink={`https://layerswap.io/explorer/${initialBridgeHash}`}
-                isLoading={!paymentCompleted}
-              />
-            </TransitionStep>
-            <TransitionStep isVisible={showPurchasing}>
-              <ConfirmingTransaction
-                title={
-                  purchaseCompleted
-                    ? "Purchased on Starknet"
-                    : "Purchasing on Starknet"
-                }
-                externalLink={
-                  purchaseTxHash
-                    ? getExplorer("starknet", purchaseTxHash, isMainnet)?.url
-                    : undefined
-                }
-                isLoading={!purchaseCompleted}
-              />
-            </TransitionStep>
-          </div>
-        )}
+          )}
         <Button
           className="w-full"
           variant="primary"

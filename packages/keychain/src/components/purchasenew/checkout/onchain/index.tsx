@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  AppleIcon,
   Button,
   GiftIcon,
   HeaderInner,
@@ -52,6 +53,9 @@ export function OnchainCheckout() {
     onSendDeposit,
     isFetchingFees,
     layerswapFees,
+    isApplePaySelected,
+    onCreateCoinbaseOrder,
+    isCreatingOrder,
   } = useOnchainPurchaseContext();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -100,10 +104,11 @@ export function OnchainCheckout() {
     }
 
     return (
-      !hasSufficientBalance ||
+      (!isApplePaySelected && !hasSufficientBalance) ||
       isLoadingBalance ||
       !!balanceError ||
-      isFetchingConversion
+      isFetchingConversion ||
+      isCreatingOrder
     );
   }, [
     feeEstimationError,
@@ -114,12 +119,19 @@ export function OnchainCheckout() {
     isFetchingConversion,
     isFetchingFees,
     layerswapFees,
+    isCreatingOrder,
+    isApplePaySelected,
   ]);
 
   const showInsufficientBalance =
-    !isLoadingBalance && !hasSufficientBalance && !balanceError && !bridgeFrom;
+    !isLoadingBalance &&
+    !hasSufficientBalance &&
+    !balanceError &&
+    !bridgeFrom &&
+    !isApplePaySelected;
 
-  const showConversionError = conversionError && needsConversion;
+  const showConversionError =
+    conversionError && needsConversion && !isApplePaySelected;
 
   const showBridgeAmountTooLow =
     feeEstimationError?.message?.includes("too low") ?? false;
@@ -129,20 +141,33 @@ export function OnchainCheckout() {
   }, []);
 
   const handlePurchase = useCallback(async () => {
-    if (!hasSufficientBalance && !isFree) return;
+    if (!hasSufficientBalance && !isFree && !isApplePaySelected) return;
 
     setIsLoading(true);
     clearError();
 
     try {
-      await onOnchainPurchase();
-      navigate("/purchase/pending", { reset: true });
+      if (isApplePaySelected) {
+        await onCreateCoinbaseOrder();
+        navigate("/purchase/checkout/coinbase", { reset: true });
+      } else {
+        await onOnchainPurchase();
+        navigate("/purchase/pending", { reset: true });
+      }
     } catch (error) {
       console.error("Purchase failed:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [hasSufficientBalance, isFree, onOnchainPurchase, navigate, clearError]);
+  }, [
+    hasSufficientBalance,
+    isFree,
+    isApplePaySelected,
+    onCreateCoinbaseOrder,
+    onOnchainPurchase,
+    navigate,
+    clearError,
+  ]);
 
   const handleBridge = useCallback(async () => {
     clearError();
@@ -226,8 +251,10 @@ export function OnchainCheckout() {
             )}
 
             <WalletSelector
-              walletName={wallet.name}
-              walletIcon={wallet.subIcon}
+              walletName={isApplePaySelected ? "Apple Pay" : wallet.name}
+              walletIcon={
+                isApplePaySelected ? <AppleIcon size="xs" /> : wallet.subIcon
+              }
               bridgeFrom={bridgeFrom}
               onClick={handleWalletSelect}
             />
@@ -236,10 +263,14 @@ export function OnchainCheckout() {
 
             <QuantityControls
               quantity={quantity}
-              isLoading={isLoading || (bridgeFrom !== null && isFetchingFees)}
+              isLoading={
+                isLoading ||
+                (bridgeFrom !== null && isFetchingFees) ||
+                isCreatingOrder
+              }
               isSendingDeposit={isSendingDeposit}
               globalDisabled={globalDisabled}
-              hasSufficientBalance={hasSufficientBalance}
+              hasSufficientBalance={hasSufficientBalance || isApplePaySelected}
               bridgeFrom={bridgeFrom}
               onIncrement={incrementQuantity}
               onDecrement={decrementQuantity}

@@ -39,7 +39,7 @@ export function WalletSelectionDrawer({
 
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
-  const { onExternalConnect, clearSelectedWallet } =
+  const { onExternalConnect, clearSelectedWallet, onApplePaySelect } =
     useOnchainPurchaseContext();
 
   const [step, setStep] = useState<DrawerStep>("network");
@@ -159,14 +159,17 @@ export function WalletSelectionDrawer({
         !me?.email || !me?.phoneNumber || !me?.phoneNumberVerifiedAt;
 
       if (needsVerification) {
-        navigate("/purchase/verification");
+        navigate("/purchase/verification?method=apple-pay");
+      } else {
+        onApplePaySelect();
+        onClose();
       }
     } catch (e) {
       setError(e as Error);
     } finally {
       setIsApplePayLoading(false);
     }
-  }, [refetchMe, navigate]);
+  }, [refetchMe, navigate, onApplePaySelect, onClose]);
 
   const onControllerWalletSelect = useCallback(() => {
     clearSelectedWallet();

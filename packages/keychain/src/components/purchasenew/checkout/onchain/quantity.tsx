@@ -11,6 +11,7 @@ interface QuantityControlsProps {
   onDecrement: () => void;
   onPurchase: () => void;
   onBridge: () => void;
+  purchaseLabel?: string;
 }
 
 export function QuantityControls({
@@ -24,8 +25,10 @@ export function QuantityControls({
   onDecrement,
   onPurchase,
   onBridge,
+  purchaseLabel: customPurchaseLabel,
 }: QuantityControlsProps) {
-  const purchaseLabel = quantity > 1 ? `Buy ${quantity}` : "Buy";
+  const purchaseLabel =
+    customPurchaseLabel || (quantity > 1 ? `Buy ${quantity}` : "Buy");
   const isQuantityDisabled =
     (globalDisabled && hasSufficientBalance) || isSendingDeposit;
 
