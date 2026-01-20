@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Skeleton,
@@ -7,10 +7,6 @@ import {
   Token,
   Thumbnail,
   ThumbnailCollectible,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
   InfoIcon,
 } from "@cartridge/ui";
 import { cn, useCountervalue } from "@cartridge/ui/utils";
@@ -43,6 +39,7 @@ import {
 } from "@cartridge/arcade/marketplace/react";
 import { StatusType } from "@cartridge/arcade";
 import { ArcadeContext } from "@/context/arcade";
+import { TotalTooltip } from "./total-tooltip";
 
 export function CollectiblePurchase() {
   const { address: contractAddress, tokenId } = useParams();
@@ -122,41 +119,38 @@ export function CollectiblePurchase() {
     );
   }, [marketplaceFeeConfig, amount]);
 
-  const { total, fees } = useMemo(() => {
+  const { fees, fixedFeeValue } = useMemo(() => {
     const price = tokenOrders.reduce(
       (acc: number, order) => acc + Number(order?.price),
       0,
     );
     const royaltyFee = Object.values(royalties).reduce(
       (acc: bigint, royalty) => acc + royalty,
-      BigInt(0),
+      0n,
     );
-    const formattedMarketplaceFee =
-      marketplaceFee / Math.pow(10, token?.metadata.decimals || 0);
-    const formattedClientFee =
-      (price * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR)) /
-      Math.pow(10, token?.metadata.decimals || 0);
-    const formattedRoyaltyFee =
-      Number(royaltyFee) / Math.pow(10, token?.metadata.decimals || 0);
-    const total = formattedMarketplaceFee + formattedRoyaltyFee;
+    const fixedFeeValue = 3;
     const fees = [
       {
         label: "Marketplace Fee",
-        amount: `${formattedMarketplaceFee.toFixed(2)} ${token?.metadata.symbol}`,
-        percentage: `${(price ? (marketplaceFee / price) * 100 : 0).toFixed(2)}%`,
-      },
-      {
-        label: "Client Fee",
-        amount: `${formattedClientFee.toFixed(2)} ${token?.metadata.symbol}`,
-        percentage: `${((CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR) * 100).toFixed(2)}%`,
+        amount: marketplaceFee / Math.pow(10, token?.metadata.decimals || 0),
+        percentage: price ? (marketplaceFee / price) * 100 : 0,
       },
       {
         label: "Creator Royalties",
-        amount: `${formattedRoyaltyFee.toFixed(2)} ${token?.metadata.symbol}`,
-        percentage: `${(price ? (Number(royaltyFee) / price) * 100 : 0).toFixed(2)}%`,
+        amount:
+          Number(royaltyFee) / Math.pow(10, token?.metadata.decimals || 0),
+        percentage: price ? (Number(royaltyFee) / price) * 100 : 0,
+      },
+      {
+        label: "Client Fee",
+        amount:
+          (price * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR)) /
+          Math.pow(10, token?.metadata.decimals || 0),
+        percentage: (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR) * 100,
       },
     ];
-    return { total, fees };
+    const totalFees = fees.reduce((acc, fee) => acc + fee.amount, 0);
+    return { fees, totalFees, fixedFeeValue };
   }, [marketplaceFee, royalties, token, tokenOrders]);
 
   const tokenData = useMemo(
@@ -174,6 +168,14 @@ export function CollectiblePurchase() {
   );
 
   const { countervalues } = useCountervalue(tokenData);
+
+  const totalUsdPrice = useMemo(() => {
+    if (!countervalues) return 0;
+    return countervalues.reduce(
+      (acc, value) => acc + (value?.current?.value ?? 0),
+      0,
+    );
+  }, [countervalues]);
 
   const props = useMemo(() => {
     if (!assets || !collection || !tokenOrders) return [];
@@ -394,36 +396,36 @@ export function CollectiblePurchase() {
                   ))}
                 </div>
 
-                <div className="flex flex-col gap-3 pb-6">
-                  <div className="w-full px-3 py-2.5 flex flex-col gap-1 bg-background-125 border border-background-200 rounded">
-                    <div className="flex items-center justify-between text-xs text-foreground-400">
-                      <p>Cost</p>
-                      <p>{`${(floatPrice - total).toFixed(2)} ${token.metadata.symbol}`}</p>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-foreground-400">
-                      <div className="flex gap-2  text-xs font-medium">
-                        Fees
-                        <FeesTooltip
-                          trigger={<InfoIcon size="xs" />}
-                          fees={fees}
-                        />
-                      </div>
-                      <p>{`${total.toFixed(2)} ${token.metadata.symbol}`}</p>
-                    </div>
+                <div className="flex-1" />
+
+                <div className="flex gap-3 w-full">
+                  <div className="flex flex-1 gap-1 p-3 h-10 items-center justify-between bg-background-125 border border-background-200 rounded">
+                    <p className="text-sm font-medium text-foreground-400">
+                      Total
+                    </p>
+                    <TotalTooltip
+                      trigger={<InfoIcon size="xs" color="gray" />}
+                      tokens={props.map((args) => ({
+                        name: args.name,
+                        amount: args.finalPrice.toFixed(fixedValue),
+                      }))}
+                      fees={fees}
+                      fixedFeeValue={fixedFeeValue}
+                      symbol={token.metadata.symbol}
+                    />
+                    <div className="flex-1" />
+                    <p className="text-sm font-medium text-foreground-300 mr-1">
+                      ${`${totalUsdPrice.toFixed(2)}`}
+                    </p>
+                    <p className="text-sm font-medium text-foreground-100">
+                      {`${floatPrice.toFixed(fixedValue)}`}
+                    </p>
                   </div>
-                  <div className="flex gap-3 w-full">
-                    <div className="w-full px-3 py-2.5 h-10 flex items-center justify-between bg-background-125 border border-background-200 rounded">
-                      <p className="text-sm font-medium text-foreground-400">
-                        Total
-                      </p>
-                      <p className="text-sm font-medium text-foreground-100">{`${floatPrice} ${token.metadata.symbol}`}</p>
-                    </div>
-                    <Link
-                      to="../.."
-                      className="px-3 h-10 flex items-center justify-center bg-primary-100 hover:bg-primary-200 text-primary-foreground rounded"
-                    >
-                      Cancel
-                    </Link>
+                  <div className="flex gap-1 p-2.5 h-10 items-center justify-between bg-background-125 border border-background-200 rounded">
+                    <Thumbnail icon={token.metadata.image || ""} size="sm" />
+                    <p className="text-sm font-medium text-foreground-100">
+                      {token.metadata.symbol}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -503,40 +505,6 @@ const Order = ({
         </div>
       </div>
     </div>
-  );
-};
-
-const FeesTooltip = ({
-  trigger,
-  fees,
-}: {
-  trigger: React.ReactNode;
-  fees: { label: string; amount: string; percentage: string }[];
-}) => {
-  return (
-    <TooltipProvider>
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-        <TooltipContent>
-          <div className="flex flex-col gap-1">
-            {fees.map((fee) => (
-              <div
-                key={fee.label}
-                className="flex items-center justify-between gap-4 text-xs"
-              >
-                <span className="text-foreground-400">{fee.label}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-foreground-100">{fee.amount}</span>
-                  <span className="text-foreground-400">
-                    ({fee.percentage})
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
   );
 };
 
