@@ -56,6 +56,12 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   onExternalConnect: async () => undefined,
   onSendDeposit: async () => {},
   waitForDeposit: async () => false,
+  isApplePaySelected: false,
+  paymentLink: undefined,
+  isCreatingOrder: false,
+  onApplePaySelect: () => {},
+  onCreateCoinbaseOrder: async () => {},
+  getTransactions: async () => [],
 };
 
 // Component that navigates to the correct route on mount

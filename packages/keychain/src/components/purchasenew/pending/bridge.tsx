@@ -20,6 +20,7 @@ import { useConnection } from "@/hooks/connection";
 import { retryWithBackoff } from "@/utils/retry";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { TransactionFinalityStatus } from "starknet";
+import { CoinbaseTransactionStatus } from "@/utils/api";
 
 interface TransitionStepProps {
   isVisible: boolean;
@@ -75,13 +76,8 @@ export function BridgePending({
   const { navigateToRoot } = useNavigation();
   const onchainContext = useOnchainPurchaseContext();
   const { transactionHash: currentTxHash } = useStarterpackContext();
-  const {
-    externalWaitForTransaction,
-    controller,
-    isMainnet,
-    closeModal,
-    account,
-  } = useConnection();
+  const { externalWaitForTransaction, controller, isMainnet, closeModal } =
+    useConnection();
 
   // Use props if provided (for stories), otherwise use context
   const selectedPlatform =
@@ -115,14 +111,16 @@ export function BridgePending({
   useEffect(() => {
     if (
       paymentMethod === "apple-pay" &&
-      account?.username &&
+      controller?.username() &&
       !paymentCompleted
     ) {
       const pollCoinbase = async () => {
         try {
-          const transactions = await getCoinbaseTransactions(account.username);
+          const transactions = await getCoinbaseTransactions(
+            controller.username(),
+          );
           const completedTx = transactions.find(
-            (tx) => tx.status === "ONRAMP_TRANSACTION_STATUS_SUCCESS",
+            (tx) => tx.status === CoinbaseTransactionStatus.Success,
           );
 
           if (completedTx) {
@@ -137,12 +135,7 @@ export function BridgePending({
       const interval = setInterval(pollCoinbase, 5000);
       return () => clearInterval(interval);
     }
-  }, [
-    paymentMethod,
-    account?.username,
-    getCoinbaseTransactions,
-    paymentCompleted,
-  ]);
+  }, [paymentMethod, controller, getCoinbaseTransactions, paymentCompleted]);
 
   useEffect(() => {
     if (wallet && initialBridgeHash) {
