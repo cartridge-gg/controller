@@ -315,7 +315,7 @@ export function CollectiblePurchase() {
               onSubmit={onSubmitPurchase}
               buttonText="Confirm"
             >
-              <div className="p-6 pb-0 flex flex-col gap-4 overflow-hidden h-full">
+              <div className="p-4 pb-0 flex flex-col gap-4 overflow-hidden h-full">
                 <div
                   className="grow flex flex-col gap-px rounded overflow-y-scroll"
                   style={{ scrollbarWidth: "none" }}
