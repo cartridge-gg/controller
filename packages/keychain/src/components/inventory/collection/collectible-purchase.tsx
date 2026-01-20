@@ -167,12 +167,18 @@ export function CollectiblePurchase() {
           (asset) => BigInt(asset.token_id ?? "0x0") === BigInt(order.tokenId),
         );
         if (!asset || !contractAddress) return;
+        let tokenName = "";
+        try {
+          tokenName = JSON.parse(asset.metadata).name || asset.name;
+        } catch {
+          tokenName = asset.name;
+        }
         const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
         const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
         return {
           orderId: order.id,
           images: [newImage, oldImage],
-          name: asset.name,
+          name: tokenName,
           collection: collection.name,
           collectionAddress: contractAddress,
           price: order.price,
