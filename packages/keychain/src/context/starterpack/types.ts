@@ -24,7 +24,7 @@ export type Item = {
 /**
  * Payment method type
  */
-export type PaymentMethod = "stripe" | "crypto";
+export type PaymentMethod = "stripe" | "crypto" | "apple-pay";
 
 /**
  * Discriminated union for starterpack sources

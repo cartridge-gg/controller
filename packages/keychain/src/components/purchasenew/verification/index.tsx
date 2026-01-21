@@ -22,6 +22,7 @@ import {
   HeaderInner,
 } from "@cartridge/ui";
 import { useNavigation } from "@/context";
+import { useLocation } from "react-router-dom";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
 type Step =
@@ -159,7 +160,14 @@ const CodeStepView = ({
 );
 
 export function Verification() {
-  const { navigate } = useNavigation();
+  const { navigate, setShowClose } = useNavigation();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const method = searchParams.get("method");
+
+  useEffect(() => {
+    setShowClose(true);
+  }, [setShowClose]);
   const {
     data: meData,
     isLoading: isMeLoading,
@@ -203,6 +211,26 @@ export function Verification() {
     }
   }, [resendCooldown]);
 
+  useEffect(() => {
+    const isVerified =
+      meData?.me?.email &&
+      meData?.me?.phoneNumber &&
+      meData?.me?.phoneNumberVerifiedAt;
+
+    if (step === "SUCCESS" && method && isVerified && !isTransientSuccess) {
+      const timer = setTimeout(() => {
+        if (method === "apple-pay") {
+          navigate("/purchase/checkout/coinbase");
+        } else {
+          navigate(
+            `/purchase/checkout/onchain${method ? `?method=${method}` : ""}`,
+          );
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [step, method, navigate, meData, isTransientSuccess]);
+
   const handleSendEmail = async () => {
     setError(null);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -245,7 +273,7 @@ export function Verification() {
             setPhone(updatedMe?.me?.phoneNumber || "");
           }
           setIsTransientSuccess(false);
-        }, 3000);
+        }, 1500);
       } else {
         setError(res.verifyEmail.message);
       }
@@ -429,17 +457,7 @@ export function Verification() {
               </CardContent>
             </Card>
           </LayoutContent>
-          <LayoutFooter>
-            {!isTransientSuccess && (
-              <Button
-                variant="primary"
-                className="w-full"
-                onClick={() => navigate("/purchase/checkout/onchain")}
-              >
-                BACK TO CHECKOUT
-              </Button>
-            )}
-          </LayoutFooter>
+          <LayoutFooter />
         </>
       );
     default:

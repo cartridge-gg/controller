@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AppleIcon,
@@ -14,7 +13,6 @@ import {
   TimesIcon,
   WalletIcon,
 } from "@cartridge/ui";
-import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import { ExternalWallet } from "@cartridge/controller";
 import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
 import { useConnection } from "@/hooks/connection";
@@ -33,13 +31,12 @@ export function WalletSelectionDrawer({
   isOpen,
   onClose,
 }: WalletSelectionDrawerProps) {
-  const navigate = useNavigate();
   const isSupportedPlatformsEnabled = useFeature("supported-platforms");
   const isApplePayEnabled = useFeature("apple-pay-support");
 
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
-  const { onExternalConnect, clearSelectedWallet } =
+  const { onExternalConnect, clearSelectedWallet, onApplePaySelect } =
     useOnchainPurchaseContext();
 
   const [step, setStep] = useState<DrawerStep>("network");
@@ -49,7 +46,6 @@ export function WalletSelectionDrawer({
   const [isApplePayLoading, setIsApplePayLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
   const [chainIds, setChainIds] = useState<Map<string, string>>(new Map());
   const [availableWallets, setAvailableWallets] = useState<
     Map<string, ExternalWallet[]>
@@ -149,24 +145,9 @@ export function WalletSelectionDrawer({
   }, []);
 
   const handleApplePaySelect = useCallback(async () => {
-    setIsApplePayLoading(true);
-    setError(null);
-
-    try {
-      const { data } = await refetchMe();
-      const me = data?.me;
-      const needsVerification =
-        !me?.email || !me?.phoneNumber || !me?.phoneNumberVerifiedAt;
-
-      if (needsVerification) {
-        navigate("/purchase/verification");
-      }
-    } catch (e) {
-      setError(e as Error);
-    } finally {
-      setIsApplePayLoading(false);
-    }
-  }, [refetchMe, navigate]);
+    onApplePaySelect();
+    onClose();
+  }, [onApplePaySelect, onClose]);
 
   const onControllerWalletSelect = useCallback(() => {
     clearSelectedWallet();

@@ -42,7 +42,7 @@ const createCoinbaseOrder = async (
     CreateCoinbaseOnRampOrderDocument,
     {
       input: {
-        purchaseAmount: input.purchaseUSDCAmount,
+        purchaseUSDCAmount: input.purchaseUSDCAmount,
         sandbox: true,
       },
     },

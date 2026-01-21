@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  AppleIcon,
   Button,
   GiftIcon,
   HeaderInner,
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/ui";
+import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import {
   useNavigation,
   useStarterpackContext,
@@ -52,10 +54,24 @@ export function OnchainCheckout() {
     onSendDeposit,
     isFetchingFees,
     layerswapFees,
+    isApplePaySelected,
+    onCreateCoinbaseOrder,
+    isCreatingOrder,
+    usdAmount,
   } = useOnchainPurchaseContext();
+
+  const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const totalUsdAmount = useMemo(() => {
+    return usdAmount * quantity;
+  }, [usdAmount, quantity]);
+
+  const isApplePayAmountTooLow = useMemo(() => {
+    return isApplePaySelected && totalUsdAmount < 2;
+  }, [isApplePaySelected, totalUsdAmount]);
 
   const quote = useMemo(() => {
     if (!starterpackDetails || !isOnchainStarterpack(starterpackDetails)) {
@@ -94,16 +110,20 @@ export function OnchainCheckout() {
     // Disable if there's a fee estimation error (e.g., bridge amount too low)
     if (feeEstimationError) return true;
 
+    // Disable if Apple Pay amount is too low
+    if (isApplePayAmountTooLow) return true;
+
     if (bridgeFrom !== null) {
       // If bridging, wait for fees to be loaded
       return isFetchingFees || !layerswapFees;
     }
 
     return (
-      !hasSufficientBalance ||
+      (!isApplePaySelected && !hasSufficientBalance) ||
       isLoadingBalance ||
       !!balanceError ||
-      isFetchingConversion
+      isFetchingConversion ||
+      isCreatingOrder
     );
   }, [
     feeEstimationError,
@@ -114,12 +134,20 @@ export function OnchainCheckout() {
     isFetchingConversion,
     isFetchingFees,
     layerswapFees,
+    isCreatingOrder,
+    isApplePaySelected,
+    isApplePayAmountTooLow,
   ]);
 
   const showInsufficientBalance =
-    !isLoadingBalance && !hasSufficientBalance && !balanceError && !bridgeFrom;
+    !isLoadingBalance &&
+    !hasSufficientBalance &&
+    !balanceError &&
+    !bridgeFrom &&
+    !isApplePaySelected;
 
-  const showConversionError = conversionError && needsConversion;
+  const showConversionError =
+    conversionError && needsConversion && !isApplePaySelected;
 
   const showBridgeAmountTooLow =
     feeEstimationError?.message?.includes("too low") ?? false;
@@ -129,20 +157,48 @@ export function OnchainCheckout() {
   }, []);
 
   const handlePurchase = useCallback(async () => {
-    if (!hasSufficientBalance && !isFree) return;
+    if (isApplePayAmountTooLow) return;
+    if (!hasSufficientBalance && !isFree && !isApplePaySelected) return;
 
     setIsLoading(true);
     clearError();
 
     try {
-      await onOnchainPurchase();
-      navigate("/purchase/pending", { reset: true });
+      if (isApplePaySelected) {
+        const { data } = await refetchMe();
+        const me = data?.me;
+        const needsVerification =
+          !me?.email || !me?.phoneNumber || !me?.phoneNumberVerifiedAt;
+
+        if (needsVerification) {
+          navigate("/purchase/verification?method=apple-pay", {
+            showClose: true,
+          });
+          return;
+        }
+
+        await onCreateCoinbaseOrder();
+        navigate("/purchase/checkout/coinbase");
+      } else {
+        await onOnchainPurchase();
+        navigate("/purchase/pending", { reset: true });
+      }
     } catch (error) {
       console.error("Purchase failed:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [hasSufficientBalance, isFree, onOnchainPurchase, navigate, clearError]);
+  }, [
+    hasSufficientBalance,
+    isFree,
+    isApplePaySelected,
+    refetchMe,
+    onCreateCoinbaseOrder,
+    onOnchainPurchase,
+    navigate,
+    clearError,
+    isApplePayAmountTooLow,
+  ]);
 
   const handleBridge = useCallback(async () => {
     clearError();
@@ -225,9 +281,19 @@ export function OnchainCheckout() {
               />
             )}
 
+            {isApplePayAmountTooLow && (
+              <ErrorCard
+                variant="warning"
+                title="Amount Too Low"
+                message="Minimum purchase amount is $2.00 for Apple Pay."
+              />
+            )}
+
             <WalletSelector
-              walletName={wallet.name}
-              walletIcon={wallet.subIcon}
+              walletName={isApplePaySelected ? "Apple Pay" : wallet.name}
+              walletIcon={
+                isApplePaySelected ? <AppleIcon size="xs" /> : wallet.subIcon
+              }
               bridgeFrom={bridgeFrom}
               onClick={handleWalletSelect}
             />
@@ -236,15 +302,20 @@ export function OnchainCheckout() {
 
             <QuantityControls
               quantity={quantity}
-              isLoading={isLoading || (bridgeFrom !== null && isFetchingFees)}
+              isLoading={
+                isLoading ||
+                (bridgeFrom !== null && isFetchingFees) ||
+                isCreatingOrder
+              }
               isSendingDeposit={isSendingDeposit}
               globalDisabled={globalDisabled}
-              hasSufficientBalance={hasSufficientBalance}
+              hasSufficientBalance={hasSufficientBalance || isApplePaySelected}
               bridgeFrom={bridgeFrom}
               onIncrement={incrementQuantity}
               onDecrement={decrementQuantity}
               onPurchase={handlePurchase}
               onBridge={handleBridge}
+              isApplePayAmountTooLow={isApplePayAmountTooLow}
             />
           </>
         )}
