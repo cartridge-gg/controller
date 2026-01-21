@@ -44,7 +44,7 @@ export function CoinbaseCheckout() {
           <div className="flex flex-col gap-3">
             <PolicyLink
               label="Guest Checkout Terms of Service"
-              href="https://www.coinbase.com/legal/guest-checkout-terms"
+              href="https://www.coinbase.com/legal/guest-checkout/us"
             />
             <PolicyLink
               label="User Agreement"
