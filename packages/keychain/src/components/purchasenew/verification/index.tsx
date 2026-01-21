@@ -43,6 +43,8 @@ interface VerificationStepViewProps {
   isLoading: boolean;
   type: string;
   error: string | null;
+  autoComplete?: string;
+  name?: string;
 }
 
 const VerificationStepView = ({
@@ -56,6 +58,8 @@ const VerificationStepView = ({
   isLoading,
   type,
   error,
+  autoComplete,
+  name,
 }: VerificationStepViewProps) => (
   <>
     <HeaderInner title={title} icon={icon} variant="compressed" />
@@ -65,6 +69,8 @@ const VerificationStepView = ({
           {label}
         </label>
         <Input
+          name={name}
+          autoComplete={autoComplete}
           placeholder={placeholder}
           value={value}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -374,6 +380,8 @@ export function Verification() {
           onContinue={handleSendEmail}
           isLoading={sendEmailMutation.isLoading}
           type="email"
+          autoComplete="email"
+          name="email"
           error={error}
         />
       );
@@ -407,6 +415,8 @@ export function Verification() {
           onContinue={handleSendPhone}
           isLoading={sendPhoneMutation.isLoading}
           type="tel"
+          autoComplete="tel"
+          name="phone"
           error={error}
         />
       );
