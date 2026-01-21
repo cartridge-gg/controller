@@ -20,9 +20,10 @@ import {
 } from "starknet";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useCollection, useToriiCollection } from "@/hooks/collection";
+import { useToriiCollection } from "@/hooks/collection";
 import { toast } from "sonner";
 import { useTokens } from "@/hooks/token";
+import { useTokenContract } from "@/hooks/contracts";
 import { useNavigation } from "@/context/navigation";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import {
@@ -78,12 +79,7 @@ export function CollectionPurchase() {
     );
   }, [tokenOrders]);
 
-  useCollection({
-    contractAddress: contractAddress,
-    tokenIds: tokenId ? [tokenId] : [],
-  });
-
-  const { collection, status: collectionStatus } = useCollection({
+  const { tokenContract, status: tokenContractStatus } = useTokenContract({
     contractAddress,
   });
 
@@ -121,7 +117,7 @@ export function CollectionPurchase() {
   const { countervalues } = useCountervalue(tokenData);
 
   const props = useMemo(() => {
-    if (!assets || !collection || !tokenOrders) return [];
+    if (!assets || !tokenContract || !tokenOrders) return [];
     return tokenOrders
       .map((order) => {
         const asset = assets.find(
@@ -140,7 +136,7 @@ export function CollectionPurchase() {
           orderId: order.id,
           images: [newImage, oldImage],
           name: tokenName,
-          collection: collection.name,
+          collection: tokenContract.name,
           collectionAddress: contractAddress,
           price: order.price,
           tokenId: asset.token_id ?? "",
@@ -150,7 +146,7 @@ export function CollectionPurchase() {
       .filter((value) => value !== undefined);
   }, [
     assets,
-    collection,
+    tokenContract,
     tokenOrders,
     contractAddress,
     project,
@@ -304,12 +300,12 @@ export function CollectionPurchase() {
   );
 
   const status = useMemo(() => {
-    if (collectionStatus === "error" || assetsStatus === "error")
+    if (tokenContractStatus === "error" || assetsStatus === "error")
       return "error";
-    if (collectionStatus === "loading" || assetsStatus === "loading")
+    if (tokenContractStatus === "loading" || assetsStatus === "loading")
       return "loading";
     return "success";
-  }, [collectionStatus, assetsStatus]);
+  }, [tokenContractStatus, assetsStatus]);
 
   useEffect(() => {
     if (!tokenOrders || tokenOrders.length === 0) return;
@@ -322,7 +318,7 @@ export function CollectionPurchase() {
 
   return (
     <>
-      {status === "loading" || !collection ? (
+      {status === "loading" || !tokenContract ? (
         <LoadingState />
       ) : status === "error" || !token || tokenOrders.length === 0 ? (
         <EmptyState />
