@@ -199,7 +199,7 @@ export const OnchainPurchaseProvider = ({
     onError: setDisplayError,
   });
 
-  const [isApplePaySelected, setIsApplePaySelected] = useState(false);
+  const [isApplePaySelected, setIsApplePaySelected] = useState(true);
   const {
     paymentLink,
     isCreatingOrder,

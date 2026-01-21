@@ -16,7 +16,6 @@ import {
 import { ExternalWallet } from "@cartridge/controller";
 import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { useFeature } from "@/hooks/features";
 import { networkWalletData } from "../../wallet/config";
 import { Network } from "../../types";
 
@@ -31,8 +30,10 @@ export function WalletSelectionDrawer({
   isOpen,
   onClose,
 }: WalletSelectionDrawerProps) {
-  const isSupportedPlatformsEnabled = useFeature("supported-platforms");
-  const isApplePayEnabled = useFeature("apple-pay-support");
+  // const isSupportedPlatformsEnabled = useFeature("supported-platforms");
+  // const isApplePayEnabled = useFeature("apple-pay-support");
+  const isSupportedPlatformsEnabled = true;
+  const isApplePayEnabled = true;
 
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
