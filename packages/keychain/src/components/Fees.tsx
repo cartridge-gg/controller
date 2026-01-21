@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Spinner } from "@cartridge/ui";
 import { FeeEstimate } from "starknet";
-
-import { convertTokenAmountToUSD, useFeeToken } from "@/hooks/tokens";
+import {
+  convertTokenAmountToUSD,
+  formatBalance,
+  useFeeToken,
+} from "@/hooks/tokens";
 import { ErrorAlert } from "./ErrorAlert";
-import { ERC20 } from "./provider/tokens";
+import { Total } from "./Total";
 
 export function Fees({
   isLoading: isEstimating,
@@ -14,7 +16,8 @@ export function Fees({
   maxFee?: FeeEstimate;
 }) {
   const { isLoading: isPriceLoading, token, error } = useFeeToken();
-  const [formattedFee, setFormattedFee] = useState<string>();
+  const [feeValue, setFeeValue] = useState<number>();
+  const [usdFee, setUsdFee] = useState<string>();
   const isLoading = isEstimating || isPriceLoading;
 
   useEffect(() => {
@@ -23,17 +26,21 @@ export function Fees({
     }
 
     if (maxFee && (maxFee.overall_fee == "0x0" || maxFee.overall_fee == "0")) {
-      setFormattedFee("FREE");
+      setUsdFee("FREE");
       return;
     }
 
     if (maxFee && maxFee.overall_fee && token.price) {
-      const formatted = convertTokenAmountToUSD(
+      const fee = Number(
+        formatBalance(BigInt(maxFee.overall_fee), token.decimals),
+      );
+      const usd = convertTokenAmountToUSD(
         BigInt(maxFee.overall_fee),
         18,
         token.price,
       );
-      setFormattedFee(formatted);
+      setFeeValue(fee);
+      setUsdFee(usd);
     }
   }, [maxFee, token, error, isLoading]);
 
@@ -47,50 +54,20 @@ export function Fees({
     );
   }
 
+  if (usdFee === "FREE") {
+    return null;
+  }
+
   return (
     <div className="w-full overflow-hidden rounded">
-      {formattedFee ? (
-        formattedFee == "FREE" ? undefined : (
-          <LineItem
-            name="Network Fee"
-            amount={formattedFee}
-            token={token}
-            isLoading={isLoading}
-          />
-        )
-      ) : (
-        <LineItem name="Calculating Fees" isLoading />
-      )}
-    </div>
-  );
-}
-
-function LineItem({
-  name,
-  token,
-  amount,
-  isLoading = false,
-}: {
-  name: string;
-  token?: ERC20;
-  amount?: string;
-  isLoading?: boolean;
-}) {
-  return (
-    <div className="flex items-center w-full h-10 p-4 bg-background-200 text-foreground-400">
-      <p className="text-xs">{name}</p>
-      <div className="flex-1" />
-
-      {isLoading || !token ? (
-        <Spinner />
-      ) : (
-        <div className="flex items-center justify-center gap-0">
-          <p className="text-sm text-foreground">{amount}</p>
-          {amount !== "FREE" && (
-            <p className="text-sm text-foreground pl-1">{token.symbol}</p>
-          )}
-        </div>
-      )}
+      <Total
+        label={isLoading ? "Calculating Fees" : "Network Fee"}
+        token={token}
+        totalValue={feeValue ?? 0}
+        decimals={2}
+        usdValue={usdFee}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

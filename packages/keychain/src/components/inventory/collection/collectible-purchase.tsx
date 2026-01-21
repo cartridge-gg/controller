@@ -7,7 +7,6 @@ import {
   Token,
   Thumbnail,
   ThumbnailCollectible,
-  InfoIcon,
 } from "@cartridge/ui";
 import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
@@ -39,7 +38,7 @@ import {
 } from "@cartridge/arcade/marketplace/react";
 import { StatusType } from "@cartridge/arcade";
 import { ArcadeContext } from "@/context/arcade";
-import { TotalTooltip } from "./total-tooltip";
+import { CollectionFooter } from "./footer";
 
 export function CollectiblePurchase() {
   const { address: contractAddress, tokenId } = useParams();
@@ -168,14 +167,6 @@ export function CollectiblePurchase() {
   );
 
   const { countervalues } = useCountervalue(tokenData);
-
-  const totalUsdPrice = useMemo(() => {
-    if (!countervalues) return 0;
-    return countervalues.reduce(
-      (acc, value) => acc + (value?.current?.value ?? 0),
-      0,
-    );
-  }, [countervalues]);
 
   const props = useMemo(() => {
     if (!assets || !collection || !tokenOrders) return [];
@@ -398,36 +389,16 @@ export function CollectiblePurchase() {
 
                 <div className="flex-1" />
 
-                <div className="flex gap-3 w-full">
-                  <div className="flex flex-1 gap-1 p-3 h-10 items-center justify-between bg-background-125 border border-background-200 rounded">
-                    <p className="text-sm font-medium text-foreground-400">
-                      Total
-                    </p>
-                    <TotalTooltip
-                      trigger={<InfoIcon size="xs" color="gray" />}
-                      tokens={props.map((args) => ({
-                        name: args.name,
-                        amount: args.finalPrice.toFixed(fixedValue),
-                      }))}
-                      fees={fees}
-                      fixedFeeValue={fixedFeeValue}
-                      symbol={token.metadata.symbol}
-                    />
-                    <div className="flex-1" />
-                    <p className="text-sm font-medium text-foreground-300 mr-1">
-                      ${`${totalUsdPrice.toFixed(2)}`}
-                    </p>
-                    <p className="text-sm font-medium text-foreground-100">
-                      {`${floatPrice.toFixed(fixedValue)}`}
-                    </p>
-                  </div>
-                  <div className="flex gap-1 p-2.5 h-10 items-center justify-between bg-background-125 border border-background-200 rounded">
-                    <Thumbnail icon={token.metadata.image || ""} size="sm" />
-                    <p className="text-sm font-medium text-foreground-100">
-                      {token.metadata.symbol}
-                    </p>
-                  </div>
-                </div>
+                <CollectionFooter
+                  token={token}
+                  fees={fees}
+                  totalPrice={floatPrice}
+                  feeDecimals={fixedFeeValue}
+                  orders={props.map((args) => ({
+                    name: args.name,
+                    amount: args.finalPrice.toFixed(fixedValue),
+                  }))}
+                />
               </div>
             </ExecutionContainer>
           ) : null}
