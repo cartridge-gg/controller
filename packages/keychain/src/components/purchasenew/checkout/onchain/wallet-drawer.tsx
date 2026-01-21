@@ -31,7 +31,6 @@ export function WalletSelectionDrawer({
   isOpen,
   onClose,
 }: WalletSelectionDrawerProps) {
-  const isSupportedPlatformsEnabled = useFeature("supported-platforms");
   const isApplePayEnabled = useFeature("apple-pay-support");
 
   const { isMainnet, externalDetectWallets } = useConnection();
@@ -52,17 +51,15 @@ export function WalletSelectionDrawer({
   >(new Map());
 
   const selectedNetworks = useMemo(() => {
-    const platforms = isSupportedPlatformsEnabled
-      ? "starknet;ethereum;base;arbitrum;optimism"
-      : "starknet";
+    const platforms = isMainnet
+      ? ["starknet", "ethereum", "base", "arbitrum", "optimism"]
+      : ["starknet"];
 
-    let networks =
-      platforms
-        ?.split(";")
-        .map((platform) =>
-          networkWalletData.networks.find((n) => n.platform === platform),
-        )
-        .filter(Boolean) || [];
+    let networks = platforms
+      .map((platform) =>
+        networkWalletData.networks.find((n) => n.platform === platform),
+      )
+      .filter(Boolean);
 
     // If acquisition type is claimed, filter networks to only show those with merkle drop support
     if (starterpackDetails?.type === "claimed") {
@@ -78,7 +75,7 @@ export function WalletSelectionDrawer({
     }
 
     return networks as Network[];
-  }, [starterpackDetails, isSupportedPlatformsEnabled]);
+  }, [isMainnet, starterpackDetails]);
 
   // Reset state when drawer closes
   useEffect(() => {
