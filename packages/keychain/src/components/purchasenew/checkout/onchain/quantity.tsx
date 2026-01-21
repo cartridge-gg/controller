@@ -11,6 +11,8 @@ interface QuantityControlsProps {
   onDecrement: () => void;
   onPurchase: () => void;
   onBridge: () => void;
+  purchaseLabel?: string;
+  isApplePayAmountTooLow?: boolean;
 }
 
 export function QuantityControls({
@@ -24,10 +26,14 @@ export function QuantityControls({
   onDecrement,
   onPurchase,
   onBridge,
+  purchaseLabel: customPurchaseLabel,
+  isApplePayAmountTooLow,
 }: QuantityControlsProps) {
-  const purchaseLabel = quantity > 1 ? `Buy ${quantity}` : "Buy";
+  const purchaseLabel =
+    customPurchaseLabel || (quantity > 1 ? `Buy ${quantity}` : "Buy");
   const isQuantityDisabled =
-    (globalDisabled && hasSufficientBalance) || isSendingDeposit;
+    (globalDisabled && hasSufficientBalance && !isApplePayAmountTooLow) ||
+    isSendingDeposit;
 
   return (
     <div className="flex flex-row gap-3">

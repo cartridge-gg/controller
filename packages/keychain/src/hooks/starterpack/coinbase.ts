@@ -4,11 +4,8 @@ import {
   CoinbaseOnrampTransactionsQuery,
   CreateCoinbaseOnRampOrderDocument,
   CreateCoinbaseOnRampOrderMutation,
-  CoinbaseOnrampRequirementsDocument,
-  CoinbaseOnrampRequirementsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { request } from "@/utils/graphql";
-import { getClientIp } from "@/utils";
 import Controller from "@/utils/controller";
 
 // Derive types from the actual GraphQL query/mutation results
@@ -16,13 +13,9 @@ export type CoinbaseOrderResult =
   CreateCoinbaseOnRampOrderMutation["createCoinbaseOnrampOrder"];
 export type CoinbaseTransactionResult =
   CoinbaseOnrampTransactionsQuery["coinbaseOnrampTransactions"]["transactions"][number];
-export type CoinbaseRequirementsResult =
-  CoinbaseOnrampRequirementsQuery["coinbaseOnrampRequirements"];
 
 export interface CreateOrderInput {
-  username: string;
-  destinationAddress: string;
-  purchaseAmount: string;
+  purchaseUSDCAmount: string;
 }
 
 export interface UseCoinbaseOptions {
@@ -40,24 +33,16 @@ export interface UseCoinbaseReturn {
   // Actions
   createOrder: (input: CreateOrderInput) => Promise<CoinbaseOrderResult>;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
-  getRequirements: (username: string) => Promise<CoinbaseRequirementsResult>;
 }
 
 const createCoinbaseOrder = async (
   input: CreateOrderInput,
 ): Promise<CoinbaseOrderResult> => {
-  const clientIp = await getClientIp();
-
   const result = await request<CreateCoinbaseOnRampOrderMutation>(
     CreateCoinbaseOnRampOrderDocument,
     {
       input: {
-        partnerUserRef: input.username,
-        clientIp,
-        destinationAddress: input.destinationAddress,
-        purchaseAmount: input.purchaseAmount,
-        paymentCurrency: "USD",
-        domain: "https://x.cartridge.gg",
+        purchaseUSDCAmount: input.purchaseUSDCAmount,
         sandbox: true,
       },
     },
@@ -75,17 +60,6 @@ const getCoinbaseTransactions = async (
   );
 
   return result.coinbaseOnrampTransactions.transactions;
-};
-
-const getCoinbaseRequirements = async (
-  username: string,
-): Promise<CoinbaseRequirementsResult> => {
-  const result = await request<CoinbaseOnrampRequirementsQuery>(
-    CoinbaseOnrampRequirementsDocument,
-    { username },
-  );
-
-  return result.coinbaseOnrampRequirements;
 };
 
 /**
@@ -112,8 +86,8 @@ export function useCoinbase({
 
         const order = await createCoinbaseOrder(input);
 
-        setOrderId(order.orderId);
-        setPaymentLink(order.paymentLink);
+        setOrderId(order.coinbaseOrder.orderId);
+        setPaymentLink(order.coinbaseOrder.paymentLink);
 
         return order;
       } catch (err) {
@@ -140,18 +114,6 @@ export function useCoinbase({
     [onError],
   );
 
-  const getRequirements = useCallback(
-    async (username: string) => {
-      try {
-        return await getCoinbaseRequirements(username);
-      } catch (err) {
-        onError?.(err as Error);
-        throw err;
-      }
-    },
-    [onError],
-  );
-
   return {
     orderId,
     paymentLink,
@@ -159,6 +121,5 @@ export function useCoinbase({
     orderError,
     createOrder,
     getTransactions,
-    getRequirements,
   };
 }

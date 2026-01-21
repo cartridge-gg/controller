@@ -6,6 +6,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { useLocation } from "react-router-dom";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
@@ -25,7 +26,9 @@ import {
   useExternalWallet,
   useLayerswap,
   useTokenSelection,
+  useCoinbase,
   type TokenOption,
+  type CoinbaseTransactionResult,
 } from "@/hooks/starterpack";
 import { Explorer } from "@/hooks/starterpack/layerswap";
 
@@ -73,6 +76,11 @@ export interface OnchainPurchaseContextType {
   setRequestedAmount: (amount: number) => void;
   feeEstimationError: Error | null;
 
+  // Coinbase / Apple Pay state
+  isApplePaySelected: boolean;
+  paymentLink: string | undefined;
+  isCreatingOrder: boolean;
+
   // Actions
   onOnchainPurchase: () => Promise<void>;
   onExternalConnect: (
@@ -82,6 +90,9 @@ export interface OnchainPurchaseContextType {
   ) => Promise<string | undefined>;
   onSendDeposit: () => Promise<void>;
   waitForDeposit: (swapId: string) => Promise<boolean>;
+  onApplePaySelect: () => void;
+  onCreateCoinbaseOrder: () => Promise<void>;
+  getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
 }
 
 export const OnchainPurchaseContext = createContext<
@@ -97,6 +108,7 @@ export const OnchainPurchaseProvider = ({
 }: OnchainPurchaseProviderProps) => {
   const { controller, isMainnet, origin, externalSendTransaction } =
     useConnection();
+  const location = useLocation();
   const {
     starterpackId,
     starterpackDetails,
@@ -116,13 +128,30 @@ export const OnchainPurchaseProvider = ({
     selectedWallet,
     selectedPlatform,
     walletAddress,
-    onExternalConnect,
-    clearSelectedWallet,
+    onExternalConnect: onExternalConnectInternal,
+    clearSelectedWallet: clearSelectedWalletInternal,
     walletError,
   } = useExternalWallet({
     controller,
     onError: setDisplayError,
   });
+
+  const clearSelectedWallet = useCallback(() => {
+    clearSelectedWalletInternal();
+    setIsApplePaySelected(false);
+  }, [clearSelectedWalletInternal]);
+
+  const onExternalConnect = useCallback(
+    async (
+      wallet: ExternalWallet,
+      platform: ExternalPlatform,
+      chainId?: string,
+    ) => {
+      setIsApplePaySelected(false);
+      return onExternalConnectInternal(wallet, platform, chainId);
+    },
+    [onExternalConnectInternal],
+  );
 
   // Get onchain starterpack details if available
   const onchainDetails =
@@ -170,6 +199,26 @@ export const OnchainPurchaseProvider = ({
     onError: setDisplayError,
   });
 
+  const [isApplePaySelected, setIsApplePaySelected] = useState(false);
+  const {
+    paymentLink,
+    isCreatingOrder,
+    createOrder: createCoinbaseOrder,
+    getTransactions,
+  } = useCoinbase({
+    controller,
+    onError: setDisplayError,
+  });
+
+  // Handle Apple Pay selection from URL (returning from verification)
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get("method") === "apple-pay") {
+      setIsApplePaySelected(true);
+      clearSelectedWalletInternal();
+    }
+  }, [location.search, clearSelectedWalletInternal]);
+
   // Reset state when starterpack changes
   useEffect(() => {
     resetTokenSelection();
@@ -205,6 +254,18 @@ export const OnchainPurchaseProvider = ({
   useEffect(() => {
     setDisplayError(undefined);
   }, [selectedToken, selectedWallet, setDisplayError]);
+
+  // Auto-select USDC when Apple Pay is selected
+  useEffect(() => {
+    if (isApplePaySelected && availableTokens.length > 0) {
+      const usdcToken = availableTokens.find(
+        (token) => token.symbol === "USDC",
+      );
+      if (usdcToken && selectedToken?.address !== usdcToken.address) {
+        setSelectedToken(usdcToken);
+      }
+    }
+  }, [isApplePaySelected, availableTokens, selectedToken, setSelectedToken]);
 
   // Wrap onSendDeposit to clear errors before sending
   const onSendDeposit = useCallback(async () => {
@@ -386,6 +447,31 @@ export const OnchainPurchaseProvider = ({
     setDisplayError,
   ]);
 
+  const onApplePaySelect = useCallback(() => {
+    setIsApplePaySelected(true);
+    clearSelectedWalletInternal();
+  }, [clearSelectedWalletInternal]);
+
+  const onCreateCoinbaseOrder = useCallback(async () => {
+    if (!onchainDetails?.quote) {
+      throw new Error("Quote not loaded yet");
+    }
+
+    if (isCreatingOrder || paymentLink) return;
+
+    const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
+
+    await createCoinbaseOrder({
+      purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
+    });
+  }, [
+    onchainDetails,
+    quantity,
+    isCreatingOrder,
+    paymentLink,
+    createCoinbaseOrder,
+  ]);
+
   const contextValue: OnchainPurchaseContextType = {
     purchaseItems,
     quantity,
@@ -401,7 +487,7 @@ export const OnchainPurchaseProvider = ({
     convertedPrice,
     swapQuote,
     isFetchingConversion,
-    isTokenSelectionLocked,
+    isTokenSelectionLocked: isTokenSelectionLocked || isApplePaySelected,
     conversionError,
     usdAmount,
     layerswapFees,
@@ -413,10 +499,16 @@ export const OnchainPurchaseProvider = ({
     setRequestedAmount,
     depositAmount,
     feeEstimationError,
+    isApplePaySelected,
+    paymentLink,
+    isCreatingOrder,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,
     waitForDeposit,
+    onApplePaySelect,
+    onCreateCoinbaseOrder,
+    getTransactions,
   };
 
   return (

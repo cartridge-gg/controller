@@ -760,6 +760,14 @@ export type CoinbaseOnrampOrder = {
   updatedAt: Scalars["Time"];
 };
 
+export type CoinbaseOnrampOrderResponse = {
+  __typename?: "CoinbaseOnrampOrderResponse";
+  /** The Coinbase onramp order details. */
+  coinbaseOrder: CoinbaseOnrampOrder;
+  /** The Layerswap payment details for tracking the bridge. */
+  layerswapPayment: LayerswapPayment;
+};
+
 export type CoinbaseOnrampQuote = {
   __typename?: "CoinbaseOnrampQuote";
   /** Fee charged by Coinbase. */
@@ -793,25 +801,6 @@ export type CoinbaseOnrampQuoteInput = {
   paymentCurrency: Scalars["String"];
   /** ISO 3166-2 subdivision code (e.g., "NY"). Required for US users. */
   subdivision?: InputMaybe<Scalars["String"]>;
-};
-
-/** Indicates what user information is required for Coinbase onramp. */
-export type CoinbaseOnrampRequirements = {
-  __typename?: "CoinbaseOnrampRequirements";
-  /** True if the user needs to provide an email address. */
-  needsEmail: Scalars["Boolean"];
-  /** True if the user needs to provide a valid US phone number. */
-  needsPhoneNumber: Scalars["Boolean"];
-  /** True if the user's phone number needs to be (re)verified. */
-  needsPhoneVerification: Scalars["Boolean"];
-};
-
-export type CoinbaseOnrampSession = {
-  __typename?: "CoinbaseOnrampSession";
-  /** The single-use Coinbase onramp URL. This URL can only be used once. */
-  onrampUrl: Scalars["String"];
-  /** The session token (for reference, already embedded in the URL). */
-  sessionToken: Scalars["String"];
 };
 
 export enum CoinbaseOnrampStatus {
@@ -871,8 +860,6 @@ export type CoinbaseTransactionsInput = {
   pageSize?: InputMaybe<Scalars["Int"]>;
   /** If true, use sandbox mode to query sandbox transactions. */
   sandbox?: InputMaybe<Scalars["Boolean"]>;
-  /** The controller username to get transactions for. */
-  username: Scalars["String"];
 };
 
 export type CoinbaseTransactionsResponse = {
@@ -1074,49 +1061,13 @@ export type ControllerWhereInput = {
 };
 
 export type CreateCoinbaseOnrampOrderInput = {
-  /** The IP address of the end user (required for compliance). */
-  clientIp?: InputMaybe<Scalars["String"]>;
-  /** The destination wallet address on Base to receive the USDC. */
-  destinationAddress: Scalars["String"];
-  /**
-   * The domain where the Apple Pay button will be rendered.
-   * Required when embedding the payment link in an iframe.
-   */
-  domain?: InputMaybe<Scalars["String"]>;
-  /**
-   * The amount of fiat currency to pay (e.g., "100.00" for $100 USD).
-   * Either paymentAmount or purchaseAmount must be provided.
-   */
-  paymentAmount?: InputMaybe<Scalars["String"]>;
-  /** The fiat currency to pay with. Currently only "USD" is supported. */
-  paymentCurrency: Scalars["String"];
   /**
    * The amount of USDC to purchase (e.g., "100.000000" for 100 USDC).
-   * Either paymentAmount or purchaseAmount must be provided.
+   * This is the amount that will be delivered to the bridge.
    */
-  purchaseAmount?: InputMaybe<Scalars["String"]>;
-  /** If true, use sandbox mode for testing (no real charges). */
+  purchaseUSDCAmount: Scalars["String"];
+  /** If true, use sandbox mode (Base Sepolia -> Starknet Sepolia). */
   sandbox?: InputMaybe<Scalars["Boolean"]>;
-  /** The controller username to create the onramp order for. */
-  username: Scalars["String"];
-};
-
-export type CreateCoinbaseOnrampSessionInput = {
-  /** The IP address of the end user (required for compliance). */
-  clientIp: Scalars["String"];
-  /** The destination wallet address to receive the crypto. */
-  destinationAddress: Scalars["String"];
-  /** The destination network (e.g., "base", "ethereum"). */
-  destinationNetwork: CoinbaseNetwork;
-  /**
-   * The amount of fiat currency to pay (e.g., "100.00" for $100 USD).
-   * Optional - if provided, creates a one-click buy URL.
-   */
-  paymentAmount?: InputMaybe<Scalars["String"]>;
-  /** The fiat currency to pay with (e.g., "USD"). Required if paymentAmount is provided. */
-  paymentCurrency?: InputMaybe<Scalars["String"]>;
-  /** URL to redirect the user after completing the purchase. */
-  redirectUrl?: InputMaybe<Scalars["String"]>;
 };
 
 export type CreateCryptoPaymentInput = {
@@ -2565,16 +2516,10 @@ export type Mutation = {
   beginRegistration: Scalars["JSON"];
   claimFreeStarterpack: Scalars["String"];
   /**
-   * Create a Coinbase onramp order for purchasing USDC via Apple Pay.
-   * Returns a payment link URL that can be used to complete the purchase.
+   * Create a unified Coinbase onramp order.
+   * This mutation orchestrates both Coinbase and Layerswap to bridge USDC from Apple Pay to Starknet.
    */
-  createCoinbaseOnrampOrder: CoinbaseOnrampOrder;
-  /**
-   * Create a Coinbase onramp session with a single-use URL.
-   * This is the recommended approach for integrating Coinbase onramp.
-   * Returns a session token and URL that can be used once to complete a purchase.
-   */
-  createCoinbaseOnrampSession: CoinbaseOnrampSession;
+  createCoinbaseOnrampOrder: CoinbaseOnrampOrderResponse;
   createCryptoPayment: CryptoPayment;
   createDeployment: Deployment;
   createLayerswapDeposit: LayerswapPayment;
@@ -2664,10 +2609,6 @@ export type MutationClaimFreeStarterpackArgs = {
 
 export type MutationCreateCoinbaseOnrampOrderArgs = {
   input: CreateCoinbaseOnrampOrderInput;
-};
-
-export type MutationCreateCoinbaseOnrampSessionArgs = {
-  input: CreateCoinbaseOnrampSessionInput;
 };
 
 export type MutationCreateCryptoPaymentArgs = {
@@ -3941,12 +3882,6 @@ export type Query = {
    */
   coinbaseOnrampQuote: CoinbaseOnrampQuote;
   /**
-   * Check if a user has the required information for Coinbase onramp.
-   * Returns flags indicating what information is missing or needs to be updated.
-   * Does not expose any user data.
-   */
-  coinbaseOnrampRequirements: CoinbaseOnrampRequirements;
-  /**
    * Get the status and history of Coinbase onramp transactions for a user.
    * Returns a paginated list of transactions in reverse chronological order.
    */
@@ -4041,10 +3976,6 @@ export type QueryBalancesArgs = {
 
 export type QueryCoinbaseOnrampQuoteArgs = {
   input: CoinbaseOnrampQuoteInput;
-};
-
-export type QueryCoinbaseOnrampRequirementsArgs = {
-  username: Scalars["String"];
 };
 
 export type QueryCoinbaseOnrampTransactionsArgs = {

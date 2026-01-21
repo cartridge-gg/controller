@@ -28,6 +28,7 @@ export function Pending() {
     swapId,
     quantity,
     selectedPlatform,
+    isApplePaySelected,
   } = useOnchainPurchaseContext();
 
   // Claim flow (merkle drop)
@@ -38,6 +39,18 @@ export function Pending() {
         items={claimItems}
         quantity={quantity}
         transactionHash={transactionHash!}
+      />
+    );
+  }
+
+  // Apple Pay / Coinbase flow
+  if (isApplePaySelected) {
+    return (
+      <BridgePending
+        name={starterpackDetails?.name || "Items"}
+        items={purchaseItems}
+        paymentMethod="apple-pay"
+        selectedPlatform="base"
       />
     );
   }

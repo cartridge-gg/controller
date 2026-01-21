@@ -57,6 +57,7 @@ import { Authenticate } from "./authenticate";
 import { Disconnect } from "./disconnect";
 import { StarterpackProviders } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
+import { CoinbaseCheckout } from "./purchasenew/checkout/coinbase";
 import { useAccount } from "@/hooks/account";
 import { BoosterPack } from "./booster-pack";
 import { useEffect } from "react";
@@ -239,6 +240,7 @@ export function App() {
           <Route path="verification" element={<Verification />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/onchain" element={<OnchainCheckout />} />
+          <Route path="checkout/coinbase" element={<CoinbaseCheckout />} />
           <Route path="review" element={<></>} />
           <Route path="pending" element={<PurchasePending />} />
           <Route path="success" element={<PurchaseSuccess />} />
