@@ -255,6 +255,18 @@ export const OnchainPurchaseProvider = ({
     setDisplayError(undefined);
   }, [selectedToken, selectedWallet, setDisplayError]);
 
+  // Auto-select USDC when Apple Pay is selected
+  useEffect(() => {
+    if (isApplePaySelected && availableTokens.length > 0) {
+      const usdcToken = availableTokens.find(
+        (token) => token.symbol === "USDC",
+      );
+      if (usdcToken && selectedToken?.address !== usdcToken.address) {
+        setSelectedToken(usdcToken);
+      }
+    }
+  }, [isApplePaySelected, availableTokens, selectedToken, setSelectedToken]);
+
   // Wrap onSendDeposit to clear errors before sending
   const onSendDeposit = useCallback(async () => {
     setDisplayError(undefined);
@@ -475,7 +487,7 @@ export const OnchainPurchaseProvider = ({
     convertedPrice,
     swapQuote,
     isFetchingConversion,
-    isTokenSelectionLocked,
+    isTokenSelectionLocked: isTokenSelectionLocked || isApplePaySelected,
     conversionError,
     usdAmount,
     layerswapFees,
