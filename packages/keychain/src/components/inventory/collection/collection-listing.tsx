@@ -408,7 +408,9 @@ const ListingConfirmation = ({
           Total potential earnings
         </p>
         <div className="flex gap-1.5">
-          <p className="text-sm text-foreground-400">{`(${totalEarnings})`}</p>
+          {totalEarnings && (
+            <p className="text-sm text-foreground-400">{`(${totalEarnings})`}</p>
+          )}
           <p className="text-sm font-medium text-foreground-100">
             {totalPriceDisplay}
           </p>
