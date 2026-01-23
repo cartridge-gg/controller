@@ -541,7 +541,6 @@ export function useLayerswap({
       const input = depositToLayerswapInput(
         requestedAmount,
         0, // Fees will be fetched and added
-        controller.username(),
         selectedPlatform,
         isMainnet,
       );
