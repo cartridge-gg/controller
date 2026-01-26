@@ -39,6 +39,7 @@ import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
 import { Execute } from "./Execute";
 import { SignMessage } from "./SignMessage";
+import { LocationPrompt } from "./location/LocationPrompt";
 import { ConnectRoute } from "./ConnectRoute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
@@ -290,6 +291,7 @@ export function App() {
         />
         <Route path="/execute" element={<Execute />} />
         <Route path="/sign-message" element={<SignMessage />} />
+        <Route path="/location" element={<LocationPrompt />} />
         <Route path="/deploy" element={<DeployController />} />
         <Route path="/connect" element={<ConnectRoute />} />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />

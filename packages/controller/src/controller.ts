@@ -25,6 +25,7 @@ import {
   ProfileContextTypeVariant,
   ResponseCodes,
   OpenOptions,
+  LocationPromptOptions,
   StarterpackOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
@@ -430,6 +431,26 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return this.keychain.username();
+  }
+
+  async openLocationPrompt(options?: LocationPromptOptions) {
+    if (!this.iframes) {
+      return;
+    }
+
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    const responsePromise = this.keychain.openLocationPrompt(options);
+    this.iframes.keychain.open();
+
+    try {
+      return await responsePromise;
+    } finally {
+      this.iframes.keychain.close();
+    }
   }
 
   openPurchaseCredits() {

@@ -1,0 +1,86 @@
+import {
+  ConnectError,
+  LocationPromptReply,
+  LocationPromptOptions,
+} from "@cartridge/controller";
+import { generateCallbackId, getCallbacks, storeCallbacks } from "./callbacks";
+
+export type LocationPromptParams = {
+  id: string;
+};
+
+type LocationPromptCallback = {
+  resolve?: (result: LocationPromptReply | ConnectError) => void;
+  reject?: (reason?: unknown) => void;
+  onCancel?: () => void;
+};
+
+export function createLocationPromptUrl(
+  options: LocationPromptCallback & LocationPromptOptions = {},
+): string {
+  const id = generateCallbackId();
+
+  if (options.resolve || options.reject || options.onCancel) {
+    storeCallbacks(id, {
+      resolve: options.resolve,
+      reject: options.reject,
+      onCancel: options.onCancel,
+    });
+  }
+
+  let url = `/location?id=${encodeURIComponent(id)}`;
+
+  if (options.returnTo) {
+    url += `&returnTo=${encodeURIComponent(options.returnTo)}`;
+  }
+
+  return url;
+}
+
+export function parseLocationPromptParams(searchParams: URLSearchParams): {
+  params: LocationPromptParams;
+  resolve?: (result: LocationPromptReply | ConnectError) => void;
+  reject?: (reason?: unknown) => void;
+  onCancel?: () => void;
+} | null {
+  try {
+    const id = searchParams.get("id");
+
+    if (!id) {
+      console.error("Missing required parameters");
+      return null;
+    }
+
+    const callbacks = getCallbacks(id) as LocationPromptCallback | undefined;
+
+    return {
+      params: { id },
+      resolve: callbacks?.resolve,
+      reject: callbacks?.reject,
+      onCancel: callbacks?.onCancel,
+    };
+  } catch (error) {
+    console.error("Failed to parse location prompt params:", error);
+    return null;
+  }
+}
+
+export function locationPromptFactory({
+  navigate,
+}: {
+  navigate: (
+    to: string | number,
+    options?: { replace?: boolean; state?: unknown },
+  ) => void;
+}) {
+  return (options?: LocationPromptOptions) =>
+    new Promise<LocationPromptReply | ConnectError>((resolve, reject) => {
+      const url = createLocationPromptUrl({
+        resolve,
+        reject,
+        returnTo: options?.returnTo,
+      });
+
+      navigate(url, { replace: true });
+    });
+}
