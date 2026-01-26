@@ -72,7 +72,7 @@ export default {
         contract_types: [],
         pagination: {
           cursor: undefined,
-          limit: BATCH_SIZE,
+          limit: 1,
           order_by: [],
           direction: "Forward",
         },

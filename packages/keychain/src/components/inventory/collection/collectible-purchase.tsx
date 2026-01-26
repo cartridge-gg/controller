@@ -118,7 +118,7 @@ export function CollectiblePurchase() {
     );
   }, [marketplaceFeeConfig, amount]);
 
-  const { fees, fixedFeeValue } = useMemo(() => {
+  const { fees } = useMemo(() => {
     const price = tokenOrders.reduce(
       (acc: number, order) => acc + Number(order?.price),
       0,
@@ -127,7 +127,6 @@ export function CollectiblePurchase() {
       (acc: bigint, royalty) => acc + royalty,
       0n,
     );
-    const fixedFeeValue = 3;
     const fees = [
       {
         label: "Marketplace Fee",
@@ -149,7 +148,7 @@ export function CollectiblePurchase() {
       },
     ];
     const totalFees = fees.reduce((acc, fee) => acc + fee.amount, 0);
-    return { fees, totalFees, fixedFeeValue };
+    return { fees, totalFees };
   }, [marketplaceFee, royalties, token, tokenOrders]);
 
   const tokenData = useMemo(
@@ -393,7 +392,7 @@ export function CollectiblePurchase() {
                   token={token}
                   fees={fees}
                   totalPrice={floatPrice}
-                  feeDecimals={fixedFeeValue}
+                  feeDecimals={3}
                   orders={props.map((args) => ({
                     name: args.name,
                     amount: args.finalPrice.toFixed(fixedValue),
