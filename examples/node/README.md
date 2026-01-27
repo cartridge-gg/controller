@@ -21,7 +21,7 @@ npm start
 Run a minimal session registration + execute flow:
 
 ```bash
-node --experimental-wasm-modules --import tsx src/simple-session.ts
+node --experimental-wasm-modules --import tsx src/session.ts
 ```
 
 This prints a URL to authorize the session in your browser, then executes a
