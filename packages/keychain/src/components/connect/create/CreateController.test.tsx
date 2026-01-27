@@ -239,18 +239,6 @@ describe("CreateController", () => {
       ),
     ).toBeInTheDocument();
   });
-  it("does not show warning for unverified theme when isSlot is true", async () => {
-    mockUseControllerTheme.mockReturnValue({
-      name: "cartridge",
-      verified: false,
-      icon: "icon-url",
-      cover: "cover-url",
-    });
-    renderWithProviders(<CreateController {...defaultProps} isSlot />);
-    expect(
-      screen.queryByText("Please proceed with caution"),
-    ).not.toBeInTheDocument();
-  });
   it("calls onCreated callback after successful creation", async () => {
     const handleSubmit = vi.fn().mockImplementation(() => {
       return Promise.resolve();

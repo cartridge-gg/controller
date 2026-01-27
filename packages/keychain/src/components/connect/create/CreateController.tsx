@@ -92,7 +92,6 @@ function CreateControllerForm({
   isDropdownOpen,
   onDropdownOpenChange,
   authOptions,
-  isSlot,
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
   const { isOpen: keyboardIsOpen, viewportHeight } = useDetectKeyboardOpen();
@@ -240,7 +239,7 @@ function CreateControllerForm({
             />
           )}
 
-          {!theme.verified && !isSlot && (
+          {!theme.verified && (
             <ErrorAlert
               title="Please proceed with caution"
               isExpanded={false}
@@ -306,7 +305,6 @@ export function CreateControllerView({
   submitButtonRef,
   isDropdownOpen,
   onDropdownOpenChange,
-  isSlot,
 }: CreateControllerViewProps) {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -353,7 +351,6 @@ export function CreateControllerView({
           isDropdownOpen={isDropdownOpen}
           onDropdownOpenChange={onDropdownOpenChange}
           authOptions={authOptions}
-          isSlot={isSlot}
         />
         <ChooseSignupMethodForm
           isLoading={isLoading}
