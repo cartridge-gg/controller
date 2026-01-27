@@ -1,3 +1,8 @@
+---
+name: release-prep
+description: Prepare repository for a new release. Use before creating a release PR to ensure everything is ready.
+---
+
 # Release Preparation Skill
 
 Prepare repository for a new release.

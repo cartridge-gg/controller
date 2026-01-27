@@ -29,6 +29,7 @@ import {
   useCoinbase,
   type TokenOption,
   type CoinbaseTransactionResult,
+  type CoinbaseQuoteResult,
 } from "@/hooks/starterpack";
 import { Explorer } from "@/hooks/starterpack/layerswap";
 
@@ -80,6 +81,8 @@ export interface OnchainPurchaseContextType {
   isApplePaySelected: boolean;
   paymentLink: string | undefined;
   isCreatingOrder: boolean;
+  coinbaseQuote: CoinbaseQuoteResult | undefined;
+  isFetchingCoinbaseQuote: boolean;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -205,6 +208,9 @@ export const OnchainPurchaseProvider = ({
     isCreatingOrder,
     createOrder: createCoinbaseOrder,
     getTransactions,
+    getQuote: getCoinbaseQuote,
+    coinbaseQuote,
+    isFetchingQuote: isFetchingCoinbaseQuote,
   } = useCoinbase({
     controller,
     onError: setDisplayError,
@@ -290,6 +296,27 @@ export const OnchainPurchaseProvider = ({
 
     setRequestedAmount(Number(convertedPrice.amount));
   }, [selectedPlatform, convertedPrice, setRequestedAmount]);
+
+  // Fetch Coinbase quote when Apple Pay is selected or quantity changes
+  useEffect(() => {
+    if (!isApplePaySelected || !onchainDetails?.quote) {
+      return;
+    }
+
+    const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
+    const purchaseUSDCAmount = (Number(purchaseAmount) / 1_000_000).toFixed(6);
+
+    getCoinbaseQuote({
+      purchaseUSDCAmount,
+      sandbox: !isMainnet,
+    });
+  }, [
+    isApplePaySelected,
+    onchainDetails,
+    quantity,
+    isMainnet,
+    getCoinbaseQuote,
+  ]);
 
   const onOnchainPurchase = useCallback(async () => {
     if (!controller || !starterpackDetails) return;
@@ -502,6 +529,8 @@ export const OnchainPurchaseProvider = ({
     isApplePaySelected,
     paymentLink,
     isCreatingOrder,
+    coinbaseQuote,
+    isFetchingCoinbaseQuote,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,

@@ -361,6 +361,8 @@ export type Activity = Node & {
   status: ActivityStatus;
   /** Transaction hash if this is a blockchain transaction */
   transactionHash?: Maybe<Scalars["String"]>;
+  /** External transaction tracking ID for sponsored transactions */
+  transactionID?: Maybe<Scalars["String"]>;
   /** Type of activity */
   type: ActivityType;
   updatedAt: Scalars["Time"];
@@ -645,6 +647,22 @@ export type ActivityWhereInput = {
   transactionHashNEQ?: InputMaybe<Scalars["String"]>;
   transactionHashNotIn?: InputMaybe<Array<Scalars["String"]>>;
   transactionHashNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** transaction_id field predicates */
+  transactionID?: InputMaybe<Scalars["String"]>;
+  transactionIDContains?: InputMaybe<Scalars["String"]>;
+  transactionIDContainsFold?: InputMaybe<Scalars["String"]>;
+  transactionIDEqualFold?: InputMaybe<Scalars["String"]>;
+  transactionIDGT?: InputMaybe<Scalars["String"]>;
+  transactionIDGTE?: InputMaybe<Scalars["String"]>;
+  transactionIDHasPrefix?: InputMaybe<Scalars["String"]>;
+  transactionIDHasSuffix?: InputMaybe<Scalars["String"]>;
+  transactionIDIn?: InputMaybe<Array<Scalars["String"]>>;
+  transactionIDIsNil?: InputMaybe<Scalars["Boolean"]>;
+  transactionIDLT?: InputMaybe<Scalars["String"]>;
+  transactionIDLTE?: InputMaybe<Scalars["String"]>;
+  transactionIDNEQ?: InputMaybe<Scalars["String"]>;
+  transactionIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  transactionIDNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** type field predicates */
   type?: InputMaybe<ActivityType>;
   typeIn?: InputMaybe<Array<ActivityType>>;
@@ -660,6 +678,14 @@ export type ActivityWhereInput = {
   updatedAtNEQ?: InputMaybe<Scalars["Time"]>;
   updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
 };
+
+export enum AdminBudgetReason {
+  Advance = "ADVANCE",
+  Correction = "CORRECTION",
+  Promotion = "PROMOTION",
+  Refund = "REFUND",
+  Settlement = "SETTLEMENT",
+}
 
 export type AssetEdge = {
   __typename?: "AssetEdge";
@@ -772,6 +798,8 @@ export type CoinbaseOnrampQuote = {
   __typename?: "CoinbaseOnrampQuote";
   /** Fee charged by Coinbase. */
   coinbaseFee: CoinbaseAmount;
+  /** Fees charged by Layerswap for bridging. */
+  layerswapFees: CoinbaseAmount;
   /** Network fee for sending the crypto. */
   networkFee: CoinbaseAmount;
   /** Ready-to-use one-click-buy URL. Only returned when destinationAddress is provided. */
@@ -787,20 +815,10 @@ export type CoinbaseOnrampQuote = {
 };
 
 export type CoinbaseOnrampQuoteInput = {
-  /** The client's IP address. Required by Coinbase for compliance. */
-  clientIP: Scalars["String"];
-  /** ISO 3166-1 two-digit country code (e.g., "US"). */
-  country: Scalars["String"];
-  /** Optional destination wallet address. If provided, the response will include a one-click-buy URL. */
-  destinationAddress?: InputMaybe<Scalars["String"]>;
-  /** The destination network for the USDC purchase. */
-  destinationNetwork: CoinbaseNetwork;
-  /** The amount of fiat currency to pay (e.g., "100.00" for $100 USD). */
-  paymentAmount: Scalars["String"];
-  /** The fiat currency to pay with (e.g., "USD"). */
-  paymentCurrency: Scalars["String"];
-  /** ISO 3166-2 subdivision code (e.g., "NY"). Required for US users. */
-  subdivision?: InputMaybe<Scalars["String"]>;
+  /** The amount of USDC to purchase (e.g., "100.00" for 100 USDC). */
+  purchaseUSDCAmount: Scalars["String"];
+  /** If true, use sandbox mode to get a quote for testnet bridging. */
+  sandbox?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export enum CoinbaseOnrampStatus {
@@ -1085,7 +1103,6 @@ export type CreateLayerswapDepositInput = {
   layerswapFees?: InputMaybe<Scalars["BigInt"]>;
   marginPercent?: InputMaybe<Scalars["Int"]>;
   sourceNetwork: LayerswapSourceNetwork;
-  username: Scalars["String"];
 };
 
 export type CreateLayerswapPaymentInput = {
@@ -1096,7 +1113,6 @@ export type CreateLayerswapPaymentInput = {
   sourceNetwork: LayerswapSourceNetwork;
   starterpackId?: InputMaybe<Scalars["ID"]>;
   teamId?: InputMaybe<Scalars["ID"]>;
-  username: Scalars["String"];
 };
 
 /**
@@ -2678,8 +2694,10 @@ export type MutationCreateTeamArgs = {
 };
 
 export type MutationDecreaseBudgetArgs = {
+  admin?: InputMaybe<Scalars["Boolean"]>;
   amount: Scalars["Int"];
   paymasterName: Scalars["ID"];
+  reason?: InputMaybe<AdminBudgetReason>;
   unit: FeeUnit;
 };
 
@@ -2719,8 +2737,10 @@ export type MutationFinalizeRegistrationArgs = {
 };
 
 export type MutationIncreaseBudgetArgs = {
+  admin?: InputMaybe<Scalars["Boolean"]>;
   amount: Scalars["Int"];
   paymasterName: Scalars["ID"];
+  reason?: InputMaybe<AdminBudgetReason>;
   unit: FeeUnit;
 };
 
@@ -6560,6 +6580,49 @@ export type AccountSearchQuery = {
   }>;
 };
 
+export type CoinbaseOnrampQuoteQueryVariables = Exact<{
+  input: CoinbaseOnrampQuoteInput;
+}>;
+
+export type CoinbaseOnrampQuoteQuery = {
+  __typename?: "Query";
+  coinbaseOnrampQuote: {
+    __typename?: "CoinbaseOnrampQuote";
+    onrampUrl?: string | null;
+    quoteId: string;
+    coinbaseFee: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    layerswapFees: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    networkFee: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    paymentSubtotal: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    paymentTotal: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    purchaseAmount: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+  };
+};
+
 export const AccountDocument = `
     query Account($username: String!) {
   account(username: $username) {
@@ -6722,6 +6785,52 @@ export const useAccountSearchQuery = <
     ["AccountSearch", variables],
     useFetchData<AccountSearchQuery, AccountSearchQueryVariables>(
       AccountSearchDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const CoinbaseOnrampQuoteDocument = `
+    query CoinbaseOnrampQuote($input: CoinbaseOnrampQuoteInput!) {
+  coinbaseOnrampQuote(input: $input) {
+    coinbaseFee {
+      amount
+      currency
+    }
+    layerswapFees {
+      amount
+      currency
+    }
+    networkFee {
+      amount
+      currency
+    }
+    onrampUrl
+    paymentSubtotal {
+      amount
+      currency
+    }
+    paymentTotal {
+      amount
+      currency
+    }
+    purchaseAmount {
+      amount
+      currency
+    }
+    quoteId
+  }
+}
+    `;
+export const useCoinbaseOnrampQuoteQuery = <
+  TData = CoinbaseOnrampQuoteQuery,
+  TError = unknown,
+>(
+  variables: CoinbaseOnrampQuoteQueryVariables,
+  options?: UseQueryOptions<CoinbaseOnrampQuoteQuery, TError, TData>,
+) =>
+  useQuery<CoinbaseOnrampQuoteQuery, TError, TData>(
+    ["CoinbaseOnrampQuote", variables],
+    useFetchData<CoinbaseOnrampQuoteQuery, CoinbaseOnrampQuoteQueryVariables>(
+      CoinbaseOnrampQuoteDocument,
     ).bind(null, variables),
     options,
   );

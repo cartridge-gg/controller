@@ -23,6 +23,7 @@ interface ExecutionContainerProps {
   onSubmit: (maxFee?: FeeEstimate) => Promise<void>;
   onDeploy?: () => void;
   onError?: (error: ControllerError) => void;
+  onCancel?: () => void;
   buttonText?: string;
   children: React.ReactNode;
   right?: React.ReactElement;
@@ -37,6 +38,7 @@ export function ExecutionContainer({
   onSubmit,
   onDeploy,
   onError,
+  onCancel,
   buttonText = "SUBMIT",
   right,
   children,
@@ -267,18 +269,20 @@ export function ExecutionContainer({
                   {!ctrlError && (
                     <Fees isLoading={isEstimating} maxFee={maxFee} />
                   )}
-                  <Button
-                    onClick={handleSubmit}
-                    isLoading={isLoading}
-                    disabled={
-                      isEstimating ||
-                      !!ctrlError ||
-                      !transactions ||
-                      !!(maxFee === undefined && transactions?.length)
-                    }
-                  >
-                    {buttonText}
-                  </Button>
+                  <LayoutButtons onCancel={onCancel}>
+                    <Button
+                      onClick={handleSubmit}
+                      isLoading={isLoading}
+                      disabled={
+                        isEstimating ||
+                        !!ctrlError ||
+                        !transactions ||
+                        !!(maxFee === undefined && transactions?.length)
+                      }
+                    >
+                      {buttonText}
+                    </Button>
+                  </LayoutButtons>
                 </>
               );
           }
@@ -302,3 +306,22 @@ const FundingButton = () => {
     </Button>
   );
 };
+
+export function LayoutButtons({
+  onCancel,
+  children,
+}: {
+  onCancel?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={"flex flex-row w-full p-0 gap-3"}>
+      {onCancel && (
+        <Button onClick={onCancel} variant="outline" className="w-[108px]">
+          Cancel
+        </Button>
+      )}
+      <div className="flex flex-col w-full">{children}</div>
+    </div>
+  );
+}

@@ -1,3 +1,8 @@
+---
+name: package-filter
+description: Run commands in specific workspace packages using pnpm filters. Use to execute commands in specific packages within the monorepo.
+---
+
 # Package Filter Skill
 
 Run commands in specific workspace packages using pnpm filters.

@@ -12,7 +12,6 @@ import { mapPlatformToLayerswapSourceNetwork } from "@/hooks/starterpack/layersw
  *
  * @param amount The deposit amount.
  * @param layerswapFees The Layerswap fees.
- * @param username The user's username.
  * @param platform The source platform for the payment.
  * @param isMainnet Whether the transaction is for mainnet or testnet.
  * @returns A CreateLayerswapDepositInput object.
@@ -20,7 +19,6 @@ import { mapPlatformToLayerswapSourceNetwork } from "@/hooks/starterpack/layersw
 export function depositToLayerswapInput(
   amount: number,
   layerswapFees: number,
-  username: string,
   platform: ExternalPlatform,
   isMainnet: boolean,
 ): CreateLayerswapDepositInput {
@@ -32,7 +30,6 @@ export function depositToLayerswapInput(
   return {
     amount: amount.toString(),
     layerswapFees: layerswapFees.toString(),
-    username,
     sourceNetwork,
   };
 }
@@ -40,7 +37,7 @@ export function depositToLayerswapInput(
 /**
  * Converts a credits purchase to a CreateLayerswapPaymentInput object.
  *
- * @param username The user's username.
+ * @param starterpackId An optional starterpack ID.
  * @param platform The source platform for the payment.
  * @param isMainnet Whether the transaction is for mainnet or testnet.
  * @param wholeCredits The amount of credits to purchase.
@@ -48,7 +45,6 @@ export function depositToLayerswapInput(
  * @returns A CreateLayerswapPaymentInput object.
  */
 export function creditsPurchaseToLayerswapInput(
-  username: string,
   starterpackId: string | undefined,
   platform: ExternalPlatform,
   isMainnet: boolean,
@@ -64,7 +60,6 @@ export function creditsPurchaseToLayerswapInput(
     : LayerswapDestinationNetwork.StarknetSepolia;
 
   return {
-    username,
     sourceNetwork,
     destinationNetwork,
     purchaseType: PurchaseType.Credits,
