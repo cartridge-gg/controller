@@ -6580,6 +6580,49 @@ export type AccountSearchQuery = {
   }>;
 };
 
+export type CoinbaseOnrampQuoteQueryVariables = Exact<{
+  input: CoinbaseOnrampQuoteInput;
+}>;
+
+export type CoinbaseOnrampQuoteQuery = {
+  __typename?: "Query";
+  coinbaseOnrampQuote: {
+    __typename?: "CoinbaseOnrampQuote";
+    onrampUrl?: string | null;
+    quoteId: string;
+    coinbaseFee: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    layerswapFees: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    networkFee: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    paymentSubtotal: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    paymentTotal: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    purchaseAmount: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+  };
+};
+
 export const AccountDocument = `
     query Account($username: String!) {
   account(username: $username) {
@@ -6742,6 +6785,52 @@ export const useAccountSearchQuery = <
     ["AccountSearch", variables],
     useFetchData<AccountSearchQuery, AccountSearchQueryVariables>(
       AccountSearchDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const CoinbaseOnrampQuoteDocument = `
+    query CoinbaseOnrampQuote($input: CoinbaseOnrampQuoteInput!) {
+  coinbaseOnrampQuote(input: $input) {
+    coinbaseFee {
+      amount
+      currency
+    }
+    layerswapFees {
+      amount
+      currency
+    }
+    networkFee {
+      amount
+      currency
+    }
+    onrampUrl
+    paymentSubtotal {
+      amount
+      currency
+    }
+    paymentTotal {
+      amount
+      currency
+    }
+    purchaseAmount {
+      amount
+      currency
+    }
+    quoteId
+  }
+}
+    `;
+export const useCoinbaseOnrampQuoteQuery = <
+  TData = CoinbaseOnrampQuoteQuery,
+  TError = unknown,
+>(
+  variables: CoinbaseOnrampQuoteQueryVariables,
+  options?: UseQueryOptions<CoinbaseOnrampQuoteQuery, TError, TData>,
+) =>
+  useQuery<CoinbaseOnrampQuoteQuery, TError, TData>(
+    ["CoinbaseOnrampQuote", variables],
+    useFetchData<CoinbaseOnrampQuoteQuery, CoinbaseOnrampQuoteQueryVariables>(
+      CoinbaseOnrampQuoteDocument,
     ).bind(null, variables),
     options,
   );
