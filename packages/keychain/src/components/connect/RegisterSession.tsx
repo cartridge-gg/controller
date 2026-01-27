@@ -9,6 +9,7 @@ import {
   type ContractType,
   type ParsedSessionPolicies,
   useCreateSession,
+  hasApprovalPolicies,
 } from "@/hooks/session";
 import { Button, LayoutContent, SliderIcon } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -18,6 +19,7 @@ import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
+import { SpendingLimitPage } from "./SpendingLimitPage";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -52,8 +54,27 @@ const RegisterSessionLayout = ({
   const [transactions, setTransactions] = useState<Call[] | undefined>(
     undefined,
   );
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState<Error | undefined>();
 
   const { duration, isEditable, onToggleEditable } = useCreateSession();
+
+  const hasTokenApprovals = useMemo(
+    () => hasApprovalPolicies(policies),
+    [policies],
+  );
+
+  const defaultStep = useMemo<"summary" | "spending-limit">(() => {
+    return policies?.verified && hasTokenApprovals
+      ? "spending-limit"
+      : "summary";
+  }, [policies?.verified, hasTokenApprovals]);
+
+  const [step, setStep] = useState<"summary" | "spending-limit">(defaultStep);
+
+  useEffect(() => {
+    setStep(defaultStep);
+  }, [defaultStep]);
 
   const expiresAt = useMemo(() => {
     return duration + now();
@@ -83,29 +104,58 @@ const RegisterSessionLayout = ({
         return;
       }
 
-      const { transaction_hash } = await controller.registerSession(
-        origin,
-        expiresAt,
-        policies,
-        publicKey,
-        maxFee,
-      );
+      try {
+        setError(undefined);
+        setIsConnecting(true);
 
-      await controller.provider.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [
-          TransactionExecutionStatus.SUCCEEDED,
-          TransactionFinalityStatus.ACCEPTED_ON_L2,
-        ],
-      });
+        const { transaction_hash } = await controller.registerSession(
+          origin,
+          expiresAt,
+          policies,
+          publicKey,
+          maxFee,
+        );
 
-      onConnect(transaction_hash, expiresAt);
+        await controller.provider.waitForTransaction(transaction_hash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+
+        onConnect(transaction_hash, expiresAt);
+      } catch (e) {
+        setError(e as Error);
+      } finally {
+        setIsConnecting(false);
+      }
     },
     [controller, expiresAt, policies, publicKey, onConnect, origin],
   );
 
+  // Handler for the spending limit page to proceed to registration
+  const handleSpendingLimitConfirm = useCallback(() => {
+    if (hasTokenApprovals && step === "spending-limit") {
+      setStep("summary");
+    }
+  }, [hasTokenApprovals, step]);
+
   if (!transactions) {
     return <div>Loading</div>;
+  }
+
+  // Show spending limit page for verified sessions with token approvals
+  if (hasTokenApprovals && step === "spending-limit") {
+    return (
+      <SpendingLimitPage
+        policies={policies}
+        isConnecting={isConnecting}
+        error={error}
+        onBack={() => setStep("summary")}
+        onConnect={handleSpendingLimitConfirm}
+      />
+    );
   }
 
   return (
