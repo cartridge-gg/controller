@@ -45,7 +45,7 @@ const Home: FC = () => {
         <div className="flex flex-col items-center gap-4">
           <Button
             onClick={() => {
-              controllerConnector.controller.openStarterPack(47);
+              controllerConnector.controller.openStarterPack(5);
             }}
           >
             Purchase Starterpack
