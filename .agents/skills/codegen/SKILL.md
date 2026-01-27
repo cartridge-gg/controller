@@ -1,3 +1,8 @@
+---
+name: codegen
+description: Regenerate GraphQL types from API schema. Use when API schema has changed, GraphQL queries/mutations added or modified, or type errors in API calls.
+---
+
 # GraphQL Codegen Skill
 
 Regenerate GraphQL types from API schema.
