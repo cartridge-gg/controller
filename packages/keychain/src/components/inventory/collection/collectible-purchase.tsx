@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Skeleton,
@@ -7,13 +7,8 @@ import {
   Token,
   Thumbnail,
   ThumbnailCollectible,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-  InfoIcon,
 } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
   addAddressPadding,
   AllowArray,
@@ -43,11 +38,12 @@ import {
 } from "@cartridge/arcade/marketplace/react";
 import { StatusType } from "@cartridge/arcade";
 import { ArcadeContext } from "@/context/arcade";
+import { CollectionFooter } from "./footer";
 
 export function CollectiblePurchase() {
   const { address: contractAddress, tokenId } = useParams();
-  const { project, controller } = useConnection();
-  const { goBack } = useNavigation();
+  const { project, controller, closeModal } = useConnection();
+  const { goBack, canGoBack } = useNavigation();
   const { tokens } = useTokens();
   const [royalties, setRoyalties] = useState<{ [orderId: number]: bigint }>({});
   const [amount, setAmount] = useState<number>(0);
@@ -122,42 +118,54 @@ export function CollectiblePurchase() {
     );
   }, [marketplaceFeeConfig, amount]);
 
-  const { total, fees } = useMemo(() => {
+  const { fees } = useMemo(() => {
     const price = tokenOrders.reduce(
       (acc: number, order) => acc + Number(order?.price),
       0,
     );
     const royaltyFee = Object.values(royalties).reduce(
       (acc: bigint, royalty) => acc + royalty,
-      BigInt(0),
+      0n,
     );
-    const formattedMarketplaceFee =
-      marketplaceFee / Math.pow(10, token?.metadata.decimals || 0);
-    const formattedClientFee =
-      (price * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR)) /
-      Math.pow(10, token?.metadata.decimals || 0);
-    const formattedRoyaltyFee =
-      Number(royaltyFee) / Math.pow(10, token?.metadata.decimals || 0);
-    const total = formattedMarketplaceFee + formattedRoyaltyFee;
     const fees = [
       {
         label: "Marketplace Fee",
-        amount: `${formattedMarketplaceFee.toFixed(2)} ${token?.metadata.symbol}`,
-        percentage: `${(price ? (marketplaceFee / price) * 100 : 0).toFixed(2)}%`,
-      },
-      {
-        label: "Client Fee",
-        amount: `${formattedClientFee.toFixed(2)} ${token?.metadata.symbol}`,
-        percentage: `${((CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR) * 100).toFixed(2)}%`,
+        amount: marketplaceFee / Math.pow(10, token?.metadata.decimals || 0),
+        percentage: price ? (marketplaceFee / price) * 100 : 0,
       },
       {
         label: "Creator Royalties",
-        amount: `${formattedRoyaltyFee.toFixed(2)} ${token?.metadata.symbol}`,
-        percentage: `${(price ? (Number(royaltyFee) / price) * 100 : 0).toFixed(2)}%`,
+        amount:
+          Number(royaltyFee) / Math.pow(10, token?.metadata.decimals || 0),
+        percentage: price ? (Number(royaltyFee) / price) * 100 : 0,
+      },
+      {
+        label: "Client Fee",
+        amount:
+          (price * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR)) /
+          Math.pow(10, token?.metadata.decimals || 0),
+        percentage: (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR) * 100,
       },
     ];
-    return { total, fees };
+    const totalFees = fees.reduce((acc, fee) => acc + fee.amount, 0);
+    return { fees, totalFees };
   }, [marketplaceFee, royalties, token, tokenOrders]);
+
+  const tokenData = useMemo(
+    () => ({
+      tokens: !token
+        ? []
+        : tokenOrders.map((order) => ({
+            balance: (
+              Number(order.price) / Math.pow(10, token.metadata.decimals)
+            ).toString(),
+            address: token.metadata.address,
+          })),
+    }),
+    [tokenOrders, token],
+  );
+
+  const { countervalues } = useCountervalue(tokenData);
 
   const props = useMemo(() => {
     if (!assets || !collection || !tokenOrders) return [];
@@ -167,22 +175,36 @@ export function CollectiblePurchase() {
           (asset) => BigInt(asset.token_id ?? "0x0") === BigInt(order.tokenId),
         );
         if (!asset || !contractAddress) return;
+        let tokenName = "";
+        try {
+          tokenName = JSON.parse(asset.metadata).name || asset.name;
+        } catch {
+          tokenName = asset.name;
+        }
         const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
         const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
         return {
           orderId: order.id,
           images: [newImage, oldImage],
-          name: asset.name,
+          name: tokenName,
           collection: collection.name,
           collectionAddress: contractAddress,
           price: order.price,
           tokenId: asset.token_id,
+          finalPrice: order.price / Math.pow(10, token?.metadata.decimals || 0),
         };
       })
       .filter((value) => value !== undefined);
-  }, [assets, collection, tokenOrders, contractAddress, project]);
+  }, [
+    assets,
+    collection,
+    tokenOrders,
+    contractAddress,
+    project,
+    token?.metadata.decimals,
+  ]);
 
-  const { totalPrice, floatPrice } = useMemo(() => {
+  const { totalPrice, floatPrice, fixedValue } = useMemo(() => {
     const total = tokenOrders.reduce(
       (acc, order) => acc + Number(order?.price),
       0,
@@ -192,7 +214,21 @@ export function CollectiblePurchase() {
     );
     const formatted =
       (total + fees) / Math.pow(10, token?.metadata.decimals || 0);
-    return { totalPrice: total + fees, floatPrice: formatted, fees };
+    // Figure out the index of the highest digit from the price, e.g 1.00 is 0, 0.01 is 2, 0.1 is 1, etc.
+    const dotPosition = formatted
+      .toString()
+      .split("")
+      .findIndex((char) => char === ".");
+    const digitPosition = formatted
+      .toString()
+      .split("")
+      .findIndex((char) => char !== "0" && char !== ".");
+    return {
+      totalPrice: total + fees,
+      floatPrice: formatted,
+      fees,
+      fixedValue: Math.max(0, digitPosition - dotPosition),
+    };
   }, [tokenOrders, token?.metadata.decimals]);
 
   const addRoyalties = useCallback(
@@ -313,9 +349,10 @@ export function CollectiblePurchase() {
               }
               transactions={buildTransactions}
               onSubmit={onSubmitPurchase}
+              onCancel={canGoBack ? goBack : closeModal}
               buttonText="Confirm"
             >
-              <div className="p-6 pb-0 flex flex-col gap-4 overflow-hidden h-full">
+              <div className="p-4 pb-0 flex flex-col gap-4 overflow-hidden h-full">
                 <div
                   className="grow flex flex-col gap-px rounded overflow-y-scroll"
                   style={{ scrollbarWidth: "none" }}
@@ -331,7 +368,7 @@ export function CollectiblePurchase() {
                       )}
                     >{`${props.length} total`}</p>
                   </div>
-                  {props.map((args) => (
+                  {props.map((args, i) => (
                     <Order
                       key={args.orderId}
                       orderId={args.orderId}
@@ -343,42 +380,24 @@ export function CollectiblePurchase() {
                       token={token}
                       tokenId={args.tokenId ?? ""}
                       addRoyalties={addRoyalties}
+                      finalPrice={args.finalPrice.toFixed(fixedValue)}
+                      counterValue={countervalues[i]?.current?.value}
                     />
                   ))}
                 </div>
 
-                <div className="flex flex-col gap-3 pb-6">
-                  <div className="w-full px-3 py-2.5 flex flex-col gap-1 bg-background-125 border border-background-200 rounded">
-                    <div className="flex items-center justify-between text-xs text-foreground-400">
-                      <p>Cost</p>
-                      <p>{`${(floatPrice - total).toFixed(2)} ${token.metadata.symbol}`}</p>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-foreground-400">
-                      <div className="flex gap-2  text-xs font-medium">
-                        Fees
-                        <FeesTooltip
-                          trigger={<InfoIcon size="xs" />}
-                          fees={fees}
-                        />
-                      </div>
-                      <p>{`${total.toFixed(2)} ${token.metadata.symbol}`}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 w-full">
-                    <div className="w-full px-3 py-2.5 h-10 flex items-center justify-between bg-background-125 border border-background-200 rounded">
-                      <p className="text-sm font-medium text-foreground-400">
-                        Total
-                      </p>
-                      <p className="text-sm font-medium text-foreground-100">{`${floatPrice} ${token.metadata.symbol}`}</p>
-                    </div>
-                    <Link
-                      to="../.."
-                      className="px-3 h-10 flex items-center justify-center bg-primary-100 hover:bg-primary-200 text-primary-foreground rounded"
-                    >
-                      Cancel
-                    </Link>
-                  </div>
-                </div>
+                <div className="flex-1" />
+
+                <CollectionFooter
+                  token={token}
+                  fees={fees}
+                  totalPrice={floatPrice}
+                  feeDecimals={3}
+                  orders={props.map((args) => ({
+                    name: args.name,
+                    amount: args.finalPrice.toFixed(fixedValue),
+                  }))}
+                />
               </div>
             </ExecutionContainer>
           ) : null}
@@ -398,6 +417,8 @@ const Order = ({
   token,
   tokenId,
   addRoyalties,
+  finalPrice,
+  counterValue,
 }: {
   orderId: number;
   image: string;
@@ -408,6 +429,8 @@ const Order = ({
   token: Token;
   tokenId: string;
   addRoyalties: (orderId: number, royaltyFee: bigint) => void;
+  finalPrice: string;
+  counterValue: number | undefined;
 }) => {
   const { data: royaltyInfo } = useMarketplaceRoyaltyFee(
     {
@@ -418,19 +441,17 @@ const Order = ({
     !!collectionAddress && !!tokenId && !!price,
   );
 
-  const finalPrice = useMemo(() => {
-    const formattedPrice = price / Math.pow(10, token.metadata.decimals);
-    return {
-      amount: formattedPrice.toFixed(2),
-      token: token.metadata.symbol,
-    };
-  }, [price, token]);
-
   useEffect(() => {
     if (royaltyInfo?.amount) {
       addRoyalties(orderId, royaltyInfo.amount);
     }
   }, [royaltyInfo, orderId, addRoyalties]);
+
+  const usdPrice = useMemo(
+    () =>
+      `$${counterValue?.toLocaleString(undefined, { maximumFractionDigits: 2 }) ?? "?"}`,
+    [counterValue],
+  );
 
   return (
     <div className="h-16 flex items-center justify-between bg-background-200 px-4 py-3 gap-3">
@@ -445,49 +466,15 @@ const Order = ({
           <p>{name}</p>
           <div className="flex items-center gap-1">
             <Thumbnail icon={token.metadata.image || ""} size="sm" />
-            <p>{finalPrice.amount}</p>
+            <p>{finalPrice}</p>
           </div>
         </div>
         <div className="flex items-center gap-1 justify-between text-xs text-foreground-300">
           <p className="truncate">{collection}</p>
-          <p></p>
+          <p>{usdPrice}</p>
         </div>
       </div>
     </div>
-  );
-};
-
-const FeesTooltip = ({
-  trigger,
-  fees,
-}: {
-  trigger: React.ReactNode;
-  fees: { label: string; amount: string; percentage: string }[];
-}) => {
-  return (
-    <TooltipProvider>
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-        <TooltipContent>
-          <div className="flex flex-col gap-1">
-            {fees.map((fee) => (
-              <div
-                key={fee.label}
-                className="flex items-center justify-between gap-4 text-xs"
-              >
-                <span className="text-foreground-400">{fee.label}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-foreground-100">{fee.amount}</span>
-                  <span className="text-foreground-400">
-                    ({fee.percentage})
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
   );
 };
 
