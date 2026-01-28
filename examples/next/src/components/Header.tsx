@@ -207,6 +207,19 @@ const Header = () => {
           >
             Phantom
           </Button>
+          <Button
+            onClick={() => {
+              controllerConnector.connect({
+                locationGate: {
+                  allowedStates: ["CA", "NY"],
+                },
+              });
+            }}
+            disabled={!isControllerReady}
+            className="bg-[#7BA6F6] hover:bg-[#6A96E6] text-white"
+          >
+            Region Gate
+          </Button>
           {sessionConnector && (
             <Button
               onClick={() => connect({ connector: sessionConnector })}

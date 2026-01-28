@@ -11,6 +11,7 @@ import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
 import { StarterpackOptions } from "@cartridge/controller";
+import { locationPromptFactory } from "./location";
 
 export type { ControllerError } from "./execute";
 
@@ -78,6 +79,7 @@ export function connectToController<ParentMethods extends object>({
             { replace: true },
           );
         },
+      openLocationPrompt: () => locationPromptFactory({ navigate }),
       switchChain: () => switchChain({ setController, setRpcUrl }),
     },
   });

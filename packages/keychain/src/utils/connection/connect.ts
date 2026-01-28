@@ -1,6 +1,13 @@
-import { AuthOptions, ConnectError, ConnectReply } from "@cartridge/controller";
+import {
+  AuthOptions,
+  ConnectError,
+  ConnectOptions,
+  ConnectReply,
+  LocationGateOptions,
+} from "@cartridge/controller";
 import { SessionPolicies } from "@cartridge/presets";
 import { generateCallbackId, storeCallbacks, getCallbacks } from "./callbacks";
+import { createLocationGateUrl } from "./location-gate";
 
 export interface ConnectParams {
   id: string;
@@ -8,6 +15,7 @@ export interface ConnectParams {
   policies: SessionPolicies | undefined;
   rpcUrl: string;
   signupOptions?: AuthOptions;
+  locationGate?: LocationGateOptions;
 }
 
 type ConnectCallback = {
@@ -29,7 +37,7 @@ function isConnectResult(value: unknown): value is ConnectReply | ConnectError {
 export function createConnectUrl(
   signupOptions?: AuthOptions,
   options: ConnectCallback = {},
-): string {
+): { url: string; id: string } {
   const id = generateCallbackId();
 
   if (options.resolve || options.reject || options.onCancel) {
@@ -49,7 +57,7 @@ export function createConnectUrl(
     params.set("signers", JSON.stringify(signupOptions));
   }
 
-  return `/connect?${params.toString()}`;
+  return { url: `/connect?${params.toString()}`, id };
 }
 
 export function parseConnectParams(searchParams: URLSearchParams): {
@@ -132,31 +140,35 @@ export function connect({
     // Old: connect(policies: SessionPolicies, rpcUrl: string, signupOptions?: AuthOptions)
     // New: connect(signupOptions?: AuthOptions)
     return (
-      policiesOrSigners?: SessionPolicies | AuthOptions,
+      policiesOrSigners?: SessionPolicies | AuthOptions | ConnectOptions,
       rpcUrl?: string,
       signupOptions?: AuthOptions,
     ): Promise<ConnectReply> => {
-      let signers: AuthOptions | undefined;
+      let options: ConnectOptions = {};
 
       // Detect which signature is being used
       if (rpcUrl !== undefined) {
         // Old signature: connect(policies, rpcUrl, signupOptions)
         // In the old signature, the first arg is policies (not used in new flow)
         // and the third arg is signupOptions
-        signers = signupOptions;
+        options.signupOptions = signupOptions;
         // Set the RPC URL for backwards compatibility
         setRpcUrl(rpcUrl);
       } else {
         // New signature: connect(signupOptions)
-        signers = policiesOrSigners as AuthOptions | undefined;
+        if (Array.isArray(policiesOrSigners)) {
+          options.signupOptions = policiesOrSigners;
+        } else if (policiesOrSigners && typeof policiesOrSigners === "object") {
+          options = policiesOrSigners as ConnectOptions;
+        }
       }
 
-      if (signers && signers.length === 0) {
+      if (options.signupOptions && options.signupOptions.length === 0) {
         throw new Error("If defined, signup options cannot be empty");
       }
 
       return new Promise<ConnectReply>((resolve, reject) => {
-        const url = createConnectUrl(signers, {
+        const { url } = createConnectUrl(options.signupOptions, {
           resolve: (result) => {
             if ("address" in result) {
               resolve(result);
@@ -167,7 +179,20 @@ export function connect({
           reject,
         });
 
-        navigate(url, { replace: true });
+        const hasLocationGate =
+          !!options.locationGate &&
+          ((options.locationGate.allowedCountries?.length ?? 0) > 0 ||
+            (options.locationGate.allowedRegions?.length ?? 0) > 0 ||
+            (options.locationGate.allowedStates?.length ?? 0) > 0);
+
+        const destination = hasLocationGate
+          ? createLocationGateUrl({
+              returnTo: url,
+              gate: options.locationGate!,
+            })
+          : url;
+
+        navigate(destination, { replace: true });
       });
     };
   };
