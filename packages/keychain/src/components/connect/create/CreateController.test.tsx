@@ -99,6 +99,9 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      headless: undefined,
+      shouldAutoCreateSession: true,
+      resolveHeadlessInteractionRequired: vi.fn(),
     });
     mockUseUsernameValidation.mockReturnValue({
       status: "valid",
@@ -154,6 +157,9 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      headless: undefined,
+      shouldAutoCreateSession: true,
+      resolveHeadlessInteractionRequired: vi.fn(),
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
@@ -201,6 +207,9 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      headless: undefined,
+      shouldAutoCreateSession: true,
+      resolveHeadlessInteractionRequired: vi.fn(),
     });
     renderComponent();
     const submitButton = screen.getByTestId("submit-button");
@@ -271,6 +280,9 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      headless: undefined,
+      shouldAutoCreateSession: true,
+      resolveHeadlessInteractionRequired: vi.fn(),
     });
     renderWithProviders(<CreateController {...defaultProps} />);
     const input = screen.getByPlaceholderText("Username");
@@ -320,6 +332,9 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      headless: undefined,
+      shouldAutoCreateSession: true,
+      resolveHeadlessInteractionRequired: vi.fn(),
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
@@ -358,6 +373,9 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      headless: undefined,
+      shouldAutoCreateSession: true,
+      resolveHeadlessInteractionRequired: vi.fn(),
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
@@ -415,6 +433,9 @@ describe("CreateController", () => {
         signupOptions: ["webauthn"],
         authMethod: undefined,
         setAuthMethod: vi.fn(),
+        headless: undefined,
+        shouldAutoCreateSession: true,
+        resolveHeadlessInteractionRequired: vi.fn(),
       });
 
       renderComponent();

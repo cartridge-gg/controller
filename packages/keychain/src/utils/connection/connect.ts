@@ -6,7 +6,11 @@ import {
 } from "@cartridge/controller";
 import { SessionPolicies } from "@cartridge/presets";
 import { generateCallbackId, storeCallbacks, getCallbacks } from "./callbacks";
-import { authenticateHeadless } from "./headless";
+
+type HeadlessConnectOptions = Required<
+  Pick<ConnectOptions, "username" | "signer">
+> &
+  Pick<ConnectOptions, "password">;
 
 export interface ConnectParams {
   id: string;
@@ -35,10 +39,11 @@ function isConnectResult(value: unknown): value is ConnectReply | ConnectError {
 export function createConnectUrl(
   signupOptions?: AuthOptions,
   options: ConnectCallback = {},
+  headless?: HeadlessConnectOptions,
 ): string {
   const id = generateCallbackId();
 
-  if (options.resolve || options.reject || options.onCancel) {
+  if (options.resolve || options.reject || options.onCancel || headless) {
     storeCallbacks(id, {
       resolve: options.resolve
         ? (result) => {
@@ -47,6 +52,7 @@ export function createConnectUrl(
         : undefined,
       reject: options.reject,
       onCancel: options.onCancel,
+      headless,
     });
   }
 
@@ -63,6 +69,7 @@ export function parseConnectParams(searchParams: URLSearchParams): {
   resolve?: (result: unknown) => void;
   reject?: (reason?: unknown) => void;
   onCancel?: () => void;
+  headless?: HeadlessConnectOptions;
 } | null {
   try {
     const id = searchParams.get("id");
@@ -82,9 +89,13 @@ export function parseConnectParams(searchParams: URLSearchParams): {
       }
     }
 
-    let callbacks: ConnectCallback | undefined;
+    let callbacks:
+      | (ConnectCallback & { headless?: HeadlessConnectOptions })
+      | undefined;
     if (id) {
-      callbacks = getCallbacks(id) as ConnectCallback | undefined;
+      callbacks = getCallbacks(id) as
+        | (ConnectCallback & { headless?: HeadlessConnectOptions })
+        | undefined;
     }
 
     const reject = callbacks?.reject
@@ -116,6 +127,7 @@ export function parseConnectParams(searchParams: URLSearchParams): {
       resolve,
       reject,
       onCancel,
+      headless: callbacks?.headless,
     };
   } catch (error) {
     console.error("Failed to parse connect params:", error);
@@ -143,7 +155,7 @@ export function connect({
       signupOptions?: AuthOptions,
     ): Promise<ConnectReply> => {
       let signers: AuthOptions | undefined;
-      let headless: ConnectOptions["headless"] | undefined;
+      let headless: HeadlessConnectOptions | undefined;
 
       // Detect which signature is being used
       // Check if it's the old 3-parameter signature (policies, rpcUrl, signupOptions)
@@ -160,12 +172,20 @@ export function connect({
         typeof policiesOrOptions === "object" &&
         !Array.isArray(policiesOrOptions) &&
         ("signupOptions" in policiesOrOptions ||
-          "headless" in policiesOrOptions)
+          "username" in policiesOrOptions ||
+          "signer" in policiesOrOptions ||
+          "password" in policiesOrOptions)
       ) {
         // New signature: connect(options: ConnectOptions)
         const options = policiesOrOptions as ConnectOptions;
         signers = options.signupOptions;
-        headless = options.headless;
+        if (options.username && options.signer) {
+          headless = {
+            username: options.username,
+            signer: options.signer,
+            password: options.password,
+          };
+        }
       } else {
         // Assume it's just AuthOptions passed directly (backwards compatibility)
         signers = policiesOrOptions as AuthOptions | undefined;
@@ -175,35 +195,21 @@ export function connect({
         throw new Error("If defined, signup options cannot be empty");
       }
 
-      // Check if headless mode
-      if (headless?.username && headless?.credentials) {
-        console.log(
-          `[HEADLESS] Detected headless mode - username: ${headless.username}, credentialType: ${headless.credentials.type}`,
-        );
-        // Perform headless authentication without UI
-        return authenticateHeadless(
-          headless.username,
-          headless.credentials,
-        ).then((result) => {
-          if ("address" in result) {
-            return result;
-          } else {
-            throw new Error(result.message);
-          }
-        });
-      }
-
       return new Promise<ConnectReply>((resolve, reject) => {
-        const url = createConnectUrl(signers, {
-          resolve: (result) => {
-            if ("address" in result) {
-              resolve(result);
-            } else {
-              reject(result);
-            }
+        const url = createConnectUrl(
+          signers,
+          {
+            resolve: (result) => {
+              if ("address" in result) {
+                resolve(result);
+              } else {
+                reject(result);
+              }
+            },
+            reject,
           },
-          reject,
-        });
+          headless,
+        );
 
         navigate(url, { replace: true });
       });

@@ -33,34 +33,14 @@ export function HeadlessLogin() {
     setResult(null);
 
     try {
-      // For passkey auth, you would need to get these from a previous registration
-      // This is a placeholder - in real usage, you'd retrieve these from storage
-      const credentialId = process.env.NEXT_PUBLIC_WEBAUTHN_CREDENTIAL_ID || "";
-      const publicKey = process.env.NEXT_PUBLIC_WEBAUTHN_PUBLIC_KEY || "";
-
-      if (!credentialId || !publicKey) {
-        setResult({
-          success: false,
-          message:
-            "WebAuthn credentials not configured. Set NEXT_PUBLIC_WEBAUTHN_CREDENTIAL_ID and NEXT_PUBLIC_WEBAUTHN_PUBLIC_KEY",
-        });
-        setLoading(null);
-        return;
-      }
-
       const controller = new Controller({
         defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
-        headless: {
-          username,
-          credentials: {
-            type: "webauthn",
-            credentialId,
-            publicKey,
-          },
-        },
       });
 
-      const account = await controller.connect();
+      const account = await controller.connect({
+        username,
+        signer: "webauthn",
+      });
 
       if (account) {
         setResult({
@@ -126,16 +106,12 @@ export function HeadlessLogin() {
 
       const controller = new Controller({
         defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
-        headless: {
-          username,
-          credentials: {
-            type: "metamask",
-            address,
-          },
-        },
       });
 
-      const account = await controller.connect();
+      const account = await controller.connect({
+        username,
+        signer: "metamask",
+      });
 
       if (account) {
         setResult({
@@ -233,10 +209,9 @@ export function HeadlessLogin() {
 
       <div className="mt-4 space-y-2 rounded-md bg-blue-50 p-4 dark:bg-blue-900/20">
         <p className="text-xs text-blue-800 dark:text-blue-400">
-          <strong>Passkey Authentication:</strong> Requires WebAuthn credentials
-          (credentialId and publicKey) to be configured via environment
-          variables NEXT_PUBLIC_WEBAUTHN_CREDENTIAL_ID and
-          NEXT_PUBLIC_WEBAUTHN_PUBLIC_KEY.
+          <strong>Passkey Authentication:</strong> Uses the passkey signer
+          already registered for this username. Make sure the account has a
+          WebAuthn signer before testing.
         </p>
         <p className="text-xs text-blue-800 dark:text-blue-400">
           <strong>MetaMask Authentication:</strong> Requires MetaMask browser
@@ -244,9 +219,11 @@ export function HeadlessLogin() {
           clicked.
         </p>
         <p className="text-xs text-blue-800 dark:text-blue-400">
-          <strong>Note:</strong> Headless mode supports Password, WebAuthn, and
-          OAuth methods (Google, Discord, MetaMask, Rabby, Phantom). Argent,
-          Braavos, and SIWS are planned for a future release.
+          <strong>Note:</strong> Headless mode supports all implemented auth
+          options (Password, WebAuthn, Google, Discord, WalletConnect, MetaMask,
+          Rabby, Phantom EVM). Use{" "}
+          <code>connect({"{ username, signer }"})</code> and pass{" "}
+          <code>password</code> when using the password signer.
         </p>
       </div>
     </div>

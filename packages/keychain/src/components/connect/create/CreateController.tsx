@@ -382,6 +382,7 @@ export function CreateController({
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
+  const headlessSubmitRef = useRef(false);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const [usernameField, setUsernameField] = useState({
@@ -414,6 +415,9 @@ export function CreateController({
     signupOptions,
     authMethod,
     setAuthMethod,
+    headless,
+    shouldAutoCreateSession,
+    resolveHeadlessInteractionRequired,
   } = useCreateController({
     isSlot,
     signers,
@@ -505,6 +509,49 @@ export function CreateController({
       handleFormSubmit();
     }
   }, [debouncedValidation.status, handleFormSubmit, authenticationStep]);
+
+  useEffect(() => {
+    if (!headless) {
+      return;
+    }
+
+    if (!shouldAutoCreateSession) {
+      resolveHeadlessInteractionRequired(
+        "Headless mode requires auto-approved session policies.",
+      );
+      headlessSubmitRef.current = true;
+      return;
+    }
+
+    if (headlessSubmitRef.current) {
+      return;
+    }
+
+    if (usernameField.value !== headless.username) {
+      setUsernameField({ value: headless.username, error: undefined });
+      return;
+    }
+
+    if (validation.status !== "valid") {
+      return;
+    }
+
+    headlessSubmitRef.current = true;
+    handleSubmit(
+      headless.username,
+      !!validation.exists,
+      headless.signer,
+      headless.password,
+    );
+  }, [
+    headless,
+    shouldAutoCreateSession,
+    resolveHeadlessInteractionRequired,
+    usernameField.value,
+    validation.status,
+    validation.exists,
+    handleSubmit,
+  ]);
 
   const handleUsernameChange = (value: string) => {
     if (!hasLoggedChange.current) {

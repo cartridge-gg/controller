@@ -249,8 +249,6 @@ export type KeychainOptions = IFrameOptions & {
   tokens?: Tokens;
   /** When true, defer iframe mounting until connect() is called. Reduces initial load and resource fetching. */
   lazyload?: boolean;
-  /** Headless mode options - when provided, authentication happens without UI */
-  headless?: HeadlessOptions;
 };
 
 export type ProfileContextTypeVariant =
@@ -277,62 +275,14 @@ export type StarterpackOptions = {
   preimage?: string;
 };
 
-// Headless mode types
-export type HeadlessCredentialType =
-  | "webauthn"
-  | "password"
-  | "google"
-  | "discord"
-  | "metamask"
-  | "rabby"
-  | "phantom-evm"
-  | "argent"
-  | "braavos"
-  | "siws";
-
-// Credential data interfaces (discriminated union for type safety)
-export interface HeadlessPasswordCredentials {
-  type: "password";
-  password: string;
-}
-
-export interface HeadlessWebAuthnCredentials {
-  type: "webauthn";
-  credentialId: string;
-  publicKey: string;
-}
-
-export interface HeadlessEIP191Credentials {
-  type: "google" | "discord" | "metamask" | "rabby" | "phantom-evm";
-  address: string;
-}
-
-export interface HeadlessStarknetCredentials {
-  type: "argent" | "braavos";
-  address: string;
-}
-
-export interface HeadlessSIWSCredentials {
-  type: "siws";
-  address: string;
-  signature: string;
-}
-
-export type HeadlessCredentialData =
-  | HeadlessPasswordCredentials
-  | HeadlessWebAuthnCredentials
-  | HeadlessEIP191Credentials
-  | HeadlessStarknetCredentials
-  | HeadlessSIWSCredentials;
-
-// Headless options
-export interface HeadlessOptions {
-  username: string;
-  credentials: HeadlessCredentialData;
-}
-
-// Connect options
+// Connect options (used by controller.connect)
 export interface ConnectOptions {
+  /** Signup options (shown in UI when not headless) */
   signupOptions?: AuthOptions;
-  headless?: HeadlessOptions;
+  /** Headless mode username (when combined with signer) */
+  username?: string;
+  /** Headless mode signer option (auth method) */
+  signer?: AuthOption;
+  /** Required when signer is "password" */
+  password?: string;
 }

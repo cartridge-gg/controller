@@ -116,6 +116,7 @@
     "http-server": "catalog:",
     "jest-image-snapshot": "catalog:",
     "jsdom": "^25.0.1",
+    "msw": "^2.4.9",
     "playwright": "catalog:",
     "postcss": "catalog:",
     "postcss-import": "catalog:",

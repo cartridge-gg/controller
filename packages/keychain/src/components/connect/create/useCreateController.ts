@@ -168,6 +168,26 @@ export function useCreateController({
     return parseConnectParams(searchParams);
   }, [searchParams]);
   const handleCompletion = useRouteCompletion();
+  const headless = params?.headless;
+  const shouldAutoCreateSession =
+    !policies || (policies.verified && !hasApprovalPolicies(policies));
+
+  const resolveHeadlessInteractionRequired = useCallback(
+    (message: string) => {
+      if (!params) {
+        return;
+      }
+      params.resolve?.({
+        code: ResponseCodes.USER_INTERACTION_REQUIRED,
+        message,
+      });
+      if (params.params.id) {
+        cleanupCallbacks(params.params.id);
+      }
+      handleCompletion();
+    },
+    [params, handleCompletion],
+  );
 
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
@@ -877,6 +897,17 @@ export function useCreateController({
 
         console.error(e);
         setError(e as Error);
+        if (headless && params) {
+          params.resolve?.({
+            code: ResponseCodes.ERROR,
+            message:
+              e instanceof Error ? e.message : "Headless authentication failed",
+          });
+          if (params.params.id) {
+            cleanupCallbacks(params.params.id);
+          }
+          handleCompletion();
+        }
       } finally {
         if (exists) {
           setWaitingForConfirmation(false);
@@ -892,6 +923,9 @@ export function useCreateController({
       setError,
       setIsLoading,
       setWaitingForConfirmation,
+      headless,
+      params,
+      handleCompletion,
     ],
   );
 
@@ -911,5 +945,8 @@ export function useCreateController({
     signupOptions,
     authMethod,
     setAuthMethod,
+    headless,
+    shouldAutoCreateSession,
+    resolveHeadlessInteractionRequired,
   };
 }
