@@ -196,7 +196,6 @@ const signupOptions: AuthOptions = [
 ];
 
 const controller = new ControllerConnector({
-  policies,
   // With the defaults, you can omit chains if you want to use:
   // - chains: [
   //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9" },
@@ -232,7 +231,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={mainnet.id}
+      defaultChainId={sepolia.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}
