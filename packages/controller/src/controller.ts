@@ -32,6 +32,12 @@ import {
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
 
+const hasLocationGate = (gate?: ConnectOptions["locationGate"]) =>
+  !!gate &&
+  ((gate.allowedCountries?.length ?? 0) > 0 ||
+    (gate.allowedRegions?.length ?? 0) > 0 ||
+    (gate.allowedStates?.length ?? 0) > 0);
+
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
   private options: ControllerOptions;
@@ -257,7 +263,10 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (this.account) {
+    const effectiveOptions = this.normalizeConnectOptions(options);
+    const shouldGate = hasLocationGate(effectiveOptions.locationGate);
+
+    if (this.account && !shouldGate) {
       return this.account;
     }
 
@@ -276,9 +285,8 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.open();
 
     try {
-      const effectiveOptions = this.normalizeConnectOptions(options);
       const connectPayload =
-        effectiveOptions.signupOptions || effectiveOptions.locationGate
+        effectiveOptions.signupOptions || shouldGate
           ? effectiveOptions
           : undefined;
       let response = await this.keychain.connect(connectPayload);
