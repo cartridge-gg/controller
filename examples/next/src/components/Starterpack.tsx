@@ -3,7 +3,7 @@
 import { useAccount, useNetwork } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button, Input } from "@cartridge/ui";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { constants, num } from "starknet";
 
 export const Starterpack = () => {
@@ -12,7 +12,7 @@ export const Starterpack = () => {
 
   const controllerConnector = connector as unknown as ControllerConnector;
 
-  const getDefaultStarterpackIds = () => {
+  const getDefaultStarterpackIds = useCallback(() => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       return {
         purchaseOnchain: 0,
@@ -23,9 +23,12 @@ export const Starterpack = () => {
       purchaseOnchain: 0,
       claim: "claim-dopewars-sepolia",
     };
-  };
+  }, [chain]);
 
-  const defaultIds = getDefaultStarterpackIds();
+  const defaultIds = useMemo(
+    () => getDefaultStarterpackIds(),
+    [getDefaultStarterpackIds],
+  );
   const [claimSpId, setClaimSpId] = useState<string>(defaultIds.claim);
   const [claimPreimage, setClaimPreimage] = useState<string>("");
   const [purchaseOnchainSpId, setPurchaseOnchainSpId] = useState<number>(
@@ -59,7 +62,7 @@ export const Starterpack = () => {
     // Update our references after successful comparison and update
     expectedDefaultsRef.current = newDefaults;
     previousChainRef.current = chain;
-  }, [chain]);
+  }, [chain, getDefaultStarterpackIds]);
 
   if (!account) {
     return null;

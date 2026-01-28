@@ -102,8 +102,6 @@ export function HeadlessLogin() {
         return;
       }
 
-      const address = accounts[0];
-
       const controller = new Controller({
         defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
       });
