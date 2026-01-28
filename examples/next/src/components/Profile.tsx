@@ -93,7 +93,10 @@ export function Profile() {
         return;
       }
 
-      if (response.code !== ResponseCodes.SUCCESS || !("location" in response)) {
+      if (
+        response.code !== ResponseCodes.SUCCESS ||
+        !("location" in response)
+      ) {
         toast({
           variant: "error",
           message: response.message || "Location verification canceled",
