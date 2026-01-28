@@ -8,7 +8,7 @@ export class Keychain {
 
   constructor({ page, username }: { page: Page; username?: string }) {
     this.page = page;
-    this.modal = page.frameLocator("#cartridge-modal");
+    this.modal = page.frameLocator("#controller-keychain");
     this.username = username ?? this.randomUsername();
   }
 
@@ -34,10 +34,10 @@ export class Keychain {
   }
 
   private connect() {
-    return this.page.getByText("Connect").click();
+    return this.page.getByRole("button", { name: "Connect" }).click();
   }
 
   private randomUsername() {
-    return `test-${Math.random().toString().slice(2, -1)}`;
+    return `test-${Math.random().toString(36).slice(2, 10)}`;
   }
 }
