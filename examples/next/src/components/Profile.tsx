@@ -1,6 +1,7 @@
 "use client";
 
-import { toast } from "@cartridge/controller";
+import { useState } from "react";
+import { ResponseCodes, toast } from "@cartridge/controller";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button } from "@cartridge/ui";
@@ -12,6 +13,11 @@ import {
 export function Profile() {
   const { account, connector } = useAccount();
   const ctrlConnector = connector as unknown as ControllerConnector;
+  const [locationBlocked, setLocationBlocked] = useState(false);
+  const [locationCoords, setLocationCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   const handleToastDemo = () => {
     // Demonstrate different toast variants
@@ -69,6 +75,39 @@ export function Profile() {
     return null;
   }
 
+  const handleLocationBlockedDemo = async () => {
+    try {
+      const response = await ctrlConnector.controller.openLocationPrompt();
+      if (!response) {
+        return;
+      }
+
+      if (response.code !== ResponseCodes.SUCCESS) {
+        toast({
+          variant: "error",
+          message: response.message || "Location verification canceled",
+        });
+        return;
+      }
+
+      setLocationCoords({
+        latitude: response.location.latitude,
+        longitude: response.location.longitude,
+      });
+      setLocationBlocked(true);
+      toast({
+        variant: "error",
+        message: "This demo blocks play after location verification.",
+      });
+    } catch (error) {
+      console.error("Location prompt failed:", error);
+      toast({
+        variant: "error",
+        message: "Unable to verify location",
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <h2>Open Starterpack</h2>
@@ -85,6 +124,24 @@ export function Profile() {
         <div className="flex flex-wrap gap-1">
           <Button onClick={handleToastDemo}>Run demo</Button>
         </div>
+      </div>
+
+      <h2>Location Prompt (Blocked Demo)</h2>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-1">
+          <Button onClick={handleLocationBlockedDemo}>
+            Verify Location
+          </Button>
+        </div>
+        {locationBlocked && (
+          <div className="text-sm text-foreground-300">
+            Access blocked by site policy
+            {locationCoords
+              ? ` (lat ${locationCoords.latitude.toFixed(2)}, lon ${locationCoords.longitude.toFixed(2)})`
+              : ""}
+            .
+          </div>
+        )}
       </div>
 
       <h2>Open Profile</h2>
