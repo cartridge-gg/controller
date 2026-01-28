@@ -117,6 +117,20 @@ export type LocationPromptReply = {
   location: LocationCoordinates;
 };
 
+export type LocationGateOptions = {
+  /** ISO 3166-1 alpha-2 country codes, e.g. "US", "CA". */
+  allowedCountries?: string[];
+  /** ISO 3166-2 region codes, e.g. "US-CA". */
+  allowedRegions?: string[];
+  /** US state abbreviations or full names, e.g. "CA" or "California". */
+  allowedStates?: string[];
+};
+
+export type ConnectOptions = {
+  signupOptions?: AuthOptions;
+  locationGate?: LocationGateOptions;
+};
+
 export type IFrames = {
   keychain?: KeychainIFrame;
   version?: number;
@@ -147,7 +161,9 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(signupOptions?: AuthOptions): Promise<ConnectReply | ConnectError>;
+  connect(
+    options?: AuthOptions | ConnectOptions,
+  ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -258,6 +274,8 @@ export type KeychainOptions = IFrameOptions & {
   feeSource?: FeeSource;
   /** Signup options (the order of the options is reflected in the UI. It's recommended to group socials and wallets together ) */
   signupOptions?: AuthOptions;
+  /** Optional location gating to enforce allowed regions before connect. */
+  locationGate?: LocationGateOptions;
   /** When true, manually provided policies will override preset policies. Default is false. */
   shouldOverridePresetPolicies?: boolean;
   /** The project name of Slot instance. */

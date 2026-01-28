@@ -26,6 +26,7 @@ import {
   ResponseCodes,
   OpenOptions,
   LocationPromptOptions,
+  ConnectOptions,
   StarterpackOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
@@ -42,6 +43,29 @@ export default class ControllerProvider extends BaseProvider {
 
   isReady(): boolean {
     return !!this.keychain;
+  }
+
+  private normalizeConnectOptions(
+    options?: AuthOptions | ConnectOptions,
+  ): ConnectOptions {
+    if (Array.isArray(options)) {
+      return {
+        signupOptions: options,
+        locationGate: this.options.locationGate,
+      };
+    }
+
+    if (options && typeof options === "object") {
+      return {
+        signupOptions: options.signupOptions ?? this.options.signupOptions,
+        locationGate: options.locationGate ?? this.options.locationGate,
+      };
+    }
+
+    return {
+      signupOptions: this.options.signupOptions,
+      locationGate: this.options.locationGate,
+    };
   }
 
   constructor(options: ControllerOptions = {}) {
@@ -227,7 +251,7 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async connect(
-    signupOptions?: AuthOptions,
+    options?: AuthOptions | ConnectOptions,
   ): Promise<WalletAccount | undefined> {
     if (!this.iframes) {
       return;
@@ -252,9 +276,12 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.open();
 
     try {
-      // Use connect() parameter if provided, otherwise fall back to constructor options
-      const effectiveOptions = signupOptions ?? this.options.signupOptions;
-      let response = await this.keychain.connect(effectiveOptions);
+      const effectiveOptions = this.normalizeConnectOptions(options);
+      const connectPayload =
+        effectiveOptions.signupOptions || effectiveOptions.locationGate
+          ? effectiveOptions
+          : undefined;
+      let response = await this.keychain.connect(connectPayload);
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
