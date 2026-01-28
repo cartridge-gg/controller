@@ -15,6 +15,16 @@ type LocationPromptCallback = {
   onCancel?: () => void;
 };
 
+function isLocationPromptResult(
+  value: unknown,
+): value is LocationPromptReply | ConnectError {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
+  return typeof obj.code === "string" && ("message" in obj || "location" in obj);
+}
+
 export function createLocationPromptUrl(
   options: LocationPromptCallback & LocationPromptOptions = {},
 ): string {
@@ -22,7 +32,17 @@ export function createLocationPromptUrl(
 
   if (options.resolve || options.reject || options.onCancel) {
     storeCallbacks(id, {
-      resolve: options.resolve,
+      resolve: options.resolve
+        ? (result) => {
+            if (!isLocationPromptResult(result)) {
+              const error = new Error("Invalid location prompt result type");
+              console.error(error.message, result);
+              options.reject?.(error);
+              return;
+            }
+            options.resolve?.(result);
+          }
+        : undefined,
       reject: options.reject,
       onCancel: options.onCancel,
     });
@@ -39,7 +59,7 @@ export function createLocationPromptUrl(
 
 export function parseLocationPromptParams(searchParams: URLSearchParams): {
   params: LocationPromptParams;
-  resolve?: (result: LocationPromptReply | ConnectError) => void;
+  resolve?: (result: unknown) => void;
   reject?: (reason?: unknown) => void;
   onCancel?: () => void;
 } | null {
@@ -53,11 +73,35 @@ export function parseLocationPromptParams(searchParams: URLSearchParams): {
 
     const callbacks = getCallbacks(id) as LocationPromptCallback | undefined;
 
+    const reject = callbacks?.reject
+      ? (reason?: unknown) => {
+          callbacks.reject?.(reason);
+        }
+      : undefined;
+
+    const resolve = callbacks?.resolve
+      ? (value: unknown) => {
+          if (!isLocationPromptResult(value)) {
+            const error = new Error("Invalid location prompt result type");
+            console.error(error.message, value);
+            reject?.(error);
+            return;
+          }
+          callbacks.resolve?.(value);
+        }
+      : undefined;
+
+    const onCancel = callbacks?.onCancel
+      ? () => {
+          callbacks.onCancel?.();
+        }
+      : undefined;
+
     return {
       params: { id },
-      resolve: callbacks?.resolve,
-      reject: callbacks?.reject,
-      onCancel: callbacks?.onCancel,
+      resolve,
+      reject,
+      onCancel,
     };
   } catch (error) {
     console.error("Failed to parse location prompt params:", error);
