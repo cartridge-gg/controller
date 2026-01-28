@@ -26,7 +26,7 @@ const CANCEL_RESPONSE = {
 
 const ERROR_RESPONSE = {
   code: ResponseCodes.ERROR,
-  message: "This game is not available in your region.",
+  message: "This game isn't available in your region.",
 };
 
 export function LocationGate() {
@@ -35,6 +35,7 @@ export function LocationGate() {
   const { search } = useLocation();
   const navigate = useNavigate();
   const [state, setState] = useState<GateState>("idle");
+  const [isBlocked, setIsBlocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -84,8 +85,8 @@ export function LocationGate() {
   );
 
   const handleCancel = useCallback(() => {
-    resolveConnect(CANCEL_RESPONSE);
-  }, [resolveConnect]);
+    resolveConnect(isBlocked ? ERROR_RESPONSE : CANCEL_RESPONSE);
+  }, [resolveConnect, isBlocked]);
 
   const handleContinue = useCallback(() => {
     if (!gate || !returnTo) {
@@ -99,6 +100,7 @@ export function LocationGate() {
     }
 
     setError(null);
+    setIsBlocked(false);
     setState("requesting");
 
     navigator.geolocation.getCurrentPosition(
@@ -119,7 +121,9 @@ export function LocationGate() {
           const gateResult = evaluateLocationGate({ gate, geo });
 
           if (!gateResult.allowed) {
-            resolveConnect(ERROR_RESPONSE);
+            setState("idle");
+            setIsBlocked(true);
+            setError("This game isn't available in your region.");
             return;
           }
 
@@ -144,7 +148,7 @@ export function LocationGate() {
         maximumAge: 60000,
       },
     );
-  }, [gate, navigate, returnTo, resolveConnect]);
+  }, [gate, navigate, returnTo]);
 
   if (!gate) {
     return null;
@@ -158,7 +162,8 @@ export function LocationGate() {
       />
       <LayoutContent className="p-4">
         <p className="text-sm text-foreground-300 leading-relaxed">
-          This game needs your location to confirm availability in your region.
+          This game needs your location to confirm eligibility in your region.
+          We'll only share it with the game after you approve.
         </p>
       </LayoutContent>
       <LayoutFooter>
@@ -179,7 +184,7 @@ export function LocationGate() {
           onClick={handleCancel}
           disabled={state === "requesting"}
         >
-          CANCEL
+          {isBlocked ? "CLOSE" : "CANCEL"}
         </Button>
       </LayoutFooter>
     </>

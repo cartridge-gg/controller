@@ -209,11 +209,15 @@ const Header = () => {
           </Button>
           <Button
             onClick={() => {
-              controllerConnector.connect({
-                locationGate: {
-                  allowedStates: ["CA", "NY"],
-                },
-              });
+              void controllerConnector
+                .connect({
+                  locationGate: {
+                    allowedStates: ["CA", "NY"],
+                  },
+                })
+                .catch((err) => {
+                  console.error("Region gate connect failed:", err);
+                });
             }}
             disabled={!isControllerReady}
             className="bg-[#7BA6F6] hover:bg-[#6A96E6] text-white"
