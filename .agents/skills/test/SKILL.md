@@ -1,3 +1,8 @@
+---
+name: test
+description: Run appropriate test suites based on changed files or user request. Use to run tests intelligently based on the type of changes.
+---
+
 # Test Skill
 
 Run appropriate test suites based on changed files or user request.

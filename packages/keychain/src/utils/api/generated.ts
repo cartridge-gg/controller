@@ -790,8 +790,11 @@ export type CoinbaseOnrampOrderResponse = {
   __typename?: "CoinbaseOnrampOrderResponse";
   /** The Coinbase onramp order details. */
   coinbaseOrder: CoinbaseOnrampOrder;
-  /** The Layerswap payment details for tracking the bridge. */
-  layerswapPayment: LayerswapPayment;
+  /**
+   * The Layerswap payment details for tracking the bridge.
+   * Only available for createCoinbaseLayerswapOrder.
+   */
+  layerswapPayment?: Maybe<LayerswapPayment>;
 };
 
 export type CoinbaseOnrampQuote = {
@@ -1078,7 +1081,7 @@ export type ControllerWhereInput = {
   updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
 };
 
-export type CreateCoinbaseOnrampOrderInput = {
+export type CreateCoinbaseLayerswapOrderInput = {
   /**
    * The amount of USDC to purchase (e.g., "100.000000" for 100 USDC).
    * This is the amount that will be delivered to the bridge.
@@ -1086,6 +1089,15 @@ export type CreateCoinbaseOnrampOrderInput = {
   purchaseUSDCAmount: Scalars["String"];
   /** If true, use sandbox mode (Base Sepolia -> Starknet Sepolia). */
   sandbox?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type CreateCoinbaseOnrampOrderInput = {
+  /** The amount of USDC to purchase (e.g., "100.000000" for 100 USDC). */
+  purchaseUSDCAmount: Scalars["String"];
+  /** If true, use sandbox mode (Base Sepolia). */
+  sandbox?: InputMaybe<Scalars["Boolean"]>;
+  /** The EIP-3009 authorization for the USDC transfer. */
+  usdcTransferAuthorization: UsdcTransferAuthorizationInput;
 };
 
 export type CreateCryptoPaymentInput = {
@@ -2535,6 +2547,11 @@ export type Mutation = {
    * Create a unified Coinbase onramp order.
    * This mutation orchestrates both Coinbase and Layerswap to bridge USDC from Apple Pay to Starknet.
    */
+  createCoinbaseLayerswapOrder: CoinbaseOnrampOrderResponse;
+  /**
+   * Create a Coinbase onramp order with a presigned transaction.
+   * This mutation sends USDC to a burner address, which then transfers to the presigned destination.
+   */
   createCoinbaseOnrampOrder: CoinbaseOnrampOrderResponse;
   createCryptoPayment: CryptoPayment;
   createDeployment: Deployment;
@@ -2621,6 +2638,10 @@ export type MutationBeginRegistrationArgs = {
 
 export type MutationClaimFreeStarterpackArgs = {
   input: StarterpackInput;
+};
+
+export type MutationCreateCoinbaseLayerswapOrderArgs = {
+  input: CreateCoinbaseLayerswapOrderInput;
 };
 
 export type MutationCreateCoinbaseOnrampOrderArgs = {
@@ -3897,6 +3918,11 @@ export type Query = {
   balance: Balance;
   balances: BalanceConnection;
   /**
+   * Get a specific Coinbase onramp order by its ID.
+   * Queries the internal database for the current status.
+   */
+  coinbaseOnrampOrder: CoinbaseOnrampOrder;
+  /**
    * Get a quote for a Coinbase onramp purchase without creating a transaction.
    * This is an estimate only and does not guarantee the final price.
    */
@@ -3992,6 +4018,10 @@ export type QueryBalancesArgs = {
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
   projects?: InputMaybe<Array<Scalars["String"]>>;
+};
+
+export type QueryCoinbaseOnrampOrderArgs = {
+  orderId: Scalars["String"];
 };
 
 export type QueryCoinbaseOnrampQuoteArgs = {
@@ -6364,6 +6394,18 @@ export type TransferResponse = {
 export type TransferResult = {
   __typename?: "TransferResult";
   items: Array<TransferItem>;
+};
+
+export type UsdcTransferAuthorizationInput = {
+  from: Scalars["String"];
+  nonce: Scalars["String"];
+  r: Scalars["String"];
+  s: Scalars["String"];
+  to: Scalars["String"];
+  v: Scalars["Int"];
+  validAfter: Scalars["Int"];
+  validBefore: Scalars["Int"];
+  value: Scalars["String"];
 };
 
 /**

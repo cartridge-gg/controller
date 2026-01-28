@@ -2,12 +2,13 @@ packages:
   - examples/next
   - examples/node
   - examples/svelte
+  - examples/capacitor
   - packages/*
 catalog:
   "@cartridge/arcade": "0.3.12"
   "@cartridge/controller-wasm": "0.9.1"
   "@cartridge/penpal": "^6.2.4"
-  "@cartridge/ui": "github:cartridge-gg/ui#301966b"
+  "@cartridge/ui": "github:cartridge-gg/ui#34dfcde"
   "@eslint/js": "^9.18.0"
   "@noble/curves": "^1.9.0"
   "@noble/hashes": "^1.8.0"

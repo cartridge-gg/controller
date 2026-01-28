@@ -1,3 +1,8 @@
+---
+name: clean-build
+description: Clean all build artifacts and rebuild from scratch. Use when experiencing stale build artifacts, Turbo cache issues, mysterious build failures, or after dependency updates.
+---
+
 # Clean Build Skill
 
 Clean all build artifacts and rebuild from scratch.

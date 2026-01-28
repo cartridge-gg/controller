@@ -118,6 +118,9 @@ export function OnchainCostBreakdown({
     isFetchingConversion,
     feeEstimationError,
     quantity,
+    isApplePaySelected,
+    coinbaseQuote,
+    isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
   const { decimals } = quote.paymentTokenMetadata;
 
@@ -214,13 +217,22 @@ export function OnchainCostBreakdown({
                 quote={quote}
                 quantity={quantity}
                 layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
+                coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
               />
             </div>
-            {isFetchingConversion ? (
+            {isFetchingConversion || isFetchingCoinbaseQuote ? (
               <Spinner />
             ) : (
               <div className="flex items-center gap-1.5">
-                {isUsingLayerswap ? (
+                {isApplePaySelected ? (
+                  coinbaseQuote ? (
+                    <span className="text-foreground-100">
+                      {`$${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)}`}
+                    </span>
+                  ) : (
+                    <span className="text-foreground-400">—</span>
+                  )
+                ) : isUsingLayerswap ? (
                   feeEstimationError ? (
                     <span className="text-foreground-400">—</span>
                   ) : layerswapTotal !== null && displayToken ? (

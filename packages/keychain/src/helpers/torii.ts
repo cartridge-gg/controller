@@ -57,6 +57,30 @@ export default {
   },
 
   /**
+   * Fetch a single contract by address
+   * @param client - The ToriiClient instance
+   * @param contractAddress - The contract address
+   * @returns The contract
+   */
+  async fetchTokenContract(
+    client: torii.ToriiClient,
+    contractAddress: string,
+  ): Promise<torii.TokenContract> {
+    return client
+      .getTokenContracts({
+        contract_addresses: [contractAddress],
+        contract_types: [],
+        pagination: {
+          cursor: undefined,
+          limit: 1,
+          order_by: [],
+          direction: "Forward",
+        },
+      })
+      .then((contracts) => contracts.items[0]);
+  },
+
+  /**
    * Fetch collections (tokens) for given contracts and token IDs
    * @param client - The ToriiClient instance
    * @param contractAddresses - Array of contract addresses

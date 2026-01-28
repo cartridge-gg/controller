@@ -1,3 +1,8 @@
+---
+name: pre-commit-check
+description: Run all pre-commit checks before committing changes. Use to manually verify changes pass all quality gates before committing.
+---
+
 # Pre-commit Check Skill
 
 Run all pre-commit checks before committing changes.
