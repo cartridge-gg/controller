@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   Button,
-  Card,
-  CardContent,
   GlobeIcon,
   HeaderInner,
   LayoutContent,
@@ -102,31 +100,11 @@ export function LocationPrompt() {
         title="Location Verification"
         icon={<GlobeIcon variant="solid" size="lg" />}
       />
-      <LayoutContent className="p-4 gap-4">
-        <div className="relative w-full overflow-hidden rounded-2xl border border-foreground-700 bg-foreground-950/40">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 20% 20%, rgba(221, 209, 255, 0.35), transparent 55%), radial-gradient(circle at 80% 60%, rgba(221, 209, 255, 0.25), transparent 50%)",
-            }}
-          />
-          <div className="relative flex aspect-[4/3] items-center justify-center">
-            <GlobeIcon
-              variant="solid"
-              size="xl"
-              className="text-primary-100 opacity-70"
-            />
-          </div>
-        </div>
-
-        <Card>
-          <CardContent className="p-4 text-sm text-foreground-300">
-            Cartridge offers skill-based, real money games in 39 states. We're
-            legally required to ask for your location to ensure you can play for
-            prizes in your state.
-          </CardContent>
-        </Card>
+      <LayoutContent className="p-4">
+        <p className="text-sm text-foreground-300 leading-relaxed">
+          This game needs your location to verify eligibility. We'll share your
+          location with the game to complete verification.
+        </p>
       </LayoutContent>
       <LayoutFooter>
         {error && (
