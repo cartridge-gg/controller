@@ -22,7 +22,9 @@ function isLocationPromptResult(
     return false;
   }
   const obj = value as Record<string, unknown>;
-  return typeof obj.code === "string" && ("message" in obj || "location" in obj);
+  return (
+    typeof obj.code === "string" && ("message" in obj || "location" in obj)
+  );
 }
 
 export function createLocationPromptUrl(
