@@ -72,6 +72,13 @@ export default class SessionAccount extends WalletAccount {
    * @returns response from addTransaction
    */
   async execute(calls: Call | Call[]): Promise<InvokeFunctionResponse> {
-    return this.controller.execute(normalizeCalls(calls));
+    try {
+      const res = await this.controller.executeFromOutside(
+        normalizeCalls(calls),
+      );
+      return res;
+    } catch (e) {
+      return this.controller.execute(normalizeCalls(calls));
+    }
   }
 }
