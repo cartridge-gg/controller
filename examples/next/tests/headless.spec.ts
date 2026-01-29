@@ -3,10 +3,9 @@ import { WebauthnEmulator } from "./webauthn";
 
 // Requires keychain running with VITE_E2E_MOCKS=true and the example app
 // pointing at that keychain via NEXT_PUBLIC_KEYCHAIN_FRAME_URL.
-const USE_MOCKS = process.env.E2E_MOCKS === "true";
-const MOCK_EVM_ADDRESS = "0xF39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+const MOCK_EVM_ADDRESS = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
 
-test.describe.skip(!USE_MOCKS, "Requires E2E_MOCKS=true", () => {
+test.describe("headless connect", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((address) => {
       // @ts-expect-error - test stub

@@ -94,4 +94,7 @@ try {
 
 - Headless mode uses the **existing signers** on the controller for the given username.
 - For passkeys, the account must already have a WebAuthn signer registered.
-- If session policies require explicit user approval, headless connect returns a `USER_INTERACTION_REQUIRED` error.
+- Headless connect only supports **verified preset policies** (no manual/URL policies).
+  - Ensure you pass a `preset` in the Controller options and that the preset’s
+    `origin` whitelist includes your app’s origin.
+- If the preset is unverified, missing policies, or the policies require explicit user approval, headless connect returns a `USER_INTERACTION_REQUIRED` error.

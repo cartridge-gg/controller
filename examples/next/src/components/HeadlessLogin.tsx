@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { constants } from "starknet";
-import Controller from "@cartridge/controller";
+import { controllerConnector } from "./providers/StarknetProvider";
 
 type AuthMethod = "passkey" | "metamask";
 
@@ -33,9 +32,7 @@ export function HeadlessLogin() {
     setResult(null);
 
     try {
-      const controller = new Controller({
-        defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
-      });
+      const controller = controllerConnector.controller;
 
       const account = await controller.connect({
         username,
@@ -102,9 +99,7 @@ export function HeadlessLogin() {
         return;
       }
 
-      const controller = new Controller({
-        defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
-      });
+      const controller = controllerConnector.controller;
 
       const account = await controller.connect({
         username,

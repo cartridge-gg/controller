@@ -57,7 +57,15 @@ export function createConnectUrl(
   }
 
   const params = new URLSearchParams({ id });
-  if (signupOptions !== undefined) {
+  if (headless) {
+    const payload: ConnectOptions = {
+      signupOptions,
+      username: headless.username,
+      signer: headless.signer,
+      password: headless.password,
+    };
+    params.set("signers", JSON.stringify(payload));
+  } else if (signupOptions !== undefined) {
     params.set("signers", JSON.stringify(signupOptions));
   }
 
@@ -76,12 +84,36 @@ export function parseConnectParams(searchParams: URLSearchParams): {
     const signersParam = searchParams.get("signers");
 
     let signers: AuthOptions | undefined;
+    let headlessFromSigners: HeadlessConnectOptions | undefined;
     if (signersParam) {
       try {
         const decoded = decodeURIComponent(signersParam);
         // Handle case where signupOptions was undefined and got stringified as "undefined"
         if (decoded !== "undefined" && decoded !== "null") {
-          signers = JSON.parse(decoded) as AuthOptions;
+          const parsed = JSON.parse(decoded) as
+            | AuthOptions
+            | HeadlessConnectOptions
+            | ConnectOptions;
+          if (Array.isArray(parsed)) {
+            signers = parsed as AuthOptions;
+          } else if (parsed && typeof parsed === "object") {
+            const maybeOptions = parsed as ConnectOptions;
+            if (
+              "signupOptions" in maybeOptions &&
+              Array.isArray(maybeOptions.signupOptions)
+            ) {
+              signers = maybeOptions.signupOptions;
+            }
+
+            const maybeHeadless = parsed as HeadlessConnectOptions;
+            if (maybeHeadless.username && maybeHeadless.signer) {
+              headlessFromSigners = {
+                username: maybeHeadless.username,
+                signer: maybeHeadless.signer,
+                password: maybeHeadless.password,
+              };
+            }
+          }
         }
       } catch (e) {
         console.error("Failed to parse signers parameter:", e);
@@ -127,7 +159,7 @@ export function parseConnectParams(searchParams: URLSearchParams): {
       resolve,
       reject,
       onCancel,
-      headless: callbacks?.headless,
+      headless: callbacks?.headless ?? headlessFromSigners,
     };
   } catch (error) {
     console.error("Failed to parse connect params:", error);
@@ -189,6 +221,26 @@ export function connect({
       } else {
         // Assume it's just AuthOptions passed directly (backwards compatibility)
         signers = policiesOrOptions as AuthOptions | undefined;
+      }
+
+      // Fallback: if we received a headless-like object as signers, normalize it.
+      if (signers && typeof signers === "object" && !Array.isArray(signers)) {
+        const maybeOptions = signers as unknown as ConnectOptions;
+        if (
+          "signupOptions" in maybeOptions ||
+          "username" in maybeOptions ||
+          "signer" in maybeOptions ||
+          "password" in maybeOptions
+        ) {
+          if (maybeOptions.username && maybeOptions.signer) {
+            headless = {
+              username: maybeOptions.username,
+              signer: maybeOptions.signer,
+              password: maybeOptions.password,
+            };
+          }
+          signers = maybeOptions.signupOptions;
+        }
       }
 
       if (signers && signers.length === 0) {

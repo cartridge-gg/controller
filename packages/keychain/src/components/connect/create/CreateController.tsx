@@ -418,6 +418,9 @@ export function CreateController({
     headless,
     shouldAutoCreateSession,
     resolveHeadlessInteractionRequired,
+    isParentReady,
+    isPoliciesResolved,
+    hasPolicies,
   } = useCreateController({
     isSlot,
     signers,
@@ -515,9 +518,25 @@ export function CreateController({
       return;
     }
 
+    if (!isParentReady) {
+      return;
+    }
+
+    if (!isPoliciesResolved) {
+      return;
+    }
+
+    if (!hasPolicies) {
+      resolveHeadlessInteractionRequired(
+        "Headless mode requires verified preset policies without approvals.",
+      );
+      headlessSubmitRef.current = true;
+      return;
+    }
+
     if (!shouldAutoCreateSession) {
       resolveHeadlessInteractionRequired(
-        "Headless mode requires auto-approved session policies.",
+        "Headless mode requires verified preset policies without approvals.",
       );
       headlessSubmitRef.current = true;
       return;
@@ -547,6 +566,9 @@ export function CreateController({
     headless,
     shouldAutoCreateSession,
     resolveHeadlessInteractionRequired,
+    isParentReady,
+    isPoliciesResolved,
+    hasPolicies,
     usernameField.value,
     validation.status,
     validation.exists,

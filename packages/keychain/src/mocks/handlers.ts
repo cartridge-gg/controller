@@ -1,6 +1,6 @@
-import { graphql, HttpResponse } from "msw";
+import { graphql, http, HttpResponse } from "msw";
 
-const DEFAULT_EVM_ADDRESS = "0xF39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+const DEFAULT_EVM_ADDRESS = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
 const DEFAULT_CONTROLLER_ADDRESS = "0x01c0ffee254729296a45a3885639AC7E10F9d549";
 const DEFAULT_PASSKEY_ID = "test-passkey-id";
 const DEFAULT_PASSKEY_PUBLIC_KEY = "test-passkey-public-key";
@@ -8,6 +8,15 @@ const DEFAULT_PASSWORD_PUBLIC_KEY = "0x1234";
 const DEFAULT_PASSWORD_ENCRYPTED_KEY = "cGFzc3dvcmQ="; // "password" in base64
 const DEFAULT_CONTROLLER_CLASS_HASH =
   "0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf";
+const PRESET_NAME = "headless";
+const PRESET_BASE_URL = "https://static.cartridge.gg/presets";
+const PRESET_POLICIES = {
+  contracts: {
+    "0x0123456789abcdef": {
+      methods: [{ name: "transfer", entrypoint: "transfer" }],
+    },
+  },
+};
 
 const now = () => new Date().toISOString();
 
@@ -82,6 +91,9 @@ const signerMap: Record<string, ControllerSigner> = {
   "phantom-evm": eip191Signer("phantom-evm"),
 };
 
+const createdUsernames = new Set<string>();
+let pendingRegistrationUsername: string | null = null;
+
 const accountConfigs: Record<string, { address: string; signers: string[] }> = {
   "headless-passkey": {
     address: "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcd",
@@ -107,16 +119,45 @@ const buildSignersForUsername = (username: string): ControllerSigner[] => {
   return [signerMap.webauthn, signerMap.metamask];
 };
 
+const isKnownUsername = (username: string) =>
+  !!accountConfigs[username] || createdUsernames.has(username);
+
 const addressForUsername = (username: string) => {
   const config = accountConfigs[username];
   return config?.address ?? DEFAULT_CONTROLLER_ADDRESS;
 };
 
 export const handlers = [
+  http.get(`${PRESET_BASE_URL}/index.json`, () =>
+    HttpResponse.json({
+      configs: [PRESET_NAME],
+      baseUrl: PRESET_BASE_URL,
+    }),
+  ),
+  http.get(`${PRESET_BASE_URL}/${PRESET_NAME}/config.json`, () =>
+    HttpResponse.json({
+      origin: ["localhost"],
+      chains: {
+        SN_MAIN: {
+          policies: PRESET_POLICIES,
+        },
+        SN_SEPOLIA: {
+          policies: PRESET_POLICIES,
+        },
+      },
+    }),
+  ),
   graphql.query("Controller", ({ variables }) => {
     const username = String(variables.username ?? "headless-user");
     const chainId = String(variables.chainId ?? "SN_SEPOLIA");
     const timestamp = now();
+
+    if (!isKnownUsername(username)) {
+      return HttpResponse.json({
+        errors: [{ message: "ent: controller not found" }],
+        data: { controller: null },
+      });
+    }
 
     return HttpResponse.json({
       data: {
@@ -135,6 +176,13 @@ export const handlers = [
   }),
   graphql.query("Account", ({ variables }) => {
     const username = String(variables.username ?? "headless-user");
+    if (!isKnownUsername(username)) {
+      return HttpResponse.json({
+        data: {
+          account: null,
+        },
+      });
+    }
     return HttpResponse.json({
       data: {
         account: {
@@ -163,6 +211,81 @@ export const handlers = [
             ],
           },
         },
+      },
+    });
+  }),
+  graphql.mutation("BeginRegistration", ({ variables }) => {
+    const username = String(variables.username ?? "mock-user");
+    pendingRegistrationUsername = username;
+
+    return HttpResponse.json({
+      data: {
+        beginRegistration: {
+          publicKey: {
+            challenge: "dGVzdC1jaGFsbGVuZ2U",
+            rp: { name: "Cartridge", id: "localhost" },
+            user: {
+              id: "",
+              name: username,
+              displayName: username,
+            },
+            pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+            timeout: 60000,
+          },
+        },
+      },
+    });
+  }),
+  graphql.mutation("FinalizeRegistration", () => {
+    const username = pendingRegistrationUsername ?? "mock-user";
+    createdUsernames.add(username);
+
+    return HttpResponse.json({
+      data: {
+        finalizeRegistration: {
+          username,
+          controllers: {
+            edges: [
+              {
+                node: {
+                  address: addressForUsername(username),
+                  constructorCalldata: [DEFAULT_CONTROLLER_CLASS_HASH],
+                  signers: [
+                    {
+                      type: "webauthn",
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          credentials: {
+            webauthn: [
+              {
+                id: DEFAULT_PASSKEY_ID,
+                publicKey: DEFAULT_PASSKEY_PUBLIC_KEY,
+              },
+            ],
+          },
+        },
+      },
+    });
+  }),
+  graphql.mutation("BeginLogin", () => {
+    return HttpResponse.json({
+      data: {
+        beginLogin: {
+          publicKey: {
+            challenge: "dGVzdC1jaGFsbGVuZ2U",
+          },
+        },
+      },
+    });
+  }),
+  graphql.mutation("FinalizeLogin", () => {
+    return HttpResponse.json({
+      data: {
+        finalizeLogin: true,
       },
     });
   }),

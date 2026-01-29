@@ -132,5 +132,10 @@
     "vite-plugin-wasm": "catalog:",
     "vitest": "2.1.8",
     "ws": "^8.18.3"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
