@@ -1,5 +1,6 @@
 import { FrameLocator } from "@playwright/test";
 import { Page } from "@playwright/test";
+import { randomUUID } from "crypto";
 
 export class Keychain {
   private page: Page;
@@ -94,6 +95,6 @@ export class Keychain {
   }
 
   private randomUsername() {
-    return `test-${Math.random().toString(36).slice(2, 10)}`;
+    return `test-${randomUUID().slice(0, 8)}`;
   }
 }
