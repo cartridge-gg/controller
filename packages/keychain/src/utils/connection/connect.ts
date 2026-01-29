@@ -189,12 +189,21 @@ export function connect({
       let signers: AuthOptions | undefined;
       let headless: HeadlessConnectOptions | undefined;
 
+      const isValidUrl = (value: string) => {
+        try {
+          const url = new URL(value);
+          return url.protocol === "http:" || url.protocol === "https:";
+        } catch {
+          return false;
+        }
+      };
+
       // Detect which signature is being used
       // Check if it's the old 3-parameter signature (policies, rpcUrl, signupOptions)
       if (
         rpcUrl !== undefined &&
         typeof rpcUrl === "string" &&
-        (rpcUrl.startsWith("http://") || rpcUrl.startsWith("https://"))
+        isValidUrl(rpcUrl)
       ) {
         // Old signature: connect(policies, rpcUrl, signupOptions)
         signers = signupOptions;
