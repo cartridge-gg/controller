@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.12.2] - 2026-01-29
+
+### ✨ New Features
+- **Examples**: Added Capacitor session example with iOS app integration, demonstrating mobile session management and providing comprehensive cross-platform development guidance (#2355)
+- **@cartridge/keychain**: Enhanced Coinbase onramp integration with `createCoinbaseLayerswapOrder` mutation for improved order creation and processing (#2354)
+- **@cartridge/keychain**: Added comprehensive cost breakdown display for Apple Pay purchases, showing detailed fee structure including Coinbase fees and bridge fees with real-time pricing from Coinbase Onramp API (#2352)
+- **@cartridge/keychain**: Added starterpack Apple Pay checkout functionality for streamlined mobile payments (#2339)
+- **@cartridge/keychain**: Implemented verification autofill functionality for improved user experience during authentication flows (#2342)
+- **@cartridge/keychain**: Added order fetching by IDs capability for enhanced order management and tracking (#2334)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Removed supported-platforms feature gate, making platform detection generally available (#2335)
+- **Development**: Migrated skills documentation to centralized `.agents/skills` directory for better organization and AI-assisted development workflows (#2353)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed 'proceed with caution' warning visibility for slot login flows, improving user experience (#2351)
+- **@cartridge/keychain**: Fixed purchase token layout issues for better visual consistency (#2343)
+- **@cartridge/keychain**: Fixed Layerswap username retrieval from authentication context for proper user identification (#2347)
+- **@cartridge/keychain**: Fixed Coinbase Terms of Service link for proper legal compliance (#2341)
+- **@cartridge/keychain**: Fixed Coinbase query handling for improved API integration (#2338)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#2350, #2348, #2346, #2345, #2344, #2337)
+
 ## [0.12.1] - 2026-01-07
 
 ### ✨ New Features
