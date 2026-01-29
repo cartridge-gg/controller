@@ -205,7 +205,7 @@ const controller = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  url: getKeychainUrl(),
+  url: "https://x.cartridge.gg",
   signupOptions,
   slot: "arcade-pistols",
   namespace: "pistols",
@@ -223,7 +223,7 @@ const session = new SessionConnector({
   chainId: constants.StarknetChainId.SN_MAIN,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   disconnectRedirectUrl: "whatsapp://",
-  keychainUrl: getKeychainUrl(),
+  keychainUrl: "https://x.cartridge.gg",
   apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
   signupOptions,
 });
@@ -232,7 +232,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={mainnet.id}
+      defaultChainId={sepolia.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}
