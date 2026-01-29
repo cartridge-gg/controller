@@ -21,7 +21,7 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useToriiCollection } from "@/hooks/collection";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
 import { useTokenContract } from "@/hooks/contracts";
 import { useNavigation } from "@/context/navigation";
@@ -49,6 +49,7 @@ export function CollectionPurchase() {
   const [amount, setAmount] = useState<number>(0);
   const arcadeContext = useContext(ArcadeContext);
   const provider = arcadeContext?.provider;
+  const { toast } = useToast();
 
   const [searchParams] = useSearchParams();
 
@@ -275,6 +276,15 @@ export function CollectionPurchase() {
     return calls;
   }, [token, tokenOrders, totalPrice, marketplaceAddress]);
 
+  const submitToast = useCallback(() => {
+    toast.marketplace("Purchase completed successfully!", {
+      action: "purchased",
+      itemNames: props.map((prop) => prop.name),
+      itemImages: props.map((prop) => prop.images[0]),
+      collectionName: tokenContract?.name ?? "",
+    });
+  }, [toast, props, tokenContract?.name]);
+
   const onSubmitPurchase = useCallback(
     async (maxFee?: FeeEstimate) => {
       if (!maxFee || !buildTransactions || !controller) {
@@ -283,11 +293,7 @@ export function CollectionPurchase() {
 
       try {
         await controller.execute(buildTransactions, maxFee);
-
-        toast.success("Purchase completed successfully!", {
-          duration: 10000,
-        });
-
+        submitToast();
         // Navigate back
         goBack();
       } catch (error) {
@@ -296,7 +302,7 @@ export function CollectionPurchase() {
         throw error;
       }
     },
-    [buildTransactions, controller, goBack],
+    [buildTransactions, controller, goBack, toast, submitToast],
   );
 
   const status = useMemo(() => {

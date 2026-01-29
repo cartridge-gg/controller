@@ -30,7 +30,7 @@ import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useUsername } from "@/hooks/username";
 import { useMarketplace } from "@/hooks/marketplace";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
 import { useAccount } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
@@ -51,6 +51,7 @@ export function CollectionAsset() {
   const { tokens } = useTokens();
   const { provider, selfOrders, order, setAmount } = useMarketplace();
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const { address: contractAddress, tokenId } = useParams();
   const {
@@ -155,6 +156,7 @@ export function CollectionAsset() {
     isOwner,
     navigate,
     selfOrders,
+    toast,
   ]);
 
   const events = useMemo(() => {

@@ -1,38 +1,140 @@
-import React, {
-  createContext,
-  useContext,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-import { toast, ToastOptions } from "@cartridge/controller";
-import { useSonner } from "sonner";
+import React, { createContext, useContext, useCallback, useMemo } from "react";
+import {
+  AchievementToastOptions,
+  MarketplaceToastOptions,
+  NetworkSwitchToastOptions,
+  QuestToastOptions,
+  ToastOptions,
+  TransactionToastOptions,
+} from "@cartridge/controller";
+import { isIframe } from "@cartridge/ui/utils";
+import { toast as sonnerToast } from "sonner";
 
 interface ToastContextType {
-  addToast: (options: ToastOptions) => void;
+  toast: {
+    success: (message: string) => void;
+    error: (message: string) => void;
+    transaction: (
+      message: string,
+      options: Omit<TransactionToastOptions, "variant">,
+    ) => void;
+    networkSwitch: (
+      message: string,
+      options: Omit<NetworkSwitchToastOptions, "variant">,
+    ) => void;
+    marketplace: (
+      message: string,
+      options: Omit<MarketplaceToastOptions, "variant">,
+    ) => void;
+    achievement: (
+      message: string,
+      options: Omit<AchievementToastOptions, "variant">,
+    ) => void;
+    quest: (options: Omit<QuestToastOptions, "variant">) => void;
+  };
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [lastToastId, setLastToastId] = useState(0);
-  const { toasts } = useSonner();
-  useEffect(() => {
-    toasts.forEach((toast) => {
-      if (typeof toast.id === "number" && toast.id > lastToastId) {
-        window.parent?.postMessage({ toast }, "*");
-        setLastToastId(toast.id);
-      }
-    });
-  }, [toasts, lastToastId]);
+  // toast injected at document level
+  // from @cartridge/controller
+  // const addToast = useCallback((options: ToastOptions) => {
+  //   if (!toast) return;
+  //   toast(options);
+  // }, []);
 
-  const addToast = useCallback((options: ToastOptions) => {
-    if (!toast) return;
-    toast(options);
+  const emitToast = useCallback((options: ToastOptions) => {
+    if (isIframe()) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const preset = searchParams.get("preset") ?? undefined;
+      window.parent.postMessage(
+        {
+          type: "controller-toast",
+          options: {
+            duration: 5000,
+            ...options,
+            preset,
+          },
+        },
+        "*",
+      );
+    }
   }, []);
 
+  const toast = useMemo(
+    () => ({
+      success: (message: string) => {
+        sonnerToast.success(message);
+        emitToast({
+          variant: "transaction",
+          status: "confirmed",
+          label: message,
+        });
+      },
+      error: (message: string) => {
+        sonnerToast.error(message);
+        emitToast({
+          variant: "error",
+          message,
+        });
+      },
+      transaction: (
+        message: string,
+        options: Omit<TransactionToastOptions, "variant">,
+      ) => {
+        sonnerToast.success(message);
+        emitToast({
+          safeToClose: options.status === "confirmed",
+          ...options,
+          variant: "transaction",
+        });
+      },
+      networkSwitch: (
+        message: string,
+        options: Omit<NetworkSwitchToastOptions, "variant">,
+      ) => {
+        sonnerToast.success(message);
+        emitToast({
+          ...options,
+          variant: "network-switch",
+        });
+      },
+      marketplace: (
+        message: string,
+        options: Omit<MarketplaceToastOptions, "variant">,
+      ) => {
+        sonnerToast.success(message);
+        emitToast({
+          duration: 10000,
+          safeToClose: true,
+          ...options,
+          variant: "marketplace",
+        });
+      },
+      achievement: (
+        message: string,
+        options: Omit<AchievementToastOptions, "variant">,
+      ) => {
+        sonnerToast.success(message);
+        emitToast({
+          ...options,
+          variant: "achievement",
+        });
+      },
+      quest: (options: Omit<QuestToastOptions, "variant">) => {
+        sonnerToast.success(options.subtitle);
+        emitToast({
+          ...options,
+          variant: "quest",
+        });
+      },
+    }),
+    [emitToast],
+  );
+
   const value: ToastContextType = {
-    addToast,
+    toast,
   };
 
   return (

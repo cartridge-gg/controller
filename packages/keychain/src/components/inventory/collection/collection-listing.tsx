@@ -30,7 +30,7 @@ import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
 import { useTokens } from "@/hooks/token";
 import { AllowArray, cairo, Call, CallData, FeeEstimate } from "starknet";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 import { ArcadeContext } from "@/context/arcade";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useConnection } from "@/hooks/connection";
@@ -73,6 +73,7 @@ export function CollectionListing() {
   const [priceError, setPriceError] = useState<Error | undefined>();
   const [userSelected, setUserSelected] = useState<boolean>(false);
   const [validated, setValidated] = useState<boolean>(false);
+  const { toast } = useToast();
 
   const tokens = useMemo(() => {
     const whitelisted = ALLOWED_TOKENS.map((address) => BigInt(address));
@@ -234,6 +235,15 @@ export function CollectionListing() {
     marketplaceAddress,
   ]);
 
+  const submitToast = useCallback(() => {
+    toast.marketplace("Listing transaction submitted successfully!", {
+      action: "listed",
+      itemNames: listingData.assets.map((asset) => asset.name),
+      itemImages: listingData.assets.map((asset) => asset.image),
+      collectionName: collection?.name ?? "",
+    });
+  }, [toast, listingData, collection?.name]);
+
   const onSubmitListing = useCallback(
     async (maxFee?: FeeEstimate) => {
       if (!maxFee || !buildTransactions || !controller) {
@@ -242,11 +252,7 @@ export function CollectionListing() {
 
       try {
         await controller.execute(buildTransactions, maxFee);
-
-        toast.success("Listing transaction submitted successfully!", {
-          duration: 10000,
-        });
-
+        submitToast();
         // Navigate back to the parent collection page with proper account path
         goBack();
       } catch (error) {
@@ -255,7 +261,7 @@ export function CollectionListing() {
         throw error; // Re-throw to let ExecutionContainer handle the error display
       }
     },
-    [buildTransactions, controller, goBack],
+    [buildTransactions, controller, goBack, toast, submitToast],
   );
 
   useEffect(() => {

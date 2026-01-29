@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 import {
   useMeQuery,
   useSendEmailVerificationMutation,
@@ -170,6 +170,7 @@ export function Verification() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const method = searchParams.get("method");
+  const { toast } = useToast();
 
   useEffect(() => {
     setShowClose(true);

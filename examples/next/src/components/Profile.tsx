@@ -43,6 +43,7 @@ export function Profile() {
         title: "First Achievement!",
         subtitle: "Earned!",
         xpAmount: 50,
+        progress: 100,
         isDraft: true,
       });
     }, 3000);
@@ -59,8 +60,9 @@ export function Profile() {
       toast({
         variant: "marketplace",
         action: "purchased",
-        itemName: "Cool NFT #123",
-        itemImage: "https://picsum.photos/seed/adventurer/200/200",
+        itemNames: ["Cool NFT #123"],
+        itemImages: ["https://picsum.photos/seed/adventurer/200/200"],
+        collectionName: "Cool Collection",
       });
     }, 5000);
   };
