@@ -131,7 +131,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(signupOptions?: AuthOptions): Promise<ConnectReply | ConnectError>;
+  connect(options?: ConnectOptions): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -274,3 +274,15 @@ export type StarterpackOptions = {
   /** The preimage to use */
   preimage?: string;
 };
+
+// Connect options (used by controller.connect)
+export interface ConnectOptions {
+  /** Signup options (shown in UI when not headless) */
+  signupOptions?: AuthOptions;
+  /** Headless mode username (when combined with signer) */
+  username?: string;
+  /** Headless mode signer option (auth method) */
+  signer?: AuthOption;
+  /** Required when signer is "password" */
+  password?: string;
+}

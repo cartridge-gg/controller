@@ -155,7 +155,18 @@ function Authentication() {
 
     if (signersParam) {
       try {
-        signers = JSON.parse(decodeURIComponent(signersParam)) as AuthOptions;
+        const parsed = JSON.parse(decodeURIComponent(signersParam)) as
+          | AuthOptions
+          | { signupOptions?: AuthOptions };
+        if (Array.isArray(parsed)) {
+          signers = parsed as AuthOptions;
+        } else if (
+          parsed &&
+          typeof parsed === "object" &&
+          Array.isArray(parsed.signupOptions)
+        ) {
+          signers = parsed.signupOptions;
+        }
       } catch (error) {
         console.error("Failed to parse signers parameter:", error);
         // Continue with undefined signers on parse error

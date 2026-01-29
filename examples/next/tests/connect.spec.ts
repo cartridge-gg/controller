@@ -19,6 +19,9 @@ test("Sign up -> Disconnect -> Log in", async ({ page }) => {
   await keychain.session();
   await keychain.disconnect();
   await keychain.login();
+  await keychain.session();
 
-  await expect(page.getByText(`Username: ${keychain.username}`)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /0x[a-fA-F0-9]+/ }),
+  ).toBeVisible();
 });

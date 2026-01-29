@@ -22,6 +22,7 @@ import {
   useAccountQuery,
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
+import { getAddress } from "ethers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { constants, shortString } from "starknet";
@@ -160,14 +161,48 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController, policies, closeModal } =
-    useConnection();
+  const {
+    parent,
+    origin,
+    rpcUrl,
+    chainId,
+    setController,
+    policies,
+    closeModal,
+    isConfigLoading,
+    isPoliciesResolved,
+  } = useConnection();
 
   // Import route params and completion for connection resolution
   const params = useMemo(() => {
     return parseConnectParams(searchParams);
   }, [searchParams]);
   const handleCompletion = useRouteCompletion();
+  const headless = params?.headless;
+  const hasVerifiedPolicies =
+    !!policies && policies.verified && !hasApprovalPolicies(policies);
+  const hasPolicies = !!policies;
+  const shouldAutoCreateSession = headless
+    ? hasVerifiedPolicies
+    : !policies || hasVerifiedPolicies;
+  const isParentReady = !!parent && !!origin;
+
+  const resolveHeadlessInteractionRequired = useCallback(
+    (message: string) => {
+      if (!params) {
+        return;
+      }
+      params.resolve?.({
+        code: ResponseCodes.USER_INTERACTION_REQUIRED,
+        message,
+      });
+      if (params.params.id) {
+        cleanupCallbacks(params.params.id);
+      }
+      handleCompletion();
+    },
+    [params, handleCompletion],
+  );
 
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
@@ -342,9 +377,6 @@ export function useCreateController({
         // }
 
         // Normal embedded flow: handle session creation for auto-close cases
-        const shouldAutoCreateSession =
-          !policies || (policies.verified && !hasApprovalPolicies(policies));
-
         if (shouldAutoCreateSession) {
           await createSession({
             controller,
@@ -370,6 +402,7 @@ export function useCreateController({
       params,
       closeModal,
       searchParams,
+      shouldAutoCreateSession,
     ],
   );
 
@@ -496,7 +529,18 @@ export function useCreateController({
     }) => {
       // Verify correct EVM wallet account is selected
       if (authenticationMethod !== "password") {
-        const connectedAddress = signerToAddress(loginResponse.signer);
+        const normalizeAddress = (address?: string) => {
+          if (!address) return undefined;
+          try {
+            return getAddress(address);
+          } catch {
+            return address.toLowerCase();
+          }
+        };
+
+        const connectedAddress = normalizeAddress(
+          signerToAddress(loginResponse.signer),
+        );
         const possibleSigners = controller.signers?.filter(
           (signer) =>
             credentialToAuth(signer.metadata as CredentialMetadata) ===
@@ -514,8 +558,9 @@ export function useCreateController({
         if (
           !possibleSigners.find(
             (signer) =>
-              credentialToAddress(signer.metadata as CredentialMetadata) ===
-              connectedAddress,
+              normalizeAddress(
+                credentialToAddress(signer.metadata as CredentialMetadata),
+              ) === connectedAddress,
           )
         ) {
           setChangeWallet(true);
@@ -562,9 +607,6 @@ export function useCreateController({
       // }
 
       // Normal embedded flow: handle session creation for auto-close cases
-      const shouldAutoCreateSession =
-        !policies || (policies.verified && !hasApprovalPolicies(policies));
-
       if (shouldAutoCreateSession) {
         await createSession({
           controller: loginRet.controller,
@@ -589,6 +631,7 @@ export function useCreateController({
       params,
       closeModal,
       searchParams,
+      shouldAutoCreateSession,
     ],
   );
 
@@ -877,6 +920,17 @@ export function useCreateController({
 
         console.error(e);
         setError(e as Error);
+        if (headless && params) {
+          params.resolve?.({
+            code: ResponseCodes.ERROR,
+            message:
+              e instanceof Error ? e.message : "Headless authentication failed",
+          });
+          if (params.params.id) {
+            cleanupCallbacks(params.params.id);
+          }
+          handleCompletion();
+        }
       } finally {
         if (exists) {
           setWaitingForConfirmation(false);
@@ -892,6 +946,9 @@ export function useCreateController({
       setError,
       setIsLoading,
       setWaitingForConfirmation,
+      headless,
+      params,
+      handleCompletion,
     ],
   );
 
@@ -911,5 +968,12 @@ export function useCreateController({
     signupOptions,
     authMethod,
     setAuthMethod,
+    headless,
+    shouldAutoCreateSession,
+    resolveHeadlessInteractionRequired,
+    isConfigLoading,
+    isParentReady,
+    isPoliciesResolved,
+    hasPolicies,
   };
 }

@@ -11,6 +11,11 @@ import "./index.css";
 
 // Controller type is already declared in vite-env.d.ts
 async function bootstrap() {
+  if (import.meta.env.VITE_E2E_MOCKS === "true") {
+    const { worker } = await import("./mocks/browser");
+    await worker.start({ onUnhandledRequest: "bypass" });
+  }
+
   window.controller = await Controller.fromStore();
 
   createRoot(document.getElementById("root")!).render(

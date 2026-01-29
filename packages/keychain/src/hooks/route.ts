@@ -8,17 +8,20 @@ import { cleanupCallbacks } from "@/utils/connection/callbacks";
  * @param parseParams - Function to parse the URLSearchParams
  * @returns Parsed params with callbacks, or null if parsing failed
  */
-export function useRouteParams<T extends { id?: string }>(
-  parseParams: (searchParams: URLSearchParams) => {
-    params: T;
-    resolve?: (result: unknown) => void;
-    reject?: (reason?: unknown) => void;
-    onCancel?: () => void;
-  } | null,
-) {
+type RouteParams<T extends { id?: string }> = {
+  params: T;
+  resolve?: (result: unknown) => void;
+  reject?: (reason?: unknown) => void;
+  onCancel?: () => void;
+};
+
+export function useRouteParams<
+  T extends { id?: string },
+  R extends RouteParams<T>,
+>(parseParams: (searchParams: URLSearchParams) => R | null) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [params, setParams] = useState<ReturnType<typeof parseParams>>(null);
+  const [params, setParams] = useState<R | null>(null);
 
   // Parse URL params on mount or when searchParams change
   // Note: parseParams is intentionally not in the dependency array to avoid infinite loops

@@ -195,8 +195,7 @@ const signupOptions: AuthOptions = [
   "phantom-evm",
 ];
 
-const controller = new ControllerConnector({
-  policies,
+export const controllerConnector = new ControllerConnector({
   // With the defaults, you can omit chains if you want to use:
   // - chains: [
   //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9" },
@@ -206,6 +205,7 @@ const controller = new ControllerConnector({
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
   url: getKeychainUrl(),
+  preset: "headless",
   signupOptions,
   slot: "arcade-pistols",
   namespace: "pistols",
@@ -234,7 +234,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       autoConnect
       defaultChainId={mainnet.id}
       chains={starknetConfigChains}
-      connectors={[controller, session]}
+      connectors={[controllerConnector, session]}
       explorer={cartridge}
       provider={provider}
     >

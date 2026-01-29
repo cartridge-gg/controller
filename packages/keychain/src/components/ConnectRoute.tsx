@@ -20,13 +20,14 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, origin } = useConnection();
+  const { controller, policies, origin, isPoliciesResolved } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
 
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
     return parseConnectParams(searchParams);
   });
+  const headless = params?.headless;
 
   const handleCompletion = useRouteCompletion();
 
@@ -48,6 +49,7 @@ export function ConnectRoute() {
     () => hasApprovalPolicies(policies),
     [policies],
   );
+  const isHeadless = !!headless;
 
   console.log(isStandalone, redirectUrl);
 
@@ -149,6 +151,10 @@ export function ConnectRoute() {
       return;
     }
 
+    if (!isPoliciesResolved) {
+      return;
+    }
+
     // In standalone mode with redirect_url, redirect immediately
     // if (isStandalone && redirectUrl) {
     //   console.log("redirecting effect");
@@ -178,7 +184,22 @@ export function ConnectRoute() {
     // Mark as auto-connected immediately to prevent race conditions
     setHasAutoConnected(true);
 
-    // if no policies, we can connect immediately
+    if (isHeadless) {
+      if (!policies || !policies.verified || hasTokenApprovals) {
+        params.resolve?.({
+          code: ResponseCodes.USER_INTERACTION_REQUIRED,
+          message:
+            "Headless mode requires verified preset policies without approvals.",
+        });
+        if (params.params.id) {
+          cleanupCallbacks(params.params.id);
+        }
+        handleCompletion();
+        return;
+      }
+    }
+
+    // if no policies, we can connect immediately (non-headless only)
     if (!policies) {
       params.resolve?.({
         code: ResponseCodes.SUCCESS,
@@ -233,6 +254,8 @@ export function ConnectRoute() {
     redirectUrl,
     hasAutoConnected,
     hasTokenApprovals,
+    isHeadless,
+    isPoliciesResolved,
     origin,
   ]);
 

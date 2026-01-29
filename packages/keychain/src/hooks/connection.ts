@@ -192,8 +192,17 @@ export function useConnectionValue() {
     import.meta.env.VITE_RPC_MAINNET,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
+  const [isPoliciesResolved, setIsPoliciesResolved] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
-  const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
+  const initialPreset =
+    typeof window !== "undefined"
+      ? window.location.pathname.startsWith("/slot")
+        ? "slot"
+        : new URLSearchParams(window.location.search).get("preset")
+      : null;
+  const [isConfigLoading, setIsConfigLoading] = useState<boolean>(
+    () => !!initialPreset,
+  );
   const [isMainnet, setIsMainnet] = useState<boolean>(false);
   const [configData, setConfigData] = useState<Record<string, unknown> | null>(
     null,
@@ -307,6 +316,29 @@ export function useConnectionValue() {
     };
 
     if (rpcUrl) {
+      const inferChainIdFromRpcUrl = (url: string) => {
+        const lower = url.toLowerCase();
+        if (lower.includes("sepolia")) {
+          return constants.StarknetChainId.SN_SEPOLIA;
+        }
+        if (lower.includes("mainnet")) {
+          return constants.StarknetChainId.SN_MAIN;
+        }
+        return undefined;
+      };
+
+      const inferredChainId = inferChainIdFromRpcUrl(rpcUrl);
+      if (import.meta.env.VITE_E2E_MOCKS === "true") {
+        if (inferredChainId) {
+          setChainId(inferredChainId);
+          return;
+        }
+      }
+
+      if (inferredChainId) {
+        setChainId(inferredChainId);
+      }
+
       fetchChainId();
     }
   }, [rpcUrl]);
@@ -564,7 +596,12 @@ export function useConnectionValue() {
     const { policies, preset } = urlParams;
 
     // Always prioritize preset policies over URL policies
-    if (preset && !isConfigLoading) {
+    if (preset) {
+      if (isConfigLoading || !chainId) {
+        setIsPoliciesResolved(false);
+        return;
+      }
+
       const configPolicies = getConfigChainPolicies(
         configData,
         chainId,
@@ -573,8 +610,12 @@ export function useConnectionValue() {
 
       if (configPolicies) {
         setPolicies(configPolicies);
+        setIsPoliciesResolved(true);
         return;
       }
+
+      setIsPoliciesResolved(true);
+      return;
     }
 
     // Fall back to URL policies if no preset or preset has no policies
@@ -582,6 +623,8 @@ export function useConnectionValue() {
     if (urlPolicies) {
       setPolicies(urlPolicies);
     }
+
+    setIsPoliciesResolved(true);
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
   useThemeEffect({ theme, assetUrl: "" });
@@ -780,6 +823,7 @@ export function useConnectionValue() {
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
     isConfigLoading,
+    isPoliciesResolved,
     isMainnet,
     verified,
     chainId,
