@@ -89,34 +89,50 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
     : policies;
 }
 
+/**
+ * Converts parsed session policies to WASM-compatible Policy objects.
+ *
+ * IMPORTANT: Policies are sorted canonically before hashing. Without this,
+ * Object.keys/entries reordering can cause identical policies to produce
+ * different merkle roots, leading to "session/not-registered" errors.
+ * See: https://github.com/cartridge-gg/controller/issues/2357
+ */
 export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
   return [
-    ...Object.entries(policies.contracts ?? {}).flatMap(
-      ([target, { methods }]) =>
-        toArray(methods).map((m) => ({
-          target,
-          method: hash.getSelectorFromName(m.entrypoint),
-          authorized: m.authorized,
-        })),
-    ),
-    ...(policies.messages ?? []).map((p) => {
-      const domainHash = typedData.getStructHash(
-        p.types,
-        "StarknetDomain",
-        p.domain,
-        TypedDataRevision.ACTIVE,
-      );
-      const typeHash = typedData.getTypeHash(
-        p.types,
-        p.primaryType,
-        TypedDataRevision.ACTIVE,
-      );
+    ...Object.entries(policies.contracts ?? {})
+      .sort(([a], [b]) => a.toLowerCase().localeCompare(b.toLowerCase()))
+      .flatMap(([target, { methods }]) =>
+        toArray(methods)
+          .slice()
+          .sort((a, b) => a.entrypoint.localeCompare(b.entrypoint))
+          .map((m) => ({
+            target,
+            method: hash.getSelectorFromName(m.entrypoint),
+            authorized: m.authorized,
+          })),
+      ),
+    ...(policies.messages ?? [])
+      .map((p) => {
+        const domainHash = typedData.getStructHash(
+          p.types,
+          "StarknetDomain",
+          p.domain,
+          TypedDataRevision.ACTIVE,
+        );
+        const typeHash = typedData.getTypeHash(
+          p.types,
+          p.primaryType,
+          TypedDataRevision.ACTIVE,
+        );
 
-      return {
-        scope_hash: hash.computePoseidonHash(domainHash, typeHash),
-        authorized: p.authorized,
-      };
-    }),
+        return {
+          scope_hash: hash.computePoseidonHash(domainHash, typeHash),
+          authorized: p.authorized,
+        };
+      })
+      .sort((a, b) =>
+        a.scope_hash.toString().localeCompare(b.scope_hash.toString()),
+      ),
   ];
 }
 
