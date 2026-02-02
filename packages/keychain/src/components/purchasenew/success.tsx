@@ -8,7 +8,6 @@ import {
 import { Receiving } from "./receiving";
 import { useConnection } from "@/hooks/connection";
 import {
-  useNavigation,
   useStarterpackContext,
   useOnchainPurchaseContext,
   Item,
@@ -17,6 +16,7 @@ import { useMemo } from "react";
 import { ConfirmingTransaction } from "./pending";
 import { getExplorer } from "@/hooks/starterpack/layerswap";
 import { StarterpackType } from "@/context";
+import { useStarterpackPlayHandler } from "@/hooks/starterpack";
 
 export function Success() {
   const { starterpackDetails, transactionHash, claimItems } =
@@ -50,8 +50,8 @@ export function PurchaseSuccessInner({
   transactionHash?: string;
 }) {
   const { quantity } = useOnchainPurchaseContext();
-  const { closeModal, isMainnet } = useConnection();
-  const { navigateToRoot } = useNavigation();
+  const { isMainnet } = useConnection();
+  const handlePlay = useStarterpackPlayHandler();
   const quantityText = quantity > 1 ? `(${quantity})` : "";
 
   return (
@@ -78,12 +78,7 @@ export function PurchaseSuccessInner({
             isLoading={false}
           />
         )}
-        <Button
-          onClick={() => {
-            closeModal?.();
-            navigateToRoot();
-          }}
-        >
+        <Button onClick={handlePlay}>
           Play
         </Button>
       </LayoutFooter>

@@ -459,7 +459,14 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    await this.keychain.openStarterPack(id, options);
+    const { onPlay, ...starterpackOptions } = options ?? {};
+    this.iframes.keychain.setOnStarterpackPlay(onPlay);
+    const sanitizedOptions =
+      Object.keys(starterpackOptions).length > 0
+        ? (starterpackOptions as Omit<StarterpackOptions, "onPlay">)
+        : undefined;
+
+    await this.keychain.openStarterPack(id, sanitizedOptions);
     this.iframes.keychain?.open();
   }
 
