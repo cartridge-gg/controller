@@ -570,20 +570,6 @@ export default class ControllerProvider extends BaseProvider {
         const url = new URL(chain.rpcUrl);
         const chainId = parseChainId(url);
 
-        // Validate that mainnet and sepolia must use Cartridge RPC
-        const isMainnet = chainId === constants.StarknetChainId.SN_MAIN;
-        const isSepolia = chainId === constants.StarknetChainId.SN_SEPOLIA;
-        const isCartridgeRpc = url.hostname === "api.cartridge.gg";
-        const isLocalhost =
-          url.hostname === "localhost" || url.hostname === "127.0.0.1";
-
-        if ((isMainnet || isSepolia) && !(isCartridgeRpc || isLocalhost)) {
-          throw new Error(
-            `Only Cartridge RPC providers are allowed for ${isMainnet ? "mainnet" : "sepolia"}. ` +
-              `Please use: https://api.cartridge.gg/x/starknet/${isMainnet ? "mainnet" : "sepolia"}/rpc/v0_9`,
-          );
-        }
-
         this.chains.set(chainId, chain);
       } catch (error) {
         console.error(`Failed to parse chainId for ${chain.rpcUrl}:`, error);
