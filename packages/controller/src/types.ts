@@ -270,6 +270,13 @@ export type OpenOptions = {
   redirectUrl?: string;
 };
 
+export type OpenPageTarget =
+  | { target: "starterpack"; id: string | number; options?: StarterpackOptions }
+  | { target: "settings" }
+  | { target: "profile"; tab?: ProfileContextTypeVariant }
+  | { target: "purchase-credits" }
+  | { target: "execute"; calls: Call[]; chainId?: string };
+
 export type StarterpackOptions = {
   /** The preimage to use */
   preimage?: string;

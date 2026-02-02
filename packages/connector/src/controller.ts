@@ -1,6 +1,8 @@
 import ControllerProvider, {
   AuthOptions,
   ControllerOptions,
+  OpenOptions,
+  OpenPageTarget,
 } from "@cartridge/controller";
 import { Connector, InjectedConnector } from "@starknet-react/core";
 
@@ -50,6 +52,26 @@ export default class ControllerConnector extends InjectedConnector {
       throw new Error("Failed to connect controller");
     }
     return super.connect({ chainIdHint: args?.chainIdHint });
+  }
+
+  async open(args: OpenPageTarget | "standalone", options?: any) {
+    return this.controller.open(args, options);
+  }
+
+  openStandalone(options?: OpenOptions) {
+    return this.controller.openStandalone(options);
+  }
+
+  async openProfile() {
+    return this.controller.openProfile();
+  }
+
+  async openSettings() {
+    return this.controller.openSettings();
+  }
+
+  async openStarterPack(id: string | number) {
+    return this.controller.openStarterPack(id);
   }
 
   static fromConnectors(connectors: Connector[]): ControllerConnector {

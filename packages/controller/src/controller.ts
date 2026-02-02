@@ -25,6 +25,7 @@ import {
   ProfileContextTypeVariant,
   ResponseCodes,
   OpenOptions,
+  OpenPageTarget,
   StarterpackOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
@@ -227,6 +228,7 @@ export default class ControllerProvider extends BaseProvider {
 
   async connect(
     signupOptions?: AuthOptions,
+    skipClose = false,
   ): Promise<WalletAccount | undefined> {
     if (!this.iframes) {
       return;
@@ -272,7 +274,9 @@ export default class ControllerProvider extends BaseProvider {
     } catch (e) {
       console.log(e);
     } finally {
-      this.iframes.keychain.close();
+      if (!skipClose || !this.account) {
+        this.iframes.keychain.close();
+      }
     }
   }
 
@@ -316,45 +320,16 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfile(tab: ProfileContextTypeVariant = "inventory") {
-    if (!this.iframes) {
-      return;
-    }
-
-    // Profile functionality is now integrated into keychain
-    // Navigate keychain iframe to profile page
-    if (!this.keychain || !this.iframes.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return;
-    }
-    if (!this.account) {
-      console.error("Account is not ready");
-      return;
-    }
-    const username = await this.keychain.username();
-
-    // Navigate first, then open to avoid flash
-    const options = [];
-    if (this.options.slot) {
-      options.push(`ps=${this.options.slot}`);
-    }
-    await this.keychain.navigate(
-      `/account/${username}/${tab}?${options.join("&")}`,
-    );
-    this.iframes.keychain.open();
+    return this.open({ target: "profile", tab });
   }
 
   async openProfileTo(to: string) {
-    if (!this.iframes) {
+    if (!(await this.ensureConnected())) {
       return;
     }
 
-    // Profile functionality is now integrated into keychain
-    if (!this.keychain || !this.iframes.keychain) {
+    if (!this.keychain || !this.iframes?.keychain) {
       console.error(new NotReadyToConnect().message);
-      return;
-    }
-    if (!this.account) {
-      console.error("Account is not ready");
       return;
     }
 
@@ -370,17 +345,12 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfileAt(at: string) {
-    if (!this.iframes) {
+    if (!(await this.ensureConnected())) {
       return;
     }
 
-    // Profile functionality is now integrated into keychain
-    if (!this.keychain || !this.iframes.keychain) {
+    if (!this.keychain || !this.iframes?.keychain) {
       console.error(new NotReadyToConnect().message);
-      return;
-    }
-    if (!this.account) {
-      console.error("Account is not ready");
       return;
     }
 
@@ -388,17 +358,8 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.open();
   }
 
-  openSettings() {
-    if (!this.iframes) {
-      return;
-    }
-
-    if (!this.keychain || !this.iframes.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return;
-    }
-    this.iframes.keychain.open();
-    this.keychain.openSettings();
+  async openSettings() {
+    return this.open({ target: "settings" });
   }
 
   revoke(origin: string, _policy: Policy[]) {
@@ -432,50 +393,31 @@ export default class ControllerProvider extends BaseProvider {
     return this.keychain.username();
   }
 
-  openPurchaseCredits() {
-    if (!this.iframes) {
-      return;
-    }
-
-    if (!this.keychain || !this.iframes.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return;
-    }
-    this.keychain.navigate("/purchase/credits").then(() => {
-      this.iframes!.keychain?.open();
-    });
+  async openPurchaseCredits() {
+    return this.open({ target: "purchase-credits" });
   }
 
   async openStarterPack(
     id: string | number,
     options?: StarterpackOptions,
   ): Promise<void> {
-    if (!this.iframes) {
-      return;
-    }
-
-    if (!this.keychain || !this.iframes.keychain) {
-      console.error(new NotReadyToConnect().message);
-      return;
-    }
-
-    await this.keychain.openStarterPack(id, options);
-    this.iframes.keychain?.open();
+    return this.open({ target: "starterpack", id, options });
   }
 
   async openExecute(calls: any, chainId?: string) {
-    if (!this.iframes) {
-      return;
+    if (!(await this.ensureConnected())) {
+      return { status: false };
     }
 
-    if (!this.keychain || !this.iframes.keychain) {
+    if (!this.keychain || !this.iframes?.keychain) {
       console.error(new NotReadyToConnect().message);
-      return;
+      return { status: false };
     }
+
     // Switch to the chain if provided
     let currentChainId = this.selectedChain;
     if (chainId) {
-      this.switchStarknetChain(chainId);
+      await this.switchStarknetChain(chainId);
     }
     // Open keychain
     this.iframes.keychain.open();
@@ -485,7 +427,7 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.close();
     // Switch back to the original chain
     if (chainId) {
-      this.switchStarknetChain(currentChainId);
+      await this.switchStarknetChain(currentChainId);
     }
     const status = !(
       res &&
@@ -507,14 +449,92 @@ export default class ControllerProvider extends BaseProvider {
     return await this.keychain.delegateAccount();
   }
 
+  private async ensureConnected(signupOptions?: AuthOptions): Promise<boolean> {
+    if (this.account) {
+      return true;
+    }
+    const account = await this.connect(signupOptions, true);
+    return !!account;
+  }
+
+  /**
+   * Opens the keychain UI to a specific page or location.
+   * If the user is not connected, it will trigger the connection flow first.
+   * @param args - The target page and its parameters
+   */
+  async open(
+    args: OpenPageTarget | "standalone",
+    options?: any,
+  ): Promise<void> {
+    if (args === "standalone") {
+      return this.openStandalone(options);
+    }
+
+    if (!this.iframes) {
+      return;
+    }
+
+    if (!(await this.ensureConnected())) {
+      return;
+    }
+
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    switch (args.target) {
+      case "settings":
+        this.iframes.keychain.open();
+        await this.keychain.openSettings();
+        return;
+      case "starterpack":
+        await this.keychain.openStarterPack(args.id, args.options);
+        this.iframes.keychain.open();
+        return;
+      case "profile":
+        const username = await this.keychain.username();
+        const profileOptions = [];
+        if (this.options.slot) {
+          profileOptions.push(`ps=${this.options.slot}`);
+        }
+        await this.keychain.navigate(
+          `/account/${username}/${args.tab ?? "inventory"}?${profileOptions.join("&")}`,
+        );
+        this.iframes.keychain.open();
+        return;
+      case "purchase-credits":
+        await this.keychain.navigate("/purchase/credits");
+        this.iframes.keychain.open();
+        return;
+      case "execute":
+        // Switch to the chain if provided
+        let currentChainId = this.selectedChain;
+        if (args.chainId) {
+          await this.switchStarknetChain(args.chainId);
+        }
+        // Open keychain
+        this.iframes.keychain.open();
+        // Invoke execute
+        await this.keychain.execute(args.calls, undefined, undefined, true);
+        // Close keychain
+        this.iframes.keychain.close();
+        // Switch back to the original chain
+        if (args.chainId) {
+          await this.switchStarknetChain(currentChainId);
+        }
+        return;
+    }
+  }
+
   /**
    * Opens the keychain in standalone mode (first-party context) for authentication.
    * This establishes first-party storage, enabling seamless iframe access across all games.
    * @param options - Configuration for redirect after authentication
    */
-  open(options: OpenOptions = {}) {
+  openStandalone(options: OpenOptions = {}) {
     if (typeof window === "undefined") {
-      console.error("open can only be called in browser context");
+      console.error("openStandalone can only be called in browser context");
       return;
     }
 
