@@ -45,7 +45,7 @@ describe("useStarterpackPlayHandler", () => {
     };
     const { result } = renderPlayHook({
       closeModal,
-      parent: parent as ConnectionContextValue["parent"],
+      parent: parent as unknown as ConnectionContextValue["parent"],
     });
 
     result.current();

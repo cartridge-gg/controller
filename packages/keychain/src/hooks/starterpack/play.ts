@@ -12,7 +12,7 @@ export function useStarterpackPlayHandler() {
       "onStarterpackPlay" in parent &&
       typeof parent.onStarterpackPlay === "function"
     ) {
-      parent.onStarterpackPlay().catch((error) => {
+      parent.onStarterpackPlay().catch((error: unknown) => {
         console.error("Failed to notify parent of starterpack play:", error);
         closeModal?.();
       });
