@@ -138,17 +138,14 @@ export function humanizeString(str: string): string {
 
 export function parseChainId(url: URL): ChainId {
   const parts = url.pathname.split("/");
+  const isCartridgeHost = url.hostname === "api.cartridge.gg";
 
-  // Handle localhost URLs by making a synchronous call to getChainId
-  if (
-    url.hostname === "localhost" ||
-    url.hostname === "127.0.0.1" ||
-    url.hostname === "0.0.0.0"
-  ) {
+  // Handle non-Cartridge hosts by making a synchronous call to getChainId
+  if (!isCartridgeHost) {
     // Check if we're in a browser environment
     if (typeof XMLHttpRequest === "undefined") {
       // In Node.js environment (like tests), we can't make synchronous HTTP calls
-      // For now, we'll use a placeholder chainId for localhost in tests
+      // For now, we'll use a placeholder chainId for non-Cartridge hosts in tests
       console.warn(
         `Cannot make synchronous HTTP call in Node.js environment for ${url.toString()}`,
       );
