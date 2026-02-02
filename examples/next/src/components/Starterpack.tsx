@@ -85,7 +85,7 @@ export const Starterpack = () => {
                 controllerConnector.controller.openStarterPack(
                   purchaseOnchainSpId,
                   {
-                    onPlay: () => {
+                    onPurchaseComplete: () => {
                       console.log("Starterpack play callback fired.");
                     },
                   },

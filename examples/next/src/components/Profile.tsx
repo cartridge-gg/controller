@@ -77,7 +77,7 @@ export function Profile() {
           <Button
             onClick={() =>
               ctrlConnector.controller.openStarterPack(0, {
-                onPlay: () => {
+                onPurchaseComplete: () => {
                   console.log("Starterpack play callback fired.");
                 },
               })

@@ -459,8 +459,9 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    const { onPlay, ...starterpackOptions } = options ?? {};
-    this.iframes.keychain.setOnStarterpackPlay(onPlay);
+    const { onPurchaseComplete, onPlay, ...starterpackOptions } = options ?? {};
+    const callback = onPurchaseComplete ?? onPlay;
+    this.iframes.keychain.setOnStarterpackPlay(callback);
     const sanitizedOptions =
       Object.keys(starterpackOptions).length > 0
         ? (starterpackOptions as Omit<StarterpackOptions, "onPlay">)
