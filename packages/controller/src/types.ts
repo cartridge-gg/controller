@@ -275,6 +275,4 @@ export type StarterpackOptions = {
   preimage?: string;
   /** Callback fired after the Play button closes the starterpack modal */
   onPurchaseComplete?: () => void;
-  /** @deprecated Use onPurchaseComplete instead. */
-  onPlay?: () => void;
 };
