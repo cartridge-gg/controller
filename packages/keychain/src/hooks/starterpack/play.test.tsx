@@ -10,9 +10,7 @@ import {
 import { createMockConnection } from "@/test/mocks/connection";
 import { useStarterpackPlayHandler } from "./play";
 
-function renderPlayHook(
-  overrides?: Partial<ConnectionContextValue>,
-) {
+function renderPlayHook(overrides?: Partial<ConnectionContextValue>) {
   const connection = createMockConnection(overrides);
   const wrapper = ({ children }: PropsWithChildren) => (
     <MemoryRouter>

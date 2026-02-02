@@ -78,9 +78,7 @@ export function PurchaseSuccessInner({
             isLoading={false}
           />
         )}
-        <Button onClick={handlePlay}>
-          Play
-        </Button>
+        <Button onClick={handlePlay}>Play</Button>
       </LayoutFooter>
     </>
   );
