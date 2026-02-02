@@ -166,6 +166,56 @@ export default class SessionProvider extends BaseProvider {
     return true;
   }
 
+  private padBase64(value: string): string {
+    const padding = value.length % 4;
+    if (padding === 0) {
+      return value;
+    }
+    return value + "=".repeat(4 - padding);
+  }
+
+  private normalizeSession(
+    session: Partial<SessionRegistration>,
+  ): SessionRegistration | undefined {
+    if (
+      session.username === undefined ||
+      session.address === undefined ||
+      session.ownerGuid === undefined ||
+      session.expiresAt === undefined
+    ) {
+      return undefined;
+    }
+
+    return {
+      username: session.username,
+      address: session.address,
+      ownerGuid: session.ownerGuid,
+      transactionHash: session.transactionHash,
+      expiresAt: session.expiresAt,
+      guardianKeyGuid: session.guardianKeyGuid ?? "0x0",
+      metadataHash: session.metadataHash ?? "0x0",
+      sessionKeyGuid: session.sessionKeyGuid ?? this._sessionKeyGuid,
+    };
+  }
+
+  public ingestSessionFromRedirect(
+    encodedSession: string,
+  ): SessionRegistration | undefined {
+    try {
+      const decoded = atob(this.padBase64(encodedSession));
+      const parsed = JSON.parse(decoded) as Partial<SessionRegistration>;
+      const normalized = this.normalizeSession(parsed);
+      if (!normalized) {
+        return undefined;
+      }
+      localStorage.setItem("session", JSON.stringify(normalized));
+      return normalized;
+    } catch (e) {
+      console.error("Failed to ingest session redirect", e);
+      return undefined;
+    }
+  }
+
   async username() {
     await this.tryRetrieveFromQueryOrStorage();
     return this._username;
@@ -299,23 +349,27 @@ export default class SessionProvider extends BaseProvider {
 
     const sessionString = localStorage.getItem("session");
     if (sessionString) {
-      sessionRegistration = JSON.parse(sessionString);
+      const parsed = JSON.parse(sessionString) as Partial<SessionRegistration>;
+      const normalized = this.normalizeSession(parsed);
+      if (normalized) {
+        sessionRegistration = normalized;
+        localStorage.setItem("session", JSON.stringify(sessionRegistration));
+      } else {
+        this.clearStoredSession();
+      }
     }
 
     if (window.location.search.includes("startapp")) {
       const params = new URLSearchParams(window.location.search);
       const session = params.get("startapp");
       if (session) {
-        const possibleNewSession: SessionRegistration = JSON.parse(
-          atob(session),
-        );
-
+        const normalizedSession = this.ingestSessionFromRedirect(session);
         if (
-          Number(possibleNewSession.expiresAt) !==
-          Number(sessionRegistration?.expiresAt)
+          normalizedSession &&
+          Number(normalizedSession.expiresAt) !==
+            Number(sessionRegistration?.expiresAt)
         ) {
-          sessionRegistration = possibleNewSession;
-          localStorage.setItem("session", JSON.stringify(sessionRegistration));
+          sessionRegistration = normalizedSession;
         }
 
         // Remove the session query parameter

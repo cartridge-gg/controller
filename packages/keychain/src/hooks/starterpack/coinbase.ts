@@ -2,8 +2,8 @@ import { useState, useCallback } from "react";
 import {
   CoinbaseOnrampTransactionsDocument,
   CoinbaseOnrampTransactionsQuery,
-  CreateCoinbaseOnRampOrderDocument,
-  CreateCoinbaseOnRampOrderMutation,
+  CreateCoinbaseLayerswapOrderDocument,
+  CreateCoinbaseLayerswapOrderMutation,
   CoinbaseOnRampQuoteDocument,
   CoinbaseOnRampQuoteQuery,
 } from "@cartridge/ui/utils/api/cartridge";
@@ -12,7 +12,7 @@ import Controller from "@/utils/controller";
 
 // Derive types from the actual GraphQL query/mutation results
 export type CoinbaseOrderResult =
-  CreateCoinbaseOnRampOrderMutation["createCoinbaseOnrampOrder"];
+  CreateCoinbaseLayerswapOrderMutation["createCoinbaseLayerswapOrder"];
 export type CoinbaseTransactionResult =
   CoinbaseOnrampTransactionsQuery["coinbaseOnrampTransactions"]["transactions"][number];
 export type CoinbaseQuoteResult =
@@ -50,8 +50,8 @@ export interface UseCoinbaseReturn {
 const createCoinbaseOrder = async (
   input: CreateOrderInput,
 ): Promise<CoinbaseOrderResult> => {
-  const result = await request<CreateCoinbaseOnRampOrderMutation>(
-    CreateCoinbaseOnRampOrderDocument,
+  const result = await request<CreateCoinbaseLayerswapOrderMutation>(
+    CreateCoinbaseLayerswapOrderDocument,
     {
       input: {
         purchaseUSDCAmount: input.purchaseUSDCAmount,
@@ -60,7 +60,7 @@ const createCoinbaseOrder = async (
     },
   );
 
-  return result.createCoinbaseOnrampOrder;
+  return result.createCoinbaseLayerswapOrder;
 };
 
 const getCoinbaseTransactions = async (
