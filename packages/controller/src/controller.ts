@@ -1,6 +1,8 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
 import { Policy } from "@cartridge/presets";
+import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
+import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
 import {
   AddInvokeTransactionResult,
   AddStarknetChainParameters,
@@ -512,6 +514,21 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return await this.keychain.delegateAccount();
+  }
+
+  /**
+   * Returns a wallet standard interface for the controller.
+   * This allows using the controller with libraries that expect the wallet standard interface.
+   */
+  asWalletStandard(): WalletWithStarknetFeatures {
+    if (typeof window !== "undefined") {
+      console.warn(
+        `Casting Controller to WalletWithStarknetFeatures is an experimental feature and may contain bugs. ` +
+          `Please report any issues at https://github.com/cartridge-gg/controller/issues`,
+      );
+    }
+
+    return new StarknetInjectedWallet(this);
   }
 
   /**
