@@ -1,57 +1,55 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { PropsWithChildren } from "react";
-import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
-import { NavigationProvider } from "@/context/navigation";
-import {
-  ConnectionContext,
-  ConnectionContextValue,
-} from "@/components/provider/connection";
-import { createMockConnection } from "@/test/mocks/connection";
 import { useStarterpackPlayHandler } from "./play";
 
-function renderPlayHook(overrides?: Partial<ConnectionContextValue>) {
-  const connection = createMockConnection(overrides);
-  const wrapper = ({ children }: PropsWithChildren) => (
-    <MemoryRouter>
-      <NavigationProvider>
-        <ConnectionContext.Provider value={connection}>
-          {children}
-        </ConnectionContext.Provider>
-      </NavigationProvider>
-    </MemoryRouter>
-  );
+const mocks = vi.hoisted(() => ({
+  closeModal: vi.fn(),
+  navigateToRoot: vi.fn(),
+  parent: undefined as undefined | { onStarterpackPlay?: () => Promise<void> },
+}));
 
-  return renderHook(() => useStarterpackPlayHandler(), { wrapper });
-}
+vi.mock("@/hooks/connection", () => ({
+  useConnection: () => ({
+    closeModal: mocks.closeModal,
+    parent: mocks.parent,
+  }),
+}));
+
+vi.mock("@/context", () => ({
+  useNavigation: () => ({
+    navigateToRoot: mocks.navigateToRoot,
+  }),
+}));
 
 describe("useStarterpackPlayHandler", () => {
+  beforeEach(() => {
+    mocks.closeModal.mockClear();
+    mocks.navigateToRoot.mockClear();
+    mocks.parent = undefined;
+  });
+
   it("closes the modal when no parent callback exists", () => {
-    const closeModal = vi.fn();
-    const { result } = renderPlayHook({ closeModal, parent: undefined });
+    const { result } = renderHook(() => useStarterpackPlayHandler());
 
     result.current();
 
-    expect(closeModal).toHaveBeenCalledTimes(1);
+    expect(mocks.closeModal).toHaveBeenCalledTimes(1);
+    expect(mocks.navigateToRoot).toHaveBeenCalledTimes(1);
   });
 
   it("falls back to closing the modal when the callback rejects", async () => {
-    const closeModal = vi.fn();
     const consoleError = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    const parent = {
+    mocks.parent = {
       onStarterpackPlay: vi.fn().mockRejectedValue(new Error("nope")),
     };
-    const { result } = renderPlayHook({
-      closeModal,
-      parent: parent as unknown as ConnectionContextValue["parent"],
-    });
+    const { result } = renderHook(() => useStarterpackPlayHandler());
 
     result.current();
 
     await waitFor(() => {
-      expect(closeModal).toHaveBeenCalledTimes(1);
+      expect(mocks.closeModal).toHaveBeenCalledTimes(1);
     });
 
     consoleError.mockRestore();
