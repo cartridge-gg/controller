@@ -111,6 +111,9 @@ export type ParentMethods = AsyncMethodReturns<{
 
   // Session creation callback (for standalone auth flow)
   onSessionCreated?: () => Promise<void>;
+
+  // Starterpack play callback (for purchase completion flow)
+  onStarterpackPlay?: () => Promise<void>;
 }>;
 
 /**
