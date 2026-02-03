@@ -9,6 +9,7 @@ import {
   AllowArray,
   Call,
   CallData,
+  FeeEstimate,
   InvocationsDetails,
   InvokeFunctionResponse,
   addAddressPadding,
