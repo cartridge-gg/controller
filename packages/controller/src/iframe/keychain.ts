@@ -11,11 +11,15 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     needsSessionCreation?: boolean;
     username?: string;
     onSessionCreated?: () => void;
+    onStarterpackPlay?: () => void;
     encryptedBlob?: string;
   };
 
+const STARTERPACK_PLAY_CALLBACK_DELAY_MS = 200;
+
 export class KeychainIFrame extends IFrame<Keychain> {
   private walletBridge: WalletBridge;
+  private onStarterpackPlay?: () => void;
 
   constructor({
     url,
@@ -32,11 +36,13 @@ export class KeychainIFrame extends IFrame<Keychain> {
     needsSessionCreation,
     username,
     onSessionCreated,
+    onStarterpackPlay,
     encryptedBlob,
     propagateSessionErrors,
     errorDisplayMode,
     ...iframeOptions
   }: KeychainIframeOptions) {
+    let onStarterpackPlayHandler: (() => Promise<void>) | undefined;
     const _url = new URL(url ?? KEYCHAIN_URL);
     const walletBridge = new WalletBridge();
 
@@ -118,10 +124,32 @@ export class KeychainIFrame extends IFrame<Keychain> {
             onSessionCreated();
           }
         },
+        onStarterpackPlay: (_origin: string) => async () => {
+          if (onStarterpackPlayHandler) {
+            await onStarterpackPlayHandler();
+          }
+        },
       },
     });
 
     this.walletBridge = walletBridge;
+    this.onStarterpackPlay = onStarterpackPlay;
+    onStarterpackPlayHandler = async () => {
+      this.close();
+      const callback = this.onStarterpackPlay;
+      this.onStarterpackPlay = undefined;
+      if (!callback) {
+        return;
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, STARTERPACK_PLAY_CALLBACK_DELAY_MS),
+      );
+      try {
+        callback();
+      } catch (error) {
+        console.error("Failed to run starterpack play callback:", error);
+      }
+    };
 
     // Expose the wallet bridge instance globally for WASM interop
     if (typeof window !== "undefined") {
@@ -131,5 +159,9 @@ export class KeychainIFrame extends IFrame<Keychain> {
 
   getWalletBridge(): WalletBridge {
     return this.walletBridge;
+  }
+
+  setOnStarterpackPlay(callback?: () => void) {
+    this.onStarterpackPlay = callback;
   }
 }

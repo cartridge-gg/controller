@@ -111,6 +111,9 @@ export type ParentMethods = AsyncMethodReturns<{
 
   // Session creation callback (for standalone auth flow)
   onSessionCreated?: () => Promise<void>;
+
+  // Starterpack play callback (for purchase completion flow)
+  onStarterpackPlay?: () => Promise<void>;
 }>;
 
 /**
@@ -426,11 +429,6 @@ export function useConnectionValue() {
       return;
     }
 
-    if (!configData.origin) {
-      setVerified(false);
-      return;
-    }
-
     const allowedOrigins = toArray(configData.origin as string | string[]);
 
     // In standalone mode (not iframe), verify preset if redirect_url matches preset whitelist
@@ -443,8 +441,10 @@ export function useConnectionValue() {
           const redirectUrlObj = new URL(redirectUrl);
           const redirectOrigin = redirectUrlObj.origin;
 
-          // Always consider localhost as verified for development
-          const isLocalhost = redirectOrigin.includes("localhost");
+          // Always consider localhost and capacitor as verified for development
+          const isLocalhost =
+            redirectOrigin.includes("localhost") ||
+            redirectOrigin.startsWith("capacitor://");
           const isOriginAllowed = isOriginVerified(
             redirectOrigin,
             allowedOrigins,
@@ -463,10 +463,16 @@ export function useConnectionValue() {
       return;
     }
 
+    if (!configData.origin) {
+      setVerified(false);
+      return;
+    }
+
     // Embedded mode: verify against parent origin
-    // Always consider localhost as verified for development (not 127.0.0.1)
+    // Always consider localhost and capacitor as verified for development (not 127.0.0.1)
     if (origin) {
-      const isLocalhost = origin.includes("localhost");
+      const isLocalhost =
+        origin.includes("localhost") || origin.startsWith("capacitor://");
       const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
       const finalVerified = isLocalhost || isOriginAllowed;
       setVerified(finalVerified);
