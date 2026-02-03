@@ -1,19 +1,28 @@
 import React, { createContext, useContext, useCallback, useMemo } from "react";
 import {
-  AchievementToastOptions,
-  MarketplaceToastOptions,
-  NetworkSwitchToastOptions,
-  QuestToastOptions,
   ToastOptions,
+  ErrorToastOptions,
+  SuccessToastOptions,
   TransactionToastOptions,
+  NetworkSwitchToastOptions,
+  AchievementToastOptions,
+  QuestToastOptions,
+  MarketplaceToastOptions,
+  CONTROLLER_TOAST_MESSAGE_TYPE,
 } from "@cartridge/ui";
 import { isIframe } from "@cartridge/ui/utils";
 import { toast as sonnerToast } from "sonner";
 
 interface ToastContextType {
   toast: {
-    success: (message: string) => void;
-    error: (message: string) => void;
+    error: (
+      message: string,
+      options?: Omit<ErrorToastOptions, "variant">,
+    ) => void;
+    success: (
+      message: string,
+      options?: Omit<SuccessToastOptions, "variant">,
+    ) => void;
     transaction: (
       message: string,
       options: Omit<TransactionToastOptions, "variant">,
@@ -50,7 +59,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       const preset = searchParams.get("preset") ?? undefined;
       window.parent.postMessage(
         {
-          type: "controller-toast",
+          type: CONTROLLER_TOAST_MESSAGE_TYPE,
           options: {
             duration: 5000,
             ...options,
@@ -64,25 +73,33 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const toast = useMemo(
     () => ({
-      success: (message: string) => {
-        sonnerToast.success(message);
-        emitToast({
-          variant: "success",
-          message,
-        });
-      },
-      error: (message: string) => {
-        sonnerToast.error(message);
+      error: (
+        message: string,
+        options?: Omit<ErrorToastOptions, "variant">,
+      ) => {
+        if (message) sonnerToast.error(message);
         emitToast({
           variant: "error",
           message,
+          ...(options ?? {}),
+        });
+      },
+      success: (
+        message: string,
+        options?: Omit<SuccessToastOptions, "variant">,
+      ) => {
+        if (message) sonnerToast.success(message);
+        emitToast({
+          variant: "success",
+          message,
+          ...(options ?? {}),
         });
       },
       transaction: (
         message: string,
         options: Omit<TransactionToastOptions, "variant">,
       ) => {
-        sonnerToast.success(message);
+        if (message) sonnerToast.success(message);
         emitToast({
           safeToClose: options.status === "confirmed",
           ...options,
@@ -93,7 +110,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         message: string,
         options: Omit<NetworkSwitchToastOptions, "variant">,
       ) => {
-        sonnerToast.success(message);
+        if (message) sonnerToast.success(message);
         emitToast({
           ...options,
           variant: "network-switch",
@@ -103,7 +120,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         message: string,
         options: Omit<MarketplaceToastOptions, "variant">,
       ) => {
-        sonnerToast.success(message);
+        if (message) sonnerToast.success(message);
         emitToast({
           duration: 10000,
           safeToClose: true,
@@ -115,14 +132,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         message: string,
         options: Omit<AchievementToastOptions, "variant">,
       ) => {
-        sonnerToast.success(message);
+        if (message) sonnerToast.success(message);
         emitToast({
           ...options,
           variant: "achievement",
         });
       },
       quest: (options: Omit<QuestToastOptions, "variant">) => {
-        sonnerToast.success(options.subtitle);
+        if (options.subtitle) sonnerToast.success(options.subtitle);
         emitToast({
           ...options,
           variant: "quest",
