@@ -11,15 +11,20 @@ export default class ControllerConnector extends InjectedConnector {
   public controller: ControllerProvider;
 
   constructor(options: ControllerOptions = {}) {
-    const controller = new ControllerProvider(options);
+    let controller: ControllerProvider;
 
-    super({
-      options: {
-        id: controller.id,
-        name: controller.name,
-      },
-    });
+    if (typeof window !== "undefined" && (window as any).starknet_controller) {
+      console.warn(
+        "ControllerConnector was instantiated multiple times. " +
+          "Reusing existing controller to prevent errors. " +
+          "To fix, create the connector at the module level instead of inside a React component.",
+      );
+      controller = (window as any).starknet_controller;
+    } else {
+      controller = new ControllerProvider(options);
+    }
 
+    super({ options: { id: controller.id, name: controller.name } });
     this.controller = controller;
   }
 
