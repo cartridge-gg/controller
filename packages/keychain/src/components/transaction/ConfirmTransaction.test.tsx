@@ -69,7 +69,13 @@ describe("ConfirmTransaction", () => {
 
     const mockExecute = vi.fn().mockRejectedValue(validationError);
     const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
+      overall_fee: "0x64",
+      l1_gas_consumed: "0x1",
+      l1_gas_price: "0x1",
+      l2_gas_consumed: "0x0",
+      l2_gas_price: "0x0",
+      l1_data_gas_consumed: "0x0",
+      l1_data_gas_price: "0x0",
     });
 
     await act(async () => {
@@ -110,7 +116,13 @@ describe("ConfirmTransaction", () => {
 
     const mockExecute = vi.fn().mockRejectedValue(validationError);
     const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
+      overall_fee: "0x64",
+      l1_gas_consumed: "0x1",
+      l1_gas_price: "0x1",
+      l2_gas_consumed: "0x0",
+      l2_gas_price: "0x0",
+      l1_data_gas_consumed: "0x0",
+      l1_data_gas_price: "0x0",
     });
 
     await act(async () => {
@@ -159,7 +171,13 @@ describe("ConfirmTransaction", () => {
       transaction_hash: "0xabc123",
     });
     const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
+      overall_fee: "0x64",
+      l1_gas_consumed: "0x1",
+      l1_gas_price: "0x1",
+      l2_gas_consumed: "0x0",
+      l2_gas_price: "0x0",
+      l1_data_gas_consumed: "0x0",
+      l1_data_gas_price: "0x0",
     });
 
     await act(async () => {
@@ -209,7 +227,13 @@ describe("ConfirmTransaction", () => {
             controller: {
               isRequestedSession: vi.fn().mockResolvedValue(true),
               estimateInvokeFee: vi.fn().mockResolvedValue({
-                suggestedMaxFee: BigInt(1000),
+                overall_fee: "0x64",
+                l1_gas_consumed: "0x1",
+                l1_gas_price: "0x1",
+                l2_gas_consumed: "0x0",
+                l2_gas_price: "0x0",
+                l1_data_gas_consumed: "0x0",
+                l1_data_gas_price: "0x0",
               }),
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
@@ -242,7 +266,13 @@ describe("ConfirmTransaction", () => {
       });
 
     const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
+      overall_fee: "0x64",
+      l1_gas_consumed: "0x1",
+      l1_gas_price: "0x1",
+      l2_gas_consumed: "0x0",
+      l2_gas_price: "0x0",
+      l1_data_gas_consumed: "0x0",
+      l1_data_gas_price: "0x0",
     });
 
     await act(async () => {
@@ -292,7 +322,13 @@ describe("ConfirmTransaction", () => {
       transaction_hash: mockTransactionHash,
     });
     const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
+      overall_fee: "0x64",
+      l1_gas_consumed: "0x1",
+      l1_gas_price: "0x1",
+      l2_gas_consumed: "0x0",
+      l2_gas_price: "0x0",
+      l1_data_gas_consumed: "0x0",
+      l1_data_gas_price: "0x0",
     });
 
     await act(async () => {

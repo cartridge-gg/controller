@@ -11,7 +11,13 @@ const meta = {
     connection: {
       controller: {
         estimateInvokeFee: () => ({
-          suggestedMaxFee: "100",
+          overall_fee: "0x64",
+          l1_gas_consumed: "0x1",
+          l1_gas_price: "0x1",
+          l2_gas_consumed: "0x0",
+          l2_gas_price: "0x0",
+          l1_data_gas_consumed: "0x0",
+          l1_data_gas_price: "0x0",
         }),
         hasSession: () => true,
         session: () => true,
@@ -127,7 +133,13 @@ export const ValidationErrorFromProp: Story = {
       controller: {
         estimateInvokeFee: () =>
           Promise.resolve({
-            suggestedMaxFee: BigInt(100),
+            overall_fee: "0x64",
+            l1_gas_consumed: "0x1",
+            l1_gas_price: "0x1",
+            l2_gas_consumed: "0x0",
+            l2_gas_price: "0x0",
+            l1_data_gas_consumed: "0x0",
+            l1_data_gas_price: "0x0",
           }),
         hasSession: () => true,
         session: () => true,

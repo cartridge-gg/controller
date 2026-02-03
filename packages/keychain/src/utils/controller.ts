@@ -32,7 +32,7 @@ import { credentialToAuth } from "@/components/connect/types";
 import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
-import { toJsFeeEstimate } from "./fee";
+import { isPartialPaymaster, toJsFeeEstimate } from "./fee";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -260,10 +260,26 @@ export default class Controller {
     )) as FeeEstimate;
     res.unit = "FRI";
 
+    if (isPartialPaymaster(res)) {
+      return res;
+    }
+
     // Scale all fee estimate values by 50% (equivalent to 1.5x)
     // Using starknet.js addPercent pattern for consistency
-    const addPercent = (number: string | number, percent: number): string => {
-      const bigIntNum = BigInt(number);
+    const addPercent = (
+      number: string | number | undefined,
+      percent: number,
+    ): string => {
+      let bigIntNum: bigint;
+      try {
+        if (number === undefined || number === null || number === "") {
+          bigIntNum = 0n;
+        } else {
+          bigIntNum = BigInt(number);
+        }
+      } catch {
+        bigIntNum = 0n;
+      }
       return (bigIntNum + (bigIntNum * BigInt(percent)) / 100n).toString();
     };
 
