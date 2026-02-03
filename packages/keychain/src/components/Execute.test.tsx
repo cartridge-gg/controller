@@ -39,6 +39,7 @@ vi.mock("@/hooks/tokens", () => ({
     error: null,
   })),
   convertTokenAmountToUSD: vi.fn(() => "$0.01"),
+  formatBalance: vi.fn(() => "0.01"),
 }));
 
 // Mock the connection hook

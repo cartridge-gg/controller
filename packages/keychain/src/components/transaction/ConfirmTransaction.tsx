@@ -9,6 +9,12 @@ import { executeCore } from "@/utils/connection/execute";
 import { useEffect, useState } from "react";
 import { PageLoading } from "../Loading";
 import { ErrorCode } from "@cartridge/controller-wasm";
+import { isPartialPaymaster } from "@/utils/fee";
+import { buildPartialPaymasterCalls } from "@/utils/partial-paymaster";
+import {
+  OutsideExecutionVersion,
+  resolveOutsideExecutionVersion,
+} from "@/utils/controller-versions";
 
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
@@ -61,6 +67,24 @@ export function ConfirmTransaction({
     }
 
     try {
+      if (isPartialPaymaster(maxFee)) {
+        const callsWithFee = buildPartialPaymasterCalls(transactions, maxFee, {
+          order: "append",
+        });
+        const version = resolveOutsideExecutionVersion(
+          account.classHash?.(),
+          OutsideExecutionVersion.V3,
+        );
+
+        const { transaction_hash } =
+          version === OutsideExecutionVersion.V2
+            ? await account.executeFromOutsideV2(callsWithFee)
+            : await account.executeFromOutsideV3(callsWithFee);
+
+        onComplete(transaction_hash);
+        return;
+      }
+
       const { transaction_hash } = await account.execute(transactions, maxFee);
       onComplete(transaction_hash);
     } catch (e) {

@@ -9,6 +9,7 @@ import {
   AllowArray,
   Call,
   CallData,
+  FeeEstimate,
   InvocationsDetails,
   InvokeFunctionResponse,
   addAddressPadding,
@@ -18,6 +19,12 @@ import { JsCall } from "@cartridge/controller-wasm/controller";
 import { mutex } from "./sync";
 import Controller from "../controller";
 import { storeCallbacks, generateCallbackId } from "./callbacks";
+import { isPartialPaymaster } from "../fee";
+import { buildPartialPaymasterCalls } from "../partial-paymaster";
+import {
+  OutsideExecutionVersion,
+  resolveOutsideExecutionVersion,
+} from "../controller-versions";
 
 export type ControllerError = {
   code: ErrorCode;
@@ -98,7 +105,41 @@ export async function executeCore(
     throw new Error("Controller not found");
   }
 
-  const calls = normalizeCalls(transactions);
+  const callArray = toArray(transactions) as Call[];
+  const calls = normalizeCalls(callArray);
+
+  let feeEstimate: FeeEstimate | undefined;
+  try {
+    feeEstimate = await controller.estimateInvokeFee(callArray);
+  } catch {
+    return await controller.trySessionExecute(origin, calls, feeSource);
+  }
+
+  if (isPartialPaymaster(feeEstimate)) {
+    const authorized = await controller.hasAuthorizedPoliciesForCalls(
+      origin,
+      callArray,
+    );
+
+    if (authorized) {
+      const callsWithFee = normalizeCalls(
+        buildPartialPaymasterCalls(callArray, feeEstimate, {
+          order: "append",
+        }),
+      );
+      const version = resolveOutsideExecutionVersion(
+        controller.classHash?.(),
+        OutsideExecutionVersion.V3,
+      );
+
+      if (version === OutsideExecutionVersion.V2) {
+        return await controller.executeFromOutsideV2(callsWithFee);
+      }
+
+      return await controller.executeFromOutsideV3(callsWithFee);
+    }
+  }
+
   return await controller.trySessionExecute(origin, calls, feeSource);
 }
 

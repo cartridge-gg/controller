@@ -13,7 +13,13 @@ import { NavigationProvider } from "@/context/navigation";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const defaultMockController: any = {
   estimateInvokeFee: vi.fn().mockImplementation(async () => ({
-    suggestedMaxFee: BigInt(1000),
+    overall_fee: "0x64",
+    l1_gas_consumed: "0x1",
+    l1_gas_price: "0x1",
+    l2_gas_consumed: "0x0",
+    l2_gas_price: "0x0",
+    l1_data_gas_consumed: "0x0",
+    l1_data_gas_price: "0x0",
   })),
   chainId: vi.fn().mockImplementation(() => constants.StarknetChainId.SN_MAIN),
 } as const;

@@ -5,6 +5,7 @@ import {
   formatBalance,
   useFeeToken,
 } from "@/hooks/tokens";
+import { isPartialPaymaster } from "@/utils/fee";
 import { ErrorAlert } from "./ErrorAlert";
 import { Total } from "./Total";
 
@@ -19,6 +20,7 @@ export function Fees({
   const [feeValue, setFeeValue] = useState<number>();
   const [usdFee, setUsdFee] = useState<string>();
   const isLoading = isEstimating || isPriceLoading;
+  const partialPaymaster = isPartialPaymaster(maxFee);
 
   useEffect(() => {
     if (isLoading || error || !token) {
@@ -68,6 +70,11 @@ export function Fees({
         usdValue={usdFee}
         isLoading={isLoading}
       />
+      {partialPaymaster && !isLoading && (
+        <p className="mt-2 text-xs text-foreground-400">
+          Partial paymaster subsidy applied
+        </p>
+      )}
     </div>
   );
 }

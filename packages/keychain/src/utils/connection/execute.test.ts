@@ -31,11 +31,22 @@ const mockController = {
   executeFromOutsideV3: vi.fn(() =>
     Promise.resolve({ transaction_hash: "0x123" }),
   ),
-  estimateInvokeFee: vi.fn(() => Promise.resolve({})),
+  estimateInvokeFee: vi.fn(() =>
+    Promise.resolve({
+      overall_fee: "0x64",
+      l1_gas_consumed: "0x1",
+      l1_gas_price: "0x1",
+      l2_gas_consumed: "0x0",
+      l2_gas_price: "0x0",
+      l1_data_gas_consumed: "0x0",
+      l1_data_gas_price: "0x0",
+    }),
+  ),
   execute: vi.fn(() => Promise.resolve({ transaction_hash: "0x456" })),
   trySessionExecute: vi.fn(() =>
     Promise.resolve({ transaction_hash: "0x123" }),
   ),
+  classHash: vi.fn(() => "0x123"),
 };
 
 describe("execute utils", () => {
@@ -213,6 +224,86 @@ describe("execute utils", () => {
         code: ErrorCode.InsufficientBalance,
         message: "Test error",
         data: { execution_error: "invalid json" },
+      });
+    });
+  });
+
+  describe("partial paymaster execution", () => {
+    const mockNavigate = vi.fn();
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it("executes from outside when policies are authorized", async () => {
+      const executeFunc = execute({ navigate: mockNavigate })(
+        "https://example.com",
+      );
+      const transactions: Call[] = [
+        {
+          contractAddress: "0x123",
+          entrypoint: "transfer",
+          calldata: ["0x456", "100", "0"],
+        },
+      ];
+
+      mockController.estimateInvokeFee.mockResolvedValueOnce({
+        overall_fee: "0x64",
+        l1_gas_consumed: "0x0",
+        l1_gas_price: "0x0",
+        l2_gas_consumed: "0x0",
+        l2_gas_price: "0x0",
+        l1_data_gas_consumed: "0x0",
+        l1_data_gas_price: "0x0",
+      });
+      mockController.hasAuthorizedPoliciesForCalls.mockResolvedValueOnce(true);
+      mockController.executeFromOutsideV3.mockResolvedValueOnce({
+        transaction_hash: "0xabc",
+      });
+
+      const result = await executeFunc(transactions);
+
+      expect(mockController.executeFromOutsideV3).toHaveBeenCalled();
+      expect(mockController.trySessionExecute).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        code: ResponseCodes.SUCCESS,
+        transaction_hash: "0xabc",
+      });
+    });
+
+    it("falls back to session execution when policies are not authorized", async () => {
+      const executeFunc = execute({ navigate: mockNavigate })(
+        "https://example.com",
+      );
+      const transactions: Call[] = [
+        {
+          contractAddress: "0x123",
+          entrypoint: "transfer",
+          calldata: ["0x456", "100", "0"],
+        },
+      ];
+
+      mockController.estimateInvokeFee.mockResolvedValueOnce({
+        overall_fee: "0x64",
+        l1_gas_consumed: "0x0",
+        l1_gas_price: "0x0",
+        l2_gas_consumed: "0x0",
+        l2_gas_price: "0x0",
+        l1_data_gas_consumed: "0x0",
+        l1_data_gas_price: "0x0",
+      });
+      mockController.hasAuthorizedPoliciesForCalls.mockResolvedValueOnce(false);
+      mockController.trySessionExecute.mockResolvedValueOnce({
+        transaction_hash: "0xdef",
+      });
+
+      const result = await executeFunc(transactions);
+
+      expect(mockController.trySessionExecute).toHaveBeenCalled();
+      expect(mockController.executeFromOutsideV3).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        code: ResponseCodes.SUCCESS,
+        transaction_hash: "0xdef",
       });
     });
   });

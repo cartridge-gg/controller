@@ -20,6 +20,7 @@ vi.mock("@/hooks/tokens", () => ({
     error: null,
   })),
   convertTokenAmountToUSD: vi.fn(() => "$0.01"),
+  formatBalance: vi.fn(() => "0.01"),
 }));
 
 describe("ExecutionContainer", () => {
@@ -46,7 +47,13 @@ describe("ExecutionContainer", () => {
 
   it("estimates fees when transactions are provided", async () => {
     const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
-      suggestedMaxFee: BigInt(1000),
+      overall_fee: "0x64",
+      l1_gas_consumed: "0x1",
+      l1_gas_price: "0x1",
+      l2_gas_consumed: "0x0",
+      l2_gas_price: "0x0",
+      l1_data_gas_consumed: "0x0",
+      l1_data_gas_price: "0x0",
     }));
 
     await act(async () => {
@@ -81,7 +88,13 @@ describe("ExecutionContainer", () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
 
     const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
-      suggestedMaxFee: BigInt(1000),
+      overall_fee: "0x64",
+      l1_gas_consumed: "0x1",
+      l1_gas_price: "0x1",
+      l2_gas_consumed: "0x0",
+      l2_gas_price: "0x0",
+      l1_data_gas_consumed: "0x0",
+      l1_data_gas_price: "0x0",
     }));
 
     await act(async () => {
@@ -139,7 +152,13 @@ describe("ExecutionContainer", () => {
       message: "Insufficient balance",
     });
     const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
+      overall_fee: "0x64",
+      l1_gas_consumed: "0x1",
+      l1_gas_price: "0x1",
+      l2_gas_consumed: "0x0",
+      l2_gas_price: "0x0",
+      l1_data_gas_consumed: "0x0",
+      l1_data_gas_price: "0x0",
     });
 
     await act(async () => {
