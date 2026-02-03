@@ -6,7 +6,7 @@ import {
   QuestToastOptions,
   ToastOptions,
   TransactionToastOptions,
-} from "@cartridge/controller";
+} from "@cartridge/ui";
 import { isIframe } from "@cartridge/ui/utils";
 import { toast as sonnerToast } from "sonner";
 
@@ -67,9 +67,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       success: (message: string) => {
         sonnerToast.success(message);
         emitToast({
-          variant: "transaction",
-          status: "confirmed",
-          label: message,
+          variant: "success",
+          message,
         });
       },
       error: (message: string) => {
