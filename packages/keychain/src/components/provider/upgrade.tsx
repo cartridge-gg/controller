@@ -13,15 +13,15 @@ import Controller from "@/utils/controller";
 import { usePostHog } from "./posthog";
 import {
   CONTROLLER_VERSIONS,
-  ControllerVersionInfo,
   OutsideExecutionVersion,
 } from "@/utils/controller-versions";
+import type { ControllerVersionInfo } from "@/utils/controller-versions";
 
 export {
   CONTROLLER_VERSIONS,
-  ControllerVersionInfo,
   OutsideExecutionVersion,
 } from "@/utils/controller-versions";
+export type { ControllerVersionInfo } from "@/utils/controller-versions";
 
 export const STABLE_CONTROLLER = CONTROLLER_VERSIONS[5];
 export const BETA_CONTROLLER = CONTROLLER_VERSIONS[5];
