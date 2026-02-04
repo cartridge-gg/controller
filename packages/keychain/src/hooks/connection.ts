@@ -429,11 +429,6 @@ export function useConnectionValue() {
       return;
     }
 
-    if (!configData.origin) {
-      setVerified(false);
-      return;
-    }
-
     const allowedOrigins = toArray(configData.origin as string | string[]);
 
     // In standalone mode (not iframe), verify preset if redirect_url matches preset whitelist
@@ -442,6 +437,11 @@ export function useConnectionValue() {
       const redirectUrl = searchParams.get("redirect_url");
 
       if (redirectUrl) {
+        if (!configData.origin) {
+          setVerified(false);
+          return;
+        }
+
         try {
           const redirectUrlObj = new URL(redirectUrl);
           const redirectOrigin = redirectUrlObj.origin;
@@ -462,6 +462,11 @@ export function useConnectionValue() {
       }
 
       // No redirect_url or invalid redirect_url - don't verify preset in standalone mode
+      setVerified(true);
+      return;
+    }
+
+    if (!configData.origin) {
       setVerified(false);
       return;
     }
