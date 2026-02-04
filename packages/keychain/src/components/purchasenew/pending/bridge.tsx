@@ -15,12 +15,12 @@ import {
 import { Explorer, getExplorer } from "@/hooks/starterpack/layerswap";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useEffect, useState, useRef } from "react";
-import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { retryWithBackoff } from "@/utils/retry";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { TransactionFinalityStatus } from "starknet";
 import { CoinbaseTransactionStatus } from "@/utils/api";
+import { useStarterpackPlayHandler } from "@/hooks/starterpack";
 
 interface TransitionStepProps {
   isVisible: boolean;
@@ -73,11 +73,10 @@ export function BridgePending({
   selectedPlatform: selectedPlatformProp,
   waitForDeposit: waitForDepositProp,
 }: BridgePendingProps) {
-  const { navigateToRoot } = useNavigation();
   const onchainContext = useOnchainPurchaseContext();
   const { transactionHash: currentTxHash } = useStarterpackContext();
-  const { externalWaitForTransaction, controller, isMainnet, closeModal } =
-    useConnection();
+  const { externalWaitForTransaction, controller, isMainnet } = useConnection();
+  const handlePlay = useStarterpackPlayHandler();
 
   // Use props if provided (for stories), otherwise use context
   const selectedPlatform =
@@ -282,10 +281,7 @@ export function BridgePending({
           className="w-full"
           variant="primary"
           disabled={!purchaseCompleted}
-          onClick={() => {
-            closeModal?.();
-            navigateToRoot();
-          }}
+          onClick={handlePlay}
         >
           Play
         </Button>

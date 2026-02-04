@@ -89,34 +89,50 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
     : policies;
 }
 
+/**
+ * Converts parsed session policies to WASM-compatible Policy objects.
+ *
+ * IMPORTANT: Policies are sorted canonically before hashing. Without this,
+ * Object.keys/entries reordering can cause identical policies to produce
+ * different merkle roots, leading to "session/not-registered" errors.
+ * See: https://github.com/cartridge-gg/controller/issues/2357
+ */
 export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
   return [
-    ...Object.entries(policies.contracts ?? {}).flatMap(
-      ([target, { methods }]) =>
-        toArray(methods).map((m) => ({
-          target,
-          method: hash.getSelectorFromName(m.entrypoint),
-          authorized: m.authorized,
-        })),
-    ),
-    ...(policies.messages ?? []).map((p) => {
-      const domainHash = typedData.getStructHash(
-        p.types,
-        "StarknetDomain",
-        p.domain,
-        TypedDataRevision.ACTIVE,
-      );
-      const typeHash = typedData.getTypeHash(
-        p.types,
-        p.primaryType,
-        TypedDataRevision.ACTIVE,
-      );
+    ...Object.entries(policies.contracts ?? {})
+      .sort(([a], [b]) => a.toLowerCase().localeCompare(b.toLowerCase()))
+      .flatMap(([target, { methods }]) =>
+        toArray(methods)
+          .slice()
+          .sort((a, b) => a.entrypoint.localeCompare(b.entrypoint))
+          .map((m) => ({
+            target,
+            method: hash.getSelectorFromName(m.entrypoint),
+            authorized: m.authorized,
+          })),
+      ),
+    ...(policies.messages ?? [])
+      .map((p) => {
+        const domainHash = typedData.getStructHash(
+          p.types,
+          "StarknetDomain",
+          p.domain,
+          TypedDataRevision.ACTIVE,
+        );
+        const typeHash = typedData.getTypeHash(
+          p.types,
+          p.primaryType,
+          TypedDataRevision.ACTIVE,
+        );
 
-      return {
-        scope_hash: hash.computePoseidonHash(domainHash, typeHash),
-        authorized: p.authorized,
-      };
-    }),
+        return {
+          scope_hash: hash.computePoseidonHash(domainHash, typeHash),
+          authorized: p.authorized,
+        };
+      })
+      .sort((a, b) =>
+        a.scope_hash.toString().localeCompare(b.scope_hash.toString()),
+      ),
   ];
 }
 
@@ -138,17 +154,14 @@ export function humanizeString(str: string): string {
 
 export function parseChainId(url: URL): ChainId {
   const parts = url.pathname.split("/");
+  const isCartridgeHost = url.hostname === "api.cartridge.gg";
 
-  // Handle localhost URLs by making a synchronous call to getChainId
-  if (
-    url.hostname === "localhost" ||
-    url.hostname === "127.0.0.1" ||
-    url.hostname === "0.0.0.0"
-  ) {
+  // Handle non-Cartridge hosts by making a synchronous call to getChainId
+  if (!isCartridgeHost) {
     // Check if we're in a browser environment
     if (typeof XMLHttpRequest === "undefined") {
       // In Node.js environment (like tests), we can't make synchronous HTTP calls
-      // For now, we'll use a placeholder chainId for localhost in tests
+      // For now, we'll use a placeholder chainId for non-Cartridge hosts in tests
       console.warn(
         `Cannot make synchronous HTTP call in Node.js environment for ${url.toString()}`,
       );

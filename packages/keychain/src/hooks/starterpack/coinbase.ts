@@ -8,7 +8,7 @@ import {
   CoinbaseOnRampQuoteQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { request } from "@/utils/graphql";
-import Controller from "@/utils/controller";
+import { useConnection } from "../connection";
 
 // Derive types from the actual GraphQL query/mutation results
 export type CoinbaseOrderResult =
@@ -28,7 +28,6 @@ export interface CoinbaseQuoteInput {
 }
 
 export interface UseCoinbaseOptions {
-  controller: Controller | undefined;
   onError?: (error: Error) => void;
 }
 
@@ -49,13 +48,14 @@ export interface UseCoinbaseReturn {
 
 const createCoinbaseOrder = async (
   input: CreateOrderInput,
+  sandbox: boolean = true,
 ): Promise<CoinbaseOrderResult> => {
   const result = await request<CreateCoinbaseLayerswapOrderMutation>(
     CreateCoinbaseLayerswapOrderDocument,
     {
       input: {
         purchaseUSDCAmount: input.purchaseUSDCAmount,
-        sandbox: true,
+        sandbox,
       },
     },
   );
@@ -94,9 +94,9 @@ const getCoinbaseQuote = async (
  * Hook for managing Coinbase onramp functionality
  */
 export function useCoinbase({
-  controller,
   onError,
 }: UseCoinbaseOptions): UseCoinbaseReturn {
+  const { controller, isMainnet } = useConnection();
   const [orderId, setOrderId] = useState<string | undefined>();
   const [paymentLink, setPaymentLink] = useState<string | undefined>();
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
@@ -116,7 +116,7 @@ export function useCoinbase({
         setIsCreatingOrder(true);
         setOrderError(null);
 
-        const order = await createCoinbaseOrder(input);
+        const order = await createCoinbaseOrder(input, !isMainnet);
 
         setOrderId(order.coinbaseOrder.orderId);
         setPaymentLink(order.coinbaseOrder.paymentLink);
@@ -131,7 +131,7 @@ export function useCoinbase({
         setIsCreatingOrder(false);
       }
     },
-    [controller, onError],
+    [controller, isMainnet, onError],
   );
 
   const getTransactions = useCallback(

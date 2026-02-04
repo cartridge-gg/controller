@@ -74,7 +74,15 @@ export function Profile() {
       <h2>Open Starterpack</h2>
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap gap-1">
-          <Button onClick={() => ctrlConnector.controller.openStarterPack(0)}>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openStarterPack(0, {
+                onPurchaseComplete: () => {
+                  console.log("Starterpack play callback fired.");
+                },
+              })
+            }
+          >
             Nums
           </Button>
         </div>
