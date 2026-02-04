@@ -35,6 +35,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { SignerAlert } from "../signer-alert";
+import { ExternalWalletError } from "@/utils/errors";
 
 type SignerPending = {
   kind: SignerMethodKind;
@@ -199,7 +200,9 @@ const WalletAuths = ({
         case "rabby": {
           response = await connectWallet(wallet as ExternalWalletType);
           if (!response || !response.success || !response.account) {
-            throw new Error(response?.error || "Wallet auth: unknown error");
+            throw new ExternalWalletError(
+              response?.error || "Wallet auth: unknown error",
+            );
           }
           signer = { eip191: { address: response.account } };
           signerInput = {
@@ -222,7 +225,9 @@ const WalletAuths = ({
           }
           response = await walletConnectWallet.connect();
           if (!response || !response.success || !response.account) {
-            throw new Error(response?.error || "Wallet auth: unknown error");
+            throw new ExternalWalletError(
+              response?.error || "Wallet auth: unknown error",
+            );
           }
           window.keychain_wallets?.addEmbeddedWallet(
             response.account,

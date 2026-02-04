@@ -26,7 +26,7 @@ import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
 import type { Quote } from "@/context";
 import { useCallback, useMemo, useEffect } from "react";
-import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
+import { useOnchainPurchaseContext } from "@/context";
 import { num } from "starknet";
 
 type PaymentRails = "stripe" | "crypto";
@@ -116,15 +116,19 @@ export function OnchainCostBreakdown({
     convertedPrice,
     isTokenSelectionLocked,
     isFetchingConversion,
+    feeEstimationError,
     quantity,
+    isApplePaySelected,
+    coinbaseQuote,
+    isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
-  const { displayError } = useStarterpackContext();
   const { decimals } = quote.paymentTokenMetadata;
 
-  // Get default token (USDC if available) for fallback
-  const defaultToken = availableTokens.find(
-    (t) => t.address.toLowerCase() === quote.paymentToken.toLowerCase(),
-  );
+  // Get default token (matching quote if available) or fallback to the first available token
+  const defaultToken =
+    availableTokens.find(
+      (t) => num.toHex(t.address) === num.toHex(quote.paymentToken),
+    ) || availableTokens[0];
 
   // Use selectedToken or fallback to defaultToken for display
   const displayToken = selectedToken || defaultToken;
@@ -213,37 +217,44 @@ export function OnchainCostBreakdown({
                 quote={quote}
                 quantity={quantity}
                 layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
+                coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
               />
             </div>
-            {!displayError && (
-              <>
-                {isFetchingConversion ? (
-                  <Spinner />
+            {isFetchingConversion || isFetchingCoinbaseQuote ? (
+              <Spinner />
+            ) : (
+              <div className="flex items-center gap-1.5">
+                {isApplePaySelected ? (
+                  coinbaseQuote ? (
+                    <span className="text-foreground-100">
+                      {`$${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)}`}
+                    </span>
+                  ) : (
+                    <span className="text-foreground-400">—</span>
+                  )
+                ) : isUsingLayerswap ? (
+                  feeEstimationError ? (
+                    <span className="text-foreground-400">—</span>
+                  ) : layerswapTotal !== null && displayToken ? (
+                    <span className="text-foreground-100">
+                      {formatAmount(layerswapTotal)}
+                    </span>
+                  ) : (
+                    <Spinner />
+                  )
+                ) : isPaymentTokenSameAsSelected ? (
+                  <span className="text-foreground-300">
+                    {formatAmount(paymentAmount)}
+                  </span>
                 ) : (
-                  <div className="flex items-center gap-1.5">
-                    {isPaymentTokenSameAsSelected ? (
-                      <span className="text-foreground-300">
-                        {formatAmount(paymentAmount)}
-                      </span>
-                    ) : isUsingLayerswap ? (
-                      layerswapTotal !== null && displayToken ? (
-                        <span className="text-foreground-100">
-                          {formatAmount(layerswapTotal)}
-                        </span>
-                      ) : (
-                        <Spinner />
-                      )
-                    ) : (
-                      convertedEquivalent !== null &&
-                      displayToken && (
-                        <span className="text-foreground-100">
-                          {formatAmount(convertedEquivalent)}
-                        </span>
-                      )
-                    )}
-                  </div>
+                  convertedEquivalent !== null &&
+                  displayToken && (
+                    <span className="text-foreground-100">
+                      {formatAmount(convertedEquivalent)}
+                    </span>
+                  )
                 )}
-              </>
+              </div>
             )}
           </div>
         </CardContent>

@@ -46,6 +46,7 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   usdAmount: 0,
   layerswapFees: undefined,
   isFetchingFees: false,
+  feeEstimationError: null,
   swapId: undefined,
   explorer: undefined,
   requestedAmount: undefined,
@@ -55,6 +56,14 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   onExternalConnect: async () => undefined,
   onSendDeposit: async () => {},
   waitForDeposit: async () => false,
+  isApplePaySelected: false,
+  paymentLink: undefined,
+  isCreatingOrder: false,
+  coinbaseQuote: undefined,
+  isFetchingCoinbaseQuote: false,
+  onApplePaySelect: () => {},
+  onCreateCoinbaseOrder: async () => {},
+  getTransactions: async () => [],
 };
 
 // Component that navigates to the correct route on mount

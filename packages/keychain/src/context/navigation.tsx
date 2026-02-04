@@ -13,16 +13,24 @@ interface NavigationEntry {
   path: string;
   state?: unknown;
   timestamp: number;
+  showClose?: boolean;
 }
 
 interface NavigationContextType {
   canGoBack: boolean;
   canGoForward: boolean;
   navigationDepth: number;
+  showClose: boolean;
   navigate: (
     to: string | number,
-    options?: { replace?: boolean; state?: unknown; reset?: boolean },
+    options?: {
+      replace?: boolean;
+      state?: unknown;
+      reset?: boolean;
+      showClose?: boolean;
+    },
   ) => void;
+  setShowClose: (show: boolean) => void;
   navigateToRoot: () => void;
   goBack: () => void;
   goForward: () => void;
@@ -132,6 +140,7 @@ export function NavigationProvider({
       path: currentPath,
       state: location.state,
       timestamp: Date.now(),
+      showClose: (location.state as { showClose?: boolean })?.showClose,
     };
 
     // Update both stack and index together to ensure consistency
@@ -203,7 +212,12 @@ export function NavigationProvider({
   const navigateWithTracking = useCallback(
     (
       to: string | number,
-      options?: { replace?: boolean; state?: unknown; reset?: boolean },
+      options?: {
+        replace?: boolean;
+        state?: unknown;
+        reset?: boolean;
+        showClose?: boolean;
+      },
     ) => {
       if (typeof to === "number") {
         // Handle relative navigation
@@ -223,6 +237,7 @@ export function NavigationProvider({
             path: to,
             state: options.state,
             timestamp: Date.now(),
+            showClose: options.showClose,
           };
 
           setNavigationStack([entry]);
@@ -254,6 +269,8 @@ export function NavigationProvider({
                 path: finalPath,
                 state: options.state,
                 timestamp: Date.now(),
+                showClose:
+                  options.showClose ?? newStack[currentIndex].showClose,
               };
             }
             return newStack;
@@ -265,6 +282,23 @@ export function NavigationProvider({
       }
     },
     [navigate, currentIndex, navigationStack, location.search],
+  );
+
+  const setShowClose = useCallback(
+    (show: boolean) => {
+      setNavigationStack((prev) => {
+        if (currentIndex >= 0 && currentIndex < prev.length) {
+          const newStack = [...prev];
+          newStack[currentIndex] = {
+            ...newStack[currentIndex],
+            showClose: show,
+          };
+          return newStack;
+        }
+        return prev;
+      });
+    },
+    [currentIndex],
   );
 
   // Go back helper
@@ -294,7 +328,9 @@ export function NavigationProvider({
     canGoBack: currentIndex > 0,
     canGoForward: currentIndex < navigationStack.length - 1,
     navigationDepth: currentIndex,
+    showClose: navigationStack[currentIndex]?.showClose || false,
     navigate: navigateWithTracking,
+    setShowClose,
     navigateToRoot,
     goBack,
     goForward,

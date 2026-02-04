@@ -6,6 +6,7 @@ import {
   TooltipTrigger,
 } from "@cartridge/ui";
 import type { Quote } from "@/context";
+import type { CoinbaseQuoteResult } from "@/hooks/starterpack";
 
 /**
  * Format bigint token amount with symbol
@@ -25,18 +26,26 @@ export const OnchainFeesTooltip = ({
   quote,
   quantity = 1,
   layerswapFees,
+  coinbaseQuote,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
   quote: Quote;
   quantity?: number;
   layerswapFees?: string;
+  coinbaseQuote?: CoinbaseQuoteResult;
 }) => {
   const { decimals, symbol } = quote.paymentTokenMetadata;
 
   // Format layerswap fees in USDC (6 decimals)
   const formattedBridgeFee = layerswapFees
     ? `${(Number(layerswapFees) / Math.pow(10, 6)).toFixed(2)} USDC`
+    : coinbaseQuote?.layerswapFees
+      ? `${Number(coinbaseQuote.layerswapFees.amount).toFixed(2)} ${coinbaseQuote.layerswapFees.currency}`
+      : null;
+
+  const formattedCoinbaseFee = coinbaseQuote?.coinbaseFee
+    ? `${Number(coinbaseQuote.coinbaseFee.amount).toFixed(2)} ${coinbaseQuote.coinbaseFee.currency}`
     : null;
 
   return (
@@ -81,22 +90,29 @@ export const OnchainFeesTooltip = ({
             </div>
           )}
           {formattedBridgeFee && (
-            <>
-              <div className="flex flex-row justify-between text-foreground-300">
-                <span>Bridge Fee:</span>
-                <span>{formattedBridgeFee}</span>
-              </div>
-            </>
+            <div className="flex flex-row justify-between text-foreground-300">
+              <span>Bridge Fee:</span>
+              <span>{formattedBridgeFee}</span>
+            </div>
+          )}
+          {formattedCoinbaseFee && (
+            <div className="flex flex-row justify-between text-foreground-300">
+              <span>Coinbase Fee:</span>
+              <span>{formattedCoinbaseFee}</span>
+            </div>
           )}
           <Separator className="bg-background-125" />
           <div className="flex flex-row justify-between text-foreground-100 font-medium">
             <span>Total:</span>
             <span>
-              {formatTokenAmount(
-                quote.totalCost * BigInt(quantity),
-                decimals,
-                symbol,
-              )}
+              {coinbaseQuote?.paymentTotal
+                ? `${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)} ${coinbaseQuote.paymentTotal.currency}`
+                : formatTokenAmount(
+                    quote.totalCost * BigInt(quantity) +
+                      (layerswapFees ? BigInt(layerswapFees) : 0n),
+                    decimals,
+                    symbol,
+                  )}
             </span>
           </div>
         </TooltipContent>

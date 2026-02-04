@@ -273,4 +273,6 @@ export type OpenOptions = {
 export type StarterpackOptions = {
   /** The preimage to use */
   preimage?: string;
+  /** Callback fired after the Play button closes the starterpack modal */
+  onPurchaseComplete?: () => void;
 };

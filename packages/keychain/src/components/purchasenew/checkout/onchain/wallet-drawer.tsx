@@ -16,12 +16,9 @@ import {
 import { ExternalWallet } from "@cartridge/controller";
 import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
 import { useConnection } from "@/hooks/connection";
+import { useFeature } from "@/hooks/features";
 import { networkWalletData } from "../../wallet/config";
 import { Network } from "../../types";
-
-// Configure supported platforms here for testing
-const SUPPORTED_PLATFORMS = "starknet"; //starknet;ethereum;base;arbitrum;optimism
-const APPLE_PAY_SUPPORT = false;
 
 type DrawerStep = "network" | "wallet";
 
@@ -34,28 +31,35 @@ export function WalletSelectionDrawer({
   isOpen,
   onClose,
 }: WalletSelectionDrawerProps) {
+  const isApplePayEnabled = useFeature("apple-pay-support");
+
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
-  const { onExternalConnect, clearSelectedWallet } =
+  const { onExternalConnect, clearSelectedWallet, onApplePaySelect } =
     useOnchainPurchaseContext();
 
   const [step, setStep] = useState<DrawerStep>("network");
   const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isApplePayLoading, setIsApplePayLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
   const [chainIds, setChainIds] = useState<Map<string, string>>(new Map());
   const [availableWallets, setAvailableWallets] = useState<
     Map<string, ExternalWallet[]>
   >(new Map());
 
   const selectedNetworks = useMemo(() => {
-    let networks =
-      SUPPORTED_PLATFORMS?.split(";")
-        .map((platform) =>
-          networkWalletData.networks.find((n) => n.platform === platform),
-        )
-        .filter(Boolean) || [];
+    const platforms = isMainnet
+      ? ["starknet", "ethereum", "base", "arbitrum", "optimism"]
+      : ["starknet"];
+
+    let networks = platforms
+      .map((platform) =>
+        networkWalletData.networks.find((n) => n.platform === platform),
+      )
+      .filter(Boolean);
 
     // If acquisition type is claimed, filter networks to only show those with merkle drop support
     if (starterpackDetails?.type === "claimed") {
@@ -71,7 +75,7 @@ export function WalletSelectionDrawer({
     }
 
     return networks as Network[];
-  }, [starterpackDetails]);
+  }, [isMainnet, starterpackDetails]);
 
   // Reset state when drawer closes
   useEffect(() => {
@@ -80,6 +84,7 @@ export function WalletSelectionDrawer({
       setSelectedNetwork(null);
       setError(null);
       setIsConnecting(false);
+      setIsApplePayLoading(false);
     }
   }, [isOpen]);
 
@@ -135,6 +140,11 @@ export function WalletSelectionDrawer({
     setSelectedNetwork(network);
     setStep("wallet");
   }, []);
+
+  const handleApplePaySelect = useCallback(async () => {
+    onApplePaySelect();
+    onClose();
+  }, [onApplePaySelect, onClose]);
 
   const onControllerWalletSelect = useCallback(() => {
     clearSelectedWallet();
@@ -257,14 +267,31 @@ export function WalletSelectionDrawer({
           {step === "network" ? (
             // Network selection step
             <>
-              {APPLE_PAY_SUPPORT && (
-                <PurchaseCard
+              {isApplePayEnabled && (
+                <div
                   key="apple-pay"
-                  text="Apple Pay"
-                  icon={<AppleIcon />}
-                  onClick={() => {}}
-                  className="rounded-lg"
-                />
+                  onClick={handleApplePaySelect}
+                  className={cn(
+                    "group flex flex-row gap-2 bg-background-200 hover:bg-background-300 rounded-lg p-3 justify-between cursor-pointer",
+                    "rounded-lg",
+                    isApplePayLoading && "opacity-50 pointer-events-none",
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <Thumbnail
+                      icon={<AppleIcon />}
+                      size="md"
+                      className="bg-background-300 group-hover:bg-background-400"
+                      rounded
+                    />
+                    <span>Apple Pay</span>
+                  </div>
+                  {isApplePayLoading && (
+                    <div className="flex items-center">
+                      <SpinnerIcon className="animate-spin" size="sm" />
+                    </div>
+                  )}
+                </div>
               )}
               {selectedNetworks.length > 0 ? (
                 selectedNetworks.map((network) => (
@@ -273,7 +300,10 @@ export function WalletSelectionDrawer({
                     text={network.name}
                     icon={network.icon}
                     onClick={() => handleNetworkSelect(network)}
-                    className="rounded-lg"
+                    className={cn(
+                      "rounded-lg",
+                      isApplePayLoading && "opacity-50 pointer-events-none",
+                    )}
                   />
                 ))
               ) : (

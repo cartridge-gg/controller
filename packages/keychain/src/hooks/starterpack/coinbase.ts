@@ -2,27 +2,29 @@ import { useState, useCallback } from "react";
 import {
   CoinbaseOnrampTransactionsDocument,
   CoinbaseOnrampTransactionsQuery,
-  CreateCoinbaseOnRampOrderDocument,
-  CreateCoinbaseOnRampOrderMutation,
-  CoinbaseOnrampRequirementsDocument,
-  CoinbaseOnrampRequirementsQuery,
+  CreateCoinbaseLayerswapOrderDocument,
+  CreateCoinbaseLayerswapOrderMutation,
+  CoinbaseOnRampQuoteDocument,
+  CoinbaseOnRampQuoteQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { request } from "@/utils/graphql";
-import { getClientIp } from "@/utils";
 import Controller from "@/utils/controller";
 
 // Derive types from the actual GraphQL query/mutation results
 export type CoinbaseOrderResult =
-  CreateCoinbaseOnRampOrderMutation["createCoinbaseOnrampOrder"];
+  CreateCoinbaseLayerswapOrderMutation["createCoinbaseLayerswapOrder"];
 export type CoinbaseTransactionResult =
   CoinbaseOnrampTransactionsQuery["coinbaseOnrampTransactions"]["transactions"][number];
-export type CoinbaseRequirementsResult =
-  CoinbaseOnrampRequirementsQuery["coinbaseOnrampRequirements"];
+export type CoinbaseQuoteResult =
+  CoinbaseOnRampQuoteQuery["coinbaseOnrampQuote"];
 
 export interface CreateOrderInput {
-  username: string;
-  destinationAddress: string;
-  purchaseAmount: string;
+  purchaseUSDCAmount: string;
+}
+
+export interface CoinbaseQuoteInput {
+  purchaseUSDCAmount: string;
+  sandbox?: boolean;
 }
 
 export interface UseCoinbaseOptions {
@@ -36,34 +38,29 @@ export interface UseCoinbaseReturn {
   paymentLink: string | undefined;
   isCreatingOrder: boolean;
   orderError: Error | null;
+  coinbaseQuote: CoinbaseQuoteResult | undefined;
+  isFetchingQuote: boolean;
 
   // Actions
   createOrder: (input: CreateOrderInput) => Promise<CoinbaseOrderResult>;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
-  getRequirements: (username: string) => Promise<CoinbaseRequirementsResult>;
+  getQuote: (input: CoinbaseQuoteInput) => Promise<CoinbaseQuoteResult>;
 }
 
 const createCoinbaseOrder = async (
   input: CreateOrderInput,
 ): Promise<CoinbaseOrderResult> => {
-  const clientIp = await getClientIp();
-
-  const result = await request<CreateCoinbaseOnRampOrderMutation>(
-    CreateCoinbaseOnRampOrderDocument,
+  const result = await request<CreateCoinbaseLayerswapOrderMutation>(
+    CreateCoinbaseLayerswapOrderDocument,
     {
       input: {
-        partnerUserRef: input.username,
-        clientIp,
-        destinationAddress: input.destinationAddress,
-        purchaseAmount: input.purchaseAmount,
-        paymentCurrency: "USD",
-        domain: "https://x.cartridge.gg",
+        purchaseUSDCAmount: input.purchaseUSDCAmount,
         sandbox: true,
       },
     },
   );
 
-  return result.createCoinbaseOnrampOrder;
+  return result.createCoinbaseLayerswapOrder;
 };
 
 const getCoinbaseTransactions = async (
@@ -77,15 +74,20 @@ const getCoinbaseTransactions = async (
   return result.coinbaseOnrampTransactions.transactions;
 };
 
-const getCoinbaseRequirements = async (
-  username: string,
-): Promise<CoinbaseRequirementsResult> => {
-  const result = await request<CoinbaseOnrampRequirementsQuery>(
-    CoinbaseOnrampRequirementsDocument,
-    { username },
+const getCoinbaseQuote = async (
+  input: CoinbaseQuoteInput,
+): Promise<CoinbaseQuoteResult> => {
+  const result = await request<CoinbaseOnRampQuoteQuery>(
+    CoinbaseOnRampQuoteDocument,
+    {
+      input: {
+        purchaseUSDCAmount: input.purchaseUSDCAmount,
+        sandbox: input.sandbox,
+      },
+    },
   );
 
-  return result.coinbaseOnrampRequirements;
+  return result.coinbaseOnrampQuote;
 };
 
 /**
@@ -99,6 +101,10 @@ export function useCoinbase({
   const [paymentLink, setPaymentLink] = useState<string | undefined>();
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [orderError, setOrderError] = useState<Error | null>(null);
+  const [coinbaseQuote, setCoinbaseQuote] = useState<
+    CoinbaseQuoteResult | undefined
+  >();
+  const [isFetchingQuote, setIsFetchingQuote] = useState(false);
 
   const createOrder = useCallback(
     async (input: CreateOrderInput) => {
@@ -112,8 +118,8 @@ export function useCoinbase({
 
         const order = await createCoinbaseOrder(input);
 
-        setOrderId(order.orderId);
-        setPaymentLink(order.paymentLink);
+        setOrderId(order.coinbaseOrder.orderId);
+        setPaymentLink(order.coinbaseOrder.paymentLink);
 
         return order;
       } catch (err) {
@@ -140,13 +146,18 @@ export function useCoinbase({
     [onError],
   );
 
-  const getRequirements = useCallback(
-    async (username: string) => {
+  const getQuote = useCallback(
+    async (input: CoinbaseQuoteInput) => {
       try {
-        return await getCoinbaseRequirements(username);
+        setIsFetchingQuote(true);
+        const quote = await getCoinbaseQuote(input);
+        setCoinbaseQuote(quote);
+        return quote;
       } catch (err) {
         onError?.(err as Error);
         throw err;
+      } finally {
+        setIsFetchingQuote(false);
       }
     },
     [onError],
@@ -157,8 +168,10 @@ export function useCoinbase({
     paymentLink,
     isCreatingOrder,
     orderError,
+    coinbaseQuote,
+    isFetchingQuote,
     createOrder,
     getTransactions,
-    getRequirements,
+    getQuote,
   };
 }

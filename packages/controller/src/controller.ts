@@ -459,7 +459,14 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    await this.keychain.openStarterPack(id, options);
+    const { onPurchaseComplete, ...starterpackOptions } = options ?? {};
+    this.iframes.keychain.setOnStarterpackPlay(onPurchaseComplete);
+    const sanitizedOptions =
+      Object.keys(starterpackOptions).length > 0
+        ? (starterpackOptions as Omit<StarterpackOptions, "onPurchaseComplete">)
+        : undefined;
+
+    await this.keychain.openStarterPack(id, sanitizedOptions);
     this.iframes.keychain?.open();
   }
 
@@ -569,20 +576,6 @@ export default class ControllerProvider extends BaseProvider {
       try {
         const url = new URL(chain.rpcUrl);
         const chainId = parseChainId(url);
-
-        // Validate that mainnet and sepolia must use Cartridge RPC
-        const isMainnet = chainId === constants.StarknetChainId.SN_MAIN;
-        const isSepolia = chainId === constants.StarknetChainId.SN_SEPOLIA;
-        const isCartridgeRpc = url.hostname === "api.cartridge.gg";
-        const isLocalhost =
-          url.hostname === "localhost" || url.hostname === "127.0.0.1";
-
-        if ((isMainnet || isSepolia) && !(isCartridgeRpc || isLocalhost)) {
-          throw new Error(
-            `Only Cartridge RPC providers are allowed for ${isMainnet ? "mainnet" : "sepolia"}. ` +
-              `Please use: https://api.cartridge.gg/x/starknet/${isMainnet ? "mainnet" : "sepolia"}/rpc/v0_9`,
-          );
-        }
 
         this.chains.set(chainId, chain);
       } catch (error) {

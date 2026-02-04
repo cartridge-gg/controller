@@ -40,5 +40,7 @@ export type {
   UseCoinbaseReturn,
   CoinbaseOrderResult,
   CoinbaseTransactionResult,
-  CoinbaseRequirementsResult,
+  CoinbaseQuoteResult,
 } from "./coinbase";
+
+export { useStarterpackPlayHandler } from "./play";

@@ -159,7 +159,6 @@ export function useTokenSelection({
       USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN];
 
     const tokens: ERC20Metadata[] = [
-      ...DEFAULT_TOKENS,
       {
         address: usdcAddress,
         name: "USD Coin",
@@ -167,6 +166,7 @@ export function useTokenSelection({
         decimals: 6,
         icon: "https://static.cartridge.gg/tokens/usdc.svg",
       },
+      ...DEFAULT_TOKENS,
     ];
 
     const isIncluded = (address: string) =>
@@ -283,8 +283,12 @@ export function useTokenSelection({
       const usdcToken = availableTokens.find(
         (token) => token.symbol === "USDC",
       );
-      if (usdcToken && selectedToken?.symbol !== "USDC") {
-        setSelectedToken(usdcToken);
+      if (usdcToken) {
+        // Only override if not already set to USDC (avoid infinite loop)
+        // AND ensure we trigger the conversion logic by setting it
+        if (selectedToken?.symbol !== "USDC") {
+          setSelectedToken(usdcToken);
+        }
       }
     }
   }, [
@@ -303,46 +307,20 @@ export function useTokenSelection({
     ) {
       const quote = starterpackDetails.quote;
       if (quote) {
-        const paymentTokenAddress = getChecksumAddress(
-          quote.paymentToken,
-        ).toLowerCase();
-
         // Set selected token to payment token if not set
         if (!selectedToken) {
-          const paymentToken = availableTokens.find(
-            (token: TokenOption) =>
-              token.address.toLowerCase() === paymentTokenAddress,
-          );
+          const paymentToken =
+            availableTokens.find(
+              (token: TokenOption) =>
+                num.toHex(token.address) === num.toHex(quote.paymentToken),
+            ) || availableTokens[0];
           if (paymentToken) {
             setSelectedToken(paymentToken);
           }
         }
-
-        // Initialize convertedPrice from quote if available
-        if (selectedToken) {
-          const convertedPriceFromQuote = quote.convertedPrice;
-          if (convertedPriceFromQuote) {
-            const targetToken = selectedToken.address.toLowerCase();
-            if (convertedPriceFromQuote.token.toLowerCase() === targetToken) {
-              setConvertedPrice({
-                amount: convertedPriceFromQuote.amount,
-                tokenMetadata: convertedPriceFromQuote.tokenMetadata,
-                quantity: quantity,
-              });
-
-              setSwapQuote(null);
-            }
-          }
-        }
       }
     }
-  }, [
-    starterpackDetails,
-    selectedToken,
-    availableTokens,
-    quantity,
-    setSelectedToken,
-  ]);
+  }, [starterpackDetails, selectedToken, availableTokens, setSelectedToken]);
 
   // Fetch conversion price when selected token or quote changes
   useEffect(() => {
@@ -355,47 +333,62 @@ export function useTokenSelection({
     const paymentToken = quote.paymentToken.toLowerCase();
     const targetToken = selectedToken.address.toLowerCase();
 
-    // Don't fetch if payment token is the same as selected token
-    if (num.toHex(paymentToken) === num.toHex(targetToken)) {
-      setConvertedPrice(null);
+    // 1. Check if tokens match (No swap needed)
+    const isMatchingToken = num.toHex(paymentToken) === num.toHex(targetToken);
+    if (isMatchingToken) {
+      const expectedAmount = quote.totalCost * BigInt(quantity);
+      if (
+        convertedPrice?.amount === expectedAmount &&
+        convertedPrice?.quantity === quantity &&
+        swapQuote === null
+      ) {
+        return;
+      }
+
+      setConvertedPrice({
+        amount: expectedAmount,
+        quantity: quantity,
+        tokenMetadata: quote.paymentTokenMetadata,
+      });
       setSwapQuote(null);
       setIsFetchingConversion(false);
       setConversionError(null);
       return;
     }
 
-    // Check if we already have valid data
+    // 2. Otherwise, fetch from Ekubo (if not already valid)
     if (
       convertedPrice &&
       swapQuote &&
       convertedPrice.tokenMetadata.symbol === selectedToken.symbol &&
-      convertedPrice.quantity === quantity
+      convertedPrice.quantity === quantity &&
+      convertedPrice.amount === swapQuote.total
     ) {
       return;
     }
 
     const fetchConversion = async () => {
+      // Use the token from availableTokens to ensure we have the latest metadata
+      const activeToken =
+        availableTokens.find((t) => t.address === selectedToken.address) ||
+        selectedToken;
+
       setIsFetchingConversion(true);
       setConversionError(null);
       try {
         const fetchedSwapQuote = await fetchSwapQuote(
           quote.totalCost * BigInt(quantity),
           quote.paymentToken,
-          selectedToken.address,
+          activeToken.address,
           controller.chainId(),
-        );
-
-        const tokenMetadata = await fetchTokenMetadata(
-          selectedToken.address,
-          controller.provider,
         );
 
         setConvertedPrice({
           amount: fetchedSwapQuote.total,
           quantity: quantity,
           tokenMetadata: {
-            symbol: tokenMetadata.symbol,
-            decimals: tokenMetadata.decimals,
+            symbol: activeToken.symbol,
+            decimals: activeToken.decimals,
           },
         });
         setSwapQuote(fetchedSwapQuote);
@@ -411,14 +404,8 @@ export function useTokenSelection({
     };
 
     fetchConversion();
-  }, [
-    controller,
-    selectedToken,
-    starterpackDetails,
-    convertedPrice,
-    swapQuote,
-    quantity,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controller, selectedToken, starterpackDetails, quantity]);
 
   return {
     availableTokens,

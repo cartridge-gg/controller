@@ -44,6 +44,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     usdAmount: 0,
     layerswapFees: undefined,
     isFetchingFees: false,
+    feeEstimationError: null,
     swapId: undefined,
     explorer: undefined,
     requestedAmount: undefined,
@@ -53,6 +54,14 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     onExternalConnect: async () => undefined,
     onSendDeposit: async () => {},
     waitForDeposit: async () => false,
+    isApplePaySelected: false,
+    paymentLink: undefined,
+    isCreatingOrder: false,
+    coinbaseQuote: undefined,
+    isFetchingCoinbaseQuote: false,
+    onApplePaySelect: () => {},
+    onCreateCoinbaseOrder: async () => {},
+    getTransactions: async () => [],
   };
 
   return (

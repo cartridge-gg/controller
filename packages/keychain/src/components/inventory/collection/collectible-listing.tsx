@@ -26,15 +26,15 @@ import {
   STRK_CONTRACT_ADDRESS,
   USDC_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
 import { useTokens } from "@/hooks/token";
 import { useConnection } from "@/hooks/connection";
 import { AllowArray, cairo, Call, CallData, FeeEstimate } from "starknet";
-import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
+import { ArcadeContext } from "@/context/arcade";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
 import { useCollection } from "@/hooks/collection";
@@ -63,7 +63,8 @@ const EXPIRATIONS = [
 ];
 
 export function CollectibleListing() {
-  const { provider } = useMarketplace();
+  const arcadeContext = useContext(ArcadeContext);
+  const provider = arcadeContext?.provider;
   const { controller } = useConnection();
   const { goBack } = useNavigation();
   const { address: contractAddress, tokenId } = useParams();
@@ -192,10 +193,10 @@ export function CollectibleListing() {
 
   // Memoize marketplace address
   const marketplaceAddress = useMemo(() => {
-    return provider.manifest.contracts.find((c: { tag: string }) =>
+    return provider?.manifest.contracts.find((c: { tag: string }) =>
       c.tag?.includes("Marketplace"),
     )?.address;
-  }, [provider.manifest.contracts]);
+  }, [provider?.manifest.contracts]);
 
   // Build transactions when validation is complete
   const buildTransactions = useMemo(() => {
@@ -454,7 +455,9 @@ const ListingConfirmation = ({
           Total potential earnings
         </p>
         <div className="flex gap-1.5">
-          <p className="text-sm text-foreground-400">{`(${totalEarnings})`}</p>
+          {totalEarnings && (
+            <p className="text-sm text-foreground-400">{`(${totalEarnings})`}</p>
+          )}
           <p className="text-sm font-medium text-foreground-100">
             {totalPriceDisplay}
           </p>

@@ -25,6 +25,7 @@ import { QuestProvider } from "@/context/quest";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
+import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -48,6 +49,16 @@ export function Provider({ children }: PropsWithChildren) {
     return num.toBigInt(connection.controller?.chainId() || 0);
   }, [connection.controller]);
 
+  const marketplaceConfig = useMemo(
+    () => ({
+      chainId:
+        (connection.controller?.chainId() as constants.StarknetChainId) ||
+        constants.StarknetChainId.SN_MAIN,
+      defaultProject: connection.project || undefined,
+    }),
+    [connection.controller, connection.project],
+  );
+
   return (
     <FeatureProvider>
       <CartridgeAPIProvider url={ENDPOINT}>
@@ -70,9 +81,15 @@ export function Provider({ children }: PropsWithChildren) {
                               <ToastProvider>
                                 <TokensProvider>
                                   <ProfileArcadeProvider>
-                                    <ProfileDataProvider>
-                                      <QuestProvider>{children}</QuestProvider>
-                                    </ProfileDataProvider>
+                                    <MarketplaceClientProvider
+                                      config={marketplaceConfig}
+                                    >
+                                      <ProfileDataProvider>
+                                        <QuestProvider>
+                                          {children}
+                                        </QuestProvider>
+                                      </ProfileDataProvider>
+                                    </MarketplaceClientProvider>
                                   </ProfileArcadeProvider>
                                 </TokensProvider>
                               </ToastProvider>
