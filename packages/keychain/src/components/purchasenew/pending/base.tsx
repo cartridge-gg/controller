@@ -8,11 +8,11 @@ import { Receiving } from "../receiving";
 import { ConfirmingTransaction } from "./confirming-transaction";
 import { Item } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { useNavigation } from "@/context";
 import { useEffect, useState } from "react";
 import { TransactionFinalityStatus } from "starknet";
 import { retryWithBackoff } from "@/utils/retry";
 import { getExplorer } from "@/hooks/starterpack/layerswap";
+import { useStarterpackPlayHandler } from "@/hooks/starterpack";
 
 export interface TransactionPendingBaseProps {
   /** Header title (e.g., "Purchasing Village Kit") */
@@ -44,8 +44,8 @@ export function TransactionPendingBase({
   buttonText,
   quantityText,
 }: TransactionPendingBaseProps) {
-  const { isMainnet, controller, closeModal } = useConnection();
-  const { navigateToRoot } = useNavigation();
+  const { isMainnet, controller } = useConnection();
+  const handlePlay = useStarterpackPlayHandler();
   const [isPending, setIsPending] = useState(true);
 
   useEffect(() => {
@@ -93,10 +93,7 @@ export function TransactionPendingBase({
           className="w-full"
           variant="primary"
           disabled={isPending}
-          onClick={() => {
-            closeModal?.();
-            navigateToRoot();
-          }}
+          onClick={handlePlay}
         >
           {buttonText}
         </Button>
