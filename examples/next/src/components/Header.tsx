@@ -13,6 +13,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { constants, num, shortString } from "starknet";
 import { Chain } from "@starknet-react/chains";
 import SessionConnector from "@cartridge/connector/session";
+import { HeadlessLogin } from "components/HeadlessLogin";
 
 const Header = () => {
   const { connect, connectors } = useConnect();
@@ -21,6 +22,7 @@ const Header = () => {
   const { address, status } = useAccount();
   const [networkOpen, setNetworkOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [headlessOpen, setHeadlessOpen] = useState(false);
   const [isControllerReady, setIsControllerReady] = useState(false);
   const { switchChain } = useSwitchChain({
     params: {
@@ -189,6 +191,12 @@ const Header = () => {
             Standalone
           </Button>
           <Button
+            onClick={() => setHeadlessOpen(true)}
+            disabled={!isControllerReady}
+          >
+            Headless
+          </Button>
+          <Button
             onClick={() => {
               connect({ connector: controllerConnector });
             }}
@@ -215,6 +223,27 @@ const Header = () => {
               Register Session
             </Button>
           )}
+        </div>
+      )}
+
+      {headlessOpen && (
+        <div
+          className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setHeadlessOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setHeadlessOpen(false)}
+              className="absolute -top-3 -right-3 rounded-full bg-white px-3 py-1 text-sm font-medium text-gray-700 shadow hover:bg-gray-100"
+            >
+              Close
+            </button>
+            <HeadlessLogin />
+          </div>
         </div>
       )}
     </div>

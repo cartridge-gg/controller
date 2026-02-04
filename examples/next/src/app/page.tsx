@@ -5,7 +5,6 @@ import { FC } from "react";
 import { ColorModeToggle } from "components/ColorModeToggle";
 import Header from "components/Header";
 import { DelegateAccount } from "components/DelegateAccount";
-import { HeadlessLogin } from "components/HeadlessLogin";
 import { InvalidTxn } from "components/InvalidTxn";
 import { LookupControllers } from "components/LookupControllers";
 import { ManualTransferEth } from "components/ManualTransferEth";
@@ -27,7 +26,6 @@ const Home: FC = () => {
       <Header />
       <PlayButton />
       <Profile />
-      <HeadlessLogin />
       <Transfer />
       <ManualTransferEth />
       <Starterpack />

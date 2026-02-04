@@ -19,6 +19,15 @@ export function HeadlessLogin() {
     address?: string;
   } | null>(null);
 
+  const prepareHeadlessConnect = async () => {
+    const controller = controllerConnector.controller;
+    // Ensure we don't short-circuit on an existing account.
+    if (controller.isReady()) {
+      await controller.disconnect();
+    }
+    return controller;
+  };
+
   const handlePasskeyLogin = async () => {
     if (!username) {
       setResult({
@@ -32,7 +41,7 @@ export function HeadlessLogin() {
     setResult(null);
 
     try {
-      const controller = controllerConnector.controller;
+      const controller = await prepareHeadlessConnect();
 
       const account = await controller.connect({
         username,
@@ -99,7 +108,7 @@ export function HeadlessLogin() {
         return;
       }
 
-      const controller = controllerConnector.controller;
+      const controller = await prepareHeadlessConnect();
 
       const account = await controller.connect({
         username,

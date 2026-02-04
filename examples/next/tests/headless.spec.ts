@@ -29,6 +29,10 @@ test.describe("headless connect", () => {
 
     await page.goto("/");
 
+    const headlessButton = page.getByRole("button", { name: "Headless" });
+    await expect(headlessButton).toBeEnabled();
+    await headlessButton.click();
+
     const client = await page.context().newCDPSession(page);
     const webauthn = new WebauthnEmulator({ client });
     await webauthn.enable();
