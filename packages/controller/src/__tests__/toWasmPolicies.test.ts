@@ -177,4 +177,203 @@ describe("toWasmPolicies", () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe("ApprovalPolicy handling", () => {
+    test("creates ApprovalPolicy for approve methods with spender and amount", () => {
+      const policies: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          "0xTOKEN": {
+            methods: [
+              {
+                entrypoint: "approve",
+                spender: "0xSPENDER",
+                amount: "1000000000000000000",
+                authorized: true,
+              },
+            ],
+          },
+        },
+      };
+
+      const result = toWasmPolicies(policies);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        target: "0xTOKEN",
+        spender: "0xSPENDER",
+        amount: "1000000000000000000",
+      });
+      // Should NOT have method or authorized fields
+      expect(result[0]).not.toHaveProperty("method");
+      expect(result[0]).not.toHaveProperty("authorized");
+    });
+
+    test("converts numeric amount to string in ApprovalPolicy", () => {
+      const policies: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          "0xTOKEN": {
+            methods: [
+              {
+                entrypoint: "approve",
+                spender: "0xSPENDER",
+                amount: 1000000000000000000,
+                authorized: true,
+              },
+            ],
+          },
+        },
+      };
+
+      const result = toWasmPolicies(policies);
+
+      expect(result[0]).toHaveProperty("amount", "1000000000000000000");
+    });
+
+    test("falls back to CallPolicy for approve without spender", () => {
+      const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+      const policies: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          "0xTOKEN": {
+            methods: [
+              {
+                entrypoint: "approve",
+                authorized: true,
+              },
+            ],
+          },
+        },
+      };
+
+      const result = toWasmPolicies(policies);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty("method");
+      expect(result[0]).toHaveProperty("authorized", true);
+      expect(result[0]).not.toHaveProperty("spender");
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("[DEPRECATED]"),
+      );
+
+      warnSpy.mockRestore();
+    });
+
+    test("falls back to CallPolicy for approve without amount", () => {
+      const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+      const policies: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          "0xTOKEN": {
+            methods: [
+              {
+                entrypoint: "approve",
+                spender: "0xSPENDER",
+                authorized: true,
+              },
+            ],
+          },
+        },
+      };
+
+      const result = toWasmPolicies(policies);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty("method");
+      expect(result[0]).not.toHaveProperty("spender");
+      expect(warnSpy).toHaveBeenCalled();
+
+      warnSpy.mockRestore();
+    });
+
+    test("creates CallPolicy for non-approve methods", () => {
+      const policies: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          "0xCONTRACT": {
+            methods: [
+              {
+                entrypoint: "transfer",
+                authorized: true,
+              },
+            ],
+          },
+        },
+      };
+
+      const result = toWasmPolicies(policies);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty("target", "0xCONTRACT");
+      expect(result[0]).toHaveProperty("method");
+      expect(result[0]).toHaveProperty("authorized", true);
+    });
+
+    test("handles mixed approve and non-approve methods", () => {
+      const policies: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          "0xTOKEN": {
+            methods: [
+              {
+                entrypoint: "approve",
+                spender: "0xSPENDER",
+                amount: "1000",
+                authorized: true,
+              },
+              {
+                entrypoint: "transfer",
+                authorized: true,
+              },
+            ],
+          },
+        },
+      };
+
+      const result = toWasmPolicies(policies);
+
+      expect(result).toHaveLength(2);
+
+      // First should be approve (sorted alphabetically)
+      const approvePolicy = result[0];
+      expect(approvePolicy).toHaveProperty("spender", "0xSPENDER");
+      expect(approvePolicy).toHaveProperty("amount", "1000");
+
+      // Second should be transfer
+      const transferPolicy = result[1];
+      expect(transferPolicy).toHaveProperty("method");
+      expect(transferPolicy).toHaveProperty("authorized", true);
+    });
+
+    test("sorts approve policies correctly among other methods", () => {
+      const policies: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          "0xTOKEN": {
+            methods: [
+              { entrypoint: "transfer", authorized: true },
+              {
+                entrypoint: "approve",
+                spender: "0xSPENDER",
+                amount: "1000",
+                authorized: true,
+              },
+              { entrypoint: "balance_of", authorized: true },
+            ],
+          },
+        },
+      };
+
+      const result = toWasmPolicies(policies);
+
+      expect(result).toHaveLength(3);
+      // Sorted order: approve, balance_of, transfer
+      expect(result[0]).toHaveProperty("spender"); // approve -> ApprovalPolicy
+      expect(result[1]).toHaveProperty("method"); // balance_of -> CallPolicy
+      expect(result[2]).toHaveProperty("method"); // transfer -> CallPolicy
+    });
+  });
 });

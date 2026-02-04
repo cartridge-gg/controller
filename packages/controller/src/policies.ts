@@ -1,4 +1,5 @@
 import {
+  Approval,
   ContractPolicy,
   Method,
   SessionPolicies,
@@ -14,7 +15,7 @@ export type ParsedSessionPolicies = {
 export type SessionContracts = Record<
   string,
   Omit<ContractPolicy, "methods"> & {
-    methods: (Method & { authorized?: boolean })[];
+    methods: ((Method | Approval) & { authorized?: boolean })[];
   }
 >;
 
