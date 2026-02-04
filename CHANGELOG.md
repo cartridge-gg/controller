@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.12.3] - 2026-02-03
+## [0.12.3] - 2026-02-04
 
 ### ✨ New Features
 - **@cartridge/controller**: Added starterpack play callback functionality, enabling developers to specify custom onPlay callbacks that execute when users click play buttons in starterpack flows. The keychain iframe now closes before calling the callback and falls back to existing close behavior when absent (#2362)
@@ -9,6 +9,8 @@
 - **@cartridge/controller**: Fixed policy hashing by ensuring canonical sorting of policies before hashing to prevent non-deterministic merkle root calculations. Contract entries are now sorted by address, methods by entrypoint, and message policies by scope_hash, resolving "session/not-registered" errors caused by inconsistent policy ordering (#2359)
 - **@cartridge/connector**: Fixed controller re-initialization issues by reusing existing controller instances from `window.starknet_controller` when `ControllerConnector` is instantiated multiple times. This prevents duplicate iframes and message channels that could break functionality during React re-renders (#2360)
 - **@cartridge/controller**: Fixed chainId lookup to support non-Cartridge chain configurations, improving compatibility with custom chain setups (#2361)
+- **@cartridge/keychain**: Fixed Coinbase sandbox configuration to ensure proper sandbox environment setup for development and testing (#2371)
+- **@cartridge/keychain**: Enhanced preset verification for Capacitor applications by adding `capacitor://` to automatic verification bypass alongside localhost, simplifying development for native apps using `capacitor://localhost` (#2369)
 
 ## [0.12.2] - 2026-01-29
 
