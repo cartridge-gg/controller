@@ -135,7 +135,6 @@ export const OnchainPurchaseProvider = ({
     clearSelectedWallet: clearSelectedWalletInternal,
     walletError,
   } = useExternalWallet({
-    controller,
     onError: setDisplayError,
   });
 
@@ -173,7 +172,6 @@ export const OnchainPurchaseProvider = ({
     isTokenSelectionLocked,
     resetTokenSelection,
   } = useTokenSelection({
-    controller,
     starterpackDetails: onchainDetails,
     quantity,
     selectedPlatform,
@@ -193,8 +191,6 @@ export const OnchainPurchaseProvider = ({
     onSendDeposit: onSendDepositInternal,
     waitForDeposit,
   } = useLayerswap({
-    controller,
-    isMainnet,
     selectedPlatform,
     walletAddress,
     selectedWallet,
@@ -212,7 +208,6 @@ export const OnchainPurchaseProvider = ({
     coinbaseQuote,
     isFetchingQuote: isFetchingCoinbaseQuote,
   } = useCoinbase({
-    controller,
     onError: setDisplayError,
   });
 

@@ -1,10 +1,9 @@
 import { useState, useCallback } from "react";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
 import { useWallets } from "@/hooks/wallets";
-import Controller from "@/utils/controller";
+import { useConnection } from "../connection";
 
 export interface UseExternalWalletOptions {
-  controller: Controller | undefined;
   onError?: (error: Error) => void;
 }
 
@@ -32,9 +31,9 @@ export interface UseExternalWalletReturn {
  * Hook for managing external wallet connections (Argent, Braavos, etc.)
  */
 export function useExternalWallet({
-  controller,
   onError,
 }: UseExternalWalletOptions): UseExternalWalletReturn {
+  const { controller } = useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
 
   const [selectedWallet, setSelectedWallet] = useState<

@@ -16,7 +16,7 @@ import {
   isOnchainStarterpack,
   type OnchainStarterpackDetails,
 } from "@/context/starterpack/types";
-import Controller from "@/utils/controller";
+import { useConnection } from "../connection";
 
 export interface TokenOption {
   name: string;
@@ -40,7 +40,6 @@ export interface ConvertedPrice {
 }
 
 export interface UseTokenSelectionOptions {
-  controller: Controller | undefined;
   starterpackDetails: OnchainStarterpackDetails | undefined;
   quantity: number;
   selectedPlatform: ExternalPlatform | undefined;
@@ -71,11 +70,11 @@ export interface UseTokenSelectionReturn {
  * Hook for managing token selection and price conversion for onchain purchases
  */
 export function useTokenSelection({
-  controller,
   starterpackDetails,
   quantity,
   selectedPlatform,
 }: UseTokenSelectionOptions): UseTokenSelectionReturn {
+  const { controller } = useConnection();
   const [selectedToken, setSelectedTokenState] = useState<
     TokenOption | undefined
   >();
