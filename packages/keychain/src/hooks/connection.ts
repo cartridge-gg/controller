@@ -332,13 +332,6 @@ export function useConnectionValue() {
       };
 
       const inferredChainId = inferChainIdFromRpcUrl(rpcUrl);
-      if (import.meta.env.VITE_E2E_MOCKS === "true") {
-        if (inferredChainId) {
-          setChainId(inferredChainId);
-          return;
-        }
-      }
-
       if (inferredChainId) {
         setChainId(inferredChainId);
       }

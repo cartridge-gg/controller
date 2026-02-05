@@ -8,7 +8,6 @@ import {
   RpcProvider,
   Signature,
   TypedData,
-  constants,
 } from "starknet";
 
 import {
@@ -34,57 +33,6 @@ import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { toJsFeeEstimate } from "./fee";
-
-const createMockController = ({
-  classHash,
-  rpcUrl,
-  address,
-  username,
-  owner,
-}: {
-  classHash: string;
-  rpcUrl: string;
-  address: string;
-  username: string;
-  owner: Owner;
-}): Controller => {
-  const mockProvider = {
-    getClassHashAt: async () => classHash,
-    waitForTransaction: async () => ({ status: "ACCEPTED_ON_L2" }),
-    callContract: async () => ({ result: ["0x0"] }),
-    call: async () => ({ result: ["0x0"] }),
-    getEvents: async () => ({ events: [] }),
-    getAddressFromStarkName: async () => "0x0",
-  } as unknown as Provider;
-
-  const controller = Object.create(Controller.prototype) as Controller;
-  controller.provider = mockProvider;
-  controller.address = () => address;
-  controller.username = () => username;
-  controller.rpcUrl = () => rpcUrl;
-  controller.chainId = () => constants.StarknetChainId.SN_SEPOLIA;
-  controller.owner = () => owner;
-  controller.classHash = () => classHash;
-  controller.ownerGuid = () => "mock-owner-guid";
-  controller.createSession = async () => undefined;
-  controller.register = async () =>
-    ({
-      register: {
-        username,
-      },
-    }) as JsRegisterResponse;
-  controller.upgrade = async (newClassHash: JsFelt) =>
-    ({
-      contractAddress: address,
-      entrypoint: "upgrade",
-      calldata: [newClassHash],
-    }) as JsCall;
-  controller.disconnect = async () => {
-    delete window.controller;
-  };
-
-  return controller;
-};
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -369,16 +317,6 @@ export default class Controller {
     username: string;
     owner: Owner;
   }): Promise<Controller> {
-    if (import.meta.env.VITE_E2E_MOCKS === "true") {
-      return createMockController({
-        classHash,
-        rpcUrl,
-        address,
-        username,
-        owner,
-      });
-    }
-
     const accountWithMeta = await ControllerFactory.apiLogin(
       username,
       classHash,
@@ -409,16 +347,6 @@ export default class Controller {
     username: string;
     owner: Owner;
   }): Promise<Controller> {
-    if (import.meta.env.VITE_E2E_MOCKS === "true") {
-      return createMockController({
-        classHash,
-        rpcUrl,
-        address,
-        username,
-        owner,
-      });
-    }
-
     const accountWithMeta = await CartridgeAccount.new(
       classHash,
       rpcUrl,
@@ -460,26 +388,6 @@ export default class Controller {
     controller: Controller;
     session: JsRevokableSession;
   }> {
-    if (import.meta.env.VITE_E2E_MOCKS === "true") {
-      return {
-        controller: createMockController({
-          classHash,
-          rpcUrl,
-          address,
-          username,
-          owner,
-        }),
-        session: {
-          expiresAt: BigInt(session_expires_at_s),
-          guardianKeyGuid: "mock-guardian-guid",
-          metadataHash: "0x0",
-          sessionKeyGuid: "mock-session-guid",
-          allowedPoliciesRoot: "0x0",
-          authorization: [],
-        } as JsRevokableSession,
-      };
-    }
-
     const loginResult = await ControllerFactory.login(
       username,
       classHash,
@@ -507,9 +415,6 @@ export default class Controller {
   }
 
   static async fromStore(): Promise<Controller | undefined> {
-    if (import.meta.env.VITE_E2E_MOCKS === "true") {
-      return undefined;
-    }
     const cartridgeWithMeta = await ControllerFactory.fromStorage(
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );

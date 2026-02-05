@@ -1,8 +1,9 @@
 import { test, expect, Page } from "@playwright/test";
 import { WebauthnEmulator } from "./webauthn";
 
-// Requires keychain running with VITE_E2E_MOCKS=true and the example app
-// pointing at that keychain via NEXT_PUBLIC_KEYCHAIN_FRAME_URL.
+// Requires keychain running via `pnpm --filter @cartridge/keychain dev:e2e`
+// and the example app pointing at that keychain entry
+// (e.g. NEXT_PUBLIC_KEYCHAIN_FRAME_URL=http://localhost:3001/index.e2e.html).
 const MOCK_EVM_ADDRESS = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
 
 const waitForKeychainFrame = async (page: Page) => {

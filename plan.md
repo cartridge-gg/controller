@@ -27,8 +27,10 @@
 - If policies require explicit user approval, return `USER_INTERACTION_REQUIRED` early.
 
 ### 3) E2E testing with Playwright + MSW
-- Add MSW handlers inside keychain (enabled via `VITE_E2E_MOCKS=true`) to stub GraphQL controller/account queries.
-- Add a test-only `Controller.login` mock (also behind `VITE_E2E_MOCKS`) to avoid backend dependencies.
+- Add MSW handlers inside keychain and enable them via the E2E entrypoint
+  (`pnpm --filter @cartridge/keychain dev:e2e`).
+- Add a test-only `Controller` mock via an E2E alias (`controller.e2e.ts`)
+  to avoid backend dependencies.
 - Add Playwright tests in `examples/next`:
   - Headless passkey login
   - Headless MetaMask login (inject a stub `window.ethereum` in the parent app)
