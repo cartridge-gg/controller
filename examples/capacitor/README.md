@@ -78,3 +78,29 @@ Add an intent filter for the custom scheme in
   intercept it with `@capacitor/browser` to ensure the system browser opens.
 - After authorizing the session in the browser, return to the app to complete
   the flow.
+
+## Security and Custom Hostnames
+
+By default, Capacitor apps use `localhost` as the hostname (`capacitor://localhost` on iOS). For production apps, it is recommended to set a custom hostname to prevent other Capacitor apps from potentially spoofing your origin.
+
+1. Set a custom hostname in `capacitor.config.ts`:
+
+```typescript
+server: {
+  hostname: "my-custom-app",
+  iosScheme: "capacitor"
+}
+```
+
+2. Add this hostname to the `origin` list in your Controller preset configuration. The Keychain will only verify custom Capacitor origins if they are explicitly authorized in your preset.
+
+Example preset configuration:
+
+```json
+{
+  "origin": ["my-custom-app", "localhost"],
+  ...
+}
+```
+
+Note: Default `localhost` origins are always allowed for development convenience.
