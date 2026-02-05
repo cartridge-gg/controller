@@ -99,7 +99,7 @@ Example preset configuration:
 
 ```json
 {
-  "origin": ["my-custom-app", "localhost"],
+  "origin": ["my-custom-app"],
   ...
 }
 ```
