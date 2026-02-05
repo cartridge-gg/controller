@@ -9,6 +9,8 @@ import { executeCore } from "@/utils/connection/execute";
 import { useEffect, useState } from "react";
 import { PageLoading } from "../Loading";
 import { ErrorCode } from "@cartridge/controller-wasm";
+import { useToast } from "@/context/toast";
+import { humanizeString } from "@cartridge/controller";
 
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
@@ -25,6 +27,7 @@ export function ConfirmTransaction({
 }: ConfirmTransactionProps) {
   const { controller, origin, policies } = useConnection();
   const account = controller;
+  const { toast } = useToast();
 
   const [hasSession, setHasSession] = useState(false);
   const [skipSession, setSkipSession] = useState(false);
@@ -60,13 +63,28 @@ export function ConfirmTransaction({
       return;
     }
 
+    const toastId = JSON.stringify(transactions);
+    toast.transaction("", {
+      status: "confirming",
+      label: `${humanizeString(transactions[0].entrypoint)}${transactions.length > 1 ? ` +${transactions.length - 1}` : ""}`,
+      toastId,
+    });
+
     try {
       const { transaction_hash } = await account.execute(transactions, maxFee);
       onComplete(transaction_hash);
+      toast.transaction("", {
+        status: "confirmed",
+        toastId,
+      });
     } catch (e) {
       const submitError = e as ControllerError;
       console.error("Transaction execution failed:", submitError);
       setError(submitError);
+      toast.error("", {
+        message: "Transaction execution failed",
+        toastId,
+      });
     }
   };
 

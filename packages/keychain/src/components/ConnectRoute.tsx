@@ -13,6 +13,7 @@ import {
 } from "@/hooks/route";
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -27,6 +28,7 @@ export function ConnectRoute() {
   const params = useRouteParams((searchParams: URLSearchParams) => {
     return parseConnectParams(searchParams);
   });
+
   const handleCompletion = useRouteCompletion();
 
   useRouteCallbacks(params, CANCEL_RESPONSE);
@@ -47,11 +49,20 @@ export function ConnectRoute() {
     () => hasApprovalPolicies(policies),
     [policies],
   );
-  console.log(isStandalone, redirectUrl);
 
   const handleConnect = useCallback(async () => {
     if (!params || !controller) {
       return;
+    }
+
+    // In iframe context, request storage access on user gesture so
+    // third-party storage can persist across app restarts.
+    if (!isStandalone) {
+      try {
+        await requestStorageAccess();
+      } catch (error) {
+        console.error("[ConnectRoute] Storage access request failed:", error);
+      }
     }
 
     params.resolve?.({
@@ -98,6 +109,14 @@ export function ConnectRoute() {
   const handleSkip = useCallback(async () => {
     if (!params || !controller) {
       return;
+    }
+
+    if (!isStandalone) {
+      try {
+        await requestStorageAccess();
+      } catch (error) {
+        console.error("[ConnectRoute] Storage access request failed:", error);
+      }
     }
 
     params.resolve?.({
@@ -244,13 +263,15 @@ export function ConnectRoute() {
     return null;
   }
 
-  // No policies auto-connect and verified policies auto-create sessions
-  // This component only handles policies that need user consent
+  // Embedded mode: No policies and verified policies are handled in useCreateController
+  // This component only handles unverified policies that need user consent
   if (!policies) {
+    // This should not be reached as no policies case is handled in useCreateController
     return null;
   }
 
   if (policies.verified && !hasTokenApprovals) {
+    // This should not be reached as verified policies are handled in useCreateController
     return null;
   }
 

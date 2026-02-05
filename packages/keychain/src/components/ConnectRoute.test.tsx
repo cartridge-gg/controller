@@ -24,6 +24,7 @@ const mockController = {
   username: vi.fn().mockReturnValue("testuser"),
   address: vi.fn().mockReturnValue("0x123456789abcdef"),
   createSession: vi.fn().mockResolvedValue(undefined),
+  chainId: vi.fn().mockReturnValue("SN_SEPOLIA"),
 };
 
 const mockUseConnection = vi.fn();

@@ -107,8 +107,8 @@ export function createMarketplaceToast(
 
   const image = document.createElement("img");
   image.className = "image";
-  image.src = sanitizeImageSrc(options.itemImage);
-  image.alt = options.itemName;
+  image.src = sanitizeImageSrc(options.itemImages[0]);
+  image.alt = options.itemNames[0];
   imageContainer.appendChild(image);
 
   const content = document.createElement("div");
@@ -117,6 +117,9 @@ export function createMarketplaceToast(
   const actionText = {
     purchased: "Purchased!",
     sold: "Sold!",
+    sent: "Sent!",
+    listed: "Listed!",
+    unlisted: "Unlisted!",
   };
 
   const title = document.createElement("p");
@@ -125,7 +128,7 @@ export function createMarketplaceToast(
 
   const itemName = document.createElement("p");
   itemName.className = "item-name";
-  itemName.textContent = options.itemName;
+  itemName.textContent = options.itemNames[0];
 
   content.appendChild(title);
   content.appendChild(itemName);

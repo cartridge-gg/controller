@@ -1,5 +1,4 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
-import { SessionConsent } from "@/components/connect";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { now } from "@/constants";
@@ -67,6 +66,7 @@ const CreateSessionLayout = ({
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
+
   const { controller, theme, origin } = useConnection();
 
   const hasTokenApprovals = useMemo(
@@ -75,6 +75,7 @@ const CreateSessionLayout = ({
   );
 
   const defaultStep = useMemo<"summary" | "spending-limit">(() => {
+    // Only show spending limit page for verified sessions with token approvals
     return policies?.verified && hasTokenApprovals
       ? "spending-limit"
       : "summary";
@@ -125,7 +126,8 @@ const CreateSessionLayout = ({
       return;
     }
 
-    if (hasTokenApprovals && step === "summary") {
+    // Only transition to spending limit page for VERIFIED sessions with token approvals
+    if (policies.verified && hasTokenApprovals && step === "summary") {
       setStep("spending-limit");
       return;
     }
@@ -185,7 +187,8 @@ const CreateSessionLayout = ({
     return null;
   }
 
-  if (hasTokenApprovals && step === "spending-limit") {
+  // Show SpendingLimitPage only for VERIFIED sessions with token approvals
+  if (policies.verified && hasTokenApprovals && step === "spending-limit") {
     return (
       <SpendingLimitPage
         policies={policies}
@@ -203,25 +206,23 @@ const CreateSessionLayout = ({
     <>
       <HeaderInner
         className="pb-0"
-        title={!isUpdate ? "Create Session" : "Update Session"}
+        title={
+          !isUpdate ? (theme ? theme.name : "Create Session") : "Update Session"
+        }
         description={isUpdate ? "The policies were updated" : undefined}
         right={
           !isEditable ? (
             <Button
               variant="icon"
-              className="size-10 relative bg-background-200 hover:bg-background-300"
+              className="bg-background-150 hover:bg-background-200 w-auto h-auto p-1.5 text-foreground-300 hover:text-foreground"
               onClick={onToggleEditable}
             >
-              <SliderIcon
-                color="white"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              />
+              <SliderIcon className="!w-5 !h-5" />
             </Button>
           ) : undefined
         }
       />
       <LayoutContent className="pb-0">
-        <SessionConsent isVerified={policies.verified} />
         {policies.verified ? (
           <VerifiedSessionSummary
             game={theme.name}
@@ -230,6 +231,7 @@ const CreateSessionLayout = ({
           />
         ) : (
           <UnverifiedSessionSummary
+            game={theme?.name}
             contracts={policies.contracts}
             messages={policies.messages}
           />
@@ -262,8 +264,8 @@ const CreateSessionLayout = ({
               }}
             />
             <h1 className="text-xs font-normal select-none">
-              I agree to grant this application permission to execute the
-              actions listed above.
+              These contracts are not verified. I agree to grant this game
+              permission to execute the actions listed above.
             </h1>
           </div>
         )}

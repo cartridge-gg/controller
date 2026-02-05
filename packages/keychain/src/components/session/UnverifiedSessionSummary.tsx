@@ -1,71 +1,82 @@
 import {
-  useCreateSession,
   type SessionContracts,
   type SessionMessages,
+  type ParsedSessionPolicies,
 } from "@/hooks/session";
 import { toArray } from "@cartridge/controller";
-
-import { ContractCard } from "./ContractCard";
-import { MessageCard } from "./MessageCard";
 import { useMemo } from "react";
-import { cn } from "@cartridge/ui";
+import { AlertIcon } from "@cartridge/ui";
+import { AggregateCard } from "./AggregateCard";
+import { TokenConsent } from "../connect/token-consent";
+import { SpendingLimitCard } from "../connect/SpendingLimitCard";
 
 export function UnverifiedSessionSummary({
+  game,
   contracts,
   messages,
 }: {
+  game?: string;
   contracts?: SessionContracts;
   messages?: SessionMessages;
 }) {
-  const { isEditable } = useCreateSession();
-  const formattedContracts = useMemo(() => {
-    const formattedContracts = Object.entries(contracts ?? {})
-      .map(([address, contract]) => {
-        // Filter out approve methods since they're shown on spending limit page
-        const methods = toArray(contract.methods).filter(
-          (method) => method.entrypoint !== "approve",
-        );
-        const title = !contract.meta?.name ? "Contract" : contract.meta.name;
-        const icon = contract.meta?.icon;
+  const { aggregate, approvePolicies } = useMemo(() => {
+    // Separate contracts with approve methods from other contracts
+    const approveContracts: SessionContracts = {};
+    const otherContracts: SessionContracts = {};
 
-        return {
+    Object.entries(contracts ?? {}).forEach(([address, contract]) => {
+      const methods = toArray(contract.methods);
+      const hasApprove = methods.some(
+        (method) => method.entrypoint === "approve",
+      );
+
+      if (hasApprove) {
+        approveContracts[address] = contract;
+      } else {
+        otherContracts[address] = contract;
+      }
+    });
+
+    // Create policies object for SpendingLimitCard
+    const policies: ParsedSessionPolicies = {
+      verified: false,
+      contracts: approveContracts,
+    };
+
+    // Create aggregate for other contracts
+    const aggregateContracts = Object.entries(otherContracts).map(
+      ([address, contract]) => {
+        const methods = toArray(contract.methods);
+        return [
           address,
-          title,
-          icon,
-          methods,
-        };
-      })
-      // Filter out contracts that only had approve methods
-      .filter((contract) => contract.methods.length > 0);
+          {
+            name: contract.meta?.name ?? "Contract",
+            methods,
+          },
+        ] as const;
+      },
+    );
 
-    return formattedContracts;
-  }, [contracts]);
+    return {
+      aggregate: {
+        contracts: Object.fromEntries(aggregateContracts),
+        messages,
+      },
+      approvePolicies: policies,
+    };
+  }, [contracts, messages]);
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Render other contracts first */}
-      <div className="space-y-px">
-        {formattedContracts.map((e) => (
-          <ContractCard
-            key={e.address}
-            address={e.address}
-            title={e.title}
-            icon={e.icon}
-            methods={e.methods}
-            isExpanded={isEditable}
-            className={cn(
-              "rounded-none first:rounded-t",
-              messages && messages.length > 0 && "last:rounded-b-none",
-            )}
-          />
-        ))}
-        {messages && messages.length > 0 && (
-          <MessageCard
-            className={cn(formattedContracts && "rounded-t-none")}
-            messages={messages}
-          />
-        )}
-      </div>
+      <AggregateCard
+        title={game || "Game"}
+        icon={<AlertIcon className="text-destructive-100" />}
+        contracts={aggregate.contracts}
+        messages={messages}
+        className="rounded"
+      />
+      <TokenConsent />
+      <SpendingLimitCard policies={approvePolicies} />
     </div>
   );
 }

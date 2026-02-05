@@ -14,8 +14,8 @@ export const TokenConsent = React.forwardRef<
       ref={ref}
     >
       <p className="text-foreground-300 text-xs font-normal">
-        You are granting this application permission to spend the following
-        tokens up to the specified amount. If the application attempts to spend
+        You are granting your controller permission to spend the following
+        tokens up to the specified amount. If your controller attempts to spend
         more than this during this session you will be notified.
       </p>
     </div>
