@@ -1,14 +1,17 @@
 # Changelog
 
-## [0.12.3] - 2026-02-04
+## [0.12.3] - 2026-02-05
 
 ### ✨ New Features
 - **@cartridge/controller**: Added starterpack play callback functionality, enabling developers to specify custom onPlay callbacks that execute when users click play buttons in starterpack flows. The keychain iframe now closes before calling the callback and falls back to existing close behavior when absent (#2362)
+- **@cartridge/controller**: Added specialized controller toast functionality, enabling games to display contextual toasts through `ControllerToaster` component for transaction execution and confirmation events when keychain is in iframe mode (#2358)
 
 ### 🐛 Bug Fixes
 - **@cartridge/controller**: Fixed policy hashing by ensuring canonical sorting of policies before hashing to prevent non-deterministic merkle root calculations. Contract entries are now sorted by address, methods by entrypoint, and message policies by scope_hash, resolving "session/not-registered" errors caused by inconsistent policy ordering (#2359)
 - **@cartridge/connector**: Fixed controller re-initialization issues by reusing existing controller instances from `window.starknet_controller` when `ControllerConnector` is instantiated multiple times. This prevents duplicate iframes and message channels that could break functionality during React re-renders (#2360)
 - **@cartridge/controller**: Fixed chainId lookup to support non-Cartridge chain configurations, improving compatibility with custom chain setups (#2361)
+- **@cartridge/controller**: Fixed ApprovalPolicy support in toWasmPolicies function to prevent merkle root mismatches between session registration and usage in SessionConnector, NodeProvider, and TelegramProvider, resolving "session/not-registered" errors for approve policies with spender and amount fields (#2372)
+- **@cartridge/keychain**: Fixed session creation by aggregating unverified session contracts into a single "Approve <game>" expendable card that appears after session methods group for improved user experience (#2304)
 - **@cartridge/keychain**: Fixed Coinbase sandbox configuration to ensure proper sandbox environment setup for development and testing (#2371)
 - **@cartridge/keychain**: Enhanced preset verification for Capacitor applications by adding `capacitor://` to automatic verification bypass alongside localhost, simplifying development for native apps using `capacitor://localhost` (#2369)
 
