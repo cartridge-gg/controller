@@ -60,13 +60,17 @@ import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { CoinbaseCheckout } from "./purchasenew/checkout/coinbase";
 import { useAccount } from "@/hooks/account";
 import { BoosterPack } from "./booster-pack";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { StandaloneSessionCreation } from "./connect/StandaloneSessionCreation";
 import { StandaloneConnect } from "./connect/StandaloneConnect";
 import { hasApprovalPolicies } from "@/hooks/session";
 import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { Quests } from "./quests";
 import { QuestClaim } from "./quests/claim";
+import { StorageAccessPrompt } from "./connect/StorageAccessPrompt";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
+import Controller from "@/utils/controller";
+import { isIframe } from "@cartridge/ui/utils";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -191,276 +195,382 @@ function Authentication() {
   );
 }
 
+function StorageAccessGate({ children }: { children: React.ReactNode }) {
+  const { setController, theme } = useConnection();
+  const [isChecking, setIsChecking] = useState(true);
+  const [hasAccess, setHasAccess] = useState(true);
+  const [isRequesting, setIsRequesting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const needsSessionCreation = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const searchParams = new URLSearchParams(window.location.search);
+    return searchParams.get("needs_session_creation") === "true";
+  }, []);
+
+  const shouldCheckStorageAccess = useMemo(() => {
+    if (needsSessionCreation) return false;
+    return (
+      isIframe() &&
+      typeof document !== "undefined" &&
+      typeof document.hasStorageAccess === "function"
+    );
+  }, [needsSessionCreation]);
+
+  useEffect(() => {
+    if (!shouldCheckStorageAccess) {
+      setIsChecking(false);
+      setHasAccess(true);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const granted = await document.hasStorageAccess();
+        if (!cancelled) {
+          setHasAccess(granted);
+        }
+      } catch (err) {
+        console.error("[Storage Access] Failed to check access:", err);
+        if (!cancelled) {
+          setHasAccess(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsChecking(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [shouldCheckStorageAccess]);
+
+  const handleContinue = useCallback(async () => {
+    setIsRequesting(true);
+    setError(null);
+
+    try {
+      const granted = await requestStorageAccess();
+      if (!granted) {
+        setError("Storage access was not granted.");
+        return;
+      }
+
+      const controller = await Controller.fromStore();
+      if (controller) {
+        window.controller = controller;
+        setController(controller);
+      }
+
+      setHasAccess(true);
+    } catch (err) {
+      console.error("[Storage Access] Request failed:", err);
+      setError("Storage access request failed.");
+    } finally {
+      setIsRequesting(false);
+    }
+  }, [setController]);
+
+  if (isChecking) {
+    return null;
+  }
+
+  if (shouldCheckStorageAccess && !hasAccess) {
+    return (
+      <StorageAccessPrompt
+        appName={theme.name}
+        onContinue={handleContinue}
+        isLoading={isRequesting}
+        error={error}
+      />
+    );
+  }
+
+  return <>{children}</>;
+}
+
 export function App() {
   const { navigate } = useNavigation();
 
   return (
-    <Routes>
-      <Route path="/booster-pack/:privateKey" element={<BoosterPack />} />
-      <Route path="/" element={<Authentication />}>
-        <Route index element={<DefaultRoute />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/settings/recovery" element={<Recovery />} />
-        <Route path="/settings/delegate" element={<Delegate />} />
-        <Route path="/settings/add-signer" element={<AddSignerRoute />} />
-        <Route
-          path="/settings/add-connection"
-          element={<AddConnectionRoute />}
-        />
-        <Route path="session" element={<Session />} />
-        <Route path="slot" element={<Outlet />}>
-          <Route index element={<Auth />} />
-          <Route path="consent" element={<Consent />} />
-          <Route path="fund" element={<Fund />} />
-        </Route>
-        <Route path="success" element={<Success />} />
-        <Route path="failure" element={<Failure />} />
-        <Route path="pending" element={<Pending />} />
-        <Route
-          path="/purchase"
-          element={
-            <StarterpackProviders>
-              <Outlet />
-            </StarterpackProviders>
-          }
-        >
+    <StorageAccessGate>
+      <Routes>
+        <Route path="/booster-pack/:privateKey" element={<BoosterPack />} />
+        <Route path="/" element={<Authentication />}>
+          <Route index element={<DefaultRoute />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings/recovery" element={<Recovery />} />
+          <Route path="/settings/delegate" element={<Delegate />} />
+          <Route path="/settings/add-signer" element={<AddSignerRoute />} />
           <Route
-            path="credits"
-            element={<Purchase type={PurchaseType.Credits} />}
+            path="/settings/add-connection"
+            element={<AddConnectionRoute />}
           />
+          <Route path="session" element={<Session />} />
+          <Route path="slot" element={<Outlet />}>
+            <Route index element={<Auth />} />
+            <Route path="consent" element={<Consent />} />
+            <Route path="fund" element={<Fund />} />
+          </Route>
+          <Route path="success" element={<Success />} />
+          <Route path="failure" element={<Failure />} />
+          <Route path="pending" element={<Pending />} />
           <Route
-            path="starterpack/:starterpackId"
-            element={<PurchaseStarterpack />}
-          />
-          <Route path="starterpack/collections" element={<Collections />} />
-          <Route path="claim/:keys/:address/:type" element={<Claim />} />
-          <Route path="method/:platforms" element={<PaymentMethod />} />
-          <Route path="network/:platforms" element={<ChooseNetwork />} />
-          <Route path="wallet/:platforms" element={<SelectWallet />} />
-          <Route path="verification" element={<Verification />} />
-          <Route path="checkout/stripe" element={<StripeCheckout />} />
-          <Route path="checkout/onchain" element={<OnchainCheckout />} />
-          <Route path="checkout/coinbase" element={<CoinbaseCheckout />} />
-          <Route path="review" element={<></>} />
-          <Route path="pending" element={<PurchasePending />} />
-          <Route path="success" element={<PurchaseSuccess />} />
-          <Route path="failed" element={<></>} />
-        </Route>
-        <Route path="/funding" element={<Funding />} />
-        <Route
-          path="/funding/deposit"
-          element={
-            <Deposit
-              onComplete={() => {
-                const searchParams = new URLSearchParams(
-                  window.location.search,
-                );
-                const returnTo = searchParams.get("returnTo");
-                if (returnTo) {
-                  // returnTo is already decoded by URLSearchParams.get()
-                  // Use replace navigation for execute URLs to ensure proper navigation stack handling
-                  navigate(returnTo, { replace: true });
-                } else {
-                  navigate("/funding");
-                }
-              }}
+            path="/purchase"
+            element={
+              <StarterpackProviders>
+                <Outlet />
+              </StarterpackProviders>
+            }
+          >
+            <Route
+              path="credits"
+              element={<Purchase type={PurchaseType.Credits} />}
             />
-          }
-        />
-        <Route
-          path="/funding/credits"
-          element={
-            <Purchase
-              type={PurchaseType.Credits}
-              // onBack={() => {
-              //   const searchParams = new URLSearchParams(
-              //     window.location.search,
-              //   );
-              //   const returnTo = searchParams.get("returnTo");
-              //   if (returnTo) {
-              //     // returnTo is already decoded by URLSearchParams.get()
-              //     // Use replace navigation for execute URLs to ensure proper navigation stack handling
-              //     navigate(returnTo, { replace: true });
-              //   } else {
-              //     navigate("/funding");
-              //   }
-              // }}
+            <Route
+              path="starterpack/:starterpackId"
+              element={<PurchaseStarterpack />}
             />
-          }
-        />
-        <Route path="/execute" element={<Execute />} />
-        <Route path="/sign-message" element={<SignMessage />} />
-        <Route path="/deploy" element={<DeployController />} />
-        <Route path="/connect" element={<ConnectRoute />} />
-        <Route path="/feature/:name/:action" element={<FeatureToggle />} />
-        <Route path="account/:username" element={<Account />}>
-          <Route path="inventory" element={<Inventory />} />
-          <Route path="inventory/token/:address" element={<Token />} />
-          <Route path="inventory/token/:address/send" element={<SendToken />} />
+            <Route path="starterpack/collections" element={<Collections />} />
+            <Route path="claim/:keys/:address/:type" element={<Claim />} />
+            <Route path="method/:platforms" element={<PaymentMethod />} />
+            <Route path="network/:platforms" element={<ChooseNetwork />} />
+            <Route path="wallet/:platforms" element={<SelectWallet />} />
+            <Route path="verification" element={<Verification />} />
+            <Route path="checkout/stripe" element={<StripeCheckout />} />
+            <Route path="checkout/onchain" element={<OnchainCheckout />} />
+            <Route path="checkout/coinbase" element={<CoinbaseCheckout />} />
+            <Route path="review" element={<></>} />
+            <Route path="pending" element={<PurchasePending />} />
+            <Route path="success" element={<PurchaseSuccess />} />
+            <Route path="failed" element={<></>} />
+          </Route>
+          <Route path="/funding" element={<Funding />} />
           <Route
-            path="inventory/collection/:address"
-            element={<Collection />}
-            key="collection"
+            path="/funding/deposit"
+            element={
+              <Deposit
+                onComplete={() => {
+                  const searchParams = new URLSearchParams(
+                    window.location.search,
+                  );
+                  const returnTo = searchParams.get("returnTo");
+                  if (returnTo) {
+                    // returnTo is already decoded by URLSearchParams.get()
+                    // Use replace navigation for execute URLs to ensure proper navigation stack handling
+                    navigate(returnTo, { replace: true });
+                  } else {
+                    navigate("/funding");
+                  }
+                }}
+              />
+            }
           />
           <Route
-            path="inventory/collection/:address/token/:tokenId"
-            element={<CollectionAsset />}
-            key="collection-asset"
+            path="/funding/credits"
+            element={
+              <Purchase
+                type={PurchaseType.Credits}
+                // onBack={() => {
+                //   const searchParams = new URLSearchParams(
+                //     window.location.search,
+                //   );
+                //   const returnTo = searchParams.get("returnTo");
+                //   if (returnTo) {
+                //     // returnTo is already decoded by URLSearchParams.get()
+                //     // Use replace navigation for execute URLs to ensure proper navigation stack handling
+                //     navigate(returnTo, { replace: true });
+                //   } else {
+                //     navigate("/funding");
+                //   }
+                // }}
+              />
+            }
           />
-          <Route
-            path="inventory/collection/:address/token/:tokenId/send"
-            element={<SendCollection />}
-            key="send-collection"
-          />
-          <Route
-            path="inventory/collection/:address/token/:tokenId/list"
-            element={<CollectionListing />}
-          />
-          <Route
-            path="inventory/collection/:address/token/:tokenId/purchase"
-            element={<CollectionPurchase />}
-          />
-          <Route
-            path="inventory/collection/:address/send"
-            element={<SendCollection />}
-            key="send-collection-bulk"
-          />
-          <Route
-            path="inventory/collection/:address/list"
-            element={<CollectionListing />}
-          />
-          <Route
-            path="inventory/collection/:address/purchase"
-            element={<CollectionPurchase />}
-          />
-          <Route
-            path="inventory/collectible/:address"
-            element={<Collectible />}
-          />
-          <Route
-            path="inventory/collectible/:address/token/:tokenId"
-            element={<CollectibleAsset />}
-          />
-          <Route
-            path="inventory/collectible/:address/token/:tokenId/send"
-            element={<SendCollectible />}
-          />
-          <Route
-            path="inventory/collectible/:address/token/:tokenId/list"
-            element={<CollectibleListing />}
-          />
-          <Route
-            path="inventory/collectible/:address/token/:tokenId/purchase"
-            element={<CollectiblePurchase />}
-          />
-          <Route
-            path="inventory/collectible/:address/purchase"
-            element={<CollectionPurchase />}
-          />
-          <Route path="activity" element={<Activity />} />
-          <Route path="achievements" element={<Achievements />} />
-          <Route path="quests" element={<Quests />} />
-          <Route path="quests/:id/claim" element={<QuestClaim />} />
-          <Route path="leaderboard" element={<Leaderboard />} />
-          <Route path="trophies" element={<RedirectAchievements />} />
+          <Route path="/execute" element={<Execute />} />
+          <Route path="/sign-message" element={<SignMessage />} />
+          <Route path="/deploy" element={<DeployController />} />
+          <Route path="/connect" element={<ConnectRoute />} />
+          <Route path="/feature/:name/:action" element={<FeatureToggle />} />
+          <Route path="account/:username" element={<Account />}>
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="inventory/token/:address" element={<Token />} />
+            <Route
+              path="inventory/token/:address/send"
+              element={<SendToken />}
+            />
+            <Route
+              path="inventory/collection/:address"
+              element={<Collection />}
+              key="collection"
+            />
+            <Route
+              path="inventory/collection/:address/token/:tokenId"
+              element={<CollectionAsset />}
+              key="collection-asset"
+            />
+            <Route
+              path="inventory/collection/:address/token/:tokenId/send"
+              element={<SendCollection />}
+              key="send-collection"
+            />
+            <Route
+              path="inventory/collection/:address/token/:tokenId/list"
+              element={<CollectionListing />}
+            />
+            <Route
+              path="inventory/collection/:address/token/:tokenId/purchase"
+              element={<CollectionPurchase />}
+            />
+            <Route
+              path="inventory/collection/:address/send"
+              element={<SendCollection />}
+              key="send-collection-bulk"
+            />
+            <Route
+              path="inventory/collection/:address/list"
+              element={<CollectionListing />}
+            />
+            <Route
+              path="inventory/collection/:address/purchase"
+              element={<CollectionPurchase />}
+            />
+            <Route
+              path="inventory/collectible/:address"
+              element={<Collectible />}
+            />
+            <Route
+              path="inventory/collectible/:address/token/:tokenId"
+              element={<CollectibleAsset />}
+            />
+            <Route
+              path="inventory/collectible/:address/token/:tokenId/send"
+              element={<SendCollectible />}
+            />
+            <Route
+              path="inventory/collectible/:address/token/:tokenId/list"
+              element={<CollectibleListing />}
+            />
+            <Route
+              path="inventory/collectible/:address/token/:tokenId/purchase"
+              element={<CollectiblePurchase />}
+            />
+            <Route
+              path="inventory/collectible/:address/purchase"
+              element={<CollectionPurchase />}
+            />
+            <Route path="activity" element={<Activity />} />
+            <Route path="achievements" element={<Achievements />} />
+            <Route path="quests" element={<Quests />} />
+            <Route path="quests/:id/claim" element={<QuestClaim />} />
+            <Route path="leaderboard" element={<Leaderboard />} />
+            <Route path="trophies" element={<RedirectAchievements />} />
 
-          <Route path="slot/:project/inventory" element={<Inventory />} />
-          <Route
-            path="slot/:project/inventory/token/:address"
-            element={<Token />}
-          />
-          <Route
-            path="slot/:project/inventory/token/:address/send"
-            element={<SendToken />}
-          />
-          <Route
-            path="slot/:project/inventory/collection/:address"
-            element={<Collection />}
-            key="slot-collection"
-          />
-          <Route
-            path="slot/:project/inventory/collection/:address/token/:tokenId"
-            element={<CollectionAsset />}
-            key="slot-collection-asset"
-          />
-          <Route
-            path="slot/:project/inventory/collection/:address/token/:tokenId/send"
-            element={<SendCollection />}
-            key="slot-send-collection"
-          />
-          <Route
-            path="slot/:project/inventory/collection/:address/token/:tokenId/list"
-            element={<CollectionListing />}
-          />
-          <Route
-            path="slot/:project/inventory/collection/:address/token/:tokenId/purchase"
-            element={<CollectionPurchase />}
-          />
-          <Route
-            path="slot/:project/inventory/collection/:address/send"
-            element={<SendCollection />}
-            key="slot-send-collection-bulk"
-          />
-          <Route
-            path="slot/:project/inventory/collection/:address/list"
-            element={<CollectionListing />}
-          />
-          <Route
-            path="slot/:project/inventory/collection/:address/purchase"
-            element={<CollectionPurchase />}
-          />
-          <Route
-            path="slot/:project/inventory/collectible/:address"
-            element={<Collectible />}
-          />
-          <Route
-            path="slot/:project/inventory/collectible/:address/token/:tokenId"
-            element={<CollectibleAsset />}
-          />
-          <Route
-            path="slot/:project/inventory/collectible/:address/token/:tokenId/send"
-            element={<SendCollectible />}
-          />
-          <Route
-            path="slot/:project/inventory/collectible/:address/token/:tokenId/list"
-            element={<CollectibleListing />}
-          />
-          <Route
-            path="slot/:project/inventory/collectible/:address/token/:tokenId/purchase"
-            element={<CollectiblePurchase />}
-          />
-          <Route
-            path="slot/:project/inventory/collectible/:address/purchase"
-            element={<CollectiblePurchase />}
-          />
-          <Route path="slot/:project/achievements" element={<Achievements />} />
-          <Route
-            path="slot/:project/achievements/:address"
-            element={<Achievements />}
-          />
-          <Route path="slot/:project/quests" element={<Quests />} />
-          <Route
-            path="slot/:project/quests/:id/claim"
-            element={<QuestClaim />}
-          />
-          <Route path="slot/:project/leaderboard" element={<Leaderboard />} />
-          <Route
-            path="slot/:project/leaderboard/:address"
-            element={<Leaderboard />}
-          />
-          <Route
-            path="slot/:project/trophies"
-            element={<RedirectAchievements />}
-          />
-          <Route
-            path="slot/:project/trophies/:address"
-            element={<RedirectAchievements />}
-          />
-          <Route path="slot/:project/activity" element={<Activity />} />
+            <Route path="slot/:project/inventory" element={<Inventory />} />
+            <Route
+              path="slot/:project/inventory/token/:address"
+              element={<Token />}
+            />
+            <Route
+              path="slot/:project/inventory/token/:address/send"
+              element={<SendToken />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address"
+              element={<Collection />}
+              key="slot-collection"
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/token/:tokenId"
+              element={<CollectionAsset />}
+              key="slot-collection-asset"
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/token/:tokenId/send"
+              element={<SendCollection />}
+              key="slot-send-collection"
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/token/:tokenId/list"
+              element={<CollectionListing />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/token/:tokenId/purchase"
+              element={<CollectionPurchase />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/send"
+              element={<SendCollection />}
+              key="slot-send-collection-bulk"
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/list"
+              element={<CollectionListing />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/purchase"
+              element={<CollectionPurchase />}
+            />
+            <Route
+              path="slot/:project/inventory/collectible/:address"
+              element={<Collectible />}
+            />
+            <Route
+              path="slot/:project/inventory/collectible/:address/token/:tokenId"
+              element={<CollectibleAsset />}
+            />
+            <Route
+              path="slot/:project/inventory/collectible/:address/token/:tokenId/send"
+              element={<SendCollectible />}
+            />
+            <Route
+              path="slot/:project/inventory/collectible/:address/token/:tokenId/list"
+              element={<CollectibleListing />}
+            />
+            <Route
+              path="slot/:project/inventory/collectible/:address/token/:tokenId/purchase"
+              element={<CollectiblePurchase />}
+            />
+            <Route
+              path="slot/:project/inventory/collectible/:address/purchase"
+              element={<CollectiblePurchase />}
+            />
+            <Route
+              path="slot/:project/achievements"
+              element={<Achievements />}
+            />
+            <Route
+              path="slot/:project/achievements/:address"
+              element={<Achievements />}
+            />
+            <Route path="slot/:project/quests" element={<Quests />} />
+            <Route
+              path="slot/:project/quests/:id/claim"
+              element={<QuestClaim />}
+            />
+            <Route path="slot/:project/leaderboard" element={<Leaderboard />} />
+            <Route
+              path="slot/:project/leaderboard/:address"
+              element={<Leaderboard />}
+            />
+            <Route
+              path="slot/:project/trophies"
+              element={<RedirectAchievements />}
+            />
+            <Route
+              path="slot/:project/trophies/:address"
+              element={<RedirectAchievements />}
+            />
+            <Route path="slot/:project/activity" element={<Activity />} />
+          </Route>
+          <Route path="*" element={<div>Page not found</div>} />
         </Route>
-        <Route path="*" element={<div>Page not found</div>} />
-      </Route>
-    </Routes>
+      </Routes>
+    </StorageAccessGate>
   );
 }
 

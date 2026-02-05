@@ -54,16 +54,14 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.sandbox.add("allow-scripts");
     iframe.sandbox.add("allow-same-origin");
     iframe.allow =
-      "publickey-credentials-create *; publickey-credentials-get *; clipboard-write; local-network-access *; payment *";
+      "publickey-credentials-create *; publickey-credentials-get *; clipboard-write; local-network-access *; payment *; storage-access-by-user-activation *";
     iframe.style.scrollbarWidth = "none";
     iframe.style.setProperty("-ms-overflow-style", "none");
     iframe.style.setProperty("-webkit-scrollbar", "none");
     // Enable Storage Access API for the iframe
     // This allows the keychain iframe to request access to its first-party storage
     // when embedded in third-party contexts (other games/apps)
-    if (!!document.hasStorageAccess) {
-      iframe.sandbox.add("allow-storage-access-by-user-activation");
-    }
+    iframe.sandbox.add("allow-storage-access-by-user-activation");
 
     const container = document.createElement("div");
     container.id = "controller";
