@@ -87,7 +87,7 @@ export function CoinbaseCheckout() {
               <iframe
                 src={safePaymentLink}
                 className="h-full w-full max-w-[440px] border-none"
-                sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts allow-top-navigation-by-user-activation"
+                sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
                 allow="payment"
                 referrerPolicy="no-referrer"
                 title="Coinbase Onramp"
