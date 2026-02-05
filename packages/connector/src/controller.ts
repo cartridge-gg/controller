@@ -49,12 +49,8 @@ export default class ControllerConnector extends InjectedConnector {
     return super.connect({ chainIdHint: args?.chainIdHint });
   }
 
-  async open(args: OpenPageTarget | "standalone", options?: any) {
-    return this.controller.open(args, options);
-  }
-
-  openStandalone(options?: OpenOptions) {
-    return this.controller.openStandalone(options);
+  async open(args: OpenPageTarget) {
+    return this.controller.open(args);
   }
 
   async openProfile() {

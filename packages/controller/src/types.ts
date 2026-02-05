@@ -275,7 +275,8 @@ export type OpenPageTarget =
   | { target: "settings" }
   | { target: "profile"; tab?: ProfileContextTypeVariant }
   | { target: "purchase-credits" }
-  | { target: "execute"; calls: Call[]; chainId?: string };
+  | { target: "execute"; calls: Call[]; chainId?: string }
+  | { target: "standalone"; options?: OpenOptions };
 
 export type StarterpackOptions = {
   /** The preimage to use */

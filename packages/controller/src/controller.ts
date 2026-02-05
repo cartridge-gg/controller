@@ -462,12 +462,9 @@ export default class ControllerProvider extends BaseProvider {
    * If the user is not connected, it will trigger the connection flow first.
    * @param args - The target page and its parameters
    */
-  async open(
-    args: OpenPageTarget | "standalone",
-    options?: any,
-  ): Promise<void> {
-    if (args === "standalone") {
-      return this.openStandalone(options);
+  async open(args: OpenPageTarget): Promise<void> {
+    if (args.target === "standalone") {
+      return this.openStandalone(args.options);
     }
 
     if (!this.iframes) {
@@ -532,7 +529,7 @@ export default class ControllerProvider extends BaseProvider {
    * This establishes first-party storage, enabling seamless iframe access across all games.
    * @param options - Configuration for redirect after authentication
    */
-  openStandalone(options: OpenOptions = {}) {
+  private openStandalone(options: OpenOptions = {}) {
     if (typeof window === "undefined") {
       console.error("openStandalone can only be called in browser context");
       return;
