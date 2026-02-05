@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { controllerConnector } from "./providers/StarknetProvider";
+import { useEffect, useState } from "react";
+import {
+  controllerConnector,
+  HEADLESS_PRESET,
+} from "./providers/StarknetProvider";
 
 type AuthMethod = "passkey" | "metamask";
 
@@ -18,6 +21,30 @@ export function HeadlessLogin() {
     message: string;
     address?: string;
   } | null>(null);
+  const [headlessAllowed, setHeadlessAllowed] = useState(true);
+  const [headlessReason, setHeadlessReason] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const allowUnverified =
+      process.env.NEXT_PUBLIC_HEADLESS_ALLOW_UNVERIFIED === "true";
+    const hostname = window.location.hostname;
+    const isLocalhost =
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.endsWith(".localhost");
+
+    if (!isLocalhost && !allowUnverified) {
+      setHeadlessAllowed(false);
+      setHeadlessReason(
+        `Headless mode requires verified preset policies without approvals. ` +
+          `The "${HEADLESS_PRESET}" preset must whitelist ${window.location.origin}.`,
+      );
+    }
+  }, []);
 
   const prepareHeadlessConnect = async () => {
     const controller = controllerConnector.controller;
@@ -33,6 +60,16 @@ export function HeadlessLogin() {
       setResult({
         success: false,
         message: "Please provide a username",
+      });
+      return;
+    }
+
+    if (!headlessAllowed) {
+      setResult({
+        success: false,
+        message:
+          headlessReason ??
+          "Headless mode requires verified preset policies without approvals.",
       });
       return;
     }
@@ -75,6 +112,16 @@ export function HeadlessLogin() {
       setResult({
         success: false,
         message: "Please provide a username",
+      });
+      return;
+    }
+
+    if (!headlessAllowed) {
+      setResult({
+        success: false,
+        message:
+          headlessReason ??
+          "Headless mode requires verified preset policies without approvals.",
       });
       return;
     }
@@ -171,7 +218,7 @@ export function HeadlessLogin() {
         <div className="flex gap-3">
           <button
             onClick={handlePasskeyLogin}
-            disabled={loading !== null || !username}
+            disabled={loading !== null || !username || !headlessAllowed}
             className="flex-1 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-500 dark:hover:bg-purple-600"
           >
             {loading === "passkey" ? "Authenticating..." : "Login with Passkey"}
@@ -179,7 +226,7 @@ export function HeadlessLogin() {
 
           <button
             onClick={handleMetaMaskLogin}
-            disabled={loading !== null || !username}
+            disabled={loading !== null || !username || !headlessAllowed}
             className="flex-1 rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-orange-500 dark:hover:bg-orange-600"
           >
             {loading === "metamask"
@@ -188,6 +235,12 @@ export function HeadlessLogin() {
           </button>
         </div>
       </div>
+
+      {!headlessAllowed && headlessReason && (
+        <div className="rounded-md bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
+          {headlessReason}
+        </div>
+      )}
 
       {result && (
         <div
