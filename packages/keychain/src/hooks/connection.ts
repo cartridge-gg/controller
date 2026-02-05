@@ -72,6 +72,7 @@ const TOKEN_ADDRESSES: Record<Token, string> = {
 };
 
 export type ParentMethods = AsyncMethodReturns<{
+  open: () => Promise<void>;
   close: () => Promise<void>;
   reload: () => Promise<void>;
 
@@ -682,6 +683,7 @@ export function useConnectionValue() {
       setOrigin(appOrigin);
 
       setParent({
+        open: async () => {},
         close: async () => {},
         reload: async () => {},
         externalDetectWallets: iframeMethods.externalDetectWallets(appOrigin),
@@ -737,7 +739,7 @@ export function useConnectionValue() {
     if (!parent) return;
 
     try {
-      await parent.close();
+      await parent.open();
     } catch (e) {
       console.error("Failed to open modal:", e);
     }

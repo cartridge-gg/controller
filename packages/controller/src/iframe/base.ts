@@ -123,6 +123,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     connectToChild<CallSender>({
       iframe: this.iframe,
       methods: {
+        open: (_origin: string) => () => this.open(),
         close: (_origin: string) => () => this.close(),
         reload: (_origin: string) => () => window.location.reload(),
         ...methods,

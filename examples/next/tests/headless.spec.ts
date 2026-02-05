@@ -1,9 +1,19 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 import { WebauthnEmulator } from "./webauthn";
 
 // Requires keychain running with VITE_E2E_MOCKS=true and the example app
 // pointing at that keychain via NEXT_PUBLIC_KEYCHAIN_FRAME_URL.
 const MOCK_EVM_ADDRESS = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+
+const waitForKeychainFrame = async (page: Page) => {
+  let keychainFrame = page.frame({ url: /localhost:3001/ });
+  for (let i = 0; i < 20 && !keychainFrame; i += 1) {
+    await page.waitForTimeout(500);
+    keychainFrame = page.frame({ url: /localhost:3001/ });
+  }
+
+  return keychainFrame;
+};
 
 test.describe("headless connect", () => {
   test.beforeEach(async ({ page }) => {
@@ -43,17 +53,17 @@ test.describe("headless connect", () => {
     await page.locator("#headless-username").fill("headless-passkey");
     await page.getByRole("button", { name: "Login with Passkey" }).click();
 
-    await expect(
-      page.getByText("Successfully authenticated with Passkey!"),
-    ).toBeVisible();
+    const keychainFrame = await waitForKeychainFrame(page);
+    await expect(page.locator("#controller")).toBeVisible();
+    expect(keychainFrame?.url()).toContain("/connect");
   });
 
   test("headless metamask login", async ({ page }) => {
     await page.locator("#headless-username").fill("headless-evm");
     await page.getByRole("button", { name: "Login with MetaMask" }).click();
 
-    await expect(
-      page.getByText("Successfully authenticated with MetaMask!"),
-    ).toBeVisible();
+    const keychainFrame = await waitForKeychainFrame(page);
+    await expect(page.locator("#controller")).toBeVisible();
+    expect(keychainFrame?.url()).toContain("/connect");
   });
 });
