@@ -10,17 +10,24 @@ import {
   cn,
 } from "@cartridge/ui";
 import { useOnchainPurchaseContext } from "@/context";
+import { getSafeCoinbasePaymentUrl } from "@/utils/iframe-url";
 
 export function CoinbaseCheckout() {
   const { paymentLink, onCreateCoinbaseOrder } = useOnchainPurchaseContext();
   const [isLoaded, setIsLoaded] = useState(false);
   const [showPolicies, setShowPolicies] = useState(true);
+  const safePaymentLink = getSafeCoinbasePaymentUrl(paymentLink);
+  const hasInvalidPaymentLink = !!paymentLink && !safePaymentLink;
 
   useEffect(() => {
     if (!paymentLink) {
       onCreateCoinbaseOrder();
     }
   }, [paymentLink, onCreateCoinbaseOrder]);
+
+  useEffect(() => {
+    setIsLoaded(false);
+  }, [safePaymentLink]);
 
   return (
     <>
@@ -75,15 +82,21 @@ export function CoinbaseCheckout() {
               <SpinnerIcon className="animate-spin" size="lg" />
             </div>
           )}
-          {paymentLink ? (
+          {safePaymentLink ? (
             <div className="h-full w-full px-10 flex justify-center">
               <iframe
-                src={paymentLink}
+                src={safePaymentLink}
                 className="h-full w-full max-w-[440px] border-none"
+                sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts allow-top-navigation-by-user-activation"
                 allow="payment"
+                referrerPolicy="no-referrer"
                 title="Coinbase Onramp"
                 onLoad={() => setIsLoaded(true)}
               />
+            </div>
+          ) : hasInvalidPaymentLink ? (
+            <div className="flex items-center justify-center h-full text-sm text-foreground-300 px-8 text-center">
+              Unable to load Coinbase checkout. Please try again.
             </div>
           ) : (
             <div className="flex items-center justify-center h-full">

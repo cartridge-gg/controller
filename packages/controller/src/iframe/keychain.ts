@@ -2,6 +2,7 @@ import { KEYCHAIN_URL } from "../constants";
 import { Keychain, KeychainOptions } from "../types";
 import { WalletBridge } from "../wallets/bridge";
 import { IFrame, IFrameOptions } from "./base";
+import { resolveChildOrigin } from "./security";
 
 type KeychainIframeOptions = IFrameOptions<Keychain> &
   KeychainOptions & {
@@ -31,6 +32,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     preset,
     shouldOverridePresetPolicies,
     rpcUrl,
+    origin,
     ref,
     refGroup,
     needsSessionCreation,
@@ -44,6 +46,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
   }: KeychainIframeOptions) {
     let onStarterpackPlayHandler: (() => Promise<void>) | undefined;
     const _url = new URL(url ?? KEYCHAIN_URL);
+    const childOrigin = resolveChildOrigin(_url, origin);
     const walletBridge = new WalletBridge();
 
     if (propagateSessionErrors) {
@@ -114,6 +117,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
 
     super({
       ...iframeOptions,
+      childOrigin,
       id: "controller-keychain",
       url: _url,
       methods: {

@@ -21,12 +21,14 @@ export class IFrame<CallSender extends {}> implements Modal {
     url,
     onClose,
     onConnect,
+    childOrigin,
     methods = {},
   }: {
     id: string;
     url: URL;
     onClose?: () => void;
     onConnect: (child: AsyncMethodReturns<CallSender>) => void;
+    childOrigin?: string;
     methods?: { [key: string]: (...args: any[]) => void };
   }) {
     if (typeof document === "undefined" || typeof window === "undefined") {
@@ -54,7 +56,8 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.sandbox.add("allow-scripts");
     iframe.sandbox.add("allow-same-origin");
     iframe.allow =
-      "publickey-credentials-create *; publickey-credentials-get *; clipboard-write; local-network-access *; payment *";
+      "publickey-credentials-create *; publickey-credentials-get *; clipboard-write; payment *";
+    iframe.referrerPolicy = "no-referrer";
     iframe.style.scrollbarWidth = "none";
     iframe.style.setProperty("-ms-overflow-style", "none");
     iframe.style.setProperty("-webkit-scrollbar", "none");
@@ -122,6 +125,7 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     connectToChild<CallSender>({
       iframe: this.iframe,
+      childOrigin,
       methods: {
         close: (_origin: string) => () => this.close(),
         reload: (_origin: string) => () => window.location.reload(),
