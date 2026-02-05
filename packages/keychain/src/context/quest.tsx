@@ -119,7 +119,7 @@ const getPlayerEventQuery = (namespace: string, playerId: string) => {
 
 export function QuestProvider({ children }: { children: React.ReactNode }) {
   const account = useAccount();
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const [client, setClient] = useState<torii.ToriiClient>();
   const entitySubscriptionRef = useRef<torii.Subscription | null>(null);
   const eventSubscriptionRef = useRef<torii.Subscription | null>(null);
@@ -210,8 +210,7 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
             (creation) => creation.definition.id === event.quest_id,
           );
           if (quest) {
-            addToast({
-              variant: "quest",
+            toast.quest({
               title: quest.metadata.name,
               subtitle: "New quest unlocked!",
             });
@@ -226,8 +225,7 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
             (creation) => creation.definition.id === event.quest_id,
           );
           if (quest) {
-            addToast({
-              variant: "quest",
+            toast.quest({
               title: quest.metadata.name,
               subtitle: "Quest completed!",
             });
@@ -242,8 +240,7 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
             (creation) => creation.definition.id === event.quest_id,
           );
           if (quest) {
-            addToast({
-              variant: "quest",
+            toast.quest({
               title: quest.metadata.name,
               subtitle: "Quest claimed!",
             });
@@ -251,7 +248,7 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
         }
       });
     },
-    [namespace, addToast, creations],
+    [namespace, toast, creations],
   );
 
   // Refresh function to fetch and subscribe to data

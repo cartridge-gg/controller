@@ -59,7 +59,7 @@ export function Fees({
   }
 
   return (
-    <div className="w-full overflow-hidden rounded">
+    <div className="w-full overflow-hidden rounded pt-2">
       <Total
         label={isLoading ? "Calculating Fees" : "Network Fee"}
         token={token}

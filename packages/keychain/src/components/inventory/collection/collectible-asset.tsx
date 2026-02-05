@@ -43,7 +43,7 @@ import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { OrderModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { createExecuteUrl } from "@/utils/connection/execute";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 import { useAccount, useUsername } from "@/hooks/account";
 import { erc20Metadata } from "@cartridge/presets";
 import { useNavigation } from "@/context";
@@ -64,6 +64,7 @@ export function CollectibleAsset() {
   const { selfOrders, tokenOrders, provider } = useMarketplace();
   const [loading, setLoading] = useState(false);
   const { navigate } = useNavigation();
+  const { toast } = useToast();
 
   const purchaseView = useMemo(
     () => searchParams.get("purchaseView") === "true",
@@ -190,7 +191,7 @@ export function CollectibleAsset() {
         setLoading(false);
       }
     },
-    [contractAddress, asset, provider, selfOrders, navigate, location],
+    [contractAddress, asset, provider, selfOrders, navigate, location, toast],
   );
 
   const status = useMemo(() => {

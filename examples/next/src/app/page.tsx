@@ -13,6 +13,7 @@ import { Profile } from "components/Profile";
 import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
 import { Starterpack } from "components/Starterpack";
+import { ControllerToaster } from "@cartridge/ui";
 
 const Home: FC = () => {
   return (
@@ -33,6 +34,7 @@ const Home: FC = () => {
       <InvalidTxn />
       <SignMessage />
       <LookupControllers />
+      <ControllerToaster />
     </main>
   );
 };
