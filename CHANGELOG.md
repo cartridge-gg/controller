@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.12.3] - 2026-02-05
+
+### ✨ New Features
+- **@cartridge/keychain**: Added Capacitor origin verification tightening for enhanced security in mobile environments (#2375)
+- **@cartridge/controller**: Added specialized controller toast notifications with improved messaging and user feedback (#2358)
+- **@cartridge/controller**: Added ApprovalPolicy support to controller toWasmPolicies for enhanced policy management (#2372)
+- **@cartridge/controller**: Added starterpack play callback functionality for improved gaming integration (#2362)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Enhanced iframe connect flow with automatic storage access request for improved cross-domain authentication (#2374)
+- **@cartridge/controller**: Improved policy handling with canonical sorting before hashing to ensure consistent policy processing (#2359)
+- **@cartridge/controller**: Enhanced preset verification for Capacitor environments with better validation (#2369)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed aggregate contracts on unverified session to prevent session-related issues (#2304)
+- **@cartridge/keychain**: Fixed Coinbase sandbox configuration to ensure proper sandbox environment setup (#2371)
+- **@cartridge/controller**: Fixed controller re-initialization issues by reusing existing controller instances (#2360)
+- **@cartridge/controller**: Fixed chain ID lookup to support non-Cartridge chain configurations (#2361)
+
 ## [0.12.2] - 2026-01-29
 
 ### ✨ New Features
