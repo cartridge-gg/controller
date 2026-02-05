@@ -273,7 +273,12 @@ export type OpenOptions = {
 export type OpenPageTarget =
   | { target: "starterpack"; id: string | number; options?: StarterpackOptions }
   | { target: "settings" }
-  | { target: "profile"; tab?: ProfileContextTypeVariant }
+  | {
+      target: "profile";
+      tab?: ProfileContextTypeVariant;
+      to?: string;
+      at?: string;
+    }
   | { target: "purchase-credits" }
   | { target: "execute"; calls: Call[]; chainId?: string }
   | { target: "standalone"; options?: OpenOptions };

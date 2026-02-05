@@ -157,13 +157,13 @@ const Header = () => {
             <div className="absolute right-0 top-full mt-1 bg-background shadow-lg rounded-md min-w-[160px] py-1 z-10 border border-gray-600">
               <button
                 className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600"
-                onClick={() => controllerConnector.controller.openProfile()}
+                onClick={() => controllerConnector.controller.open({ target: "profile" })}
               >
                 Profile
               </button>
               <button
                 className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600"
-                onClick={() => controllerConnector.controller.openSettings()}
+                onClick={() => controllerConnector.controller.open({ target: "settings" })}
               >
                 Settings
               </button>

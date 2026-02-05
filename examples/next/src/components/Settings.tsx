@@ -9,8 +9,7 @@ export function Settings() {
   const cartridgeConnector = connector as unknown as ControllerConnector;
 
   const onOpenSettings = async () => {
-    if (!account) return;
-    cartridgeConnector.controller.openSettings();
+    cartridgeConnector.controller.open({ target: "settings" });
   };
 
   if (!account) {

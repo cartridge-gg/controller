@@ -74,7 +74,11 @@ export function Profile() {
       <h2>Open Starterpack</h2>
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap gap-1">
-          <Button onClick={() => ctrlConnector.controller.openStarterPack(0)}>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.open({ target: "starterpack", id: 0 })
+            }
+          >
             Nums
           </Button>
         </div>
@@ -91,37 +95,69 @@ export function Profile() {
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap gap-1">
           <Button
-            onClick={() => ctrlConnector.controller.openProfile("inventory")}
+            onClick={() =>
+              ctrlConnector.controller.open({
+                target: "profile",
+                tab: "inventory",
+              })
+            }
           >
             Inventory
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfile("achievements")}
+            onClick={() =>
+              ctrlConnector.controller.open({
+                target: "profile",
+                tab: "achievements",
+              })
+            }
           >
             Achievements
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfile("leaderboard")}
+            onClick={() =>
+              ctrlConnector.controller.open({
+                target: "profile",
+                tab: "leaderboard",
+              })
+            }
           >
             Leaderboard
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfile("activity")}
+            onClick={() =>
+              ctrlConnector.controller.open({
+                target: "profile",
+                tab: "activity",
+              })
+            }
           >
             Activity
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfileTo("followers")}
+            onClick={() =>
+              ctrlConnector.controller.open({
+                target: "profile",
+                to: "followers",
+              })
+            }
           >
             Followers
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfileTo("following")}
+            onClick={() =>
+              ctrlConnector.controller.open({
+                target: "profile",
+                to: "following",
+              })
+            }
           >
             Following
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfileAt("/funding")}
+            onClick={() =>
+              ctrlConnector.controller.open({ target: "profile", at: "/funding" })
+            }
           >
             Funding
           </Button>
@@ -129,27 +165,30 @@ export function Profile() {
         <div className="flex flex-wrap gap-1">
           <Button
             onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                `inventory/token/${STRK_CONTRACT_ADDRESS}?preset=cartridge`,
-              )
+              ctrlConnector.controller.open({
+                target: "profile",
+                to: `inventory/token/${STRK_CONTRACT_ADDRESS}?preset=cartridge`,
+              })
             }
           >
             Open to Token STRK
           </Button>
           <Button
             onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                `inventory/token/${ETH_CONTRACT_ADDRESS}?preset=cartridge`,
-              )
+              ctrlConnector.controller.open({
+                target: "profile",
+                to: `inventory/token/${ETH_CONTRACT_ADDRESS}?preset=cartridge`,
+              })
             }
           >
             Open to Token ETH
           </Button>
           <Button
             onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                `inventory/token/${STRK_CONTRACT_ADDRESS}/send?preset=cartridge`,
-              )
+              ctrlConnector.controller.open({
+                target: "profile",
+                to: `inventory/token/${STRK_CONTRACT_ADDRESS}/send?preset=cartridge`,
+              })
             }
           >
             Open to Token STRK Send
@@ -158,9 +197,10 @@ export function Profile() {
         <div className="flex flex-wrap gap-1">
           <Button
             onClick={() =>
-              ctrlConnector.controller.openProfileAt(
-                "account/bal7hazar/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/token/0x000000000000000000000000000000000000000000000000000000000000c527?ps=arcade-main&preset=arcade&address=0x027917d3084dC0dcd3C4ED5189733d14b0c4C13E762829BD3D1D761aa36201AB&purchaseView=true&tokenIds=0x000000000000000000000000000000000000000000000000000000000000c527",
-              )
+              ctrlConnector.controller.open({
+                target: "profile",
+                at: "account/bal7hazar/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/token/0x000000000000000000000000000000000000000000000000000000000000c527?ps=arcade-main&preset=arcade&address=0x027917d3084dC0dcd3C4ED5189733d14b0c4C13E762829BD3D1D761aa36201AB&purchaseView=true&tokenIds=0x000000000000000000000000000000000000000000000000000000000000c527",
+              })
             }
           >
             Open at Purchase

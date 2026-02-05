@@ -82,9 +82,10 @@ export const Starterpack = () => {
             />
             <Button
               onClick={() => {
-                controllerConnector.controller.openStarterPack(
-                  purchaseOnchainSpId,
-                );
+                controllerConnector.controller.open({
+                  target: "starterpack",
+                  id: purchaseOnchainSpId,
+                });
               }}
             >
               Purchase
@@ -106,12 +107,13 @@ export const Starterpack = () => {
               <Button
                 onClick={() => {
                   if (claimSpId.trim()) {
-                    controllerConnector.controller.openStarterPack(
-                      claimSpId.trim(),
-                      {
+                    controllerConnector.controller.open({
+                      target: "starterpack",
+                      id: claimSpId.trim(),
+                      options: {
                         preimage: claimPreimage.trim(),
                       },
-                    );
+                    });
                   }
                 }}
               >

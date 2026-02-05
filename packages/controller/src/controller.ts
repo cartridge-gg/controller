@@ -490,14 +490,19 @@ export default class ControllerProvider extends BaseProvider {
         this.iframes.keychain.open();
         return;
       case "profile":
-        const username = await this.keychain.username();
-        const profileOptions = [];
-        if (this.options.slot) {
-          profileOptions.push(`ps=${this.options.slot}`);
+        if (args.at) {
+          await this.keychain.navigate(args.at);
+        } else {
+          const username = await this.keychain.username();
+          const profileOptions = [];
+          if (this.options.slot) {
+            profileOptions.push(`ps=${this.options.slot}`);
+          }
+          const path = args.to ? args.to : args.tab ?? "inventory";
+          await this.keychain.navigate(
+            `/account/${username}/${path}?${profileOptions.join("&")}`,
+          );
         }
-        await this.keychain.navigate(
-          `/account/${username}/${args.tab ?? "inventory"}?${profileOptions.join("&")}`,
-        );
         this.iframes.keychain.open();
         return;
       case "purchase-credits":
