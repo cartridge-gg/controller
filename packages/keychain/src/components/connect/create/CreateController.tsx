@@ -47,7 +47,7 @@ interface CreateControllerViewProps {
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
   onSubmit: (authenticationMode?: AuthOption) => void;
-  onStorageAccessRequest: () => void;
+  onStorageAccessRequest: () => Promise<void>;
   onKeyDown: (e: React.KeyboardEvent) => void;
   isSlot?: boolean;
   authenticationStep: AuthenticationStep;
@@ -199,13 +199,14 @@ function CreateControllerForm({
           height: layoutHeight,
         }}
         ref={layoutRef}
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          onStorageAccessRequest();
           // Don't submit if dropdown is open
           if (isDropdownOpen) {
             return;
           }
+
+          await onStorageAccessRequest();
 
           if (keyboardIsOpen) {
             // If keyboard is open, mark for pending submit after it closes
@@ -503,21 +504,19 @@ export function CreateController({
     ],
   );
 
-  const handleStorageAccessRequest = useCallback(() => {
+  const handleStorageAccessRequest = useCallback(async () => {
     if (!isIframe()) {
       return;
     }
 
-    void (async () => {
-      try {
-        await requestStorageAccess();
-      } catch (error) {
-        console.error(
-          "[CreateController] Storage access request failed:",
-          error,
-        );
-      }
-    })();
+    try {
+      await requestStorageAccess();
+    } catch (error) {
+      console.error(
+        "[CreateController] Storage access request failed:",
+        error,
+      );
+    }
   }, []);
 
   useEffect(() => {
@@ -602,7 +601,6 @@ export function CreateController({
 
       if ((e.key === "Enter" || e.key === " ") && canSubmit) {
         e.preventDefault();
-        handleStorageAccessRequest();
         submitButtonRef.current?.click();
       }
     };
@@ -613,9 +611,6 @@ export function CreateController({
     canSubmit,
     authenticationStep,
     isDropdownOpen,
-    setAuthMethod,
-    handleFormSubmit,
-    handleStorageAccessRequest,
   ]);
 
   // Reset authMethod and pendingSubmit when sheet is closed

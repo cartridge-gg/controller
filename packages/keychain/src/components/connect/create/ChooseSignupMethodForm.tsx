@@ -10,7 +10,7 @@ interface ChooseSignupMethodProps {
   isLoading: boolean;
   validation: ReturnType<typeof useUsernameValidation>;
   onSubmit: (authenticationMode?: AuthOption, password?: string) => void;
-  onStorageAccessRequest: () => void;
+  onStorageAccessRequest: () => Promise<void>;
   authOptions: AuthOption[];
   isOpen?: boolean;
 }
@@ -125,8 +125,10 @@ export function ChooseSignupMethodForm({
               setSelectedAuth(option);
             } else {
               setSelectedAuth(option);
-              onStorageAccessRequest();
-              onSubmit(option);
+              void (async () => {
+                await onStorageAccessRequest();
+                onSubmit(option);
+              })();
             }
           }
           break;
@@ -179,14 +181,18 @@ export function ChooseSignupMethodForm({
       setSelectedAuth(option);
     } else {
       setSelectedAuth(option);
-      onStorageAccessRequest();
-      onSubmit(option);
+      void (async () => {
+        await onStorageAccessRequest();
+        onSubmit(option);
+      })();
     }
   };
 
   const handlePasswordSubmit = (password: string) => {
-    onStorageAccessRequest();
-    onSubmit("password", password);
+    void (async () => {
+      await onStorageAccessRequest();
+      onSubmit("password", password);
+    })();
   };
 
   const handlePasswordCancel = () => {
