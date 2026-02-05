@@ -21,8 +21,14 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, origin, isPoliciesResolved, openModal } =
-    useConnection();
+  const {
+    controller,
+    policies,
+    origin,
+    isPoliciesResolved,
+    openModal,
+    parent,
+  } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
   const hasOpenedApprovalRef = useRef(false);
 
@@ -57,6 +63,7 @@ export function ConnectRoute() {
     [policies, hasTokenApprovals],
   );
   const isHeadless = !!params?.headless;
+  const isParentReady = !!parent && !!origin;
 
   useEffect(() => {
     if (!isHeadless || !needsApprovalUi || !openModal) {
@@ -64,6 +71,10 @@ export function ConnectRoute() {
     }
 
     if (!controller || !isPoliciesResolved) {
+      return;
+    }
+
+    if (!isParentReady) {
       return;
     }
 
@@ -79,6 +90,7 @@ export function ConnectRoute() {
     needsApprovalUi,
     openModal,
     isPoliciesResolved,
+    isParentReady,
   ]);
 
   const handleConnect = useCallback(async () => {

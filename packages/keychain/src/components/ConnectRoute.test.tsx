@@ -222,6 +222,34 @@ describe("ConnectRoute", () => {
       expect(screen.getByText("Create Session")).toBeInTheDocument();
     });
 
+    it("opens the modal for headless unverified policies once parent is ready", async () => {
+      const openModal = vi.fn().mockResolvedValue(undefined);
+      mockUseRouteParams.mockReturnValue(mockHeadlessParams);
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: {
+          verified: false,
+          contracts: {
+            "0xcontract": {
+              methods: [{ entrypoint: "transfer", authorized: true }],
+            },
+          },
+          messages: [],
+        },
+        isPoliciesResolved: true,
+        verified: false,
+        origin: "https://test.app",
+        parent: {},
+        openModal,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      await waitFor(() => {
+        expect(openModal).toHaveBeenCalled();
+      });
+    });
+
     it("does not show UI for verified policies without approvals", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
