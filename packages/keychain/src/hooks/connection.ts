@@ -474,10 +474,10 @@ export function useConnectionValue() {
           const redirectUrlObj = new URL(redirectUrl);
           const redirectOrigin = redirectUrlObj.origin;
 
-          // Always consider localhost and capacitor as verified for development
+          // Always consider localhost and default capacitor as verified for development
           const isLocalhost =
             redirectOrigin.includes("localhost") ||
-            redirectOrigin.startsWith("capacitor://");
+            redirectOrigin === "capacitor://localhost";
           const isOriginAllowed = isOriginVerified(
             redirectOrigin,
             allowedOrigins,
@@ -502,10 +502,10 @@ export function useConnectionValue() {
     }
 
     // Embedded mode: verify against parent origin
-    // Always consider localhost and capacitor as verified for development (not 127.0.0.1)
+    // Always consider localhost and default capacitor as verified for development (not 127.0.0.1)
     if (origin) {
       const isLocalhost =
-        origin.includes("localhost") || origin.startsWith("capacitor://");
+        origin.includes("localhost") || origin === "capacitor://localhost";
       const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
       const finalVerified = isLocalhost || isOriginAllowed;
       setVerified(finalVerified);
