@@ -264,8 +264,8 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    const shouldOpenModal = !headless || !!this.options.policies;
-    if (shouldOpenModal) {
+    // Only open modal if NOT headless
+    if (!headless) {
       this.iframes.keychain.open();
     }
 
@@ -310,8 +310,8 @@ export default class ControllerProvider extends BaseProvider {
       }
       console.log(e);
     } finally {
-      // Only close modal if it was opened
-      if (shouldOpenModal) {
+      // Only close modal if it was opened (not headless)
+      if (!headless) {
         this.iframes.keychain.close();
       }
     }

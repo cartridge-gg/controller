@@ -158,17 +158,20 @@ export function useCreateController({
   const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(
     undefined,
   );
+  const [pendingApprovalUi, setPendingApprovalUi] = useState(false);
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [searchParams, setSearchParams] = useSearchParams();
   const {
     parent,
+    controller,
     origin,
     rpcUrl,
     chainId,
     setController,
     policies,
     closeModal,
+    openModal,
     isConfigLoading,
     isPoliciesResolved,
   } = useConnection();
@@ -181,11 +184,57 @@ export function useCreateController({
   const headless = params?.headless;
   const hasVerifiedPolicies =
     !!policies && policies.verified && !hasApprovalPolicies(policies);
+  const needsApprovalUi =
+    !!policies && (!policies.verified || hasApprovalPolicies(policies));
   const hasPolicies = !!policies;
   const shouldAutoCreateSession = headless
     ? hasVerifiedPolicies
     : !policies || hasVerifiedPolicies;
   const isParentReady = !!parent && !!origin;
+
+  const queueApprovalUi = useCallback(() => {
+    if (!headless || !needsApprovalUi) {
+      return;
+    }
+    setPendingApprovalUi(true);
+  }, [headless, needsApprovalUi]);
+
+  useEffect(() => {
+    if (!pendingApprovalUi) {
+      return;
+    }
+
+    if (isLoading) {
+      return;
+    }
+
+    if (!isParentReady || !openModal) {
+      return;
+    }
+
+    if (!isPoliciesResolved) {
+      return;
+    }
+
+    if (!controller) {
+      return;
+    }
+
+    void (async () => {
+      try {
+        await openModal();
+      } finally {
+        setPendingApprovalUi(false);
+      }
+    })();
+  }, [
+    pendingApprovalUi,
+    isLoading,
+    isParentReady,
+    openModal,
+    isPoliciesResolved,
+    controller,
+  ]);
 
   const resolveHeadlessInteractionRequired = useCallback(
     (message: string) => {
@@ -354,6 +403,7 @@ export function useCreateController({
       if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
+        queueApprovalUi();
 
         // Check if this is a standalone redirect flow
         const urlSearchParams = new URLSearchParams(window.location.search);
@@ -398,6 +448,7 @@ export function useCreateController({
       setController,
       origin,
       policies,
+      queueApprovalUi,
       handleCompletion,
       params,
       closeModal,
@@ -584,6 +635,7 @@ export function useCreateController({
 
       window.controller = loginRet.controller;
       setController(loginRet.controller);
+      queueApprovalUi();
 
       // Check if this is a standalone redirect flow
       const urlSearchParams = new URLSearchParams(window.location.search);
@@ -627,6 +679,7 @@ export function useCreateController({
       origin,
       setController,
       policies,
+      queueApprovalUi,
       handleCompletion,
       params,
       closeModal,
@@ -659,7 +712,7 @@ export function useCreateController({
           if (!webauthnSigners || webauthnSigners.length === 0) {
             throw new Error("Signer not found for controller");
           }
-          await loginWithWebauthn(
+          const loginController = await loginWithWebauthn(
             controller,
             {
               signer: {
@@ -675,6 +728,23 @@ export function useCreateController({
             },
             !!isSlot,
           );
+          if (!loginController) {
+            throw new Error("Login failed");
+          }
+
+          queueApprovalUi();
+
+          if (shouldAutoCreateSession) {
+            await createSession({
+              controller: loginController,
+              origin,
+              policies,
+              params,
+              handleCompletion,
+              closeModal,
+              searchParams,
+            });
+          }
 
           // Handle redirect_url for webauthn
           const urlSearchParams = new URLSearchParams(window.location.search);
@@ -765,7 +835,15 @@ export function useCreateController({
       loginWithWalletConnect,
       loginWithExternalWallet,
       chainId,
+      origin,
       rpcUrl,
+      policies,
+      params,
+      handleCompletion,
+      closeModal,
+      searchParams,
+      shouldAutoCreateSession,
+      queueApprovalUi,
       finishLogin,
       passwordAuth,
       setWaitingForConfirmation,

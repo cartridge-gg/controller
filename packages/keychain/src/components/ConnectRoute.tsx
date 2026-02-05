@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
@@ -20,16 +20,8 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const {
-    controller,
-    policies,
-    origin,
-    isPoliciesResolved,
-    openModal,
-    parent,
-  } = useConnection();
+  const { controller, policies, origin, isPoliciesResolved } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
-  const hasOpenedApprovalRef = useRef(false);
 
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
@@ -55,26 +47,7 @@ export function ConnectRoute() {
     () => hasApprovalPolicies(policies),
     [policies],
   );
-  const needsApprovalUi = useMemo(
-    () => !!policies && (!policies.verified || hasTokenApprovals),
-    [policies, hasTokenApprovals],
-  );
-  const headless = params?.headless;
-  const isHeadless = !!headless;
   console.log(isStandalone, redirectUrl);
-
-  useEffect(() => {
-    if (!isHeadless || !needsApprovalUi || !openModal || !parent) {
-      return;
-    }
-
-    if (hasOpenedApprovalRef.current) {
-      return;
-    }
-
-    hasOpenedApprovalRef.current = true;
-    void openModal();
-  }, [isHeadless, needsApprovalUi, openModal, parent]);
 
   const handleConnect = useCallback(async () => {
     if (!params || !controller) {

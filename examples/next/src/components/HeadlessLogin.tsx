@@ -10,7 +10,7 @@ interface EthereumProvider {
   isMetaMask?: boolean;
 }
 
-export function HeadlessLogin() {
+export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState<AuthMethod | null>(null);
   const [result, setResult] = useState<{
@@ -36,6 +36,7 @@ export function HeadlessLogin() {
       return;
     }
 
+    onStart?.();
     setLoading("passkey");
     setResult(null);
 
@@ -78,6 +79,7 @@ export function HeadlessLogin() {
       return;
     }
 
+    onStart?.();
     setLoading("metamask");
     setResult(null);
 
