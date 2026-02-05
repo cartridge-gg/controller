@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "Cartridge Controller Connector",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
