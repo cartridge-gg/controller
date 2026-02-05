@@ -66,17 +66,13 @@ export function formatBalance(
     }
   }
 
-  // For regular numbers, format with up to 2 decimal places
-  const fixed2 = num.toFixed(2);
-  if (fixed2.endsWith(".00")) {
-    return fixed2.slice(0, -3);
-  }
-
-  if (fixed2.endsWith("0")) {
-    return fixed2.slice(0, -1);
-  }
-
-  return fixed2;
+  // For regular numbers, format with thousands separators and up to 2 decimal places.
+  // Do not force trailing ".00" for whole numbers — keep whole numbers without decimals,
+  // but keep up to two decimals when needed (e.g. 1.5 -> "1.5", 1.23 -> "1.23").
+  return num.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 }
 
 export function convertTokenAmountToUSD(
@@ -114,12 +110,21 @@ export function convertTokenAmountToUSD(
     return `$${valueInUsd.toFixed(3)}`;
   }
 
-  // Format with exactly 2 decimal places for non-whole numbers
-  const formatted = valueInUsd.toFixed(2);
-  const isWhole = formatted.endsWith(".00");
+  // Format with thousands separators
+  const isWhole = valueInUsd % 1 === 0;
 
-  // Return whole numbers without decimals, otherwise show exactly 2 decimal places
-  return "$" + (isWhole ? Math.floor(valueInUsd).toString() : formatted);
+  if (isWhole) {
+    // For whole numbers, format without decimal places
+    const formatted = Math.floor(valueInUsd).toLocaleString("en-US");
+    return `$${formatted}`;
+  } else {
+    // For non-whole numbers, format with exactly 2 decimal places
+    const formatted = valueInUsd.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return `$${formatted}`;
+  }
 }
 
 export function convertUSDToTokenAmount(

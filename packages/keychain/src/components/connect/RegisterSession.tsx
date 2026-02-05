@@ -139,6 +139,7 @@ const RegisterSessionLayout = ({
           />
         ) : (
           <UnverifiedSessionSummary
+            game={theme?.name}
             contracts={policies.contracts}
             messages={policies.messages}
           />

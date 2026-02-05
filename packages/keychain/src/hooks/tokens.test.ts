@@ -282,6 +282,6 @@ describe("convertUSDToAmount", () => {
     const backToUSD = convertTokenAmountToUSD(tokenAmount, decimals, price);
 
     // Should maintain precision and round to nearest cent
-    expect(backToUSD).toBe("$9999999.99");
+    expect(backToUSD).toBe("$9,999,999.99");
   });
 });
