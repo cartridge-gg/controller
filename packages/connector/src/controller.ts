@@ -1,7 +1,6 @@
 import ControllerProvider, {
   AuthOptions,
   ControllerOptions,
-  OpenOptions,
   OpenPageTarget,
 } from "@cartridge/controller";
 import { Connector, InjectedConnector } from "@starknet-react/core";

@@ -156,7 +156,10 @@ export function Profile() {
           </Button>
           <Button
             onClick={() =>
-              ctrlConnector.controller.open({ target: "profile", at: "/funding" })
+              ctrlConnector.controller.open({
+                target: "profile",
+                at: "/funding",
+              })
             }
           >
             Funding

@@ -498,7 +498,7 @@ export default class ControllerProvider extends BaseProvider {
           if (this.options.slot) {
             profileOptions.push(`ps=${this.options.slot}`);
           }
-          const path = args.to ? args.to : args.tab ?? "inventory";
+          const path = args.to ? args.to : (args.tab ?? "inventory");
           await this.keychain.navigate(
             `/account/${username}/${path}?${profileOptions.join("&")}`,
           );
