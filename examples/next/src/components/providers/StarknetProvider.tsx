@@ -195,9 +195,6 @@ const signupOptions: AuthOptions = [
   "phantom-evm",
 ];
 
-export const HEADLESS_PRESET =
-  process.env.NEXT_PUBLIC_HEADLESS_PRESET || "headless";
-
 export const controllerConnector = new ControllerConnector({
   // With the defaults, you can omit chains if you want to use:
   // - chains: [
@@ -208,13 +205,10 @@ export const controllerConnector = new ControllerConnector({
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
   url: getKeychainUrl(),
-  preset: HEADLESS_PRESET,
   signupOptions,
   slot: "arcade-pistols",
   namespace: "pistols",
-  // By default, preset policies take precedence over manually provided policies
-  // Set shouldOverridePresetPolicies to true if you want your policies to override preset
-  // shouldOverridePresetPolicies: true,
+  policies,
   tokens: {
     erc20: ["lords", "strk"],
   },

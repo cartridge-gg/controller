@@ -27,8 +27,6 @@ export function ConnectRoute() {
   const params = useRouteParams((searchParams: URLSearchParams) => {
     return parseConnectParams(searchParams);
   });
-  const headless = params?.headless;
-
   const handleCompletion = useRouteCompletion();
 
   useRouteCallbacks(params, CANCEL_RESPONSE);
@@ -49,8 +47,6 @@ export function ConnectRoute() {
     () => hasApprovalPolicies(policies),
     [policies],
   );
-  const isHeadless = !!headless;
-
   console.log(isStandalone, redirectUrl);
 
   const handleConnect = useCallback(async () => {
@@ -184,22 +180,7 @@ export function ConnectRoute() {
     // Mark as auto-connected immediately to prevent race conditions
     setHasAutoConnected(true);
 
-    if (isHeadless) {
-      if (!policies || !policies.verified || hasTokenApprovals) {
-        params.resolve?.({
-          code: ResponseCodes.USER_INTERACTION_REQUIRED,
-          message:
-            "Headless mode requires verified preset policies without approvals.",
-        });
-        if (params.params.id) {
-          cleanupCallbacks(params.params.id);
-        }
-        handleCompletion();
-        return;
-      }
-    }
-
-    // if no policies, we can connect immediately (non-headless only)
+    // if no policies, we can connect immediately
     if (!policies) {
       params.resolve?.({
         code: ResponseCodes.SUCCESS,
@@ -254,7 +235,6 @@ export function ConnectRoute() {
     redirectUrl,
     hasAutoConnected,
     hasTokenApprovals,
-    isHeadless,
     isPoliciesResolved,
     origin,
   ]);
@@ -264,15 +244,13 @@ export function ConnectRoute() {
     return null;
   }
 
-  // Embedded mode: No policies and verified policies are handled in useCreateController
-  // This component only handles unverified policies that need user consent
+  // No policies auto-connect and verified policies auto-create sessions
+  // This component only handles policies that need user consent
   if (!policies) {
-    // This should not be reached as no policies case is handled in useCreateController
     return null;
   }
 
   if (policies.verified && !hasTokenApprovals) {
-    // This should not be reached as verified policies are handled in useCreateController
     return null;
   }
 

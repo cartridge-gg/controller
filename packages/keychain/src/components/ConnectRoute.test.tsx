@@ -77,6 +77,12 @@ describe("ConnectRoute", () => {
     reject: vi.fn(),
     params: { id: "test-id" },
   };
+  const mockHeadlessParams = {
+    resolve: vi.fn(),
+    reject: vi.fn(),
+    params: { id: "headless-id" },
+    headless: { username: "headless-user", signer: "webauthn" },
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -124,6 +130,27 @@ describe("ConnectRoute", () => {
       });
     });
 
+    it("auto-connects when no policies exist in headless mode", async () => {
+      mockUseRouteParams.mockReturnValue(mockHeadlessParams);
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        isPoliciesResolved: true,
+        verified: true,
+        origin: "https://test.app",
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      await waitFor(() => {
+        expect(mockHeadlessParams.resolve).toHaveBeenCalledWith({
+          code: ResponseCodes.SUCCESS,
+          address: "0x123456789abcdef",
+        });
+        expect(mockCleanupCallbacks).toHaveBeenCalledWith("headless-id");
+      });
+    });
+
     it("auto-creates session for verified policies", async () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
@@ -168,6 +195,29 @@ describe("ConnectRoute", () => {
       renderWithProviders(<ConnectRoute />);
 
       // Should render CreateSession component
+      expect(screen.getByText("Create Session")).toBeInTheDocument();
+    });
+
+    it("shows UI for unverified policies in headless mode", () => {
+      mockUseRouteParams.mockReturnValue(mockHeadlessParams);
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: {
+          verified: false,
+          contracts: {
+            "0xcontract": {
+              methods: [{ entrypoint: "transfer", authorized: true }],
+            },
+          },
+          messages: [],
+        },
+        isPoliciesResolved: true,
+        verified: false,
+        origin: "https://test.app",
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
       expect(screen.getByText("Create Session")).toBeInTheDocument();
     });
 
