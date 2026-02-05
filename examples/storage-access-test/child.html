@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Storage Access Test - Child</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        margin: 16px;
+        color: #111;
+      }
+      h1 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      button {
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      .card {
+        background: #f8f8f8;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+        font-size: 13px;
+      }
+      .label {
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Storage Access Test - Child</h1>
+    <div class="card">
+      <div><span class="label">Origin:</span> <span id="origin"></span></div>
+      <div>
+        <span class="label">hasStorageAccess supported:</span>
+        <span id="support"></span>
+      </div>
+      <div>
+        <span class="label">hasStorageAccess result:</span>
+        <span id="access"></span>
+      </div>
+      <div>
+        <span class="label">localStorage value:</span>
+        <span id="localValue"></span>
+      </div>
+      <div>
+        <span class="label">cookie value:</span>
+        <span id="cookieValue"></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="checkBtn">Check access</button>
+      <button id="requestBtn">Request access</button>
+      <button id="writeBtn">Write storage</button>
+      <button id="clearBtn">Clear storage</button>
+    </div>
+
+    <div class="card" id="status">Ready.</div>
+
+    <script>
+      const originEl = document.getElementById("origin");
+      const supportEl = document.getElementById("support");
+      const accessEl = document.getElementById("access");
+      const localValueEl = document.getElementById("localValue");
+      const cookieValueEl = document.getElementById("cookieValue");
+      const statusEl = document.getElementById("status");
+
+      const checkBtn = document.getElementById("checkBtn");
+      const requestBtn = document.getElementById("requestBtn");
+      const writeBtn = document.getElementById("writeBtn");
+      const clearBtn = document.getElementById("clearBtn");
+
+      const STORAGE_KEY = "storage_access_test";
+
+      originEl.textContent = window.location.origin;
+      supportEl.textContent =
+        typeof document.hasStorageAccess === "function" ? "yes" : "no";
+
+      function postStatus(type, detail) {
+        statusEl.textContent = detail;
+        if (window.parent) {
+          window.parent.postMessage({ type, detail }, "*");
+        }
+      }
+
+      function readLocalStorage() {
+        try {
+          return localStorage.getItem(STORAGE_KEY) || "(empty)";
+        } catch (err) {
+          return `error: ${err}`;
+        }
+      }
+
+      function readCookie() {
+        return document.cookie || "(empty)";
+      }
+
+      async function checkAccess() {
+        if (typeof document.hasStorageAccess !== "function") {
+          accessEl.textContent = "unsupported";
+          postStatus("check", "hasStorageAccess not supported");
+          return false;
+        }
+        try {
+          const granted = await document.hasStorageAccess();
+          accessEl.textContent = String(granted);
+          postStatus("check", `hasStorageAccess: ${granted}`);
+          return granted;
+        } catch (err) {
+          accessEl.textContent = `error: ${err}`;
+          postStatus("check", `hasStorageAccess error: ${err}`);
+          return false;
+        }
+      }
+
+      async function requestAccess() {
+        if (typeof document.requestStorageAccess !== "function") {
+          postStatus("request", "requestStorageAccess not supported");
+          return false;
+        }
+        try {
+          await document.requestStorageAccess();
+          postStatus("request", "requestStorageAccess resolved");
+          return true;
+        } catch (err) {
+          postStatus("request", `requestStorageAccess error: ${err}`);
+          return false;
+        }
+      }
+
+      function writeStorage() {
+        const value = new Date().toISOString();
+        try {
+          localStorage.setItem(STORAGE_KEY, value);
+        } catch (err) {
+          postStatus("write", `localStorage error: ${err}`);
+        }
+
+        const cookieParts = [`${STORAGE_KEY}=${value}`, "Path=/", "Max-Age=86400"];
+        if (window.location.protocol === "https:") {
+          cookieParts.push("Secure", "SameSite=None");
+        } else {
+          cookieParts.push("SameSite=Lax");
+        }
+        document.cookie = cookieParts.join("; ");
+
+        postStatus("write", `wrote storage value: ${value}`);
+        refreshValues();
+      }
+
+      function clearStorage() {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (err) {
+          postStatus("clear", `localStorage error: ${err}`);
+        }
+        document.cookie = `${STORAGE_KEY}=; Path=/; Max-Age=0`;
+        postStatus("clear", "cleared storage");
+        refreshValues();
+      }
+
+      function refreshValues() {
+        localValueEl.textContent = readLocalStorage();
+        cookieValueEl.textContent = readCookie();
+      }
+
+      checkBtn.addEventListener("click", () => {
+        checkAccess().then(refreshValues);
+      });
+      requestBtn.addEventListener("click", async () => {
+        await requestAccess();
+        await checkAccess();
+        refreshValues();
+      });
+      writeBtn.addEventListener("click", writeStorage);
+      clearBtn.addEventListener("click", clearStorage);
+
+      refreshValues();
+      checkAccess();
+    </script>
+  </body>
+</html>

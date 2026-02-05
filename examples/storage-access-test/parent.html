@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Storage Access Test - Parent</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        margin: 24px;
+        color: #111;
+      }
+      h1 {
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      input {
+        padding: 8px;
+        min-width: 320px;
+      }
+      button {
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      iframe {
+        width: 100%;
+        height: 520px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      pre {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 8px;
+        max-height: 200px;
+        overflow: auto;
+      }
+      .muted {
+        color: #666;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Storage Access Test - Parent</h1>
+    <div class="muted">Parent origin: <span id="origin"></span></div>
+
+    <div class="row" style="margin-top: 12px;">
+      <input id="childUrl" type="text" />
+      <button id="loadBtn">Load iframe</button>
+      <button id="reloadBtn">Reload iframe</button>
+      <button id="openBtn">Open child in new tab</button>
+    </div>
+
+    <iframe id="childFrame" title="Storage Access Child"></iframe>
+
+    <h2 style="font-size: 16px; margin-top: 16px;">Messages</h2>
+    <pre id="log"></pre>
+
+    <script>
+      const originEl = document.getElementById("origin");
+      const childUrlInput = document.getElementById("childUrl");
+      const loadBtn = document.getElementById("loadBtn");
+      const reloadBtn = document.getElementById("reloadBtn");
+      const openBtn = document.getElementById("openBtn");
+      const iframe = document.getElementById("childFrame");
+      const logEl = document.getElementById("log");
+
+      originEl.textContent = window.location.origin;
+
+      const params = new URLSearchParams(window.location.search);
+      const defaultChild =
+        params.get("child") || "http://127.0.0.1:3001/child.html";
+
+      childUrlInput.value = defaultChild;
+
+      function log(message) {
+        const timestamp = new Date().toISOString();
+        logEl.textContent = `[${timestamp}] ${message}\n` + logEl.textContent;
+      }
+
+      function loadIframe() {
+        const url = childUrlInput.value.trim();
+        if (!url) {
+          return;
+        }
+        iframe.src = url;
+        log(`iframe loaded: ${url}`);
+      }
+
+      loadBtn.addEventListener("click", loadIframe);
+      reloadBtn.addEventListener("click", () => {
+        if (iframe.src) {
+          iframe.src = iframe.src;
+          log("iframe reloaded");
+        }
+      });
+      openBtn.addEventListener("click", () => {
+        const url = childUrlInput.value.trim();
+        if (url) {
+          window.open(url, "_blank", "noopener,noreferrer");
+        }
+      });
+
+      window.addEventListener("message", (event) => {
+        if (!event.data || typeof event.data !== "object") {
+          return;
+        }
+        const payload = JSON.stringify(event.data);
+        log(`message from ${event.origin}: ${payload}`);
+      });
+
+      loadIframe();
+    </script>
+  </body>
+</html>
