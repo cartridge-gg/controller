@@ -1,7 +1,12 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.12.2",
+  "version": "0.13.2",
   "description": "Cartridge Controller",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cartridge-gg/controller.git",
+    "directory": "packages/controller"
+  },
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
