@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAccount, useConnect } from "@starknet-react/core";
 import { controllerConnector } from "./providers/StarknetProvider";
 
 type AuthMethod = "passkey" | "metamask";
@@ -11,6 +12,8 @@ interface EthereumProvider {
 }
 
 export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
+  const { connectAsync } = useConnect();
+  const { address } = useAccount();
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState<AuthMethod | null>(null);
   const [result, setResult] = useState<{
@@ -25,6 +28,13 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
       await controller.disconnect();
     }
     return controller;
+  };
+
+  const syncConnectionState = async () => {
+    if (address) {
+      return;
+    }
+    await connectAsync({ connector: controllerConnector });
   };
 
   const handlePasskeyLogin = async () => {
@@ -49,6 +59,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
       });
 
       if (account) {
+        await syncConnectionState();
         setResult({
           success: true,
           message: "Successfully authenticated with Passkey!",
@@ -117,6 +128,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
       });
 
       if (account) {
+        await syncConnectionState();
         setResult({
           success: true,
           message: "Successfully authenticated with MetaMask!",
