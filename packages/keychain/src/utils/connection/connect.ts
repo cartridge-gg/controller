@@ -7,11 +7,6 @@ import {
 import { SessionPolicies } from "@cartridge/presets";
 import { generateCallbackId, storeCallbacks, getCallbacks } from "./callbacks";
 
-type HeadlessConnectOptions = Required<
-  Pick<ConnectOptions, "username" | "signer">
-> &
-  Pick<ConnectOptions, "password">;
-
 export interface ConnectParams {
   id: string;
   origin: string;
@@ -39,11 +34,10 @@ function isConnectResult(value: unknown): value is ConnectReply | ConnectError {
 export function createConnectUrl(
   signupOptions?: AuthOptions,
   options: ConnectCallback = {},
-  headless?: HeadlessConnectOptions,
 ): string {
   const id = generateCallbackId();
 
-  if (options.resolve || options.reject || options.onCancel || headless) {
+  if (options.resolve || options.reject || options.onCancel) {
     storeCallbacks(id, {
       resolve: options.resolve
         ? (result) => {
@@ -52,20 +46,11 @@ export function createConnectUrl(
         : undefined,
       reject: options.reject,
       onCancel: options.onCancel,
-      headless,
     });
   }
 
   const params = new URLSearchParams({ id });
-  if (headless) {
-    const payload: ConnectOptions = {
-      signupOptions,
-      username: headless.username,
-      signer: headless.signer,
-      password: headless.password,
-    };
-    params.set("signers", JSON.stringify(payload));
-  } else if (signupOptions !== undefined) {
+  if (signupOptions !== undefined) {
     params.set("signers", JSON.stringify(signupOptions));
   }
 
@@ -77,23 +62,18 @@ export function parseConnectParams(searchParams: URLSearchParams): {
   resolve?: (result: unknown) => void;
   reject?: (reason?: unknown) => void;
   onCancel?: () => void;
-  headless?: HeadlessConnectOptions;
 } | null {
   try {
     const id = searchParams.get("id");
     const signersParam = searchParams.get("signers");
 
     let signers: AuthOptions | undefined;
-    let headlessFromSigners: HeadlessConnectOptions | undefined;
     if (signersParam) {
       try {
         const decoded = decodeURIComponent(signersParam);
         // Handle case where signupOptions was undefined and got stringified as "undefined"
         if (decoded !== "undefined" && decoded !== "null") {
-          const parsed = JSON.parse(decoded) as
-            | AuthOptions
-            | HeadlessConnectOptions
-            | ConnectOptions;
+          const parsed = JSON.parse(decoded) as AuthOptions | ConnectOptions;
           if (Array.isArray(parsed)) {
             signers = parsed as AuthOptions;
           } else if (parsed && typeof parsed === "object") {
@@ -104,15 +84,6 @@ export function parseConnectParams(searchParams: URLSearchParams): {
             ) {
               signers = maybeOptions.signupOptions;
             }
-
-            const maybeHeadless = parsed as HeadlessConnectOptions;
-            if (maybeHeadless.username && maybeHeadless.signer) {
-              headlessFromSigners = {
-                username: maybeHeadless.username,
-                signer: maybeHeadless.signer,
-                password: maybeHeadless.password,
-              };
-            }
           }
         }
       } catch (e) {
@@ -121,13 +92,9 @@ export function parseConnectParams(searchParams: URLSearchParams): {
       }
     }
 
-    let callbacks:
-      | (ConnectCallback & { headless?: HeadlessConnectOptions })
-      | undefined;
+    let callbacks: ConnectCallback | undefined;
     if (id) {
-      callbacks = getCallbacks(id) as
-        | (ConnectCallback & { headless?: HeadlessConnectOptions })
-        | undefined;
+      callbacks = getCallbacks(id) as ConnectCallback | undefined;
     }
 
     const reject = callbacks?.reject
@@ -159,7 +126,6 @@ export function parseConnectParams(searchParams: URLSearchParams): {
       resolve,
       reject,
       onCancel,
-      headless: callbacks?.headless ?? headlessFromSigners,
     };
   } catch (error) {
     console.error("Failed to parse connect params:", error);
@@ -187,8 +153,6 @@ export function connect({
       signupOptions?: AuthOptions,
     ): Promise<ConnectReply> => {
       let signers: AuthOptions | undefined;
-      let headless: HeadlessConnectOptions | undefined;
-
       const isValidUrl = (value: string) => {
         try {
           const url = new URL(value);
@@ -220,36 +184,9 @@ export function connect({
         // New signature: connect(options: ConnectOptions)
         const options = policiesOrOptions as ConnectOptions;
         signers = options.signupOptions;
-        if (options.username && options.signer) {
-          headless = {
-            username: options.username,
-            signer: options.signer,
-            password: options.password,
-          };
-        }
       } else {
         // Assume it's just AuthOptions passed directly (backwards compatibility)
         signers = policiesOrOptions as AuthOptions | undefined;
-      }
-
-      // Fallback: if we received a headless-like object as signers, normalize it.
-      if (signers && typeof signers === "object" && !Array.isArray(signers)) {
-        const maybeOptions = signers as unknown as ConnectOptions;
-        if (
-          "signupOptions" in maybeOptions ||
-          "username" in maybeOptions ||
-          "signer" in maybeOptions ||
-          "password" in maybeOptions
-        ) {
-          if (maybeOptions.username && maybeOptions.signer) {
-            headless = {
-              username: maybeOptions.username,
-              signer: maybeOptions.signer,
-              password: maybeOptions.password,
-            };
-          }
-          signers = maybeOptions.signupOptions;
-        }
       }
 
       if (signers && signers.length === 0) {
@@ -257,20 +194,16 @@ export function connect({
       }
 
       return new Promise<ConnectReply>((resolve, reject) => {
-        const url = createConnectUrl(
-          signers,
-          {
-            resolve: (result) => {
-              if ("address" in result) {
-                resolve(result);
-              } else {
-                reject(result);
-              }
-            },
-            reject,
+        const url = createConnectUrl(signers, {
+          resolve: (result) => {
+            if ("address" in result) {
+              resolve(result);
+            } else {
+              reject(result);
+            }
           },
-          headless,
-        );
+          reject,
+        });
 
         navigate(url, { replace: true });
       });

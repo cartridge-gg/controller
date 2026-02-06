@@ -10,11 +10,7 @@ import { constants, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { KEYCHAIN_URL } from "./constants";
-import {
-  HeadlessAuthenticationError,
-  HeadlessModeNotSupportedError,
-  NotReadyToConnect,
-} from "./errors";
+import { HeadlessAuthenticationError, NotReadyToConnect } from "./errors";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
 import {
@@ -43,6 +39,8 @@ export default class ControllerProvider extends BaseProvider {
   private chains: Map<ChainId, Chain>;
   private referral: { ref?: string; refGroup?: string };
   private encryptedBlob?: string;
+  private headlessApprovalListeners: Set<(account: WalletAccount) => void> =
+    new Set();
 
   isReady(): boolean {
     return !!this.keychain;
@@ -264,32 +262,58 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    // Only open modal if NOT headless
-    if (!headless) {
-      this.iframes.keychain.open();
-    }
-
     try {
+      if (headless) {
+        const response = await this.keychain.headlessConnect({
+          username: headless.username,
+          signer: headless.signer,
+          password: headless.password,
+        });
+
+        if (response.code === ResponseCodes.SUCCESS) {
+          this.account = new ControllerAccount(
+            this,
+            this.rpcUrl(),
+            response.address,
+            this.keychain,
+            this.options,
+            this.iframes.keychain,
+          );
+          return this.account;
+        }
+
+        if (response.code === ResponseCodes.USER_INTERACTION_REQUIRED) {
+          try {
+            await this.keychain.navigate(
+              `/headless-approval/${response.requestId}`,
+            );
+          } catch (error) {
+            console.error(
+              "Failed to navigate to headless approval route:",
+              error,
+            );
+          }
+          this.iframes.keychain.open();
+          return;
+        }
+
+        throw new HeadlessAuthenticationError(response.message);
+      }
+
+      // Only open modal if NOT headless
+      this.iframes.keychain.open();
+
       // Use connect() parameter if provided, otherwise fall back to constructor options
       const effectiveOptions = Array.isArray(options)
         ? options
         : (connectOptions?.signupOptions ?? this.options.signupOptions);
 
-      // Pass options to keychain (it handles headless mode internally)
+      // Pass options to keychain
       let response = await this.keychain.connect({
         signupOptions: effectiveOptions,
-        username: headless?.username,
-        signer: headless?.signer,
-        password: headless?.password,
       });
 
       if (response.code !== ResponseCodes.SUCCESS) {
-        if (headless) {
-          if (response.code === ResponseCodes.USER_INTERACTION_REQUIRED) {
-            throw new HeadlessModeNotSupportedError("connect");
-          }
-          throw new HeadlessAuthenticationError(response.message);
-        }
         throw new Error(response.message);
       }
 
@@ -315,6 +339,23 @@ export default class ControllerProvider extends BaseProvider {
         this.iframes.keychain.close();
       }
     }
+  }
+
+  onHeadlessApprovalComplete(
+    handler: (account: WalletAccount) => void,
+  ): () => void {
+    this.headlessApprovalListeners.add(handler);
+    return () => this.offHeadlessApprovalComplete(handler);
+  }
+
+  offHeadlessApprovalComplete(handler: (account: WalletAccount) => void) {
+    this.headlessApprovalListeners.delete(handler);
+  }
+
+  private emitHeadlessApprovalComplete(account: WalletAccount) {
+    this.headlessApprovalListeners.forEach((handler) => {
+      handler(account);
+    });
   }
 
   async switchStarknetChain(chainId: string): Promise<boolean> {
@@ -676,6 +717,23 @@ export default class ControllerProvider extends BaseProvider {
       onSessionCreated: async () => {
         // Re-probe to establish connection now that storage access is granted and session created
         await this.probe();
+      },
+      onHeadlessSessionApproved: async (_requestId, address) => {
+        if (!this.keychain || !this.iframes?.keychain) {
+          return;
+        }
+
+        this.account = new ControllerAccount(
+          this,
+          this.rpcUrl(),
+          address,
+          this.keychain,
+          this.options,
+          this.iframes.keychain,
+        );
+        this.emitAccountsChanged([address]);
+        this.emitHeadlessApprovalComplete(this.account);
+        this.iframes.keychain.close();
       },
     });
 

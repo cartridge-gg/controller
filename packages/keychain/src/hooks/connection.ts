@@ -6,6 +6,7 @@ import {
 } from "@/components/provider/connection";
 import { useNavigation } from "@/context/navigation";
 import { connectToController } from "@/utils/connection";
+import type { HeadlessConnectionState } from "@/utils/connection/headless";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -113,6 +114,12 @@ export type ParentMethods = AsyncMethodReturns<{
   // Session creation callback (for standalone auth flow)
   onSessionCreated?: () => Promise<void>;
 
+  // Headless session approval callback
+  onHeadlessSessionApproved?: (
+    requestId: string,
+    address: string,
+  ) => Promise<void>;
+
   // Starterpack play callback (for purchase completion flow)
   onStarterpackPlay?: () => Promise<void>;
 }>;
@@ -191,6 +198,7 @@ function getConfigChainPolicies(
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
+  const parentRef = useRef<ParentMethods>();
   const [origin, setOrigin] = useState<string | undefined>(undefined);
   const [rpcUrl, setRpcUrl] = useState<string>(
     import.meta.env.VITE_RPC_MAINNET,
@@ -218,6 +226,14 @@ export function useConnectionValue() {
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
+  const connectionStateRef = useRef<HeadlessConnectionState>({
+    origin,
+    chainId,
+    rpcUrl,
+    policies,
+    isPoliciesResolved,
+    isConfigLoading,
+  });
   const [onModalClose, setOnModalCloseInternal] = useState<
     (() => void) | undefined
   >();
@@ -630,6 +646,21 @@ export function useConnectionValue() {
   useThemeEffect({ theme, assetUrl: "" });
 
   useEffect(() => {
+    connectionStateRef.current = {
+      origin,
+      chainId,
+      rpcUrl,
+      policies,
+      isPoliciesResolved,
+      isConfigLoading,
+    };
+  }, [origin, chainId, rpcUrl, policies, isPoliciesResolved, isConfigLoading]);
+
+  useEffect(() => {
+    parentRef.current = parent;
+  }, [parent]);
+
+  useEffect(() => {
     if (isIframe()) {
       const connection = connectToController<ParentMethods>({
         setRpcUrl,
@@ -637,6 +668,8 @@ export function useConnectionValue() {
         navigate,
         propagateError: urlParams.propagateError,
         errorDisplayMode: urlParams.errorDisplayMode,
+        getParent: () => parentRef.current,
+        getConnectionState: () => connectionStateRef.current,
       });
 
       connection.promise

@@ -158,20 +158,16 @@ export function useCreateController({
   const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(
     undefined,
   );
-  const [pendingApprovalUi, setPendingApprovalUi] = useState(false);
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [searchParams, setSearchParams] = useSearchParams();
   const {
-    parent,
-    controller,
     origin,
     rpcUrl,
     chainId,
     setController,
     policies,
     closeModal,
-    openModal,
     isConfigLoading,
     isPoliciesResolved,
   } = useConnection();
@@ -181,77 +177,10 @@ export function useCreateController({
     return parseConnectParams(searchParams);
   }, [searchParams]);
   const handleCompletion = useRouteCompletion();
-  const headless = params?.headless;
   const hasVerifiedPolicies =
     !!policies && policies.verified && !hasApprovalPolicies(policies);
-  const needsApprovalUi =
-    !!policies && (!policies.verified || hasApprovalPolicies(policies));
   const hasPolicies = !!policies;
-  const shouldAutoCreateSession = headless
-    ? hasVerifiedPolicies
-    : !policies || hasVerifiedPolicies;
-  const isParentReady = !!parent && !!origin;
-
-  const queueApprovalUi = useCallback(() => {
-    if (!headless || !needsApprovalUi) {
-      return;
-    }
-    setPendingApprovalUi(true);
-  }, [headless, needsApprovalUi]);
-
-  useEffect(() => {
-    if (!pendingApprovalUi) {
-      return;
-    }
-
-    if (isLoading) {
-      return;
-    }
-
-    if (!isParentReady || !openModal) {
-      return;
-    }
-
-    if (!isPoliciesResolved) {
-      return;
-    }
-
-    if (!controller) {
-      return;
-    }
-
-    void (async () => {
-      try {
-        await openModal();
-      } finally {
-        setPendingApprovalUi(false);
-      }
-    })();
-  }, [
-    pendingApprovalUi,
-    isLoading,
-    isParentReady,
-    openModal,
-    isPoliciesResolved,
-    controller,
-  ]);
-
-  const resolveHeadlessInteractionRequired = useCallback(
-    (message: string) => {
-      if (!params) {
-        return;
-      }
-      params.resolve?.({
-        code: ResponseCodes.USER_INTERACTION_REQUIRED,
-        message,
-      });
-      if (params.params.id) {
-        cleanupCallbacks(params.params.id);
-      }
-      handleCompletion();
-    },
-    [params, handleCompletion],
-  );
+  const shouldAutoCreateSession = !policies || hasVerifiedPolicies;
 
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
@@ -403,7 +332,6 @@ export function useCreateController({
       if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
-        queueApprovalUi();
 
         // Check if this is a standalone redirect flow
         const urlSearchParams = new URLSearchParams(window.location.search);
@@ -448,7 +376,6 @@ export function useCreateController({
       setController,
       origin,
       policies,
-      queueApprovalUi,
       handleCompletion,
       params,
       closeModal,
@@ -635,7 +562,6 @@ export function useCreateController({
 
       window.controller = loginRet.controller;
       setController(loginRet.controller);
-      queueApprovalUi();
 
       // Check if this is a standalone redirect flow
       const urlSearchParams = new URLSearchParams(window.location.search);
@@ -679,7 +605,6 @@ export function useCreateController({
       origin,
       setController,
       policies,
-      queueApprovalUi,
       handleCompletion,
       params,
       closeModal,
@@ -731,8 +656,6 @@ export function useCreateController({
           if (!loginController) {
             throw new Error("Login failed");
           }
-
-          queueApprovalUi();
 
           if (shouldAutoCreateSession) {
             await createSession({
@@ -843,7 +766,6 @@ export function useCreateController({
       closeModal,
       searchParams,
       shouldAutoCreateSession,
-      queueApprovalUi,
       finishLogin,
       passwordAuth,
       setWaitingForConfirmation,
@@ -998,17 +920,6 @@ export function useCreateController({
 
         console.error(e);
         setError(e as Error);
-        if (headless && params) {
-          params.resolve?.({
-            code: ResponseCodes.ERROR,
-            message:
-              e instanceof Error ? e.message : "Headless authentication failed",
-          });
-          if (params.params.id) {
-            cleanupCallbacks(params.params.id);
-          }
-          handleCompletion();
-        }
       } finally {
         if (exists) {
           setWaitingForConfirmation(false);
@@ -1024,9 +935,6 @@ export function useCreateController({
       setError,
       setIsLoading,
       setWaitingForConfirmation,
-      headless,
-      params,
-      handleCompletion,
     ],
   );
 
@@ -1046,11 +954,8 @@ export function useCreateController({
     signupOptions,
     authMethod,
     setAuthMethod,
-    headless,
     shouldAutoCreateSession,
-    resolveHeadlessInteractionRequired,
     isConfigLoading,
-    isParentReady,
     isPoliciesResolved,
     hasPolicies,
   };

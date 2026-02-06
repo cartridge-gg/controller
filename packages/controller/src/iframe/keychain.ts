@@ -12,6 +12,7 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     username?: string;
     onSessionCreated?: () => void;
     onStarterpackPlay?: () => void;
+    onHeadlessSessionApproved?: (requestId: string, address: string) => void;
     encryptedBlob?: string;
   };
 
@@ -37,6 +38,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     username,
     onSessionCreated,
     onStarterpackPlay,
+    onHeadlessSessionApproved,
     encryptedBlob,
     propagateSessionErrors,
     errorDisplayMode,
@@ -124,6 +126,10 @@ export class KeychainIFrame extends IFrame<Keychain> {
             onSessionCreated();
           }
         },
+        onHeadlessSessionApproved:
+          (_origin: string) => (requestId: string, address: string) => {
+            onHeadlessSessionApproved?.(requestId, address);
+          },
         onStarterpackPlay: (_origin: string) => async () => {
           if (onStarterpackPlayHandler) {
             await onStarterpackPlayHandler();

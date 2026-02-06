@@ -51,6 +51,7 @@ import { Collections } from "./purchasenew/starterpack/collections";
 import { DeployController } from "./DeployController";
 import { useConnection } from "@/hooks/connection";
 import { CreateController, Upgrade } from "./connect";
+import { HeadlessApprovalRoute } from "./connect/HeadlessApprovalRoute";
 import { useUpgrade } from "./provider/upgrade";
 import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
@@ -303,6 +304,10 @@ export function App() {
         <Route path="/sign-message" element={<SignMessage />} />
         <Route path="/deploy" element={<DeployController />} />
         <Route path="/connect" element={<ConnectRoute />} />
+        <Route
+          path="/headless-approval/:requestId"
+          element={<HeadlessApprovalRoute />}
+        />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />

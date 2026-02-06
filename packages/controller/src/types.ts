@@ -132,6 +132,9 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
   connect(options?: ConnectOptions): Promise<ConnectReply | ConnectError>;
+  headlessConnect(
+    options: HeadlessConnectOptions,
+  ): Promise<HeadlessConnectReply>;
   disconnect(): void;
 
   reset(): void;
@@ -288,3 +291,20 @@ export interface ConnectOptions {
   /** Required when signer is "password" */
   password?: string;
 }
+
+export type HeadlessConnectOptions = Required<
+  Pick<ConnectOptions, "username" | "signer">
+> &
+  Pick<ConnectOptions, "password">;
+
+export type HeadlessConnectReply =
+  | {
+      code: ResponseCodes.SUCCESS;
+      address: string;
+    }
+  | {
+      code: ResponseCodes.USER_INTERACTION_REQUIRED;
+      requestId: string;
+      message?: string;
+    }
+  | ConnectError;

@@ -69,6 +69,26 @@ Headless mode supports all **implemented** auth options:
 - `rabby`
 - `phantom-evm`
 
+## Handling Session Approval
+
+If policies are unverified or include approvals, Keychain will prompt for
+session approval **after** authentication. In that case, `connect` returns
+`undefined` and you should listen for the approval completion event.
+
+```ts
+const account = await controller.connect({
+  username: "alice",
+  signer: "webauthn",
+});
+
+if (!account) {
+  const unsubscribe = controller.onHeadlessApprovalComplete((approved) => {
+    console.log("Session approved:", approved.address);
+    unsubscribe();
+  });
+}
+```
+
 ## Error Handling
 
 The SDK provides specific error classes for headless mode:
@@ -76,15 +96,12 @@ The SDK provides specific error classes for headless mode:
 ```ts
 import {
   HeadlessAuthenticationError,
-  HeadlessModeNotSupportedError,
 } from "@cartridge/controller";
 
 try {
   await controller.connect({ username: "alice", signer: "webauthn" });
 } catch (error) {
-  if (error instanceof HeadlessModeNotSupportedError) {
-    // Policies require user interaction/session approval
-  } else if (error instanceof HeadlessAuthenticationError) {
+  if (error instanceof HeadlessAuthenticationError) {
     // Auth failed (invalid credentials, signer mismatch, etc.)
   }
 }
@@ -94,7 +111,5 @@ try {
 
 - Headless mode uses the **existing signers** on the controller for the given username.
 - For passkeys, the account must already have a WebAuthn signer registered.
-- Headless connect only supports **verified preset policies** (no manual/URL policies).
-  - Ensure you pass a `preset` in the Controller options and that the preset’s
-    `origin` whitelist includes your app’s origin.
-- If the preset is unverified, missing policies, or the policies require explicit user approval, headless connect returns a `USER_INTERACTION_REQUIRED` error.
+- If policies are unverified or include approvals, Keychain will request
+  explicit approval after authentication.

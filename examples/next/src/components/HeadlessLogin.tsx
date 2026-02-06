@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { controllerConnector } from "./providers/StarknetProvider";
+import type { WalletAccount } from "starknet";
 
 type AuthMethod = "passkey" | "metamask";
 
@@ -16,6 +17,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
   const { address } = useAccount();
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState<AuthMethod | null>(null);
+  const [pendingApproval, setPendingApproval] = useState(false);
   const [result, setResult] = useState<{
     success: boolean;
     message: string;
@@ -30,12 +32,37 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
     return controller;
   };
 
-  const syncConnectionState = async () => {
+  const syncConnectionState = useCallback(async () => {
     if (address) {
       return;
     }
     await connectAsync({ connector: controllerConnector });
-  };
+  }, [address, connectAsync]);
+
+  useEffect(() => {
+    const controller = controllerConnector.controller;
+    const handleApproved = async (account: WalletAccount) => {
+      await syncConnectionState();
+      setPendingApproval(false);
+      setResult({
+        success: true,
+        message: "Session approved!",
+        address: account.address,
+      });
+      setLoading(null);
+    };
+
+    const unsubscribe =
+      controller.onHeadlessApprovalComplete?.(handleApproved) ?? undefined;
+
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      } else {
+        controller.offHeadlessApprovalComplete?.(handleApproved);
+      }
+    };
+  }, [syncConnectionState]);
 
   const handlePasskeyLogin = async () => {
     if (!username) {
@@ -48,6 +75,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
 
     onStart?.();
     setLoading("passkey");
+    setPendingApproval(false);
     setResult(null);
 
     try {
@@ -67,9 +95,10 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
         });
       } else {
         setResult({
-          success: false,
-          message: "Authentication failed - no account returned",
+          success: true,
+          message: "Waiting for session approval...",
         });
+        setPendingApproval(true);
       }
     } catch (error: unknown) {
       setResult({
@@ -92,6 +121,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
 
     onStart?.();
     setLoading("metamask");
+    setPendingApproval(false);
     setResult(null);
 
     try {
@@ -136,9 +166,10 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
         });
       } else {
         setResult({
-          success: false,
-          message: "Authentication failed - no account returned",
+          success: true,
+          message: "Waiting for session approval...",
         });
+        setPendingApproval(true);
       }
     } catch (error: unknown) {
       setResult({
@@ -184,7 +215,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
         <div className="flex gap-3">
           <button
             onClick={handlePasskeyLogin}
-            disabled={loading !== null || !username}
+            disabled={loading !== null || !username || pendingApproval}
             className="flex-1 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-500 dark:hover:bg-purple-600"
           >
             {loading === "passkey" ? "Authenticating..." : "Login with Passkey"}
@@ -192,7 +223,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
 
           <button
             onClick={handleMetaMaskLogin}
-            disabled={loading !== null || !username}
+            disabled={loading !== null || !username || pendingApproval}
             className="flex-1 rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-orange-500 dark:hover:bg-orange-600"
           >
             {loading === "metamask"
@@ -237,8 +268,8 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
           <strong>Note:</strong> Headless mode auto-submits login. With no
           policies, sign-in completes without session approval UI. If policies
           are unverified or include approvals, Keychain will prompt for session
-          approval; verified policies auto-create the session. Use{" "}
-          <code>connect({"{ username, signer }"})</code> and pass{" "}
+          approval after authentication; verified policies auto-create the
+          session. Use <code>connect({"{ username, signer }"})</code> and pass{" "}
           <code>password</code> when using the password signer.
         </p>
       </div>
