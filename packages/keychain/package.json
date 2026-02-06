@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "env-cmd -f .env.dev vite",
-    "dev:e2e": "env-cmd -f .env.dev vite --mode e2e",
     "dev:live": "env-cmd -f .env.live vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview --port 3001",
@@ -117,7 +116,6 @@
     "http-server": "catalog:",
     "jest-image-snapshot": "catalog:",
     "jsdom": "^25.0.1",
-    "msw": "^2.4.9",
     "playwright": "catalog:",
     "postcss": "catalog:",
     "postcss-import": "catalog:",
@@ -133,10 +131,5 @@
     "vite-plugin-wasm": "catalog:",
     "vitest": "2.1.8",
     "ws": "^8.18.3"
-  },
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
   }
 }

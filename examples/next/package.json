@@ -17,7 +17,6 @@
   "dependencies": {
     "@cartridge/connector": "workspace:*",
     "@cartridge/controller": "workspace:*",
-    "@cartridge/controller-wasm": "catalog:",
     "@cartridge/ui": "catalog:",
     "@starknet-react/chains": "catalog:",
     "@starknet-react/core": "^5.0.1",
@@ -38,7 +37,6 @@
     "autoprefixer": "catalog:",
     "eslint": "catalog:",
     "eslint-config-next": "^15.1.5",
-    "eslint-import-resolver-typescript": "^4.4.4",
     "postcss": "catalog:",
     "postcss-import": "catalog:",
     "tailwindcss": "catalog:",
