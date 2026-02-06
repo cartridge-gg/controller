@@ -1,6 +1,8 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
 import { Policy } from "@cartridge/presets";
+import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
+import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
 import {
   AddInvokeTransactionResult,
   AddStarknetChainParameters,
@@ -512,6 +514,54 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return await this.keychain.delegateAccount();
+  }
+
+  /**
+   * Returns a wallet standard interface for the controller.
+   * This allows using the controller with libraries that expect the wallet standard interface.
+   */
+  asWalletStandard(): WalletWithStarknetFeatures {
+    if (typeof window !== "undefined") {
+      console.warn(
+        `Casting Controller to WalletWithStarknetFeatures is an experimental feature. ` +
+          `Please report any issues at https://github.com/cartridge-gg/controller/issues`,
+      );
+    }
+
+    const controller = this;
+    const inner = new StarknetInjectedWallet(controller);
+
+    // Override disconnect to also disconnect controller
+    const disconnect = {
+      "standard:disconnect": {
+        version: "1.0.0" as const,
+        disconnect: async () => {
+          await inner.features["standard:disconnect"].disconnect();
+          await controller.disconnect();
+        },
+      },
+    };
+
+    return {
+      get version() {
+        return inner.version;
+      },
+      get name() {
+        return inner.name;
+      },
+      get icon() {
+        return inner.icon;
+      },
+      get chains() {
+        return inner.chains;
+      },
+      get accounts() {
+        return inner.accounts;
+      },
+      get features() {
+        return { ...inner.features, ...disconnect };
+      },
+    };
   }
 
   /**
