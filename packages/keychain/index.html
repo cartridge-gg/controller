@@ -3,6 +3,10 @@
   <head>
     <title>Cartridge Controller</title>
     <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss:; frame-src 'self' https:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self' https:"
+    />
 
     <link rel="icon" type="image/png" href="/favicon-48x48.png" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -36,43 +40,8 @@
       content="{CartridgeTheme.semanticTokens.colors.brand}"
     />
     <script src="/noflash.js"></script>
-    <script>
-      if ("virtualKeyboard" in navigator) {
-        navigator.virtualKeyboard.overlaysContent = true;
-      }
-    </script>
-
-    <script>
-      window.addEventListener(
-        "touchstart",
-        (e) => {
-          if (e.touches.length > 1) {
-            e.preventDefault();
-          }
-        },
-        { passive: false },
-      );
-
-      window.addEventListener(
-        "touchmove",
-        (e) => {
-          if (e.touches.length > 1) {
-            e.preventDefault();
-          }
-        },
-        { passive: false },
-      );
-
-      window.addEventListener(
-        "touchend",
-        (e) => {
-          if (e.touches.length > 1) {
-            e.preventDefault();
-          }
-        },
-        { passive: false },
-      );
-    </script>
+    <script src="/init-virtual-keyboard.js"></script>
+    <script src="/disable-multitouch-zoom.js"></script>
   </head>
   <body class="h-dvh bg-background text-foreground overflow-y-auto">
     <div id="root"></div>
