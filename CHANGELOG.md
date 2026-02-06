@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.4] - 2026-02-06
+
+### 🐛 Bug Fixes
+- **CI/CD**: Fixed npm publishing with catalog resolution by reverting to pnpm publish, which correctly handles pnpm catalog: protocol that npm publish doesn't support, ensuring proper package resolution in published packages (#77210c65)
+
+### 🔧 Development
+- **Agent Tooling**: Added standardized agent/dev tooling with `.agents/` directory as source of truth, Claude/Cursor skill compatibility symlinks, and enhanced pre-commit hooks for improved development workflow (#2388)
+
 ## [0.13.3] - 2026-02-06
 
 ### ✨ New Features
