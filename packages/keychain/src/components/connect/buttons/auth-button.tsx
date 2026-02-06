@@ -87,7 +87,6 @@ const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
   },
   password: {
     Icon: LockIcon,
-    bgColor: "bg-background-300",
     label: AUTH_METHODS_LABELS.password,
   },
 };
