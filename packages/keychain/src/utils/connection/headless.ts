@@ -20,8 +20,8 @@ import { Owner } from "@cartridge/controller-wasm";
 import {
   Eip191Credentials,
   PasswordCredentials,
-  Signer as ControllerSigner,
   WebauthnCredentials,
+  type ControllerQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import {
@@ -38,15 +38,19 @@ export type HeadlessConnectionState = {
   isConfigLoading: boolean;
 };
 
-type HeadlessConnectDependencies = {
+type ControllerSigners = NonNullable<
+  NonNullable<ControllerQuery["controller"]>["signers"]
+>;
+
+export type HeadlessConnectParent = {
+  externalConnectWallet: (
+    type: ExternalWalletType,
+  ) => Promise<ExternalWalletResponse>;
+};
+
+type HeadlessConnectDependencies<Parent extends HeadlessConnectParent> = {
   setController: (controller?: Controller) => void;
-  getParent: () =>
-    | {
-        externalConnectWallet: (
-          type: ExternalWalletType,
-        ) => Promise<ExternalWalletResponse>;
-      }
-    | undefined;
+  getParent: () => Parent | undefined;
   getConnectionState: () => HeadlessConnectionState;
 };
 
@@ -73,7 +77,7 @@ const waitForConnectionReady = async (
   return getConnectionState();
 };
 
-const buildWebauthnOwner = (signers?: ControllerSigner[]): Owner => {
+const buildWebauthnOwner = (signers?: ControllerSigners): Owner => {
   const credential = signers?.find(
     (signer) => signer.metadata.__typename === "WebauthnCredentials",
   )?.metadata as WebauthnCredentials | undefined;
@@ -95,7 +99,7 @@ const buildWebauthnOwner = (signers?: ControllerSigner[]): Owner => {
 };
 
 const buildPasswordOwner = async (
-  signers: ControllerSigner[] | undefined,
+  signers: ControllerSigners | undefined,
   password?: string,
 ): Promise<Owner> => {
   if (!password) {
@@ -127,7 +131,7 @@ const hasMatchingEip191Signer = ({
   provider,
   address,
 }: {
-  signers: ControllerSigner[] | undefined;
+  signers: ControllerSigners | undefined;
   provider?: string;
   address: string;
 }) => {
@@ -169,7 +173,7 @@ const buildEip191Owner = async ({
   provider,
   connectWallet,
 }: {
-  signers: ControllerSigner[] | undefined;
+  signers: ControllerSigners | undefined;
   provider: ExternalWalletType;
   connectWallet: (type: ExternalWalletType) => Promise<ExternalWalletResponse>;
 }): Promise<Owner> => {
@@ -198,7 +202,7 @@ const buildEip191Owner = async ({
 };
 
 const buildWalletConnectOwner = async (
-  signers: ControllerSigner[] | undefined,
+  signers: ControllerSigners | undefined,
 ): Promise<Owner> => {
   const walletConnectWallet = new WalletConnectWallet();
   const { success, account, error } =
@@ -242,7 +246,7 @@ const buildSocialOwner = async ({
   chainId: string;
   rpcUrl: string;
   provider: SocialProvider;
-  signers: ControllerSigner[] | undefined;
+  signers: ControllerSigners | undefined;
 }): Promise<Owner> => {
   const turnkeyWallet = new TurnkeyWallet(username, chainId, rpcUrl, provider);
   const { account, error, success } = await turnkeyWallet.connect(false);
@@ -253,7 +257,7 @@ const buildSocialOwner = async ({
 
   window.keychain_wallets?.addEmbeddedWallet(
     account,
-    turnkeyWallet as WalletAdapter,
+    turnkeyWallet as unknown as WalletAdapter,
   );
 
   if (
@@ -289,13 +293,7 @@ const loginWithSigner = async ({
   origin: string;
   chainId: string;
   rpcUrl: string;
-  getParent: () =>
-    | {
-        externalConnectWallet: (
-          type: ExternalWalletType,
-        ) => Promise<ExternalWalletResponse>;
-      }
-    | undefined;
+  getParent: () => HeadlessConnectParent | undefined;
 }) => {
   const controllerData = await fetchController(chainId, username);
   const controllerQuery = controllerData?.controller;
@@ -377,11 +375,12 @@ const createSessionIfVerified = async ({
 };
 
 export const headlessConnect =
-  ({
+  <Parent extends HeadlessConnectParent>({
     setController,
     getParent,
     getConnectionState,
-  }: HeadlessConnectDependencies) =>
+  }: HeadlessConnectDependencies<Parent>) =>
+  (origin: string) =>
   async (options: HeadlessConnectOptions): Promise<HeadlessConnectReply> => {
     if (!options?.username || !options?.signer) {
       return {
@@ -398,7 +397,8 @@ export const headlessConnect =
     }
 
     const state = await waitForConnectionReady(getConnectionState);
-    if (!state.origin || !state.chainId) {
+    const effectiveOrigin = state.origin ?? origin;
+    if (!effectiveOrigin || !state.chainId) {
       return {
         code: ResponseCodes.ERROR,
         message: "Connection is not ready",
@@ -410,7 +410,7 @@ export const headlessConnect =
         username: options.username,
         signer: options.signer,
         password: options.password,
-        origin: state.origin,
+        origin: effectiveOrigin,
         chainId: state.chainId,
         rpcUrl: state.rpcUrl,
         getParent,
@@ -432,7 +432,7 @@ export const headlessConnect =
       if (!needsApproval) {
         await createSessionIfVerified({
           controller,
-          origin: state.origin,
+          origin: effectiveOrigin,
           policies: state.policies,
         });
         return {

@@ -270,7 +270,11 @@ export default class ControllerProvider extends BaseProvider {
           password: headless.password,
         });
 
-        if (response.code === ResponseCodes.SUCCESS) {
+        if (
+          response.code === ResponseCodes.SUCCESS &&
+          "address" in response &&
+          response.address
+        ) {
           this.account = new ControllerAccount(
             this,
             this.rpcUrl(),
@@ -282,7 +286,10 @@ export default class ControllerProvider extends BaseProvider {
           return this.account;
         }
 
-        if (response.code === ResponseCodes.USER_INTERACTION_REQUIRED) {
+        if (
+          response.code === ResponseCodes.USER_INTERACTION_REQUIRED &&
+          "requestId" in response
+        ) {
           try {
             await this.keychain.navigate(
               `/headless-approval/${response.requestId}`,
@@ -297,7 +304,11 @@ export default class ControllerProvider extends BaseProvider {
           return;
         }
 
-        throw new HeadlessAuthenticationError(response.message);
+        const message =
+          "message" in response && response.message
+            ? response.message
+            : "Headless authentication failed";
+        throw new HeadlessAuthenticationError(message);
       }
 
       // Only open modal if NOT headless

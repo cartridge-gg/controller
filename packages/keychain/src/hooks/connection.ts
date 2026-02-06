@@ -72,6 +72,20 @@ const TOKEN_ADDRESSES: Record<Token, string> = {
   usdt: USDT_CONTRACT_ADDRESS,
 };
 
+type ParentCallbackMethods = {
+  // Session creation callback (for standalone auth flow)
+  onSessionCreated?: () => Promise<void>;
+
+  // Headless session approval callback
+  onHeadlessSessionApproved?: (
+    requestId: string,
+    address: string,
+  ) => Promise<void>;
+
+  // Starterpack play callback (for purchase completion flow)
+  onStarterpackPlay?: () => Promise<void>;
+};
+
 export type ParentMethods = AsyncMethodReturns<{
   open: () => Promise<void>;
   close: () => Promise<void>;
@@ -110,19 +124,8 @@ export type ParentMethods = AsyncMethodReturns<{
     txHash: string,
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
-
-  // Session creation callback (for standalone auth flow)
-  onSessionCreated?: () => Promise<void>;
-
-  // Headless session approval callback
-  onHeadlessSessionApproved?: (
-    requestId: string,
-    address: string,
-  ) => Promise<void>;
-
-  // Starterpack play callback (for purchase completion flow)
-  onStarterpackPlay?: () => Promise<void>;
-}>;
+}> &
+  ParentCallbackMethods;
 
 /**
  * Parses policies from a URL string.

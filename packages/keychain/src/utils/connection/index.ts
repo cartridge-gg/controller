@@ -5,7 +5,10 @@ import { connect } from "./connect";
 import { deployFactory } from "./deploy";
 import { estimateInvokeFee } from "./estimate";
 import { execute } from "./execute";
-import type { HeadlessConnectionState } from "./headless";
+import type {
+  HeadlessConnectParent,
+  HeadlessConnectionState,
+} from "./headless";
 import { headlessConnect } from "./headless";
 import { probe } from "./probe";
 import { openSettingsFactory } from "./settings";
@@ -16,7 +19,9 @@ import { StarterpackOptions } from "@cartridge/controller";
 
 export type { ControllerError } from "./execute";
 
-export function connectToController<ParentMethods extends object>({
+export function connectToController<
+  ParentMethods extends HeadlessConnectParent,
+>({
   setRpcUrl,
   setController,
   navigate,

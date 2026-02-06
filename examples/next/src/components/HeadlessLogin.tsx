@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { controllerConnector } from "./providers/StarknetProvider";
-import type { WalletAccount } from "starknet";
 
 type AuthMethod = "passkey" | "metamask";
 
@@ -41,7 +40,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
 
   useEffect(() => {
     const controller = controllerConnector.controller;
-    const handleApproved = async (account: WalletAccount) => {
+    const handleApproved = async (account: { address: string }) => {
       await syncConnectionState();
       setPendingApproval(false);
       setResult({
