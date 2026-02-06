@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.2] - 2026-02-06
+
+### 🐛 Bug Fixes
+- **@cartridge/controller, @cartridge/connector**: Added repository field to package.json files for npm OIDC trusted publishing, ensuring proper package verification and supply chain security (#c9c6f25d)
+
 ## [0.13.1] - 2026-02-06
 
 ### 🐛 Bug Fixes
