@@ -1,2 +1,4 @@
-pnpm run format --ui stream
-pnpm run lint:check --ui stream
+#!/usr/bin/env sh
+set -e
+
+bash .githooks/pre-commit

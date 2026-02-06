@@ -2,6 +2,10 @@
   "name": "controller",
   "packageManager": "pnpm@10.0.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cartridge-gg/controller.git"
+  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build:deps": "turbo build:deps",
