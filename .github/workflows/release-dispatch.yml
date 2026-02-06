@@ -56,6 +56,7 @@ jobs:
         id: changelog
         uses: anthropics/claude-code-action@beta
         with:
+          mode: agent
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           direct_prompt: |
