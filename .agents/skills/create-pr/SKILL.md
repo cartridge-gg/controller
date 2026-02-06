@@ -1,115 +1,89 @@
 ---
 name: create-pr
-description: Create a pull request from the current branch. Use when changes are ready for review, when asked to submit work, or when explicitly asked to create a PR.
+description: Create or update a PR from current branch to main, watch CI, and address feedback
 ---
+The user likes the state of the code.
 
-# Create Pull Request
+There are $`git status --porcelain | wc -l | tr -d ' '` uncommitted changes.
+The current branch is $`git branch --show-current`.
+The target branch is origin/main.
 
-## Prerequisites
+$`git rev-parse --abbrev-ref @{upstream} 2>/dev/null && echo "Upstream branch exists." || echo "There is no upstream branch yet."`
 
-Before creating a PR, ensure:
-1. You are NOT on the `main` branch
-2. All changes are committed
-3. Tests pass locally (run `pnpm lint:check` at minimum)
+**Existing PR:** $`gh pr view --json number,title,url --jq '"#\(.number): \(.title) - \(.url)"' 2>/dev/null || echo "None"`
 
-## Steps
+The user requested a PR.
 
-### 1. Verify Branch State
+Follow these exact steps:
 
-```bash
-# Check current branch
-git branch --show-current
+## Phase 1: Review the code
 
-# Ensure not on main
-if [ "$(git branch --show-current)" = "main" ]; then
-  echo "ERROR: Cannot create PR from main. Create a feature branch first."
-  exit 1
-fi
+1. Review test coverage
+2. Check for silent failures
+3. Verify code comments are accurate
+4. Review any new types
+5. General code review
 
-# Check for uncommitted changes
-git status --porcelain
-```
+## Phase 2: Create/Update PR
 
-If there are uncommitted changes, commit them first using conventional commit format.
+6. Run `git diff` to review uncommitted changes
+7. Commit them. Follow any instructions the user gave you about writing commit messages.
+8. Push to origin.
+9. Use `git diff origin/main...` to review the full PR diff
+10. Check if a PR already exists for this branch:
+   - **If PR exists**:
+     - Draft/update the description in a temp file (e.g. `/tmp/pr-body.txt`).
+     - Update the PR body using the non-deprecated script:
+       - `./.agents/skills/create-pr/scripts/pr-body-update.sh --file /tmp/pr-body.txt`
+     - Re-fetch the body with `gh pr view --json body --jq .body` to confirm it changed.
+   - **If no PR exists**: Use `gh pr create --base main` to create a new PR. Keep the title under 80 characters and the description under five sentences.
 
-### 2. Check Remote Status
+The PR description should summarize ALL commits in the PR, not just the latest changes.
 
-```bash
-# Fetch latest from origin
-git fetch origin
+## Phase 3: Monitor CI and Address Issues
 
-# Check if branch exists on remote
-git ls-remote --heads origin $(git branch --show-current)
+Note: Keep commands CI-safe and avoid interactive `gh` prompts. Ensure `GH_TOKEN` or `GITHUB_TOKEN` is set in CI.
 
-# If branch doesn't exist on remote, push it
-git push -u origin $(git branch --show-current)
-```
+11. Watch CI status and feedback using the polling script (instead of running `gh` in a loop):
+   - Run `./.agents/skills/create-pr/scripts/poll-pr.sh --triage-on-change --exit-when-green` (polls every 30s for 10 mins).
+   - If checks fail, use `gh pr checks` or `gh run list` to find the failing run id, then:
+     - Fetch the failed check logs using `gh run view <run-id> --log-failed`
+     - Analyze the failure and fix the issue
+     - Commit and push the fix
+     - Continue polling until all checks pass
 
-### 3. Generate PR Summary
+12. Check for merge conflicts:
+   - Run `git fetch origin main && git merge origin/main`
+   - If conflicts exist, resolve them sensibly
+   - Commit the merge resolution and push
 
-Analyze the diff between the current branch and main:
+13. Use the polling script output to notice new reviews and comments (avoid direct polling via `gh`):
+   - If you need a full snapshot, run `./.agents/skills/create-pr/scripts/triage-pr.sh` once.
+   - If you need full context after the script reports a new item, fetch details once with `gh pr view --comments` or `gh api ...`.
+   - **Address feedback**:
+     - For bot reviews, read the review body and any inline comments carefully
+     - Address comments that are clearly actionable (bug fixes, typos, simple improvements)
+     - Skip comments that require design decisions or user input
+     - For addressed feedback, commit fixes with a message referencing the review/comment
 
-```bash
-# Get the diff summary
-git log origin/main..HEAD --oneline
+## Phase 4: Merge and Cleanup
 
-# Get detailed diff for analysis
-git diff origin/main...HEAD --stat
-```
+14. Once CI passes and the PR is approved, ask the user if they want to merge the PR.
 
-Based on the changes, generate:
-- **Title**: Concise description following conventional commit style (e.g., "feat: add session timeout handling")
-- **Summary**: 2-3 bullet points explaining what changed and why
+15. If the user confirms, merge the PR:
+    - Use `gh pr merge --squash --delete-branch` to squash-merge and delete the remote branch
 
-### 4. Create the Pull Request
+16. After successful merge, check if we're in a git worktree:
+    - Run: `[ "$(git rev-parse --git-common-dir)" != "$(git rev-parse --git-dir)" ]`
+    - **If in a worktree**: Use the ask user question tool (`request_user_input`) to ask if they want to clean up the worktree. If yes, run `wt remove --yes --force` to remove the worktree and local branch, then switch back to the main worktree.
+    - **If not in a worktree**: Just switch back to main with `git checkout main && git pull`
 
-```bash
-gh pr create \
-  --title "your-title-here" \
-  --body "$(cat <<'EOF'
-## Summary
-- First change description
-- Second change description
+## Completion
 
-## Testing
-- [ ] Ran `pnpm lint:check`
-- [ ] Ran `pnpm test` (if applicable)
-- [ ] Tested manually (if UI changes)
-EOF
-)"
-```
+Report the final PR status to the user, including:
+- PR URL
+- CI status (passed/merged)
+- Any unresolved review comments that need user attention
+- Cleanup status (worktree removed or branch switched)
 
-### 5. Link Issues (if applicable)
-
-If the PR addresses a GitHub issue, include in the body:
-- `Closes #123` - Automatically closes the issue when PR merges
-- `Fixes #123` - Same as above
-- `Relates to #123` - Links without auto-closing
-
-### 6. Post-Creation
-
-After creating the PR:
-1. Return the PR URL to the user
-2. Note that CI will run automatically
-3. Mention that Claude will review the PR shortly (via `.github/workflows/claude.yml`)
-
-## Common Issues
-
-### Branch behind main
-```bash
-git fetch origin main
-git rebase origin/main
-git push --force-with-lease
-```
-
-### Need to update existing PR
-Push new commits to the same branch - the PR updates automatically.
-
-## Example Output
-
-```
-Created PR #42: feat: add WebAuthn timeout handling
-URL: https://github.com/cartridge-gg/controller/pull/42
-
-CI checks will run automatically. Claude will review shortly.
-```
+If any step fails in a way you cannot resolve, ask the user for help.
