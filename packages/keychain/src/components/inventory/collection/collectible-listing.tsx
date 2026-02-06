@@ -33,7 +33,7 @@ import { ListHeader } from "./send/header";
 import { useTokens } from "@/hooks/token";
 import { useConnection } from "@/hooks/connection";
 import { AllowArray, cairo, Call, CallData, FeeEstimate } from "starknet";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 import { ArcadeContext } from "@/context/arcade";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
@@ -77,6 +77,7 @@ export function CollectibleListing() {
   const [validated, setValidated] = useState<boolean>(false);
   const [split, setSplit] = useState<boolean>(false);
   const [quantity, setQuantity] = useState<number>(1);
+  const { toast } = useToast();
 
   const { navigate } = useNavigation();
 
@@ -261,6 +262,15 @@ export function CollectibleListing() {
     split,
   ]);
 
+  const submitToast = useCallback(() => {
+    toast.marketplace("Listing transaction submitted successfully!", {
+      action: "listed",
+      itemNames: listingData.assets.map((asset) => asset.name),
+      itemImages: listingData.assets.map((asset) => asset.image),
+      collectionName: listingData.assets[0].collection,
+    });
+  }, [toast, listingData]);
+
   const onSubmitListing = useCallback(
     async (maxFee?: FeeEstimate) => {
       if (!maxFee || !buildTransactions || !controller) {
@@ -269,11 +279,7 @@ export function CollectibleListing() {
 
       try {
         await controller.execute(buildTransactions, maxFee);
-
-        toast.success("Listing transaction submitted successfully!", {
-          duration: 10000,
-        });
-
+        submitToast();
         // Navigate back to the parent page
         goBack();
       } catch (error) {
@@ -282,7 +288,7 @@ export function CollectibleListing() {
         throw error;
       }
     },
-    [buildTransactions, controller, goBack],
+    [buildTransactions, controller, goBack, toast, submitToast],
   );
 
   useEffect(() => {
@@ -405,7 +411,7 @@ const ListingConfirmation = ({
   totalPriceDisplay: string;
 }) => {
   return (
-    <div className="p-6 pb-0 flex flex-col gap-4 overflow-hidden h-full">
+    <div className="p-4 pb-0 flex flex-col gap-4 overflow-hidden h-full">
       <div
         className="grow flex flex-col gap-px rounded overflow-y-scroll"
         style={{ scrollbarWidth: "none" }}

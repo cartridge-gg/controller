@@ -1,4 +1,4 @@
-import { Policy } from "@cartridge/controller-wasm/controller";
+import { Policy, ApprovalPolicy } from "@cartridge/controller-wasm/controller";
 import { Policies, SessionPolicies } from "@cartridge/presets";
 import { ChainId } from "@starknet-io/types-js";
 import {
@@ -105,11 +105,33 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
         toArray(methods)
           .slice()
           .sort((a, b) => a.entrypoint.localeCompare(b.entrypoint))
-          .map((m) => ({
-            target,
-            method: hash.getSelectorFromName(m.entrypoint),
-            authorized: m.authorized,
-          })),
+          .map((m): Policy => {
+            // Check if this is an approve entrypoint with spender and amount
+            if (m.entrypoint === "approve") {
+              if ("spender" in m && "amount" in m && m.spender && m.amount) {
+                const approvalPolicy: ApprovalPolicy = {
+                  target,
+                  spender: m.spender,
+                  amount: String(m.amount),
+                };
+                return approvalPolicy;
+              }
+
+              // Fall back to CallPolicy with deprecation warning
+              console.warn(
+                `[DEPRECATED] Approve method without spender and amount fields will be rejected in future versions. ` +
+                  `Please update your preset or policies to include both 'spender' and 'amount' fields for approve calls on contract ${target}. ` +
+                  `Example: { entrypoint: "approve", spender: "0x...", amount: "0x..." }`,
+              );
+            }
+
+            // For non-approve methods and legacy approve, create a regular CallPolicy
+            return {
+              target,
+              method: hash.getSelectorFromName(m.entrypoint),
+              authorized: m.authorized,
+            };
+          }),
       ),
     ...(policies.messages ?? [])
       .map((p) => {

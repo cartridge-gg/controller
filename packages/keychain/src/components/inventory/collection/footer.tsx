@@ -43,7 +43,6 @@ export function CollectionFooter({
   return (
     <Total
       label="Total"
-      className="pb-3"
       token={erc20}
       totalValue={totalPrice}
       decimals={feeDecimals}

@@ -13,6 +13,7 @@ import {
 } from "@/hooks/route";
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -49,11 +50,19 @@ export function ConnectRoute() {
     [policies],
   );
 
-  console.log(isStandalone, redirectUrl);
-
   const handleConnect = useCallback(async () => {
     if (!params || !controller) {
       return;
+    }
+
+    // In iframe context, request storage access on user gesture so
+    // third-party storage can persist across app restarts.
+    if (!isStandalone) {
+      try {
+        await requestStorageAccess();
+      } catch (error) {
+        console.error("[ConnectRoute] Storage access request failed:", error);
+      }
     }
 
     params.resolve?.({
@@ -100,6 +109,14 @@ export function ConnectRoute() {
   const handleSkip = useCallback(async () => {
     if (!params || !controller) {
       return;
+    }
+
+    if (!isStandalone) {
+      try {
+        await requestStorageAccess();
+      } catch (error) {
+        console.error("[ConnectRoute] Storage access request failed:", error);
+      }
     }
 
     params.resolve?.({

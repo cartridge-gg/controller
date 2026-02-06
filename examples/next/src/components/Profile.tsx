@@ -43,6 +43,7 @@ export function Profile() {
         title: "First Achievement!",
         subtitle: "Earned!",
         xpAmount: 50,
+        progress: 100,
         isDraft: true,
       });
     }, 3000);
@@ -59,8 +60,9 @@ export function Profile() {
       toast({
         variant: "marketplace",
         action: "purchased",
-        itemName: "Cool NFT #123",
-        itemImage: "https://picsum.photos/seed/adventurer/200/200",
+        itemNames: ["Cool NFT #123"],
+        itemImages: ["https://picsum.photos/seed/adventurer/200/200"],
+        collectionName: "Cool Collection",
       });
     }, 5000);
   };
@@ -167,7 +169,10 @@ export function Profile() {
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileAt(
-                "account/bal7hazar/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/token/0x000000000000000000000000000000000000000000000000000000000000c527?ps=arcade-main&preset=arcade&address=0x027917d3084dC0dcd3C4ED5189733d14b0c4C13E762829BD3D1D761aa36201AB&purchaseView=true&tokenIds=0x000000000000000000000000000000000000000000000000000000000000c527",
+                // "account/bal7hazar/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/token/0x000000000000000000000000000000000000000000000000000000000000c527?ps=arcade-main&preset=loot-survivor&address=0x027917d3084dC0dcd3C4ED5189733d14b0c4C13E762829BD3D1D761aa36201AB&purchaseView=true&tokenIds=0x000000000000000000000000000000000000000000000000000000000000c527",
+                // "account/mataleone/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/purchase?ps=arcade-main&preset=loot-survivor&orders=2674",
+                // "account/mataleone/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/purchase?ps=arcade-main&preset=loot-survivor&orders=520",
+                "account/mataleone/inventory/collection/0x07aAa9866750A0db82a54bA8674c38620Fa2F967D2FBb31133DEF48E0527c87f/purchase?ps=arcade-main&preset=pistols&orders=2867",
               )
             }
           >

@@ -33,6 +33,15 @@ vi.mock("@/components/provider/upgrade", () => ({
   })),
 }));
 
+vi.mock("@/context/toast", () => ({
+  useToast: vi.fn(() => ({
+    toast: {
+      transaction: vi.fn(),
+      error: vi.fn(),
+    },
+  })),
+}));
+
 describe("ConfirmTransaction", () => {
   const mockTransactions = [
     {

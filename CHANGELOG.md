@@ -1,5 +1,75 @@
 # Changelog
 
+## [0.13.3] - 2026-02-06
+
+### ✨ New Features
+- **@cartridge/controller**: Added starterpack play callback functionality enabling custom game launch behavior and improved gaming integration (#2362)
+- **@cartridge/controller**: Added specialized controller toast notifications with improved messaging and user feedback for iframe-embedded applications (#2358)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced iframe connect flow with automatic Storage Access API request for improved cross-domain authentication in WebView environments (#2374)
+- **@cartridge/keychain**: Tightened Capacitor origin verification to only auto-verify localhost, requiring explicit authorization for custom hostnames in presets for enhanced security (#2375)
+- **@cartridge/controller**: Improved policy handling with canonical sorting before hashing to ensure consistent policy processing and prevent non-deterministic merkle root calculations (#2359)
+- **@cartridge/controller**: Enhanced preset verification for Capacitor environments with better validation and support for capacitor:// scheme (#2369)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Added ApprovalPolicy support to controller toWasmPolicies for proper merkle root calculation across different connectors, fixing session registration mismatches (#2372)
+- **@cartridge/controller**: Fixed aggregate contracts display on unverified session to properly group methods into "Approve <game>" expendable cards (#2304)
+- **@cartridge/controller**: Fixed controller re-initialization issues by reusing existing controller instances to prevent duplicate iframes and message channels (#2360)
+- **@cartridge/controller**: Fixed chain ID lookup to support non-Cartridge chain configurations for better multi-chain compatibility (#2361)
+- **@cartridge/keychain**: Fixed Coinbase sandbox configuration to ensure proper sandbox environment setup (#2371)
+- **@cartridge/keychain**: Fixed password login button alignment with primary theme for consistent UI styling (#2385)
+
+## [0.13.2] - 2026-02-06
+
+### 🐛 Bug Fixes
+- **@cartridge/controller, @cartridge/connector**: Added repository field to package.json files for npm OIDC trusted publishing, ensuring proper package verification and supply chain security (#c9c6f25d)
+
+## [0.13.1] - 2026-02-06
+
+### 🐛 Bug Fixes
+- **CI/CD**: Fixed npm publishing with OIDC authentication by switching from pnpm publish to npm publish and removing registry-url from setup-node to prevent .npmrc conflicts that block OIDC token exchange (#3880e8ba)
+
+## [0.13.0] - 2026-02-06
+
+### ✨ New Features
+- **@cartridge/controller**: Added ApprovalPolicy support to controller toWasmPolicies for enhanced policy management and proper merkle root calculation across different connectors (#2372)
+- **@cartridge/controller**: Added starterpack play callback functionality enabling custom game launch behavior and improved gaming integration (#2362)
+- **@cartridge/controller**: Added specialized controller toast notifications with improved messaging and user feedback for iframe-embedded applications (#2358)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced iframe connect flow with automatic Storage Access API request for improved cross-domain authentication in WebView environments (#2374)
+- **@cartridge/keychain**: Tightened Capacitor origin verification to only auto-verify localhost, requiring explicit authorization for custom hostnames in presets for enhanced security (#2375)
+- **@cartridge/controller**: Improved policy handling with canonical sorting before hashing to ensure consistent policy processing and prevent non-deterministic merkle root calculations (#2359)
+- **@cartridge/controller**: Enhanced preset verification for Capacitor environments with better validation and support for capacitor:// scheme (#2369)
+- **Development**: Migrated npm publishing to OIDC authentication with supply chain provenance attestation for enhanced security (#2381)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed aggregate contracts display on unverified session to properly group methods into "Approve <game>" expendable cards (#2304)
+- **@cartridge/controller**: Fixed controller re-initialization issues by reusing existing controller instances to prevent duplicate iframes and message channels (#2360)
+- **@cartridge/controller**: Fixed chain ID lookup to support non-Cartridge chain configurations for better multi-chain compatibility (#2361)
+- **@cartridge/keychain**: Fixed Coinbase sandbox configuration to ensure proper sandbox environment setup (#2371)
+- **CI/CD**: Fixed release workflow race conditions by inlining changelog generation into release dispatch workflow (#2379)
+
+## [0.12.3] - 2026-02-05
+
+### ✨ New Features
+- **@cartridge/keychain**: Added Capacitor origin verification tightening for enhanced security in mobile environments (#2375)
+- **@cartridge/controller**: Added specialized controller toast notifications with improved messaging and user feedback (#2358)
+- **@cartridge/controller**: Added ApprovalPolicy support to controller toWasmPolicies for enhanced policy management (#2372)
+- **@cartridge/controller**: Added starterpack play callback functionality for improved gaming integration (#2362)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Enhanced iframe connect flow with automatic storage access request for improved cross-domain authentication (#2374)
+- **@cartridge/controller**: Improved policy handling with canonical sorting before hashing to ensure consistent policy processing (#2359)
+- **@cartridge/controller**: Enhanced preset verification for Capacitor environments with better validation (#2369)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed aggregate contracts on unverified session to prevent session-related issues (#2304)
+- **@cartridge/keychain**: Fixed Coinbase sandbox configuration to ensure proper sandbox environment setup (#2371)
+- **@cartridge/controller**: Fixed controller re-initialization issues by reusing existing controller instances (#2360)
+- **@cartridge/controller**: Fixed chain ID lookup to support non-Cartridge chain configurations (#2361)
+
 ## [0.12.2] - 2026-01-29
 
 ### ✨ New Features
