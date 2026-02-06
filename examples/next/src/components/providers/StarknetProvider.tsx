@@ -207,14 +207,27 @@ const controller = new ControllerConnector({
   chains: controllerConnectorChains,
   url: getKeychainUrl(),
   signupOptions,
-  slot: "arcade-pistols",
-  namespace: "pistols",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
   tokens: {
     erc20: ["lords", "strk"],
   },
+
+  // nums (achievements, quests)
+  slot: "nums-bal",
+  namespace: "NUMS",
+  preset: "nums",
+
+  // Pistols (achievements, no quests)
+  // slot: "arcade-pistols",
+  // namespace: "pistols",
+  // preset: "pistols",
+
+  // Loot Survivor (no achievements, no quests)
+  // namespace: "ls_0_0_9",
+  // slot: "pg-mainnet-10",
+  // preset: "loot-survivor",
 });
 
 const session = new SessionConnector({
