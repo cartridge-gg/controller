@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.13.1] - 2026-02-06
+
+### 🐛 Bug Fixes
+- **CI/CD**: Fixed npm publishing with OIDC authentication by switching from pnpm publish to npm publish and removing registry-url from setup-node to prevent .npmrc conflicts that block OIDC token exchange (#3880e8ba)
+
 ## [0.13.0] - 2026-02-06
 
 ### ✨ New Features
