@@ -523,12 +523,45 @@ export default class ControllerProvider extends BaseProvider {
   asWalletStandard(): WalletWithStarknetFeatures {
     if (typeof window !== "undefined") {
       console.warn(
-        `Casting Controller to WalletWithStarknetFeatures is an experimental feature and may contain bugs. ` +
+        `Casting Controller to WalletWithStarknetFeatures is an experimental feature. ` +
           `Please report any issues at https://github.com/cartridge-gg/controller/issues`,
       );
     }
 
-    return new StarknetInjectedWallet(this);
+    const controller = this;
+    const inner = new StarknetInjectedWallet(controller);
+
+    // Override disconnect to also disconnect controller
+    const disconnect = {
+      "standard:disconnect": {
+        version: "1.0.0" as const,
+        disconnect: async () => {
+          await inner.features["standard:disconnect"].disconnect();
+          await controller.disconnect();
+        },
+      },
+    };
+
+    return {
+      get version() {
+        return inner.version;
+      },
+      get name() {
+        return inner.name;
+      },
+      get icon() {
+        return inner.icon;
+      },
+      get chains() {
+        return inner.chains;
+      },
+      get accounts() {
+        return inner.accounts;
+      },
+      get features() {
+        return { ...inner.features, ...disconnect };
+      },
+    };
   }
 
   /**
