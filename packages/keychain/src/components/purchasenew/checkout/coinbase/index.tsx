@@ -79,7 +79,7 @@ export function CoinbaseCheckout() {
             <div className="h-full w-full px-10 flex justify-center">
               <iframe
                 src={paymentLink}
-                className="h-full w-full max-w-[440px] border-none"
+                className="h-full w-full max-w-[440px] border-none overflow-hidden"
                 allow="payment"
                 title="Coinbase Onramp"
                 onLoad={() => setIsLoaded(true)}
