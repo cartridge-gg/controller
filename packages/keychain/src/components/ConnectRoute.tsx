@@ -21,7 +21,7 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, origin } = useConnection();
+  const { controller, policies, origin, isPoliciesResolved } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
 
   // Parse params and set RPC URL immediately
@@ -50,6 +50,12 @@ export function ConnectRoute() {
     [policies],
   );
 
+  const clearConnectParams = useCallback(() => {
+    const url = new URL(window.location.href);
+    url.search = "";
+    window.history.replaceState(null, "", url.toString());
+  }, []);
+
   const handleConnect = useCallback(async () => {
     if (!params || !controller) {
       return;
@@ -72,6 +78,7 @@ export function ConnectRoute() {
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
+    clearConnectParams();
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
@@ -104,7 +111,14 @@ export function ConnectRoute() {
     }
 
     handleCompletion();
-  }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
+  }, [
+    params,
+    controller,
+    clearConnectParams,
+    handleCompletion,
+    isStandalone,
+    redirectUrl,
+  ]);
 
   const handleSkip = useCallback(async () => {
     if (!params || !controller) {
@@ -126,6 +140,7 @@ export function ConnectRoute() {
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
+    clearConnectParams();
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
@@ -158,11 +173,22 @@ export function ConnectRoute() {
     }
 
     handleCompletion();
-  }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
+  }, [
+    params,
+    controller,
+    clearConnectParams,
+    handleCompletion,
+    isStandalone,
+    redirectUrl,
+  ]);
 
   // Handle cases where we can connect immediately (embedded mode only)
   useEffect(() => {
     if (!params || !controller || hasAutoConnected) {
+      return;
+    }
+
+    if (!isPoliciesResolved) {
       return;
     }
 
@@ -250,6 +276,7 @@ export function ConnectRoute() {
     redirectUrl,
     hasAutoConnected,
     hasTokenApprovals,
+    isPoliciesResolved,
     origin,
   ]);
 

@@ -5,6 +5,11 @@ import { connect } from "./connect";
 import { deployFactory } from "./deploy";
 import { estimateInvokeFee } from "./estimate";
 import { execute } from "./execute";
+import type {
+  HeadlessConnectParent,
+  HeadlessConnectionState,
+} from "./headless";
+import { headlessConnect } from "./headless";
 import { probe } from "./probe";
 import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
@@ -14,12 +19,16 @@ import { StarterpackOptions } from "@cartridge/controller";
 
 export type { ControllerError } from "./execute";
 
-export function connectToController<ParentMethods extends object>({
+export function connectToController<
+  ParentMethods extends HeadlessConnectParent,
+>({
   setRpcUrl,
   setController,
   navigate,
   propagateError,
   errorDisplayMode,
+  getParent,
+  getConnectionState,
 }: {
   setRpcUrl: (url: string) => void;
   setController: (controller?: Controller) => void;
@@ -29,6 +38,8 @@ export function connectToController<ParentMethods extends object>({
   ) => void;
   propagateError?: boolean;
   errorDisplayMode?: "modal" | "notification" | "silent";
+  getParent: () => ParentMethods | undefined;
+  getConnectionState: () => HeadlessConnectionState;
 }) {
   return connectToParent<ParentMethods>({
     methods: {
@@ -36,6 +47,13 @@ export function connectToController<ParentMethods extends object>({
         connect({
           navigate,
           setRpcUrl,
+        }),
+      ),
+      headlessConnect: normalize(
+        headlessConnect({
+          setController,
+          getParent,
+          getConnectionState,
         }),
       ),
       deploy: () => deployFactory({ navigate }),

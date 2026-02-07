@@ -12,7 +12,7 @@ import { constants, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { KEYCHAIN_URL } from "./constants";
-import { NotReadyToConnect } from "./errors";
+import { HeadlessAuthenticationError, NotReadyToConnect } from "./errors";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
 import {
@@ -20,6 +20,7 @@ import {
   Chain,
   ConnectError,
   ConnectReply,
+  ConnectOptions,
   ControllerOptions,
   IFrames,
   Keychain,
@@ -40,6 +41,8 @@ export default class ControllerProvider extends BaseProvider {
   private chains: Map<ChainId, Chain>;
   private referral: { ref?: string; refGroup?: string };
   private encryptedBlob?: string;
+  private headlessApprovalListeners: Set<(account: WalletAccount) => void> =
+    new Set();
 
   isReady(): boolean {
     return !!this.keychain;
@@ -228,8 +231,18 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async connect(
-    signupOptions?: AuthOptions,
+    options?: AuthOptions | ConnectOptions,
   ): Promise<WalletAccount | undefined> {
+    const connectOptions = Array.isArray(options) ? undefined : options;
+    const headless =
+      connectOptions?.username && connectOptions?.signer
+        ? {
+            username: connectOptions.username,
+            signer: connectOptions.signer,
+            password: connectOptions.password,
+          }
+        : undefined;
+
     if (!this.iframes) {
       return;
     }
@@ -241,21 +254,78 @@ export default class ControllerProvider extends BaseProvider {
     // Ensure iframe is created if using lazy loading
     if (!this.iframes.keychain) {
       this.iframes.keychain = this.createKeychainIframe();
-      // Wait for the keychain to be ready
-      await this.waitForKeychain();
     }
+
+    // Always wait for the keychain connection to be established
+    await this.waitForKeychain();
 
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    this.iframes.keychain.open();
-
     try {
+      if (headless) {
+        const response = await this.keychain.headlessConnect({
+          username: headless.username,
+          signer: headless.signer,
+          password: headless.password,
+        });
+
+        if (
+          response.code === ResponseCodes.SUCCESS &&
+          "address" in response &&
+          response.address
+        ) {
+          this.account = new ControllerAccount(
+            this,
+            this.rpcUrl(),
+            response.address,
+            this.keychain,
+            this.options,
+            this.iframes.keychain,
+          );
+          return this.account;
+        }
+
+        if (
+          response.code === ResponseCodes.USER_INTERACTION_REQUIRED &&
+          "requestId" in response
+        ) {
+          try {
+            await this.keychain.navigate(
+              `/headless-approval/${response.requestId}`,
+            );
+          } catch (error) {
+            console.error(
+              "Failed to navigate to headless approval route:",
+              error,
+            );
+          }
+          this.iframes.keychain.open();
+          return;
+        }
+
+        const message =
+          "message" in response && response.message
+            ? response.message
+            : "Headless authentication failed";
+        throw new HeadlessAuthenticationError(message);
+      }
+
+      // Only open modal if NOT headless
+      this.iframes.keychain.open();
+
       // Use connect() parameter if provided, otherwise fall back to constructor options
-      const effectiveOptions = signupOptions ?? this.options.signupOptions;
-      let response = await this.keychain.connect(effectiveOptions);
+      const effectiveOptions = Array.isArray(options)
+        ? options
+        : (connectOptions?.signupOptions ?? this.options.signupOptions);
+
+      // Pass options to keychain
+      let response = await this.keychain.connect({
+        signupOptions: effectiveOptions,
+      });
+
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -272,10 +342,33 @@ export default class ControllerProvider extends BaseProvider {
 
       return this.account;
     } catch (e) {
+      if (headless) {
+        throw e;
+      }
       console.log(e);
     } finally {
-      this.iframes.keychain.close();
+      // Only close modal if it was opened (not headless)
+      if (!headless) {
+        this.iframes.keychain.close();
+      }
     }
+  }
+
+  onHeadlessApprovalComplete(
+    handler: (account: WalletAccount) => void,
+  ): () => void {
+    this.headlessApprovalListeners.add(handler);
+    return () => this.offHeadlessApprovalComplete(handler);
+  }
+
+  offHeadlessApprovalComplete(handler: (account: WalletAccount) => void) {
+    this.headlessApprovalListeners.delete(handler);
+  }
+
+  private emitHeadlessApprovalComplete(account: WalletAccount) {
+    this.headlessApprovalListeners.forEach((handler) => {
+      handler(account);
+    });
   }
 
   async switchStarknetChain(chainId: string): Promise<boolean> {
@@ -685,6 +778,23 @@ export default class ControllerProvider extends BaseProvider {
       onSessionCreated: async () => {
         // Re-probe to establish connection now that storage access is granted and session created
         await this.probe();
+      },
+      onHeadlessSessionApproved: async (_requestId, address) => {
+        if (!this.keychain || !this.iframes?.keychain) {
+          return;
+        }
+
+        this.account = new ControllerAccount(
+          this,
+          this.rpcUrl(),
+          address,
+          this.keychain,
+          this.options,
+          this.iframes.keychain,
+        );
+        this.emitAccountsChanged([address]);
+        this.emitHeadlessApprovalComplete(this.account);
+        this.iframes.keychain.close();
       },
     });
 

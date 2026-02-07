@@ -44,7 +44,7 @@ describe("parseChainId", () => {
 
   describe("Non-Cartridge hosts", () => {
     test("returns placeholder chainId in Node", () => {
-      expect(parseChainId(new URL("http://dl:123123"))).toBe(
+      expect(parseChainId(new URL("http://dl:1234"))).toBe(
         shortString.encodeShortString("LOCALHOST"),
       );
     });
