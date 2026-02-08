@@ -101,6 +101,36 @@ export type DeployReply = {
   transaction_hash: string;
 };
 
+export type LocationCoordinates = {
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+  altitude?: number | null;
+  altitudeAccuracy?: number | null;
+  heading?: number | null;
+  speed?: number | null;
+  timestamp: number;
+};
+
+export type LocationPromptReply = {
+  code: ResponseCodes.SUCCESS;
+  location: LocationCoordinates;
+};
+
+export type LocationGateOptions = {
+  /** ISO 3166-1 alpha-2 country codes, e.g. "US", "CA". */
+  allowedCountries?: string[];
+  /** ISO 3166-2 region codes, e.g. "US-CA". */
+  allowedRegions?: string[];
+  /** US state abbreviations or full names, e.g. "CA" or "California". */
+  allowedStates?: string[];
+};
+
+export type ConnectOptions = {
+  signupOptions?: AuthOptions;
+  locationGate?: LocationGateOptions;
+};
+
 export type IFrames = {
   keychain?: KeychainIFrame;
   version?: number;
@@ -131,7 +161,9 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(signupOptions?: AuthOptions): Promise<ConnectReply | ConnectError>;
+  connect(
+    options?: AuthOptions | ConnectOptions,
+  ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -160,6 +192,9 @@ export interface Keychain {
   username(): string;
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
+  openLocationPrompt(
+    options?: LocationPromptOptions,
+  ): Promise<LocationPromptReply | ConnectError>;
   switchChain(rpcUrl: string): Promise<void>;
   openStarterPack(
     id: string | number,
@@ -239,6 +274,8 @@ export type KeychainOptions = IFrameOptions & {
   feeSource?: FeeSource;
   /** Signup options (the order of the options is reflected in the UI. It's recommended to group socials and wallets together ) */
   signupOptions?: AuthOptions;
+  /** Optional location gating to enforce allowed regions before connect. */
+  locationGate?: LocationGateOptions;
   /** When true, manually provided policies will override preset policies. Default is false. */
   shouldOverridePresetPolicies?: boolean;
   /** The project name of Slot instance. */
@@ -268,6 +305,11 @@ export type Tokens = {
 export type OpenOptions = {
   /** The URL to redirect to after authentication (defaults to current page) */
   redirectUrl?: string;
+};
+
+export type LocationPromptOptions = {
+  /** Optional path to navigate to after completion (standalone mode). */
+  returnTo?: string;
 };
 
 export type StarterpackOptions = {
