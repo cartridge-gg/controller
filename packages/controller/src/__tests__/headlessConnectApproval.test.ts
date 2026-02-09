@@ -1,12 +1,10 @@
 import { ResponseCodes } from "../types";
 
-let capturedOnSessionCreated: (() => void | Promise<void>) | undefined;
 let iframeOpen: jest.Mock | undefined;
 
 // Mock the KeychainIFrame so we can manually trigger onSessionCreated.
 jest.mock("../iframe/keychain", () => ({
-  KeychainIFrame: jest.fn().mockImplementation((opts: any) => {
-    capturedOnSessionCreated = opts?.onSessionCreated;
+  KeychainIFrame: jest.fn().mockImplementation((_opts: any) => {
     iframeOpen = jest.fn();
     return {
       open: iframeOpen,
@@ -36,19 +34,16 @@ jest.mock("../account", () => ({
 import ControllerProvider from "../controller";
 
 describe("headless connect requiring approval", () => {
-  test("resolves connect() only after onSessionCreated and emits approval complete", async () => {
+  test("does not open UI and resolves connect() only after keychain.connect()", async () => {
     const controller = new ControllerProvider();
 
+    let resolveConnect: ((value: any) => void) | undefined;
+    const connectPromise = new Promise((resolve) => {
+      resolveConnect = resolve;
+    });
+
     const keychain = {
-      headlessConnect: jest.fn().mockResolvedValue({
-        code: ResponseCodes.USER_INTERACTION_REQUIRED,
-        requestId: "req_123",
-      }),
-      navigate: jest.fn().mockResolvedValue(undefined),
-      probe: jest.fn().mockResolvedValue({
-        code: ResponseCodes.SUCCESS,
-        address: "0xabc",
-      }),
+      connect: jest.fn().mockReturnValue(connectPromise),
       disconnect: jest.fn(),
       reset: jest.fn(),
     } as any;
@@ -57,51 +52,46 @@ describe("headless connect requiring approval", () => {
     (controller as any).keychain = keychain;
     (controller as any).waitForKeychain = () => Promise.resolve();
 
-    const approvalHandler = jest.fn();
-    controller.onHeadlessApprovalComplete(approvalHandler);
+    const accountsChanged = jest.fn();
+    controller.on("accountsChanged", accountsChanged as any);
 
-    const connectPromise = controller.connect({
+    const controllerConnectPromise = controller.connect({
       username: "alice",
       signer: "webauthn",
     });
 
     let resolved = false;
-    void connectPromise.then(() => {
+    void controllerConnectPromise.then(() => {
       resolved = true;
     });
 
     // Flush microtasks for:
     // 1) await waitForKeychain()
-    // 2) await headlessConnect(...)
-    // 3) await navigate(...)
+    // 2) await keychain.connect(...)
     await Promise.resolve();
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(keychain.headlessConnect).toHaveBeenCalledWith({
+    expect(keychain.connect).toHaveBeenCalledWith({
       username: "alice",
       signer: "webauthn",
       password: undefined,
     });
-    expect(keychain.navigate).toHaveBeenCalledWith(
-      "/headless-approval/req_123",
-    );
-    expect(iframeOpen).toHaveBeenCalled();
+    expect(iframeOpen).not.toHaveBeenCalled();
     expect(resolved).toBe(false);
 
-    expect(capturedOnSessionCreated).toBeDefined();
-    await capturedOnSessionCreated?.();
+    resolveConnect?.({
+      code: ResponseCodes.SUCCESS,
+      address: "0xabc",
+    });
 
-    const account = await connectPromise;
+    const account = await controllerConnectPromise;
     expect(account?.address).toBe("0xabc");
-    expect(approvalHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ address: "0xabc" }),
-    );
+    expect(accountsChanged).toHaveBeenCalledWith(["0xabc"]);
 
     // Subsequent connect() should short-circuit (no second approval flow).
     const account2 = await controller.connect();
     expect(account2?.address).toBe("0xabc");
-    expect(keychain.headlessConnect).toHaveBeenCalledTimes(1);
-    expect(keychain.navigate).toHaveBeenCalledTimes(1);
+    expect(keychain.connect).toHaveBeenCalledTimes(1);
   });
 });

@@ -15,7 +15,14 @@ import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
-import { StarterpackOptions } from "@cartridge/controller";
+import { ResponseCodes } from "@cartridge/controller";
+import type {
+  AuthOptions,
+  ConnectOptions,
+  SessionPolicies,
+  StarterpackOptions,
+} from "@cartridge/controller";
+import { waitForHeadlessApprovalRequest } from "./headless-requests";
 
 export type { ControllerError } from "./execute";
 
@@ -41,14 +48,85 @@ export function connectToController<
   getParent: () => ParentMethods | undefined;
   getConnectionState: () => HeadlessConnectionState;
 }) {
+  const uiConnect = connect({
+    navigate,
+    setRpcUrl,
+  });
+
+  const headlessConnectImpl = headlessConnect({
+    setController,
+    getParent,
+    getConnectionState,
+  });
+
   return connectToParent<ParentMethods>({
     methods: {
-      connect: normalize(
-        connect({
-          navigate,
-          setRpcUrl,
-        }),
-      ),
+      connect: normalize((origin) => {
+        const uiConnectFn = uiConnect();
+        const headlessConnectFn = headlessConnectImpl(origin);
+
+        return async (
+          policiesOrOptions?: SessionPolicies | AuthOptions | ConnectOptions,
+          rpcUrl?: string,
+          signupOptions?: AuthOptions,
+        ) => {
+          const maybeOptions = policiesOrOptions as ConnectOptions | undefined;
+          const isHeadlessOptions =
+            !!maybeOptions &&
+            typeof maybeOptions === "object" &&
+            !Array.isArray(maybeOptions) &&
+            "username" in maybeOptions &&
+            "signer" in maybeOptions;
+
+          if (isHeadlessOptions) {
+            const { username, signer, password } =
+              maybeOptions as ConnectOptions;
+
+            const response = await headlessConnectFn({
+              username: username!,
+              signer: signer!,
+              password,
+            });
+
+            if (
+              response.code === ResponseCodes.SUCCESS &&
+              "address" in response
+            ) {
+              // Let the parent controller probe and update its connected account.
+              await getParent()?.onSessionCreated?.();
+              return {
+                code: ResponseCodes.SUCCESS as const,
+                address: response.address,
+              };
+            }
+
+            if (
+              response.code === ResponseCodes.USER_INTERACTION_REQUIRED &&
+              "requestId" in response
+            ) {
+              navigate(`/headless-approval/${response.requestId}`, {
+                replace: true,
+              });
+              await getParent()?.open?.();
+              await waitForHeadlessApprovalRequest(response.requestId);
+
+              if (!window.controller) {
+                throw new Error("Controller not ready after approval");
+              }
+
+              return {
+                code: ResponseCodes.SUCCESS as const,
+                address: window.controller.address(),
+              };
+            }
+
+            // response is a ConnectError
+            throw response;
+          }
+
+          return uiConnectFn(policiesOrOptions, rpcUrl, signupOptions);
+        };
+      }),
       headlessConnect: normalize(
         headlessConnect({
           setController,

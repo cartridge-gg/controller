@@ -43,6 +43,9 @@ type ControllerSigners = NonNullable<
 >;
 
 export type HeadlessConnectParent = {
+  open?: () => void | Promise<void>;
+  close?: () => void | Promise<void>;
+  onSessionCreated?: () => void | Promise<void>;
   externalConnectWallet: (
     type: ExternalWalletType,
   ) => Promise<ExternalWalletResponse>;

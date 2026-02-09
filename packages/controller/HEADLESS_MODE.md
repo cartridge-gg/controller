@@ -83,16 +83,9 @@ const account = await controller.connect({
 
 console.log("Session approved:", account.address);
 ```
-
-If you want to react to approval completion (for example, to sync UI state),
-you can also subscribe to the event:
-
-```ts
-const unsubscribe = controller.onHeadlessApprovalComplete((account) => {
-  console.log("Session approved:", account.address);
-  unsubscribe();
-});
-```
+If you want to react to connection state changes, subscribe to the standard
+wallet events (for example `accountsChanged`) or just await `connect(...)` and
+update your app state afterwards.
 
 ## Error Handling
 

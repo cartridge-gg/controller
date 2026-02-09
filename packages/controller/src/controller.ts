@@ -41,11 +41,6 @@ export default class ControllerProvider extends BaseProvider {
   private chains: Map<ChainId, Chain>;
   private referral: { ref?: string; refGroup?: string };
   private encryptedBlob?: string;
-  private headlessApprovalListeners: Set<(account: WalletAccount) => void> =
-    new Set();
-  private pendingHeadlessApproval?: Promise<WalletAccount>;
-  private pendingHeadlessApprovalResolve?: (account: WalletAccount) => void;
-  private pendingHeadlessApprovalReject?: (error: Error) => void;
 
   isReady(): boolean {
     return !!this.keychain;
@@ -269,59 +264,46 @@ export default class ControllerProvider extends BaseProvider {
 
     try {
       if (headless) {
-        const response = await this.keychain.headlessConnect({
+        // Headless auth should not open the UI until the keychain determines
+        // user interaction is required (e.g. session approval).
+        const response = await this.keychain.connect({
           username: headless.username,
           signer: headless.signer,
           password: headless.password,
         });
 
-        if (
-          response.code === ResponseCodes.SUCCESS &&
-          "address" in response &&
-          response.address
-        ) {
-          this.account = new ControllerAccount(
-            this,
-            this.rpcUrl(),
-            response.address,
-            this.keychain,
-            this.options,
-            this.iframes.keychain,
+        if (response.code !== ResponseCodes.SUCCESS) {
+          throw new HeadlessAuthenticationError(
+            "message" in response && response.message
+              ? response.message
+              : "Headless authentication failed",
           );
-          this.emitAccountsChanged([response.address]);
-          this.emitHeadlessApprovalComplete(this.account);
+        }
+
+        // Keychain will call onSessionCreated (awaitable) during headless connect,
+        // which probes and updates this.account. Keep a fallback for older keychains.
+        if (this.account) {
           return this.account;
         }
 
-        if (
-          response.code === ResponseCodes.USER_INTERACTION_REQUIRED &&
-          "requestId" in response
-        ) {
-          const approvalPromise = this.ensurePendingHeadlessApproval();
-          try {
-            await this.keychain.navigate(
-              `/headless-approval/${response.requestId}`,
-            );
-          } catch (error) {
-            console.error(
-              "Failed to navigate to headless approval route:",
-              error,
-            );
-            this.pendingHeadlessApprovalReject?.(
-              new Error("Failed to open session approval UI"),
-            );
-            this.clearPendingHeadlessApproval();
-            throw error;
-          }
-          this.iframes.keychain.open();
-          return await approvalPromise;
+        const address =
+          "address" in response && response.address ? response.address : null;
+        if (!address) {
+          throw new HeadlessAuthenticationError(
+            "Headless authentication failed",
+          );
         }
 
-        const message =
-          "message" in response && response.message
-            ? response.message
-            : "Headless authentication failed";
-        throw new HeadlessAuthenticationError(message);
+        this.account = new ControllerAccount(
+          this,
+          this.rpcUrl(),
+          address,
+          this.keychain,
+          this.options,
+          this.iframes.keychain,
+        );
+        this.emitAccountsChanged([address]);
+        return this.account;
       }
 
       // Only open modal if NOT headless
@@ -354,7 +336,17 @@ export default class ControllerProvider extends BaseProvider {
       return this.account;
     } catch (e) {
       if (headless) {
-        throw e;
+        if (e instanceof HeadlessAuthenticationError) {
+          throw e;
+        }
+
+        const message =
+          e instanceof Error
+            ? e.message
+            : typeof e === "object" && e && "message" in e
+              ? String((e as any).message)
+              : "Headless authentication failed";
+        throw new HeadlessAuthenticationError(message);
       }
       console.log(e);
     } finally {
@@ -363,44 +355,6 @@ export default class ControllerProvider extends BaseProvider {
         this.iframes.keychain.close();
       }
     }
-  }
-
-  onHeadlessApprovalComplete(
-    handler: (account: WalletAccount) => void,
-  ): () => void {
-    this.headlessApprovalListeners.add(handler);
-    return () => this.offHeadlessApprovalComplete(handler);
-  }
-
-  offHeadlessApprovalComplete(handler: (account: WalletAccount) => void) {
-    this.headlessApprovalListeners.delete(handler);
-  }
-
-  private emitHeadlessApprovalComplete(account: WalletAccount) {
-    this.headlessApprovalListeners.forEach((handler) => {
-      handler(account);
-    });
-  }
-
-  private ensurePendingHeadlessApproval(): Promise<WalletAccount> {
-    if (this.pendingHeadlessApproval) {
-      return this.pendingHeadlessApproval;
-    }
-
-    this.pendingHeadlessApproval = new Promise<WalletAccount>(
-      (resolve, reject) => {
-        this.pendingHeadlessApprovalResolve = resolve;
-        this.pendingHeadlessApprovalReject = reject;
-      },
-    );
-
-    return this.pendingHeadlessApproval;
-  }
-
-  private clearPendingHeadlessApproval() {
-    this.pendingHeadlessApproval = undefined;
-    this.pendingHeadlessApprovalResolve = undefined;
-    this.pendingHeadlessApprovalReject = undefined;
   }
 
   async switchStarknetChain(chainId: string): Promise<boolean> {
@@ -806,15 +760,6 @@ export default class ControllerProvider extends BaseProvider {
       rpcUrl: this.rpcUrl(),
       onClose: () => {
         this.keychain?.reset?.();
-
-        // If a headless approval was pending and the modal was closed, treat it
-        // as a cancellation to avoid leaving callers hanging forever.
-        if (this.pendingHeadlessApprovalReject) {
-          this.pendingHeadlessApprovalReject(
-            new Error("Headless session approval was canceled"),
-          );
-          this.clearPendingHeadlessApproval();
-        }
       },
       onConnect: (keychain) => {
         this.keychain = keychain;
@@ -831,14 +776,6 @@ export default class ControllerProvider extends BaseProvider {
 
         if (account?.address && account.address !== previousAddress) {
           this.emitAccountsChanged([account.address]);
-        }
-
-        // Headless approvals are completed by creating a session in the iframe.
-        // If connect() is awaiting approval, resolve it once the account is ready.
-        if (account && this.pendingHeadlessApprovalResolve) {
-          this.emitHeadlessApprovalComplete(account);
-          this.pendingHeadlessApprovalResolve(account);
-          this.clearPendingHeadlessApproval();
         }
       },
     });

@@ -119,11 +119,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
       methods: {
         ...walletBridge.getIFrameMethods(),
         // Expose callback for keychain to notify parent that session was created and storage access granted
-        onSessionCreated: (_origin: string) => () => {
-          if (onSessionCreated) {
-            onSessionCreated();
-          }
-        },
+        onSessionCreated: (_origin: string) => () => onSessionCreated?.(),
         onStarterpackPlay: (_origin: string) => async () => {
           if (onStarterpackPlayHandler) {
             await onStarterpackPlayHandler();
