@@ -63,6 +63,7 @@ export type QuestProps = {
 interface QuestContextType {
   quests: QuestProps[];
   status: "loading" | "error" | "success";
+  supportsQuests: boolean;
   refresh: () => Promise<void>;
 }
 
@@ -394,9 +395,15 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
       .sort((a, b) => (a.completed && !b.completed ? -1 : 1));
   }, [definitions, completions, advancements, creations]);
 
+  const supportsQuests = useMemo(
+    () => (status === "success" ? Object.keys(quests).length > 0 : false),
+    [status, quests],
+  );
+
   const value: QuestContextType = {
     quests,
     status,
+    supportsQuests,
     refresh,
   };
 
