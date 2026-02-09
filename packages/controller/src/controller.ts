@@ -403,6 +403,13 @@ export default class ControllerProvider extends BaseProvider {
     this.keychain.openSettings();
   }
 
+  async close() {
+    if (!this.iframes || !this.iframes.keychain) {
+      return;
+    }
+    this.iframes.keychain.close();
+  }
+
   revoke(origin: string, _policy: Policy[]) {
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
