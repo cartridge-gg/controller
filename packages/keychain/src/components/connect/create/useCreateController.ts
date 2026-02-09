@@ -37,12 +37,15 @@ import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
-import { processPolicies } from "../CreateSession";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
-import { ParsedSessionPolicies, hasApprovalPolicies } from "@/hooks/session";
+import { ParsedSessionPolicies } from "@/hooks/session";
 import { safeRedirect } from "@/utils/url-validator";
+import {
+  canAutoCreateSession,
+  createVerifiedSession,
+} from "@/utils/connection/session-creation";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -119,12 +122,11 @@ const createSession = async ({
   }
 
   try {
-    // Use a default duration for verified sessions (24 hours)
-    const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-    const expiresAt = duration + now();
-
-    const processedPolicies = processPolicies(policies, false);
-    await controller.createSession(origin, expiresAt, processedPolicies);
+    await createVerifiedSession({
+      controller,
+      origin,
+      policies,
+    });
     currentParams.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -177,10 +179,8 @@ export function useCreateController({
     return parseConnectParams(searchParams);
   }, [searchParams]);
   const handleCompletion = useRouteCompletion();
-  const hasVerifiedPolicies =
-    !!policies && policies.verified && !hasApprovalPolicies(policies);
   const hasPolicies = !!policies;
-  const shouldAutoCreateSession = !policies || hasVerifiedPolicies;
+  const shouldAutoCreateSession = canAutoCreateSession(policies);
 
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();

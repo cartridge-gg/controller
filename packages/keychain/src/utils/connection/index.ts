@@ -15,7 +15,6 @@ import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
-import { ResponseCodes } from "@cartridge/controller";
 import type {
   AuthOptions,
   ConnectOptions,
@@ -23,6 +22,7 @@ import type {
   StarterpackOptions,
 } from "@cartridge/controller";
 import { waitForHeadlessApprovalRequest } from "./headless-requests";
+import { createConnectHandler } from "./connect-routing";
 
 export type { ControllerError } from "./execute";
 
@@ -70,61 +70,16 @@ export function connectToController<
           rpcUrl?: string,
           signupOptions?: AuthOptions,
         ) => {
-          const maybeOptions = policiesOrOptions as ConnectOptions | undefined;
-          const isHeadlessOptions =
-            !!maybeOptions &&
-            typeof maybeOptions === "object" &&
-            !Array.isArray(maybeOptions) &&
-            "username" in maybeOptions &&
-            "signer" in maybeOptions;
+          const handler = createConnectHandler({
+            uiConnect: uiConnectFn,
+            headlessConnect: headlessConnectFn,
+            navigate,
+            getParent,
+            waitForApproval: waitForHeadlessApprovalRequest,
+            getConnectedAddress: () => window.controller?.address?.(),
+          });
 
-          if (isHeadlessOptions) {
-            const { username, signer, password } =
-              maybeOptions as ConnectOptions;
-
-            const response = await headlessConnectFn({
-              username: username!,
-              signer: signer!,
-              password,
-            });
-
-            if (
-              response.code === ResponseCodes.SUCCESS &&
-              "address" in response
-            ) {
-              // Let the parent controller probe and update its connected account.
-              await getParent()?.onSessionCreated?.();
-              return {
-                code: ResponseCodes.SUCCESS as const,
-                address: response.address,
-              };
-            }
-
-            if (
-              response.code === ResponseCodes.USER_INTERACTION_REQUIRED &&
-              "requestId" in response
-            ) {
-              navigate(`/headless-approval/${response.requestId}`, {
-                replace: true,
-              });
-              await getParent()?.open?.();
-              await waitForHeadlessApprovalRequest(response.requestId);
-
-              if (!window.controller) {
-                throw new Error("Controller not ready after approval");
-              }
-
-              return {
-                code: ResponseCodes.SUCCESS as const,
-                address: window.controller.address(),
-              };
-            }
-
-            // response is a ConnectError
-            throw response;
-          }
-
-          return uiConnectFn(policiesOrOptions, rpcUrl, signupOptions);
+          return handler(policiesOrOptions, rpcUrl, signupOptions);
         };
       }),
       headlessConnect: normalize(

@@ -4,8 +4,11 @@ import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
-import { CreateSession, processPolicies } from "./connect/CreateSession";
-import { now } from "@/constants";
+import { CreateSession } from "./connect/CreateSession";
+import {
+  createVerifiedSession,
+  requiresSessionApproval,
+} from "@/utils/connection/session-creation";
 import {
   useRouteParams,
   useRouteCompletion,
@@ -237,19 +240,14 @@ export function ConnectRoute() {
 
     // Bypass session approval screen for verified sessions in embedded mode
     // Note: This is a fallback - main logic is handled in useCreateController
-    if (policies.verified) {
-      if (hasTokenApprovals) {
-        return;
-      }
-
+    if (!requiresSessionApproval(policies)) {
       const createSessionForVerifiedPolicies = async () => {
         try {
-          // Use a default duration for verified sessions (24 hours)
-          const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-          const expiresAt = duration + now();
-
-          const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(origin, expiresAt, processedPolicies);
+          await createVerifiedSession({
+            controller,
+            origin,
+            policies,
+          });
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),

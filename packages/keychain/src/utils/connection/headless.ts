@@ -1,8 +1,7 @@
-import { processPolicies } from "@/components/connect/CreateSession";
 import { fetchController } from "@/components/connect/create/utils";
 import { decryptPrivateKey } from "@/components/connect/create/password/crypto";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
-import { hasApprovalPolicies, ParsedSessionPolicies } from "@/hooks/session";
+import { ParsedSessionPolicies } from "@/hooks/session";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { SocialProvider } from "@/wallets/social/turnkey_utils";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
@@ -28,6 +27,10 @@ import {
   createHeadlessApprovalRequest,
   hasPendingHeadlessApproval,
 } from "./headless-requests";
+import {
+  createVerifiedSession,
+  requiresSessionApproval,
+} from "./session-creation";
 
 export type HeadlessConnectionState = {
   origin?: string;
@@ -362,21 +365,6 @@ const loginWithSigner = async ({
   return loginRet.controller;
 };
 
-const createSessionIfVerified = async ({
-  controller,
-  origin,
-  policies,
-}: {
-  controller: Controller;
-  origin: string;
-  policies: ParsedSessionPolicies;
-}) => {
-  const duration = BigInt(24 * 60 * 60);
-  const expiresAt = duration + now();
-  const processedPolicies = processPolicies(policies, false);
-  await controller.createSession(origin, expiresAt, processedPolicies);
-};
-
 export const headlessConnect =
   <Parent extends HeadlessConnectParent>({
     setController,
@@ -429,11 +417,8 @@ export const headlessConnect =
         };
       }
 
-      const needsApproval =
-        !state.policies.verified || hasApprovalPolicies(state.policies);
-
-      if (!needsApproval) {
-        await createSessionIfVerified({
+      if (!requiresSessionApproval(state.policies)) {
+        await createVerifiedSession({
           controller,
           origin: effectiveOrigin,
           policies: state.policies,
