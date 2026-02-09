@@ -76,12 +76,6 @@ type ParentCallbackMethods = {
   // Session creation callback (for standalone auth flow)
   onSessionCreated?: () => Promise<void>;
 
-  // Headless session approval callback
-  onHeadlessSessionApproved?: (
-    requestId: string,
-    address: string,
-  ) => Promise<void>;
-
   // Starterpack play callback (for purchase completion flow)
   onStarterpackPlay?: () => Promise<void>;
 };

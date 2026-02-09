@@ -1,5 +1,5 @@
 import ControllerProvider, {
-  AuthOptions,
+  ConnectOptions,
   ControllerOptions,
 } from "@cartridge/controller";
 import { Connector, InjectedConnector } from "@starknet-react/core";
@@ -44,12 +44,18 @@ export default class ControllerConnector extends InjectedConnector {
     return await this.controller.delegateAccount();
   }
 
-  async connect(args?: { chainIdHint?: bigint; signupOptions?: AuthOptions }) {
-    const account = await this.controller.connect(args?.signupOptions);
+  async connect(args?: { chainIdHint?: bigint } & ConnectOptions) {
+    const { chainIdHint, ...connectOptions } = args ?? {};
+    const controllerArgs =
+      args && Object.keys(connectOptions).length > 0
+        ? (connectOptions as ConnectOptions)
+        : undefined;
+
+    const account = await this.controller.connect(controllerArgs);
     if (!account) {
       throw new Error("Failed to connect controller");
     }
-    return super.connect({ chainIdHint: args?.chainIdHint });
+    return super.connect({ chainIdHint });
   }
 
   static fromConnectors(connectors: Connector[]): ControllerConnector {

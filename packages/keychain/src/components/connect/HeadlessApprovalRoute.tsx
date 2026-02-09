@@ -11,7 +11,7 @@ import { CreateSession } from "./CreateSession";
 
 export function HeadlessApprovalRoute() {
   const { requestId } = useParams<{ requestId: string }>();
-  const { controller, policies, parent } = useConnection();
+  const { controller, policies, parent, closeModal } = useConnection();
   const { navigate } = useNavigation();
 
   const request = useMemo(() => {
@@ -27,9 +27,12 @@ export function HeadlessApprovalRoute() {
     }
 
     completeHeadlessApprovalRequest(requestId);
-    await parent?.onHeadlessSessionApproved?.(requestId, controller.address());
+    // Reuse the existing session-created callback used by standalone flows.
+    // The parent controller will re-probe and update its connected account.
+    await parent?.onSessionCreated?.();
+    closeModal?.();
     navigate("/", { replace: true });
-  }, [requestId, controller, parent, navigate]);
+  }, [requestId, controller, parent, closeModal, navigate]);
 
   if (!requestId || !request) {
     return (

@@ -72,8 +72,8 @@ Headless mode supports all **implemented** auth options:
 ## Handling Session Approval
 
 If policies are unverified or include approvals, Keychain will prompt for
-session approval **after** authentication. In that case, `connect` returns
-`undefined` and you should listen for the approval completion event.
+session approval **after** authentication. In that case, `connect` will open
+the approval UI and resolve once the session is approved.
 
 ```ts
 const account = await controller.connect({
@@ -81,12 +81,17 @@ const account = await controller.connect({
   signer: "webauthn",
 });
 
-if (!account) {
-  const unsubscribe = controller.onHeadlessApprovalComplete((approved) => {
-    console.log("Session approved:", approved.address);
-    unsubscribe();
-  });
-}
+console.log("Session approved:", account.address);
+```
+
+If you want to react to approval completion (for example, to sync UI state),
+you can also subscribe to the event:
+
+```ts
+const unsubscribe = controller.onHeadlessApprovalComplete((account) => {
+  console.log("Session approved:", account.address);
+  unsubscribe();
+});
 ```
 
 ## Error Handling

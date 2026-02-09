@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { controllerConnector } from "./providers/StarknetProvider";
 
@@ -16,7 +16,6 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
   const { address } = useAccount();
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState<AuthMethod | null>(null);
-  const [pendingApproval, setPendingApproval] = useState(false);
   const [result, setResult] = useState<{
     success: boolean;
     message: string;
@@ -31,38 +30,6 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
     return controller;
   };
 
-  const syncConnectionState = useCallback(async () => {
-    if (address) {
-      return;
-    }
-    await connectAsync({ connector: controllerConnector });
-  }, [address, connectAsync]);
-
-  useEffect(() => {
-    const controller = controllerConnector.controller;
-    const handleApproved = async (account: { address: string }) => {
-      await syncConnectionState();
-      setPendingApproval(false);
-      setResult({
-        success: true,
-        message: "Session approved!",
-        address: account.address,
-      });
-      setLoading(null);
-    };
-
-    const unsubscribe =
-      controller.onHeadlessApprovalComplete?.(handleApproved) ?? undefined;
-
-    return () => {
-      if (typeof unsubscribe === "function") {
-        unsubscribe();
-      } else {
-        controller.offHeadlessApprovalComplete?.(handleApproved);
-      }
-    };
-  }, [syncConnectionState]);
-
   const handlePasskeyLogin = async () => {
     if (!username) {
       setResult({
@@ -74,31 +41,22 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
 
     onStart?.();
     setLoading("passkey");
-    setPendingApproval(false);
     setResult(null);
 
     try {
       const controller = await prepareHeadlessConnect();
-
-      const account = await controller.connect({
+      await controller.connect({
         username,
         signer: "webauthn",
       });
 
-      if (account) {
-        await syncConnectionState();
-        setResult({
-          success: true,
-          message: "Successfully authenticated with Passkey!",
-          address: account.address,
-        });
-      } else {
-        setResult({
-          success: true,
-          message: "Waiting for session approval...",
-        });
-        setPendingApproval(true);
-      }
+      // Sync starknet-react connection state after headless connect completes.
+      await connectAsync({ connector: controllerConnector });
+      setResult({
+        success: true,
+        message: "Successfully authenticated with Passkey!",
+        address,
+      });
     } catch (error: unknown) {
       setResult({
         success: false,
@@ -120,7 +78,6 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
 
     onStart?.();
     setLoading("metamask");
-    setPendingApproval(false);
     setResult(null);
 
     try {
@@ -135,41 +92,19 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
         return;
       }
 
-      // Request account access
-      const accounts = (await ethereum.request({
-        method: "eth_requestAccounts",
-      })) as string[];
-
-      if (!accounts || accounts.length === 0) {
-        setResult({
-          success: false,
-          message: "No MetaMask accounts found",
-        });
-        setLoading(null);
-        return;
-      }
-
       const controller = await prepareHeadlessConnect();
-
-      const account = await controller.connect({
+      await controller.connect({
         username,
         signer: "metamask",
       });
 
-      if (account) {
-        await syncConnectionState();
-        setResult({
-          success: true,
-          message: "Successfully authenticated with MetaMask!",
-          address: account.address,
-        });
-      } else {
-        setResult({
-          success: true,
-          message: "Waiting for session approval...",
-        });
-        setPendingApproval(true);
-      }
+      // Sync starknet-react connection state after headless connect completes.
+      await connectAsync({ connector: controllerConnector });
+      setResult({
+        success: true,
+        message: "Successfully authenticated with MetaMask!",
+        address,
+      });
     } catch (error: unknown) {
       setResult({
         success: false,
@@ -214,7 +149,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
         <div className="flex gap-3">
           <button
             onClick={handlePasskeyLogin}
-            disabled={loading !== null || !username || pendingApproval}
+            disabled={loading !== null || !username}
             className="flex-1 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-500 dark:hover:bg-purple-600"
           >
             {loading === "passkey" ? "Authenticating..." : "Login with Passkey"}
@@ -222,7 +157,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
 
           <button
             onClick={handleMetaMaskLogin}
-            disabled={loading !== null || !username || pendingApproval}
+            disabled={loading !== null || !username}
             className="flex-1 rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-orange-500 dark:hover:bg-orange-600"
           >
             {loading === "metamask"

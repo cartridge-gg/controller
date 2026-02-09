@@ -41,6 +41,9 @@ export default class ControllerProvider extends BaseProvider {
   private encryptedBlob?: string;
   private headlessApprovalListeners: Set<(account: WalletAccount) => void> =
     new Set();
+  private pendingHeadlessApproval?: Promise<WalletAccount>;
+  private pendingHeadlessApprovalResolve?: (account: WalletAccount) => void;
+  private pendingHeadlessApprovalReject?: (error: Error) => void;
 
   isReady(): boolean {
     return !!this.keychain;
@@ -283,6 +286,7 @@ export default class ControllerProvider extends BaseProvider {
             this.options,
             this.iframes.keychain,
           );
+          this.emitAccountsChanged([response.address]);
           return this.account;
         }
 
@@ -290,6 +294,7 @@ export default class ControllerProvider extends BaseProvider {
           response.code === ResponseCodes.USER_INTERACTION_REQUIRED &&
           "requestId" in response
         ) {
+          const approvalPromise = this.ensurePendingHeadlessApproval();
           try {
             await this.keychain.navigate(
               `/headless-approval/${response.requestId}`,
@@ -299,9 +304,14 @@ export default class ControllerProvider extends BaseProvider {
               "Failed to navigate to headless approval route:",
               error,
             );
+            this.pendingHeadlessApprovalReject?.(
+              new Error("Failed to open session approval UI"),
+            );
+            this.clearPendingHeadlessApproval();
+            throw error;
           }
           this.iframes.keychain.open();
-          return;
+          return await approvalPromise;
         }
 
         const message =
@@ -367,6 +377,27 @@ export default class ControllerProvider extends BaseProvider {
     this.headlessApprovalListeners.forEach((handler) => {
       handler(account);
     });
+  }
+
+  private ensurePendingHeadlessApproval(): Promise<WalletAccount> {
+    if (this.pendingHeadlessApproval) {
+      return this.pendingHeadlessApproval;
+    }
+
+    this.pendingHeadlessApproval = new Promise<WalletAccount>(
+      (resolve, reject) => {
+        this.pendingHeadlessApprovalResolve = resolve;
+        this.pendingHeadlessApprovalReject = reject;
+      },
+    );
+
+    return this.pendingHeadlessApproval;
+  }
+
+  private clearPendingHeadlessApproval() {
+    this.pendingHeadlessApproval = undefined;
+    this.pendingHeadlessApprovalResolve = undefined;
+    this.pendingHeadlessApprovalReject = undefined;
   }
 
   async switchStarknetChain(chainId: string): Promise<boolean> {
@@ -715,7 +746,18 @@ export default class ControllerProvider extends BaseProvider {
     const iframe = new KeychainIFrame({
       ...this.options,
       rpcUrl: this.rpcUrl(),
-      onClose: this.keychain?.reset,
+      onClose: () => {
+        this.keychain?.reset?.();
+
+        // If a headless approval was pending and the modal was closed, treat it
+        // as a cancellation to avoid leaving callers hanging forever.
+        if (this.pendingHeadlessApprovalReject) {
+          this.pendingHeadlessApprovalReject(
+            new Error("Headless session approval was canceled"),
+          );
+          this.clearPendingHeadlessApproval();
+        }
+      },
       onConnect: (keychain) => {
         this.keychain = keychain;
       },
@@ -726,25 +768,20 @@ export default class ControllerProvider extends BaseProvider {
       encryptedBlob: encryptedBlob ?? undefined,
       username: username,
       onSessionCreated: async () => {
-        // Re-probe to establish connection now that storage access is granted and session created
-        await this.probe();
-      },
-      onHeadlessSessionApproved: async (_requestId, address) => {
-        if (!this.keychain || !this.iframes?.keychain) {
-          return;
+        const previousAddress = this.account?.address;
+        const account = await this.probe();
+
+        if (account?.address && account.address !== previousAddress) {
+          this.emitAccountsChanged([account.address]);
         }
 
-        this.account = new ControllerAccount(
-          this,
-          this.rpcUrl(),
-          address,
-          this.keychain,
-          this.options,
-          this.iframes.keychain,
-        );
-        this.emitAccountsChanged([address]);
-        this.emitHeadlessApprovalComplete(this.account);
-        this.iframes.keychain.close();
+        // Headless approvals are completed by creating a session in the iframe.
+        // If connect() is awaiting approval, resolve it once the account is ready.
+        if (account && this.pendingHeadlessApprovalResolve) {
+          this.emitHeadlessApprovalComplete(account);
+          this.pendingHeadlessApprovalResolve(account);
+          this.clearPendingHeadlessApproval();
+        }
       },
     });
 
