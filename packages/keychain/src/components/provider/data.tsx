@@ -39,16 +39,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
   );
 
   const account = useAccount();
-  const address = account?.address || "";
+  const address = useMemo(
+    () => (account ? addAddressPadding(account.address) : ""),
+    [account],
+  );
   const { project } = useConnection();
 
   const projects = useMemo(() => {
     const projects = project ? [project] : [];
-    return projects.map((proejct) => {
+    return projects.map((project) => {
       return {
-        project: proejct,
+        project,
         address,
         limit: 0,
+        date: "",
       };
     });
   }, [project, address]);
@@ -61,7 +65,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refetch: refetchTransfers,
   } = useTransfersQuery(
     {
-      projects: projects.map((p) => ({ ...p, date: "" })),
+      projects,
     },
     {
       queryKey: ["transfers", address, project],
