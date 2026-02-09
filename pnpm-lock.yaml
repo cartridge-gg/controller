@@ -403,9 +403,6 @@ importers:
       '@cartridge/controller':
         specifier: workspace:*
         version: link:../controller
-      '@starknet-io/get-starknet-wallet-standard':
-        specifier: 5.0.0-beta.0
-        version: 5.0.0-beta.0(typescript@5.8.3)(zod@3.24.4)
       '@starknet-react/core':
         specifier: ^5.0.1
         version: 5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@8.5.4)(typescript@5.8.3)(utf-8-validate@5.0.10)
@@ -431,6 +428,9 @@ importers:
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
+      '@starknet-io/get-starknet-wallet-standard':
+        specifier: 5.0.0-beta.0
+        version: 5.0.0-beta.0(typescript@5.8.3)(zod@3.24.4)
       '@starknet-io/types-js':
         specifier: ^0.8.4
         version: 0.8.4
@@ -817,9 +817,6 @@ packages:
 
   '@adraffy/ens-normalize@1.10.1':
     resolution: {integrity: sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw==}
-
-  '@adraffy/ens-normalize@1.11.0':
-    resolution: {integrity: sha512-/3DDPKHqqIqxUULp8yP4zODUY1i+2xvVWsv8A79xGWdCAG+8sb0hRh0Rk2QyOJUnnbyPUAZYcpBuRe3nS2OIUg==}
 
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
@@ -10663,8 +10660,6 @@ snapshots:
 
   '@adraffy/ens-normalize@1.10.1': {}
 
-  '@adraffy/ens-normalize@1.11.0': {}
-
   '@adraffy/ens-normalize@1.11.1': {}
 
   '@alloc/quick-lru@5.2.0': {}
@@ -20363,12 +20358,12 @@ snapshots:
 
   ox@0.4.4(typescript@5.8.3)(zod@3.24.4):
     dependencies:
-      '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.9.0
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.4)
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.1(typescript@5.8.3)(zod@3.24.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.8.3

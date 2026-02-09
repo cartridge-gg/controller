@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.13.3",
+  "version": "0.13.4",
   "description": "Cartridge Controller",
   "repository": {
     "type": "git",
@@ -42,6 +42,7 @@
     "micro-sol-signer": "^0.5.0",
     "bs58": "^6.0.0",
     "ethers": "^6.13.5",
+    "@starknet-io/get-starknet-wallet-standard": "5.0.0-beta.0",
     "@starknet-io/types-js": "0.9.1",
     "@telegram-apps/sdk": "^2.4.0",
     "@turnkey/sdk-browser": "^4.0.0",

@@ -78,6 +78,11 @@ export function useAchievements(accountAddress?: string) {
         : "success";
   }, [trophiesStatus, progressionsStatus]);
 
+  const supportsAchievements = useMemo(
+    () => (status === "success" ? Object.keys(trophies).length > 0 : false),
+    [status, trophies],
+  );
+
   // Compute achievements and players
   useEffect(() => {
     if (
@@ -207,5 +212,5 @@ export function useAchievements(accountAddress?: string) {
     );
   }, [currentAddress, trophies, progressions, status]);
 
-  return { achievements, players, status };
+  return { achievements, players, status, supportsAchievements };
 }

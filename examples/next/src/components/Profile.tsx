@@ -178,6 +178,16 @@ export function Profile() {
           >
             Open at Purchase
           </Button>
+          <Button
+            onClick={() => {
+              ctrlConnector.controller.openProfile("inventory");
+              setTimeout(() => {
+                ctrlConnector.controller.close();
+              }, 3000);
+            }}
+          >
+            Close after 3 seconds...
+          </Button>
         </div>
       </div>
     </div>

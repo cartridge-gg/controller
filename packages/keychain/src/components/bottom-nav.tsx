@@ -10,6 +10,8 @@ import {
 } from "@cartridge/ui";
 import { useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
+import { useData } from "@/hooks/data";
+import { useQuestContext } from "@/context/quest";
 
 export function LayoutBottomNav() {
   const { namespace, project } = useConnection();
@@ -17,6 +19,10 @@ export function LayoutBottomNav() {
   const { username } = useParams<{
     username: string;
   }>();
+  const {
+    trophies: { supportsAchievements },
+  } = useData();
+  const { supportsQuests } = useQuestContext();
 
   const active = useMemo<
     | "inventory"
@@ -52,7 +58,7 @@ export function LayoutBottomNav() {
           <ChestIcon variant="solid" size="lg" />
         </Link>
       </BottomTab>
-      {project && namespace && (
+      {project && namespace && supportsAchievements && (
         <BottomTab status={active === "achievements" ? "active" : undefined}>
           <Link
             to={`${basePath}/achievements${search}`}
@@ -62,7 +68,7 @@ export function LayoutBottomNav() {
           </Link>
         </BottomTab>
       )}
-      {project && namespace && (
+      {project && namespace && supportsQuests && (
         <BottomTab status={active === "quests" ? "active" : undefined}>
           <Link
             to={`${basePath}/quests${search}`}
@@ -72,14 +78,16 @@ export function LayoutBottomNav() {
           </Link>
         </BottomTab>
       )}
-      <BottomTab status={active === "leaderboard" ? "active" : undefined}>
-        <Link
-          to={`${basePath}/leaderboard${search}`}
-          className="h-full w-full flex items-center justify-center"
-        >
-          <LeaderboardIcon size="lg" variant="solid" />
-        </Link>
-      </BottomTab>
+      {project && namespace && supportsAchievements && (
+        <BottomTab status={active === "leaderboard" ? "active" : undefined}>
+          <Link
+            to={`${basePath}/leaderboard${search}`}
+            className="h-full w-full flex items-center justify-center"
+          >
+            <LeaderboardIcon size="lg" variant="solid" />
+          </Link>
+        </BottomTab>
+      )}
       <BottomTab status={active === "activity" ? "active" : undefined}>
         <Link
           to={`${basePath}/activity${search}`}

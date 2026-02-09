@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.13.3",
+  "version": "0.13.4",
   "description": "Cartridge Controller Connector",
   "repository": {
     "type": "git",
@@ -49,8 +49,7 @@
     "@starknet-react/core": "^5.0.1"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:*",
-    "@starknet-io/get-starknet-wallet-standard": "5.0.0-beta.0"
+    "@cartridge/controller": "workspace:*"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
