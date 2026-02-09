@@ -387,12 +387,22 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async disconnect() {
+    this.account = undefined;
+    this.emitAccountsChanged([]);
+
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("lastUsedConnector");
+      }
+    } catch {
+      // Ignore environments where localStorage is unavailable.
+    }
+
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    this.account = undefined;
     return this.keychain.disconnect();
   }
 

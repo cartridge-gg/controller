@@ -132,9 +132,6 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
   connect(options?: ConnectOptions): Promise<ConnectReply | ConnectError>;
-  headlessConnect(
-    options: HeadlessConnectOptions,
-  ): Promise<HeadlessConnectReply>;
   disconnect(): void;
 
   reset(): void;

@@ -26,7 +26,12 @@ export default class ControllerConnector extends InjectedConnector {
   }
 
   async disconnect() {
-    this.controller.disconnect();
+    await this.controller.disconnect();
+    try {
+      await super.disconnect();
+    } catch {
+      // Best-effort: starknet-react may call disconnect even when the injected wallet isn't present.
+    }
   }
 
   username() {

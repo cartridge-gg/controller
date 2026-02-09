@@ -314,6 +314,7 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("sessionPolicies");
     localStorage.removeItem("lastUsedConnector");
     this.account = undefined;
+    this.emitAccountsChanged([]);
     this._username = undefined;
     const disconnectUrl = new URL(`${this._keychainUrl}`);
     disconnectUrl.pathname = "disconnect";

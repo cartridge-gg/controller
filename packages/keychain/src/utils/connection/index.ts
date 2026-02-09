@@ -82,13 +82,6 @@ export function connectToController<
           return handler(policiesOrOptions, rpcUrl, signupOptions);
         };
       }),
-      headlessConnect: normalize(
-        headlessConnect({
-          setController,
-          getParent,
-          getConnectionState,
-        }),
-      ),
       deploy: () => deployFactory({ navigate }),
       execute: normalize(
         execute({ navigate, propagateError, errorDisplayMode }),
