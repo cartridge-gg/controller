@@ -90,9 +90,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   );
 
   const status = useMemo(() => {
-    return transfersStatus === "loading" && activitiesStatus === "loading"
+    return transfersStatus === "loading" || activitiesStatus === "loading"
       ? "loading"
-      : transfersStatus === "error" || activitiesStatus === "error"
+      : transfersStatus === "error" && activitiesStatus === "error"
         ? "error"
         : "success";
   }, [transfersStatus, activitiesStatus]);
