@@ -1,5 +1,6 @@
 "use client";
 
+import { useConnect } from "@starknet-react/core";
 import { useState } from "react";
 import { controllerConnector } from "./providers/StarknetProvider";
 
@@ -10,7 +11,16 @@ interface EthereumProvider {
   isMetaMask?: boolean;
 }
 
-export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
+export function HeadlessLogin({
+  onStart,
+  onDone,
+  onError,
+}: {
+  onStart?: () => void;
+  onDone?: () => void;
+  onError?: () => void;
+}) {
+  const { connectAsync } = useConnect();
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState<AuthMethod | null>(null);
   const [result, setResult] = useState<{
@@ -21,7 +31,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
   const prepareHeadlessConnect = async () => {
     const controller = controllerConnector.controller;
     // Ensure we don't short-circuit on an existing account.
-    if (controller.isReady()) {
+    if (controller.account) {
       await controller.disconnect();
     }
     return controller;
@@ -49,16 +59,22 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
       if (!account) {
         throw new Error("Failed to connect");
       }
+
+      // Sync starknet-react state so the header/app reflect the new connection.
+      await connectAsync({ connector: controllerConnector });
+
       setResult({
         success: true,
         message: "Successfully authenticated with Passkey!",
         address: account.address,
       });
+      onDone?.();
     } catch (error: unknown) {
       setResult({
         success: false,
         message: (error as Error)?.message || "Passkey authentication failed",
       });
+      onError?.();
     } finally {
       setLoading(null);
     }
@@ -85,7 +101,7 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
           success: false,
           message: "MetaMask is not installed",
         });
-        setLoading(null);
+        onError?.();
         return;
       }
 
@@ -97,16 +113,22 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
       if (!account) {
         throw new Error("Failed to connect");
       }
+
+      // Sync starknet-react state so the header/app reflect the new connection.
+      await connectAsync({ connector: controllerConnector });
+
       setResult({
         success: true,
         message: "Successfully authenticated with MetaMask!",
         address: account.address,
       });
+      onDone?.();
     } catch (error: unknown) {
       setResult({
         success: false,
         message: (error as Error)?.message || "MetaMask authentication failed",
       });
+      onError?.();
     } finally {
       setLoading(null);
     }
