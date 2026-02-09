@@ -52,7 +52,19 @@ export default class ControllerConnector extends InjectedConnector {
     if (!account) {
       throw new Error("Failed to connect controller");
     }
-    return super.connect({ chainIdHint });
+
+    // Ensure the injected wallet instance used by starknet-react (window.starknet_controller)
+    // always points at the same ControllerProvider instance this connector wraps.
+    if (typeof window !== "undefined") {
+      (window as any).starknet_controller = this.controller;
+    }
+
+    const data = await super.connect({ chainIdHint });
+
+    // `@starknet-react/core` updates its state from the `account` returned here.
+    // Use the authoritative address from `controller.connect()` to avoid edge cases
+    // where the injected wallet request returns an empty/undefined account.
+    return { ...data, account: account.address };
   }
 
   static fromConnectors(connectors: Connector[]): ControllerConnector {

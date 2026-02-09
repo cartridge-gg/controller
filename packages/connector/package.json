@@ -13,6 +13,8 @@
   "sideEffects": false,
   "scripts": {
     "build:deps": "tsup --dts-resolve",
+    "test": "vitest",
+    "test:ci": "vitest run",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },
@@ -53,8 +55,10 @@
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
+    "@vitest/coverage-v8": "2.1.8",
     "prettier": "catalog:",
     "tsup": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "2.1.8"
   }
 }

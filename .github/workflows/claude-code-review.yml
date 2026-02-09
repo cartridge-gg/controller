@@ -27,3 +27,4 @@ jobs:
           # CLAUDE.md is a symlink to AGENTS.md in this repo; keep repo rules there.
           claude_args: |
             --max-turns 4
+            --allowed-tools Bash
