@@ -16,7 +16,7 @@ import SessionConnector from "@cartridge/connector/session";
 import { HeadlessLogin } from "components/HeadlessLogin";
 
 const Header = () => {
-  const { connect, connectors } = useConnect();
+  const { connect, connectAsync, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { chain, chains } = useNetwork();
   const { address, status } = useAccount();
@@ -53,6 +53,37 @@ const Header = () => {
 
     return () => clearInterval(interval);
   }, [controllerConnector]);
+
+  // Headless flows call `controller.connect({ username, signer })` directly, which bypasses
+  // starknet-react's active connector selection. When headless completes, sync by connecting
+  // the controller connector so the app/header updates.
+  useEffect(() => {
+    const controller = controllerConnector.controller;
+
+    const handleApproved = () => {
+      if (address) {
+        return;
+      }
+
+      void connectAsync({ connector: controllerConnector }).catch((error) => {
+        console.error(
+          "Failed to sync controller connection after headless flow:",
+          error,
+        );
+      });
+    };
+
+    const unsubscribe =
+      controller.onHeadlessApprovalComplete?.(handleApproved) ?? undefined;
+
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      } else {
+        controller.offHeadlessApprovalComplete?.(handleApproved);
+      }
+    };
+  }, [controllerConnector, connectAsync, address]);
 
   const sessionConnector = useMemo(() => {
     try {

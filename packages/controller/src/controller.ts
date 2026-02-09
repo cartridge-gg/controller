@@ -287,6 +287,7 @@ export default class ControllerProvider extends BaseProvider {
             this.iframes.keychain,
           );
           this.emitAccountsChanged([response.address]);
+          this.emitHeadlessApprovalComplete(this.account);
           return this.account;
         }
 

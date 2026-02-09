@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useConnect } from "@starknet-react/core";
 import { controllerConnector } from "./providers/StarknetProvider";
 
 type AuthMethod = "passkey" | "metamask";
@@ -12,8 +11,6 @@ interface EthereumProvider {
 }
 
 export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
-  const { connectAsync } = useConnect();
-  const { address } = useAccount();
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState<AuthMethod | null>(null);
   const [result, setResult] = useState<{
@@ -45,17 +42,17 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
 
     try {
       const controller = await prepareHeadlessConnect();
-      await controller.connect({
+      const account = await controller.connect({
         username,
         signer: "webauthn",
       });
-
-      // Sync starknet-react connection state after headless connect completes.
-      await connectAsync({ connector: controllerConnector });
+      if (!account) {
+        throw new Error("Failed to connect");
+      }
       setResult({
         success: true,
         message: "Successfully authenticated with Passkey!",
-        address,
+        address: account.address,
       });
     } catch (error: unknown) {
       setResult({
@@ -93,17 +90,17 @@ export function HeadlessLogin({ onStart }: { onStart?: () => void }) {
       }
 
       const controller = await prepareHeadlessConnect();
-      await controller.connect({
+      const account = await controller.connect({
         username,
         signer: "metamask",
       });
-
-      // Sync starknet-react connection state after headless connect completes.
-      await connectAsync({ connector: controllerConnector });
+      if (!account) {
+        throw new Error("Failed to connect");
+      }
       setResult({
         success: true,
         message: "Successfully authenticated with MetaMask!",
-        address,
+        address: account.address,
       });
     } catch (error: unknown) {
       setResult({
