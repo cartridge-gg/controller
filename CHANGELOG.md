@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.13.5] - 2026-02-10
+
+### ✨ New Features
+- **@cartridge/controller**: Added headless mode support to controller SDK for seamless authentication, allowing `connect({ username, signer, password? })` with hidden keychain iframe and UI-less authentication flows (#2315)
+- **@cartridge/controller**: Added `close()` method to ControllerProvider for programmatic cleanup of controller instances (#2373)
+- **@cartridge/controller**: Moved `asWalletStandard()` method from connector to controller package, enabling wallet standard usage without starknet-react dependency (#2364)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced session management with exposed session GUID fields (`allowedPoliciesRoot`, `metadataHash`, `sessionKeyGuid`, `guardianKeyGuid`) in keychain callback payloads for registered sessions (#2396)
+- **@cartridge/keychain**: Consolidated policy handling by refactoring `toWasmPolicies` into single source of truth for improved consistency (#2394)
+- **@cartridge/keychain**: Enhanced quests and achievements display to only show tabs when game/application supports them (#2392)
+- **@cartridge/keychain**: Improved starterpack purchase UI to always show quantity in purchase button for better user clarity (#2390)
+- **@cartridge/connector**: Improved disconnect handling to keep `@starknet-react/core` state in sync with controller state (#2315)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed session authentication to properly disconnect and re-authenticate when session `rpc_url` differs from stored controller, ensuring correct chain targeting (#2395)
+- **@cartridge/controller**: Enhanced iframe security by hardening keychain iframe loading with URL validation, origin pinning, and reduced feature grants by default (#2384)
+- **@cartridge/keychain**: Added keychain CSP/security headers and removed inline scripts from index.html for improved security posture (#2384)
+
+### 📦 Dependencies
+- **controller-rs**: Updated to v0.9.3 for improved backend functionality (#2397)
+
 ## [0.13.4] - 2026-02-06
 
 ### 🐛 Bug Fixes
