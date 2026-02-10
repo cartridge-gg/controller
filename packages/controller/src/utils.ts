@@ -8,6 +8,7 @@ import {
   constants,
   getChecksumAddress,
   hash,
+  merkle,
   shortString,
   typedData,
   TypedDataRevision,
@@ -98,7 +99,7 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
  * See: https://github.com/cartridge-gg/controller/issues/2357
  */
 export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
-  return [
+  const result: Policy[] = [
     ...Object.entries(policies.contracts ?? {})
       .sort(([a], [b]) => a.toLowerCase().localeCompare(b.toLowerCase()))
       .flatMap(([target, { methods }]) =>
@@ -156,6 +157,49 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
         a.scope_hash.toString().localeCompare(b.scope_hash.toString()),
       ),
   ];
+
+  const leafHashes = result.map((p) => policyLeafHash(p));
+  const root =
+    leafHashes.length > 0
+      ? new merkle.MerkleTree(leafHashes, hash.computePoseidonHash).root
+      : "0x0";
+  console.log(`[toWasmPolicies] allowed_policies_root: ${root}`);
+
+  return result;
+}
+
+// Type hashes matching controller-rs/account_sdk/src/account/session/policy.rs
+const CALL_TYPE_HASH = hash.getSelectorFromName(
+  '"Allowed Method"("Contract Address":"ContractAddress","selector":"selector")',
+);
+const TYPED_DATA_TYPE_HASH = hash.getSelectorFromName(
+  '"Allowed Type"("Scope Hash":"felt")',
+);
+
+function policyLeafHash(policy: Policy): string {
+  if ("scope_hash" in policy) {
+    // TypedDataPolicy
+    if (!policy.authorized) return "0x0";
+    return hash.computePoseidonHashOnElements([
+      TYPED_DATA_TYPE_HASH,
+      policy.scope_hash,
+    ]);
+  }
+  if ("spender" in policy) {
+    // ApprovalPolicy — always authorized, maps to CallPolicy(target, approve_selector)
+    return hash.computePoseidonHashOnElements([
+      CALL_TYPE_HASH,
+      policy.target,
+      hash.getSelectorFromName("approve"),
+    ]);
+  }
+  // CallPolicy
+  if (!policy.authorized) return "0x0";
+  return hash.computePoseidonHashOnElements([
+    CALL_TYPE_HASH,
+    policy.target,
+    policy.method,
+  ]);
 }
 
 export function toArray<T>(val: T | T[]): T[] {
