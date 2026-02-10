@@ -8,6 +8,7 @@ import {
 
 import { useConnection } from "@/hooks/connection";
 import { CheckIcon, HeaderInner } from "@cartridge/ui";
+import type { JsFelt } from "@cartridge/controller-wasm/controller";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Failure } from "./failure";
@@ -19,7 +20,10 @@ type SessionResponse = {
   expiresAt: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
-  allowedPoliciesRoot?: string;
+  allowedPoliciesRoot?: JsFelt;
+  metadataHash?: JsFelt;
+  sessionKeyGuid?: JsFelt;
+  guardianKeyGuid?: JsFelt;
 };
 
 type SessionQueryParams = {
@@ -162,6 +166,9 @@ export function Session() {
             alreadyRegistered: true,
             expiresAt: String(session.session.expiresAt),
             allowedPoliciesRoot: session.allowedPoliciesRoot,
+            metadataHash: session.session.metadataHash,
+            sessionKeyGuid: session.session.sessionKeyGuid,
+            guardianKeyGuid: session.session.guardianKeyGuid,
           });
 
           return;
