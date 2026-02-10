@@ -5,21 +5,37 @@ import { connect } from "./connect";
 import { deployFactory } from "./deploy";
 import { estimateInvokeFee } from "./estimate";
 import { execute } from "./execute";
+import type {
+  HeadlessConnectParent,
+  HeadlessConnectionState,
+} from "./headless";
+import { headlessConnect } from "./headless";
 import { probe } from "./probe";
 import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
-import { StarterpackOptions } from "@cartridge/controller";
+import type {
+  AuthOptions,
+  ConnectOptions,
+  SessionPolicies,
+  StarterpackOptions,
+} from "@cartridge/controller";
+import { waitForHeadlessApprovalRequest } from "./headless-requests";
+import { createConnectHandler } from "./connect-routing";
 
 export type { ControllerError } from "./execute";
 
-export function connectToController<ParentMethods extends object>({
+export function connectToController<
+  ParentMethods extends HeadlessConnectParent,
+>({
   setRpcUrl,
   setController,
   navigate,
   propagateError,
   errorDisplayMode,
+  getParent,
+  getConnectionState,
 }: {
   setRpcUrl: (url: string) => void;
   setController: (controller?: Controller) => void;
@@ -29,15 +45,43 @@ export function connectToController<ParentMethods extends object>({
   ) => void;
   propagateError?: boolean;
   errorDisplayMode?: "modal" | "notification" | "silent";
+  getParent: () => ParentMethods | undefined;
+  getConnectionState: () => HeadlessConnectionState;
 }) {
+  const uiConnect = connect({
+    navigate,
+    setRpcUrl,
+  });
+
+  const headlessConnectImpl = headlessConnect({
+    setController,
+    getParent,
+    getConnectionState,
+  });
+
   return connectToParent<ParentMethods>({
     methods: {
-      connect: normalize(
-        connect({
-          navigate,
-          setRpcUrl,
-        }),
-      ),
+      connect: normalize((origin) => {
+        const uiConnectFn = uiConnect();
+        const headlessConnectFn = headlessConnectImpl(origin);
+
+        return async (
+          policiesOrOptions?: SessionPolicies | AuthOptions | ConnectOptions,
+          rpcUrl?: string,
+          signupOptions?: AuthOptions,
+        ) => {
+          const handler = createConnectHandler({
+            uiConnect: uiConnectFn,
+            headlessConnect: headlessConnectFn,
+            navigate,
+            getParent,
+            waitForApproval: waitForHeadlessApprovalRequest,
+            getConnectedAddress: () => window.controller?.address?.(),
+          });
+
+          return handler(policiesOrOptions, rpcUrl, signupOptions);
+        };
+      }),
       deploy: () => deployFactory({ navigate }),
       execute: normalize(
         execute({ navigate, propagateError, errorDisplayMode }),

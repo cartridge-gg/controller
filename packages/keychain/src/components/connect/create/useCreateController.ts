@@ -22,6 +22,7 @@ import {
   useAccountQuery,
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
+import { getAddress } from "ethers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { constants, shortString } from "starknet";
@@ -36,12 +37,15 @@ import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
-import { processPolicies } from "../CreateSession";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
-import { ParsedSessionPolicies, hasApprovalPolicies } from "@/hooks/session";
+import { ParsedSessionPolicies } from "@/hooks/session";
 import { safeRedirect } from "@/utils/url-validator";
+import {
+  canAutoCreateSession,
+  createVerifiedSession,
+} from "@/utils/connection/session-creation";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -118,12 +122,11 @@ const createSession = async ({
   }
 
   try {
-    // Use a default duration for verified sessions (24 hours)
-    const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-    const expiresAt = duration + now();
-
-    const processedPolicies = processPolicies(policies, false);
-    await controller.createSession(origin, expiresAt, processedPolicies);
+    await createVerifiedSession({
+      controller,
+      origin,
+      policies,
+    });
     currentParams.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -160,14 +163,24 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController, policies, closeModal } =
-    useConnection();
+  const {
+    origin,
+    rpcUrl,
+    chainId,
+    setController,
+    policies,
+    closeModal,
+    isConfigLoading,
+    isPoliciesResolved,
+  } = useConnection();
 
   // Import route params and completion for connection resolution
   const params = useMemo(() => {
     return parseConnectParams(searchParams);
   }, [searchParams]);
   const handleCompletion = useRouteCompletion();
+  const hasPolicies = !!policies;
+  const shouldAutoCreateSession = canAutoCreateSession(policies);
 
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
@@ -342,9 +355,6 @@ export function useCreateController({
         // }
 
         // Normal embedded flow: handle session creation for auto-close cases
-        const shouldAutoCreateSession =
-          !policies || (policies.verified && !hasApprovalPolicies(policies));
-
         if (shouldAutoCreateSession) {
           await createSession({
             controller,
@@ -370,6 +380,7 @@ export function useCreateController({
       params,
       closeModal,
       searchParams,
+      shouldAutoCreateSession,
     ],
   );
 
@@ -496,7 +507,18 @@ export function useCreateController({
     }) => {
       // Verify correct EVM wallet account is selected
       if (authenticationMethod !== "password") {
-        const connectedAddress = signerToAddress(loginResponse.signer);
+        const normalizeAddress = (address?: string) => {
+          if (!address) return undefined;
+          try {
+            return getAddress(address);
+          } catch {
+            return address.toLowerCase();
+          }
+        };
+
+        const connectedAddress = normalizeAddress(
+          signerToAddress(loginResponse.signer),
+        );
         const possibleSigners = controller.signers?.filter(
           (signer) =>
             credentialToAuth(signer.metadata as CredentialMetadata) ===
@@ -514,8 +536,9 @@ export function useCreateController({
         if (
           !possibleSigners.find(
             (signer) =>
-              credentialToAddress(signer.metadata as CredentialMetadata) ===
-              connectedAddress,
+              normalizeAddress(
+                credentialToAddress(signer.metadata as CredentialMetadata),
+              ) === connectedAddress,
           )
         ) {
           setChangeWallet(true);
@@ -562,9 +585,6 @@ export function useCreateController({
       // }
 
       // Normal embedded flow: handle session creation for auto-close cases
-      const shouldAutoCreateSession =
-        !policies || (policies.verified && !hasApprovalPolicies(policies));
-
       if (shouldAutoCreateSession) {
         await createSession({
           controller: loginRet.controller,
@@ -589,6 +609,7 @@ export function useCreateController({
       params,
       closeModal,
       searchParams,
+      shouldAutoCreateSession,
     ],
   );
 
@@ -616,7 +637,7 @@ export function useCreateController({
           if (!webauthnSigners || webauthnSigners.length === 0) {
             throw new Error("Signer not found for controller");
           }
-          await loginWithWebauthn(
+          const loginController = await loginWithWebauthn(
             controller,
             {
               signer: {
@@ -632,6 +653,21 @@ export function useCreateController({
             },
             !!isSlot,
           );
+          if (!loginController) {
+            throw new Error("Login failed");
+          }
+
+          if (shouldAutoCreateSession) {
+            await createSession({
+              controller: loginController,
+              origin,
+              policies,
+              params,
+              handleCompletion,
+              closeModal,
+              searchParams,
+            });
+          }
 
           // Handle redirect_url for webauthn
           const urlSearchParams = new URLSearchParams(window.location.search);
@@ -722,7 +758,14 @@ export function useCreateController({
       loginWithWalletConnect,
       loginWithExternalWallet,
       chainId,
+      origin,
       rpcUrl,
+      policies,
+      params,
+      handleCompletion,
+      closeModal,
+      searchParams,
+      shouldAutoCreateSession,
       finishLogin,
       passwordAuth,
       setWaitingForConfirmation,
@@ -911,5 +954,9 @@ export function useCreateController({
     signupOptions,
     authMethod,
     setAuthMethod,
+    shouldAutoCreateSession,
+    isConfigLoading,
+    isPoliciesResolved,
+    hasPolicies,
   };
 }

@@ -126,6 +126,7 @@ export class IFrame<CallSender extends {}> implements Modal {
       iframe: this.iframe,
       childOrigin: url.origin,
       methods: {
+        open: (_origin: string) => () => this.open(),
         close: (_origin: string) => () => this.close(),
         reload: (_origin: string) => () => window.location.reload(),
         ...methods,

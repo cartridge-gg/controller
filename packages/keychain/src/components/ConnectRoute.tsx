@@ -4,8 +4,11 @@ import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
-import { CreateSession, processPolicies } from "./connect/CreateSession";
-import { now } from "@/constants";
+import { CreateSession } from "./connect/CreateSession";
+import {
+  createVerifiedSession,
+  requiresSessionApproval,
+} from "@/utils/connection/session-creation";
 import {
   useRouteParams,
   useRouteCompletion,
@@ -21,7 +24,7 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, origin } = useConnection();
+  const { controller, policies, origin, isPoliciesResolved } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
 
   // Parse params and set RPC URL immediately
@@ -50,6 +53,12 @@ export function ConnectRoute() {
     [policies],
   );
 
+  const clearConnectParams = useCallback(() => {
+    const url = new URL(window.location.href);
+    url.search = "";
+    window.history.replaceState(null, "", url.toString());
+  }, []);
+
   const handleConnect = useCallback(async () => {
     if (!params || !controller) {
       return;
@@ -72,6 +81,7 @@ export function ConnectRoute() {
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
+    clearConnectParams();
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
@@ -104,7 +114,14 @@ export function ConnectRoute() {
     }
 
     handleCompletion();
-  }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
+  }, [
+    params,
+    controller,
+    clearConnectParams,
+    handleCompletion,
+    isStandalone,
+    redirectUrl,
+  ]);
 
   const handleSkip = useCallback(async () => {
     if (!params || !controller) {
@@ -126,6 +143,7 @@ export function ConnectRoute() {
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
+    clearConnectParams();
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
@@ -158,11 +176,22 @@ export function ConnectRoute() {
     }
 
     handleCompletion();
-  }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
+  }, [
+    params,
+    controller,
+    clearConnectParams,
+    handleCompletion,
+    isStandalone,
+    redirectUrl,
+  ]);
 
   // Handle cases where we can connect immediately (embedded mode only)
   useEffect(() => {
     if (!params || !controller || hasAutoConnected) {
+      return;
+    }
+
+    if (!isPoliciesResolved) {
       return;
     }
 
@@ -211,19 +240,14 @@ export function ConnectRoute() {
 
     // Bypass session approval screen for verified sessions in embedded mode
     // Note: This is a fallback - main logic is handled in useCreateController
-    if (policies.verified) {
-      if (hasTokenApprovals) {
-        return;
-      }
-
+    if (!requiresSessionApproval(policies)) {
       const createSessionForVerifiedPolicies = async () => {
         try {
-          // Use a default duration for verified sessions (24 hours)
-          const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-          const expiresAt = duration + now();
-
-          const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(origin, expiresAt, processedPolicies);
+          await createVerifiedSession({
+            controller,
+            origin,
+            policies,
+          });
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
@@ -250,6 +274,7 @@ export function ConnectRoute() {
     redirectUrl,
     hasAutoConnected,
     hasTokenApprovals,
+    isPoliciesResolved,
     origin,
   ]);
 

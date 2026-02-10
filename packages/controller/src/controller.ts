@@ -12,7 +12,7 @@ import { constants, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { KEYCHAIN_URL } from "./constants";
-import { NotReadyToConnect } from "./errors";
+import { HeadlessAuthenticationError, NotReadyToConnect } from "./errors";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
 import {
@@ -20,6 +20,7 @@ import {
   Chain,
   ConnectError,
   ConnectReply,
+  ConnectOptions,
   ControllerOptions,
   IFrames,
   Keychain,
@@ -228,8 +229,18 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async connect(
-    signupOptions?: AuthOptions,
+    options?: AuthOptions | ConnectOptions,
   ): Promise<WalletAccount | undefined> {
+    const connectOptions = Array.isArray(options) ? undefined : options;
+    const headless =
+      connectOptions?.username && connectOptions?.signer
+        ? {
+            username: connectOptions.username,
+            signer: connectOptions.signer,
+            password: connectOptions.password,
+          }
+        : undefined;
+
     if (!this.iframes) {
       return;
     }
@@ -241,21 +252,73 @@ export default class ControllerProvider extends BaseProvider {
     // Ensure iframe is created if using lazy loading
     if (!this.iframes.keychain) {
       this.iframes.keychain = this.createKeychainIframe();
-      // Wait for the keychain to be ready
-      await this.waitForKeychain();
     }
+
+    // Always wait for the keychain connection to be established
+    await this.waitForKeychain();
 
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    this.iframes.keychain.open();
-
     try {
+      if (headless) {
+        // Headless auth should not open the UI until the keychain determines
+        // user interaction is required (e.g. session approval).
+        const response = await this.keychain.connect({
+          username: headless.username,
+          signer: headless.signer,
+          password: headless.password,
+        });
+
+        if (response.code !== ResponseCodes.SUCCESS) {
+          throw new HeadlessAuthenticationError(
+            "message" in response && response.message
+              ? response.message
+              : "Headless authentication failed",
+          );
+        }
+
+        // Keychain will call onSessionCreated (awaitable) during headless connect,
+        // which probes and updates this.account. Keep a fallback for older keychains.
+        if (this.account) {
+          return this.account;
+        }
+
+        const address =
+          "address" in response && response.address ? response.address : null;
+        if (!address) {
+          throw new HeadlessAuthenticationError(
+            "Headless authentication failed",
+          );
+        }
+
+        this.account = new ControllerAccount(
+          this,
+          this.rpcUrl(),
+          address,
+          this.keychain,
+          this.options,
+          this.iframes.keychain,
+        );
+        this.emitAccountsChanged([address]);
+        return this.account;
+      }
+
+      // Only open modal if NOT headless
+      this.iframes.keychain.open();
+
       // Use connect() parameter if provided, otherwise fall back to constructor options
-      const effectiveOptions = signupOptions ?? this.options.signupOptions;
-      let response = await this.keychain.connect(effectiveOptions);
+      const effectiveOptions = Array.isArray(options)
+        ? options
+        : (connectOptions?.signupOptions ?? this.options.signupOptions);
+
+      // Pass options to keychain
+      let response = await this.keychain.connect({
+        signupOptions: effectiveOptions,
+      });
+
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -272,9 +335,25 @@ export default class ControllerProvider extends BaseProvider {
 
       return this.account;
     } catch (e) {
+      if (headless) {
+        if (e instanceof HeadlessAuthenticationError) {
+          throw e;
+        }
+
+        const message =
+          e instanceof Error
+            ? e.message
+            : typeof e === "object" && e && "message" in e
+              ? String((e as any).message)
+              : "Headless authentication failed";
+        throw new HeadlessAuthenticationError(message);
+      }
       console.log(e);
     } finally {
-      this.iframes.keychain.close();
+      // Only close modal if it was opened (not headless)
+      if (!headless) {
+        this.iframes.keychain.close();
+      }
     }
   }
 
@@ -308,12 +387,22 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async disconnect() {
+    this.account = undefined;
+    this.emitAccountsChanged([]);
+
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("lastUsedConnector");
+      }
+    } catch {
+      // Ignore environments where localStorage is unavailable.
+    }
+
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    this.account = undefined;
     return this.keychain.disconnect();
   }
 
@@ -679,7 +768,9 @@ export default class ControllerProvider extends BaseProvider {
     const iframe = new KeychainIFrame({
       ...this.options,
       rpcUrl: this.rpcUrl(),
-      onClose: this.keychain?.reset,
+      onClose: () => {
+        this.keychain?.reset?.();
+      },
       onConnect: (keychain) => {
         this.keychain = keychain;
       },
@@ -690,8 +781,12 @@ export default class ControllerProvider extends BaseProvider {
       encryptedBlob: encryptedBlob ?? undefined,
       username: username,
       onSessionCreated: async () => {
-        // Re-probe to establish connection now that storage access is granted and session created
-        await this.probe();
+        const previousAddress = this.account?.address;
+        const account = await this.probe();
+
+        if (account?.address && account.address !== previousAddress) {
+          this.emitAccountsChanged([account.address]);
+        }
       },
     });
 

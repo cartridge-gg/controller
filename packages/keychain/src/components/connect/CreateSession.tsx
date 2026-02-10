@@ -10,6 +10,7 @@ import {
   useCreateSession,
   hasApprovalPolicies,
 } from "@/hooks/session";
+import { processPolicies } from "@/utils/session/policies";
 import type { ControllerError } from "@/utils/connection";
 import {
   Button,
@@ -305,42 +306,5 @@ const CreateSessionLayout = ({
   );
 };
 
-/**
- * Deep copy the policies and remove the id fields
- * @param policies The policies to clean
- * @param toggleOff Optional. When true, sets all policies to unauthorized (false)
- */
-export const processPolicies = (
-  policies: ParsedSessionPolicies,
-  toggleOff?: boolean,
-): ParsedSessionPolicies => {
-  // Deep copy the policies
-  const processPolicies: ParsedSessionPolicies = JSON.parse(
-    JSON.stringify(policies),
-  );
-
-  // Remove the id fields from the methods and optionally set authorized to false
-  if (processPolicies.contracts) {
-    Object.values(processPolicies.contracts).forEach((contract) => {
-      contract.methods.forEach((method) => {
-        delete method.id;
-        if (toggleOff !== undefined) {
-          method.authorized = !toggleOff;
-        }
-      });
-    });
-  }
-
-  // Remove the id fields from the messages and optionally set authorized to false
-  if (processPolicies.messages) {
-    processPolicies.messages.forEach((message) => {
-      delete message.id;
-      if (toggleOff !== undefined) {
-        message.authorized = !toggleOff;
-      }
-    });
-  }
-
-  // Return the cleaned policies
-  return processPolicies;
-};
+// Backwards compat: other modules import `processPolicies` from this component.
+export { processPolicies };

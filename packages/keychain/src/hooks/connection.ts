@@ -6,6 +6,7 @@ import {
 } from "@/components/provider/connection";
 import { useNavigation } from "@/context/navigation";
 import { connectToController } from "@/utils/connection";
+import type { HeadlessConnectionState } from "@/utils/connection/headless";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -71,7 +72,16 @@ const TOKEN_ADDRESSES: Record<Token, string> = {
   usdt: USDT_CONTRACT_ADDRESS,
 };
 
+type ParentCallbackMethods = {
+  // Session creation callback (for standalone auth flow)
+  onSessionCreated?: () => Promise<void>;
+
+  // Starterpack play callback (for purchase completion flow)
+  onStarterpackPlay?: () => Promise<void>;
+};
+
 export type ParentMethods = AsyncMethodReturns<{
+  open: () => Promise<void>;
   close: () => Promise<void>;
   reload: () => Promise<void>;
 
@@ -108,13 +118,8 @@ export type ParentMethods = AsyncMethodReturns<{
     txHash: string,
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
-
-  // Session creation callback (for standalone auth flow)
-  onSessionCreated?: () => Promise<void>;
-
-  // Starterpack play callback (for purchase completion flow)
-  onStarterpackPlay?: () => Promise<void>;
-}>;
+}> &
+  ParentCallbackMethods;
 
 /**
  * Parses policies from a URL string.
@@ -190,13 +195,23 @@ function getConfigChainPolicies(
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
+  const parentRef = useRef<ParentMethods>();
   const [origin, setOrigin] = useState<string | undefined>(undefined);
   const [rpcUrl, setRpcUrl] = useState<string>(
     import.meta.env.VITE_RPC_MAINNET,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
+  const [isPoliciesResolved, setIsPoliciesResolved] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
-  const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
+  const initialPreset =
+    typeof window !== "undefined"
+      ? window.location.pathname.startsWith("/slot")
+        ? "slot"
+        : new URLSearchParams(window.location.search).get("preset")
+      : null;
+  const [isConfigLoading, setIsConfigLoading] = useState<boolean>(
+    () => !!initialPreset,
+  );
   const [isMainnet, setIsMainnet] = useState<boolean>(false);
   const [configData, setConfigData] = useState<Record<string, unknown> | null>(
     null,
@@ -208,6 +223,14 @@ export function useConnectionValue() {
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
+  const connectionStateRef = useRef<HeadlessConnectionState>({
+    origin,
+    chainId,
+    rpcUrl,
+    policies,
+    isPoliciesResolved,
+    isConfigLoading,
+  });
   const [onModalClose, setOnModalCloseInternal] = useState<
     (() => void) | undefined
   >();
@@ -333,6 +356,22 @@ export function useConnectionValue() {
     };
 
     if (rpcUrl) {
+      const inferChainIdFromRpcUrl = (url: string) => {
+        const lower = url.toLowerCase();
+        if (lower.includes("sepolia")) {
+          return constants.StarknetChainId.SN_SEPOLIA;
+        }
+        if (lower.includes("mainnet")) {
+          return constants.StarknetChainId.SN_MAIN;
+        }
+        return undefined;
+      };
+
+      const inferredChainId = inferChainIdFromRpcUrl(rpcUrl);
+      if (inferredChainId) {
+        setChainId(inferredChainId);
+      }
+
       fetchChainId();
     }
   }, [rpcUrl]);
@@ -593,7 +632,12 @@ export function useConnectionValue() {
     const { policies, preset } = urlParams;
 
     // Always prioritize preset policies over URL policies
-    if (preset && !isConfigLoading) {
+    if (preset) {
+      if (isConfigLoading || !chainId) {
+        setIsPoliciesResolved(false);
+        return;
+      }
+
       const configPolicies = getConfigChainPolicies(
         configData,
         chainId,
@@ -602,8 +646,12 @@ export function useConnectionValue() {
 
       if (configPolicies) {
         setPolicies(configPolicies);
+        setIsPoliciesResolved(true);
         return;
       }
+
+      setIsPoliciesResolved(true);
+      return;
     }
 
     // Fall back to URL policies if no preset or preset has no policies
@@ -611,9 +659,26 @@ export function useConnectionValue() {
     if (urlPolicies) {
       setPolicies(urlPolicies);
     }
+
+    setIsPoliciesResolved(true);
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
   useThemeEffect({ theme, assetUrl: "" });
+
+  useEffect(() => {
+    connectionStateRef.current = {
+      origin,
+      chainId,
+      rpcUrl,
+      policies,
+      isPoliciesResolved,
+      isConfigLoading,
+    };
+  }, [origin, chainId, rpcUrl, policies, isPoliciesResolved, isConfigLoading]);
+
+  useEffect(() => {
+    parentRef.current = parent;
+  }, [parent]);
 
   useEffect(() => {
     if (isIframe()) {
@@ -623,6 +688,8 @@ export function useConnectionValue() {
         navigate,
         propagateError: urlParams.propagateError,
         errorDisplayMode: urlParams.errorDisplayMode,
+        getParent: () => parentRef.current,
+        getConnectionState: () => connectionStateRef.current,
       });
 
       connection.promise
@@ -662,6 +729,7 @@ export function useConnectionValue() {
       setOrigin(appOrigin);
 
       setParent({
+        open: async () => {},
         close: async () => {},
         reload: async () => {},
         externalDetectWallets: iframeMethods.externalDetectWallets(appOrigin),
@@ -717,7 +785,7 @@ export function useConnectionValue() {
     if (!parent) return;
 
     try {
-      await parent.close();
+      await parent.open();
     } catch (e) {
       console.error("Failed to open modal:", e);
     }
@@ -809,6 +877,7 @@ export function useConnectionValue() {
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
     isConfigLoading,
+    isPoliciesResolved,
     isMainnet,
     verified,
     chainId,
