@@ -158,48 +158,11 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
       ),
   ];
 
-  const leafHashes = result.map((p) => policyLeafHash(p));
-  const root =
-    leafHashes.length > 0
-      ? new merkle.MerkleTree(leafHashes, hash.computePoseidonHash).root
-      : "0x0";
-  console.log(`[toWasmPolicies] allowed_policies_root: ${root}`);
+  console.log(
+    `[toWasmPolicies] allowed_policies_root: ${computePoliciesRoot(result)}`,
+  );
 
   return result;
-}
-
-// Type hashes matching controller-rs/account_sdk/src/account/session/policy.rs
-const CALL_TYPE_HASH = hash.getSelectorFromName(
-  '"Allowed Method"("Contract Address":"ContractAddress","selector":"selector")',
-);
-const TYPED_DATA_TYPE_HASH = hash.getSelectorFromName(
-  '"Allowed Type"("Scope Hash":"felt")',
-);
-
-function policyLeafHash(policy: Policy): string {
-  if ("scope_hash" in policy) {
-    // TypedDataPolicy
-    if (!policy.authorized) return "0x0";
-    return hash.computePoseidonHashOnElements([
-      TYPED_DATA_TYPE_HASH,
-      policy.scope_hash,
-    ]);
-  }
-  if ("spender" in policy) {
-    // ApprovalPolicy — always authorized, maps to CallPolicy(target, approve_selector)
-    return hash.computePoseidonHashOnElements([
-      CALL_TYPE_HASH,
-      policy.target,
-      hash.getSelectorFromName("approve"),
-    ]);
-  }
-  // CallPolicy
-  if (!policy.authorized) return "0x0";
-  return hash.computePoseidonHashOnElements([
-    CALL_TYPE_HASH,
-    policy.target,
-    policy.method,
-  ]);
 }
 
 export function toArray<T>(val: T | T[]): T[] {
@@ -307,4 +270,27 @@ export function sanitizeImageSrc(src: string): string {
   }
   // Fallback image (transparent pixel or default)
   return "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+}
+
+// Mirrors leaf hash computation from controller-rs account_sdk/src/account/session/policy.rs
+const CALL_TH = hash.getSelectorFromName(
+  '"Allowed Method"("Contract Address":"ContractAddress","selector":"selector")',
+);
+const TD_TH = hash.getSelectorFromName('"Allowed Type"("Scope Hash":"felt")');
+const APPROVE_SEL = hash.getSelectorFromName("approve");
+
+function computePoliciesRoot(policies: Policy[]): string {
+  if (!policies.length) return "0x0";
+  const leaves = policies.map((p) =>
+    "scope_hash" in p
+      ? p.authorized
+        ? hash.computePoseidonHashOnElements([TD_TH, p.scope_hash])
+        : "0x0"
+      : "spender" in p
+        ? hash.computePoseidonHashOnElements([CALL_TH, p.target, APPROVE_SEL])
+        : p.authorized
+          ? hash.computePoseidonHashOnElements([CALL_TH, p.target, p.method])
+          : "0x0",
+  );
+  return new merkle.MerkleTree(leaves, hash.computePoseidonHash).root;
 }
