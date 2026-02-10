@@ -1,3 +1,6 @@
+import { getPromiseWithResolvers } from "@/utils/promises";
+import { cleanupCallbacks, getCallbacks, storeCallbacks } from "./callbacks";
+
 const HEADLESS_REQUEST_TTL_MS = 5 * 60 * 1000;
 
 export type HeadlessApprovalRequest = {
@@ -7,22 +10,34 @@ export type HeadlessApprovalRequest = {
 };
 
 const pendingRequests = new Map<string, HeadlessApprovalRequest>();
-const pendingWaiters = new Map<
-  string,
-  {
-    promise: Promise<void>;
-    resolve: () => void;
-    reject: (error: Error) => void;
-    timeoutId?: ReturnType<typeof setTimeout>;
-  }
->();
+
+type HeadlessApprovalWaiter = {
+  promise: Promise<void>;
+  resolve: () => void;
+  reject: (error: Error) => void;
+  timeoutId?: ReturnType<typeof setTimeout>;
+};
+
+const HEADLESS_WAITER_KEY = "__cartridge_headless_waiter";
 
 const generateRequestId = () => {
+  const prefix = "headless_";
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
+    return `${prefix}${crypto.randomUUID()}`;
   }
 
-  return `headless_${Math.random().toString(36).slice(2)}_${Date.now()}`;
+  return `${prefix}${Math.random().toString(36).slice(2)}_${Date.now()}`;
+};
+
+const getWaiter = (id: string): HeadlessApprovalWaiter | undefined => {
+  const callbacks = getCallbacks(id) as Record<string, unknown> | undefined;
+  return callbacks?.[HEADLESS_WAITER_KEY] as HeadlessApprovalWaiter | undefined;
+};
+
+const setWaiter = (id: string, waiter: HeadlessApprovalWaiter) => {
+  storeCallbacks(id, {
+    [HEADLESS_WAITER_KEY]: waiter,
+  });
 };
 
 export const createHeadlessApprovalRequest = (): HeadlessApprovalRequest => {
@@ -57,7 +72,7 @@ export const completeHeadlessApprovalRequest = (id: string) => {
 };
 
 export const waitForHeadlessApprovalRequest = (id: string): Promise<void> => {
-  const existing = pendingWaiters.get(id);
+  const existing = getWaiter(id);
   if (existing) {
     return existing.promise;
   }
@@ -67,26 +82,16 @@ export const waitForHeadlessApprovalRequest = (id: string): Promise<void> => {
     return Promise.reject(new Error("Headless approval expired"));
   }
 
-  let resolve!: () => void;
-  let reject!: (error: Error) => void;
-  const promise = new Promise<void>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-
-  const waiter: {
-    promise: Promise<void>;
-    resolve: () => void;
-    reject: (error: Error) => void;
-    timeoutId?: ReturnType<typeof setTimeout>;
-  } = { promise, resolve, reject };
-  pendingWaiters.set(id, waiter);
+  const { promise, resolve, reject } = getPromiseWithResolvers<void>();
+  const waiter: HeadlessApprovalWaiter = { promise, resolve, reject };
+  setWaiter(id, waiter);
 
   const msUntilExpiry = Math.max(0, request.expiresAt - Date.now());
   const timeoutId = setTimeout(() => {
-    if (!pendingWaiters.has(id)) return;
-    pendingWaiters.get(id)?.reject(new Error("Headless approval expired"));
-    pendingWaiters.delete(id);
+    const pending = getWaiter(id);
+    if (!pending) return;
+    pending.reject(new Error("Headless approval expired"));
+    cleanupCallbacks(id);
   }, msUntilExpiry);
 
   // Store the timeout id after creation (for clearTimeout on resolve/reject).
@@ -96,23 +101,23 @@ export const waitForHeadlessApprovalRequest = (id: string): Promise<void> => {
 };
 
 export const resolveHeadlessApprovalRequest = (id: string) => {
-  const waiter = pendingWaiters.get(id);
+  const waiter = getWaiter(id);
   if (!waiter) return;
   if (waiter.timeoutId) {
     clearTimeout(waiter.timeoutId);
   }
   waiter.resolve();
-  pendingWaiters.delete(id);
+  cleanupCallbacks(id);
 };
 
 export const rejectHeadlessApprovalRequest = (id: string, error: Error) => {
-  const waiter = pendingWaiters.get(id);
+  const waiter = getWaiter(id);
   if (!waiter) return;
   if (waiter.timeoutId) {
     clearTimeout(waiter.timeoutId);
   }
   waiter.reject(error);
-  pendingWaiters.delete(id);
+  cleanupCallbacks(id);
 };
 
 const cleanupExpiredRequests = () => {
