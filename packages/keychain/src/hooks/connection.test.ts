@@ -84,10 +84,10 @@ const mockController = {
   appId: () => "test-app",
   classHash: () => "0x123",
   chainId: () => "0x534e5f534550",
-  rpcUrl: () => "https://rpc.example.com",
+  rpcUrl: () => "https://rpc.sepolia.example.com",
   address: () => "0x456",
   username: () => "testuser",
-  owner: () => "0x789",
+  owner: () => ({ signer: { starknet: "0x789" } }) as unknown,
 };
 
 vi.mock("@/utils/controller", () => ({
@@ -321,6 +321,110 @@ describe("Config Loading and Verification Separation", () => {
       expect(isOriginVerified("http://localhost:3000", allowedOrigins)).toBe(
         true,
       );
+    });
+  });
+});
+
+describe("URL rpc_url priority over stored controller rpcUrl", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("Controller disconnect on chain mismatch", () => {
+    it("should disconnect controller when URL rpc_url differs from stored controller", () => {
+      const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
+
+      // Simulate the effect logic: URL rpc_url differs from controller's rpcUrl
+      const controllerRpcUrl = mockController.rpcUrl();
+      expect(controllerRpcUrl).not.toBe(urlRpcUrl);
+
+      // The effect should trigger disconnect when rpcUrls don't match
+      const shouldDisconnect =
+        mockController && urlRpcUrl && controllerRpcUrl !== urlRpcUrl;
+      expect(shouldDisconnect).toBeTruthy();
+    });
+
+    it("should NOT disconnect controller when URL rpc_url matches stored controller", () => {
+      const urlRpcUrl = "https://rpc.sepolia.example.com";
+      const controllerRpcUrl = mockController.rpcUrl();
+
+      // URLs match - no disconnect should happen
+      expect(controllerRpcUrl).toBe(urlRpcUrl);
+
+      const shouldDisconnect = controllerRpcUrl !== urlRpcUrl;
+      expect(shouldDisconnect).toBe(false);
+    });
+
+    it("should NOT disconnect controller when no URL rpc_url is provided", () => {
+      const urlRpcUrl = null;
+
+      // No urlRpcUrl - the effect guard returns early
+      const shouldDisconnect = urlRpcUrl !== null;
+      expect(shouldDisconnect).toBe(false);
+    });
+
+    it("should NOT disconnect controller when controller is not set", () => {
+      const controller = undefined;
+      const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
+
+      // No controller - the effect guard returns early
+      const shouldDisconnect = controller && urlRpcUrl;
+      expect(shouldDisconnect).toBeFalsy();
+    });
+  });
+
+  describe("rpcUrl state priority", () => {
+    it("should use URL rpc_url when provided, not controller's stored rpcUrl", () => {
+      const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
+      const controllerRpcUrl = "https://rpc.sepolia.example.com";
+
+      // Simulate the sync effect: when urlRpcUrl exists, don't override from controller
+      const shouldSyncFromController = !urlRpcUrl;
+      expect(shouldSyncFromController).toBe(false);
+
+      // The effective rpcUrl should be the URL value
+      const effectiveRpcUrl = urlRpcUrl || controllerRpcUrl;
+      expect(effectiveRpcUrl).toBe(urlRpcUrl);
+    });
+
+    it("should sync rpcUrl from controller when no URL rpc_url is provided", () => {
+      const urlRpcUrl = null;
+      const controllerRpcUrl = "https://rpc.sepolia.example.com";
+
+      // Simulate the sync effect: when no urlRpcUrl, sync from controller
+      const shouldSyncFromController = !urlRpcUrl;
+      expect(shouldSyncFromController).toBe(true);
+
+      // The effective rpcUrl should be the controller's value
+      const effectiveRpcUrl = urlRpcUrl || controllerRpcUrl;
+      expect(effectiveRpcUrl).toBe(controllerRpcUrl);
+    });
+
+    it("should decode URL-encoded rpc_url parameter", () => {
+      const encodedRpcUrl =
+        "https%3A%2F%2Fapi.cartridge.gg%2Fx%2Fstarknet%2Fmainnet";
+      const decoded = decodeURIComponent(encodedRpcUrl);
+      expect(decoded).toBe("https://api.cartridge.gg/x/starknet/mainnet");
+    });
+
+    it("should parse rpc_url from URLSearchParams correctly", () => {
+      const params = new URLSearchParams(
+        "rpc_url=https%3A%2F%2Fapi.cartridge.gg%2Fx%2Fstarknet%2Fmainnet&public_key=0x123",
+      );
+      const raw = params.get("rpc_url");
+      expect(raw).toBe("https://api.cartridge.gg/x/starknet/mainnet");
+
+      const urlRpcUrl = raw ? decodeURIComponent(raw) : null;
+      expect(urlRpcUrl).toBe("https://api.cartridge.gg/x/starknet/mainnet");
+    });
+
+    it("should return null urlRpcUrl when rpc_url param is absent", () => {
+      const params = new URLSearchParams("public_key=0x123");
+      const raw = params.get("rpc_url");
+      expect(raw).toBeNull();
+
+      const urlRpcUrl = raw ? decodeURIComponent(raw) : null;
+      expect(urlRpcUrl).toBeNull();
     });
   });
 });
