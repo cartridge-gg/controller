@@ -33,6 +33,7 @@ import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { toJsFeeEstimate } from "./fee";
+import { clearControllerWasmStorage } from "./controller-wasm-storage";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -72,8 +73,12 @@ export default class Controller {
   }
 
   async disconnect() {
-    await this.cartridge.disconnect();
-    delete window.controller;
+    try {
+      await this.cartridge.disconnect();
+    } finally {
+      clearControllerWasmStorage(window.localStorage);
+      delete window.controller;
+    }
   }
 
   async register(registerInput: JsRegister): Promise<JsRegisterResponse> {
