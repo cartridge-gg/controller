@@ -129,7 +129,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
             return {
               target,
               method: hash.getSelectorFromName(m.entrypoint),
-              authorized: m.authorized,
+              authorized: !!m.authorized,
             };
           }),
       ),
@@ -149,7 +149,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
 
         return {
           scope_hash: hash.computePoseidonHash(domainHash, typeHash),
-          authorized: p.authorized,
+          authorized: !!p.authorized,
         };
       })
       .sort((a, b) =>
