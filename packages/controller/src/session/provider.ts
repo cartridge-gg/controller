@@ -23,6 +23,7 @@ interface SessionRegistration {
   guardianKeyGuid: string;
   metadataHash: string;
   sessionKeyGuid: string;
+  allowedPoliciesRoot?: string;
 }
 
 export type SessionOptions = {

@@ -239,13 +239,36 @@ export function useConnectionValue() {
     setOnModalCloseInternal(() => fn);
   }, []);
 
+  const [searchParams] = useSearchParams();
+
+  // Track if URL explicitly provides an rpc_url that should take priority
+  const urlRpcUrl = useMemo(() => {
+    const raw = searchParams.get("rpc_url");
+    return raw ? decodeURIComponent(raw) : null;
+  }, [searchParams]);
+
+  // Sync rpcUrl from controller, but only if URL doesn't provide an explicit rpc_url
   useEffect(() => {
-    if (controller) {
+    if (controller && !urlRpcUrl) {
       setRpcUrl(controller.rpcUrl());
     }
-  }, [controller, setRpcUrl]);
+  }, [controller, setRpcUrl, urlRpcUrl]);
 
-  const [searchParams] = useSearchParams();
+  // When URL provides an rpc_url that differs from the controller's, log the user
+  // out so they re-authenticate on the correct chain. The account may not be deployed
+  // on the target chain, so we can't simply recreate the controller.
+  useEffect(() => {
+    if (!controller || !urlRpcUrl) return;
+    if (controller.rpcUrl() === urlRpcUrl) return;
+
+    setRpcUrl(urlRpcUrl);
+
+    (async () => {
+      await controller.disconnect();
+      setController(undefined);
+    })();
+  }, [controller, urlRpcUrl, setController, setRpcUrl]);
+
   const urlParamsRef = useRef<{
     theme: string | null;
     preset: string | null;

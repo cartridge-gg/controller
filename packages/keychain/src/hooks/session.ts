@@ -9,15 +9,9 @@ import {
 } from "@cartridge/presets";
 import { CartridgeIcon } from "@cartridge/ui";
 import React, { createContext, useContext } from "react";
-import {
-  TypedDataRevision,
-  getChecksumAddress,
-  hash,
-  typedData,
-} from "starknet";
+import { getChecksumAddress } from "starknet";
 
 import { DEFAULT_SESSION_DURATION } from "@/constants";
-import type { Policy, ApprovalPolicy } from "@cartridge/controller-wasm";
 import makeBlockie from "ethereum-blockies-base64";
 
 // Extended method type to support both Method and Approval from presets
@@ -151,77 +145,6 @@ export function parseSessionPolicies({
   summary.contracts = Object.fromEntries(sortedEntries);
 
   return summary;
-}
-
-/**
- * Converts parsed session policies to WASM-compatible Policy objects.
- *
- * IMPORTANT: Policies are sorted canonically before hashing. Without this,
- * Object.keys/entries reordering can cause identical policies to produce
- * different merkle roots, leading to "session/not-registered" errors.
- * See: https://github.com/cartridge-gg/controller/issues/2357
- */
-export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
-  return [
-    ...Object.entries(policies.contracts ?? {})
-      .sort(([a], [b]) => a.toLowerCase().localeCompare(b.toLowerCase()))
-      .flatMap(([target, { methods }]) => {
-        const methodsArr = Array.isArray(methods) ? methods : [methods];
-        return methodsArr
-          .slice()
-          .sort((a, b) => a.entrypoint.localeCompare(b.entrypoint))
-          .map((m): Policy => {
-            // Check if this is an approve entrypoint
-            if (m.entrypoint === "approve") {
-              // Only create ApprovalPolicy if both spender and amount are defined
-              if ("spender" in m && "amount" in m && m.spender && m.amount) {
-                const approvalPolicy: ApprovalPolicy = {
-                  target,
-                  spender: m.spender,
-                  amount: String(m.amount), // Convert to string as ApprovalPolicy expects string
-                };
-                return approvalPolicy;
-              }
-
-              // Fall back to CallPolicy with deprecation warning
-              console.warn(
-                `[DEPRECATED] Approve method without spender and amount fields will be rejected in future versions. ` +
-                  `Please update your preset or policies to include both 'spender' and 'amount' fields for approve calls on contract ${target}. ` +
-                  `Example: { entrypoint: "approve", spender: "0x...", amount: "0x..." }`,
-              );
-            }
-
-            // For non-approve methods and legacy approve, create a regular CallPolicy
-            return {
-              target,
-              method: hash.getSelectorFromName(m.entrypoint),
-              authorized: !!m.authorized,
-            };
-          });
-      }),
-    ...(policies.messages ?? [])
-      .map((p) => {
-        const domainHash = typedData.getStructHash(
-          p.types,
-          "StarknetDomain",
-          p.domain,
-          TypedDataRevision.ACTIVE,
-        );
-        const typeHash = typedData.getTypeHash(
-          p.types,
-          p.primaryType,
-          TypedDataRevision.ACTIVE,
-        );
-
-        return {
-          scope_hash: hash.computePoseidonHash(domainHash, typeHash),
-          authorized: !!p.authorized,
-        };
-      })
-      .sort((a, b) =>
-        a.scope_hash.toString().localeCompare(b.scope_hash.toString()),
-      ),
-  ];
 }
 
 interface ICreateSessionContext {
