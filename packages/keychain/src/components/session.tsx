@@ -19,6 +19,7 @@ type SessionResponse = {
   expiresAt: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
+  allowedPoliciesRoot?: string;
 };
 
 type SessionQueryParams = {
@@ -160,6 +161,7 @@ export function Session() {
             ownerGuid: controller.ownerGuid(),
             alreadyRegistered: true,
             expiresAt: String(session.session.expiresAt),
+            allowedPoliciesRoot: session.allowedPoliciesRoot,
           });
 
           return;

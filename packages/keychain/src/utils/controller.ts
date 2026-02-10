@@ -29,7 +29,8 @@ import {
 } from "@cartridge/controller-wasm/controller";
 
 import { credentialToAuth } from "@/components/connect/types";
-import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
+import { ParsedSessionPolicies } from "@/hooks/session";
+import { toWasmPolicies } from "@cartridge/controller";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { toJsFeeEstimate } from "./fee";
