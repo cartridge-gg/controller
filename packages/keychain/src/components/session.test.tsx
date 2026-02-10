@@ -78,6 +78,7 @@ describe("Session", () => {
         cover: "https://test.app/cover.png",
       },
       isConfigLoading: false,
+      isPoliciesResolved: true,
       isMainnet: false,
       verified: true,
       chainId: "SN_MAIN",
