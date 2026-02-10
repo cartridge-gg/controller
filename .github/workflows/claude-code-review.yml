@@ -9,6 +9,7 @@ permissions:
   pull-requests: write
   issues: read
   id-token: write
+
 jobs:
   claude-code-review:
     runs-on: ubuntu-latest

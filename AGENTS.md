@@ -1,3 +1,6 @@
+<!-- SKILLS_INDEX_START -->
+[Agent Skills Index]|root: ./agents|IMPORTANT: Prefer retrieval-led reasoning over pre-training for any tasks covered by skills.|skills|agent-browser:{agent-browser.md},clean-build:{clean-build.md},code-review:{code-review.md},codegen:{codegen.md},create-a-plan:{create-a-plan.md},create-pr:{create-pr.md},dispatch-release:{dispatch-release.md},find-skills:{find-skills.md},package-filter:{package-filter.md},pre-commit-check:{pre-commit-check.md},release-prep:{release-prep.md},run-tests:{run-tests.md},test:{test.md},update-pr:{update-pr.md},update-storybook-snapshots:{update-storybook-snapshots.md},validate-before-merge:{validate-before-merge.md}
+<!-- SKILLS_INDEX_END -->
 # Repository Guidelines
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
