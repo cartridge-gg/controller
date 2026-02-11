@@ -110,7 +110,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
             if (m.entrypoint === "approve") {
               if ("spender" in m && "amount" in m && m.spender && m.amount) {
                 const approvalPolicy: ApprovalPolicy = {
-                  target,
+                  target: getChecksumAddress(target),
                   spender: m.spender,
                   amount: String(m.amount),
                 };
@@ -127,7 +127,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
 
             // For non-approve methods and legacy approve, create a regular CallPolicy
             return {
-              target,
+              target: getChecksumAddress(target),
               method: hash.getSelectorFromName(m.entrypoint),
               authorized: !!m.authorized,
             };

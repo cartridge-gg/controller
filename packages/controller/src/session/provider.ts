@@ -4,14 +4,14 @@ import {
   signerToGuid,
   subscribeCreateSession,
 } from "@cartridge/controller-wasm";
-import { SessionPolicies } from "@cartridge/presets";
+import { loadConfig, Policies, SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
-import { encode } from "starknet";
+import { encode, shortString } from "starknet";
 import { API_URL, KEYCHAIN_URL } from "../constants";
-import { ParsedSessionPolicies } from "../policies";
+import { parsePolicies, ParsedSessionPolicies } from "../policies";
 import BaseProvider from "../provider";
 import { AuthOptions } from "../types";
-import { toWasmPolicies } from "../utils";
+import { toSessionPolicies, toWasmPolicies } from "../utils";
 import SessionAccount from "./account";
 
 interface SessionRegistration {
@@ -29,7 +29,8 @@ interface SessionRegistration {
 export type SessionOptions = {
   rpc: string;
   chainId: string;
-  policies: SessionPolicies;
+  policies?: SessionPolicies;
+  preset?: string;
   redirectUrl: string;
   disconnectRedirectUrl?: string;
   keychainUrl?: string;
@@ -47,6 +48,8 @@ export default class SessionProvider extends BaseProvider {
   protected _redirectUrl: string;
   protected _disconnectRedirectUrl?: string;
   protected _policies: ParsedSessionPolicies;
+  protected _preset?: string;
+  private _policiesResolved: boolean;
   protected _keychainUrl: string;
   protected _apiUrl: string;
   protected _publicKey: string;
@@ -58,6 +61,7 @@ export default class SessionProvider extends BaseProvider {
     rpc,
     chainId,
     policies,
+    preset,
     redirectUrl,
     disconnectRedirectUrl,
     keychainUrl,
@@ -66,27 +70,19 @@ export default class SessionProvider extends BaseProvider {
   }: SessionOptions) {
     super();
 
-    this._policies = {
-      verified: false,
-      contracts: policies.contracts
-        ? Object.fromEntries(
-            Object.entries(policies.contracts).map(([address, contract]) => [
-              address,
-              {
-                ...contract,
-                methods: contract.methods.map((method) => ({
-                  ...method,
-                  authorized: true,
-                })),
-              },
-            ]),
-          )
-        : undefined,
-      messages: policies.messages?.map((message) => ({
-        ...message,
-        authorized: true,
-      })),
-    };
+    if (!policies && !preset) {
+      throw new Error("Either `policies` or `preset` must be provided");
+    }
+
+    this._preset = preset;
+
+    if (policies) {
+      this._policies = parsePolicies(policies);
+      this._policiesResolved = true;
+    } else {
+      this._policies = { verified: false };
+      this._policiesResolved = false;
+    }
 
     this._rpcUrl = rpc;
     this._chainId = chainId;
@@ -96,7 +92,9 @@ export default class SessionProvider extends BaseProvider {
     this._apiUrl = apiUrl ?? API_URL;
     this._signupOptions = signupOptions;
 
-    const account = this.tryRetrieveFromQueryOrStorage();
+    const account = this._policiesResolved
+      ? this.tryRetrieveFromQueryOrStorage()
+      : undefined;
     if (!account) {
       const pk = stark.randomAddress();
       this._publicKey = ec.starkCurve.getStarkKey(pk);
@@ -129,6 +127,33 @@ export default class SessionProvider extends BaseProvider {
     if (typeof window !== "undefined") {
       (window as any).starknet_controller_session = this;
     }
+  }
+
+  private async _resolvePresetPolicies(): Promise<void> {
+    if (this._policiesResolved) return;
+    if (!this._preset) {
+      throw new Error("No preset or policies configured");
+    }
+
+    const config = await loadConfig(this._preset);
+    if (!config) {
+      throw new Error(`Failed to load preset: ${this._preset}`);
+    }
+
+    const decodedChainId = shortString.decodeShortString(this._chainId);
+    const chains = config.chains as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+    const chainConfig = chains?.[decodedChainId];
+    if (!chainConfig?.policies) {
+      throw new Error(
+        `No policies found for chain ${decodedChainId} in preset ${this._preset}`,
+      );
+    }
+
+    const sessionPolicies = toSessionPolicies(chainConfig.policies as Policies);
+    this._policies = parsePolicies(sessionPolicies);
+    this._policiesResolved = true;
   }
 
   private validatePoliciesSubset(
@@ -218,6 +243,7 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async username() {
+    await this._resolvePresetPolicies();
     await this.tryRetrieveFromQueryOrStorage();
     return this._username;
   }
@@ -227,6 +253,7 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
+    await this._resolvePresetPolicies();
     this.account = this.tryRetrieveFromQueryOrStorage();
     return this.account;
   }
@@ -235,6 +262,8 @@ export default class SessionProvider extends BaseProvider {
     if (this.account) {
       return this.account;
     }
+
+    await this._resolvePresetPolicies();
 
     this.account = this.tryRetrieveFromQueryOrStorage();
     if (this.account) {
@@ -259,13 +288,13 @@ export default class SessionProvider extends BaseProvider {
         this._sessionKeyGuid = signerToGuid({
           starknet: { privateKey: encode.addHexPrefix(pk) },
         });
-        let url = `${
-          this._keychainUrl
-        }/session?public_key=${this._publicKey}&redirect_uri=${
-          this._redirectUrl
-        }&redirect_query_name=startapp&policies=${JSON.stringify(
-          this._policies,
-        )}&rpc_url=${this._rpcUrl}`;
+        let url = `${this._keychainUrl}/session?public_key=${this._publicKey}&redirect_uri=${this._redirectUrl}&redirect_query_name=startapp&rpc_url=${this._rpcUrl}`;
+
+        if (this._preset) {
+          url += `&preset=${encodeURIComponent(this._preset)}`;
+        } else {
+          url += `&policies=${encodeURIComponent(JSON.stringify(this._policies))}`;
+        }
 
         if (this._signupOptions) {
           url += `&signers=${encodeURIComponent(JSON.stringify(this._signupOptions))}`;

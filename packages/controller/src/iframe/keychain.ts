@@ -104,6 +104,13 @@ export class KeychainIFrame extends IFrame<Keychain> {
       );
     } else if (preset) {
       _url.searchParams.set("preset", preset);
+      if (policies) {
+        console.warn(
+          "[Controller] Both `preset` and `policies` provided. " +
+            "Policies are ignored when preset is set. " +
+            "Use `shouldOverridePresetPolicies: true` to override.",
+        );
+      }
     }
 
     // Add encrypted blob to URL fragment (hash) if present
