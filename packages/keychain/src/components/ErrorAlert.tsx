@@ -115,16 +115,16 @@ export function ErrorAlert({
             <Button
               size="icon"
               variant="icon"
-              className="absolute right-5 w-5 h-5 bg-[rgba(0,0,0,0.1)]"
+              className="absolute right-5 w-5 h-5 bg-background/10"
               onClick={() => {
                 setCopied(true);
                 navigator.clipboard.writeText(copyText);
               }}
             >
               {copied ? (
-                <CheckIcon size="xs" className="text-[black]" />
+                <CheckIcon size="xs" className={styles.text} />
               ) : (
-                <CopyIcon size="xs" className="text-[black]" />
+                <CopyIcon size="xs" className={styles.text} />
               )}
             </Button>
           )}
