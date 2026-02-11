@@ -4,14 +4,14 @@ import {
   signerToGuid,
   subscribeCreateSession,
 } from "@cartridge/controller-wasm";
-import { loadConfig, Policies, SessionPolicies } from "@cartridge/presets";
+import { loadConfig } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
-import { encode, shortString } from "starknet";
+import { encode } from "starknet";
 import { API_URL, KEYCHAIN_URL } from "../constants";
 import { parsePolicies, ParsedSessionPolicies } from "../policies";
 import BaseProvider from "../provider";
 import { AuthOptions } from "../types";
-import { toSessionPolicies, toWasmPolicies } from "../utils";
+import { getPresetSessionPolicies, toWasmPolicies } from "../utils";
 import SessionAccount from "./account";
 
 interface SessionRegistration {
@@ -131,18 +131,13 @@ export default class SessionProvider extends BaseProvider {
       throw new Error(`Failed to load preset: ${this._preset}`);
     }
 
-    const decodedChainId = shortString.decodeShortString(this._chainId);
-    const chains = config.chains as
-      | Record<string, Record<string, unknown>>
-      | undefined;
-    const chainConfig = chains?.[decodedChainId];
-    if (!chainConfig?.policies) {
+    const sessionPolicies = getPresetSessionPolicies(config, this._chainId);
+    if (!sessionPolicies) {
       throw new Error(
-        `No policies found for chain ${decodedChainId} in preset ${this._preset}`,
+        `No policies found for chain ${this._chainId} in preset ${this._preset}`,
       );
     }
 
-    const sessionPolicies = toSessionPolicies(chainConfig.policies as Policies);
     this._policies = parsePolicies(sessionPolicies);
   }
 

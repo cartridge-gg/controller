@@ -48,6 +48,19 @@ export function normalizeCalls(calls: Call | Call[]) {
   });
 }
 
+export function getPresetSessionPolicies(
+  config: Record<string, unknown>,
+  chainId: string,
+): SessionPolicies | undefined {
+  const decodedChainId = shortString.decodeShortString(chainId);
+  const chains = config.chains as
+    | Record<string, Record<string, unknown>>
+    | undefined;
+  const chainConfig = chains?.[decodedChainId];
+  if (!chainConfig?.policies) return undefined;
+  return toSessionPolicies(chainConfig.policies as Policies);
+}
+
 export function toSessionPolicies(policies: Policies): SessionPolicies {
   return Array.isArray(policies)
     ? policies.reduce<SessionPolicies>(
