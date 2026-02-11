@@ -38,6 +38,10 @@ export default class ControllerConnector extends InjectedConnector {
     return this.controller.username();
   }
 
+  lookupUsername(username: string) {
+    return this.controller.lookupUsername(username);
+  }
+
   isReady(): boolean {
     return this.controller.isReady();
   }
