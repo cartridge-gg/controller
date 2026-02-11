@@ -49,7 +49,7 @@ export default class SessionProvider extends BaseProvider {
   protected _disconnectRedirectUrl?: string;
   protected _policies: ParsedSessionPolicies;
   protected _preset?: string;
-  private _policiesResolved: boolean;
+  private _policiesReady: Promise<void>;
   protected _keychainUrl: string;
   protected _apiUrl: string;
   protected _publicKey: string;
@@ -75,14 +75,7 @@ export default class SessionProvider extends BaseProvider {
     }
 
     this._preset = preset;
-
-    if (policies) {
-      this._policies = parsePolicies(policies);
-      this._policiesResolved = true;
-    } else {
-      this._policies = { verified: false };
-      this._policiesResolved = false;
-    }
+    this._policies = policies ? parsePolicies(policies) : { verified: false };
 
     this._rpcUrl = rpc;
     this._chainId = chainId;
@@ -92,9 +85,12 @@ export default class SessionProvider extends BaseProvider {
     this._apiUrl = apiUrl ?? API_URL;
     this._signupOptions = signupOptions;
 
-    const account = this._policiesResolved
-      ? this.tryRetrieveFromQueryOrStorage()
-      : undefined;
+    // If preset is provided without explicit policies, eagerly resolve them.
+    // All async methods await this before accessing _policies.
+    this._policiesReady =
+      preset && !policies ? this._resolvePresetPolicies() : Promise.resolve();
+
+    const account = policies ? this.tryRetrieveFromQueryOrStorage() : undefined;
     if (!account) {
       const pk = stark.randomAddress();
       this._publicKey = ec.starkCurve.getStarkKey(pk);
@@ -130,12 +126,7 @@ export default class SessionProvider extends BaseProvider {
   }
 
   private async _resolvePresetPolicies(): Promise<void> {
-    if (this._policiesResolved) return;
-    if (!this._preset) {
-      throw new Error("No preset or policies configured");
-    }
-
-    const config = await loadConfig(this._preset);
+    const config = await loadConfig(this._preset!);
     if (!config) {
       throw new Error(`Failed to load preset: ${this._preset}`);
     }
@@ -153,7 +144,6 @@ export default class SessionProvider extends BaseProvider {
 
     const sessionPolicies = toSessionPolicies(chainConfig.policies as Policies);
     this._policies = parsePolicies(sessionPolicies);
-    this._policiesResolved = true;
   }
 
   private validatePoliciesSubset(
@@ -243,7 +233,7 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async username() {
-    await this._resolvePresetPolicies();
+    await this._policiesReady;
     await this.tryRetrieveFromQueryOrStorage();
     return this._username;
   }
@@ -253,7 +243,7 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
-    await this._resolvePresetPolicies();
+    await this._policiesReady;
     this.account = this.tryRetrieveFromQueryOrStorage();
     return this.account;
   }
@@ -263,7 +253,7 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
-    await this._resolvePresetPolicies();
+    await this._policiesReady;
 
     this.account = this.tryRetrieveFromQueryOrStorage();
     if (this.account) {
