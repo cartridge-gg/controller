@@ -31,6 +31,7 @@ export type SessionOptions = {
   chainId: string;
   policies?: SessionPolicies;
   preset?: string;
+  shouldOverridePresetPolicies?: boolean;
   redirectUrl: string;
   disconnectRedirectUrl?: string;
   keychainUrl?: string;
@@ -62,6 +63,7 @@ export default class SessionProvider extends BaseProvider {
     chainId,
     policies,
     preset,
+    shouldOverridePresetPolicies,
     redirectUrl,
     disconnectRedirectUrl,
     keychainUrl,
@@ -74,19 +76,23 @@ export default class SessionProvider extends BaseProvider {
       throw new Error("Either `policies` or `preset` must be provided");
     }
 
-    // Preset takes precedence over explicit policies (matching ControllerProvider).
-    // When both are provided, policies are ignored and resolved from the preset.
-    this._preset = preset;
-    if (preset) {
+    // Policy precedence logic (matching ControllerProvider):
+    // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
+    // 2. Otherwise, if preset is defined, resolve policies from preset
+    // 3. Otherwise, use provided policies
+    if ((!preset || shouldOverridePresetPolicies) && policies) {
+      this._policies = parsePolicies(policies);
+      this._preset = undefined;
+    } else {
+      this._preset = preset;
       if (policies) {
         console.warn(
           "[Controller] Both `preset` and `policies` provided to SessionProvider. " +
-            "Policies are ignored when preset is set.",
+            "Policies are ignored when preset is set. " +
+            "Use `shouldOverridePresetPolicies: true` to override.",
         );
       }
       this._policies = { verified: false };
-    } else {
-      this._policies = parsePolicies(policies!);
     }
 
     this._rpcUrl = rpc;
@@ -99,11 +105,13 @@ export default class SessionProvider extends BaseProvider {
 
     // If preset is provided, eagerly resolve policies from it.
     // All async methods await this before accessing _policies.
-    this._policiesReady = preset
+    this._policiesReady = this._preset
       ? this._resolvePresetPolicies()
       : Promise.resolve();
 
-    const account = !preset ? this.tryRetrieveFromQueryOrStorage() : undefined;
+    const account = !this._preset
+      ? this.tryRetrieveFromQueryOrStorage()
+      : undefined;
     if (!account) {
       const pk = stark.randomAddress();
       this._publicKey = ec.starkCurve.getStarkKey(pk);
