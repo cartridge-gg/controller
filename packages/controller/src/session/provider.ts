@@ -273,7 +273,12 @@ export default class SessionProvider extends BaseProvider {
         this._sessionKeyGuid = signerToGuid({
           starknet: { privateKey: encode.addHexPrefix(pk) },
         });
-        let url = `${this._keychainUrl}/session?public_key=${this._publicKey}&redirect_uri=${this._redirectUrl}&redirect_query_name=startapp&rpc_url=${this._rpcUrl}`;
+        let url =
+          `${this._keychainUrl}` +
+          `/session?public_key=${this._publicKey}` +
+          `&redirect_uri=${this._redirectUrl}` +
+          `&redirect_query_name=startapp` +
+          `&rpc_url=${this._rpcUrl}`;
 
         if (this._preset) {
           url += `&preset=${encodeURIComponent(this._preset)}`;
