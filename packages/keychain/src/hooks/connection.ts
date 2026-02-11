@@ -15,6 +15,7 @@ import {
   ExternalWalletType,
   toArray,
   Token,
+  getPresetSessionPolicies,
   toSessionPolicies,
   WalletAdapter,
   WalletBridge,
@@ -47,12 +48,7 @@ import {
 } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SemVer } from "semver";
-import {
-  constants,
-  getChecksumAddress,
-  RpcProvider,
-  shortString,
-} from "starknet";
+import { constants, getChecksumAddress, RpcProvider } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import {
   storeReferral,
@@ -163,29 +159,9 @@ function getConfigChainPolicies(
   }
 
   try {
-    const decodedChainId = shortString.decodeShortString(chainId);
-
-    if (
-      "chains" in configData &&
-      typeof configData.chains === "object" &&
-      configData.chains &&
-      decodedChainId in (configData.chains as object) &&
-      (configData.chains as Record<string, unknown>)[decodedChainId] &&
-      typeof (configData.chains as Record<string, unknown>)[decodedChainId] ===
-        "object" &&
-      "policies" in
-        ((configData.chains as Record<string, unknown>)[
-          decodedChainId
-        ] as object)
-    ) {
-      const chainConfig = (
-        configData.chains as Record<string, Record<string, unknown>>
-      )[decodedChainId];
-      return parseSessionPolicies({
-        verified,
-        policies: toSessionPolicies(chainConfig.policies as Policies),
-      });
-    }
+    const sessionPolicies = getPresetSessionPolicies(configData, chainId);
+    if (!sessionPolicies) return undefined;
+    return parseSessionPolicies({ verified, policies: sessionPolicies });
   } catch (e) {
     console.error("Failed to process chain policies from config:", e);
   }

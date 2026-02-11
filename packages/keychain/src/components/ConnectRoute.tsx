@@ -24,7 +24,7 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, policies, origin, isPoliciesResolved } = useConnection();
+  const { controller, policies, origin } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
 
   // Parse params and set RPC URL immediately
@@ -191,10 +191,6 @@ export function ConnectRoute() {
       return;
     }
 
-    if (!isPoliciesResolved) {
-      return;
-    }
-
     // In standalone mode with redirect_url, redirect immediately
     // if (isStandalone && redirectUrl) {
     //   console.log("redirecting effect");
@@ -274,7 +270,6 @@ export function ConnectRoute() {
     redirectUrl,
     hasAutoConnected,
     hasTokenApprovals,
-    isPoliciesResolved,
     origin,
   ]);
 

@@ -4,14 +4,14 @@ import {
   signerToGuid,
   subscribeCreateSession,
 } from "@cartridge/controller-wasm";
-import { SessionPolicies } from "@cartridge/presets";
+import { loadConfig, SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
 import { encode } from "starknet";
 import { API_URL, KEYCHAIN_URL } from "../constants";
-import { ParsedSessionPolicies } from "../policies";
+import { parsePolicies, ParsedSessionPolicies } from "../policies";
 import BaseProvider from "../provider";
 import { AuthOptions } from "../types";
-import { toWasmPolicies } from "../utils";
+import { getPresetSessionPolicies, toWasmPolicies } from "../utils";
 import SessionAccount from "./account";
 
 interface SessionRegistration {
@@ -29,7 +29,9 @@ interface SessionRegistration {
 export type SessionOptions = {
   rpc: string;
   chainId: string;
-  policies: SessionPolicies;
+  policies?: SessionPolicies;
+  preset?: string;
+  shouldOverridePresetPolicies?: boolean;
   redirectUrl: string;
   disconnectRedirectUrl?: string;
   keychainUrl?: string;
@@ -47,10 +49,12 @@ export default class SessionProvider extends BaseProvider {
   protected _redirectUrl: string;
   protected _disconnectRedirectUrl?: string;
   protected _policies: ParsedSessionPolicies;
+  protected _preset?: string;
+  private _ready: Promise<void>;
   protected _keychainUrl: string;
   protected _apiUrl: string;
-  protected _publicKey: string;
-  protected _sessionKeyGuid: string;
+  protected _publicKey!: string;
+  protected _sessionKeyGuid!: string;
   protected _signupOptions?: AuthOptions;
   public reopenBrowser: boolean = true;
 
@@ -58,6 +62,8 @@ export default class SessionProvider extends BaseProvider {
     rpc,
     chainId,
     policies,
+    preset,
+    shouldOverridePresetPolicies,
     redirectUrl,
     disconnectRedirectUrl,
     keychainUrl,
@@ -66,27 +72,27 @@ export default class SessionProvider extends BaseProvider {
   }: SessionOptions) {
     super();
 
-    this._policies = {
-      verified: false,
-      contracts: policies.contracts
-        ? Object.fromEntries(
-            Object.entries(policies.contracts).map(([address, contract]) => [
-              address,
-              {
-                ...contract,
-                methods: contract.methods.map((method) => ({
-                  ...method,
-                  authorized: true,
-                })),
-              },
-            ]),
-          )
-        : undefined,
-      messages: policies.messages?.map((message) => ({
-        ...message,
-        authorized: true,
-      })),
-    };
+    if (!policies && !preset) {
+      throw new Error("Either `policies` or `preset` must be provided");
+    }
+
+    // Policy precedence logic (matching ControllerProvider):
+    // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
+    // 2. Otherwise, if preset is defined, resolve policies from preset
+    // 3. Otherwise, use provided policies
+    if ((!preset || shouldOverridePresetPolicies) && policies) {
+      this._policies = parsePolicies(policies);
+    } else {
+      this._preset = preset;
+      if (policies) {
+        console.warn(
+          "[Controller] Both `preset` and `policies` provided to SessionProvider. " +
+            "Policies are ignored when preset is set. " +
+            "Use `shouldOverridePresetPolicies: true` to override.",
+        );
+      }
+      this._policies = { verified: false };
+    }
 
     this._rpcUrl = rpc;
     this._chainId = chainId;
@@ -95,6 +101,33 @@ export default class SessionProvider extends BaseProvider {
     this._keychainUrl = keychainUrl || KEYCHAIN_URL;
     this._apiUrl = apiUrl ?? API_URL;
     this._signupOptions = signupOptions;
+
+    // Eagerly start async init: resolve preset policies (if any),
+    // then try to restore an existing session from storage.
+    // All public async methods await this before proceeding.
+    this._ready = this._init();
+
+    if (typeof window !== "undefined") {
+      (window as any).starknet_controller_session = this;
+    }
+  }
+
+  private async _init(): Promise<void> {
+    if (this._preset) {
+      const config = await loadConfig(this._preset);
+      if (!config) {
+        throw new Error(`Failed to load preset: ${this._preset}`);
+      }
+
+      const sessionPolicies = getPresetSessionPolicies(config, this._chainId);
+      if (!sessionPolicies) {
+        throw new Error(
+          `No policies found for chain ${this._chainId} in preset ${this._preset}`,
+        );
+      }
+
+      this._policies = parsePolicies(sessionPolicies);
+    }
 
     const account = this.tryRetrieveFromQueryOrStorage();
     if (!account) {
@@ -124,10 +157,6 @@ export default class SessionProvider extends BaseProvider {
       this._sessionKeyGuid = signerToGuid({
         starknet: { privateKey: encode.addHexPrefix(jsonPk.privKey) },
       });
-    }
-
-    if (typeof window !== "undefined") {
-      (window as any).starknet_controller_session = this;
     }
   }
 
@@ -218,25 +247,18 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async username() {
-    await this.tryRetrieveFromQueryOrStorage();
+    await this._ready;
     return this._username;
   }
 
   async probe(): Promise<WalletAccount | undefined> {
-    if (this.account) {
-      return this.account;
-    }
-
-    this.account = this.tryRetrieveFromQueryOrStorage();
+    await this._ready;
     return this.account;
   }
 
   async connect(): Promise<WalletAccount | undefined> {
-    if (this.account) {
-      return this.account;
-    }
+    await this._ready;
 
-    this.account = this.tryRetrieveFromQueryOrStorage();
     if (this.account) {
       return this.account;
     }
@@ -259,13 +281,18 @@ export default class SessionProvider extends BaseProvider {
         this._sessionKeyGuid = signerToGuid({
           starknet: { privateKey: encode.addHexPrefix(pk) },
         });
-        let url = `${
-          this._keychainUrl
-        }/session?public_key=${this._publicKey}&redirect_uri=${
-          this._redirectUrl
-        }&redirect_query_name=startapp&policies=${JSON.stringify(
-          this._policies,
-        )}&rpc_url=${this._rpcUrl}`;
+        let url =
+          `${this._keychainUrl}` +
+          `/session?public_key=${this._publicKey}` +
+          `&redirect_uri=${this._redirectUrl}` +
+          `&redirect_query_name=startapp` +
+          `&rpc_url=${this._rpcUrl}`;
+
+        if (this._preset) {
+          url += `&preset=${encodeURIComponent(this._preset)}`;
+        } else {
+          url += `&policies=${encodeURIComponent(JSON.stringify(this._policies))}`;
+        }
 
         if (this._signupOptions) {
           url += `&signers=${encodeURIComponent(JSON.stringify(this._signupOptions))}`;

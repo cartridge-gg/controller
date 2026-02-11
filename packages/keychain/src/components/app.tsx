@@ -100,7 +100,13 @@ function DefaultRoute() {
 }
 
 function Authentication() {
-  const { controller, isConfigLoading, policies, verified } = useConnection();
+  const {
+    controller,
+    isConfigLoading,
+    isPoliciesResolved,
+    policies,
+    verified,
+  } = useConnection();
   const { pathname, search } = useLocation();
 
   const upgrade = useUpgrade();
@@ -115,7 +121,7 @@ function Authentication() {
   // If session creation is needed (returning from standalone auth)
   if (needsSessionCreation) {
     // Show loading while config is loading
-    if (preset && isConfigLoading) {
+    if (preset && (isConfigLoading || !isPoliciesResolved)) {
       return (
         <CreateController
           isSlot={pathname.startsWith("/slot")}
@@ -183,7 +189,7 @@ function Authentication() {
   }
 
   // Controller exists but upgrade not synced - show CreateController with loading instead of PageLoading
-  if (!upgrade.isSynced || isConfigLoading) {
+  if (!upgrade.isSynced || isConfigLoading || !isPoliciesResolved) {
     return (
       <CreateController
         isSlot={pathname.startsWith("/slot")}
