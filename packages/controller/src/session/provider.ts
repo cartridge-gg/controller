@@ -74,10 +74,20 @@ export default class SessionProvider extends BaseProvider {
       throw new Error("Either `policies` or `preset` must be provided");
     }
 
-    // Only store preset when it's the active policy source, so that
-    // URL construction sends the correct param to the keychain.
-    this._preset = !policies ? preset : undefined;
-    this._policies = policies ? parsePolicies(policies) : { verified: false };
+    // Preset takes precedence over explicit policies (matching ControllerProvider).
+    // When both are provided, policies are ignored and resolved from the preset.
+    this._preset = preset;
+    if (preset) {
+      if (policies) {
+        console.warn(
+          "[Controller] Both `preset` and `policies` provided to SessionProvider. " +
+            "Policies are ignored when preset is set.",
+        );
+      }
+      this._policies = { verified: false };
+    } else {
+      this._policies = parsePolicies(policies!);
+    }
 
     this._rpcUrl = rpc;
     this._chainId = chainId;
@@ -87,12 +97,13 @@ export default class SessionProvider extends BaseProvider {
     this._apiUrl = apiUrl ?? API_URL;
     this._signupOptions = signupOptions;
 
-    // If preset is provided without explicit policies, eagerly resolve them.
+    // If preset is provided, eagerly resolve policies from it.
     // All async methods await this before accessing _policies.
-    this._policiesReady =
-      preset && !policies ? this._resolvePresetPolicies() : Promise.resolve();
+    this._policiesReady = preset
+      ? this._resolvePresetPolicies()
+      : Promise.resolve();
 
-    const account = policies ? this.tryRetrieveFromQueryOrStorage() : undefined;
+    const account = !preset ? this.tryRetrieveFromQueryOrStorage() : undefined;
     if (!account) {
       const pk = stark.randomAddress();
       this._publicKey = ec.starkCurve.getStarkKey(pk);
