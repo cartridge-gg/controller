@@ -105,9 +105,10 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
 /**
  * Converts parsed session policies to WASM-compatible Policy objects.
  *
- * IMPORTANT: Policies are sorted canonically before hashing. Without this,
- * Object.keys/entries reordering can cause identical policies to produce
- * different merkle roots, leading to "session/not-registered" errors.
+ * IMPORTANT: Policies are sorted canonically and addresses are normalized
+ * via getChecksumAddress before hashing. Without this, Object.keys/entries
+ * reordering or inconsistent address casing can cause identical policies to
+ * produce different merkle roots, leading to "session/not-registered" errors.
  * See: https://github.com/cartridge-gg/controller/issues/2357
  */
 export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {

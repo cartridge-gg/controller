@@ -106,7 +106,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
       _url.searchParams.set("preset", preset);
       if (policies) {
         console.warn(
-          "[Controller] Both `preset` and `policies` provided. " +
+          "[Controller] Both `preset` and `policies` provided to ControllerProvider. " +
             "Policies are ignored when preset is set. " +
             "Use `shouldOverridePresetPolicies: true` to override.",
         );

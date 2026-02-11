@@ -4,7 +4,7 @@ import {
   signerToGuid,
   subscribeCreateSession,
 } from "@cartridge/controller-wasm";
-import { loadConfig } from "@cartridge/presets";
+import { loadConfig, SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
 import { encode } from "starknet";
 import { API_URL, KEYCHAIN_URL } from "../constants";
@@ -53,8 +53,8 @@ export default class SessionProvider extends BaseProvider {
   private _ready: Promise<void>;
   protected _keychainUrl: string;
   protected _apiUrl: string;
-  protected _publicKey: string;
-  protected _sessionKeyGuid: string;
+  protected _publicKey!: string;
+  protected _sessionKeyGuid!: string;
   protected _signupOptions?: AuthOptions;
   public reopenBrowser: boolean = true;
 
@@ -82,7 +82,6 @@ export default class SessionProvider extends BaseProvider {
     // 3. Otherwise, use provided policies
     if ((!preset || shouldOverridePresetPolicies) && policies) {
       this._policies = parsePolicies(policies);
-      this._preset = undefined;
     } else {
       this._preset = preset;
       if (policies) {
@@ -249,28 +248,17 @@ export default class SessionProvider extends BaseProvider {
 
   async username() {
     await this._ready;
-    this.tryRetrieveFromQueryOrStorage();
     return this._username;
   }
 
   async probe(): Promise<WalletAccount | undefined> {
-    if (this.account) {
-      return this.account;
-    }
-
     await this._ready;
-    this.account = this.tryRetrieveFromQueryOrStorage();
     return this.account;
   }
 
   async connect(): Promise<WalletAccount | undefined> {
-    if (this.account) {
-      return this.account;
-    }
-
     await this._ready;
 
-    this.account = this.tryRetrieveFromQueryOrStorage();
     if (this.account) {
       return this.account;
     }
