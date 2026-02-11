@@ -50,7 +50,7 @@ export default class SessionProvider extends BaseProvider {
   protected _disconnectRedirectUrl?: string;
   protected _policies: ParsedSessionPolicies;
   protected _preset?: string;
-  private _policiesReady: Promise<void>;
+  private _ready: Promise<void>;
   protected _keychainUrl: string;
   protected _apiUrl: string;
   protected _publicKey: string;
@@ -103,15 +103,34 @@ export default class SessionProvider extends BaseProvider {
     this._apiUrl = apiUrl ?? API_URL;
     this._signupOptions = signupOptions;
 
-    // If preset is provided, eagerly resolve policies from it.
-    // All async methods await this before accessing _policies.
-    this._policiesReady = this._preset
-      ? this._resolvePresetPolicies()
-      : Promise.resolve();
+    // Eagerly start async init: resolve preset policies (if any),
+    // then try to restore an existing session from storage.
+    // All public async methods await this before proceeding.
+    this._ready = this._init();
 
-    const account = !this._preset
-      ? this.tryRetrieveFromQueryOrStorage()
-      : undefined;
+    if (typeof window !== "undefined") {
+      (window as any).starknet_controller_session = this;
+    }
+  }
+
+  private async _init(): Promise<void> {
+    if (this._preset) {
+      const config = await loadConfig(this._preset);
+      if (!config) {
+        throw new Error(`Failed to load preset: ${this._preset}`);
+      }
+
+      const sessionPolicies = getPresetSessionPolicies(config, this._chainId);
+      if (!sessionPolicies) {
+        throw new Error(
+          `No policies found for chain ${this._chainId} in preset ${this._preset}`,
+        );
+      }
+
+      this._policies = parsePolicies(sessionPolicies);
+    }
+
+    const account = this.tryRetrieveFromQueryOrStorage();
     if (!account) {
       const pk = stark.randomAddress();
       this._publicKey = ec.starkCurve.getStarkKey(pk);
@@ -140,26 +159,6 @@ export default class SessionProvider extends BaseProvider {
         starknet: { privateKey: encode.addHexPrefix(jsonPk.privKey) },
       });
     }
-
-    if (typeof window !== "undefined") {
-      (window as any).starknet_controller_session = this;
-    }
-  }
-
-  private async _resolvePresetPolicies(): Promise<void> {
-    const config = await loadConfig(this._preset!);
-    if (!config) {
-      throw new Error(`Failed to load preset: ${this._preset}`);
-    }
-
-    const sessionPolicies = getPresetSessionPolicies(config, this._chainId);
-    if (!sessionPolicies) {
-      throw new Error(
-        `No policies found for chain ${this._chainId} in preset ${this._preset}`,
-      );
-    }
-
-    this._policies = parsePolicies(sessionPolicies);
   }
 
   private validatePoliciesSubset(
@@ -249,8 +248,8 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async username() {
-    await this._policiesReady;
-    await this.tryRetrieveFromQueryOrStorage();
+    await this._ready;
+    this.tryRetrieveFromQueryOrStorage();
     return this._username;
   }
 
@@ -259,7 +258,7 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
-    await this._policiesReady;
+    await this._ready;
     this.account = this.tryRetrieveFromQueryOrStorage();
     return this.account;
   }
@@ -269,7 +268,7 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
-    await this._policiesReady;
+    await this._ready;
 
     this.account = this.tryRetrieveFromQueryOrStorage();
     if (this.account) {
