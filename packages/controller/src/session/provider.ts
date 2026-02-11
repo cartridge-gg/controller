@@ -74,7 +74,9 @@ export default class SessionProvider extends BaseProvider {
       throw new Error("Either `policies` or `preset` must be provided");
     }
 
-    this._preset = preset;
+    // Only store preset when it's the active policy source, so that
+    // URL construction sends the correct param to the keychain.
+    this._preset = !policies ? preset : undefined;
     this._policies = policies ? parsePolicies(policies) : { verified: false };
 
     this._rpcUrl = rpc;
