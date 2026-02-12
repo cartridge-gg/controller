@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.13.7] - 2026-02-12
+
+### ✨ New Features
+- **@cartridge/controller**: Added `lookupUsername(username)` method for headless flows, returning account existence status and normalized signer options for the controller's configured chain (#2400)
+- **@cartridge/controller**: Added auto-signup functionality for headless connect when a username is missing, while maintaining strict signer matching for existing accounts (#2400)
+- **@cartridge/connector**: Exposed `lookupUsername` helper method through ControllerConnector for easier integration with starknet-react applications (#2400)
+
+### 🚀 Improvements
+- **Documentation**: Updated HEADLESS_MODE.md with recommended lookup-first flow patterns for improved developer guidance (#2400)
+- **Testing**: Added comprehensive test coverage for username lookup normalization, error handling, and password-based headless auto-signup flows (#2400)
+
 ## [0.13.6] - 2026-02-12
 
 ### 🚀 Improvements
