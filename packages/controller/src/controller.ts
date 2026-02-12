@@ -15,6 +15,7 @@ import { KEYCHAIN_URL } from "./constants";
 import { HeadlessAuthenticationError, NotReadyToConnect } from "./errors";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
+import { lookupUsername as lookupUsernameApi } from "./lookup";
 import {
   AuthOptions,
   Chain,
@@ -28,6 +29,7 @@ import {
   ProfileContextTypeVariant,
   ResponseCodes,
   OpenOptions,
+  HeadlessUsernameLookupResult,
   StarterpackOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
@@ -528,6 +530,17 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return this.keychain.username();
+  }
+
+  async lookupUsername(
+    username: string,
+  ): Promise<HeadlessUsernameLookupResult> {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      throw new Error("Username is required");
+    }
+
+    return lookupUsernameApi(trimmed, this.selectedChain);
   }
 
   openPurchaseCredits() {

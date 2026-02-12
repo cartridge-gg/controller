@@ -120,6 +120,12 @@ export interface LookupResponse {
   results: LookupResult[];
 }
 
+export interface HeadlessUsernameLookupResult {
+  username: string;
+  exists: boolean;
+  signers: AuthOption[];
+}
+
 export enum FeeSource {
   PAYMASTER = "PAYMASTER",
   CREDITS = "CREDITS",
