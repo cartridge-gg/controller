@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.13.6] - 2026-02-12
+
+### 🚀 Improvements
+- **@cartridge/controller**: Enhanced SessionProvider preset support with automatic policy resolution from `@cartridge/presets`, enabling developers to use `preset: "my-game"` instead of manually duplicating policies and ensuring consistent policy hashing between SDK and keychain (#2401)
+- **Documentation**: Updated project structure documentation with comprehensive provider flows, clarified ControllerProvider (web) and SessionProvider (native) architecture, and improved examples directory guidance (#2404)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed `session/not-registered` errors by normalizing contract addresses in policy hashing and consolidating async initialization to prevent policy hash divergence between SDK and keychain (#2401)
+- **@cartridge/keychain**: Fixed theme copy button visibility in ErrorAlert component by replacing hardcoded black icons with theme-aware styling, ensuring proper visibility on dark backgrounds (#2402)
+
 ## [0.13.5] - 2026-02-10
 
 ### ✨ New Features
