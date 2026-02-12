@@ -1,0 +1,4 @@
+interface:
+  display_name: "Controller Development"
+  short_description: "Contributor workflow for cartridge-gg/controller"
+  default_prompt: "Use $controller-development to implement and validate changes in controller."
