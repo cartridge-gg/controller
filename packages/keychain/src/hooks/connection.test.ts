@@ -1,5 +1,13 @@
-import { isOriginVerified } from "./connection";
+import { isOriginVerified, resolvePolicies } from "./connection";
 import { vi } from "vitest";
+
+vi.mock("@cartridge/controller", async () => {
+  const actual = await vi.importActual("@cartridge/controller");
+  return {
+    ...actual,
+    getPresetSessionPolicies: vi.fn(() => undefined),
+  };
+});
 
 describe("isOriginVerified", () => {
   const allowedOrigins = ["example.com", "*.example.com", "sub.test.com"];
@@ -322,6 +330,63 @@ describe("Config Loading and Verification Separation", () => {
         true,
       );
     });
+  });
+});
+
+describe("resolvePolicies", () => {
+  const encodedPolicies = encodeURIComponent(
+    JSON.stringify({
+      contracts: {
+        "0x1": {
+          methods: [{ entrypoint: "transfer" }],
+        },
+      },
+    }),
+  );
+
+  it("uses URL policies when shouldOverridePresetPolicies is true", () => {
+    const result = resolvePolicies({
+      policiesStr: encodedPolicies,
+      preset: "some-preset",
+      shouldOverridePresetPolicies: true,
+      configData: null,
+      chainId: undefined,
+      verified: false,
+      isConfigLoading: true,
+    });
+
+    expect(result.isPoliciesResolved).toBe(true);
+    expect(result.policies).toBeDefined();
+  });
+
+  it("falls back to URL policies when preset has no chain policies", () => {
+    const result = resolvePolicies({
+      policiesStr: encodedPolicies,
+      preset: "some-preset",
+      shouldOverridePresetPolicies: false,
+      configData: {},
+      chainId: "0x534e5f534550",
+      verified: true,
+      isConfigLoading: false,
+    });
+
+    expect(result.isPoliciesResolved).toBe(true);
+    expect(result.policies).toBeDefined();
+  });
+
+  it("waits for config when preset is present and override is not active", () => {
+    const result = resolvePolicies({
+      policiesStr: encodedPolicies,
+      preset: "some-preset",
+      shouldOverridePresetPolicies: false,
+      configData: null,
+      chainId: undefined,
+      verified: true,
+      isConfigLoading: true,
+    });
+
+    expect(result.isPoliciesResolved).toBe(false);
+    expect(result.policies).toBeUndefined();
   });
 });
 

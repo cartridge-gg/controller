@@ -93,17 +93,24 @@ export class KeychainIFrame extends IFrame<Keychain> {
       _url.searchParams.set("username", encodeURIComponent(username));
     }
 
+    if (preset) {
+      _url.searchParams.set("preset", preset);
+    }
+
+    if (shouldOverridePresetPolicies) {
+      _url.searchParams.set("should_override_preset_policies", "true");
+    }
+
     // Policy precedence logic:
     // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
-    // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
-    // 3. Otherwise, use provided policies or empty object
+    // 2. Otherwise, if preset is defined, ignore provided policies
+    // 3. Otherwise, use provided policies
     if ((!preset || shouldOverridePresetPolicies) && policies) {
       _url.searchParams.set(
         "policies",
         encodeURIComponent(JSON.stringify(policies)),
       );
     } else if (preset) {
-      _url.searchParams.set("preset", preset);
       if (policies) {
         console.warn(
           "[Controller] Both `preset` and `policies` provided to ControllerProvider. " +
