@@ -1,7 +1,7 @@
 {
   "name": "@cartridge/tsconfig",
   "private": true,
-  "version": "0.13.6",
+  "version": "0.13.7",
   "files": [
     "base.json",
     "react.json"
