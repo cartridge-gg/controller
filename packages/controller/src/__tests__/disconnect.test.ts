@@ -50,9 +50,6 @@ describe("ControllerProvider.disconnect", () => {
     };
 
     localStorage.setItem("lastUsedConnector", "controller");
-    localStorage.setItem("session", JSON.stringify({ id: "0xabc" }));
-    localStorage.setItem("sessionSigner", JSON.stringify({ privKey: "0x1" }));
-    localStorage.setItem("sessionPolicies", JSON.stringify({}));
     localStorage.setItem(
       "@cartridge/account/0x40bda2fcd37963c0b8f951801c63a88132feb399dab0f5318245b2c59a553af/0x534e5f5345504f4c4941",
       JSON.stringify({ Controller: {} }),
@@ -76,9 +73,6 @@ describe("ControllerProvider.disconnect", () => {
     await controller.disconnect();
 
     expect(localStorage.getItem("lastUsedConnector")).toBeNull();
-    expect(localStorage.getItem("session")).toBeNull();
-    expect(localStorage.getItem("sessionSigner")).toBeNull();
-    expect(localStorage.getItem("sessionPolicies")).toBeNull();
     expect(
       localStorage.getItem(
         "@cartridge/account/0x40bda2fcd37963c0b8f951801c63a88132feb399dab0f5318245b2c59a553af/0x534e5f5345504f4c4941",

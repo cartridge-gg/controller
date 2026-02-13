@@ -395,9 +395,6 @@ export default class ControllerProvider extends BaseProvider {
     try {
       if (typeof localStorage !== "undefined") {
         localStorage.removeItem("lastUsedConnector");
-        localStorage.removeItem("session");
-        localStorage.removeItem("sessionSigner");
-        localStorage.removeItem("sessionPolicies");
 
         for (let i = localStorage.length - 1; i >= 0; i--) {
           const key = localStorage.key(i);
