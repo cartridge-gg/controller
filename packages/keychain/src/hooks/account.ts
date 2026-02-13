@@ -42,12 +42,21 @@ const createCredentials = async (
     if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         "cross-platform";
-    else if (isIOS)
-      // Explicitly set "platform" on iOS so Chrome iOS (Google Password Manager)
-      // shows "Create Passkey" instead of a "Sign in" dialog
+    else if (isIOS) {
+      // Force all authenticatorSelection properties on iOS so Chrome iOS
+      // (Google Password Manager) shows "Create Passkey" instead of "Sign in"
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         "platform";
-    else
+      beginRegistration.publicKey.authenticatorSelection.residentKey =
+        "required";
+      beginRegistration.publicKey.authenticatorSelection.requireResidentKey =
+        true;
+      beginRegistration.publicKey.authenticatorSelection.userVerification =
+        "required";
+      // Clear excludeCredentials to prevent existing passkeys from
+      // triggering a sign-in flow instead of creation
+      beginRegistration.publicKey.excludeCredentials = [];
+    } else
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         undefined;
   }
@@ -63,6 +72,21 @@ const createCredentials = async (
     { alg: -7, type: "public-key" },
   ];
   beginRegistration.publicKey.rp.id = import.meta.env.VITE_RP_ID;
+
+  // Debug: log the full options to compare Chrome iOS vs Safari behavior
+  console.log(
+    "[WebAuthn] navigator.credentials.create options:",
+    JSON.stringify(beginRegistration, (_, v) =>
+      v instanceof ArrayBuffer
+        ? `ArrayBuffer(${v.byteLength})`
+        : v instanceof Uint8Array
+          ? `Uint8Array(${v.length})`
+          : v,
+    ),
+  );
+  console.log("[WebAuthn] userAgent:", navigator.userAgent);
+  console.log("[WebAuthn] hasPlatformAuthenticator:", hasPlatformAuthenticator);
+
   const credentials = (await navigator.credentials.create(
     beginRegistration,
   )) as RawAttestation & {
