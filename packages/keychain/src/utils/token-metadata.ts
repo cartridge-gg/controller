@@ -22,12 +22,6 @@ const CACHED_TOKEN_METADATA: Record<string, TokenMetadata> = {
     symbol: "USDC",
     decimals: 6,
   },
-  // USDC.e on mainnet (legacy)
-  "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8": {
-    name: "USD Coin",
-    symbol: "USDC.e",
-    decimals: 6,
-  },
   // USDC on sepolia
   [USDC_ADDRESSES[constants.StarknetChainId.SN_SEPOLIA].toLowerCase()]: {
     name: "USD Coin",
