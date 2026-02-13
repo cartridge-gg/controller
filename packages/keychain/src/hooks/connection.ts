@@ -168,6 +168,53 @@ function getConfigChainPolicies(
   return undefined;
 }
 
+export function resolvePolicies({
+  policiesStr,
+  preset,
+  shouldOverridePresetPolicies,
+  configData,
+  chainId,
+  verified,
+  isConfigLoading,
+}: {
+  policiesStr: string | null;
+  preset: string | null;
+  shouldOverridePresetPolicies: boolean;
+  configData: Record<string, unknown> | null;
+  chainId: string | undefined;
+  verified: boolean;
+  isConfigLoading: boolean;
+}): {
+  policies: ParsedSessionPolicies | undefined;
+  isPoliciesResolved: boolean;
+} {
+  const urlPolicies = parseUrlPolicies(policiesStr);
+
+  if (shouldOverridePresetPolicies && urlPolicies) {
+    return { policies: urlPolicies, isPoliciesResolved: true };
+  }
+
+  if (preset) {
+    if (isConfigLoading || !chainId) {
+      return { policies: undefined, isPoliciesResolved: false };
+    }
+
+    const configPolicies = getConfigChainPolicies(
+      configData,
+      chainId,
+      verified,
+    );
+    if (configPolicies) {
+      return { policies: configPolicies, isPoliciesResolved: true };
+    }
+
+    // Preset exists but has no policies for this chain; fall back to URL policies.
+    return { policies: urlPolicies, isPoliciesResolved: true };
+  }
+
+  return { policies: urlPolicies, isPoliciesResolved: true };
+}
+
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
@@ -249,6 +296,7 @@ export function useConnectionValue() {
     theme: string | null;
     preset: string | null;
     policies: string | null;
+    shouldOverridePresetPolicies: boolean;
     version: string | null;
     project: string | null;
     namespace: string | null;
@@ -267,6 +315,8 @@ export function useConnectionValue() {
       : urlParams.get("preset");
     const rpcUrl = urlParams.get("rpc_url");
     const policies = urlParams.get("policies");
+    const shouldOverridePresetPolicies =
+      urlParams.get("should_override_preset_policies") === "true";
     const version = urlParams.get("v");
     const project = urlParams.get("ps");
     const namespace = urlParams.get("ns");
@@ -302,6 +352,10 @@ export function useConnectionValue() {
       theme: theme || urlParamsRef.current?.theme || null,
       preset: preset || urlParamsRef.current?.preset || null,
       policies: policies || urlParamsRef.current?.policies || null,
+      shouldOverridePresetPolicies:
+        shouldOverridePresetPolicies ||
+        urlParamsRef.current?.shouldOverridePresetPolicies ||
+        false,
       version: version || urlParamsRef.current?.version || null,
       project: project || urlParamsRef.current?.project || null,
       namespace: namespace || urlParamsRef.current?.namespace || null,
@@ -605,38 +659,24 @@ export function useConnectionValue() {
 
   // Handle policies configuration
   useEffect(() => {
-    const { policies, preset } = urlParams;
-
-    // Always prioritize preset policies over URL policies
-    if (preset) {
-      if (isConfigLoading || !chainId) {
-        setIsPoliciesResolved(false);
-        return;
-      }
-
-      const configPolicies = getConfigChainPolicies(
+    const {
+      policies: policyStr,
+      preset,
+      shouldOverridePresetPolicies,
+    } = urlParams;
+    const { policies: resolvedPolicies, isPoliciesResolved: resolved } =
+      resolvePolicies({
+        policiesStr: policyStr,
+        preset,
+        shouldOverridePresetPolicies,
         configData,
         chainId,
         verified,
-      );
+        isConfigLoading,
+      });
 
-      if (configPolicies) {
-        setPolicies(configPolicies);
-        setIsPoliciesResolved(true);
-        return;
-      }
-
-      setIsPoliciesResolved(true);
-      return;
-    }
-
-    // Fall back to URL policies if no preset or preset has no policies
-    const urlPolicies = parseUrlPolicies(policies);
-    if (urlPolicies) {
-      setPolicies(urlPolicies);
-    }
-
-    setIsPoliciesResolved(true);
+    setPolicies(resolvedPolicies);
+    setIsPoliciesResolved(resolved);
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
   useThemeEffect({ theme, assetUrl: "" });
