@@ -15,7 +15,10 @@ export function useWebauthnAuthentication() {
       if (!chainId) throw new Error("No chainId found");
 
       // Signup flow
-      const isSafari = /^((?!chrome|android).)*safari/i.test(
+      // Only Safari needs the popup flow for passkey creation in cross-origin iframes.
+      // Chrome iOS (CriOS) uses WebKit like Safari but handles popups differently,
+      // so we let it use the direct iframe path (which has publickey-credentials-create permission).
+      const isSafari = /^((?!chrome|android|crios).)*safari/i.test(
         navigator.userAgent,
       );
 
