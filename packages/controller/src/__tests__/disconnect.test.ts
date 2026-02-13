@@ -53,6 +53,23 @@ describe("ControllerProvider.disconnect", () => {
     localStorage.setItem("session", JSON.stringify({ id: "0xabc" }));
     localStorage.setItem("sessionSigner", JSON.stringify({ privKey: "0x1" }));
     localStorage.setItem("sessionPolicies", JSON.stringify({}));
+    localStorage.setItem(
+      "@cartridge/account/0x40bda2fcd37963c0b8f951801c63a88132feb399dab0f5318245b2c59a553af/0x534e5f5345504f4c4941",
+      JSON.stringify({ Controller: {} }),
+    );
+    localStorage.setItem("@cartridge/active", JSON.stringify({ Active: {} }));
+    localStorage.setItem(
+      "@cartridge/https://x.cartridge.gg/active",
+      JSON.stringify({ Active: {} }),
+    );
+    localStorage.setItem(
+      "@cartridge/policies/0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b/0x534e5f4d41494e",
+      JSON.stringify({ policies: [] }),
+    );
+    localStorage.setItem(
+      "@cartridge/session/0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b/0x534e5f4d41494e",
+      JSON.stringify({ Session: {} }),
+    );
     localStorage.setItem("keepMe", "keep");
 
     await controller.disconnect();
@@ -61,6 +78,25 @@ describe("ControllerProvider.disconnect", () => {
     expect(localStorage.getItem("session")).toBeNull();
     expect(localStorage.getItem("sessionSigner")).toBeNull();
     expect(localStorage.getItem("sessionPolicies")).toBeNull();
+    expect(
+      localStorage.getItem(
+        "@cartridge/account/0x40bda2fcd37963c0b8f951801c63a88132feb399dab0f5318245b2c59a553af/0x534e5f5345504f4c4941",
+      ),
+    ).toBeNull();
+    expect(localStorage.getItem("@cartridge/active")).toBeNull();
+    expect(
+      localStorage.getItem("@cartridge/https://x.cartridge.gg/active"),
+    ).toBeNull();
+    expect(
+      localStorage.getItem(
+        "@cartridge/policies/0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b/0x534e5f4d41494e",
+      ),
+    ).toBeNull();
+    expect(
+      localStorage.getItem(
+        "@cartridge/session/0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b/0x534e5f4d41494e",
+      ),
+    ).toBeNull();
     expect(localStorage.getItem("keepMe")).toBe("keep");
     expect(localStorage.removeItem).toHaveBeenCalledWith("lastUsedConnector");
     expect(keychainDisconnect).toHaveBeenCalledTimes(1);

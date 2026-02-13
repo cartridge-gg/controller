@@ -398,6 +398,13 @@ export default class ControllerProvider extends BaseProvider {
         localStorage.removeItem("session");
         localStorage.removeItem("sessionSigner");
         localStorage.removeItem("sessionPolicies");
+
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key?.startsWith("@cartridge/")) {
+            localStorage.removeItem(key);
+          }
+        }
       }
     } catch {
       // Ignore environments where localStorage is unavailable.
