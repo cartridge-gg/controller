@@ -5465,6 +5465,7 @@ export type Session = Node & {
   /** Whether the session has been revoked */
   isRevoked: Scalars["Boolean"];
   metadata?: Maybe<SessionMetadata>;
+  sessionKeyGUID?: Maybe<Scalars["String"]>;
   signer?: Maybe<Signer>;
   updatedAt: Scalars["Time"];
 };
@@ -5604,6 +5605,22 @@ export type SessionWhereInput = {
   isRevokedNEQ?: InputMaybe<Scalars["Boolean"]>;
   not?: InputMaybe<SessionWhereInput>;
   or?: InputMaybe<Array<SessionWhereInput>>;
+  /** session_key_guid field predicates */
+  sessionKeyGUID?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDContains?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDContainsFold?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDEqualFold?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDGT?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDGTE?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDHasPrefix?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDHasSuffix?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDIn?: InputMaybe<Array<Scalars["String"]>>;
+  sessionKeyGUIDIsNil?: InputMaybe<Scalars["Boolean"]>;
+  sessionKeyGUIDLT?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDLTE?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDNEQ?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  sessionKeyGUIDNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** updated_at field predicates */
   updatedAt?: InputMaybe<Scalars["Time"]>;
   updatedAtGT?: InputMaybe<Scalars["Time"]>;

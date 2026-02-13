@@ -1,5 +1,6 @@
 import * as http from "http";
 import { AddressInfo } from "net";
+import { REDIRECT_QUERY_NAME } from "../constants";
 
 type ServerResponse = http.ServerResponse<http.IncomingMessage> & {
   req: http.IncomingMessage;
@@ -38,7 +39,7 @@ export class CallbackServer {
     }
 
     const params = new URLSearchParams(req.url.split("?")[1]);
-    const session = params.get("startapp");
+    const session = params.get(REDIRECT_QUERY_NAME);
 
     if (!session) {
       console.warn("Received callback without session data");
