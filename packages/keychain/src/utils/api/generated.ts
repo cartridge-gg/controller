@@ -2982,6 +2982,11 @@ export type Mutation = {
   finalizeLogin: Scalars["String"];
   finalizeRegistration: Account;
   increaseBudget: Paymaster;
+  /**
+   * Perform Prove Identity Verify v2.
+   * Submits consumer PII for verification.
+   */
+  proveVerify: ProveVerifyResponse;
   register: Account;
   removeAllPolicies: Scalars["Boolean"];
   removeFromTeam: Scalars["Boolean"];
@@ -3173,6 +3178,10 @@ export type MutationIncreaseBudgetArgs = {
   paymasterName: Scalars["ID"];
   reason?: InputMaybe<AdminBudgetReason>;
   unit: FeeUnit;
+};
+
+export type MutationProveVerifyArgs = {
+  input: ProveVerifyInput;
 };
 
 export type MutationRegisterArgs = {
@@ -4331,6 +4340,77 @@ export type Project = {
   project: Scalars["String"];
 };
 
+export type ProveAddressResult = {
+  __typename?: "ProveAddressResult";
+  addressScore: Scalars["Int"];
+  city: Scalars["Boolean"];
+  distance: Scalars["Float"];
+  postalCode: Scalars["Boolean"];
+  region: Scalars["Boolean"];
+  street: Scalars["Boolean"];
+  streetNumber: Scalars["Int"];
+};
+
+export type ProveEmailResult = {
+  __typename?: "ProveEmailResult";
+  emailAddress: Scalars["Boolean"];
+};
+
+export type ProveIdentifiersResult = {
+  __typename?: "ProveIdentifiersResult";
+  dob: Scalars["Boolean"];
+  driversLicenseNumber: Scalars["Boolean"];
+  driversLicenseState: Scalars["Boolean"];
+  last4: Scalars["Boolean"];
+  ssn: Scalars["Boolean"];
+};
+
+export type ProveNameResult = {
+  __typename?: "ProveNameResult";
+  firstName: Scalars["Int"];
+  lastName: Scalars["Int"];
+  nameScore: Scalars["Int"];
+};
+
+export type ProveVerifyInput = {
+  address?: InputMaybe<Scalars["String"]>;
+  city?: InputMaybe<Scalars["String"]>;
+  dob?: InputMaybe<Scalars["String"]>;
+  emailAddress?: InputMaybe<Scalars["String"]>;
+  extendedAddress?: InputMaybe<Scalars["String"]>;
+  /** Use the UAT sandbox environment instead of production. */
+  firstName?: InputMaybe<Scalars["String"]>;
+  last4?: InputMaybe<Scalars["String"]>;
+  lastName?: InputMaybe<Scalars["String"]>;
+  phoneNumber?: InputMaybe<Scalars["String"]>;
+  postalCode?: InputMaybe<Scalars["String"]>;
+  region?: InputMaybe<Scalars["String"]>;
+  ssn?: InputMaybe<Scalars["String"]>;
+};
+
+export type ProveVerifyResponse = {
+  __typename?: "ProveVerifyResponse";
+  address?: Maybe<ProveAddressResult>;
+  carrier?: Maybe<Scalars["String"]>;
+  cipConfidence?: Maybe<Scalars["String"]>;
+  countryCode?: Maybe<Scalars["String"]>;
+  description: Scalars["String"];
+  email?: Maybe<ProveEmailResult>;
+  enrollStatus?: Maybe<Scalars["String"]>;
+  identifiers?: Maybe<ProveIdentifiersResult>;
+  lineType?: Maybe<Scalars["String"]>;
+  multiCipConfidence?: Maybe<Scalars["String"]>;
+  multiVerified?: Maybe<Scalars["Boolean"]>;
+  name?: Maybe<ProveNameResult>;
+  payfoneAlias?: Maybe<Scalars["String"]>;
+  phoneNumber?: Maybe<Scalars["String"]>;
+  reasonCodes?: Maybe<Array<Scalars["String"]>>;
+  status: Scalars["Int"];
+  success: Scalars["Boolean"];
+  transactionId?: Maybe<Scalars["String"]>;
+  verified?: Maybe<Scalars["Boolean"]>;
+};
+
 export enum PurchaseType {
   Credits = "CREDITS",
   /** @deprecated Starterpack purchases are now handled client-side */
@@ -5385,6 +5465,7 @@ export type Session = Node & {
   /** Whether the session has been revoked */
   isRevoked: Scalars["Boolean"];
   metadata?: Maybe<SessionMetadata>;
+  sessionKeyGUID?: Maybe<Scalars["String"]>;
   signer?: Maybe<Signer>;
   updatedAt: Scalars["Time"];
 };
@@ -5524,6 +5605,22 @@ export type SessionWhereInput = {
   isRevokedNEQ?: InputMaybe<Scalars["Boolean"]>;
   not?: InputMaybe<SessionWhereInput>;
   or?: InputMaybe<Array<SessionWhereInput>>;
+  /** session_key_guid field predicates */
+  sessionKeyGUID?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDContains?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDContainsFold?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDEqualFold?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDGT?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDGTE?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDHasPrefix?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDHasSuffix?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDIn?: InputMaybe<Array<Scalars["String"]>>;
+  sessionKeyGUIDIsNil?: InputMaybe<Scalars["Boolean"]>;
+  sessionKeyGUIDLT?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDLTE?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDNEQ?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  sessionKeyGUIDNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** updated_at field predicates */
   updatedAt?: InputMaybe<Scalars["Time"]>;
   updatedAtGT?: InputMaybe<Scalars["Time"]>;
