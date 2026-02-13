@@ -72,6 +72,21 @@ const createCredentials = async (
     { alg: -7, type: "public-key" },
   ];
   beginRegistration.publicKey.rp.id = import.meta.env.VITE_RP_ID;
+
+  // Debug: log the full options to compare Chrome iOS vs Safari behavior
+  console.log(
+    "[WebAuthn] navigator.credentials.create options:",
+    JSON.stringify(beginRegistration, (_, v) =>
+      v instanceof ArrayBuffer
+        ? `ArrayBuffer(${v.byteLength})`
+        : v instanceof Uint8Array
+          ? `Uint8Array(${v.length})`
+          : v,
+    ),
+  );
+  console.log("[WebAuthn] userAgent:", navigator.userAgent);
+  console.log("[WebAuthn] hasPlatformAuthenticator:", hasPlatformAuthenticator);
+
   const credentials = (await navigator.credentials.create(
     beginRegistration,
   )) as RawAttestation & {
