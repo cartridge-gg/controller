@@ -103,7 +103,6 @@ export function Activity() {
                           <ActivityGameCard
                             action={props.title}
                             name={props.name}
-                            logo={props.image}
                             themeColor={props.color}
                             website={props.website}
                             certified={props.certified}
@@ -146,12 +145,12 @@ export function Activity() {
   );
 }
 
-const LoadingState = () => {
+export const LoadingState = ({ rowCount = 5 }: { rowCount?: number }) => {
   return (
     <LayoutContent>
       <Skeleton className="w-1/5 h-4 py-4 rounded" />
       <div className="flex flex-col gap-2">
-        {Array.from({ length: 20 }).map((_, index) => (
+        {Array.from({ length: rowCount }).map((_, index) => (
           <Skeleton key={index} className="w-full h-16 rounded" />
         ))}
       </div>
@@ -159,7 +158,7 @@ const LoadingState = () => {
   );
 };
 
-const EmptyState = () => {
+export const EmptyState = () => {
   return (
     <LayoutContent>
       <Empty

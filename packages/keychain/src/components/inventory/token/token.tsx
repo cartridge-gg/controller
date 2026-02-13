@@ -22,6 +22,7 @@ import { useCallback, useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
 import { useNavigation } from "@/context/navigation";
+import { EmptyState, LoadingState } from "@/components/activity";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -116,7 +117,7 @@ function ERC20() {
   const accountAddress = account?.address || "";
   const { controller } = useConnection();
   const explorer = useExplorer();
-  const { transfers } = useData();
+  const { transfers, status } = useData();
   const { isControllerGte } = useVersion();
 
   const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
@@ -212,50 +213,56 @@ function ERC20() {
           chainId={chainId as constants.StarknetChainId}
         />
 
-        <div className="flex flex-col gap-3">
-          {Object.entries(
-            txs
-              .filter((tx) => tx?.symbol === token.metadata.symbol)
-              .reduce(
-                (acc, tx) => {
-                  if (!acc[tx.date]) {
-                    acc[tx.date] = [];
-                  }
-                  acc[tx.date].push(tx);
-                  return acc;
-                },
-                {} as Record<string, typeof txs>,
-              ),
-          ).map(([date, transactions]) => (
-            <div key={date} className="flex flex-col gap-2">
-              <p className="text-foreground-400 text-xs font-bold uppercase py-2">
-                {date}
-              </p>
-              {transactions.map((item) => (
-                <Link
-                  key={item.key}
-                  to={to(item.transactionHash)}
-                  target="_blank"
-                >
-                  <ActivityTokenCard
-                    amount={item.amount}
-                    // no price available from the oracle for $PAPER
-                    value=""
-                    address={item.action === "send" ? item.to : item.from}
-                    username={
-                      item.action === "send"
-                        ? item.toUsername
-                        : item.fromUsername
+        {status === "loading" ? (
+          <LoadingState rowCount={2} />
+        ) : status === "error" || !txs.length ? (
+          <EmptyState />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {Object.entries(
+              txs
+                .filter((tx) => tx?.symbol === token.metadata.symbol)
+                .reduce(
+                  (acc, tx) => {
+                    if (!acc[tx.date]) {
+                      acc[tx.date] = [];
                     }
-                    image={token.metadata.image!}
-                    action={item.action}
-                    timestamp={item.timestamp}
-                  />
-                </Link>
-              ))}
-            </div>
-          ))}
-        </div>
+                    acc[tx.date].push(tx);
+                    return acc;
+                  },
+                  {} as Record<string, typeof txs>,
+                ),
+            ).map(([date, transactions]) => (
+              <div key={date} className="flex flex-col gap-2">
+                <p className="text-foreground-400 text-xs font-bold uppercase py-2">
+                  {date}
+                </p>
+                {transactions.map((item) => (
+                  <Link
+                    key={item.key}
+                    to={to(item.transactionHash)}
+                    target="_blank"
+                  >
+                    <ActivityTokenCard
+                      amount={item.amount}
+                      // no price available from the oracle for $PAPER
+                      value=""
+                      address={item.action === "send" ? item.to : item.from}
+                      username={
+                        item.action === "send"
+                          ? item.toUsername
+                          : item.fromUsername
+                      }
+                      image={token.metadata.image!}
+                      action={item.action}
+                      timestamp={item.timestamp}
+                    />
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </LayoutContent>
 
       {compatibility && controller && (
