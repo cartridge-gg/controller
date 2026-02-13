@@ -7,7 +7,7 @@ import {
 import { loadConfig, SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
 import { encode } from "starknet";
-import { API_URL, KEYCHAIN_URL } from "../constants";
+import { API_URL, KEYCHAIN_URL, REDIRECT_QUERY_NAME } from "../constants";
 import { parsePolicies, ParsedSessionPolicies } from "../policies";
 import BaseProvider from "../provider";
 import { AuthOptions } from "../types";
@@ -397,10 +397,9 @@ export default class SessionProvider extends BaseProvider {
       }
     }
 
-    // Ingest session from URL query params (web redirect flow)
-    if (window.location.search.includes("startapp")) {
+    if (window.location.search.includes(REDIRECT_QUERY_NAME)) {
       const params = new URLSearchParams(window.location.search);
-      const session = params.get("startapp");
+      const session = params.get(REDIRECT_QUERY_NAME);
       if (session) {
         const normalizedSession = this.ingestSessionFromRedirect(session);
         if (
@@ -412,7 +411,7 @@ export default class SessionProvider extends BaseProvider {
         }
 
         // Remove the session query parameter
-        params.delete("startapp");
+        params.delete(REDIRECT_QUERY_NAME);
         const newUrl =
           window.location.pathname +
           (params.toString() ? `?${params.toString()}` : "") +

@@ -113,7 +113,9 @@ jobs:
             - Only create documentation updates if they are actually needed
             - Don't document internal implementation details unless they affect usage
             - If no documentation updates are needed, simply state that and exit
+            - Focus on adding documention to the 1-3 most relevant files, not everywhere
             - DO NOT create git branches, commits, or PRs - just update the files
+            - DO NOT create many redundant code samples - create one sample and reference it as-needed
 
             The docs repository is checked out in the `docs-repo` directory. Please analyze the controller changes and update the documentation files accordingly.
 
@@ -132,7 +134,7 @@ jobs:
             # Create new branch
             BRANCH_NAME="docs-update-$(date +%s)"
             git checkout -b "$BRANCH_NAME"
-            
+
             # Add and commit changes
             git add .
             if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -140,20 +142,20 @@ jobs:
 
               Updates documentation to reflect changes made in commit:
               ${{ github.event.inputs.commit_sha }}
-              
+
               Manually triggered documentation sync"
             else
               git commit -m "docs: Update documentation for controller PR #${{ github.event.pull_request.number }}
 
               Updates documentation to reflect changes made in:
               ${{ github.event.pull_request.title }}
-              
+
               Related controller PR: cartridge-gg/controller#${{ github.event.pull_request.number }}"
             fi
-            
+
             # Push branch
             git push origin "$BRANCH_NAME"
-            
+
             # Create PR
             if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
               gh pr create \
