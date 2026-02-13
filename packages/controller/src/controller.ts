@@ -395,6 +395,9 @@ export default class ControllerProvider extends BaseProvider {
     try {
       if (typeof localStorage !== "undefined") {
         localStorage.removeItem("lastUsedConnector");
+        localStorage.removeItem("session");
+        localStorage.removeItem("sessionSigner");
+        localStorage.removeItem("sessionPolicies");
       }
     } catch {
       // Ignore environments where localStorage is unavailable.
