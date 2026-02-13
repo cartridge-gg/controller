@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.13.8] - 2026-02-13
+
+### ✨ New Features
+- **@cartridge/controller**: Added new mainnet USDC token support with legacy USDC.e labeling for improved token identification (#94dae94e)
+
+### 🚀 Improvements
+- **@cartridge/controller**: Enhanced connection policy resolution by fixing preset theme and custom policy override precedence, allowing apps to maintain preset-derived configuration while explicitly overriding preset policies (#2408)
+- **@cartridge/controller**: Improved maintainability by extracting hardcoded "startapp" query parameter into `REDIRECT_QUERY_NAME` constant following Telegram mini app convention (#2412)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed `SessionProvider.probe()` returning undefined after `ingestSessionFromRedirect()` by restoring on-demand session retrieval for deep link redirects in Capacitor and mobile apps (#2409)
+- **Token Configuration**: Reverted mainnet USDC token support changes to restore legacy behavior for token metadata and mainnet token indexing entries (#2410)
+
+### 🔧 Testing
+- **@cartridge/controller**: Added comprehensive regression tests for controller disconnect localStorage cleanup functionality (#2414)
+
 ## [0.13.7] - 2026-02-12
 
 ### ✨ New Features
