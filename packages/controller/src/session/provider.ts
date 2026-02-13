@@ -50,12 +50,12 @@ export default class SessionProvider extends BaseProvider {
   protected _disconnectRedirectUrl?: string;
   protected _policies: ParsedSessionPolicies;
   protected _preset?: string;
-  private _ready: Promise<void>;
   protected _keychainUrl: string;
   protected _apiUrl: string;
   protected _publicKey!: string;
   protected _sessionKeyGuid!: string;
   protected _signupOptions?: AuthOptions;
+  private _readyPromise: Promise<void>;
   public reopenBrowser: boolean = true;
 
   constructor({
@@ -102,35 +102,23 @@ export default class SessionProvider extends BaseProvider {
     this._apiUrl = apiUrl ?? API_URL;
     this._signupOptions = signupOptions;
 
-    // Eagerly start async init: resolve preset policies (if any),
-    // then try to restore an existing session from storage.
-    // All public async methods await this before proceeding.
-    this._ready = this._init();
+    this._setSigningKeys();
+    this._readyPromise = this._resolvePreset();
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller_session = this;
     }
   }
 
-  private async _init(): Promise<void> {
-    if (this._preset) {
-      const config = await loadConfig(this._preset);
-      if (!config) {
-        throw new Error(`Failed to load preset: ${this._preset}`);
-      }
-
-      const sessionPolicies = getPresetSessionPolicies(config, this._chainId);
-      if (!sessionPolicies) {
-        throw new Error(
-          `No policies found for chain ${this._chainId} in preset ${this._preset}`,
-        );
-      }
-
-      this._policies = parsePolicies(sessionPolicies);
-    }
-
-    const account = this.tryRetrieveFromQueryOrStorage();
-    if (!account) {
+  private _setSigningKeys(): void {
+    const signerString = localStorage.getItem("sessionSigner");
+    if (signerString) {
+      const signer = JSON.parse(signerString);
+      this._publicKey = signer.pubKey;
+      this._sessionKeyGuid = signerToGuid({
+        starknet: { privateKey: encode.addHexPrefix(signer.privKey) },
+      });
+    } else {
       const pk = stark.randomAddress();
       this._publicKey = ec.starkCurve.getStarkKey(pk);
 
@@ -144,20 +132,27 @@ export default class SessionProvider extends BaseProvider {
       this._sessionKeyGuid = signerToGuid({
         starknet: { privateKey: encode.addHexPrefix(pk) },
       });
-    } else {
-      const pk = localStorage.getItem("sessionSigner");
-      if (!pk) throw new Error("failed to get sessionSigner");
-
-      const jsonPk: {
-        privKey: string;
-        pubKey: string;
-      } = JSON.parse(pk);
-
-      this._publicKey = jsonPk.pubKey;
-      this._sessionKeyGuid = signerToGuid({
-        starknet: { privateKey: encode.addHexPrefix(jsonPk.privKey) },
-      });
     }
+  }
+
+  // Resolve preset policies asynchronously.
+  // Public methods await this before proceeding.
+  private async _resolvePreset(): Promise<void> {
+    if (!this._preset) return;
+
+    const config = await loadConfig(this._preset);
+    if (!config) {
+      throw new Error(`Failed to load preset: ${this._preset}`);
+    }
+
+    const sessionPolicies = getPresetSessionPolicies(config, this._chainId);
+    if (!sessionPolicies) {
+      throw new Error(
+        `No policies found for chain ${this._chainId} in preset ${this._preset}`,
+      );
+    }
+
+    this._policies = parsePolicies(sessionPolicies);
   }
 
   private validatePoliciesSubset(
@@ -247,17 +242,31 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async username() {
-    await this._ready;
+    await this._readyPromise;
+
+    if (!this.account) {
+      this.tryRetrieveSessionAccount();
+    }
+
     return this._username;
   }
 
   async probe(): Promise<WalletAccount | undefined> {
-    await this._ready;
+    await this._readyPromise;
+
+    if (!this.account) {
+      this.tryRetrieveSessionAccount();
+    }
+
     return this.account;
   }
 
   async connect(): Promise<WalletAccount | undefined> {
-    await this._ready;
+    await this._readyPromise;
+
+    if (!this.account) {
+      this.tryRetrieveSessionAccount();
+    }
 
     if (this.account) {
       return this.account;
@@ -319,7 +328,7 @@ export default class SessionProvider extends BaseProvider {
       };
       localStorage.setItem("session", JSON.stringify(session));
 
-      this.tryRetrieveFromQueryOrStorage();
+      this.tryRetrieveSessionAccount();
 
       return this.account;
     } catch (e) {
@@ -367,15 +376,15 @@ export default class SessionProvider extends BaseProvider {
     return promise;
   }
 
-  tryRetrieveFromQueryOrStorage() {
+  // Try to retrieve the session account from localStorage or URL query params
+  private tryRetrieveSessionAccount() {
     if (this.account) {
       return this.account;
     }
 
-    const signerString = localStorage.getItem("sessionSigner");
-    const signer = signerString ? JSON.parse(signerString) : null;
     let sessionRegistration: SessionRegistration | null = null;
 
+    // Load session from localStorage (saved by ingestSessionFromRedirect or connect)
     const sessionString = localStorage.getItem("session");
     if (sessionString) {
       const parsed = JSON.parse(sessionString) as Partial<SessionRegistration>;
@@ -410,6 +419,9 @@ export default class SessionProvider extends BaseProvider {
         window.history.replaceState({}, document.title, newUrl);
       }
     }
+
+    const signerString = localStorage.getItem("sessionSigner");
+    const signer = signerString ? JSON.parse(signerString) : null;
 
     if (!sessionRegistration || !signer) {
       return;
