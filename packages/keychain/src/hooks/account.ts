@@ -38,9 +38,15 @@ const createCredentials = async (
 ) => {
   if (!beginRegistration.publicKey) return;
   if (beginRegistration.publicKey?.authenticatorSelection) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         "cross-platform";
+    else if (isIOS)
+      // Explicitly set "platform" on iOS so Chrome iOS (Google Password Manager)
+      // shows "Create Passkey" instead of a "Sign in" dialog
+      beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
+        "platform";
     else
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         undefined;
