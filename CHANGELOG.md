@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.13.8] - 2026-02-13
+
+### ✨ New Features
+- **@cartridge/controller**: Added new mainnet USDC token support with legacy USDC.e labeling for improved token compatibility and mainnet asset management (#94dae94e)
+
+### 🚀 Improvements
+- **@cartridge/controller**: Extracted startapp query parameter into constant (`REDIRECT_QUERY_NAME`) for better maintainability and documentation of Telegram mini app convention (#2412)
+- **@cartridge/keychain**: Fixed preset theme and custom policy override precedence, enabling apps to keep preset-derived config/theme while explicitly overriding preset policies when needed (#2408)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed `probe()` returning undefined after `ingestSessionFromRedirect()` by restoring on-demand session retrieval in public methods, resolving deep link and mobile app session restoration issues (#2409)
+- **Documentation**: Updated docs-sync instructions to encourage more focused documentation creation, simplifying review and improving maintainability (#2336)
+
+### ⚠️ Breaking Changes
+- **Token Support**: Mainnet USDC token changes were reverted (#2410) - applications relying on the new USDC configuration should use the legacy USDC.e format
+
 ## [0.13.7] - 2026-02-12
 
 ### ✨ New Features
