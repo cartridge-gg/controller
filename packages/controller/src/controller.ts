@@ -395,6 +395,13 @@ export default class ControllerProvider extends BaseProvider {
     try {
       if (typeof localStorage !== "undefined") {
         localStorage.removeItem("lastUsedConnector");
+
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key?.startsWith("@cartridge/")) {
+            localStorage.removeItem(key);
+          }
+        }
       }
     } catch {
       // Ignore environments where localStorage is unavailable.
