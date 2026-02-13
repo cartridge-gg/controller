@@ -16,7 +16,7 @@ import { useData } from "@/hooks/data";
 import { getDate, isPublicChain, useCreditBalance } from "@cartridge/ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import { constants, getChecksumAddress } from "starknet";
-import { useAccount } from "@/hooks/account";
+import { useAccount, useUsernames } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
 import { useCallback, useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
@@ -127,6 +127,22 @@ function ERC20() {
     return isControllerGte("0.5.6");
   }, [isControllerGte]);
 
+  const addresses = useMemo<string[]>(() => {
+    const accounts =
+      transfers?.transfers?.items.flatMap((item) =>
+        item.transfers.reduce(
+          (acc, item) => [
+            ...acc,
+            `0x${BigInt(item.fromAddress).toString(16)}`,
+            `0x${BigInt(item.toAddress).toString(16)}`,
+          ],
+          [] as string[],
+        ),
+      ) ?? [];
+    return Array.from(new Set(accounts));
+  }, [transfers]);
+  const { usernames } = useUsernames({ addresses });
+
   const txs = useMemo(() => {
     if (!transfers || !token?.metadata?.image) {
       return [];
@@ -142,16 +158,27 @@ function ERC20() {
           const timestamp = new Date(transfer.executedAt).getTime();
           const date = getDate(timestamp);
           const image = token.metadata.image;
+          const toUsername = usernames.find(
+            (user) =>
+              BigInt(user.address ?? "0x0") === BigInt(transfer.toAddress),
+          )?.username;
+          const fromUsername = usernames.find(
+            (user) =>
+              BigInt(user.address ?? "0x0") === BigInt(transfer.fromAddress),
+          )?.username;
           return {
             key: `${transfer.transactionHash}-${transfer.eventId}-${i}`,
             transactionHash: transfer.transactionHash,
             amount: value,
             to: transfer.toAddress,
+            toUsername,
             from: transfer.fromAddress,
+            fromUsername,
             contractAddress: transfer.contractAddress,
             symbol: transfer.symbol,
             eventId: transfer.eventId,
             date: date,
+            timestamp,
             image,
             action:
               getChecksumAddress(transfer.fromAddress) ===
@@ -161,7 +188,7 @@ function ERC20() {
           };
         });
     });
-  }, [transfers, accountAddress, token?.metadata?.image]);
+  }, [transfers, accountAddress, usernames, token?.metadata?.image]);
 
   const to = useCallback(
     (transactionHash: string) => {
@@ -200,8 +227,8 @@ function ERC20() {
                 {} as Record<string, typeof txs>,
               ),
           ).map(([date, transactions]) => (
-            <div key={date} className="flex flex-col gap-3">
-              <p className="text-foreground-400 font-semibold text-xs py-3 tracking-wider">
+            <div key={date} className="flex flex-col gap-2">
+              <p className="text-foreground-400 text-xs font-bold uppercase py-2">
                 {date}
               </p>
               {transactions.map((item) => (
@@ -215,8 +242,14 @@ function ERC20() {
                     // no price available from the oracle for $PAPER
                     value=""
                     address={item.action === "send" ? item.to : item.from}
+                    username={
+                      item.action === "send"
+                        ? item.toUsername
+                        : item.fromUsername
+                    }
                     image={token.metadata.image!}
                     action={item.action}
+                    timestamp={item.timestamp}
                   />
                 </Link>
               ))}
