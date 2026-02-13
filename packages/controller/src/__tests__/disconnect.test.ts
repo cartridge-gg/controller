@@ -66,6 +66,7 @@ describe("ControllerProvider.disconnect", () => {
       "@cartridge/policies/0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b/0x534e5f4d41494e",
       JSON.stringify({ policies: [] }),
     );
+    localStorage.setItem("@cartridge/features", JSON.stringify({}));
     localStorage.setItem(
       "@cartridge/session/0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b/0x534e5f4d41494e",
       JSON.stringify({ Session: {} }),
@@ -92,6 +93,7 @@ describe("ControllerProvider.disconnect", () => {
         "@cartridge/policies/0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b/0x534e5f4d41494e",
       ),
     ).toBeNull();
+    expect(localStorage.getItem("@cartridge/features")).toBeNull();
     expect(
       localStorage.getItem(
         "@cartridge/session/0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b/0x534e5f4d41494e",
