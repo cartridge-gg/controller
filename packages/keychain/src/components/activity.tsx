@@ -55,7 +55,6 @@ export function Activity() {
               {events
                 .filter((event) => event.date === current)
                 .map((props: CardProps, index: number) => {
-                  console.log(`EVENT [USERNAME]:`, props.username);
                   switch (props.variant) {
                     case "token":
                       return (

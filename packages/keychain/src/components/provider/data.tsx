@@ -124,7 +124,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ) ?? [];
     return Array.from(new Set(accounts));
   }, [transfers]);
-  const { usernames } = useUsernames({ addresses });
+  const { getUsername } = useUsernames({ addresses });
 
   const erc20s: CardProps[] = useMemo(() => {
     return (
@@ -146,9 +146,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
               BigInt(transfer.fromAddress) === BigInt(address)
                 ? transfer.toAddress
                 : transfer.fromAddress;
-            const username = usernames.find(
-              (user) => BigInt(user.address ?? "0x0") === BigInt(userAddress),
-            )?.username;
             const result: CardProps = {
               variant: "token",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
@@ -156,7 +153,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
               transactionHash: transfer.transactionHash,
               amount: value,
               address: userAddress,
-              username: username ?? "",
+              username: getUsername(userAddress) ?? "",
               value: "$-",
               name: "",
               collection: "",
@@ -178,7 +175,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           }),
       ) || []
     );
-  }, [transfers, address, usernames, theme]);
+  }, [transfers, address, getUsername, theme]);
 
   const erc721s: CardProps[] = useMemo(() => {
     return (
@@ -206,9 +203,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
               BigInt(transfer.fromAddress) === BigInt(address)
                 ? transfer.toAddress
                 : transfer.fromAddress;
-            const username = usernames.find(
-              (user) => BigInt(user.address ?? "0x0") === BigInt(userAddress),
-            )?.username;
             const result: CardProps = {
               variant: "collectible",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
@@ -216,7 +210,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
               transactionHash: transfer.transactionHash,
               amount: "",
               address: userAddress,
-              username: username ?? "",
+              username: getUsername(userAddress) ?? "",
               value: "",
               name: name || "",
               collection: transfer.name,
@@ -238,7 +232,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           });
       }) || []
     );
-  }, [transfers, address, usernames, theme]);
+  }, [transfers, address, getUsername, theme]);
 
   const actions: CardProps[] = useMemo(() => {
     return (

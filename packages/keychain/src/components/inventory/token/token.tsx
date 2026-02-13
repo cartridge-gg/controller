@@ -142,7 +142,7 @@ function ERC20() {
       ) ?? [];
     return Array.from(new Set(accounts));
   }, [transfers]);
-  const { usernames } = useUsernames({ addresses });
+  const { getUsername } = useUsernames({ addresses });
 
   const txs = useMemo(() => {
     if (!transfers || !token?.metadata?.image) {
@@ -159,22 +159,14 @@ function ERC20() {
           const timestamp = new Date(transfer.executedAt).getTime();
           const date = getDate(timestamp);
           const image = token.metadata.image;
-          const toUsername = usernames.find(
-            (user) =>
-              BigInt(user.address ?? "0x0") === BigInt(transfer.toAddress),
-          )?.username;
-          const fromUsername = usernames.find(
-            (user) =>
-              BigInt(user.address ?? "0x0") === BigInt(transfer.fromAddress),
-          )?.username;
           return {
             key: `${transfer.transactionHash}-${transfer.eventId}-${i}`,
             transactionHash: transfer.transactionHash,
             amount: value,
             to: transfer.toAddress,
-            toUsername,
+            toUsername: getUsername(transfer.toAddress),
             from: transfer.fromAddress,
-            fromUsername,
+            fromUsername: getUsername(transfer.fromAddress),
             contractAddress: transfer.contractAddress,
             symbol: transfer.symbol,
             eventId: transfer.eventId,
@@ -189,7 +181,7 @@ function ERC20() {
           };
         });
     });
-  }, [transfers, accountAddress, usernames, token?.metadata?.image]);
+  }, [transfers, accountAddress, getUsername, token?.metadata?.image]);
 
   const to = useCallback(
     (transactionHash: string) => {

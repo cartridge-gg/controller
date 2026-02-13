@@ -11,7 +11,7 @@ import {
   useAddressByUsernameQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import base64url from "base64url";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMatch, useSearchParams } from "react-router-dom";
 import { constants, getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
@@ -271,12 +271,29 @@ export function useUsernames({ addresses }: { addresses: string[] }) {
     { enabled: addresses.length > 0 },
   );
 
-  return {
-    usernames:
+  const usernames = useMemo(() => {
+    return (
       data?.accounts?.edges?.map((edge) => ({
         username: edge?.node?.username,
         address: edge?.node?.controllers?.edges?.[0]?.node?.address,
-      })) ?? [],
+      })) ?? []
+    );
+  }, [data]);
+
+  const getUsername = useCallback(
+    (adress: string | null | undefined) => {
+      return !adress
+        ? undefined
+        : usernames.find(
+            (user) => BigInt(user.address ?? "0x0") === BigInt(adress),
+          )?.username;
+    },
+    [usernames],
+  );
+
+  return {
+    usernames,
+    getUsername,
   };
 }
 
