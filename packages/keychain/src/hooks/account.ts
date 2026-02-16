@@ -17,6 +17,7 @@ import { constants, getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
+import { posthog } from "@/components/provider/posthog";
 import { useAccountSearchQuery } from "@/utils/api";
 
 type RawAssertion = PublicKeyCredential & {
@@ -86,6 +87,20 @@ const createCredentials = async (
   );
   console.log("[WebAuthn] userAgent:", navigator.userAgent);
   console.log("[WebAuthn] hasPlatformAuthenticator:", hasPlatformAuthenticator);
+
+  // Also capture via PostHog for remote debugging (iOS Chrome)
+  posthog.capture("WebAuthn Create Options", {
+    options: JSON.stringify(beginRegistration, (_, v) =>
+      v instanceof ArrayBuffer
+        ? `ArrayBuffer(${v.byteLength})`
+        : v instanceof Uint8Array
+          ? `Uint8Array(${v.length})`
+          : v,
+    ),
+    userAgent: navigator.userAgent,
+    hasPlatformAuthenticator,
+    isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+  });
 
   const credentials = (await navigator.credentials.create(
     beginRegistration,
