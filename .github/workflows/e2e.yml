@@ -61,7 +61,7 @@ jobs:
       - name: Run Capacitor E2E tests
         run: pnpm --filter cartridge-capacitor-example e2e
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: capacitor-playwright-report
           path: examples/capacitor/playwright-report/
