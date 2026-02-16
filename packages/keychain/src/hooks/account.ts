@@ -40,26 +40,23 @@ const createCredentials = async (
   if (!beginRegistration.publicKey) return;
   if (beginRegistration.publicKey?.authenticatorSelection) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
-      beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
-        "cross-platform";
-    else if (isIOS) {
-      // Force all authenticatorSelection properties on iOS so Chrome iOS
-      // (Google Password Manager) shows "Create Passkey" instead of "Sign in"
+    if (isIOS) {
+      // iOS check must come first: Chrome iOS reports hasPlatformAuthenticator
+      // as false even though the device supports passkeys via iCloud Keychain.
+      // Explicitly set "platform" so Chrome iOS shows "Create Passkey"
+      // instead of "Sign in".
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         "platform";
-      beginRegistration.publicKey.authenticatorSelection.residentKey =
-        "required";
-      beginRegistration.publicKey.authenticatorSelection.requireResidentKey =
-        true;
-      beginRegistration.publicKey.authenticatorSelection.userVerification =
-        "required";
-      // Clear excludeCredentials to prevent existing passkeys from
-      // triggering a sign-in flow instead of creation
-      beginRegistration.publicKey.excludeCredentials = [];
-    } else
+    } else if (
+      !hasPlatformAuthenticator ||
+      navigator.userAgent.indexOf("Win") != -1
+    ) {
+      beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
+        "cross-platform";
+    } else {
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         undefined;
+    }
   }
 
   beginRegistration.publicKey.user.id = Buffer.from(name);
