@@ -3,7 +3,7 @@ import { useVersion } from "@/hooks/version";
 import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
 import { PropsWithChildren, useContext, useEffect, useState } from "react";
 
-const posthog = new PostHogWrapper(
+export const posthog = new PostHogWrapper(
   import.meta.env.VITE_POSTHOG_KEY ?? "api key",
   {
     host: import.meta.env.VITE_POSTHOG_HOST,
