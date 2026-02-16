@@ -43,19 +43,10 @@ const createCredentials = async (
     if (isIOS) {
       // iOS check must come first: Chrome iOS reports hasPlatformAuthenticator
       // as false even though the device supports passkeys via iCloud Keychain.
-      // Force all authenticatorSelection properties so Chrome iOS shows
-      // "Create Passkey" instead of "Sign in".
+      // Explicitly set "platform" so Chrome iOS shows "Create Passkey"
+      // instead of "Sign in".
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         "platform";
-      beginRegistration.publicKey.authenticatorSelection.residentKey =
-        "required";
-      beginRegistration.publicKey.authenticatorSelection.requireResidentKey =
-        true;
-      beginRegistration.publicKey.authenticatorSelection.userVerification =
-        "required";
-      // Clear excludeCredentials to prevent existing passkeys from
-      // triggering a sign-in flow instead of creation
-      beginRegistration.publicKey.excludeCredentials = [];
     } else if (
       !hasPlatformAuthenticator ||
       navigator.userAgent.indexOf("Win") != -1
