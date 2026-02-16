@@ -7,6 +7,8 @@ import { Browser } from "@capacitor/browser";
 import { Capacitor } from "@capacitor/core";
 
 const RPC_URL = "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9";
+const KEYCHAIN_URL =
+  import.meta.env.VITE_KEYCHAIN_URL || "https://x.cartridge.gg";
 const STRK_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 const SESSION_SIGNER_KEY = "sessionSigner";
@@ -101,6 +103,7 @@ const provider = new SessionProvider({
     ? `${REDIRECT_SCHEME}://session`
     : window.location.origin,
   policies,
+  keychainUrl: KEYCHAIN_URL,
 });
 
 let account: Awaited<ReturnType<typeof provider.connect>> | undefined;
@@ -156,7 +159,7 @@ const openKeychainSession = async () => {
     rpc_url: RPC_URL,
   });
 
-  const url = `https://x.cartridge.gg/session?${params.toString()}`;
+  const url = `${KEYCHAIN_URL}/session?${params.toString()}`;
   setStatus(`Opening browser: ${url}`);
   if (Capacitor.isNativePlatform()) {
     try {
