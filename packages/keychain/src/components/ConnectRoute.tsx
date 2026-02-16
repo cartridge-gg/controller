@@ -17,7 +17,6 @@ import {
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
 import { requestStorageAccess } from "@/utils/connection/storage-access";
-import { posthog } from "@/components/provider/posthog";
 import {
   Button,
   HeaderInner,
@@ -271,13 +270,6 @@ export function ConnectRoute() {
           handleCompletion();
         } catch (e) {
           console.error("Failed to create verified session:", e);
-          posthog.capture("Verified Session Creation Failed", {
-            error: e instanceof Error ? e.message : String(e),
-            errorName: e instanceof Error ? e.name : undefined,
-            userAgent: navigator.userAgent,
-            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
-            isChromeIOS,
-          });
 
           if (isChromeIOS) {
             // Chrome iOS requires a user gesture for navigator.credentials.get().
@@ -336,12 +328,6 @@ export function ConnectRoute() {
           handleCompletion();
         } catch (e) {
           console.error("Failed to create verified session:", e);
-          posthog.capture("Verified Session Creation Failed (Continue)", {
-            error: e instanceof Error ? e.message : String(e),
-            errorName: e instanceof Error ? e.name : undefined,
-            userAgent: navigator.userAgent,
-            isChromeIOS: true,
-          });
           setSessionError(e instanceof Error ? e : new Error(String(e)));
         } finally {
           setIsSessionCreating(false);
