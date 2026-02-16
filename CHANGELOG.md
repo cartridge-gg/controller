@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.13.9] - 2026-02-16
+
+### 🚀 Improvements
+- **@cartridge/controller**: Enhanced iOS WebAuthn support with explicit creation options and improved debug logging for more reliable passkey creation on iOS devices (#2421)
+- **@cartridge/controller**: Streamlined build process by removing redundant build script in controller package for improved development workflow (#2423)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed quest toast notifications by removing them to prevent user interface clutter and improve user experience (#2425)
+- **@cartridge/controller**: Improved passkey creation flow for Chrome iOS by implementing direct iframe approach instead of popup flow for better mobile compatibility (#2419, #2420)
+- **@cartridge/controller**: Enhanced iOS passkey creation reliability by setting authenticatorAttachment to platform for improved device authentication (#2417)
+
+### 🔧 Testing
+- **@cartridge/controller**: Added comprehensive Capacitor session redirect E2E tests to prevent regressions in session ingestion and account creation flows (#2424)
+- **@cartridge/controller**: Added regression tests for controller disconnect localStorage cleanup functionality (#2414)
+
+### 📦 Dependencies
+- **controller-wasm**: Updated to version 0.9.4 for improved backend functionality (#2418)
+- **Dependencies**: Updated ERC metadata dependencies for better token support (#2422)
+
 ## [0.13.8] - 2026-02-13
 
 ### ✨ New Features
