@@ -17,15 +17,32 @@ import {
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
 import { requestStorageAccess } from "@/utils/connection/storage-access";
+import { posthog } from "@/components/provider/posthog";
+import {
+  Button,
+  HeaderInner,
+  LayoutContent,
+  LayoutFooter,
+} from "@cartridge/ui";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
   message: "Canceled",
 };
 
+// Chrome on iOS uses WebKit under the hood and requires a user gesture
+// for navigator.credentials.get(). Auto session creation in useEffect
+// fails silently, so we show a "Continue" button instead.
+const isChromeIOS =
+  typeof navigator !== "undefined" && /CriOS/i.test(navigator.userAgent);
+
 export function ConnectRoute() {
-  const { controller, policies, origin } = useConnection();
+  const { controller, policies, origin, theme } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
+  const [isSessionCreating, setIsSessionCreating] = useState(false);
+  const [sessionError, setSessionError] = useState<Error>();
+  const [showContinueButton, setShowContinueButton] = useState(false);
 
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
@@ -254,8 +271,22 @@ export function ConnectRoute() {
           handleCompletion();
         } catch (e) {
           console.error("Failed to create verified session:", e);
-          // Fall back to showing the UI if auto-creation fails
-          params.reject?.(e);
+          posthog.capture("Verified Session Creation Failed", {
+            error: e instanceof Error ? e.message : String(e),
+            errorName: e instanceof Error ? e.name : undefined,
+            userAgent: navigator.userAgent,
+            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+            isChromeIOS,
+          });
+
+          if (isChromeIOS) {
+            // Chrome iOS requires a user gesture for navigator.credentials.get().
+            // Show a "Continue" button so the user tap provides the gesture.
+            setShowContinueButton(true);
+          } else {
+            // Fall back to rejecting on other browsers
+            params.reject?.(e);
+          }
         }
       };
 
@@ -286,7 +317,62 @@ export function ConnectRoute() {
   }
 
   if (policies.verified && !hasTokenApprovals) {
-    // This should not be reached as verified policies are handled in useCreateController
+    // Auto session creation failed on Chrome iOS — show a "Continue" button
+    // so the user tap provides the gesture required by WebAuthn.
+    if (showContinueButton) {
+      const handleContinue = async () => {
+        if (!controller) return;
+        setIsSessionCreating(true);
+        setSessionError(undefined);
+        try {
+          await createVerifiedSession({ controller, origin, policies });
+          params?.resolve?.({
+            code: ResponseCodes.SUCCESS,
+            address: controller.address(),
+          });
+          if (params?.params.id) {
+            cleanupCallbacks(params.params.id);
+          }
+          handleCompletion();
+        } catch (e) {
+          console.error("Failed to create verified session:", e);
+          posthog.capture("Verified Session Creation Failed (Continue)", {
+            error: e instanceof Error ? e.message : String(e),
+            errorName: e instanceof Error ? e.name : undefined,
+            userAgent: navigator.userAgent,
+            isChromeIOS: true,
+          });
+          setSessionError(e instanceof Error ? e : new Error(String(e)));
+        } finally {
+          setIsSessionCreating(false);
+        }
+      };
+
+      return (
+        <>
+          <HeaderInner
+            className="pb-0"
+            title={theme ? theme.name : "Create Session"}
+          />
+          <LayoutContent />
+          <LayoutFooter>
+            {sessionError && (
+              <ControllerErrorAlert className="mb-3" error={sessionError} />
+            )}
+            <Button
+              className="w-full"
+              disabled={isSessionCreating}
+              isLoading={isSessionCreating}
+              onClick={() => void handleContinue()}
+            >
+              continue
+            </Button>
+          </LayoutFooter>
+        </>
+      );
+    }
+
+    // Auto-creation either succeeded or is in progress
     return null;
   }
 
