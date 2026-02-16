@@ -17,7 +17,7 @@ import { constants, getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
-import { posthog } from "@/components/provider/posthog";
+
 import { useAccountSearchQuery } from "@/utils/api";
 
 type RawAssertion = PublicKeyCredential & {
@@ -70,34 +70,6 @@ const createCredentials = async (
     { alg: -7, type: "public-key" },
   ];
   beginRegistration.publicKey.rp.id = import.meta.env.VITE_RP_ID;
-
-  // Debug: log the full options to compare Chrome iOS vs Safari behavior
-  console.log(
-    "[WebAuthn] navigator.credentials.create options:",
-    JSON.stringify(beginRegistration, (_, v) =>
-      v instanceof ArrayBuffer
-        ? `ArrayBuffer(${v.byteLength})`
-        : v instanceof Uint8Array
-          ? `Uint8Array(${v.length})`
-          : v,
-    ),
-  );
-  console.log("[WebAuthn] userAgent:", navigator.userAgent);
-  console.log("[WebAuthn] hasPlatformAuthenticator:", hasPlatformAuthenticator);
-
-  // Also capture via PostHog for remote debugging (iOS Chrome)
-  posthog.capture("WebAuthn Create Options", {
-    options: JSON.stringify(beginRegistration, (_, v) =>
-      v instanceof ArrayBuffer
-        ? `ArrayBuffer(${v.byteLength})`
-        : v instanceof Uint8Array
-          ? `Uint8Array(${v.length})`
-          : v,
-    ),
-    userAgent: navigator.userAgent,
-    hasPlatformAuthenticator,
-    isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
-  });
 
   const credentials = (await navigator.credentials.create(
     beginRegistration,
