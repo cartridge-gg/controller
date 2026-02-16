@@ -42,9 +42,9 @@ const createCredentials = async (
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
       // iOS check must come first: Chrome iOS reports hasPlatformAuthenticator
-      // as false even though the device supports passkeys via Apple's keychain.
-      // Force all authenticatorSelection properties so Chrome iOS (Google
-      // Password Manager) shows "Create Passkey" instead of "Sign in".
+      // as false even though the device supports passkeys via iCloud Keychain.
+      // Force all authenticatorSelection properties so Chrome iOS shows
+      // "Create Passkey" instead of "Sign in".
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         "platform";
       beginRegistration.publicKey.authenticatorSelection.residentKey =
