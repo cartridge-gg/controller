@@ -17,6 +17,7 @@ import { constants, getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
+import { posthog } from "@/components/provider/posthog";
 import { useAccountSearchQuery } from "@/utils/api";
 
 type RawAssertion = PublicKeyCredential & {
@@ -39,12 +40,11 @@ const createCredentials = async (
   if (!beginRegistration.publicKey) return;
   if (beginRegistration.publicKey?.authenticatorSelection) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
-      beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
-        "cross-platform";
-    else if (isIOS) {
-      // Force all authenticatorSelection properties on iOS so Chrome iOS
-      // (Google Password Manager) shows "Create Passkey" instead of "Sign in"
+    if (isIOS) {
+      // iOS check must come first: Chrome iOS reports hasPlatformAuthenticator
+      // as false even though the device supports passkeys via Apple's keychain.
+      // Force all authenticatorSelection properties so Chrome iOS (Google
+      // Password Manager) shows "Create Passkey" instead of "Sign in".
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         "platform";
       beginRegistration.publicKey.authenticatorSelection.residentKey =
@@ -56,9 +56,16 @@ const createCredentials = async (
       // Clear excludeCredentials to prevent existing passkeys from
       // triggering a sign-in flow instead of creation
       beginRegistration.publicKey.excludeCredentials = [];
-    } else
+    } else if (
+      !hasPlatformAuthenticator ||
+      navigator.userAgent.indexOf("Win") != -1
+    ) {
+      beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
+        "cross-platform";
+    } else {
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         undefined;
+    }
   }
 
   beginRegistration.publicKey.user.id = Buffer.from(name);
@@ -86,6 +93,20 @@ const createCredentials = async (
   );
   console.log("[WebAuthn] userAgent:", navigator.userAgent);
   console.log("[WebAuthn] hasPlatformAuthenticator:", hasPlatformAuthenticator);
+
+  // Also capture via PostHog for remote debugging (iOS Chrome)
+  posthog.capture("WebAuthn Create Options", {
+    options: JSON.stringify(beginRegistration, (_, v) =>
+      v instanceof ArrayBuffer
+        ? `ArrayBuffer(${v.byteLength})`
+        : v instanceof Uint8Array
+          ? `Uint8Array(${v.length})`
+          : v,
+    ),
+    userAgent: navigator.userAgent,
+    hasPlatformAuthenticator,
+    isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+  });
 
   const credentials = (await navigator.credentials.create(
     beginRegistration,
