@@ -12,6 +12,8 @@ concurrency:
 jobs:
   next:
     if: always() == 'skip' # temporarily skip cc @jun
+    permissions:
+      contents: read
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -33,6 +35,8 @@ jobs:
           retention-days: 30
 
   capacitor:
+    permissions:
+      contents: read
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
