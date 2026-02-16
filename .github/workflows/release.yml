@@ -37,15 +37,18 @@ jobs:
         run: |
           echo "VERSION=$(jq -r '.version' packages/controller/package.json)" >> $GITHUB_OUTPUT
 
-      - name: Publish release to npm
-        if: ${{ github.event.pull_request.head.ref == 'prepare-release' }}
+      - name: Publish to npm
+        if: |
+          github.event.pull_request.head.ref == 'prepare-release' ||
+          github.event.pull_request.head.ref == 'prepare-prerelease' ||
+          github.event_name == 'workflow_dispatch'
         run: |
-          pnpm release
-
-      - name: Publish prerelease to npm
-        if: ${{ github.event.pull_request.head.ref == 'prepare-prerelease' }}
-        run: |
-          pnpm release:prerelease
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          if [[ "$VERSION" == *-* ]]; then
+            pnpm release:prerelease
+          else
+            pnpm release
+          fi
 
       - name: Extract changelog for version
         id: get_changelog
