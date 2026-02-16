@@ -397,28 +397,8 @@ export default class SessionProvider extends BaseProvider {
       }
     }
 
-    if (window.location.search.includes(REDIRECT_QUERY_NAME)) {
-      const params = new URLSearchParams(window.location.search);
-      const session = params.get(REDIRECT_QUERY_NAME);
-      if (session) {
-        const normalizedSession = this.ingestSessionFromRedirect(session);
-        if (
-          normalizedSession &&
-          Number(normalizedSession.expiresAt) !==
-            Number(sessionRegistration?.expiresAt)
-        ) {
-          sessionRegistration = normalizedSession;
-        }
-
-        // Remove the session query parameter
-        params.delete(REDIRECT_QUERY_NAME);
-        const newUrl =
-          window.location.pathname +
-          (params.toString() ? `?${params.toString()}` : "") +
-          window.location.hash;
-        window.history.replaceState({}, document.title, newUrl);
-      }
-    }
+    // REGRESSION TEST: skip redirect ingestion (simulates v0.13.7 bug)
+    // if (window.location.search.includes(REDIRECT_QUERY_NAME)) { ... }
 
     const signerString = localStorage.getItem("sessionSigner");
     const signer = signerString ? JSON.parse(signerString) : null;
