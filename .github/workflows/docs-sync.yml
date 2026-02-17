@@ -170,6 +170,7 @@ jobs:
               - Trigger: Manual documentation sync
 
               Please review the documentation changes to ensure they accurately reflect the controller updates."
+              gh pr merge --auto --squash
             else
               gh pr create \
                 --title "docs: Update documentation for controller PR #${{ github.event.pull_request.number }}" \
@@ -180,6 +181,7 @@ jobs:
               - Files changed: ${{ steps.changed-files.outputs.changed_files }}
 
               Please review the documentation changes to ensure they accurately reflect the controller updates."
+              gh pr merge --auto --squash
             fi
           else
             echo "No documentation changes were made by Claude"
