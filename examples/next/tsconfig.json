@@ -21,6 +21,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.otf",
     ".next/types/**/*.ts",
     "**/*.wasm"
   ],

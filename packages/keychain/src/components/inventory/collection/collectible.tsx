@@ -65,6 +65,7 @@ export function Collectible() {
                         ? asset.name
                         : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
                     }
+                    clickable
                     selectable={false}
                     images={[...asset.imageUrls, placeholder]}
                     totalCount={asset.amount}
