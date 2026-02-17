@@ -25,6 +25,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: "/review"
+          allowed_tools: "Read,Glob,Grep"
           # CLAUDE.md is a symlink to AGENTS.md in this repo; keep repo rules there.
           claude_args: |
             --max-turns 4
