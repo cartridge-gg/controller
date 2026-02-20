@@ -98,6 +98,24 @@ describe("ControllerProvider.disconnect", () => {
     expect(keychainDisconnect).toHaveBeenCalledTimes(1);
   });
 
+  test("closes iframe to reset keychain state for subsequent connect", async () => {
+    const controller = new ControllerProvider({});
+    const keychainDisconnect = jest.fn().mockResolvedValue(undefined);
+    (controller as any).keychain = {
+      disconnect: keychainDisconnect,
+    };
+
+    const mockClose = jest.fn();
+    (controller as any).iframes = {
+      keychain: { close: mockClose },
+    };
+
+    await controller.disconnect();
+
+    expect(keychainDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockClose).toHaveBeenCalledTimes(1);
+  });
+
   test("does not throw when localStorage is unavailable", async () => {
     delete (global as any).localStorage;
     const controller = new ControllerProvider({});

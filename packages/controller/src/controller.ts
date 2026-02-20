@@ -412,7 +412,8 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    return this.keychain.disconnect();
+    await this.keychain.disconnect();
+    return this.close();
   }
 
   async openProfile(tab: ProfileContextTypeVariant = "inventory") {
