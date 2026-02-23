@@ -146,7 +146,7 @@ export default class SessionProvider extends BaseProvider {
       redirectUri,
     )}&redirect_query_name=startapp&policies=${encodeURIComponent(
       JSON.stringify(this._policies),
-    )}&rpc_url=${encodeURIComponent(this._rpcUrl)}`;
+    )}&rpc_url=${encodeURIComponent(this._rpcUrl)}&chain_id=${encodeURIComponent(this._chainId)}`;
 
     this._backend.openLink(url);
 

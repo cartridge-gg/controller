@@ -6,6 +6,7 @@ import { IFrame, IFrameOptions } from "./base";
 type KeychainIframeOptions = IFrameOptions<Keychain> &
   KeychainOptions & {
     version?: string;
+    chainId?: string;
     ref?: string;
     refGroup?: string;
     needsSessionCreation?: boolean;
@@ -31,6 +32,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     preset,
     shouldOverridePresetPolicies,
     rpcUrl,
+    chainId,
     ref,
     refGroup,
     needsSessionCreation,
@@ -75,6 +77,10 @@ export class KeychainIFrame extends IFrame<Keychain> {
 
     if (rpcUrl) {
       _url.searchParams.set("rpc_url", encodeURIComponent(rpcUrl));
+    }
+
+    if (chainId) {
+      _url.searchParams.set("chain_id", chainId);
     }
 
     if (ref) {

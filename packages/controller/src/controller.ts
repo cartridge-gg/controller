@@ -789,6 +789,7 @@ export default class ControllerProvider extends BaseProvider {
     const iframe = new KeychainIFrame({
       ...this.options,
       rpcUrl: this.rpcUrl(),
+      chainId: this.selectedChain,
       onClose: () => {
         this.keychain?.reset?.();
       },

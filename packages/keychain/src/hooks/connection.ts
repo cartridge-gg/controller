@@ -244,7 +244,12 @@ export function useConnectionValue() {
     ...defaultTheme,
   });
   const [controller, setController] = useState(window.controller);
-  const [chainId, setChainId] = useState<string>();
+  const [chainId, setChainId] = useState<string | undefined>(() =>
+    typeof window !== "undefined"
+      ? (new URLSearchParams(window.location.search).get("chain_id") ??
+        undefined)
+      : undefined,
+  );
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
   const connectionStateRef = useRef<HeadlessConnectionState>({
     origin,
@@ -277,20 +282,23 @@ export function useConnectionValue() {
     }
   }, [controller, setRpcUrl, urlRpcUrl]);
 
-  // When URL provides an rpc_url that differs from the controller's, log the user
-  // out so they re-authenticate on the correct chain. The account may not be deployed
-  // on the target chain, so we can't simply recreate the controller.
+  // When the requested chain differs from the controller's, log the user out so
+  // they re-authenticate on the correct chain. Compares chain IDs (semantic
+  // equality) rather than RPC URLs (string equality) to avoid false mismatches
+  // from URL normalization differences.
   useEffect(() => {
-    if (!controller || !urlRpcUrl) return;
-    if (controller.rpcUrl() === urlRpcUrl) return;
+    if (!controller || !chainId) return;
+    if (controller.chainId() === chainId) return;
 
-    setRpcUrl(urlRpcUrl);
+    if (urlRpcUrl) {
+      setRpcUrl(urlRpcUrl);
+    }
 
     (async () => {
       await controller.disconnect();
       setController(undefined);
     })();
-  }, [controller, urlRpcUrl, setController, setRpcUrl]);
+  }, [controller, chainId, urlRpcUrl, setController, setRpcUrl]);
 
   const urlParamsRef = useRef<{
     theme: string | null;

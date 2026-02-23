@@ -295,7 +295,8 @@ export default class SessionProvider extends BaseProvider {
           `/session?public_key=${this._publicKey}` +
           `&redirect_uri=${this._redirectUrl}` +
           `&redirect_query_name=startapp` +
-          `&rpc_url=${this._rpcUrl}`;
+          `&rpc_url=${this._rpcUrl}` +
+          `&chain_id=${this._chainId}`;
 
         if (this._preset) {
           url += `&preset=${encodeURIComponent(this._preset)}`;

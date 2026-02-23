@@ -396,44 +396,59 @@ describe("URL rpc_url priority over stored controller rpcUrl", () => {
   });
 
   describe("Controller disconnect on chain mismatch", () => {
-    it("should disconnect controller when URL rpc_url differs from stored controller", () => {
-      const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
+    it("should disconnect controller when chain IDs differ", () => {
+      // Controller is on sepolia (0x534e5f534550), URL requests mainnet
+      const controllerChainId = mockController.chainId();
+      const urlChainId = "0x534e5f4d41494e"; // SN_MAIN
 
-      // Simulate the effect logic: URL rpc_url differs from controller's rpcUrl
-      const controllerRpcUrl = mockController.rpcUrl();
-      expect(controllerRpcUrl).not.toBe(urlRpcUrl);
+      expect(controllerChainId).not.toBe(urlChainId);
 
-      // The effect should trigger disconnect when rpcUrls don't match
+      // The effect should trigger disconnect when chain IDs don't match
       const shouldDisconnect =
-        mockController && urlRpcUrl && controllerRpcUrl !== urlRpcUrl;
+        mockController && urlChainId && controllerChainId !== urlChainId;
       expect(shouldDisconnect).toBeTruthy();
     });
 
-    it("should NOT disconnect controller when URL rpc_url matches stored controller", () => {
-      const urlRpcUrl = "https://rpc.sepolia.example.com";
-      const controllerRpcUrl = mockController.rpcUrl();
+    it("should NOT disconnect controller when chain IDs match", () => {
+      // Same chain, potentially different RPC endpoints
+      const controllerChainId = mockController.chainId();
+      const urlChainId = "0x534e5f534550"; // SN_SEPOLIA (matches mock)
 
-      // URLs match - no disconnect should happen
-      expect(controllerRpcUrl).toBe(urlRpcUrl);
+      expect(controllerChainId).toBe(urlChainId);
 
-      const shouldDisconnect = controllerRpcUrl !== urlRpcUrl;
+      const shouldDisconnect = controllerChainId !== urlChainId;
       expect(shouldDisconnect).toBe(false);
     });
 
-    it("should NOT disconnect controller when no URL rpc_url is provided", () => {
-      const urlRpcUrl = null;
+    it("should NOT disconnect when chain IDs match despite different RPC URLs", () => {
+      // Both on sepolia but using different RPC endpoints
+      const controllerChainId = mockController.chainId(); // 0x534e5f534550
+      const urlChainId = "0x534e5f534550"; // SN_SEPOLIA
 
-      // No urlRpcUrl - the effect guard returns early
-      const shouldDisconnect = urlRpcUrl !== null;
+      // RPC URLs differ, but chain IDs match — no disconnect
+      const controllerRpcUrl = mockController.rpcUrl(); // sepolia.example.com
+      const urlRpcUrl = "https://other-provider.com/sepolia";
+      expect(controllerRpcUrl).not.toBe(urlRpcUrl);
+      expect(controllerChainId).toBe(urlChainId);
+
+      const shouldDisconnect = controllerChainId !== urlChainId;
       expect(shouldDisconnect).toBe(false);
+    });
+
+    it("should NOT disconnect controller when chainId is undefined", () => {
+      const chainId = undefined;
+
+      // No chainId - the effect guard returns early
+      const shouldDisconnect = mockController && chainId;
+      expect(shouldDisconnect).toBeFalsy();
     });
 
     it("should NOT disconnect controller when controller is not set", () => {
       const controller = undefined;
-      const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
+      const chainId = "0x534e5f4d41494e";
 
       // No controller - the effect guard returns early
-      const shouldDisconnect = controller && urlRpcUrl;
+      const shouldDisconnect = controller && chainId;
       expect(shouldDisconnect).toBeFalsy();
     });
   });

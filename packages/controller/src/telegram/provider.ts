@@ -82,7 +82,7 @@ export default class TelegramProvider extends BaseProvider {
       this._tmaUrl
     }&redirect_query_name=startapp&policies=${JSON.stringify(
       this._policies,
-    )}&rpc_url=${this._rpcUrl}`;
+    )}&rpc_url=${this._rpcUrl}&chain_id=${this._chainId}`;
 
     localStorage.setItem("lastUsedConnector", this.id);
     openLink(url);
