@@ -15,7 +15,7 @@ import { ExternalWalletError } from "@/utils/errors";
 /**
  * Extended Error type with retry control
  */
-interface ExtendedError extends Error {
+export interface ExtendedError extends Error {
   noRetry?: boolean;
 }
 
@@ -319,7 +319,11 @@ export async function fetchSwapQuoteInUsdc(
 ): Promise<bigint> {
   const usdcAddress = USDC_ADDRESSES[chainId];
   if (!usdcAddress) {
-    throw new Error(`USDC address not found for chain ID: ${chainId}`);
+    const error = new Error(
+      `USDC address not found for chain ID: ${chainId}`,
+    ) as ExtendedError;
+    error.noRetry = true;
+    throw error;
   }
   const quote = await fetchSwapQuote(
     amount,

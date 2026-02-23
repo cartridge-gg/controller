@@ -14,7 +14,7 @@ import {
 import { Price } from "@cartridge/ui/utils/api/cartridge";
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
-import { fetchSwapQuoteInUsdc } from "@/utils/ekubo";
+import { fetchSwapQuoteInUsdc, type ExtendedError } from "@/utils/ekubo";
 
 export const DEFAULT_TOKENS = [
   {
@@ -253,11 +253,22 @@ export function TokensProvider({
               quote: "USDC",
             };
           } catch (error) {
+            const ekuboError = error as ExtendedError;
             // Only log non-429 errors (rate limiting is expected)
-            const is429 =
-              error instanceof Error && error.message.includes("429");
+            const is429 = ekuboError.message.includes("429");
             if (!is429) {
-              console.error(`Failed to fetch price for ${address}:`, error);
+              console.warn(
+                `Failed to fetch price for ${address}:`,
+                ekuboError.message,
+              );
+            }
+            if (ekuboError.noRetry) {
+              return {
+                base: address,
+                amount: "0",
+                decimals: USDC_DECIMALS,
+                quote: "USDC",
+              };
             }
             return null;
           }
