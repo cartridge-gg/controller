@@ -220,14 +220,19 @@ export const controllerConnector = new ControllerConnector({
   // preset: "nums",
 
   // Pistols (achievements, no quests)
-  slot: "arcade-pistols",
-  namespace: "pistols",
+  // slot: "arcade-pistols",
+  // namespace: "pistols",
   // preset: "pistols",
 
   // Loot Survivor (no achievements, no quests)
   // namespace: "ls_0_0_9",
   // slot: "pg-mainnet-10",
   // preset: "loot-survivor",
+
+  // Summit (no achievements, no quests)
+  namespace: "relayer_0_0_1",
+  slot: "pg-mainnet-10",
+  preset: "savage-summit",
 });
 
 const session = new SessionConnector({
