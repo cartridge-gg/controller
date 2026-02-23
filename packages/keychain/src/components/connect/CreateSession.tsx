@@ -23,6 +23,7 @@ import {
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { SpendingLimitPage } from "./SpendingLimitPage";
+import { useNavigation } from "@/context/navigation";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -64,6 +65,7 @@ const CreateSessionLayout = ({
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
   const createButtonRef = useRef<HTMLButtonElement>(null);
+  const { setOnBackCallback } = useNavigation();
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
@@ -87,6 +89,17 @@ const CreateSessionLayout = ({
   useEffect(() => {
     setStep(defaultStep);
   }, [defaultStep]);
+
+  useEffect(() => {
+    const callback = (): void => {
+      setStep("summary");
+    };
+    // function state setters treat functions as updater callback, returning the actual value to store
+    setOnBackCallback(() => (step === "spending-limit" ? callback : undefined));
+    return () => {
+      setOnBackCallback(undefined);
+    };
+  }, [step, setOnBackCallback]);
 
   const expiresAt = useMemo(() => {
     return duration + now();
@@ -195,7 +208,12 @@ const CreateSessionLayout = ({
         policies={policies}
         isConnecting={isConnecting}
         error={error}
-        onBack={() => setStep("summary")}
+        onSkip={async () => {
+          await createSession({
+            toggleOff: true,
+            successCallback: onSkip,
+          });
+        }}
         onConnect={() => {
           void handlePrimaryAction();
         }}
@@ -208,7 +226,11 @@ const CreateSessionLayout = ({
       <HeaderInner
         className="pb-0"
         title={
-          !isUpdate ? (theme ? theme.name : "Create Session") : "Update Session"
+          !isUpdate
+            ? theme
+              ? `Play ${theme.name}`
+              : "Create Session"
+            : "Update Session"
         }
         description={isUpdate ? "The policies were updated" : undefined}
         right={
@@ -273,22 +295,7 @@ const CreateSessionLayout = ({
 
         {error && <ControllerErrorAlert className="mb-3" error={error} />}
 
-        <div className="flex items-center gap-3">
-          {!policies.verified && (
-            <Button
-              variant="secondary"
-              onClick={async () => {
-                await createSession({
-                  toggleOff: true,
-                  successCallback: onSkip,
-                });
-              }}
-              disabled={isConnecting}
-              className="px-8"
-            >
-              Skip
-            </Button>
-          )}
+        <div className="flex flex-col gap-2">
           <Button
             ref={createButtonRef}
             className={cn("flex-1", policies.verified && "w-full")}
@@ -299,6 +306,19 @@ const CreateSessionLayout = ({
             }}
           >
             {isUpdate ? "update session" : "continue"}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={async () => {
+              await createSession({
+                toggleOff: true,
+                successCallback: onSkip,
+              });
+            }}
+            disabled={isConnecting}
+            className="px-8"
+          >
+            Skip
           </Button>
         </div>
       </LayoutFooter>
