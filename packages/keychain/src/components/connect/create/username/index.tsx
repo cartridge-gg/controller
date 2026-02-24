@@ -22,6 +22,7 @@ type CreateAccountProps = {
   error?: Error;
   isLoading: boolean;
   autoFocus?: boolean;
+  readOnly?: boolean;
   showAutocomplete?: boolean;
   selectedAccount?: AccountSearchResult; // For pill functionality with account data
   onUsernameChange: (value: string) => void;
@@ -49,6 +50,7 @@ export const CreateAccount = React.forwardRef<
       error,
       isLoading,
       autoFocus = false,
+      readOnly = false,
       showAutocomplete = false,
       selectedAccount,
       onUsernameChange,
@@ -356,20 +358,25 @@ export const CreateAccount = React.forwardRef<
             data-1p-ignore="true"
             data-lpignore="true"
             data-form-type="other"
+            readOnly={readOnly}
             onFocus={handleFocus}
             onBlur={handleBlur}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             isLoading={validation.status === "validating"}
             disabled={isLoading}
-            onClear={() => {
-              onUsernameClear();
-              if (showAutocomplete) {
-                setIsDropdownOpen(false);
-                setSelectedIndex(undefined);
-                onDropdownOpenChange?.(false);
-              }
-            }}
+            onClear={
+              readOnly
+                ? undefined
+                : () => {
+                    onUsernameClear();
+                    if (showAutocomplete) {
+                      setIsDropdownOpen(false);
+                      setSelectedIndex(undefined);
+                      onDropdownOpenChange?.(false);
+                    }
+                  }
+            }
           />
           {!hasDropdownContent && (
             <Status
