@@ -41,6 +41,7 @@ interface CreateControllerViewProps {
   validation: ReturnType<typeof useUsernameValidation>;
   isLoading: boolean;
   error?: Error;
+  prefillUsername?: string;
   onUsernameChange: (value: string) => void;
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
@@ -78,6 +79,7 @@ function CreateControllerForm({
   validation,
   isLoading,
   error,
+  prefillUsername,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -216,11 +218,12 @@ function CreateControllerForm({
             validation={validation}
             error={error}
             isLoading={isLoading}
+            readOnly={!!prefillUsername}
             onUsernameChange={onUsernameChange}
             onUsernameFocus={onUsernameFocus}
             onUsernameClear={onUsernameClear}
             onKeyDown={onKeyDown}
-            showAutocomplete={true}
+            showAutocomplete={!prefillUsername}
             selectedAccount={selectedAccount}
             onAccountSelect={handleAccountSelect}
             onSelectedUsernameRemove={handleRemovePill}
@@ -291,6 +294,7 @@ export function CreateControllerView({
   validation,
   isLoading,
   error,
+  prefillUsername,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -339,6 +343,7 @@ export function CreateControllerView({
           validation={validation}
           isLoading={isLoading}
           error={error}
+          prefillUsername={prefillUsername}
           onUsernameChange={onUsernameChange}
           onUsernameFocus={onUsernameFocus}
           onUsernameClear={onUsernameClear}
@@ -370,11 +375,13 @@ export function CreateControllerView({
 export function CreateController({
   isSlot,
   signers,
+  prefillUsername,
   isLoading: externalIsLoading = false,
 }: {
   isSlot?: boolean;
   error?: Error;
   signers?: AuthOptions;
+  prefillUsername?: string;
   isLoading?: boolean;
 }) {
   const posthog = usePostHog();
@@ -385,7 +392,7 @@ export function CreateController({
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const [usernameField, setUsernameField] = useState({
-    value: "",
+    value: prefillUsername ?? "",
     error: undefined,
   });
 
@@ -507,6 +514,7 @@ export function CreateController({
   }, [debouncedValidation.status, handleFormSubmit, authenticationStep]);
 
   const handleUsernameChange = (value: string) => {
+    if (prefillUsername) return;
     if (!hasLoggedChange.current) {
       posthog?.capture("Change Username");
       hasLoggedChange.current = true;
@@ -527,6 +535,7 @@ export function CreateController({
   };
 
   const handleUsernameClear = () => {
+    if (prefillUsername) return;
     setError(undefined);
     setUsernameField((u) => ({ ...u, value: "" }));
   };
@@ -607,6 +616,7 @@ export function CreateController({
         validation={debouncedValidation}
         isLoading={isLoading}
         error={error}
+        prefillUsername={prefillUsername}
         isSlot={isSlot}
         onUsernameChange={handleUsernameChange}
         onUsernameFocus={handleUsernameFocus}

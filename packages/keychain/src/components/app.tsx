@@ -180,10 +180,17 @@ function Authentication() {
       }
     }
 
+    // On the session page, prefill and lock the username if account param is provided
+    const accountParam =
+      pathname === "/session" || pathname === "session"
+        ? (searchParams.get("account") ?? undefined)
+        : undefined;
+
     return (
       <CreateController
         isSlot={pathname.startsWith("/slot")}
         signers={signers}
+        prefillUsername={accountParam}
       />
     );
   }
