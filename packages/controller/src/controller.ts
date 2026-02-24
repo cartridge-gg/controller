@@ -31,6 +31,7 @@ import {
   OpenOptions,
   HeadlessUsernameLookupResult,
   StarterpackOptions,
+  UpdateSessionOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
@@ -506,6 +507,47 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
     this.iframes.keychain.close();
+  }
+
+  async updateSession(options: UpdateSessionOptions = {}) {
+    if (!options.policies && !options.preset) {
+      throw new Error("Either `policies` or `preset` must be provided");
+    }
+
+    if (!this.iframes) {
+      return;
+    }
+
+    // Ensure iframe is created if using lazy loading
+    if (!this.iframes.keychain) {
+      this.iframes.keychain = this.createKeychainIframe();
+    }
+
+    await this.waitForKeychain();
+
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    this.iframes.keychain.open();
+
+    try {
+      const response = await this.keychain.updateSession(
+        options.policies,
+        options.preset,
+      );
+
+      if (response.code !== ResponseCodes.SUCCESS) {
+        throw new Error((response as ConnectError).message);
+      }
+
+      return response as ConnectReply;
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.iframes.keychain.close();
+    }
   }
 
   revoke(origin: string, _policy: Policy[]) {

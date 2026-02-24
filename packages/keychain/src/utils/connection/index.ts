@@ -15,6 +15,7 @@ import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
+import { updateSession } from "./update-session";
 import type {
   AuthOptions,
   ConnectOptions,
@@ -123,6 +124,7 @@ export function connectToController<
           );
         },
       switchChain: () => switchChain({ setController, setRpcUrl }),
+      updateSession: updateSession({ navigate }),
     },
   });
 }

@@ -157,6 +157,10 @@ export interface Keychain {
     account: string,
     async?: boolean,
   ): Promise<Signature | ConnectError>;
+  updateSession(
+    policies?: SessionPolicies,
+    preset?: string,
+  ): Promise<ConnectReply | ConnectError>;
   openSettings(): Promise<void | ConnectError>;
   session(): Promise<KeychainSession>;
   sessions(): Promise<{
@@ -294,6 +298,14 @@ export interface ConnectOptions {
   /** Required when signer is "password" */
   password?: string;
 }
+
+/** Options for updating session policies at runtime */
+export type UpdateSessionOptions = {
+  /** Session policies to set */
+  policies?: SessionPolicies;
+  /** Preset name to resolve policies from */
+  preset?: string;
+};
 
 export type HeadlessConnectOptions = Required<
   Pick<ConnectOptions, "username" | "signer">
