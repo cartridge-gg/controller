@@ -358,13 +358,12 @@ export const CreateAccount = React.forwardRef<
             data-1p-ignore="true"
             data-lpignore="true"
             data-form-type="other"
-            readOnly={readOnly}
             onFocus={handleFocus}
             onBlur={handleBlur}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             isLoading={validation.status === "validating"}
-            disabled={isLoading}
+            disabled={isLoading || readOnly}
             onClear={
               readOnly
                 ? undefined
