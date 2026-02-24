@@ -40,7 +40,6 @@ import { CollectiblePurchase } from "./inventory/collection/collectible-purchase
 import { Execute } from "./Execute";
 import { SignMessage } from "./SignMessage";
 import { ConnectRoute } from "./ConnectRoute";
-import { UpdateSessionRoute } from "./UpdateSessionRoute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
 import { useNavigation } from "@/context";
@@ -318,7 +317,6 @@ export function App() {
         <Route path="/sign-message" element={<SignMessage />} />
         <Route path="/deploy" element={<DeployController />} />
         <Route path="/connect" element={<ConnectRoute />} />
-        <Route path="/update-session" element={<UpdateSessionRoute />} />
         <Route
           path="/headless-approval/:requestId"
           element={<HeadlessApprovalRoute />}
