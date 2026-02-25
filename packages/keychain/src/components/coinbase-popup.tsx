@@ -52,21 +52,35 @@ export function CoinbasePopup() {
   useEffect(() => {
     // Derive the allowed origin from the payment link URL
     const allowedOrigin = paymentLink ? new URL(paymentLink).origin : null;
+    console.log("[coinbase-popup] Listening for postMessages, allowedOrigin:", allowedOrigin);
+    console.log("[coinbase-popup] paymentLink:", paymentLink);
+    console.log("[coinbase-popup] sandbox attrs: allow-scripts allow-same-origin");
 
     const handleMessage = (event: MessageEvent) => {
+      // Log ALL incoming messages for debugging
+      console.log("[coinbase-popup] Raw postMessage received:", {
+        origin: event.origin,
+        data: event.data,
+        type: typeof event.data,
+        source: event.source ? "has source" : "no source",
+      });
+
       // Verify the message origin matches the Coinbase payment link domain
       if (allowedOrigin && event.origin !== allowedOrigin) {
-        console.error(
-          `[coinbase-popup] Rejected postMessage from unexpected origin: ${event.origin} (expected: ${allowedOrigin})`,
+        console.warn(
+          `[coinbase-popup] Origin mismatch: got "${event.origin}", expected "${allowedOrigin}"`,
         );
         return;
       }
 
       // Only process messages that look like Coinbase events
       const data = event.data as CoinbasePostMessage;
-      if (!data?.eventName?.startsWith("onramp_api.")) return;
+      if (!data?.eventName?.startsWith("onramp_api.")) {
+        console.log("[coinbase-popup] Ignoring non-Coinbase message:", event.data);
+        return;
+      }
 
-      console.log("[coinbase-popup] event:", data.eventName, data.data);
+      console.log("[coinbase-popup] ✅ Coinbase event:", data.eventName, data.data);
 
       switch (data.eventName) {
         case "onramp_api.load_success":
@@ -186,7 +200,10 @@ export function CoinbasePopup() {
           sandbox="allow-scripts allow-same-origin"
           referrerPolicy="no-referrer"
           title="Coinbase Onramp"
-          onLoad={() => setIframeReady(true)}
+          onLoad={() => {
+            console.log("[coinbase-popup] iframe onLoad fired");
+            setIframeReady(true);
+          }}
         />
       </div>
     </div>
