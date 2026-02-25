@@ -67,6 +67,7 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   stopPolling: () => {},
   orderId: undefined,
   orderStatus: undefined,
+  orderTxHash: undefined,
   isPollingOrder: false,
   getTransactions: async () => [],
 };

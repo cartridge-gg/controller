@@ -86,6 +86,7 @@ export interface OnchainPurchaseContextType {
   isFetchingCoinbaseQuote: boolean;
   orderId: string | undefined;
   orderStatus: CoinbaseOnrampStatus | undefined;
+  orderTxHash: string | undefined;
   isPollingOrder: boolean;
 
   // Actions
@@ -216,6 +217,7 @@ export const OnchainPurchaseProvider = ({
     isFetchingQuote: isFetchingCoinbaseQuote,
     isPollingOrder,
     orderStatus,
+    orderTxHash,
     openPaymentPopup,
     stopPolling,
   } = useCoinbase({
@@ -539,6 +541,7 @@ export const OnchainPurchaseProvider = ({
     isFetchingCoinbaseQuote,
     orderId,
     orderStatus,
+    orderTxHash,
     isPollingOrder,
     onOnchainPurchase,
     onExternalConnect,

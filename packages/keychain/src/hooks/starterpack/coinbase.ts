@@ -51,6 +51,7 @@ export interface UseCoinbaseReturn {
   isFetchingQuote: boolean;
   isPollingOrder: boolean;
   orderStatus: CoinbaseOnrampStatus | undefined;
+  orderTxHash: string | undefined;
 
   // Actions
   createOrder: (input: CreateOrderInput) => Promise<CoinbaseOrderResult>;
@@ -140,6 +141,7 @@ export function useCoinbase({
   const [orderStatus, setOrderStatus] = useState<
     CoinbaseOnrampStatus | undefined
   >();
+  const [orderTxHash, setOrderTxHash] = useState<string | undefined>();
 
   // Refs for managing the polling lifecycle
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -172,6 +174,10 @@ export function useCoinbase({
         try {
           const result = await getCoinbaseOrderStatus(targetOrderId);
           setOrderStatus(result.status);
+
+          if (result.txHash) {
+            setOrderTxHash(result.txHash);
+          }
 
           // Terminal states – stop polling
           if (
@@ -253,6 +259,7 @@ export function useCoinbase({
         setIsCreatingOrder(true);
         setOrderError(null);
         setOrderStatus(undefined);
+        setOrderTxHash(undefined);
 
         const order = await createCoinbaseOrder(input, !isMainnet);
 
@@ -310,6 +317,7 @@ export function useCoinbase({
     isFetchingQuote,
     isPollingOrder,
     orderStatus,
+    orderTxHash,
     createOrder,
     getTransactions,
     getQuote,
