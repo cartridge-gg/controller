@@ -1,0 +1,482 @@
+[
+  {
+    "type": "impl",
+    "name": "LockerImpl",
+    "interface_name": "ekubo::interfaces::core::ILocker"
+  },
+  {
+    "type": "struct",
+    "name": "core::array::Span::<core::felt252>",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "ekubo::interfaces::core::ILocker",
+    "items": [
+      {
+        "type": "function",
+        "name": "locked",
+        "inputs": [
+          {
+            "name": "id",
+            "type": "core::integer::u32"
+          },
+          {
+            "name": "data",
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "type": "impl",
+    "name": "RouterImpl",
+    "interface_name": "ekubo::router::IRouter"
+  },
+  {
+    "type": "struct",
+    "name": "ekubo::types::keys::PoolKey",
+    "members": [
+      {
+        "name": "token0",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "token1",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "fee",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "tick_spacing",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "extension",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "ekubo::router::RouteNode",
+    "members": [
+      {
+        "name": "pool_key",
+        "type": "ekubo::types::keys::PoolKey"
+      },
+      {
+        "name": "sqrt_ratio_limit",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "skip_ahead",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "ekubo::types::i129::i129",
+    "members": [
+      {
+        "name": "mag",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "sign",
+        "type": "core::bool"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "ekubo::router::TokenAmount",
+    "members": [
+      {
+        "name": "token",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "amount",
+        "type": "ekubo::types::i129::i129"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "ekubo::types::delta::Delta",
+    "members": [
+      {
+        "name": "amount0",
+        "type": "ekubo::types::i129::i129"
+      },
+      {
+        "name": "amount1",
+        "type": "ekubo::types::i129::i129"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "ekubo::router::Swap",
+    "members": [
+      {
+        "name": "route",
+        "type": "core::array::Array::<ekubo::router::RouteNode>"
+      },
+      {
+        "name": "token_amount",
+        "type": "ekubo::router::TokenAmount"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "ekubo::router::Depth",
+    "members": [
+      {
+        "name": "token0",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "token1",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "ekubo::router::IRouter",
+    "items": [
+      {
+        "type": "function",
+        "name": "swap",
+        "inputs": [
+          {
+            "name": "node",
+            "type": "ekubo::router::RouteNode"
+          },
+          {
+            "name": "token_amount",
+            "type": "ekubo::router::TokenAmount"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "ekubo::types::delta::Delta"
+          }
+        ],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "multihop_swap",
+        "inputs": [
+          {
+            "name": "route",
+            "type": "core::array::Array::<ekubo::router::RouteNode>"
+          },
+          {
+            "name": "token_amount",
+            "type": "ekubo::router::TokenAmount"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Array::<ekubo::types::delta::Delta>"
+          }
+        ],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "multi_multihop_swap",
+        "inputs": [
+          {
+            "name": "swaps",
+            "type": "core::array::Array::<ekubo::router::Swap>"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::array::Array::<ekubo::types::delta::Delta>>"
+          }
+        ],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "quote",
+        "inputs": [
+          {
+            "name": "swaps",
+            "type": "core::array::Array::<ekubo::router::Swap>"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::array::Array::<ekubo::types::delta::Delta>>"
+          }
+        ],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_delta_to_sqrt_ratio",
+        "inputs": [
+          {
+            "name": "pool_key",
+            "type": "ekubo::types::keys::PoolKey"
+          },
+          {
+            "name": "sqrt_ratio",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "ekubo::types::delta::Delta"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_market_depth",
+        "inputs": [
+          {
+            "name": "pool_key",
+            "type": "ekubo::types::keys::PoolKey"
+          },
+          {
+            "name": "sqrt_percent",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "ekubo::router::Depth"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_market_depth_v2",
+        "inputs": [
+          {
+            "name": "pool_key",
+            "type": "ekubo::types::keys::PoolKey"
+          },
+          {
+            "name": "percent_64x64",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "ekubo::router::Depth"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_market_depth_at_sqrt_ratio",
+        "inputs": [
+          {
+            "name": "pool_key",
+            "type": "ekubo::types::keys::PoolKey"
+          },
+          {
+            "name": "sqrt_ratio",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "percent_64x64",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "ekubo::router::Depth"
+          }
+        ],
+        "state_mutability": "view"
+      }
+    ]
+  },
+  {
+    "type": "impl",
+    "name": "Clear",
+    "interface_name": "ekubo::components::clear::IClear"
+  },
+  {
+    "type": "struct",
+    "name": "ekubo::interfaces::erc20::IERC20Dispatcher",
+    "members": [
+      {
+        "name": "contract_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "ekubo::components::clear::IClear",
+    "items": [
+      {
+        "type": "function",
+        "name": "clear",
+        "inputs": [
+          {
+            "name": "token",
+            "type": "ekubo::interfaces::erc20::IERC20Dispatcher"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "clear_minimum",
+        "inputs": [
+          {
+            "name": "token",
+            "type": "ekubo::interfaces::erc20::IERC20Dispatcher"
+          },
+          {
+            "name": "minimum",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "clear_minimum_to_recipient",
+        "inputs": [
+          {
+            "name": "token",
+            "type": "ekubo::interfaces::erc20::IERC20Dispatcher"
+          },
+          {
+            "name": "minimum",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "recipient",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
+        "state_mutability": "view"
+      }
+    ]
+  },
+  {
+    "type": "impl",
+    "name": "Expires",
+    "interface_name": "ekubo::components::expires::IExpires"
+  },
+  {
+    "type": "interface",
+    "name": "ekubo::components::expires::IExpires",
+    "items": [
+      {
+        "type": "function",
+        "name": "expires",
+        "inputs": [
+          {
+            "name": "at",
+            "type": "core::integer::u64"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "view"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "ekubo::interfaces::core::ICoreDispatcher",
+    "members": [
+      {
+        "name": "contract_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "type": "constructor",
+    "name": "constructor",
+    "inputs": [
+      {
+        "name": "core",
+        "type": "ekubo::interfaces::core::ICoreDispatcher"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "ekubo::router::Router::Event",
+    "kind": "enum",
+    "variants": []
+  }
+]
