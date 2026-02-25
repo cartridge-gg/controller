@@ -211,17 +211,9 @@ export function useCoinbase({
     [stopPolling, onError],
   );
 
-  /** Open the payment link in a popup and begin polling */
+  /** Open the payment link directly in a popup and begin polling */
   const openPaymentPopup = useCallback(() => {
     if (!paymentLink || !orderId) return;
-
-    // Build the keychain-hosted coinbase page URL
-    // The popup runs at the keychain origin (x.cartridge.gg) so the
-    // Coinbase iframe inside it will work correctly.
-    const keychainOrigin = window.location.origin;
-    const popupUrl = new URL("/coinbase", keychainOrigin);
-    popupUrl.searchParams.set("paymentLink", paymentLink);
-    popupUrl.searchParams.set("orderId", orderId);
 
     // Open a centered popup (use screen dimensions since we may be in an iframe)
     const width = 500;
@@ -230,14 +222,14 @@ export function useCoinbase({
     const top = (window.screen.height - height) / 2;
 
     const popup = window.open(
-      popupUrl.toString(),
+      paymentLink,
       "coinbase-payment",
       `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
     );
 
     popupRef.current = popup;
 
-    // Start polling for order status in the keychain as well
+    // Start polling for order status
     startPolling(orderId);
 
     // Watch for the popup being closed by the user
