@@ -154,13 +154,13 @@ function Authentication() {
     return <Disconnect />;
   }
 
-  // Update-session should never flash login UI while controller state settles.
-  if (pathname.startsWith("/update-session") && !controller) {
+  // Update-session should bypass auth/login gating entirely so it never flashes
+  // CreateController (login) while controller state settles.
+  if (pathname.startsWith("/update-session")) {
     return (
-      <CreateController
-        isSlot={pathname.startsWith("/slot")}
-        isLoading={true}
-      />
+      <Layout>
+        <Outlet />
+      </Layout>
     );
   }
 
