@@ -21,6 +21,7 @@ import {
 import { Item } from "./types";
 import { useStarterpackContext } from "./starterpack";
 import { ExternalWalletError } from "@/utils/errors";
+import { CoinbaseOnrampStatus } from "@cartridge/ui/utils/api/cartridge";
 import {
   useQuantity,
   useExternalWallet,
@@ -83,6 +84,9 @@ export interface OnchainPurchaseContextType {
   isCreatingOrder: boolean;
   coinbaseQuote: CoinbaseQuoteResult | undefined;
   isFetchingCoinbaseQuote: boolean;
+  orderId: string | undefined;
+  orderStatus: CoinbaseOnrampStatus | undefined;
+  isPollingOrder: boolean;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -95,6 +99,8 @@ export interface OnchainPurchaseContextType {
   waitForDeposit: (swapId: string) => Promise<boolean>;
   onApplePaySelect: () => void;
   onCreateCoinbaseOrder: () => Promise<void>;
+  openPaymentPopup: () => void;
+  stopPolling: () => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
 }
 
@@ -200,6 +206,7 @@ export const OnchainPurchaseProvider = ({
 
   const [isApplePaySelected, setIsApplePaySelected] = useState(false);
   const {
+    orderId,
     paymentLink,
     isCreatingOrder,
     createOrder: createCoinbaseOrder,
@@ -207,6 +214,10 @@ export const OnchainPurchaseProvider = ({
     getQuote: getCoinbaseQuote,
     coinbaseQuote,
     isFetchingQuote: isFetchingCoinbaseQuote,
+    isPollingOrder,
+    orderStatus,
+    openPaymentPopup,
+    stopPolling,
   } = useCoinbase({
     onError: setDisplayError,
   });
@@ -526,12 +537,17 @@ export const OnchainPurchaseProvider = ({
     isCreatingOrder,
     coinbaseQuote,
     isFetchingCoinbaseQuote,
+    orderId,
+    orderStatus,
+    isPollingOrder,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,
     waitForDeposit,
     onApplePaySelect,
     onCreateCoinbaseOrder,
+    openPaymentPopup,
+    stopPolling,
     getTransactions,
   };
 
