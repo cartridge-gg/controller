@@ -84,6 +84,7 @@ export function BridgePending({
   const waitForDeposit = waitForDepositProp ?? onchainContext.waitForDeposit;
   const onOnchainPurchase = onchainContext.onOnchainPurchase;
   const orderStatus = onchainContext.orderStatus;
+  const orderTxHash = onchainContext.orderTxHash;
 
   const [initialBridgeHash, setInitialBridgeHash] = useState(bridgeTxHash);
 
@@ -235,8 +236,8 @@ export function BridgePending({
                       : "Bridging to Starknet"
                   }
                   externalLink={
-                    initialBridgeHash
-                      ? `https://layerswap.io/explorer/${initialBridgeHash}`
+                    orderTxHash || initialBridgeHash
+                      ? `https://layerswap.io/explorer/${orderTxHash || initialBridgeHash}`
                       : undefined
                   }
                   isLoading={!paymentCompleted}

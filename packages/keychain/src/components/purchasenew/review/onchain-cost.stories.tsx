@@ -65,6 +65,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     stopPolling: () => {},
     orderId: undefined,
     orderStatus: undefined,
+    orderTxHash: undefined,
     isPollingOrder: false,
     getTransactions: async () => [],
   };

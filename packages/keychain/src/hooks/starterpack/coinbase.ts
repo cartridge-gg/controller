@@ -51,6 +51,7 @@ export interface UseCoinbaseReturn {
   isFetchingQuote: boolean;
   isPollingOrder: boolean;
   orderStatus: CoinbaseOnrampStatus | undefined;
+  orderTxHash: string | undefined;
 
   // Actions
   createOrder: (input: CreateOrderInput) => Promise<CoinbaseOrderResult>;
@@ -140,6 +141,7 @@ export function useCoinbase({
   const [orderStatus, setOrderStatus] = useState<
     CoinbaseOnrampStatus | undefined
   >();
+  const [orderTxHash, setOrderTxHash] = useState<string | undefined>();
 
   // Refs for managing the polling lifecycle
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -172,6 +174,10 @@ export function useCoinbase({
         try {
           const result = await getCoinbaseOrderStatus(targetOrderId);
           setOrderStatus(result.status);
+
+          if (result.txHash) {
+            setOrderTxHash(result.txHash);
+          }
 
           // Terminal states – stop polling
           if (
@@ -209,29 +215,36 @@ export function useCoinbase({
   const openPaymentPopup = useCallback(() => {
     if (!paymentLink || !orderId) return;
 
-    // Open a centered popup (use screen dimensions since we're inside an iframe)
+    // Build the keychain-hosted coinbase page URL
+    // The popup runs at the keychain origin (x.cartridge.gg) so the
+    // Coinbase iframe inside it will work correctly.
+    const keychainOrigin = window.location.origin;
+    const popupUrl = new URL("/coinbase", keychainOrigin);
+    popupUrl.searchParams.set("paymentLink", paymentLink);
+    popupUrl.searchParams.set("orderId", orderId);
+
+    // Open a centered popup (use screen dimensions since we may be in an iframe)
     const width = 500;
     const height = 700;
     const left = (window.screen.width - width) / 2;
     const top = (window.screen.height - height) / 2;
 
     const popup = window.open(
-      paymentLink,
+      popupUrl.toString(),
       "coinbase-payment",
       `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
     );
 
     popupRef.current = popup;
 
-    // Start polling for order status
+    // Start polling for order status in the keychain as well
     startPolling(orderId);
 
-    // Also watch for the popup being closed by the user
+    // Watch for the popup being closed by the user
     const checkClosed = setInterval(() => {
       if (popup && popup.closed) {
         clearInterval(checkClosed);
-        // If order is still not in a terminal state, keep polling briefly
-        // to catch last-second completions, but don't error immediately
+        // Keep polling briefly to catch last-second completions
       }
     }, 1000);
   }, [paymentLink, orderId, startPolling]);
@@ -246,6 +259,7 @@ export function useCoinbase({
         setIsCreatingOrder(true);
         setOrderError(null);
         setOrderStatus(undefined);
+        setOrderTxHash(undefined);
 
         const order = await createCoinbaseOrder(input, !isMainnet);
 
@@ -303,6 +317,7 @@ export function useCoinbase({
     isFetchingQuote,
     isPollingOrder,
     orderStatus,
+    orderTxHash,
     createOrder,
     getTransactions,
     getQuote,
