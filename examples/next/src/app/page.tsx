@@ -13,6 +13,7 @@ import { Profile } from "components/Profile";
 import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
 import { Starterpack } from "components/Starterpack";
+import { UpdateSession } from "components/UpdateSession";
 import { ControllerToaster } from "@cartridge/ui";
 
 const Home: FC = () => {
@@ -30,6 +31,7 @@ const Home: FC = () => {
       <Transfer />
       <ManualTransferEth />
       <Starterpack />
+      <UpdateSession />
       <DelegateAccount />
       <InvalidTxn />
       <SignMessage />
