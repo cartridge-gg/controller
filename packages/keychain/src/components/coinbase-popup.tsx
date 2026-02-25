@@ -8,8 +8,8 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { request } from "@/utils/graphql";
 
-/** Polling interval for checking order status (5 seconds) */
-const POLL_INTERVAL_MS = 5_000;
+/** Polling interval for checking order status (1 second for responsive UX) */
+const POLL_INTERVAL_MS = 1_000;
 /** Timeout for the payment (10 minutes) */
 const PAYMENT_TIMEOUT_MS = 10 * 60 * 1000;
 
