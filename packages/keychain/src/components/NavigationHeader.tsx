@@ -24,11 +24,9 @@ export function NavigationHeader({
   // Check if we're in an iframe
   const isInIframe = window.self !== window.top;
 
-  // Determine which button to show based on navigation state.
-  // In iframe/popup context, prefer close over back by default.
+  // Determine which button to show based on navigation state
   const shouldShowBack =
-    forceShowBack ||
-    (!isInIframe && canGoBack && !forceShowClose && !showClose);
+    forceShowBack || (canGoBack && !forceShowClose && !showClose);
   const shouldShowClose =
     isInIframe && (forceShowClose || showClose || !shouldShowBack);
 
