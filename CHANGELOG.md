@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.13.10-alpha.1] - 2026-02-25
+
+### ✨ New Features
+- **@cartridge/controller**: Added `updateSession` API for runtime session policy updates, enabling dynamic modification of session policies during runtime for improved flexibility (#2440)
+- **@cartridge/keychain**: Added account parameter support on session page, allowing developers to pass account information directly to session flows (#2439)
+- **@cartridge/keychain**: Enhanced activity tab with comprehensive review functionality for improved user activity tracking (#2413)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed connect flow to ensure reliable connection establishment and prevent connection failures (#2438)
+- **@cartridge/controller**: Removed console errors for cleaner debugging experience and improved production logging (#2437)
+- **@cartridge/controller**: Fixed disconnect method to properly call `close()` and reset iframe state, ensuring clean disconnection and preventing stale iframe issues (#2434)
+- **@cartridge/keychain**: Fixed Stripe.js Content Security Policy by adding script-src allowlist entry, enabling proper Stripe integration for payment processing (#2433)
+- **@cartridge/keychain**: Fixed Continue button display on Chrome iOS when automatic session creation fails, ensuring users can still proceed with manual session creation (#2429)
+- **@cartridge/keychain**: Prioritized iOS detection before hasPlatformAuthenticator check for WebAuthn, improving passkey creation reliability on iOS devices (#2428)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced WebAuthn debugging by capturing options via PostHog for iOS troubleshooting and analytics (#2427)
+- **@cartridge/keychain**: Removed WebAuthn debug logging to reduce console noise in production environments (#2430)
+
+### 🔧 Development
+- **CI/CD**: Added auto-merge functionality for docs-sync PRs after checks pass for improved documentation workflow (#2432)
+- **CI/CD**: Refined docs-sync process for more concise and accurate documentation updates (#2431)
+
 ## [0.13.9] - 2026-02-16
 
 ### 🚀 Improvements
