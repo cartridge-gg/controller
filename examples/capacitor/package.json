@@ -1,6 +1,6 @@
 {
   "name": "cartridge-capacitor-example",
-  "version": "0.13.9",
+  "version": "0.13.10-alpha.1",
   "private": true,
   "type": "module",
   "scripts": {
