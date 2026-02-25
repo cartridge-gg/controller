@@ -63,6 +63,11 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   isFetchingCoinbaseQuote: false,
   onApplePaySelect: () => {},
   onCreateCoinbaseOrder: async () => {},
+  openPaymentPopup: () => {},
+  stopPolling: () => {},
+  orderId: undefined,
+  orderStatus: undefined,
+  isPollingOrder: false,
   getTransactions: async () => [],
 };
 
