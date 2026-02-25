@@ -308,19 +308,19 @@ export function App() {
           element={
             <Purchase
               type={PurchaseType.Credits}
-            // onBack={() => {
-            //   const searchParams = new URLSearchParams(
-            //     window.location.search,
-            //   );
-            //   const returnTo = searchParams.get("returnTo");
-            //   if (returnTo) {
-            //     // returnTo is already decoded by URLSearchParams.get()
-            //     // Use replace navigation for execute URLs to ensure proper navigation stack handling
-            //     navigate(returnTo, { replace: true });
-            //   } else {
-            //     navigate("/funding");
-            //   }
-            // }}
+              // onBack={() => {
+              //   const searchParams = new URLSearchParams(
+              //     window.location.search,
+              //   );
+              //   const returnTo = searchParams.get("returnTo");
+              //   if (returnTo) {
+              //     // returnTo is already decoded by URLSearchParams.get()
+              //     // Use replace navigation for execute URLs to ensure proper navigation stack handling
+              //     navigate(returnTo, { replace: true });
+              //   } else {
+              //     navigate("/funding");
+              //   }
+              // }}
             />
           }
         />
