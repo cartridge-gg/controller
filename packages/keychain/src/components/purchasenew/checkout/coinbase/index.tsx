@@ -56,13 +56,6 @@ export function CoinbaseCheckout() {
     }
   }, [paymentLink, popupOpened, openPaymentPopup]);
 
-  const handleRetryPopup = useCallback(() => {
-    if (paymentLink) {
-      openPaymentPopup();
-      setPopupOpened(true);
-    }
-  }, [paymentLink, openPaymentPopup]);
-
   const isFailed = orderStatus === CoinbaseOnrampStatus.Failed;
 
   return (
@@ -151,30 +144,17 @@ export function CoinbaseCheckout() {
                 <p className="text-xs text-foreground-300 mt-1">
                   Complete the payment in the popup window that opened.
                 </p>
-                <p className="text-xs text-foreground-400 mt-2">
-                  If the popup didn't open or was closed, click below to reopen
-                  it.
-                </p>
               </div>
             </div>
           )}
         </LayoutContent>
-        <LayoutFooter>
-          {isFailed ? (
-            <Button className="w-full" onClick={handleRetryPopup}>
+        {isFailed && (
+          <LayoutFooter>
+            <Button className="w-full" onClick={handleContinue}>
               TRY AGAIN
             </Button>
-          ) : (
-            <Button
-              className="w-full"
-              variant="secondary"
-              onClick={handleRetryPopup}
-              disabled={!paymentLink}
-            >
-              REOPEN PAYMENT WINDOW
-            </Button>
-          )}
-        </LayoutFooter>
+          </LayoutFooter>
+        )}
       </div>
     </>
   );
