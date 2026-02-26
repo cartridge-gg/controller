@@ -39,13 +39,6 @@ const parseCoinbaseMessage = (rawData: unknown): CoinbasePostMessage | null => {
     try {
       data = JSON.parse(data);
     } catch {
-      // Last-resort fallback: extract eventName from raw string payloads
-      // that are not valid JSON due to transport quirks.
-      const rawString = String(data);
-      const eventNameMatch = rawString.match(/"eventName"\s*:\s*"([^"]+)"/);
-      if (eventNameMatch?.[1]) {
-        return { eventName: eventNameMatch[1] as CoinbaseEventName };
-      }
       return null;
     }
   }
@@ -55,7 +48,7 @@ const parseCoinbaseMessage = (rawData: unknown): CoinbasePostMessage | null => {
     const wrappedData = (data as { data?: unknown }).data;
     if (wrappedData) {
       const nested = parseCoinbaseMessage(wrappedData);
-      if (nested) return nested;
+      if (nested?.eventName?.startsWith("onramp_api.")) return nested;
     }
 
     return data as CoinbasePostMessage;
@@ -134,6 +127,14 @@ export function CoinbasePopup() {
       );
 
       switch (data.eventName) {
+        case "onramp_api.load_pending":
+          setIframeReady(false);
+          setError(undefined);
+          setCommitted(false);
+          setFailed(false);
+          setCompleted(false);
+          break;
+
         case "onramp_api.load_success":
           setIframeReady(true);
           break;
@@ -144,11 +145,15 @@ export function CoinbasePopup() {
             data.data?.errorMessage ||
               "Failed to load payment. Please close and try again.",
           );
+          setCommitted(false);
           setFailed(true);
+          setCompleted(false);
           break;
 
         case "onramp_api.commit_success":
           setCommitted(true);
+          setError(undefined);
+          setFailed(false);
           break;
 
         case "onramp_api.pending_payment_auth":
@@ -168,15 +173,29 @@ export function CoinbasePopup() {
             data.data?.errorMessage ||
               "Payment could not be processed. Please try again.",
           );
+          setCommitted(false);
           setFailed(true);
+          setCompleted(false);
           break;
 
         case "onramp_api.cancel":
           setError("Payment was cancelled.");
+          setCommitted(false);
+          setFailed(true);
+          setCompleted(false);
+          break;
+
+        case "onramp_api.polling_start":
+          setCommitted(true);
+          setError(undefined);
+          setFailed(false);
+          setCompleted(false);
           break;
 
         case "onramp_api.polling_success":
           setCompleted(true);
+          setCommitted(false);
+          setFailed(false);
           setTimeout(() => window.close(), 1500);
           break;
 
@@ -185,7 +204,9 @@ export function CoinbasePopup() {
             data.data?.errorMessage ||
               "Transaction failed. Please close and try again.",
           );
+          setCommitted(false);
           setFailed(true);
+          setCompleted(false);
           break;
       }
     };
