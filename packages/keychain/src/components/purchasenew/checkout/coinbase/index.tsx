@@ -17,6 +17,7 @@ import { CoinbaseOnrampStatus } from "@cartridge/ui/utils/api/cartridge";
 export function CoinbaseCheckout() {
   const {
     paymentLink,
+    isCreatingOrder,
     orderStatus,
     onCreateCoinbaseOrder,
     openPaymentPopup,
@@ -24,7 +25,7 @@ export function CoinbaseCheckout() {
   } = useOnchainPurchaseContext();
   const { navigate } = useNavigation();
   const [showPolicies, setShowPolicies] = useState(true);
-  const [popupOpened, setPopupOpened] = useState(false);
+  const [isOpeningPopup, setIsOpeningPopup] = useState(false);
 
   // Create the order if we don't have a payment link yet
   useEffect(() => {
@@ -47,14 +48,28 @@ export function CoinbaseCheckout() {
     };
   }, [stopPolling]);
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
+    if (isOpeningPopup) return;
+
     setShowPolicies(false);
-    // Open popup immediately after accepting policies
-    if (paymentLink && !popupOpened) {
-      openPaymentPopup();
-      setPopupOpened(true);
+    setIsOpeningPopup(true);
+    try {
+      const order = await onCreateCoinbaseOrder({ force: true });
+      const nextPaymentLink = order?.coinbaseOrder.paymentLink ?? paymentLink;
+      const nextOrderId = order?.coinbaseOrder.orderId;
+
+      if (nextPaymentLink && nextOrderId) {
+        openPaymentPopup({
+          paymentLink: nextPaymentLink,
+          orderId: nextOrderId,
+        });
+      }
+    } catch {
+      setShowPolicies(true);
+    } finally {
+      setIsOpeningPopup(false);
     }
-  }, [paymentLink, popupOpened, openPaymentPopup]);
+  }, [isOpeningPopup, onCreateCoinbaseOrder, paymentLink, openPaymentPopup]);
 
   const isFailed = orderStatus === CoinbaseOnrampStatus.Failed;
 
@@ -96,9 +111,9 @@ export function CoinbaseCheckout() {
           <Button
             className="w-full"
             onClick={handleContinue}
-            disabled={!paymentLink}
+            disabled={isCreatingOrder || isOpeningPopup}
           >
-            {paymentLink ? "CONTINUE" : "LOADING..."}
+            {isCreatingOrder || isOpeningPopup ? "LOADING..." : "CONTINUE"}
           </Button>
         </LayoutFooter>
       </div>

@@ -57,7 +57,7 @@ export interface UseCoinbaseReturn {
   createOrder: (input: CreateOrderInput) => Promise<CoinbaseOrderResult>;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
   getQuote: (input: CoinbaseQuoteInput) => Promise<CoinbaseQuoteResult>;
-  openPaymentPopup: () => void;
+  openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
   stopPolling: () => void;
 }
 
@@ -212,42 +212,47 @@ export function useCoinbase({
   );
 
   /** Open the payment link in a popup and begin polling */
-  const openPaymentPopup = useCallback(() => {
-    if (!paymentLink || !orderId) return;
+  const openPaymentPopup = useCallback(
+    (opts?: { paymentLink?: string; orderId?: string }) => {
+      const targetPaymentLink = opts?.paymentLink ?? paymentLink;
+      const targetOrderId = opts?.orderId ?? orderId;
+      if (!targetPaymentLink || !targetOrderId) return;
 
-    // Build the keychain-hosted coinbase page URL
-    // The popup runs at the keychain origin (x.cartridge.gg) so the
-    // Coinbase iframe inside it will work correctly.
-    const keychainOrigin = window.location.origin;
-    const popupUrl = new URL("/coinbase", keychainOrigin);
-    popupUrl.searchParams.set("paymentLink", paymentLink);
-    popupUrl.searchParams.set("orderId", orderId);
+      // Build the keychain-hosted coinbase page URL
+      // The popup runs at the keychain origin (x.cartridge.gg) so the
+      // Coinbase iframe inside it will work correctly.
+      const keychainOrigin = window.location.origin;
+      const popupUrl = new URL("/coinbase", keychainOrigin);
+      popupUrl.searchParams.set("paymentLink", targetPaymentLink);
+      popupUrl.searchParams.set("orderId", targetOrderId);
 
-    // Open a centered popup (use screen dimensions since we may be in an iframe)
-    const width = 500;
-    const height = 700;
-    const left = (window.screen.width - width) / 2;
-    const top = (window.screen.height - height) / 2;
+      // Open a centered popup (use screen dimensions since we may be in an iframe)
+      const width = 500;
+      const height = 700;
+      const left = (window.screen.width - width) / 2;
+      const top = (window.screen.height - height) / 2;
 
-    const popup = window.open(
-      popupUrl.toString(),
-      "coinbase-payment",
-      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
-    );
+      const popup = window.open(
+        popupUrl.toString(),
+        "coinbase-payment",
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
+      );
 
-    popupRef.current = popup;
+      popupRef.current = popup;
 
-    // Start polling for order status in the keychain as well
-    startPolling(orderId);
+      // Start polling for order status in the keychain as well
+      startPolling(targetOrderId);
 
-    // Watch for the popup being closed by the user
-    const checkClosed = setInterval(() => {
-      if (popup && popup.closed) {
-        clearInterval(checkClosed);
-        // Keep polling briefly to catch last-second completions
-      }
-    }, 1000);
-  }, [paymentLink, orderId, startPolling]);
+      // Watch for the popup being closed by the user
+      const checkClosed = setInterval(() => {
+        if (popup && popup.closed) {
+          clearInterval(checkClosed);
+          // Keep polling briefly to catch last-second completions
+        }
+      }, 1000);
+    },
+    [paymentLink, orderId, startPolling],
+  );
 
   const createOrder = useCallback(
     async (input: CreateOrderInput) => {

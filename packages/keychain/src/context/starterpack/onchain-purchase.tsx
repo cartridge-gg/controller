@@ -29,6 +29,7 @@ import {
   useTokenSelection,
   useCoinbase,
   type TokenOption,
+  type CoinbaseOrderResult,
   type CoinbaseTransactionResult,
   type CoinbaseQuoteResult,
 } from "@/hooks/starterpack";
@@ -99,8 +100,10 @@ export interface OnchainPurchaseContextType {
   onSendDeposit: () => Promise<void>;
   waitForDeposit: (swapId: string) => Promise<boolean>;
   onApplePaySelect: () => void;
-  onCreateCoinbaseOrder: () => Promise<void>;
-  openPaymentPopup: () => void;
+  onCreateCoinbaseOrder: (opts?: {
+    force?: boolean;
+  }) => Promise<CoinbaseOrderResult | undefined>;
+  openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
   stopPolling: () => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
 }
@@ -487,25 +490,29 @@ export const OnchainPurchaseProvider = ({
     clearSelectedWalletInternal();
   }, [clearSelectedWalletInternal]);
 
-  const onCreateCoinbaseOrder = useCallback(async () => {
-    if (!onchainDetails?.quote) {
-      throw new Error("Quote not loaded yet");
-    }
+  const onCreateCoinbaseOrder = useCallback(
+    async (opts?: { force?: boolean }) => {
+      if (!onchainDetails?.quote) {
+        throw new Error("Quote not loaded yet");
+      }
 
-    if (isCreatingOrder || paymentLink) return;
+      const force = opts?.force ?? false;
+      if (isCreatingOrder || (paymentLink && !force)) return;
 
-    const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
+      const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
 
-    await createCoinbaseOrder({
-      purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
-    });
-  }, [
-    onchainDetails,
-    quantity,
-    isCreatingOrder,
-    paymentLink,
-    createCoinbaseOrder,
-  ]);
+      return createCoinbaseOrder({
+        purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
+      });
+    },
+    [
+      onchainDetails,
+      quantity,
+      isCreatingOrder,
+      paymentLink,
+      createCoinbaseOrder,
+    ],
+  );
 
   const contextValue: OnchainPurchaseContextType = {
     purchaseItems,
