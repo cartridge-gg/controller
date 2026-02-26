@@ -32,6 +32,7 @@ type SessionQueryParams = {
   redirect_uri: string | null;
   redirect_query_name: string | null;
   account: string | null;
+  expires_at: string | null;
 };
 
 /**
@@ -46,9 +47,19 @@ export function Session() {
       redirect_uri: searchParams.get("redirect_uri"),
       redirect_query_name: searchParams.get("redirect_query_name"),
       account: searchParams.get("account"),
+      expires_at: searchParams.get("expires_at"),
     }),
     [searchParams],
   );
+
+  const expiresAt = useMemo(() => {
+    if (!queries.expires_at) return undefined;
+    try {
+      return BigInt(queries.expires_at);
+    } catch {
+      return undefined;
+    }
+  }, [queries.expires_at]);
 
   const { controller, setController, policies } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -234,9 +245,14 @@ export function Session() {
           policies={policies}
           onConnect={onConnect}
           publicKey={queries.public_key}
+          expiresAt={expiresAt}
         />
       ) : (
-        <CreateSession policies={policies} onConnect={onConnect} />
+        <CreateSession
+          policies={policies}
+          onConnect={onConnect}
+          expiresAt={expiresAt}
+        />
       )}
     </>
   );
