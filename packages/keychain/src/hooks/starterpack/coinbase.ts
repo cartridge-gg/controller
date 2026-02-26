@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   CoinbaseOnrampTransactionsDocument,
   CoinbaseOnrampTransactionsQuery,
@@ -32,10 +32,10 @@ export interface CoinbaseQuoteInput {
   sandbox?: boolean;
 }
 
-/** Default timeout for the payment popup (10 minutes) */
-const PAYMENT_TIMEOUT_MS = 10 * 60 * 1000;
-/** Polling interval for checking order status (5 seconds) */
-const POLL_INTERVAL_MS = 5_000;
+/** Tight polling interval after popup reports success (1 second) */
+const CONFIRMATION_POLL_INTERVAL_MS = 1_000;
+/** Timeout for the confirmation poll after popup reports success (15 seconds) */
+const CONFIRMATION_TIMEOUT_MS = 15_000;
 
 export interface UseCoinbaseOptions {
   onError?: (error: Error) => void;
@@ -49,16 +49,15 @@ export interface UseCoinbaseReturn {
   orderError: Error | null;
   coinbaseQuote: CoinbaseQuoteResult | undefined;
   isFetchingQuote: boolean;
-  isPollingOrder: boolean;
   orderStatus: CoinbaseOnrampStatus | undefined;
   orderTxHash: string | undefined;
+  popupClosed: boolean;
 
   // Actions
   createOrder: (input: CreateOrderInput) => Promise<CoinbaseOrderResult>;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
   getQuote: (input: CoinbaseQuoteInput) => Promise<CoinbaseQuoteResult>;
   openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
-  stopPolling: () => void;
 }
 
 const createCoinbaseOrder = async (
@@ -120,10 +119,9 @@ const getCoinbaseOrderStatus = async (
  * Hook for managing Coinbase onramp functionality.
  *
  * After creating an order, call `openPaymentPopup()` to open the Coinbase
- * payment link in a new browser tab/popup. The hook will automatically poll
- * the order status via GraphQL and update `orderStatus`. Polling stops when
- * the order reaches a terminal state (COMPLETED / FAILED) or the timeout
- * elapses.
+ * payment link in a new browser popup. The popup relays Coinbase postMessage
+ * events back to the keychain via BroadcastChannel. When the popup reports
+ * success, the hook polls the backend for a confirmed status and txHash.
  */
 export function useCoinbase({
   onError,
@@ -137,96 +135,143 @@ export function useCoinbase({
     CoinbaseQuoteResult | undefined
   >();
   const [isFetchingQuote, setIsFetchingQuote] = useState(false);
-  const [isPollingOrder, setIsPollingOrder] = useState(false);
   const [orderStatus, setOrderStatus] = useState<
     CoinbaseOnrampStatus | undefined
   >();
   const [orderTxHash, setOrderTxHash] = useState<string | undefined>();
+  const [popupClosed, setPopupClosed] = useState(false);
 
-  // Refs for managing the polling lifecycle
-  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Refs for managing the popup and channel lifecycle
   const popupRef = useRef<Window | null>(null);
+  const channelRef = useRef<BroadcastChannel | null>(null);
+  const popupCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const confirmPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const confirmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Whether a terminal status has been reached (prevents popup-closed from overriding) */
+  const terminalReachedRef = useRef(false);
 
-  /** Clean up polling timers and popup reference */
-  const stopPolling = useCallback(() => {
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
+  /** Clean up BroadcastChannel, popup watcher, and confirmation poll */
+  const cleanup = useCallback(() => {
+    if (channelRef.current) {
+      channelRef.current.close();
+      channelRef.current = null;
     }
-    if (pollTimeoutRef.current) {
-      clearTimeout(pollTimeoutRef.current);
-      pollTimeoutRef.current = null;
+    if (popupCheckRef.current) {
+      clearInterval(popupCheckRef.current);
+      popupCheckRef.current = null;
     }
-    setIsPollingOrder(false);
+    if (confirmPollRef.current) {
+      clearInterval(confirmPollRef.current);
+      confirmPollRef.current = null;
+    }
+    if (confirmTimeoutRef.current) {
+      clearTimeout(confirmTimeoutRef.current);
+      confirmTimeoutRef.current = null;
+    }
   }, []);
 
-  /** Start polling the order status for the current orderId */
-  const startPolling = useCallback(
-    (targetOrderId: string) => {
-      // Avoid duplicate polling
-      if (pollIntervalRef.current) return;
+  // Clean up on unmount
+  useEffect(() => cleanup, [cleanup]);
 
-      setIsPollingOrder(true);
-      setOrderStatus(undefined);
+  /**
+   * After the popup reports polling_success, poll the backend every 1s
+   * until status === Completed (to get the txHash). Times out after 15s.
+   */
+  const startConfirmationPoll = useCallback(
+    (targetOrderId: string) => {
+      // Avoid duplicate polls
+      if (confirmPollRef.current) return;
 
       const poll = async () => {
         try {
           const result = await getCoinbaseOrderStatus(targetOrderId);
-          setOrderStatus(result.status);
 
           if (result.txHash) {
             setOrderTxHash(result.txHash);
           }
 
-          // Terminal states – stop polling
-          if (
-            result.status === CoinbaseOnrampStatus.Completed ||
-            result.status === CoinbaseOnrampStatus.Failed
-          ) {
-            stopPolling();
+          if (result.status === CoinbaseOnrampStatus.Completed) {
+            setOrderStatus(CoinbaseOnrampStatus.Completed);
+            terminalReachedRef.current = true;
+            if (confirmPollRef.current) {
+              clearInterval(confirmPollRef.current);
+              confirmPollRef.current = null;
+            }
+            if (confirmTimeoutRef.current) {
+              clearTimeout(confirmTimeoutRef.current);
+              confirmTimeoutRef.current = null;
+            }
+          } else if (result.status === CoinbaseOnrampStatus.Failed) {
+            setOrderStatus(CoinbaseOnrampStatus.Failed);
+            terminalReachedRef.current = true;
+            if (confirmPollRef.current) {
+              clearInterval(confirmPollRef.current);
+              confirmPollRef.current = null;
+            }
+            if (confirmTimeoutRef.current) {
+              clearTimeout(confirmTimeoutRef.current);
+              confirmTimeoutRef.current = null;
+            }
+            onError?.(new Error("Coinbase order failed."));
           }
         } catch (err) {
-          console.error("Failed to poll Coinbase order status:", err);
-          // Don't stop polling on transient errors
+          console.error(
+            "Failed to poll Coinbase order status for confirmation:",
+            err,
+          );
+          // Don't stop on transient errors
         }
       };
 
       // Immediate first poll
       poll();
 
-      // Subsequent polls on interval
-      pollIntervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
+      // Subsequent polls
+      confirmPollRef.current = setInterval(poll, CONFIRMATION_POLL_INTERVAL_MS);
 
-      // Timeout – stop polling and close popup after limit
-      pollTimeoutRef.current = setTimeout(() => {
-        stopPolling();
-        if (popupRef.current && !popupRef.current.closed) {
-          popupRef.current.close();
+      // Timeout: if status never reaches Completed, treat as fatal
+      confirmTimeoutRef.current = setTimeout(() => {
+        if (confirmPollRef.current) {
+          clearInterval(confirmPollRef.current);
+          confirmPollRef.current = null;
         }
-        setOrderStatus(CoinbaseOnrampStatus.Failed);
-        onError?.(new Error("Payment timed out. Please try again."));
-      }, PAYMENT_TIMEOUT_MS);
+        if (!terminalReachedRef.current) {
+          setOrderStatus(CoinbaseOnrampStatus.Failed);
+          terminalReachedRef.current = true;
+          onError?.(
+            new Error(
+              "Payment confirmation timed out. Your card may have been charged — please contact support.",
+            ),
+          );
+        }
+      }, CONFIRMATION_TIMEOUT_MS);
     },
-    [stopPolling, onError],
+    [onError],
   );
 
-  /** Open the payment link in a popup and begin polling */
+  /** Open the payment link in a popup and listen via BroadcastChannel */
   const openPaymentPopup = useCallback(
     (opts?: { paymentLink?: string; orderId?: string }) => {
       const targetPaymentLink = opts?.paymentLink ?? paymentLink;
       const targetOrderId = opts?.orderId ?? orderId;
       if (!targetPaymentLink || !targetOrderId) return;
 
+      // Reset state for a new popup session
+      setPopupClosed(false);
+      setOrderStatus(undefined);
+      setOrderTxHash(undefined);
+      terminalReachedRef.current = false;
+
+      // Clean up any previous session
+      cleanup();
+
       // Build the keychain-hosted coinbase page URL
-      // The popup runs at the keychain origin (x.cartridge.gg) so the
-      // Coinbase iframe inside it will work correctly.
       const keychainOrigin = window.location.origin;
       const popupUrl = new URL("/coinbase", keychainOrigin);
       popupUrl.searchParams.set("paymentLink", targetPaymentLink);
       popupUrl.searchParams.set("orderId", targetOrderId);
 
-      // Open a centered popup (use screen dimensions since we may be in an iframe)
+      // Open a centered popup
       const width = 500;
       const height = 700;
       const left = (window.screen.width - width) / 2;
@@ -237,21 +282,59 @@ export function useCoinbase({
         "coinbase-payment",
         `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
       );
-
       popupRef.current = popup;
 
-      // Start polling for order status in the keychain as well
-      startPolling(targetOrderId);
+      // Listen for events from the popup via BroadcastChannel
+      const channel = new BroadcastChannel(`coinbase-payment-${targetOrderId}`);
+      channelRef.current = channel;
+
+      channel.onmessage = (event: MessageEvent) => {
+        const { type, data } = event.data as {
+          type: string;
+          data?: { errorCode?: string; errorMessage?: string };
+        };
+
+        console.log("[coinbase-hook] BroadcastChannel event:", type, data);
+
+        switch (type) {
+          case "onramp_api.polling_success":
+            // Popup reports success — start tight backend poll for txHash
+            startConfirmationPoll(targetOrderId);
+            break;
+
+          case "onramp_api.polling_error":
+          case "onramp_api.commit_error":
+          case "onramp_api.load_error":
+            setOrderStatus(CoinbaseOnrampStatus.Failed);
+            terminalReachedRef.current = true;
+            onError?.(
+              new Error(data?.errorMessage || "Coinbase payment failed."),
+            );
+            break;
+
+          case "onramp_api.cancel":
+            setOrderStatus(CoinbaseOnrampStatus.Failed);
+            terminalReachedRef.current = true;
+            onError?.(new Error("Payment was cancelled."));
+            break;
+        }
+      };
 
       // Watch for the popup being closed by the user
-      const checkClosed = setInterval(() => {
+      popupCheckRef.current = setInterval(() => {
         if (popup && popup.closed) {
-          clearInterval(checkClosed);
-          // Keep polling briefly to catch last-second completions
+          if (popupCheckRef.current) {
+            clearInterval(popupCheckRef.current);
+            popupCheckRef.current = null;
+          }
+          // Only flag as closed if no terminal status has been reached
+          if (!terminalReachedRef.current) {
+            setPopupClosed(true);
+          }
         }
       }, 1000);
     },
-    [paymentLink, orderId, startPolling],
+    [paymentLink, orderId, cleanup, startConfirmationPoll, onError],
   );
 
   const createOrder = useCallback(
@@ -265,6 +348,11 @@ export function useCoinbase({
         setOrderError(null);
         setOrderStatus(undefined);
         setOrderTxHash(undefined);
+        setPopupClosed(false);
+        terminalReachedRef.current = false;
+
+        // Clean up any previous session
+        cleanup();
 
         const order = await createCoinbaseOrder(input, !isMainnet);
 
@@ -281,7 +369,7 @@ export function useCoinbase({
         setIsCreatingOrder(false);
       }
     },
-    [controller, isMainnet, onError],
+    [controller, isMainnet, onError, cleanup],
   );
 
   const getTransactions = useCallback(
@@ -320,13 +408,12 @@ export function useCoinbase({
     orderError,
     coinbaseQuote,
     isFetchingQuote,
-    isPollingOrder,
     orderStatus,
     orderTxHash,
+    popupClosed,
     createOrder,
     getTransactions,
     getQuote,
     openPaymentPopup,
-    stopPolling,
   };
 }

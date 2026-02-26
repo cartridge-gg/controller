@@ -88,7 +88,7 @@ export interface OnchainPurchaseContextType {
   orderId: string | undefined;
   orderStatus: CoinbaseOnrampStatus | undefined;
   orderTxHash: string | undefined;
-  isPollingOrder: boolean;
+  popupClosed: boolean;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -104,7 +104,6 @@ export interface OnchainPurchaseContextType {
     force?: boolean;
   }) => Promise<CoinbaseOrderResult | undefined>;
   openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
-  stopPolling: () => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
 }
 
@@ -218,11 +217,10 @@ export const OnchainPurchaseProvider = ({
     getQuote: getCoinbaseQuote,
     coinbaseQuote,
     isFetchingQuote: isFetchingCoinbaseQuote,
-    isPollingOrder,
     orderStatus,
     orderTxHash,
+    popupClosed,
     openPaymentPopup,
-    stopPolling,
   } = useCoinbase({
     onError: setDisplayError,
   });
@@ -549,7 +547,7 @@ export const OnchainPurchaseProvider = ({
     orderId,
     orderStatus,
     orderTxHash,
-    isPollingOrder,
+    popupClosed,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,
@@ -557,7 +555,6 @@ export const OnchainPurchaseProvider = ({
     onApplePaySelect,
     onCreateCoinbaseOrder,
     openPaymentPopup,
-    stopPolling,
     getTransactions,
   };
 
