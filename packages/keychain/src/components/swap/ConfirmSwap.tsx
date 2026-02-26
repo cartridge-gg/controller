@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   LayoutContent,
   TokenCard,
@@ -7,10 +6,10 @@ import {
 } from "@cartridge/ui";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ControllerError } from "@/utils/connection";
-import { Call, FeeEstimate, getChecksumAddress } from "starknet";
+import { Call, FeeEstimate } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useSwapTransaction } from "@/components/swap/swap";
-import { useTokens } from "@/hooks/token";
+import { useTokenSwapData } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
 
 interface ConfirmSwapProps {
@@ -28,40 +27,23 @@ export function ConfirmSwap({
   error,
   origin,
 }: ConfirmSwapProps) {
-  const { tokens } = useTokens();
   const { isSwap, swapTransaction } = useSwapTransaction(transactions);
+  const { tokenSwapData } = useTokenSwapData([
+    {
+      address: swapTransaction.sellAddress,
+      amount: swapTransaction.sellAmount,
+    },
+    {
+      address: swapTransaction.buyAddress,
+      amount: swapTransaction.buyAmount,
+    },
+  ]);
   // console.log("swapTransaction:", swapTransaction);
-
-  const sellTokens = useMemo(
-    () =>
-      tokens
-        .filter(
-          (token) =>
-            swapTransaction.sellAddress ==
-            getChecksumAddress(token.metadata.address),
-        )
-        .map((token) => ({ ...token, decreasing: true, increasing: false })),
-    [tokens, swapTransaction],
-  );
-
-  const buyTokens = useMemo(
-    () =>
-      tokens
-        .filter(
-          (token) =>
-            swapTransaction.buyAddress ==
-            getChecksumAddress(token.metadata.address),
-        )
-        .map((token) => ({ ...token, increasing: true, decreasing: false })),
-    [tokens, swapTransaction],
-  );
 
   console.log(
     swapTransaction.sellAddress,
     swapTransaction.buyAddress,
-    tokens,
-    sellTokens,
-    buyTokens,
+    tokenSwapData,
   );
 
   return (
@@ -80,18 +62,15 @@ export function ConfirmSwap({
         ) : (
           <>
             <TokenSummary title="Simulation Results">
-              {[...sellTokens, ...buyTokens].map((token) => (
+              {tokenSwapData.map((token) => (
                 <TokenCard
-                  image={token.metadata.image || placeholder}
-                  title={token.metadata.name}
-                  amount={`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
-                  value={
-                    token.balance.value
-                      ? `$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-                      : ""
-                  }
-                  increasing={token.increasing}
-                  decreasing={token.decreasing}
+                  key={token.address}
+                  image={token.image || placeholder}
+                  title={token.name}
+                  amount={`${token.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.symbol}`}
+                  value={token.value ? `$${token.value.toFixed(2)}` : ""}
+                  increasing={token.address === swapTransaction.buyAddress}
+                  decreasing={token.address === swapTransaction.sellAddress}
                   approximately
                   clickable={false}
                 />

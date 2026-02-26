@@ -8,6 +8,7 @@ import {
 import {
   useBalanceQuery,
   useBalancesQuery,
+  usePriceByAddressesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import makeBlockie from "ethereum-blockies-base64";
 import { useAccount } from "./account";
@@ -389,4 +390,63 @@ export function useToken({
     ),
     status,
   };
+}
+
+export type TokenSwap = {
+  address: string;
+  amount: string;
+};
+
+export type TokenSwapData = Metadata & {
+  amount: number;
+  value: number | null | undefined;
+};
+
+export type UseTokenSwapDataResponse = {
+  tokenSwapData: TokenSwapData[];
+  status: "success" | "error" | "idle" | "loading";
+};
+
+export function useTokenSwapData(
+  tokens: TokenSwap[],
+): UseTokenSwapDataResponse {
+  const { data: priceData, ...restPriceData } = usePriceByAddressesQuery({
+    addresses: tokens.map((token) => token.address),
+  });
+
+  const tokenSwapData = useMemo(() => {
+    return tokens.map((token) => {
+      const metadata = erc20Metadata.find(
+        (m) =>
+          getChecksumAddress(m.l2_token_address) ===
+          getChecksumAddress(token.address),
+      );
+      const price = priceData?.priceByAddresses.find(
+        (p) => getChecksumAddress(p.base) === getChecksumAddress(token.address),
+      );
+      const amount = Number(token.amount) / 10 ** (metadata?.decimals || 18);
+      const tokenData: TokenSwapData = {
+        amount,
+        name: metadata?.name || "Unknown",
+        symbol: metadata?.symbol || "UNKNOWN",
+        decimals: metadata?.decimals || 18,
+        address: getChecksumAddress(token.address),
+        image:
+          metadata?.logo_url || makeBlockie(getChecksumAddress(token.address)),
+        value: price
+          ? (Number(price.amount) / 10 ** (price.decimals || 18)) * amount
+          : undefined,
+      };
+      return tokenData;
+    });
+  }, [tokens, priceData]);
+
+  const status = useMemo(() => {
+    if (restPriceData.isLoading) return "loading";
+    if (restPriceData.isError) return "error";
+    if (restPriceData.isSuccess) return "success";
+    return "idle";
+  }, [restPriceData]);
+
+  return { tokenSwapData, status };
 }
