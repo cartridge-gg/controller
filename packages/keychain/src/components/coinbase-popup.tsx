@@ -4,6 +4,8 @@ import { SpinnerIcon, TimesIcon } from "@cartridge/ui";
 
 /** Timeout for the payment (10 minutes) */
 const PAYMENT_TIMEOUT_MS = 10 * 60 * 1000;
+/** Time to wait after iframe loads for a Coinbase event before assuming an error (15s) */
+const LOAD_EVENT_TIMEOUT_MS = 15_000;
 
 /** Coinbase postMessage event names */
 type CoinbaseEventName =
@@ -77,8 +79,11 @@ export function CoinbasePopup() {
   const [committed, setCommitted] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [failed, setFailed] = useState(false);
+  /** Tracks whether we've received any Coinbase postMessage event */
+  const coinbaseEventReceived = useRef(false);
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Listen for Coinbase postMessage events from the iframe
   useEffect(() => {
@@ -125,6 +130,13 @@ export function CoinbasePopup() {
         data.eventName,
         data.data,
       );
+      coinbaseEventReceived.current = true;
+
+      // Clear the load timeout since we got a valid Coinbase event
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = null;
+      }
 
       switch (data.eventName) {
         case "onramp_api.load_pending":
@@ -226,6 +238,9 @@ export function CoinbasePopup() {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -286,6 +301,21 @@ export function CoinbasePopup() {
           title="Coinbase Onramp"
           onLoad={() => {
             console.log("[coinbase-popup] iframe onLoad fired");
+            setIframeReady(true);
+
+            // If no Coinbase postMessage event arrives within the timeout,
+            // the payment link likely returned an error (e.g. 500).
+            loadTimeoutRef.current = setTimeout(() => {
+              if (!coinbaseEventReceived.current) {
+                console.error(
+                  "[coinbase-popup] No Coinbase events received after iframe load — assuming server error",
+                );
+                setError(
+                  "Coinbase is having issues right now. Please close this window and try again later.",
+                );
+                setFailed(true);
+              }
+            }, LOAD_EVENT_TIMEOUT_MS);
           }}
         />
       </div>
