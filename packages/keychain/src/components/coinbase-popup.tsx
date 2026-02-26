@@ -28,6 +28,62 @@ interface CoinbasePostMessage {
   };
 }
 
+const extractJsonStringField = (
+  raw: string,
+  fieldName: string,
+): string | undefined => {
+  const key = `"${fieldName}"`;
+  const keyIndex = raw.indexOf(key);
+  if (keyIndex === -1) return undefined;
+
+  const colonIndex = raw.indexOf(":", keyIndex + key.length);
+  if (colonIndex === -1) return undefined;
+
+  let i = colonIndex + 1;
+  while (i < raw.length && /\s/.test(raw[i])) i++;
+  if (raw[i] !== '"') return undefined;
+
+  i += 1; // skip opening quote
+  let value = "";
+  let escaped = false;
+
+  while (i < raw.length) {
+    const ch = raw[i];
+
+    if (escaped) {
+      switch (ch) {
+        case "n":
+          value += "\n";
+          break;
+        case "\\":
+        case '"':
+          value += ch;
+          break;
+        default:
+          value += ch;
+      }
+      escaped = false;
+      i += 1;
+      continue;
+    }
+
+    if (ch === "\\") {
+      escaped = true;
+      i += 1;
+      continue;
+    }
+
+    if (ch === '"') {
+      return value;
+    }
+
+    value += ch;
+    i += 1;
+  }
+
+  return undefined;
+};
+
 const parseCoinbaseMessage = (rawData: unknown): CoinbasePostMessage | null => {
   if (!rawData) return null;
 
@@ -42,27 +98,19 @@ const parseCoinbaseMessage = (rawData: unknown): CoinbasePostMessage | null => {
       // Last-resort fallback: extract eventName from raw string payloads
       // that are not valid JSON due to transport quirks.
       const rawString = String(data);
-      const eventNameMatch = rawString.match(/"eventName"\s*:\s*"([^"]+)"/);
-      const errorCodeMatch = rawString.match(/"errorCode"\s*:\s*"([^"]+)"/);
-      const errorMessageMatch = rawString.match(
-        /"errorMessage"\s*:\s*"((?:\\.|[^"])*)"/,
-      );
-      if (eventNameMatch?.[1]) {
-        const errorMessage = errorMessageMatch?.[1]
-          ? errorMessageMatch[1]
-              .replace(/\\"/g, '"')
-              .replace(/\\\\/g, "\\")
-              .replace(/\\n/g, "\n")
-          : undefined;
+      const eventName = extractJsonStringField(rawString, "eventName");
+      const errorCode = extractJsonStringField(rawString, "errorCode");
+      const errorMessage = extractJsonStringField(rawString, "errorMessage");
+      if (eventName) {
 
         return {
-          eventName: eventNameMatch[1] as CoinbaseEventName,
+          eventName: eventName as CoinbaseEventName,
           data:
-            errorCodeMatch?.[1] || errorMessage
+            errorCode || errorMessage
               ? {
-                  errorCode: errorCodeMatch?.[1],
-                  errorMessage,
-                }
+                errorCode,
+                errorMessage,
+              }
               : undefined,
         };
       }
@@ -162,7 +210,7 @@ export function CoinbasePopup() {
           setIframeReady(true); // hide spinner even on error
           setError(
             data.data?.errorMessage ||
-              "Failed to load payment. Please close and try again.",
+            "Failed to load payment. Please close and try again.",
           );
           setFailed(true);
           break;
@@ -186,7 +234,7 @@ export function CoinbasePopup() {
         case "onramp_api.commit_error":
           setError(
             data.data?.errorMessage ||
-              "Payment could not be processed. Please try again.",
+            "Payment could not be processed. Please try again.",
           );
           setFailed(true);
           break;
@@ -205,7 +253,7 @@ export function CoinbasePopup() {
         case "onramp_api.polling_error":
           setError(
             data.data?.errorMessage ||
-              "Transaction failed. Please close and try again.",
+            "Transaction failed. Please close and try again.",
           );
           setFailed(true);
           break;
@@ -243,11 +291,10 @@ export function CoinbasePopup() {
       {/* Status bar */}
       {(completed || failed) && (
         <div
-          className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium ${
-            completed
+          className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium ${completed
               ? "bg-[#1a2e1a] text-[#4ade80]"
               : "bg-[#2e1a1a] text-[#f87171]"
-          }`}
+            }`}
         >
           {completed ? (
             <>
