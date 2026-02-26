@@ -32,11 +32,13 @@ export function CreateSession({
   onConnect,
   onSkip,
   isUpdate,
+  expiresAt: expiresAtOverride,
 }: {
   policies: ParsedSessionPolicies;
   onConnect: () => void;
   onSkip?: () => void;
   isUpdate?: boolean;
+  expiresAt?: bigint;
 }) {
   return (
     <CreateSessionProvider
@@ -47,6 +49,7 @@ export function CreateSession({
         isUpdate={isUpdate}
         onConnect={onConnect}
         onSkip={onSkip}
+        expiresAtOverride={expiresAtOverride}
       />
     </CreateSessionProvider>
   );
@@ -56,10 +59,12 @@ const CreateSessionLayout = ({
   isUpdate,
   onConnect,
   onSkip,
+  expiresAtOverride,
 }: {
   isUpdate?: boolean;
   onConnect: () => void;
   onSkip?: () => void;
+  expiresAtOverride?: bigint;
 }) => {
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -102,8 +107,8 @@ const CreateSessionLayout = ({
   }, [step, setOnBackCallback]);
 
   const expiresAt = useMemo(() => {
-    return duration + now();
-  }, [duration]);
+    return expiresAtOverride ?? duration + now();
+  }, [expiresAtOverride, duration]);
 
   const createSession = useCallback(
     async ({
