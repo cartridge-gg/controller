@@ -28,62 +28,6 @@ interface CoinbasePostMessage {
   };
 }
 
-const extractJsonStringField = (
-  raw: string,
-  fieldName: string,
-): string | undefined => {
-  const key = `"${fieldName}"`;
-  const keyIndex = raw.indexOf(key);
-  if (keyIndex === -1) return undefined;
-
-  const colonIndex = raw.indexOf(":", keyIndex + key.length);
-  if (colonIndex === -1) return undefined;
-
-  let i = colonIndex + 1;
-  while (i < raw.length && /\s/.test(raw[i])) i++;
-  if (raw[i] !== '"') return undefined;
-
-  i += 1; // skip opening quote
-  let value = "";
-  let escaped = false;
-
-  while (i < raw.length) {
-    const ch = raw[i];
-
-    if (escaped) {
-      switch (ch) {
-        case "n":
-          value += "\n";
-          break;
-        case "\\":
-        case '"':
-          value += ch;
-          break;
-        default:
-          value += ch;
-      }
-      escaped = false;
-      i += 1;
-      continue;
-    }
-
-    if (ch === "\\") {
-      escaped = true;
-      i += 1;
-      continue;
-    }
-
-    if (ch === '"') {
-      return value;
-    }
-
-    value += ch;
-    i += 1;
-  }
-
-  return undefined;
-};
-
 const parseCoinbaseMessage = (rawData: unknown): CoinbasePostMessage | null => {
   if (!rawData) return null;
 
@@ -95,25 +39,6 @@ const parseCoinbaseMessage = (rawData: unknown): CoinbasePostMessage | null => {
     try {
       data = JSON.parse(data);
     } catch {
-      // Last-resort fallback: extract eventName from raw string payloads
-      // that are not valid JSON due to transport quirks.
-      const rawString = String(data);
-      const eventName = extractJsonStringField(rawString, "eventName");
-      const errorCode = extractJsonStringField(rawString, "errorCode");
-      const errorMessage = extractJsonStringField(rawString, "errorMessage");
-      if (eventName) {
-
-        return {
-          eventName: eventName as CoinbaseEventName,
-          data:
-            errorCode || errorMessage
-              ? {
-                errorCode,
-                errorMessage,
-              }
-              : undefined,
-        };
-      }
       return null;
     }
   }
@@ -202,6 +127,14 @@ export function CoinbasePopup() {
       );
 
       switch (data.eventName) {
+        case "onramp_api.load_pending":
+          setIframeReady(false);
+          setError(undefined);
+          setCommitted(false);
+          setFailed(false);
+          setCompleted(false);
+          break;
+
         case "onramp_api.load_success":
           setIframeReady(true);
           break;
@@ -210,13 +143,17 @@ export function CoinbasePopup() {
           setIframeReady(true); // hide spinner even on error
           setError(
             data.data?.errorMessage ||
-            "Failed to load payment. Please close and try again.",
+              "Failed to load payment. Please close and try again.",
           );
+          setCommitted(false);
           setFailed(true);
+          setCompleted(false);
           break;
 
         case "onramp_api.commit_success":
           setCommitted(true);
+          setError(undefined);
+          setFailed(false);
           break;
 
         case "onramp_api.pending_payment_auth":
@@ -234,28 +171,42 @@ export function CoinbasePopup() {
         case "onramp_api.commit_error":
           setError(
             data.data?.errorMessage ||
-            "Payment could not be processed. Please try again.",
+              "Payment could not be processed. Please try again.",
           );
+          setCommitted(false);
           setFailed(true);
+          setCompleted(false);
           break;
 
         case "onramp_api.cancel":
           setError("Payment was cancelled.");
           setCommitted(false);
           setFailed(true);
+          setCompleted(false);
+          break;
+
+        case "onramp_api.polling_start":
+          setCommitted(true);
+          setError(undefined);
+          setFailed(false);
+          setCompleted(false);
           break;
 
         case "onramp_api.polling_success":
           setCompleted(true);
+          setCommitted(false);
+          setFailed(false);
           setTimeout(() => window.close(), 1500);
           break;
 
         case "onramp_api.polling_error":
           setError(
             data.data?.errorMessage ||
-            "Transaction failed. Please close and try again.",
+              "Transaction failed. Please close and try again.",
           );
+          setCommitted(false);
           setFailed(true);
+          setCompleted(false);
           break;
       }
     };
@@ -291,10 +242,11 @@ export function CoinbasePopup() {
       {/* Status bar */}
       {(completed || failed) && (
         <div
-          className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium ${completed
+          className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium ${
+            completed
               ? "bg-[#1a2e1a] text-[#4ade80]"
               : "bg-[#2e1a1a] text-[#f87171]"
-            }`}
+          }`}
         >
           {completed ? (
             <>
