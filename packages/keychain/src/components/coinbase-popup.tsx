@@ -43,8 +43,28 @@ const parseCoinbaseMessage = (rawData: unknown): CoinbasePostMessage | null => {
       // that are not valid JSON due to transport quirks.
       const rawString = String(data);
       const eventNameMatch = rawString.match(/"eventName"\s*:\s*"([^"]+)"/);
+      const errorCodeMatch = rawString.match(/"errorCode"\s*:\s*"([^"]+)"/);
+      const errorMessageMatch = rawString.match(
+        /"errorMessage"\s*:\s*"((?:\\.|[^"])*)"/,
+      );
       if (eventNameMatch?.[1]) {
-        return { eventName: eventNameMatch[1] as CoinbaseEventName };
+        const errorMessage = errorMessageMatch?.[1]
+          ? errorMessageMatch[1]
+              .replace(/\\"/g, '"')
+              .replace(/\\\\/g, "\\")
+              .replace(/\\n/g, "\n")
+          : undefined;
+
+        return {
+          eventName: eventNameMatch[1] as CoinbaseEventName,
+          data:
+            errorCodeMatch?.[1] || errorMessage
+              ? {
+                  errorCode: errorCodeMatch?.[1],
+                  errorMessage,
+                }
+              : undefined,
+        };
       }
       return null;
     }
@@ -55,7 +75,7 @@ const parseCoinbaseMessage = (rawData: unknown): CoinbasePostMessage | null => {
     const wrappedData = (data as { data?: unknown }).data;
     if (wrappedData) {
       const nested = parseCoinbaseMessage(wrappedData);
-      if (nested) return nested;
+      if (nested?.eventName?.startsWith("onramp_api.")) return nested;
     }
 
     return data as CoinbasePostMessage;
@@ -173,6 +193,8 @@ export function CoinbasePopup() {
 
         case "onramp_api.cancel":
           setError("Payment was cancelled.");
+          setCommitted(false);
+          setFailed(true);
           break;
 
         case "onramp_api.polling_success":
