@@ -10,6 +10,9 @@ type CoinbaseEventName =
   | "onramp_api.load_pending"
   | "onramp_api.load_success"
   | "onramp_api.load_error"
+  | "onramp_api.pending_payment_auth"
+  | "onramp_api.payment_authorized"
+  | "onramp_api.apple_pay_button_pressed"
   | "onramp_api.commit_success"
   | "onramp_api.commit_error"
   | "onramp_api.cancel"
@@ -24,6 +27,42 @@ interface CoinbasePostMessage {
     errorMessage?: string;
   };
 }
+
+const parseCoinbaseMessage = (rawData: unknown): CoinbasePostMessage | null => {
+  if (!rawData) return null;
+
+  // Some environments send Coinbase payloads as nested JSON strings.
+  // Parse up to a bounded depth to avoid infinite loops on malformed input.
+  let data: unknown = rawData;
+  for (let i = 0; i < 5; i++) {
+    if (typeof data !== "string") break;
+    try {
+      data = JSON.parse(data);
+    } catch {
+      // Last-resort fallback: extract eventName from raw string payloads
+      // that are not valid JSON due to transport quirks.
+      const rawString = String(data);
+      const eventNameMatch = rawString.match(/"eventName"\s*:\s*"([^"]+)"/);
+      if (eventNameMatch?.[1]) {
+        return { eventName: eventNameMatch[1] as CoinbaseEventName };
+      }
+      return null;
+    }
+  }
+
+  if (typeof data === "object" && data !== null) {
+    // Some message bridges wrap payloads under a `data` key.
+    const wrappedData = (data as { data?: unknown }).data;
+    if (wrappedData) {
+      const nested = parseCoinbaseMessage(wrappedData);
+      if (nested) return nested;
+    }
+
+    return data as CoinbasePostMessage;
+  }
+
+  return null;
+};
 
 /**
  * Standalone page rendered at /coinbase in the keychain app.
@@ -52,9 +91,14 @@ export function CoinbasePopup() {
   useEffect(() => {
     // Derive the allowed origin from the payment link URL
     const allowedOrigin = paymentLink ? new URL(paymentLink).origin : null;
-    console.log("[coinbase-popup] Listening for postMessages, allowedOrigin:", allowedOrigin);
+    console.log(
+      "[coinbase-popup] Listening for postMessages, allowedOrigin:",
+      allowedOrigin,
+    );
     console.log("[coinbase-popup] paymentLink:", paymentLink);
-    console.log("[coinbase-popup] sandbox attrs: allow-scripts allow-same-origin");
+    console.log(
+      "[coinbase-popup] sandbox attrs: allow-scripts allow-same-origin",
+    );
 
     const handleMessage = (event: MessageEvent) => {
       // Log ALL incoming messages for debugging
@@ -73,14 +117,21 @@ export function CoinbasePopup() {
         return;
       }
 
-      // Only process messages that look like Coinbase events
-      const data = event.data as CoinbasePostMessage;
+      // Coinbase may send object payloads or JSON-encoded strings.
+      const data = parseCoinbaseMessage(event.data);
       if (!data?.eventName?.startsWith("onramp_api.")) {
-        console.log("[coinbase-popup] Ignoring non-Coinbase message:", event.data);
+        console.log(
+          "[coinbase-popup] Ignoring non-Coinbase message:",
+          event.data,
+        );
         return;
       }
 
-      console.log("[coinbase-popup] ✅ Coinbase event:", data.eventName, data.data);
+      console.log(
+        "[coinbase-popup] ✅ Coinbase event:",
+        data.eventName,
+        data.data,
+      );
 
       switch (data.eventName) {
         case "onramp_api.load_success":
@@ -97,6 +148,18 @@ export function CoinbasePopup() {
           break;
 
         case "onramp_api.commit_success":
+          setCommitted(true);
+          break;
+
+        case "onramp_api.pending_payment_auth":
+          setCommitted(true);
+          break;
+
+        case "onramp_api.payment_authorized":
+          setCommitted(true);
+          break;
+
+        case "onramp_api.apple_pay_button_pressed":
           setCommitted(true);
           break;
 
@@ -202,7 +265,6 @@ export function CoinbasePopup() {
           title="Coinbase Onramp"
           onLoad={() => {
             console.log("[coinbase-popup] iframe onLoad fired");
-            setIframeReady(true);
           }}
         />
       </div>
