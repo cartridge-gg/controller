@@ -22,7 +22,7 @@ import {
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SpendingLimitPage } from "./SpendingLimitPage";
-import { processPolicies } from "./CreateSession";
+import { processPolicies } from "@/utils/session/policies";
 import Controller from "@/utils/controller";
 
 /**

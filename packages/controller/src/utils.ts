@@ -48,6 +48,19 @@ export function normalizeCalls(calls: Call | Call[]) {
   });
 }
 
+export function getPresetSessionPolicies(
+  config: Record<string, unknown>,
+  chainId: string,
+): SessionPolicies | undefined {
+  const decodedChainId = shortString.decodeShortString(chainId);
+  const chains = config.chains as
+    | Record<string, Record<string, unknown>>
+    | undefined;
+  const chainConfig = chains?.[decodedChainId];
+  if (!chainConfig?.policies) return undefined;
+  return toSessionPolicies(chainConfig.policies as Policies);
+}
+
 export function toSessionPolicies(policies: Policies): SessionPolicies {
   return Array.isArray(policies)
     ? policies.reduce<SessionPolicies>(
@@ -92,9 +105,10 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
 /**
  * Converts parsed session policies to WASM-compatible Policy objects.
  *
- * IMPORTANT: Policies are sorted canonically before hashing. Without this,
- * Object.keys/entries reordering can cause identical policies to produce
- * different merkle roots, leading to "session/not-registered" errors.
+ * IMPORTANT: Policies are sorted canonically and addresses are normalized
+ * via getChecksumAddress before hashing. Without this, Object.keys/entries
+ * reordering or inconsistent address casing can cause identical policies to
+ * produce different merkle roots, leading to "session/not-registered" errors.
  * See: https://github.com/cartridge-gg/controller/issues/2357
  */
 export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
@@ -110,7 +124,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
             if (m.entrypoint === "approve") {
               if ("spender" in m && "amount" in m && m.spender && m.amount) {
                 const approvalPolicy: ApprovalPolicy = {
-                  target,
+                  target: getChecksumAddress(target),
                   spender: m.spender,
                   amount: String(m.amount),
                 };
@@ -127,9 +141,9 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
 
             // For non-approve methods and legacy approve, create a regular CallPolicy
             return {
-              target,
+              target: getChecksumAddress(target),
               method: hash.getSelectorFromName(m.entrypoint),
-              authorized: m.authorized,
+              authorized: !!m.authorized,
             };
           }),
       ),
@@ -149,7 +163,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
 
         return {
           scope_hash: hash.computePoseidonHash(domainHash, typeHash),
-          authorized: p.authorized,
+          authorized: !!p.authorized,
         };
       })
       .sort((a, b) =>

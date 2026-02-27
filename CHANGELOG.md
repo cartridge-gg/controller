@@ -1,5 +1,114 @@
 # Changelog
 
+## [0.13.10-alpha.1] - 2026-02-25
+
+### ✨ New Features
+- **@cartridge/controller**: Added `updateSession` API for runtime session policy updates, enabling dynamic modification of session policies during runtime for improved flexibility (#2440)
+- **@cartridge/keychain**: Added account parameter support on session page, allowing developers to pass account information directly to session flows (#2439)
+- **@cartridge/keychain**: Enhanced activity tab with comprehensive review functionality for improved user activity tracking (#2413)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed connect flow to ensure reliable connection establishment and prevent connection failures (#2438)
+- **@cartridge/controller**: Removed console errors for cleaner debugging experience and improved production logging (#2437)
+- **@cartridge/controller**: Fixed disconnect method to properly call `close()` and reset iframe state, ensuring clean disconnection and preventing stale iframe issues (#2434)
+- **@cartridge/keychain**: Fixed Stripe.js Content Security Policy by adding script-src allowlist entry, enabling proper Stripe integration for payment processing (#2433)
+- **@cartridge/keychain**: Fixed Continue button display on Chrome iOS when automatic session creation fails, ensuring users can still proceed with manual session creation (#2429)
+- **@cartridge/keychain**: Prioritized iOS detection before hasPlatformAuthenticator check for WebAuthn, improving passkey creation reliability on iOS devices (#2428)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced WebAuthn debugging by capturing options via PostHog for iOS troubleshooting and analytics (#2427)
+- **@cartridge/keychain**: Removed WebAuthn debug logging to reduce console noise in production environments (#2430)
+
+### 🔧 Development
+- **CI/CD**: Added auto-merge functionality for docs-sync PRs after checks pass for improved documentation workflow (#2432)
+- **CI/CD**: Refined docs-sync process for more concise and accurate documentation updates (#2431)
+
+## [0.13.9] - 2026-02-16
+
+### 🚀 Improvements
+- **@cartridge/controller**: Enhanced iOS WebAuthn support with explicit creation options and improved debug logging for more reliable passkey creation on iOS devices (#2421)
+- **@cartridge/controller**: Streamlined build process by removing redundant build script in controller package for improved development workflow (#2423)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed quest toast notifications by removing them to prevent user interface clutter and improve user experience (#2425)
+- **@cartridge/controller**: Improved passkey creation flow for Chrome iOS by implementing direct iframe approach instead of popup flow for better mobile compatibility (#2419, #2420)
+- **@cartridge/controller**: Enhanced iOS passkey creation reliability by setting authenticatorAttachment to platform for improved device authentication (#2417)
+
+### 🔧 Testing
+- **@cartridge/controller**: Added comprehensive Capacitor session redirect E2E tests to prevent regressions in session ingestion and account creation flows (#2424)
+- **@cartridge/controller**: Added regression tests for controller disconnect localStorage cleanup functionality (#2414)
+
+### 📦 Dependencies
+- **controller-wasm**: Updated to version 0.9.4 for improved backend functionality (#2418)
+- **Dependencies**: Updated ERC metadata dependencies for better token support (#2422)
+
+## [0.13.8] - 2026-02-13
+
+### ✨ New Features
+- **@cartridge/controller**: Added new mainnet USDC token support with legacy USDC.e labeling for improved token identification (#94dae94e)
+
+### 🚀 Improvements
+- **@cartridge/controller**: Enhanced connection policy resolution by fixing preset theme and custom policy override precedence, allowing apps to maintain preset-derived configuration while explicitly overriding preset policies (#2408)
+- **@cartridge/controller**: Improved maintainability by extracting hardcoded "startapp" query parameter into `REDIRECT_QUERY_NAME` constant following Telegram mini app convention (#2412)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed `SessionProvider.probe()` returning undefined after `ingestSessionFromRedirect()` by restoring on-demand session retrieval for deep link redirects in Capacitor and mobile apps (#2409)
+- **Token Configuration**: Reverted mainnet USDC token support changes to restore legacy behavior for token metadata and mainnet token indexing entries (#2410)
+
+### 🔧 Testing
+- **@cartridge/controller**: Added comprehensive regression tests for controller disconnect localStorage cleanup functionality (#2414)
+
+## [0.13.7] - 2026-02-12
+
+### ✨ New Features
+- **@cartridge/controller**: Added `lookupUsername(username)` method for headless flows, returning account existence status and normalized signer options for the controller's configured chain (#2400)
+- **@cartridge/controller**: Added auto-signup functionality for headless connect when a username is missing, while maintaining strict signer matching for existing accounts (#2400)
+- **@cartridge/connector**: Exposed `lookupUsername` helper method through ControllerConnector for easier integration with starknet-react applications (#2400)
+
+### 🚀 Improvements
+- **Documentation**: Updated HEADLESS_MODE.md with recommended lookup-first flow patterns for improved developer guidance (#2400)
+- **Testing**: Added comprehensive test coverage for username lookup normalization, error handling, and password-based headless auto-signup flows (#2400)
+
+## [0.13.6] - 2026-02-12
+
+### 🚀 Improvements
+- **@cartridge/controller**: Enhanced SessionProvider preset support with automatic policy resolution from `@cartridge/presets`, enabling developers to use `preset: "my-game"` instead of manually duplicating policies and ensuring consistent policy hashing between SDK and keychain (#2401)
+- **Documentation**: Updated project structure documentation with comprehensive provider flows, clarified ControllerProvider (web) and SessionProvider (native) architecture, and improved examples directory guidance (#2404)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed `session/not-registered` errors by normalizing contract addresses in policy hashing and consolidating async initialization to prevent policy hash divergence between SDK and keychain (#2401)
+- **@cartridge/keychain**: Fixed theme copy button visibility in ErrorAlert component by replacing hardcoded black icons with theme-aware styling, ensuring proper visibility on dark backgrounds (#2402)
+
+## [0.13.5] - 2026-02-10
+
+### ✨ New Features
+- **@cartridge/controller**: Added headless mode support to controller SDK for seamless authentication, allowing `connect({ username, signer, password? })` with hidden keychain iframe and UI-less authentication flows (#2315)
+- **@cartridge/controller**: Added `close()` method to ControllerProvider for programmatic cleanup of controller instances (#2373)
+- **@cartridge/controller**: Moved `asWalletStandard()` method from connector to controller package, enabling wallet standard usage without starknet-react dependency (#2364)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced session management with exposed session GUID fields (`allowedPoliciesRoot`, `metadataHash`, `sessionKeyGuid`, `guardianKeyGuid`) in keychain callback payloads for registered sessions (#2396)
+- **@cartridge/keychain**: Consolidated policy handling by refactoring `toWasmPolicies` into single source of truth for improved consistency (#2394)
+- **@cartridge/keychain**: Enhanced quests and achievements display to only show tabs when game/application supports them (#2392)
+- **@cartridge/keychain**: Improved starterpack purchase UI to always show quantity in purchase button for better user clarity (#2390)
+- **@cartridge/connector**: Improved disconnect handling to keep `@starknet-react/core` state in sync with controller state (#2315)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed session authentication to properly disconnect and re-authenticate when session `rpc_url` differs from stored controller, ensuring correct chain targeting (#2395)
+- **@cartridge/controller**: Enhanced iframe security by hardening keychain iframe loading with URL validation, origin pinning, and reduced feature grants by default (#2384)
+- **@cartridge/keychain**: Added keychain CSP/security headers and removed inline scripts from index.html for improved security posture (#2384)
+
+### 📦 Dependencies
+- **controller-rs**: Updated to v0.9.3 for improved backend functionality (#2397)
+
+## [0.13.4] - 2026-02-06
+
+### 🐛 Bug Fixes
+- **CI/CD**: Fixed npm publishing with catalog resolution by reverting to pnpm publish, which correctly handles pnpm catalog: protocol that npm publish doesn't support, ensuring proper package resolution in published packages (#77210c65)
+
+### 🔧 Development
+- **Agent Tooling**: Added standardized agent/dev tooling with `.agents/` directory as source of truth, Claude/Cursor skill compatibility symlinks, and enhanced pre-commit hooks for improved development workflow (#2388)
+
 ## [0.13.3] - 2026-02-06
 
 ### ✨ New Features

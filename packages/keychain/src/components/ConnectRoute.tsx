@@ -4,8 +4,11 @@ import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
-import { CreateSession, processPolicies } from "./connect/CreateSession";
-import { now } from "@/constants";
+import { CreateSession } from "./connect/CreateSession";
+import {
+  createVerifiedSession,
+  requiresSessionApproval,
+} from "@/utils/connection/session-creation";
 import {
   useRouteParams,
   useRouteCompletion,
@@ -14,15 +17,31 @@ import {
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
 import { requestStorageAccess } from "@/utils/connection/storage-access";
+import {
+  Button,
+  HeaderInner,
+  LayoutContent,
+  LayoutFooter,
+} from "@cartridge/ui";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
   message: "Canceled",
 };
 
+// Chrome on iOS uses WebKit under the hood and requires a user gesture
+// for navigator.credentials.get(). Auto session creation in useEffect
+// fails silently, so we show a "Continue" button instead.
+const isChromeIOS =
+  typeof navigator !== "undefined" && /CriOS/i.test(navigator.userAgent);
+
 export function ConnectRoute() {
-  const { controller, policies, origin } = useConnection();
+  const { controller, policies, origin, theme } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
+  const [isSessionCreating, setIsSessionCreating] = useState(false);
+  const [sessionError, setSessionError] = useState<Error>();
+  const [showContinueButton, setShowContinueButton] = useState(false);
 
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
@@ -50,6 +69,12 @@ export function ConnectRoute() {
     [policies],
   );
 
+  const clearConnectParams = useCallback(() => {
+    const url = new URL(window.location.href);
+    url.search = "";
+    window.history.replaceState(null, "", url.toString());
+  }, []);
+
   const handleConnect = useCallback(async () => {
     if (!params || !controller) {
       return;
@@ -72,6 +97,7 @@ export function ConnectRoute() {
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
+    clearConnectParams();
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
@@ -104,7 +130,14 @@ export function ConnectRoute() {
     }
 
     handleCompletion();
-  }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
+  }, [
+    params,
+    controller,
+    clearConnectParams,
+    handleCompletion,
+    isStandalone,
+    redirectUrl,
+  ]);
 
   const handleSkip = useCallback(async () => {
     if (!params || !controller) {
@@ -126,6 +159,7 @@ export function ConnectRoute() {
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
+    clearConnectParams();
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
@@ -158,7 +192,14 @@ export function ConnectRoute() {
     }
 
     handleCompletion();
-  }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
+  }, [
+    params,
+    controller,
+    clearConnectParams,
+    handleCompletion,
+    isStandalone,
+    redirectUrl,
+  ]);
 
   // Handle cases where we can connect immediately (embedded mode only)
   useEffect(() => {
@@ -211,19 +252,14 @@ export function ConnectRoute() {
 
     // Bypass session approval screen for verified sessions in embedded mode
     // Note: This is a fallback - main logic is handled in useCreateController
-    if (policies.verified) {
-      if (hasTokenApprovals) {
-        return;
-      }
-
+    if (!requiresSessionApproval(policies)) {
       const createSessionForVerifiedPolicies = async () => {
         try {
-          // Use a default duration for verified sessions (24 hours)
-          const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-          const expiresAt = duration + now();
-
-          const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(origin, expiresAt, processedPolicies);
+          await createVerifiedSession({
+            controller,
+            origin,
+            policies,
+          });
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
@@ -234,8 +270,15 @@ export function ConnectRoute() {
           handleCompletion();
         } catch (e) {
           console.error("Failed to create verified session:", e);
-          // Fall back to showing the UI if auto-creation fails
-          params.reject?.(e);
+
+          if (isChromeIOS) {
+            // Chrome iOS requires a user gesture for navigator.credentials.get().
+            // Show a "Continue" button so the user tap provides the gesture.
+            setShowContinueButton(true);
+          } else {
+            // Fall back to rejecting on other browsers
+            params.reject?.(e);
+          }
         }
       };
 
@@ -266,7 +309,56 @@ export function ConnectRoute() {
   }
 
   if (policies.verified && !hasTokenApprovals) {
-    // This should not be reached as verified policies are handled in useCreateController
+    // Auto session creation failed on Chrome iOS — show a "Continue" button
+    // so the user tap provides the gesture required by WebAuthn.
+    if (showContinueButton) {
+      const handleContinue = async () => {
+        if (!controller) return;
+        setIsSessionCreating(true);
+        setSessionError(undefined);
+        try {
+          await createVerifiedSession({ controller, origin, policies });
+          params?.resolve?.({
+            code: ResponseCodes.SUCCESS,
+            address: controller.address(),
+          });
+          if (params?.params.id) {
+            cleanupCallbacks(params.params.id);
+          }
+          handleCompletion();
+        } catch (e) {
+          console.error("Failed to create verified session:", e);
+          setSessionError(e instanceof Error ? e : new Error(String(e)));
+        } finally {
+          setIsSessionCreating(false);
+        }
+      };
+
+      return (
+        <>
+          <HeaderInner
+            className="pb-0"
+            title={theme ? theme.name : "Create Session"}
+          />
+          <LayoutContent />
+          <LayoutFooter>
+            {sessionError && (
+              <ControllerErrorAlert className="mb-3" error={sessionError} />
+            )}
+            <Button
+              className="w-full"
+              disabled={isSessionCreating}
+              isLoading={isSessionCreating}
+              onClick={() => void handleContinue()}
+            >
+              continue
+            </Button>
+          </LayoutFooter>
+        </>
+      );
+    }
+
+    // Auto-creation either succeeded or is in progress
     return null;
   }
 

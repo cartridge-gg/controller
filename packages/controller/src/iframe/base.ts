@@ -1,5 +1,6 @@
 import { AsyncMethodReturns, connectToChild } from "@cartridge/penpal";
 import { Modal } from "../types";
+import { buildIframeAllowList, validateKeychainIframeUrl } from "./security";
 
 export type IFrameOptions<CallSender> = Omit<
   ConstructorParameters<typeof IFrame>[0],
@@ -34,6 +35,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     }
 
     this.url = url;
+    validateKeychainIframeUrl(url);
 
     const docHead = document.head;
 
@@ -53,8 +55,8 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.sandbox.add("allow-popups-to-escape-sandbox");
     iframe.sandbox.add("allow-scripts");
     iframe.sandbox.add("allow-same-origin");
-    iframe.allow =
-      "publickey-credentials-create *; publickey-credentials-get *; clipboard-write; local-network-access *; payment *";
+    iframe.allow = buildIframeAllowList(url);
+    iframe.referrerPolicy = "no-referrer";
     iframe.style.scrollbarWidth = "none";
     iframe.style.setProperty("-ms-overflow-style", "none");
     iframe.style.setProperty("-webkit-scrollbar", "none");
@@ -122,12 +124,21 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     connectToChild<CallSender>({
       iframe: this.iframe,
+      childOrigin: url.origin,
       methods: {
+        open: (_origin: string) => () => this.open(),
         close: (_origin: string) => () => this.close(),
         reload: (_origin: string) => () => window.location.reload(),
         ...methods,
       },
-    }).promise.then(onConnect);
+    })
+      .promise.then(onConnect)
+      .catch((error) => {
+        console.error("Failed to establish secure keychain iframe connection", {
+          error,
+          childOrigin: url.origin,
+        });
+      });
 
     this.resize();
     window.addEventListener("resize", () => this.resize());

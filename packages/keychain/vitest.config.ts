@@ -56,13 +56,18 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov"],
+      // Limit coverage to source files. This avoids counting build outputs/configs
+      // (dist/, public/, vite config, etc.) which are not meaningful for unit tests.
+      include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "node_modules/**",
         "src/test/**",
         "**/*.test.{ts,tsx}",
         "**/*.spec.{ts,tsx}",
         "**/*.stories.{ts,tsx}",
+        "**/*.d.ts",
         "src/**/__mocks__/**",
+        "src/utils/api/generated.ts",
       ],
     },
     server: {

@@ -16,12 +16,14 @@ export function SpendingLimitPage({
   isConnecting,
   error,
   onBack,
+  onSkip,
   onConnect,
 }: {
   policies: ParsedSessionPolicies;
   isConnecting: boolean;
   error?: ControllerError | Error;
-  onBack: () => void;
+  onBack?: () => void;
+  onSkip?: () => void;
   onConnect: () => void;
 }) {
   const { theme } = useConnection();
@@ -32,7 +34,7 @@ export function SpendingLimitPage({
         className="pb-0"
         title={
           theme?.name?.toLowerCase() !== "cartridge"
-            ? `Connect to ${theme?.name}`
+            ? `Play ${theme?.name}`
             : "Connect Controller"
         }
       />
@@ -52,16 +54,28 @@ export function SpendingLimitPage({
             isLoading={isConnecting}
             onClick={onConnect}
           >
-            Confirm
+            Play
           </Button>
-          <Button
-            variant="secondary"
-            onClick={onBack}
-            disabled={isConnecting}
-            className="w-full"
-          >
-            Back
-          </Button>
+          {onBack && (
+            <Button
+              variant="secondary"
+              onClick={onBack}
+              disabled={isConnecting}
+              className="w-full"
+            >
+              Back
+            </Button>
+          )}
+          {onSkip && (
+            <Button
+              variant="secondary"
+              onClick={onSkip}
+              disabled={isConnecting}
+              className="w-full"
+            >
+              Skip
+            </Button>
+          )}
         </div>
       </LayoutFooter>
     </>

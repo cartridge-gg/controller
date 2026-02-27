@@ -100,6 +100,7 @@ export function useWebauthnAuthentication() {
 
       window.controller = controller;
       setController(controller);
+      return controller;
     },
     [chainId, rpcUrl, origin, setController],
   );

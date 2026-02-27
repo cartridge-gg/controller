@@ -99,6 +99,8 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      shouldAutoCreateSession: true,
+      hasPolicies: true,
     });
     mockUseUsernameValidation.mockReturnValue({
       status: "valid",
@@ -154,6 +156,8 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      shouldAutoCreateSession: true,
+      hasPolicies: true,
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
@@ -201,6 +205,8 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      shouldAutoCreateSession: true,
+      hasPolicies: true,
     });
     renderComponent();
     const submitButton = screen.getByTestId("submit-button");
@@ -271,6 +277,8 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      shouldAutoCreateSession: true,
+      hasPolicies: true,
     });
     renderWithProviders(<CreateController {...defaultProps} />);
     const input = screen.getByPlaceholderText("Username");
@@ -320,6 +328,8 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      shouldAutoCreateSession: true,
+      hasPolicies: true,
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
@@ -358,6 +368,8 @@ describe("CreateController", () => {
       signupOptions: ["webauthn"],
       authMethod: undefined,
       setAuthMethod: vi.fn(),
+      shouldAutoCreateSession: true,
+      hasPolicies: true,
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
@@ -415,6 +427,8 @@ describe("CreateController", () => {
         signupOptions: ["webauthn"],
         authMethod: undefined,
         setAuthMethod: vi.fn(),
+        shouldAutoCreateSession: true,
+        hasPolicies: true,
       });
 
       renderComponent();

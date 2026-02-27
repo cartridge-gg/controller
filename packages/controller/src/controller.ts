@@ -1,6 +1,8 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
 import { Policy } from "@cartridge/presets";
+import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
+import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
 import {
   AddInvokeTransactionResult,
   AddStarknetChainParameters,
@@ -10,14 +12,16 @@ import { constants, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { KEYCHAIN_URL } from "./constants";
-import { NotReadyToConnect } from "./errors";
+import { HeadlessAuthenticationError, NotReadyToConnect } from "./errors";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
+import { lookupUsername as lookupUsernameApi } from "./lookup";
 import {
   AuthOptions,
   Chain,
   ConnectError,
   ConnectReply,
+  ConnectOptions,
   ControllerOptions,
   IFrames,
   Keychain,
@@ -25,7 +29,9 @@ import {
   ProfileContextTypeVariant,
   ResponseCodes,
   OpenOptions,
+  HeadlessUsernameLookupResult,
   StarterpackOptions,
+  UpdateSessionOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
@@ -226,8 +232,18 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async connect(
-    signupOptions?: AuthOptions,
+    options?: AuthOptions | ConnectOptions,
   ): Promise<WalletAccount | undefined> {
+    const connectOptions = Array.isArray(options) ? undefined : options;
+    const headless =
+      connectOptions?.username && connectOptions?.signer
+        ? {
+            username: connectOptions.username,
+            signer: connectOptions.signer,
+            password: connectOptions.password,
+          }
+        : undefined;
+
     if (!this.iframes) {
       return;
     }
@@ -239,21 +255,73 @@ export default class ControllerProvider extends BaseProvider {
     // Ensure iframe is created if using lazy loading
     if (!this.iframes.keychain) {
       this.iframes.keychain = this.createKeychainIframe();
-      // Wait for the keychain to be ready
-      await this.waitForKeychain();
     }
+
+    // Always wait for the keychain connection to be established
+    await this.waitForKeychain();
 
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    this.iframes.keychain.open();
-
     try {
+      if (headless) {
+        // Headless auth should not open the UI until the keychain determines
+        // user interaction is required (e.g. session approval).
+        const response = await this.keychain.connect({
+          username: headless.username,
+          signer: headless.signer,
+          password: headless.password,
+        });
+
+        if (response.code !== ResponseCodes.SUCCESS) {
+          throw new HeadlessAuthenticationError(
+            "message" in response && response.message
+              ? response.message
+              : "Headless authentication failed",
+          );
+        }
+
+        // Keychain will call onSessionCreated (awaitable) during headless connect,
+        // which probes and updates this.account. Keep a fallback for older keychains.
+        if (this.account) {
+          return this.account;
+        }
+
+        const address =
+          "address" in response && response.address ? response.address : null;
+        if (!address) {
+          throw new HeadlessAuthenticationError(
+            "Headless authentication failed",
+          );
+        }
+
+        this.account = new ControllerAccount(
+          this,
+          this.rpcUrl(),
+          address,
+          this.keychain,
+          this.options,
+          this.iframes.keychain,
+        );
+        this.emitAccountsChanged([address]);
+        return this.account;
+      }
+
+      // Only open modal if NOT headless
+      this.iframes.keychain.open();
+
       // Use connect() parameter if provided, otherwise fall back to constructor options
-      const effectiveOptions = signupOptions ?? this.options.signupOptions;
-      let response = await this.keychain.connect(effectiveOptions);
+      const effectiveOptions = Array.isArray(options)
+        ? options
+        : (connectOptions?.signupOptions ?? this.options.signupOptions);
+
+      // Pass options to keychain
+      let response = await this.keychain.connect({
+        signupOptions: effectiveOptions,
+      });
+
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -270,9 +338,25 @@ export default class ControllerProvider extends BaseProvider {
 
       return this.account;
     } catch (e) {
+      if (headless) {
+        if (e instanceof HeadlessAuthenticationError) {
+          throw e;
+        }
+
+        const message =
+          e instanceof Error
+            ? e.message
+            : typeof e === "object" && e && "message" in e
+              ? String((e as any).message)
+              : "Headless authentication failed";
+        throw new HeadlessAuthenticationError(message);
+      }
       console.log(e);
     } finally {
-      this.iframes.keychain.close();
+      // Only close modal if it was opened (not headless)
+      if (!headless) {
+        this.iframes.keychain.close();
+      }
     }
   }
 
@@ -306,13 +390,31 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async disconnect() {
+    this.account = undefined;
+    this.emitAccountsChanged([]);
+
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("lastUsedConnector");
+
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key?.startsWith("@cartridge/")) {
+            localStorage.removeItem(key);
+          }
+        }
+      }
+    } catch {
+      // Ignore environments where localStorage is unavailable.
+    }
+
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    this.account = undefined;
-    return this.keychain.disconnect();
+    await this.keychain.disconnect();
+    return this.close();
   }
 
   async openProfile(tab: ProfileContextTypeVariant = "inventory") {
@@ -401,6 +503,54 @@ export default class ControllerProvider extends BaseProvider {
     this.keychain.openSettings();
   }
 
+  async close() {
+    if (!this.iframes || !this.iframes.keychain) {
+      return;
+    }
+    this.iframes.keychain.close();
+  }
+
+  async updateSession(options: UpdateSessionOptions = {}) {
+    if (!options.policies && !options.preset) {
+      throw new Error("Either `policies` or `preset` must be provided");
+    }
+
+    if (!this.iframes) {
+      return;
+    }
+
+    // Ensure iframe is created if using lazy loading
+    if (!this.iframes.keychain) {
+      this.iframes.keychain = this.createKeychainIframe();
+    }
+
+    await this.waitForKeychain();
+
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    this.iframes.keychain.open();
+
+    try {
+      const response = await this.keychain.updateSession(
+        options.policies,
+        options.preset,
+      );
+
+      if (response.code !== ResponseCodes.SUCCESS) {
+        throw new Error((response as ConnectError).message);
+      }
+
+      return response as ConnectReply;
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.iframes.keychain.close();
+    }
+  }
+
   revoke(origin: string, _policy: Policy[]) {
     if (!this.keychain) {
       console.error(new NotReadyToConnect().message);
@@ -430,6 +580,17 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return this.keychain.username();
+  }
+
+  async lookupUsername(
+    username: string,
+  ): Promise<HeadlessUsernameLookupResult> {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      throw new Error("Username is required");
+    }
+
+    return lookupUsernameApi(trimmed, this.selectedChain);
   }
 
   openPurchaseCredits() {
@@ -512,6 +673,54 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return await this.keychain.delegateAccount();
+  }
+
+  /**
+   * Returns a wallet standard interface for the controller.
+   * This allows using the controller with libraries that expect the wallet standard interface.
+   */
+  asWalletStandard(): WalletWithStarknetFeatures {
+    if (typeof window !== "undefined") {
+      console.warn(
+        `Casting Controller to WalletWithStarknetFeatures is an experimental feature. ` +
+          `Please report any issues at https://github.com/cartridge-gg/controller/issues`,
+      );
+    }
+
+    const controller = this;
+    const inner = new StarknetInjectedWallet(controller);
+
+    // Override disconnect to also disconnect controller
+    const disconnect = {
+      "standard:disconnect": {
+        version: "1.0.0" as const,
+        disconnect: async () => {
+          await inner.features["standard:disconnect"].disconnect();
+          await controller.disconnect();
+        },
+      },
+    };
+
+    return {
+      get version() {
+        return inner.version;
+      },
+      get name() {
+        return inner.name;
+      },
+      get icon() {
+        return inner.icon;
+      },
+      get chains() {
+        return inner.chains;
+      },
+      get accounts() {
+        return inner.accounts;
+      },
+      get features() {
+        return { ...inner.features, ...disconnect };
+      },
+    };
   }
 
   /**
@@ -622,7 +831,9 @@ export default class ControllerProvider extends BaseProvider {
     const iframe = new KeychainIFrame({
       ...this.options,
       rpcUrl: this.rpcUrl(),
-      onClose: this.keychain?.reset,
+      onClose: () => {
+        this.keychain?.reset?.();
+      },
       onConnect: (keychain) => {
         this.keychain = keychain;
       },
@@ -633,8 +844,12 @@ export default class ControllerProvider extends BaseProvider {
       encryptedBlob: encryptedBlob ?? undefined,
       username: username,
       onSessionCreated: async () => {
-        // Re-probe to establish connection now that storage access is granted and session created
-        await this.probe();
+        const previousAddress = this.account?.address;
+        const account = await this.probe();
+
+        if (account?.address && account.address !== previousAddress) {
+          this.emitAccountsChanged([account.address]);
+        }
       },
     });
 

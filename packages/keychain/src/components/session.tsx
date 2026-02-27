@@ -8,6 +8,7 @@ import {
 
 import { useConnection } from "@/hooks/connection";
 import { CheckIcon, HeaderInner } from "@cartridge/ui";
+import type { JsFelt } from "@cartridge/controller-wasm/controller";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Failure } from "./failure";
@@ -19,6 +20,10 @@ type SessionResponse = {
   expiresAt: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
+  allowedPoliciesRoot?: JsFelt;
+  metadataHash?: JsFelt;
+  sessionKeyGuid?: JsFelt;
+  guardianKeyGuid?: JsFelt;
 };
 
 type SessionQueryParams = {
@@ -26,6 +31,8 @@ type SessionQueryParams = {
   callback_uri: string | null;
   redirect_uri: string | null;
   redirect_query_name: string | null;
+  account: string | null;
+  expires_at: string | null;
 };
 
 /**
@@ -39,11 +46,22 @@ export function Session() {
       callback_uri: searchParams.get("callback_uri"),
       redirect_uri: searchParams.get("redirect_uri"),
       redirect_query_name: searchParams.get("redirect_query_name"),
+      account: searchParams.get("account"),
+      expires_at: searchParams.get("expires_at"),
     }),
     [searchParams],
   );
 
-  const { controller, policies } = useConnection();
+  const expiresAt = useMemo(() => {
+    if (!queries.expires_at) return undefined;
+    try {
+      return BigInt(queries.expires_at);
+    } catch {
+      return undefined;
+    }
+  }, [queries.expires_at]);
+
+  const { controller, setController, policies } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [isFailure, setIsFailure] = useState<boolean>(false);
@@ -135,6 +153,18 @@ export function Session() {
     [controller, hasExternalTarget, markCompleted, onCallback],
   );
 
+  // When URL provides an account that differs from the controller's username, log the user
+  // out so they re-authenticate with the correct account.
+  useEffect(() => {
+    if (!controller || !queries.account) return;
+    if (controller.username() === queries.account) return;
+
+    (async () => {
+      await controller.disconnect();
+      setController(undefined);
+    })();
+  }, [controller, queries.account, setController]);
+
   // Once we have a connected controller initialized, check if a session already exists.
   // If yes, check if the policies of the session are the same as the ones that are
   // currently being requested. Return existing session to the callback uri if policies match.
@@ -160,6 +190,10 @@ export function Session() {
             ownerGuid: controller.ownerGuid(),
             alreadyRegistered: true,
             expiresAt: String(session.session.expiresAt),
+            allowedPoliciesRoot: session.allowedPoliciesRoot,
+            metadataHash: session.session.metadataHash,
+            sessionKeyGuid: session.session.sessionKeyGuid,
+            guardianKeyGuid: session.session.guardianKeyGuid,
           });
 
           return;
@@ -177,7 +211,7 @@ export function Session() {
   ]);
 
   if (!controller) {
-    return <CreateController />;
+    return <CreateController prefillUsername={queries.account ?? undefined} />;
   }
 
   if (isSuccess) {
@@ -211,9 +245,14 @@ export function Session() {
           policies={policies}
           onConnect={onConnect}
           publicKey={queries.public_key}
+          expiresAt={expiresAt}
         />
       ) : (
-        <CreateSession policies={policies} onConnect={onConnect} />
+        <CreateSession
+          policies={policies}
+          onConnect={onConnect}
+          expiresAt={expiresAt}
+        />
       )}
     </>
   );

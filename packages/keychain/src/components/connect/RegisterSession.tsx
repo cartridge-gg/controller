@@ -25,17 +25,23 @@ export function RegisterSession({
   policies,
   onConnect,
   publicKey,
+  expiresAt: expiresAtOverride,
 }: {
   policies: ParsedSessionPolicies;
   onConnect: (transaction_hash: string, expiresAt: bigint) => void;
   publicKey?: string;
+  expiresAt?: bigint;
 }) {
   return (
     <CreateSessionProvider
       initialPolicies={policies}
       requiredPolicies={requiredPolicies}
     >
-      <RegisterSessionLayout onConnect={onConnect} publicKey={publicKey} />
+      <RegisterSessionLayout
+        onConnect={onConnect}
+        publicKey={publicKey}
+        expiresAtOverride={expiresAtOverride}
+      />
     </CreateSessionProvider>
   );
 }
@@ -43,9 +49,11 @@ export function RegisterSession({
 const RegisterSessionLayout = ({
   onConnect,
   publicKey,
+  expiresAtOverride,
 }: {
   onConnect: (transaction_hash: string, expiresAt: bigint) => void;
   publicKey?: string;
+  expiresAtOverride?: bigint;
 }) => {
   const { policies } = useCreateSession();
   const { controller, theme, origin } = useConnection();
@@ -56,8 +64,8 @@ const RegisterSessionLayout = ({
   const { duration, isEditable, onToggleEditable } = useCreateSession();
 
   const expiresAt = useMemo(() => {
-    return duration + now();
-  }, [duration]);
+    return expiresAtOverride ?? duration + now();
+  }, [expiresAtOverride, duration]);
 
   useEffect(() => {
     if (!publicKey || !controller) {

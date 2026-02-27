@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   HeaderInner,
   LayoutContent,
@@ -8,36 +8,76 @@ import {
   CoinbaseWalletColorIcon,
   ExternalIcon,
   cn,
+  TimesIcon,
 } from "@cartridge/ui";
 import { useOnchainPurchaseContext } from "@/context";
+import { useNavigation } from "@/context";
+import { CoinbaseOnrampStatus } from "@cartridge/ui/utils/api/cartridge";
 
 export function CoinbaseCheckout() {
-  const { paymentLink, onCreateCoinbaseOrder } = useOnchainPurchaseContext();
-  const [isLoaded, setIsLoaded] = useState(false);
+  const {
+    paymentLink,
+    isCreatingOrder,
+    orderStatus,
+    popupClosed,
+    onCreateCoinbaseOrder,
+    openPaymentPopup,
+  } = useOnchainPurchaseContext();
+  const { navigate } = useNavigation();
   const [showPolicies, setShowPolicies] = useState(true);
+  const [isOpeningPopup, setIsOpeningPopup] = useState(false);
 
+  // Create the order if we don't have a payment link yet
   useEffect(() => {
     if (!paymentLink) {
       onCreateCoinbaseOrder();
     }
   }, [paymentLink, onCreateCoinbaseOrder]);
 
+  // Navigate to pending when order is completed
+  useEffect(() => {
+    if (orderStatus === CoinbaseOnrampStatus.Completed) {
+      navigate("/purchase/pending", { reset: true });
+    }
+  }, [orderStatus, navigate]);
+
+  const handleContinue = useCallback(async () => {
+    if (isOpeningPopup) return;
+
+    setShowPolicies(false);
+    setIsOpeningPopup(true);
+    try {
+      const order = await onCreateCoinbaseOrder({ force: true });
+      const nextPaymentLink = order?.coinbaseOrder.paymentLink ?? paymentLink;
+      const nextOrderId = order?.coinbaseOrder.orderId;
+
+      if (nextPaymentLink && nextOrderId) {
+        openPaymentPopup({
+          paymentLink: nextPaymentLink,
+          orderId: nextOrderId,
+        });
+      }
+    } catch {
+      setShowPolicies(true);
+    } finally {
+      setIsOpeningPopup(false);
+    }
+  }, [isOpeningPopup, onCreateCoinbaseOrder, paymentLink, openPaymentPopup]);
+
+  const isFailed = orderStatus === CoinbaseOnrampStatus.Failed;
+
   return (
     <>
       {/* Policies Screen */}
       <div className={cn("flex flex-col h-full", !showPolicies && "hidden")}>
         <HeaderInner
-          title={
-            <div className="flex flex-col">
-              <span className="text-lg font-bold">Coinbase</span>
-              <span className="text-xs text-foreground-300">Policies</span>
-            </div>
-          }
+          title="Coinbase"
+          description="Policies"
           icon={<CoinbaseWalletColorIcon size="lg" />}
         />
         <LayoutContent className="p-4 flex flex-col gap-4">
           <div className="bg-[#181C19] border border-background-200 p-4 rounded-[4px] text-xs text-foreground-300">
-            By clicking ‘Continue’ you are agreeing to the following Coinbase
+            By clicking 'Continue' you are agreeing to the following Coinbase
             policies.
           </div>
 
@@ -57,40 +97,78 @@ export function CoinbaseCheckout() {
           </div>
         </LayoutContent>
         <LayoutFooter>
-          <Button className="w-full" onClick={() => setShowPolicies(false)}>
-            CONTINUE
+          <Button
+            className="w-full"
+            onClick={handleContinue}
+            disabled={isCreatingOrder || isOpeningPopup}
+          >
+            {isCreatingOrder || isOpeningPopup ? "LOADING..." : "CONTINUE"}
           </Button>
         </LayoutFooter>
       </div>
 
+      {/* Payment Status Screen */}
       <div
         className={cn(
           "flex flex-col h-full",
           showPolicies && "invisible absolute inset-0 -z-10",
         )}
       >
-        <LayoutContent className="p-0 overflow-hidden relative bg-[#121212]">
-          {!isLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#0F1410] z-10">
-              <SpinnerIcon className="animate-spin" size="lg" />
+        <HeaderInner
+          title="Apple Pay"
+          description="via Coinbase"
+          icon={<CoinbaseWalletColorIcon size="lg" />}
+        />
+        <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6 pb-24">
+          {isFailed ? (
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                <TimesIcon size="lg" className="text-destructive" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground-100">
+                  Payment Failed
+                </p>
+                <p className="text-xs text-foreground-300 mt-1">
+                  The payment could not be completed. Please try again.
+                </p>
+              </div>
             </div>
-          )}
-          {paymentLink ? (
-            <div className="h-full w-full px-10 flex justify-center">
-              <iframe
-                src={paymentLink}
-                className="h-full w-full max-w-[440px] border-none overflow-hidden"
-                allow="payment"
-                title="Coinbase Onramp"
-                onLoad={() => setIsLoaded(true)}
-              />
+          ) : popupClosed ? (
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                <TimesIcon size="lg" className="text-foreground-300" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground-100">
+                  Payment Window Closed
+                </p>
+                <p className="text-xs text-foreground-300 mt-1">
+                  The payment window was closed. Go back to try again.
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex flex-col items-center gap-4 text-center">
               <SpinnerIcon className="animate-spin" size="lg" />
+              <div>
+                <p className="text-sm font-semibold text-foreground-100">
+                  Complete in Popup
+                </p>
+                <p className="text-xs text-foreground-300 mt-1">
+                  Complete the payment in the popup window that opened.
+                </p>
+              </div>
             </div>
           )}
         </LayoutContent>
+        {(isFailed || popupClosed) && (
+          <LayoutFooter>
+            <Button className="w-full" onClick={() => navigate(-1)}>
+              GO BACK
+            </Button>
+          </LayoutFooter>
+        )}
       </div>
     </>
   );

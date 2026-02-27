@@ -1,11 +1,8 @@
 import ControllerProvider, {
-  AuthOptions,
+  ConnectOptions,
   ControllerOptions,
 } from "@cartridge/controller";
 import { Connector, InjectedConnector } from "@starknet-react/core";
-
-import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
-import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
 
 export default class ControllerConnector extends InjectedConnector {
   public controller: ControllerProvider;
@@ -29,11 +26,20 @@ export default class ControllerConnector extends InjectedConnector {
   }
 
   async disconnect() {
-    this.controller.disconnect();
+    await this.controller.disconnect();
+    try {
+      await super.disconnect();
+    } catch {
+      // Best-effort: starknet-react may call disconnect even when the injected wallet isn't present.
+    }
   }
 
   username() {
     return this.controller.username();
+  }
+
+  lookupUsername(username: string) {
+    return this.controller.lookupUsername(username);
   }
 
   isReady(): boolean {
@@ -44,12 +50,30 @@ export default class ControllerConnector extends InjectedConnector {
     return await this.controller.delegateAccount();
   }
 
-  async connect(args?: { chainIdHint?: bigint; signupOptions?: AuthOptions }) {
-    const account = await this.controller.connect(args?.signupOptions);
+  async connect(args?: { chainIdHint?: bigint } & ConnectOptions) {
+    const { chainIdHint, ...connectOptions } = args ?? {};
+    const controllerArgs =
+      args && Object.keys(connectOptions).length > 0
+        ? (connectOptions as ConnectOptions)
+        : undefined;
+
+    const account = await this.controller.connect(controllerArgs);
     if (!account) {
       throw new Error("Failed to connect controller");
     }
-    return super.connect({ chainIdHint: args?.chainIdHint });
+
+    // Ensure the injected wallet instance used by starknet-react (window.starknet_controller)
+    // always points at the same ControllerProvider instance this connector wraps.
+    if (typeof window !== "undefined") {
+      (window as any).starknet_controller = this.controller;
+    }
+
+    const data = await super.connect({ chainIdHint });
+
+    // `@starknet-react/core` updates its state from the `account` returned here.
+    // Use the authoritative address from `controller.connect()` to avoid edge cases
+    // where the injected wallet request returns an empty/undefined account.
+    return { ...data, account: account.address };
   }
 
   static fromConnectors(connectors: Connector[]): ControllerConnector {
@@ -60,14 +84,7 @@ export default class ControllerConnector extends InjectedConnector {
     return connector as ControllerConnector;
   }
 
-  asWalletStandard(): WalletWithStarknetFeatures {
-    if (typeof window !== "undefined") {
-      console.warn(
-        `Casting Controller to WalletWithStarknetFeatures is an experimental feature and may contain bugs. ` +
-          `Please report any issues at https://github.com/cartridge-gg/controller/issues`,
-      );
-    }
-
-    return new StarknetInjectedWallet(this.controller);
+  asWalletStandard() {
+    return this.controller.asWalletStandard();
   }
 }

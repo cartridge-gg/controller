@@ -21,6 +21,7 @@ import {
 import { Item } from "./types";
 import { useStarterpackContext } from "./starterpack";
 import { ExternalWalletError } from "@/utils/errors";
+import { CoinbaseOnrampStatus } from "@cartridge/ui/utils/api/cartridge";
 import {
   useQuantity,
   useExternalWallet,
@@ -28,6 +29,7 @@ import {
   useTokenSelection,
   useCoinbase,
   type TokenOption,
+  type CoinbaseOrderResult,
   type CoinbaseTransactionResult,
   type CoinbaseQuoteResult,
 } from "@/hooks/starterpack";
@@ -83,6 +85,10 @@ export interface OnchainPurchaseContextType {
   isCreatingOrder: boolean;
   coinbaseQuote: CoinbaseQuoteResult | undefined;
   isFetchingCoinbaseQuote: boolean;
+  orderId: string | undefined;
+  orderStatus: CoinbaseOnrampStatus | undefined;
+  orderTxHash: string | undefined;
+  popupClosed: boolean;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -94,7 +100,10 @@ export interface OnchainPurchaseContextType {
   onSendDeposit: () => Promise<void>;
   waitForDeposit: (swapId: string) => Promise<boolean>;
   onApplePaySelect: () => void;
-  onCreateCoinbaseOrder: () => Promise<void>;
+  onCreateCoinbaseOrder: (opts?: {
+    force?: boolean;
+  }) => Promise<CoinbaseOrderResult | undefined>;
+  openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
 }
 
@@ -200,6 +209,7 @@ export const OnchainPurchaseProvider = ({
 
   const [isApplePaySelected, setIsApplePaySelected] = useState(true);
   const {
+    orderId,
     paymentLink,
     isCreatingOrder,
     createOrder: createCoinbaseOrder,
@@ -207,6 +217,10 @@ export const OnchainPurchaseProvider = ({
     getQuote: getCoinbaseQuote,
     coinbaseQuote,
     isFetchingQuote: isFetchingCoinbaseQuote,
+    orderStatus,
+    orderTxHash,
+    popupClosed,
+    openPaymentPopup,
   } = useCoinbase({
     onError: setDisplayError,
   });
@@ -474,25 +488,29 @@ export const OnchainPurchaseProvider = ({
     clearSelectedWalletInternal();
   }, [clearSelectedWalletInternal]);
 
-  const onCreateCoinbaseOrder = useCallback(async () => {
-    if (!onchainDetails?.quote) {
-      throw new Error("Quote not loaded yet");
-    }
+  const onCreateCoinbaseOrder = useCallback(
+    async (opts?: { force?: boolean }) => {
+      if (!onchainDetails?.quote) {
+        throw new Error("Quote not loaded yet");
+      }
 
-    if (isCreatingOrder || paymentLink) return;
+      const force = opts?.force ?? false;
+      if (isCreatingOrder || (paymentLink && !force)) return;
 
-    const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
+      const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
 
-    await createCoinbaseOrder({
-      purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
-    });
-  }, [
-    onchainDetails,
-    quantity,
-    isCreatingOrder,
-    paymentLink,
-    createCoinbaseOrder,
-  ]);
+      return createCoinbaseOrder({
+        purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
+      });
+    },
+    [
+      onchainDetails,
+      quantity,
+      isCreatingOrder,
+      paymentLink,
+      createCoinbaseOrder,
+    ],
+  );
 
   const contextValue: OnchainPurchaseContextType = {
     purchaseItems,
@@ -526,12 +544,17 @@ export const OnchainPurchaseProvider = ({
     isCreatingOrder,
     coinbaseQuote,
     isFetchingCoinbaseQuote,
+    orderId,
+    orderStatus,
+    orderTxHash,
+    popupClosed,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,
     waitForDeposit,
     onApplePaySelect,
     onCreateCoinbaseOrder,
+    openPaymentPopup,
     getTransactions,
   };
 

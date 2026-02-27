@@ -6,6 +6,7 @@ import {
 } from "@/components/provider/connection";
 import { useNavigation } from "@/context/navigation";
 import { connectToController } from "@/utils/connection";
+import type { HeadlessConnectionState } from "@/utils/connection/headless";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -14,6 +15,7 @@ import {
   ExternalWalletType,
   toArray,
   Token,
+  getPresetSessionPolicies,
   toSessionPolicies,
   WalletAdapter,
   WalletBridge,
@@ -46,12 +48,7 @@ import {
 } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SemVer } from "semver";
-import {
-  constants,
-  getChecksumAddress,
-  RpcProvider,
-  shortString,
-} from "starknet";
+import { constants, getChecksumAddress, RpcProvider } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import {
   storeReferral,
@@ -71,7 +68,16 @@ const TOKEN_ADDRESSES: Record<Token, string> = {
   usdt: USDT_CONTRACT_ADDRESS,
 };
 
+type ParentCallbackMethods = {
+  // Session creation callback (for standalone auth flow)
+  onSessionCreated?: () => Promise<void>;
+
+  // Starterpack play callback (for purchase completion flow)
+  onStarterpackPlay?: () => Promise<void>;
+};
+
 export type ParentMethods = AsyncMethodReturns<{
+  open: () => Promise<void>;
   close: () => Promise<void>;
   reload: () => Promise<void>;
 
@@ -108,13 +114,8 @@ export type ParentMethods = AsyncMethodReturns<{
     txHash: string,
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
-
-  // Session creation callback (for standalone auth flow)
-  onSessionCreated?: () => Promise<void>;
-
-  // Starterpack play callback (for purchase completion flow)
-  onStarterpackPlay?: () => Promise<void>;
-}>;
+}> &
+  ParentCallbackMethods;
 
 /**
  * Parses policies from a URL string.
@@ -158,45 +159,82 @@ function getConfigChainPolicies(
   }
 
   try {
-    const decodedChainId = shortString.decodeShortString(chainId);
-
-    if (
-      "chains" in configData &&
-      typeof configData.chains === "object" &&
-      configData.chains &&
-      decodedChainId in (configData.chains as object) &&
-      (configData.chains as Record<string, unknown>)[decodedChainId] &&
-      typeof (configData.chains as Record<string, unknown>)[decodedChainId] ===
-        "object" &&
-      "policies" in
-        ((configData.chains as Record<string, unknown>)[
-          decodedChainId
-        ] as object)
-    ) {
-      const chainConfig = (
-        configData.chains as Record<string, Record<string, unknown>>
-      )[decodedChainId];
-      return parseSessionPolicies({
-        verified,
-        policies: toSessionPolicies(chainConfig.policies as Policies),
-      });
-    }
+    const sessionPolicies = getPresetSessionPolicies(configData, chainId);
+    if (!sessionPolicies) return undefined;
+    return parseSessionPolicies({ verified, policies: sessionPolicies });
   } catch (e) {
     console.error("Failed to process chain policies from config:", e);
   }
   return undefined;
 }
 
+export function resolvePolicies({
+  policiesStr,
+  preset,
+  shouldOverridePresetPolicies,
+  configData,
+  chainId,
+  verified,
+  isConfigLoading,
+}: {
+  policiesStr: string | null;
+  preset: string | null;
+  shouldOverridePresetPolicies: boolean;
+  configData: Record<string, unknown> | null;
+  chainId: string | undefined;
+  verified: boolean;
+  isConfigLoading: boolean;
+}): {
+  policies: ParsedSessionPolicies | undefined;
+  isPoliciesResolved: boolean;
+} {
+  const urlPolicies = parseUrlPolicies(policiesStr);
+
+  if (shouldOverridePresetPolicies && urlPolicies) {
+    return { policies: urlPolicies, isPoliciesResolved: true };
+  }
+
+  if (preset) {
+    if (isConfigLoading || !chainId) {
+      return { policies: undefined, isPoliciesResolved: false };
+    }
+
+    const configPolicies = getConfigChainPolicies(
+      configData,
+      chainId,
+      verified,
+    );
+    if (configPolicies) {
+      return { policies: configPolicies, isPoliciesResolved: true };
+    }
+
+    // Preset exists but has no policies for this chain; fall back to URL policies.
+    return { policies: urlPolicies, isPoliciesResolved: true };
+  }
+
+  return { policies: urlPolicies, isPoliciesResolved: true };
+}
+
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
+  const parentRef = useRef<ParentMethods>();
   const [origin, setOrigin] = useState<string | undefined>(undefined);
   const [rpcUrl, setRpcUrl] = useState<string>(
     import.meta.env.VITE_RPC_MAINNET,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
+  const [isPoliciesResolved, setIsPoliciesResolved] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
-  const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
+  const initialPreset =
+    typeof window !== "undefined"
+      ? window.location.pathname.startsWith("/slot")
+        ? "slot"
+        : new URLSearchParams(window.location.search).get("preset")
+      : null;
+  const [isConfigLoading, setIsConfigLoading] = useState<boolean>(
+    () => !!initialPreset,
+  );
   const [isMainnet, setIsMainnet] = useState<boolean>(false);
   const [configData, setConfigData] = useState<Record<string, unknown> | null>(
     null,
@@ -208,6 +246,14 @@ export function useConnectionValue() {
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
+  const connectionStateRef = useRef<HeadlessConnectionState>({
+    origin,
+    chainId,
+    rpcUrl,
+    policies,
+    isPoliciesResolved,
+    isConfigLoading,
+  });
   const [onModalClose, setOnModalCloseInternal] = useState<
     (() => void) | undefined
   >();
@@ -216,17 +262,41 @@ export function useConnectionValue() {
     setOnModalCloseInternal(() => fn);
   }, []);
 
+  const [searchParams] = useSearchParams();
+
+  // Track if URL explicitly provides an rpc_url that should take priority
+  const urlRpcUrl = useMemo(() => {
+    const raw = searchParams.get("rpc_url");
+    return raw ? decodeURIComponent(raw) : null;
+  }, [searchParams]);
+
+  // Sync rpcUrl from controller, but only if URL doesn't provide an explicit rpc_url
   useEffect(() => {
-    if (controller) {
+    if (controller && !urlRpcUrl) {
       setRpcUrl(controller.rpcUrl());
     }
-  }, [controller, setRpcUrl]);
+  }, [controller, setRpcUrl, urlRpcUrl]);
 
-  const [searchParams] = useSearchParams();
+  // When URL provides an rpc_url that differs from the controller's, log the user
+  // out so they re-authenticate on the correct chain. The account may not be deployed
+  // on the target chain, so we can't simply recreate the controller.
+  useEffect(() => {
+    if (!controller || !urlRpcUrl) return;
+    if (controller.rpcUrl() === urlRpcUrl) return;
+
+    setRpcUrl(urlRpcUrl);
+
+    (async () => {
+      await controller.disconnect();
+      setController(undefined);
+    })();
+  }, [controller, urlRpcUrl, setController, setRpcUrl]);
+
   const urlParamsRef = useRef<{
     theme: string | null;
     preset: string | null;
     policies: string | null;
+    shouldOverridePresetPolicies: boolean;
     version: string | null;
     project: string | null;
     namespace: string | null;
@@ -245,6 +315,8 @@ export function useConnectionValue() {
       : urlParams.get("preset");
     const rpcUrl = urlParams.get("rpc_url");
     const policies = urlParams.get("policies");
+    const shouldOverridePresetPolicies =
+      urlParams.get("should_override_preset_policies") === "true";
     const version = urlParams.get("v");
     const project = urlParams.get("ps");
     const namespace = urlParams.get("ns");
@@ -280,6 +352,10 @@ export function useConnectionValue() {
       theme: theme || urlParamsRef.current?.theme || null,
       preset: preset || urlParamsRef.current?.preset || null,
       policies: policies || urlParamsRef.current?.policies || null,
+      shouldOverridePresetPolicies:
+        shouldOverridePresetPolicies ||
+        urlParamsRef.current?.shouldOverridePresetPolicies ||
+        false,
       version: version || urlParamsRef.current?.version || null,
       project: project || urlParamsRef.current?.project || null,
       namespace: namespace || urlParamsRef.current?.namespace || null,
@@ -310,6 +386,22 @@ export function useConnectionValue() {
     };
 
     if (rpcUrl) {
+      const inferChainIdFromRpcUrl = (url: string) => {
+        const lower = url.toLowerCase();
+        if (lower.includes("sepolia")) {
+          return constants.StarknetChainId.SN_SEPOLIA;
+        }
+        if (lower.includes("mainnet")) {
+          return constants.StarknetChainId.SN_MAIN;
+        }
+        return undefined;
+      };
+
+      const inferredChainId = inferChainIdFromRpcUrl(rpcUrl);
+      if (inferredChainId) {
+        setChainId(inferredChainId);
+      }
+
       fetchChainId();
     }
   }, [rpcUrl]);
@@ -567,30 +659,42 @@ export function useConnectionValue() {
 
   // Handle policies configuration
   useEffect(() => {
-    const { policies, preset } = urlParams;
-
-    // Always prioritize preset policies over URL policies
-    if (preset && !isConfigLoading) {
-      const configPolicies = getConfigChainPolicies(
+    const {
+      policies: policyStr,
+      preset,
+      shouldOverridePresetPolicies,
+    } = urlParams;
+    const { policies: resolvedPolicies, isPoliciesResolved: resolved } =
+      resolvePolicies({
+        policiesStr: policyStr,
+        preset,
+        shouldOverridePresetPolicies,
         configData,
         chainId,
         verified,
-      );
+        isConfigLoading,
+      });
 
-      if (configPolicies) {
-        setPolicies(configPolicies);
-        return;
-      }
-    }
-
-    // Fall back to URL policies if no preset or preset has no policies
-    const urlPolicies = parseUrlPolicies(policies);
-    if (urlPolicies) {
-      setPolicies(urlPolicies);
-    }
+    setPolicies(resolvedPolicies);
+    setIsPoliciesResolved(resolved);
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
   useThemeEffect({ theme, assetUrl: "" });
+
+  useEffect(() => {
+    connectionStateRef.current = {
+      origin,
+      chainId,
+      rpcUrl,
+      policies,
+      isPoliciesResolved,
+      isConfigLoading,
+    };
+  }, [origin, chainId, rpcUrl, policies, isPoliciesResolved, isConfigLoading]);
+
+  useEffect(() => {
+    parentRef.current = parent;
+  }, [parent]);
 
   useEffect(() => {
     if (isIframe()) {
@@ -600,6 +704,8 @@ export function useConnectionValue() {
         navigate,
         propagateError: urlParams.propagateError,
         errorDisplayMode: urlParams.errorDisplayMode,
+        getParent: () => parentRef.current,
+        getConnectionState: () => connectionStateRef.current,
       });
 
       connection.promise
@@ -639,6 +745,7 @@ export function useConnectionValue() {
       setOrigin(appOrigin);
 
       setParent({
+        open: async () => {},
         close: async () => {},
         reload: async () => {},
         externalDetectWallets: iframeMethods.externalDetectWallets(appOrigin),
@@ -694,7 +801,7 @@ export function useConnectionValue() {
     if (!parent) return;
 
     try {
-      await parent.close();
+      await parent.open();
     } catch (e) {
       console.error("Failed to open modal:", e);
     }
@@ -786,6 +893,7 @@ export function useConnectionValue() {
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
     isConfigLoading,
+    isPoliciesResolved,
     isMainnet,
     verified,
     chainId,

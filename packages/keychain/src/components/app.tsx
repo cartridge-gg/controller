@@ -40,6 +40,7 @@ import { CollectiblePurchase } from "./inventory/collection/collectible-purchase
 import { Execute } from "./Execute";
 import { SignMessage } from "./SignMessage";
 import { ConnectRoute } from "./ConnectRoute";
+import { UpdateSessionRoute } from "./UpdateSessionRoute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
 import { useNavigation } from "@/context";
@@ -51,6 +52,7 @@ import { Collections } from "./purchasenew/starterpack/collections";
 import { DeployController } from "./DeployController";
 import { useConnection } from "@/hooks/connection";
 import { CreateController, Upgrade } from "./connect";
+import { HeadlessApprovalRoute } from "./connect/HeadlessApprovalRoute";
 import { useUpgrade } from "./provider/upgrade";
 import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
@@ -67,6 +69,7 @@ import { hasApprovalPolicies } from "@/hooks/session";
 import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { Quests } from "./quests";
 import { QuestClaim } from "./quests/claim";
+import { CoinbasePopup } from "./coinbase-popup";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -99,7 +102,13 @@ function DefaultRoute() {
 }
 
 function Authentication() {
-  const { controller, isConfigLoading, policies, verified } = useConnection();
+  const {
+    controller,
+    isConfigLoading,
+    isPoliciesResolved,
+    policies,
+    verified,
+  } = useConnection();
   const { pathname, search } = useLocation();
 
   const upgrade = useUpgrade();
@@ -114,7 +123,7 @@ function Authentication() {
   // If session creation is needed (returning from standalone auth)
   if (needsSessionCreation) {
     // Show loading while config is loading
-    if (preset && isConfigLoading) {
+    if (preset && (isConfigLoading || !isPoliciesResolved)) {
       return (
         <CreateController
           isSlot={pathname.startsWith("/slot")}
@@ -146,6 +155,16 @@ function Authentication() {
     return <Disconnect />;
   }
 
+  // Update-session should bypass auth/login gating entirely so it never flashes
+  // CreateController (login) while controller state settles.
+  if (pathname.startsWith("/update-session")) {
+    return (
+      <Layout>
+        <Outlet />
+      </Layout>
+    );
+  }
+
   // No controller, show CreateController
   if (!controller) {
     // Extract signers from URL if present (for connect flow)
@@ -155,23 +174,41 @@ function Authentication() {
 
     if (signersParam) {
       try {
-        signers = JSON.parse(decodeURIComponent(signersParam)) as AuthOptions;
+        const parsed = JSON.parse(decodeURIComponent(signersParam)) as
+          | AuthOptions
+          | { signupOptions?: AuthOptions };
+        if (Array.isArray(parsed)) {
+          signers = parsed as AuthOptions;
+        } else if (
+          parsed &&
+          typeof parsed === "object" &&
+          Array.isArray(parsed.signupOptions)
+        ) {
+          signers = parsed.signupOptions;
+        }
       } catch (error) {
         console.error("Failed to parse signers parameter:", error);
         // Continue with undefined signers on parse error
       }
     }
 
+    // On the session page, prefill and lock the username if account param is provided
+    const accountParam =
+      pathname === "/session" || pathname === "session"
+        ? (searchParams.get("account") ?? undefined)
+        : undefined;
+
     return (
       <CreateController
         isSlot={pathname.startsWith("/slot")}
         signers={signers}
+        prefillUsername={accountParam}
       />
     );
   }
 
   // Controller exists but upgrade not synced - show CreateController with loading instead of PageLoading
-  if (!upgrade.isSynced || isConfigLoading) {
+  if (!upgrade.isSynced || isConfigLoading || !isPoliciesResolved) {
     return (
       <CreateController
         isSlot={pathname.startsWith("/slot")}
@@ -197,6 +234,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/booster-pack/:privateKey" element={<BoosterPack />} />
+      <Route path="/coinbase" element={<CoinbasePopup />} />
       <Route path="/" element={<Authentication />}>
         <Route index element={<DefaultRoute />} />
         <Route path="/settings" element={<Settings />} />
@@ -292,6 +330,11 @@ export function App() {
         <Route path="/sign-message" element={<SignMessage />} />
         <Route path="/deploy" element={<DeployController />} />
         <Route path="/connect" element={<ConnectRoute />} />
+        <Route path="/update-session" element={<UpdateSessionRoute />} />
+        <Route
+          path="/headless-approval/:requestId"
+          element={<HeadlessApprovalRoute />}
+        />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />

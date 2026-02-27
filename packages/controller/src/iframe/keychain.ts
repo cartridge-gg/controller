@@ -93,17 +93,31 @@ export class KeychainIFrame extends IFrame<Keychain> {
       _url.searchParams.set("username", encodeURIComponent(username));
     }
 
+    if (preset) {
+      _url.searchParams.set("preset", preset);
+    }
+
+    if (shouldOverridePresetPolicies) {
+      _url.searchParams.set("should_override_preset_policies", "true");
+    }
+
     // Policy precedence logic:
     // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
-    // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
-    // 3. Otherwise, use provided policies or empty object
+    // 2. Otherwise, if preset is defined, ignore provided policies
+    // 3. Otherwise, use provided policies
     if ((!preset || shouldOverridePresetPolicies) && policies) {
       _url.searchParams.set(
         "policies",
         encodeURIComponent(JSON.stringify(policies)),
       );
     } else if (preset) {
-      _url.searchParams.set("preset", preset);
+      if (policies) {
+        console.warn(
+          "[Controller] Both `preset` and `policies` provided to ControllerProvider. " +
+            "Policies are ignored when preset is set. " +
+            "Use `shouldOverridePresetPolicies: true` to override.",
+        );
+      }
     }
 
     // Add encrypted blob to URL fragment (hash) if present
@@ -119,11 +133,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
       methods: {
         ...walletBridge.getIFrameMethods(),
         // Expose callback for keychain to notify parent that session was created and storage access granted
-        onSessionCreated: (_origin: string) => () => {
-          if (onSessionCreated) {
-            onSessionCreated();
-          }
-        },
+        onSessionCreated: (_origin: string) => () => onSessionCreated?.(),
         onStarterpackPlay: (_origin: string) => async () => {
           if (onStarterpackPlayHandler) {
             await onStarterpackPlayHandler();

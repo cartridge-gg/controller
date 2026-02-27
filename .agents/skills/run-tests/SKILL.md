@@ -130,7 +130,7 @@ If Storybook tests fail with visual differences:
 
 ```bash
 # Check specific package
-pnpm controller build
+pnpm controller build:deps
 pnpm keychain build
 ```
 

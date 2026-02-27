@@ -8,6 +8,9 @@ import { Outlet, useLocation } from "react-router-dom";
 export function Layout({ children }: { children?: React.ReactNode }) {
   const { closeModal, onModalClose } = useConnection();
   const location = useLocation();
+  const isUpdateSessionRoute = useMemo(() => {
+    return location.pathname.startsWith("/update-session");
+  }, [location.pathname]);
   // Check if current page should have bottom navigation
   const hasBottomNav = useMemo(() => {
     return [
@@ -24,7 +27,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
       <LayoutContainer>
         <NavigationHeader
           variant="hidden"
-          forceShowClose={hasBottomNav}
+          forceShowClose={hasBottomNav || isUpdateSessionRoute}
           icon={<GearIcon />}
           onClose={hasBottomNav ? closeModal : onModalClose}
         />

@@ -78,7 +78,6 @@ describe("ConnectRoute", () => {
     reject: vi.fn(),
     params: { id: "test-id" },
   };
-
   beforeEach(() => {
     vi.clearAllMocks();
     mockIsIframe.mockReturnValue(true); // Default to embedded mode
@@ -90,6 +89,7 @@ describe("ConnectRoute", () => {
     mockUseConnection.mockReturnValue({
       controller: mockController,
       policies: null,
+      isPoliciesResolved: true,
       verified: true,
       origin: "https://test.app",
       theme: {
@@ -108,6 +108,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -131,6 +132,7 @@ describe("ConnectRoute", () => {
           contracts: {},
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -158,6 +160,7 @@ describe("ConnectRoute", () => {
           },
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: false,
         origin: "https://test.app",
       });
@@ -176,6 +179,7 @@ describe("ConnectRoute", () => {
           contracts: {},
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -206,6 +210,7 @@ describe("ConnectRoute", () => {
           },
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
         theme: {
@@ -234,6 +239,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
         theme: {
@@ -267,6 +273,7 @@ describe("ConnectRoute", () => {
           contracts: {},
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
         theme: {
@@ -298,6 +305,7 @@ describe("ConnectRoute", () => {
           },
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: false,
         origin: "https://test.app",
       });
@@ -319,6 +327,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: false,
         origin: "https://test.app",
         theme: {
@@ -346,6 +355,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -374,6 +384,7 @@ describe("ConnectRoute", () => {
           contracts: {},
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -389,6 +400,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: null,
         policies: null,
+        isPoliciesResolved: true,
         verified: false,
         origin: "https://test.app",
       });
@@ -411,6 +423,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
         theme: {
@@ -442,6 +455,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -469,6 +483,7 @@ describe("ConnectRoute", () => {
           },
           messages: [{ id: "3", content: "Sign this", authorized: true }],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });

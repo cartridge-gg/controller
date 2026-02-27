@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.13.3",
+  "version": "0.13.10-alpha.1",
   "description": "Cartridge Controller",
   "repository": {
     "type": "git",
@@ -11,11 +11,10 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build:deps": "pnpm build",
+    "build:deps": "pnpm build:browser && pnpm build:node",
     "dev": "vite build --watch",
     "build:browser": "vite build",
     "build:node": "tsup --config tsup.node.config.ts",
-    "build": "pnpm build:browser && pnpm build:node",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",
@@ -42,6 +41,7 @@
     "micro-sol-signer": "^0.5.0",
     "bs58": "^6.0.0",
     "ethers": "^6.13.5",
+    "@starknet-io/get-starknet-wallet-standard": "5.0.0-beta.0",
     "@starknet-io/types-js": "0.9.1",
     "@telegram-apps/sdk": "^2.4.0",
     "@turnkey/sdk-browser": "^4.0.0",

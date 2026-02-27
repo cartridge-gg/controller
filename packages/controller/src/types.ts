@@ -120,6 +120,12 @@ export interface LookupResponse {
   results: LookupResult[];
 }
 
+export interface HeadlessUsernameLookupResult {
+  username: string;
+  exists: boolean;
+  signers: AuthOption[];
+}
+
 export enum FeeSource {
   PAYMASTER = "PAYMASTER",
   CREDITS = "CREDITS",
@@ -131,7 +137,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(signupOptions?: AuthOptions): Promise<ConnectReply | ConnectError>;
+  connect(options?: ConnectOptions): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -151,6 +157,10 @@ export interface Keychain {
     account: string,
     async?: boolean,
   ): Promise<Signature | ConnectError>;
+  updateSession(
+    policies?: SessionPolicies,
+    preset?: string,
+  ): Promise<ConnectReply | ConnectError>;
   openSettings(): Promise<void | ConnectError>;
   session(): Promise<KeychainSession>;
   sessions(): Promise<{
@@ -276,3 +286,40 @@ export type StarterpackOptions = {
   /** Callback fired after the Play button closes the starterpack modal */
   onPurchaseComplete?: () => void;
 };
+
+// Connect options (used by controller.connect)
+export interface ConnectOptions {
+  /** Signup options (shown in UI when not headless) */
+  signupOptions?: AuthOptions;
+  /** Headless mode username (when combined with signer) */
+  username?: string;
+  /** Headless mode signer option (auth method) */
+  signer?: AuthOption;
+  /** Required when signer is "password" */
+  password?: string;
+}
+
+/** Options for updating session policies at runtime */
+export type UpdateSessionOptions = {
+  /** Session policies to set */
+  policies?: SessionPolicies;
+  /** Preset name to resolve policies from */
+  preset?: string;
+};
+
+export type HeadlessConnectOptions = Required<
+  Pick<ConnectOptions, "username" | "signer">
+> &
+  Pick<ConnectOptions, "password">;
+
+export type HeadlessConnectReply =
+  | {
+      code: ResponseCodes.SUCCESS;
+      address: string;
+    }
+  | {
+      code: ResponseCodes.USER_INTERACTION_REQUIRED;
+      requestId: string;
+      message?: string;
+    }
+  | ConnectError;

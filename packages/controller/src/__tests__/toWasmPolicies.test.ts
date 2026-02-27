@@ -1,5 +1,16 @@
+import { getChecksumAddress } from "starknet";
 import { toWasmPolicies } from "../utils";
 import { ParsedSessionPolicies } from "../policies";
+
+// Valid hex addresses for testing (short but valid for getChecksumAddress)
+const ADDR_A = "0x0aaa";
+const ADDR_B = "0x0bbb";
+const ADDR_C = "0x0ccc";
+
+// Pre-compute checksummed forms
+const ADDR_A_CS = getChecksumAddress(ADDR_A);
+const ADDR_B_CS = getChecksumAddress(ADDR_B);
+const ADDR_C_CS = getChecksumAddress(ADDR_C);
 
 describe("toWasmPolicies", () => {
   describe("canonical ordering", () => {
@@ -7,10 +18,10 @@ describe("toWasmPolicies", () => {
       const policies1: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xAAA": {
+          [ADDR_A]: {
             methods: [{ entrypoint: "foo", authorized: true }],
           },
-          "0xBBB": {
+          [ADDR_B]: {
             methods: [{ entrypoint: "bar", authorized: true }],
           },
         },
@@ -19,10 +30,10 @@ describe("toWasmPolicies", () => {
       const policies2: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xBBB": {
+          [ADDR_B]: {
             methods: [{ entrypoint: "bar", authorized: true }],
           },
-          "0xAAA": {
+          [ADDR_A]: {
             methods: [{ entrypoint: "foo", authorized: true }],
           },
         },
@@ -32,16 +43,16 @@ describe("toWasmPolicies", () => {
       const result2 = toWasmPolicies(policies2);
 
       expect(result1).toEqual(result2);
-      // First policy should be for 0xAAA (sorted alphabetically)
-      expect(result1[0]).toHaveProperty("target", "0xAAA");
-      expect(result1[1]).toHaveProperty("target", "0xBBB");
+      // First policy should be for ADDR_A (sorted alphabetically)
+      expect(result1[0]).toHaveProperty("target", ADDR_A_CS);
+      expect(result1[1]).toHaveProperty("target", ADDR_B_CS);
     });
 
     test("sorts methods within contracts by entrypoint", () => {
       const policies1: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xAAA": {
+          [ADDR_A]: {
             methods: [
               { entrypoint: "zebra", authorized: true },
               { entrypoint: "apple", authorized: true },
@@ -54,7 +65,7 @@ describe("toWasmPolicies", () => {
       const policies2: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xAAA": {
+          [ADDR_A]: {
             methods: [
               { entrypoint: "mango", authorized: true },
               { entrypoint: "zebra", authorized: true },
@@ -74,19 +85,19 @@ describe("toWasmPolicies", () => {
       const policies1: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xCCC": {
+          [ADDR_C]: {
             methods: [
               { entrypoint: "c_method", authorized: true },
               { entrypoint: "a_method", authorized: true },
             ],
           },
-          "0xAAA": {
+          [ADDR_A]: {
             methods: [
               { entrypoint: "z_method", authorized: true },
               { entrypoint: "a_method", authorized: true },
             ],
           },
-          "0xBBB": {
+          [ADDR_B]: {
             methods: [{ entrypoint: "b_method", authorized: true }],
           },
         },
@@ -96,16 +107,16 @@ describe("toWasmPolicies", () => {
       const policies2: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xBBB": {
+          [ADDR_B]: {
             methods: [{ entrypoint: "b_method", authorized: true }],
           },
-          "0xAAA": {
+          [ADDR_A]: {
             methods: [
               { entrypoint: "a_method", authorized: true },
               { entrypoint: "z_method", authorized: true },
             ],
           },
-          "0xCCC": {
+          [ADDR_C]: {
             methods: [
               { entrypoint: "a_method", authorized: true },
               { entrypoint: "c_method", authorized: true },
@@ -119,21 +130,21 @@ describe("toWasmPolicies", () => {
 
       expect(result1).toEqual(result2);
 
-      // Verify order: 0xAAA first, then 0xBBB, then 0xCCC
-      // Within 0xAAA: a_method before z_method
-      expect(result1[0]).toHaveProperty("target", "0xAAA");
-      expect(result1[2]).toHaveProperty("target", "0xBBB");
-      expect(result1[3]).toHaveProperty("target", "0xCCC");
+      // Verify order: ADDR_A first, then ADDR_B, then ADDR_C
+      // Within ADDR_A: a_method before z_method
+      expect(result1[0]).toHaveProperty("target", ADDR_A_CS);
+      expect(result1[2]).toHaveProperty("target", ADDR_B_CS);
+      expect(result1[3]).toHaveProperty("target", ADDR_C_CS);
     });
 
     test("handles case-insensitive address sorting", () => {
       const policies1: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xaaa": {
+          "0x0aaa": {
             methods: [{ entrypoint: "foo", authorized: true }],
           },
-          "0xAAB": {
+          "0x0AAB": {
             methods: [{ entrypoint: "bar", authorized: true }],
           },
         },
@@ -142,10 +153,10 @@ describe("toWasmPolicies", () => {
       const policies2: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xAAB": {
+          "0x0AAB": {
             methods: [{ entrypoint: "bar", authorized: true }],
           },
-          "0xaaa": {
+          "0x0aaa": {
             methods: [{ entrypoint: "foo", authorized: true }],
           },
         },
@@ -155,6 +166,34 @@ describe("toWasmPolicies", () => {
       const result2 = toWasmPolicies(policies2);
 
       expect(result1).toEqual(result2);
+    });
+
+    test("normalizes address casing via getChecksumAddress", () => {
+      const addr =
+        "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+      const policies1: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          [addr.toLowerCase()]: {
+            methods: [{ entrypoint: "transfer", authorized: true }],
+          },
+        },
+      };
+
+      const policies2: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          [addr.toUpperCase().replace("0X", "0x")]: {
+            methods: [{ entrypoint: "transfer", authorized: true }],
+          },
+        },
+      };
+
+      const result1 = toWasmPolicies(policies1);
+      const result2 = toWasmPolicies(policies2);
+
+      expect(result1).toEqual(result2);
+      expect(result1[0]).toHaveProperty("target", getChecksumAddress(addr));
     });
 
     test("handles empty policies", () => {
@@ -179,15 +218,21 @@ describe("toWasmPolicies", () => {
   });
 
   describe("ApprovalPolicy handling", () => {
+    const TOKEN =
+      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+    const TOKEN_CS = getChecksumAddress(TOKEN);
+    const SPENDER =
+      "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
+
     test("creates ApprovalPolicy for approve methods with spender and amount", () => {
       const policies: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xTOKEN": {
+          [TOKEN]: {
             methods: [
               {
                 entrypoint: "approve",
-                spender: "0xSPENDER",
+                spender: SPENDER,
                 amount: "1000000000000000000",
                 authorized: true,
               },
@@ -200,8 +245,8 @@ describe("toWasmPolicies", () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
-        target: "0xTOKEN",
-        spender: "0xSPENDER",
+        target: TOKEN_CS,
+        spender: SPENDER,
         amount: "1000000000000000000",
       });
       // Should NOT have method or authorized fields
@@ -213,11 +258,11 @@ describe("toWasmPolicies", () => {
       const policies: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xTOKEN": {
+          [TOKEN]: {
             methods: [
               {
                 entrypoint: "approve",
-                spender: "0xSPENDER",
+                spender: SPENDER,
                 amount: 1000000000000000000,
                 authorized: true,
               },
@@ -237,7 +282,7 @@ describe("toWasmPolicies", () => {
       const policies: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xTOKEN": {
+          [TOKEN]: {
             methods: [
               {
                 entrypoint: "approve",
@@ -267,11 +312,11 @@ describe("toWasmPolicies", () => {
       const policies: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xTOKEN": {
+          [TOKEN]: {
             methods: [
               {
                 entrypoint: "approve",
-                spender: "0xSPENDER",
+                spender: SPENDER,
                 authorized: true,
               },
             ],
@@ -290,10 +335,14 @@ describe("toWasmPolicies", () => {
     });
 
     test("creates CallPolicy for non-approve methods", () => {
+      const CONTRACT =
+        "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49";
+      const CONTRACT_CS = getChecksumAddress(CONTRACT);
+
       const policies: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xCONTRACT": {
+          [CONTRACT]: {
             methods: [
               {
                 entrypoint: "transfer",
@@ -307,7 +356,7 @@ describe("toWasmPolicies", () => {
       const result = toWasmPolicies(policies);
 
       expect(result).toHaveLength(1);
-      expect(result[0]).toHaveProperty("target", "0xCONTRACT");
+      expect(result[0]).toHaveProperty("target", CONTRACT_CS);
       expect(result[0]).toHaveProperty("method");
       expect(result[0]).toHaveProperty("authorized", true);
     });
@@ -316,11 +365,11 @@ describe("toWasmPolicies", () => {
       const policies: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xTOKEN": {
+          [TOKEN]: {
             methods: [
               {
                 entrypoint: "approve",
-                spender: "0xSPENDER",
+                spender: SPENDER,
                 amount: "1000",
                 authorized: true,
               },
@@ -339,7 +388,7 @@ describe("toWasmPolicies", () => {
 
       // First should be approve (sorted alphabetically)
       const approvePolicy = result[0];
-      expect(approvePolicy).toHaveProperty("spender", "0xSPENDER");
+      expect(approvePolicy).toHaveProperty("spender", SPENDER);
       expect(approvePolicy).toHaveProperty("amount", "1000");
 
       // Second should be transfer
@@ -352,12 +401,12 @@ describe("toWasmPolicies", () => {
       const policies: ParsedSessionPolicies = {
         verified: false,
         contracts: {
-          "0xTOKEN": {
+          [TOKEN]: {
             methods: [
               { entrypoint: "transfer", authorized: true },
               {
                 entrypoint: "approve",
-                spender: "0xSPENDER",
+                spender: SPENDER,
                 amount: "1000",
                 authorized: true,
               },

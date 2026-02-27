@@ -14,7 +14,7 @@ import {
 import { Price } from "@cartridge/ui/utils/api/cartridge";
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
-import { fetchSwapQuoteInUsdc } from "@/utils/ekubo";
+import { fetchSwapQuoteInUsdc, type ExtendedError } from "@/utils/ekubo";
 
 export const DEFAULT_TOKENS = [
   {
@@ -207,13 +207,22 @@ export function TokensProvider({
     },
   );
 
+  const [invalidatedAddresses, setInvalidatedAddresses] = useState<string[]>(
+    [],
+  );
+
   // Fetch prices using Ekubo
   const {
     data: priceData,
     isLoading: isPriceLoading,
     error: priceError,
   } = useQuery(
-    ["token-prices-ekubo", debouncedAddresses.join(","), chainId],
+    [
+      "token-prices-ekubo",
+      debouncedAddresses.join(","),
+      invalidatedAddresses.join(","),
+      chainId,
+    ],
     async () => {
       if (debouncedAddresses.length === 0 || !chainId) return [];
 
@@ -221,47 +230,57 @@ export function TokensProvider({
       const ONE_USDC = BigInt(10 ** USDC_DECIMALS); // 1 USDC
 
       const prices = await Promise.allSettled(
-        debouncedAddresses.map(async (address) => {
-          try {
-            const checksumAddress = getChecksumAddress(address);
+        debouncedAddresses
+          .filter((address) => !invalidatedAddresses.includes(address))
+          .map(async (address) => {
+            try {
+              const checksumAddress = getChecksumAddress(address);
 
-            // Get token decimals - tokens should exist by the time price query runs
-            const token = tokens[checksumAddress];
-            const tokenDecimals = token?.decimals ?? 18; // Default to 18 if not found
+              // Get token decimals - tokens should exist by the time price query runs
+              const token = tokens[checksumAddress];
+              const tokenDecimals = token?.decimals ?? 18; // Default to 18 if not found
 
-            // USDC price is always 1:1
-            if (checksumAddress === getChecksumAddress(USDC_CONTRACT_ADDRESS)) {
+              // USDC price is always 1:1
+              if (
+                checksumAddress === getChecksumAddress(USDC_CONTRACT_ADDRESS)
+              ) {
+                return {
+                  base: address,
+                  amount: String(ONE_USDC),
+                  decimals: USDC_DECIMALS,
+                  quote: "USDC",
+                };
+              }
+
+              // Fetch quote from Ekubo: how many token base units = 1 USDC
+              const tokenAmount = await fetchSwapQuoteInUsdc(
+                address,
+                BigInt(10 ** (tokenDecimals + 1)),
+                chainId,
+              );
+
               return {
                 base: address,
-                amount: String(ONE_USDC),
+                amount: String(tokenAmount / BigInt(10)),
                 decimals: USDC_DECIMALS,
                 quote: "USDC",
               };
+            } catch (error) {
+              const ekuboError = error as ExtendedError;
+              // Only log non-429 errors (rate limiting is expected)
+              const is429 = ekuboError.message.includes("429");
+              if (!is429) {
+                console.warn(
+                  `Failed to fetch price for ${address}:`,
+                  ekuboError.message,
+                );
+              }
+              if (ekuboError.noRetry) {
+                setInvalidatedAddresses((prev) => [...prev, address]);
+              }
+              return null;
             }
-
-            // Fetch quote from Ekubo: how many token base units = 1 USDC
-            const tokenAmount = await fetchSwapQuoteInUsdc(
-              address,
-              BigInt(10 ** (tokenDecimals + 1)),
-              chainId,
-            );
-
-            return {
-              base: address,
-              amount: String(tokenAmount / BigInt(10)),
-              decimals: USDC_DECIMALS,
-              quote: "USDC",
-            };
-          } catch (error) {
-            // Only log non-429 errors (rate limiting is expected)
-            const is429 =
-              error instanceof Error && error.message.includes("429");
-            if (!is429) {
-              console.error(`Failed to fetch price for ${address}:`, error);
-            }
-            return null;
-          }
-        }),
+          }),
       );
 
       return prices

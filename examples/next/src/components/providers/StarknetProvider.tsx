@@ -195,7 +195,7 @@ const signupOptions: AuthOptions = [
   "phantom-evm",
 ];
 
-const controller = new ControllerConnector({
+export const controllerConnector = new ControllerConnector({
   // With the defaults, you can omit chains if you want to use:
   // - chains: [
   //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9" },
@@ -204,16 +204,35 @@ const controller = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  url: getKeychainUrl(),
+  url: "https://x.cartridge.gg",
   signupOptions,
-  slot: "arcade-pistols",
-  namespace: "pistols",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
+  policies,
   tokens: {
     erc20: ["lords", "strk"],
   },
+
+  // nums (achievements, quests)
+  // slot: "nums-bal",
+  // namespace: "NUMS",
+  // preset: "nums",
+
+  // Pistols (achievements, no quests)
+  // slot: "arcade-pistols",
+  // namespace: "pistols",
+  // preset: "pistols",
+
+  // Loot Survivor (no achievements, no quests)
+  // namespace: "ls_0_0_9",
+  // slot: "pg-mainnet-10",
+  // preset: "loot-survivor",
+
+  // Summit (no achievements, no quests)
+  namespace: "relayer_0_0_1",
+  slot: "pg-mainnet-10",
+  preset: "savage-summit",
 });
 
 const session = new SessionConnector({
@@ -233,7 +252,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       autoConnect
       defaultChainId={mainnet.id}
       chains={starknetConfigChains}
-      connectors={[controller, session]}
+      connectors={[controllerConnector, session]}
       explorer={cartridge}
       provider={provider}
     >
