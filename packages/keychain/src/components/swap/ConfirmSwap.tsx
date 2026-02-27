@@ -8,7 +8,7 @@ import { TransactionSummary } from "@/components/transaction/TransactionSummary"
 import { ControllerError } from "@/utils/connection";
 import { Call, FeeEstimate } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { useSwapTransaction } from "@/components/swap/swap";
+import { useSwapTransactions } from "@/components/swap/swap";
 import { useTokenSwapData } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
 
@@ -27,24 +27,15 @@ export function ConfirmSwap({
   error,
   origin,
 }: ConfirmSwapProps) {
-  const { isSwap, swapTransaction } = useSwapTransaction(transactions);
+  const { isSwap, swapTransactions, additionalMethodCount } =
+    useSwapTransactions(transactions);
   const { tokenSwapData } = useTokenSwapData([
-    {
-      address: swapTransaction.sellAddress,
-      amount: swapTransaction.sellAmount,
-    },
-    {
-      address: swapTransaction.buyAddress,
-      amount: swapTransaction.buyAmount,
-    },
+    ...swapTransactions.selling,
+    ...swapTransactions.buying,
   ]);
   // console.log("swapTransaction:", swapTransaction);
 
-  console.log(
-    swapTransaction.sellAddress,
-    swapTransaction.buyAddress,
-    tokenSwapData,
-  );
+  console.log(`SWAPS:`, swapTransactions, tokenSwapData);
 
   return (
     <ExecutionContainer
@@ -55,6 +46,7 @@ export function ConfirmSwap({
       transactions={transactions}
       onSubmit={onSubmit}
       onError={onError}
+      buttonText={`Swap ${additionalMethodCount > 0 ? `+ ${additionalMethodCount}` : ""}`}
     >
       <LayoutContent>
         {!isSwap ? (
@@ -68,10 +60,19 @@ export function ConfirmSwap({
                   image={token.image || placeholder}
                   title={token.name}
                   amount={`${token.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.symbol}`}
-                  value={token.value ? `$${token.value.toFixed(2)}` : ""}
-                  increasing={token.address === swapTransaction.buyAddress}
-                  decreasing={token.address === swapTransaction.sellAddress}
-                  approximately
+                  value={
+                    !token.value
+                      ? "$0.00"
+                      : token.value < 0.01
+                        ? "<$0.01"
+                        : `~$${token.value.toFixed(2)}`
+                  }
+                  increasing={swapTransactions.buying.some(
+                    (t) => t.address === token.address,
+                  )}
+                  decreasing={swapTransactions.selling.some(
+                    (t) => t.address === token.address,
+                  )}
                   clickable={false}
                 />
               ))}
