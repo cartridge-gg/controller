@@ -205,13 +205,9 @@ export function CoinbasePopup() {
           break;
 
         case "onramp_api.commit_error":
-          setError(
-            data.data?.errorMessage ||
-              "Payment could not be processed. Please try again.",
-          );
+          // Don't treat as terminal — Coinbase falls back to QR code
+          // when Apple Pay is unsupported or fails.
           setCommitted(false);
-          setFailed(true);
-          setCompleted(false);
           break;
 
         case "onramp_api.cancel":
