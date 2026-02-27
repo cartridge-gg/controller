@@ -204,7 +204,7 @@ export const controllerConnector = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  url: "https://x.cartridge.gg",
+  url: getKeychainUrl(),
   signupOptions,
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
