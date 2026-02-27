@@ -90,10 +90,6 @@ export function Session() {
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
 
-      // Remove any trailing '=' characters from the encoded response
-      // Telegram doesnt seem to be able to decode the response if there are any
-      const encodedResponse = btoa(JSON.stringify(response)).replace(/=+$/, "");
-
       if (queries.callback_uri) {
         try {
           const url = sanitizeCallbackUrl(
@@ -104,7 +100,7 @@ export function Session() {
           }
 
           const res = await fetch(url, {
-            body: encodedResponse,
+            body: JSON.stringify(response),
             headers,
             method: "POST",
           });
@@ -123,6 +119,13 @@ export function Session() {
       }
 
       if (queries.redirect_uri) {
+        // Remove any trailing '=' characters from the encoded response
+        // Telegram doesnt seem to be able to decode the response if there are any
+        const encodedResponse = btoa(JSON.stringify(response)).replace(
+          /=+$/,
+          "",
+        );
+
         const url = decodeURIComponent(queries.redirect_uri);
         const query_name = queries.redirect_query_name ?? "session";
         window.location.href = `${url}?${query_name}=${encodedResponse}`;
