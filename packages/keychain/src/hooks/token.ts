@@ -394,7 +394,7 @@ export function useToken({
 
 export type TokenSwap = {
   address: string;
-  amount: string;
+  amount: bigint;
 };
 
 export type TokenSwapData = Metadata & {
@@ -417,12 +417,10 @@ export function useTokenSwapData(
   const tokenSwapData = useMemo(() => {
     return tokens.map((token) => {
       const metadata = erc20Metadata.find(
-        (m) =>
-          getChecksumAddress(m.l2_token_address) ===
-          getChecksumAddress(token.address),
+        (m) => BigInt(m.l2_token_address) === BigInt(token.address),
       );
       const price = priceData?.priceByAddresses.find(
-        (p) => getChecksumAddress(p.base) === getChecksumAddress(token.address),
+        (p) => BigInt(p.base) === BigInt(token.address),
       );
       const amount = Number(token.amount) / 10 ** (metadata?.decimals || 18);
       const tokenData: TokenSwapData = {
