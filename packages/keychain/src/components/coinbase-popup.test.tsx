@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { CoinbasePopup } from "./coinbase-popup";
 
 const paymentLink = "https://pay.coinbase.com/buy";
@@ -28,6 +28,18 @@ async function dispatchCoinbaseMessage(data: string) {
     );
   });
 }
+
+/** Helper to listen on the BroadcastChannel the popup opens */
+function listenOnChannel() {
+  const channel = new BroadcastChannel(`coinbase-payment-${orderId}`);
+  const messages: unknown[] = [];
+  channel.onmessage = (event: MessageEvent) => messages.push(event.data);
+  return { channel, messages };
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("CoinbasePopup", () => {
   it("handles stringified load_success postMessage", async () => {
@@ -96,5 +108,30 @@ describe("CoinbasePopup", () => {
       await screen.findByText("Payment was cancelled."),
     ).toBeInTheDocument();
     expect(screen.queryByText("Payment processing...")).not.toBeInTheDocument();
+  });
+
+  it("relays Coinbase events via BroadcastChannel", async () => {
+    const { channel, messages } = listenOnChannel();
+
+    renderPopup();
+
+    await dispatchCoinbaseMessage('{"eventName":"onramp_api.load_success"}');
+    await dispatchCoinbaseMessage('{"eventName":"onramp_api.commit_success"}');
+
+    // BroadcastChannel delivery is async; wait briefly
+    await waitFor(() => {
+      expect(messages).toHaveLength(2);
+    });
+
+    expect(messages[0]).toEqual({
+      type: "onramp_api.load_success",
+      data: undefined,
+    });
+    expect(messages[1]).toEqual({
+      type: "onramp_api.commit_success",
+      data: undefined,
+    });
+
+    channel.close();
   });
 });
