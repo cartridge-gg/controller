@@ -32,9 +32,11 @@ export interface CoinbaseQuoteInput {
   sandbox?: boolean;
 }
 
-/** Tight polling interval after popup reports success (1 second) */
+/** Slow fallback poll interval while popup is open (5 seconds) */
+const FALLBACK_POLL_INTERVAL_MS = 5_000;
+/** Fast polling interval after popup reports success (1 second) */
 const CONFIRMATION_POLL_INTERVAL_MS = 1_000;
-/** Timeout for the confirmation poll after popup reports success (15 seconds) */
+/** Timeout for the fast confirmation poll after popup reports success (15 seconds) */
 const CONFIRMATION_TIMEOUT_MS = 15_000;
 
 export interface UseCoinbaseOptions {
@@ -145,12 +147,13 @@ export function useCoinbase({
   const popupRef = useRef<Window | null>(null);
   const channelRef = useRef<BroadcastChannel | null>(null);
   const popupCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fallbackPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const confirmPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const confirmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Whether a terminal status has been reached (prevents popup-closed from overriding) */
   const terminalReachedRef = useRef(false);
 
-  /** Clean up BroadcastChannel, popup watcher, and confirmation poll */
+  /** Clean up BroadcastChannel, popup watcher, and all polls */
   const cleanup = useCallback(() => {
     if (channelRef.current) {
       channelRef.current.close();
@@ -159,6 +162,10 @@ export function useCoinbase({
     if (popupCheckRef.current) {
       clearInterval(popupCheckRef.current);
       popupCheckRef.current = null;
+    }
+    if (fallbackPollRef.current) {
+      clearInterval(fallbackPollRef.current);
+      fallbackPollRef.current = null;
     }
     if (confirmPollRef.current) {
       clearInterval(confirmPollRef.current);
@@ -173,61 +180,89 @@ export function useCoinbase({
   // Clean up on unmount
   useEffect(() => cleanup, [cleanup]);
 
+  /** Stop all polling (fallback + confirmation) */
+  const stopAllPolls = useCallback(() => {
+    if (fallbackPollRef.current) {
+      clearInterval(fallbackPollRef.current);
+      fallbackPollRef.current = null;
+    }
+    if (confirmPollRef.current) {
+      clearInterval(confirmPollRef.current);
+      confirmPollRef.current = null;
+    }
+    if (confirmTimeoutRef.current) {
+      clearTimeout(confirmTimeoutRef.current);
+      confirmTimeoutRef.current = null;
+    }
+  }, []);
+
+  /** Shared poll function — queries backend and handles terminal statuses */
+  const pollOnce = useCallback(
+    async (targetOrderId: string) => {
+      try {
+        const result = await getCoinbaseOrderStatus(targetOrderId);
+
+        if (result.txHash) {
+          setOrderTxHash(result.txHash);
+        }
+
+        if (result.status === CoinbaseOnrampStatus.Completed) {
+          setOrderStatus(CoinbaseOnrampStatus.Completed);
+          terminalReachedRef.current = true;
+          stopAllPolls();
+        } else if (result.status === CoinbaseOnrampStatus.Failed) {
+          setOrderStatus(CoinbaseOnrampStatus.Failed);
+          terminalReachedRef.current = true;
+          stopAllPolls();
+          onError?.(new Error("Coinbase order failed."));
+        }
+      } catch (err) {
+        console.error("Failed to poll Coinbase order status:", err);
+        // Don't stop on transient errors
+      }
+    },
+    [onError, stopAllPolls],
+  );
+
   /**
-   * After the popup reports polling_success, poll the backend every 1s
-   * until status === Completed (to get the txHash). Times out after 15s.
+   * Slow fallback poll (5s) — starts as soon as the popup opens.
+   * Catches completions even if the BroadcastChannel signal is lost.
+   */
+  const startFallbackPoll = useCallback(
+    (targetOrderId: string) => {
+      if (fallbackPollRef.current) return;
+
+      fallbackPollRef.current = setInterval(
+        () => pollOnce(targetOrderId),
+        FALLBACK_POLL_INTERVAL_MS,
+      );
+    },
+    [pollOnce],
+  );
+
+  /**
+   * Fast confirmation poll (1s) — starts when popup reports polling_success.
+   * Replaces the fallback poll. Times out after 15s.
    */
   const startConfirmationPoll = useCallback(
     (targetOrderId: string) => {
-      // Avoid duplicate polls
+      // Stop the slow fallback poll — we're upgrading to fast
+      if (fallbackPollRef.current) {
+        clearInterval(fallbackPollRef.current);
+        fallbackPollRef.current = null;
+      }
+
+      // Avoid duplicate confirmation polls
       if (confirmPollRef.current) return;
 
-      const poll = async () => {
-        try {
-          const result = await getCoinbaseOrderStatus(targetOrderId);
-
-          if (result.txHash) {
-            setOrderTxHash(result.txHash);
-          }
-
-          if (result.status === CoinbaseOnrampStatus.Completed) {
-            setOrderStatus(CoinbaseOnrampStatus.Completed);
-            terminalReachedRef.current = true;
-            if (confirmPollRef.current) {
-              clearInterval(confirmPollRef.current);
-              confirmPollRef.current = null;
-            }
-            if (confirmTimeoutRef.current) {
-              clearTimeout(confirmTimeoutRef.current);
-              confirmTimeoutRef.current = null;
-            }
-          } else if (result.status === CoinbaseOnrampStatus.Failed) {
-            setOrderStatus(CoinbaseOnrampStatus.Failed);
-            terminalReachedRef.current = true;
-            if (confirmPollRef.current) {
-              clearInterval(confirmPollRef.current);
-              confirmPollRef.current = null;
-            }
-            if (confirmTimeoutRef.current) {
-              clearTimeout(confirmTimeoutRef.current);
-              confirmTimeoutRef.current = null;
-            }
-            onError?.(new Error("Coinbase order failed."));
-          }
-        } catch (err) {
-          console.error(
-            "Failed to poll Coinbase order status for confirmation:",
-            err,
-          );
-          // Don't stop on transient errors
-        }
-      };
-
       // Immediate first poll
-      poll();
+      pollOnce(targetOrderId);
 
-      // Subsequent polls
-      confirmPollRef.current = setInterval(poll, CONFIRMATION_POLL_INTERVAL_MS);
+      // Subsequent fast polls
+      confirmPollRef.current = setInterval(
+        () => pollOnce(targetOrderId),
+        CONFIRMATION_POLL_INTERVAL_MS,
+      );
 
       // Timeout: if status never reaches Completed, treat as fatal
       confirmTimeoutRef.current = setTimeout(() => {
@@ -246,7 +281,7 @@ export function useCoinbase({
         }
       }, CONFIRMATION_TIMEOUT_MS);
     },
-    [onError],
+    [onError, pollOnce],
   );
 
   /** Open the payment link in a popup and listen via BroadcastChannel */
@@ -283,6 +318,9 @@ export function useCoinbase({
         `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
       );
       popupRef.current = popup;
+
+      // Start slow fallback poll immediately (catches completions if signal is lost)
+      startFallbackPoll(targetOrderId);
 
       // Listen for events from the popup via BroadcastChannel
       const channel = new BroadcastChannel(`coinbase-payment-${targetOrderId}`);
@@ -336,7 +374,14 @@ export function useCoinbase({
         }
       }, 1000);
     },
-    [paymentLink, orderId, cleanup, startConfirmationPoll, onError],
+    [
+      paymentLink,
+      orderId,
+      cleanup,
+      startFallbackPoll,
+      startConfirmationPoll,
+      onError,
+    ],
   );
 
   const createOrder = useCallback(
