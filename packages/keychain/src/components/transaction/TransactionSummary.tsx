@@ -8,7 +8,6 @@ export function TransactionSummary({ calls }: { calls: Call[] }) {
         return (
           <CallCard
             key={i}
-            address={c.contractAddress}
             title="Contract"
             // title={c?.meta?.name || "Contract"}
             // icon={c?.meta?.icon}
