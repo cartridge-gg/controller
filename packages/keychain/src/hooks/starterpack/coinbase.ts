@@ -298,6 +298,8 @@ export function useCoinbase({
 
         switch (type) {
           case "onramp_api.polling_success":
+            // Mark terminal immediately so popup-close watcher doesn't interfere
+            terminalReachedRef.current = true;
             // Popup reports success — start tight backend poll for txHash
             startConfirmationPoll(targetOrderId);
             break;
