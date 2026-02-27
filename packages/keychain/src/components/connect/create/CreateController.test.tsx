@@ -10,6 +10,8 @@ const mockUseCreateController = vi.fn();
 const mockUseUsernameValidation = vi.fn();
 const mockUseControllerTheme = vi.fn();
 const mockUseWallets = vi.fn().mockReturnValue({ wallets: [] });
+const mockRequestStorageAccess = vi.fn().mockResolvedValue(true);
+const mockIsIframe = vi.fn();
 
 // Mock the ResizeObserver
 const ResizeObserverMock = vi.fn(() => ({
@@ -76,6 +78,18 @@ vi.mock("./useCreateController", () => ({
 vi.mock("@/hooks/debounce", () => ({
   useDebounce: <T,>(value: T) => ({ debouncedValue: value }),
 }));
+vi.mock("@/utils/connection/storage-access", () => ({
+  requestStorageAccess: () => mockRequestStorageAccess(),
+}));
+vi.mock("@cartridge/ui/utils", async () => {
+  const actual = await vi.importActual<typeof import("@cartridge/ui/utils")>(
+    "@cartridge/ui/utils",
+  );
+  return {
+    ...actual,
+    isIframe: () => mockIsIframe(),
+  };
+});
 describe("CreateController", () => {
   const defaultProps = {
     isSlot: false,
@@ -83,6 +97,7 @@ describe("CreateController", () => {
   };
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIsIframe.mockReturnValue(false);
     // Set default mock returns
     mockUseCreateController.mockReturnValue({
       isLoading: false,
@@ -186,6 +201,51 @@ describe("CreateController", () => {
         "webauthn",
         undefined,
       );
+    });
+  });
+
+  it("requests storage access on submit in iframe", async () => {
+    mockIsIframe.mockReturnValue(true);
+    const handleSubmit = vi.fn().mockResolvedValue(undefined);
+    const setAuthenticationStep = vi.fn();
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit,
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
+      setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
+      signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
+    });
+    renderComponent();
+    const input = screen.getByPlaceholderText("Username");
+    fireEvent.change(input, { target: { value: "validuser" } });
+
+    // Ensure dropdown is closed by blurring input
+    fireEvent.blur(input);
+
+    // Wait for validation to be applied
+    await waitFor(() => {
+      const submitButton = screen.getByTestId("submit-button");
+      expect(submitButton).not.toBeDisabled();
+    });
+
+    // Submit form
+    const submitButton = screen.getByTestId("submit-button");
+    const form = submitButton.closest("form");
+    if (form) {
+      fireEvent.submit(form);
+    }
+
+    await waitFor(() => {
+      expect(mockRequestStorageAccess).toHaveBeenCalled();
     });
   });
 
