@@ -188,14 +188,20 @@ export function CoinbasePopup() {
 
         case "onramp_api.pending_payment_auth":
           setCommitted(true);
+          setError(undefined);
+          setFailed(false);
           break;
 
         case "onramp_api.payment_authorized":
           setCommitted(true);
+          setError(undefined);
+          setFailed(false);
           break;
 
         case "onramp_api.apple_pay_button_pressed":
           setCommitted(true);
+          setError(undefined);
+          setFailed(false);
           break;
 
         case "onramp_api.commit_error":
@@ -270,41 +276,37 @@ export function CoinbasePopup() {
     );
   }
 
+  const showStatusBar =
+    completed || failed || (committed && !completed && !failed);
+
   return (
-    <div className="flex flex-col h-screen bg-[#0F1410]">
-      {/* Status bar */}
-      {(completed || failed) && (
-        <div
-          className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium ${
-            completed
-              ? "bg-[#1a2e1a] text-[#4ade80]"
-              : "bg-[#2e1a1a] text-[#f87171]"
-          }`}
-        >
-          {completed ? (
-            <>
-              <span>✓</span>
-              <span>Payment successful! This window will close shortly.</span>
-            </>
-          ) : (
-            <>
-              <TimesIcon size="sm" />
-              <span>{error}</span>
-            </>
-          )}
-        </div>
-      )}
+    <div className="relative h-screen bg-[#0F1410]">
+      {/* Status bar — overlays top of iframe with slide-down animation */}
+      <div
+        className={`absolute top-0 left-0 right-0 z-20 transition-transform duration-300 ease-out ${
+          showStatusBar ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
+        {completed ? (
+          <div className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#1a2e1a] text-[#4ade80]">
+            <span>✓</span>
+            <span>Payment successful! This window will close shortly.</span>
+          </div>
+        ) : failed ? (
+          <div className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#2e1a1a] text-[#f87171]">
+            <TimesIcon size="sm" />
+            <span>{error}</span>
+          </div>
+        ) : committed ? (
+          <div className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#1a2a2e] text-[#60a5fa]">
+            <SpinnerIcon className="animate-spin" size="sm" />
+            <span>Payment processing...</span>
+          </div>
+        ) : null}
+      </div>
 
-      {/* Committed indicator (payment in progress) */}
-      {committed && !completed && !failed && (
-        <div className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#1a2a2e] text-[#60a5fa]">
-          <SpinnerIcon className="animate-spin" size="sm" />
-          <span>Payment processing...</span>
-        </div>
-      )}
-
-      {/* Iframe */}
-      <div className="flex-1 relative">
+      {/* Iframe — fills the full screen, status bar overlays on top */}
+      <div className="h-full relative">
         {!iframeReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#0F1410] z-10">
             <SpinnerIcon className="animate-spin" size="lg" />

@@ -71,12 +71,8 @@ export function CoinbaseCheckout() {
       {/* Policies Screen */}
       <div className={cn("flex flex-col h-full", !showPolicies && "hidden")}>
         <HeaderInner
-          title={
-            <div className="flex flex-col">
-              <span className="text-lg font-bold">Coinbase</span>
-              <span className="text-xs text-foreground-300">Policies</span>
-            </div>
-          }
+          title="Coinbase"
+          description="Policies"
           icon={<CoinbaseWalletColorIcon size="lg" />}
         />
         <LayoutContent className="p-4 flex flex-col gap-4">
@@ -119,12 +115,8 @@ export function CoinbaseCheckout() {
         )}
       >
         <HeaderInner
-          title={
-            <div className="flex flex-col">
-              <span className="text-lg font-bold">Apple Pay</span>
-              <span className="text-xs text-foreground-300">via Coinbase</span>
-            </div>
-          }
+          title="Apple Pay"
+          description="via Coinbase"
           icon={<CoinbaseWalletColorIcon size="lg" />}
         />
         <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6 pb-24">
