@@ -1,4 +1,7 @@
+import { useState } from "react";
 import {
+  Button,
+  GearIcon,
   LayoutContent,
   TokenCard,
   TokenSummary,
@@ -10,6 +13,7 @@ import { Call, FeeEstimate } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useSwapTransactions } from "@/components/swap/swap";
 import { useTokenSwapData } from "@/hooks/token";
+import { AdvancedTransactions } from "./AdvancedTransactions";
 import placeholder from "/placeholder.svg?url";
 
 interface ConfirmSwapProps {
@@ -27,15 +31,14 @@ export function ConfirmSwap({
   error,
   origin,
 }: ConfirmSwapProps) {
+  const [advancedVisible, setAdvancedVisible] = useState(false);
+
   const { isSwap, swapTransactions, additionalMethodCount } =
     useSwapTransactions(transactions);
   const { tokenSwapData } = useTokenSwapData([
     ...swapTransactions.selling,
     ...swapTransactions.buying,
   ]);
-  // console.log("swapTransaction:", swapTransaction);
-
-  console.log(`SWAPS:`, swapTransactions, tokenSwapData);
 
   return (
     <ExecutionContainer
@@ -47,13 +50,25 @@ export function ConfirmSwap({
       onSubmit={onSubmit}
       onError={onError}
       buttonText={`Swap ${additionalMethodCount > 0 ? `+ ${additionalMethodCount}` : ""}`}
+      right={
+        !advancedVisible ? (
+          <Button
+            onClick={() => setAdvancedVisible(true)}
+            size="thumbnail"
+            variant="icon"
+            className="rounded-full text-foreground-300"
+          >
+            <GearIcon />
+          </Button>
+        ) : undefined
+      }
     >
       <LayoutContent>
         {!isSwap ? (
           <TransactionSummary calls={transactions} />
         ) : (
           <>
-            <TokenSummary title="Simulation Results">
+            <TokenSummary title="Simulation Results" className="flex-none">
               {tokenSwapData.map((token) => (
                 <TokenCard
                   key={token.address}
@@ -77,6 +92,9 @@ export function ConfirmSwap({
                 />
               ))}
             </TokenSummary>
+            {advancedVisible && (
+              <AdvancedTransactions transactions={transactions} />
+            )}
           </>
         )}
       </LayoutContent>
