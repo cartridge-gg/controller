@@ -1,17 +1,11 @@
 import { useMemo } from "react";
-import {
-  Abi,
-  CallData,
-  CallResult,
-  FunctionAbi,
-  getChecksumAddress,
-  InterfaceAbi,
-  type Call,
-} from "starknet";
+import { getChecksumAddress, type Call } from "starknet";
+import { useDecodeTransactionInputs } from "@/hooks/calldata-decode";
+import { TokenSwap } from "@/hooks/token";
 
-// abi from: https://voyager.online/contract/0x04505a9f06f2bd639b6601f37a4dc0908bb70e8e0e0c34b1220827d64f4fc066#code
-import ekuboRouterAbi from "./ekuboRouterAbi.json" assert { type: "json" };
-import { erc20Abi } from "viem";
+const findTransactions = (transactions: Call[], entrypoint: string) => {
+  return transactions.filter((t) => t.entrypoint === entrypoint);
+};
 
 // detect swap transaction
 // swap example in /examples/next/src/components/Profile.tsx
@@ -22,136 +16,92 @@ export const useIsSwapTransaction = (
 } => {
   const isSwap = useMemo(
     () =>
-      transactions.length === 4 &&
-      transactions[0].entrypoint === "transfer" &&
-      transactions[1].entrypoint === "multihop_swap" &&
-      transactions[2].entrypoint === "clear_minimum" &&
-      transactions[3].entrypoint === "clear",
+      transactions.length >= 4 &&
+      findTransactions(transactions, "transfer").length > 0 &&
+      findTransactions(transactions, "multihop_swap").length > 0 &&
+      findTransactions(transactions, "clear_minimum").length > 0 &&
+      findTransactions(transactions, "clear").length > 0,
     [transactions],
   );
-
   return { isSwap };
 };
 
-type TransferInputs = {
-  amount: bigint;
-  recipient: string;
+export type SwapTransactions = {
+  selling: TokenSwap[];
+  buying: TokenSwap[];
 };
 
-// type SwapInputs = {
-//   route: [
-//     {
-//       pool_key: {
-//         token0: bigint;
-//         token1: bigint;
-//         fee: bigint;
-//         tick_spacing: bigint;
-//         extension: bigint;
-//       };
-//       sqrt_ratio_limit: bigint;
-//       skip_ahead: bigint;
-//     },
-//   ];
-//   token_amount: {
-//     token: bigint;
-//     amount: {
-//       mag: bigint;
-//       sign: boolean;
-//     };
-//   };
-// };
-
-type ClearMinimumInputs = {
-  minimum: bigint;
-  token: {
-    contract_address: bigint;
-  };
-};
-
-export type SwapTransaction = {
-  sellAddress: string;
-  sellAmount: string;
-  buyAddress: string;
-  buyAmount: string;
-};
-
-export const useSwapTransaction = (
+export const useSwapTransactions = (
   transactions: Call[],
 ): {
   isSwap: boolean;
-  swapTransaction: SwapTransaction;
+  swapTransactions: SwapTransactions;
+  swapMethodCount: number;
+  additionalMethodCount: number;
 } => {
   const { isSwap } = useIsSwapTransaction(transactions);
-  const swapTransaction = useMemo(() => {
-    if (!isSwap) return {} as SwapTransaction;
 
-    const transfer = transactions.find((t) => t.entrypoint === "transfer");
-    const multihop_swap = transactions.find(
-      (t) => t.entrypoint === "multihop_swap",
-    );
-    const clear_minimum = transactions.find(
-      (t) => t.entrypoint === "clear_minimum",
-    );
-    const clear = transactions.find((t) => t.entrypoint === "clear");
-    if (!transfer || !multihop_swap || !clear_minimum || !clear) {
-      return {} as SwapTransaction;
-    }
+  const { decodeTransferInputs, decodeClearMinimumInputs } =
+    useDecodeTransactionInputs();
 
-    const parseInputs = (
-      abi: Abi,
-      interfaceName: string,
-      method: string,
-      args: string[],
-    ) => {
-      const interfaceAbi = abi.find(
-        (a) => a.name === interfaceName,
-      ) as InterfaceAbi;
-      const { inputs } = (interfaceAbi?.items ?? abi).find(
-        (a) => a.name === method,
-      ) as FunctionAbi;
-      const callData = new CallData(abi);
-      const decoded = callData.decodeParameters(
-        inputs.map((i) => i.type),
-        args,
-      );
-      const result = inputs.reduce(
-        (acc, input, index) => {
-          acc[input.name] = Array.isArray(decoded) ? decoded[index] : decoded;
-          return acc;
-        },
-        {} as { [key: string]: CallResult },
-      );
-      return result;
+  const [swapTransactions, swapMethodCount] = useMemo(() => {
+    const swapTransactions: SwapTransactions = {
+      selling: [],
+      buying: [],
+    };
+    if (!isSwap) return [swapTransactions, 0];
+
+    const transfers = findTransactions(transactions, "transfer");
+    const multihop_swaps = findTransactions(transactions, "multihop_swap");
+    const clear_minimuns = findTransactions(transactions, "clear_minimum");
+    const clears = findTransactions(transactions, "clear");
+
+    const transferInputs = transfers.map((transfer) =>
+      decodeTransferInputs(transfer.calldata as string[]),
+    );
+    const clearInputs = clear_minimuns.map((clear_minimum) =>
+      decodeClearMinimumInputs(clear_minimum.calldata as string[]),
+    );
+
+    const addToken = (acc: TokenSwap[], address: string, amount: bigint) => {
+      const token = acc.find((t) => t.address === address);
+      if (token) {
+        token.amount += amount;
+      } else {
+        acc.push({ address, amount });
+      }
+      return acc;
     };
 
-    // CallResult is typed, but we can't get the typescript types from them...
-    const transferInputs = parseInputs(
-      erc20Abi,
-      "IERC20",
-      "transfer",
-      transfer.calldata as string[],
-    ) as TransferInputs;
-    // const swapInputs = parseInputs(
-    //   ekuboRouterAbi,
-    //   "ekubo::router::IRouter",
-    //   "multihop_swap",
-    //   multihop_swap.calldata as string[],
-    // ) as SwapInputs;
-    const clearMinimumInputs = parseInputs(
-      ekuboRouterAbi,
-      "ekubo::components::clear::IClear",
-      "clear_minimum",
-      clear_minimum.calldata as string[],
-    ) as ClearMinimumInputs;
+    swapTransactions.selling = transferInputs.reduce((acc, input, index) => {
+      return addToken(
+        acc,
+        getChecksumAddress(transfers[index].contractAddress),
+        input.amount,
+      );
+    }, [] as TokenSwap[]);
 
-    const swapTransaction: SwapTransaction = {
-      sellAddress: getChecksumAddress(transfer.contractAddress),
-      sellAmount: `0x${BigInt(transferInputs.amount).toString(16)}`,
-      buyAddress: getChecksumAddress(clearMinimumInputs.token.contract_address),
-      buyAmount: `0x${BigInt(clearMinimumInputs.minimum).toString(16)}`,
-    };
-    return swapTransaction;
-  }, [isSwap, transactions]);
+    swapTransactions.buying = clearInputs.reduce((acc, input) => {
+      return addToken(
+        acc,
+        getChecksumAddress(input.token.contract_address),
+        input.minimum,
+      );
+    }, [] as TokenSwap[]);
 
-  return { isSwap, swapTransaction };
+    const count =
+      transfers.length +
+      multihop_swaps.length +
+      clear_minimuns.length +
+      clears.length;
+
+    return [swapTransactions, count];
+  }, [isSwap, transactions, decodeClearMinimumInputs, decodeTransferInputs]);
+
+  return {
+    isSwap,
+    swapTransactions,
+    swapMethodCount,
+    additionalMethodCount: transactions.length - swapMethodCount,
+  };
 };
