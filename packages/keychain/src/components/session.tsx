@@ -264,8 +264,8 @@ export function Session() {
 function sanitizeCallbackUrl(url: string): URL | undefined {
   try {
     const parsed = new URL(url);
-    const allowedHostnames = ["localhost"];
-    const allowedPaths = ["/callback"];
+    const allowedHostnames = ["localhost", "127.0.0.1"];
+    const allowedPaths = ["/", "/callback"];
 
     if (
       !allowedHostnames.includes(parsed.hostname) ||
