@@ -135,7 +135,25 @@ export class PhantomWallet implements WalletAdapter {
     }
 
     try {
+      console.log(
+        "[PhantomWallet.sendTransaction] Received serialized_txn length:",
+        serailized_txn.length,
+      );
+      console.log(
+        "[PhantomWallet.sendTransaction] First 32 bytes:",
+        Array.from(serailized_txn.slice(0, 32)),
+      );
+      console.log(
+        "[PhantomWallet.sendTransaction] Deserializing with Transaction.from...",
+      );
+
       const txn = Transaction.from(serailized_txn);
+
+      console.log("[PhantomWallet.sendTransaction] Successfully deserialized");
+      console.log(
+        "[PhantomWallet.sendTransaction] Sending to Phantom provider...",
+      );
+
       const provider = this.getProvider();
       const result = await provider.signAndSendTransaction(txn);
       return {
