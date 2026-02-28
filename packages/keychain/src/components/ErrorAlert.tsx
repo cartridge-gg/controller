@@ -213,7 +213,9 @@ export function ControllerErrorAlert({
       description = error.message;
     } else {
       title = "Unknown error";
-      description = error.message;
+      description = error.message || serializeErrorDetails(error);
+      copyText = serializeErrorDetails(error);
+      isExpanded = true;
     }
 
     return (
@@ -363,7 +365,9 @@ export function ControllerErrorAlert({
       break;
     case ErrorCode.StarknetUnexpectedError:
       title = "Unexpected Error";
-      description = error.data?.reason || JSON.stringify(error);
+      description = error.data?.reason || serializeErrorDetails(error);
+      isExpanded = true;
+      copyText = serializeErrorDetails(error);
       break;
     case ErrorCode.StarknetTransactionExecutionError:
       try {
@@ -399,6 +403,9 @@ export function ControllerErrorAlert({
     }
     default: {
       title = "Unknown Error";
+      description = serializeErrorDetails(error);
+      isExpanded = true;
+      copyText = serializeErrorDetails(error);
       break;
     }
   }
@@ -497,4 +504,70 @@ export function humanizeString(str: string): string {
       // Capitalize first letter
       .replace(/^\w/, (c) => c.toUpperCase())
   );
+}
+
+/**
+ * Serializes error details including all enumerable properties
+ * This is especially useful for WASM/Rust errors that may have additional fields
+ * Handles circular references and non-serializable values safely
+ */
+export function serializeErrorDetails(error: unknown): string {
+  const errorObj: Record<string, unknown> = {};
+
+  // Type guard to ensure error is an object
+  if (typeof error !== "object" || error === null) {
+    return String(error);
+  }
+
+  // Get all enumerable properties from the error
+  for (const key in error) {
+    try {
+      const value = (error as Record<string, unknown>)[key];
+      // Skip functions and undefined values
+      if (typeof value !== "function" && value !== undefined) {
+        errorObj[key] = value;
+      }
+    } catch () {
+      // Skip properties that throw errors when accessed
+      continue;
+    }
+  }
+
+  // Also try to get standard Error properties that might not be enumerable
+  const err = error as Partial<Error>;
+  if (err.message && !errorObj.message) {
+    errorObj.message = err.message;
+  }
+  if (err.name && !errorObj.name) {
+    errorObj.name = err.name;
+  }
+  if (err.stack && !errorObj.stack) {
+    errorObj.stack = err.stack;
+  }
+
+  // Format as a readable string with circular reference handling
+  try {
+    const seen = new WeakSet();
+    return JSON.stringify(
+      errorObj,
+      (key, value) => {
+        // Handle circular references
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) {
+            return "[Circular Reference]";
+          }
+          seen.add(value);
+        }
+        // Handle BigInt
+        if (typeof value === "bigint") {
+          return value.toString();
+        }
+        return value;
+      },
+      2,
+    );
+  } catch (e) {
+    // Fallback if JSON.stringify still fails
+    return `Error serialization failed: ${String(e)}. Original error: ${String(error)}`;
+  }
 }
