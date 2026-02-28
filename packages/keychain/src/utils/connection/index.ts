@@ -42,7 +42,7 @@ export function connectToController<
   setController: (controller?: Controller) => void;
   navigate: (
     to: string | number,
-    options?: { replace?: boolean; state?: unknown },
+    options?: { replace?: boolean; state?: unknown; reset?: boolean },
   ) => void;
   propagateError?: boolean;
   errorDisplayMode?: "modal" | "notification" | "silent";
