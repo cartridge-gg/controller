@@ -89,9 +89,12 @@ export function CoinbasePopup() {
   // Open BroadcastChannel scoped to this orderId
   useEffect(() => {
     if (!orderId) return;
-    const channel = new BroadcastChannel(`coinbase-payment-${orderId}`);
+    const channelName = `coinbase-payment-${orderId}`;
+    console.log("[coinbase-popup] Opening BroadcastChannel:", channelName);
+    const channel = new BroadcastChannel(channelName);
     channelRef.current = channel;
     return () => {
+      console.log("[coinbase-popup] Closing BroadcastChannel:", channelName);
       channel.close();
       channelRef.current = null;
     };
@@ -151,10 +154,24 @@ export function CoinbasePopup() {
       }
 
       // Relay every Coinbase event to the keychain via BroadcastChannel
-      channelRef.current?.postMessage({
-        type: data.eventName,
-        data: data.data,
-      });
+      const channel = channelRef.current;
+      console.log(
+        "[coinbase-popup] BroadcastChannel relay:",
+        data.eventName,
+        "channel open:",
+        !!channel,
+      );
+      if (channel) {
+        channel.postMessage({
+          type: data.eventName,
+          data: data.data,
+        });
+        console.log("[coinbase-popup] Message posted to BroadcastChannel");
+      } else {
+        console.error(
+          "[coinbase-popup] BroadcastChannel is null — message NOT relayed!",
+        );
+      }
 
       switch (data.eventName) {
         case "onramp_api.load_pending":
@@ -228,7 +245,7 @@ export function CoinbasePopup() {
           setCompleted(true);
           setCommitted(false);
           setFailed(false);
-          setTimeout(() => window.close(), 1500);
+          //setTimeout(() => window.close(), 1500);
           break;
 
         case "onramp_api.polling_error":
