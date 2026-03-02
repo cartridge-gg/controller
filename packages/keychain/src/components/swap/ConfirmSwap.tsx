@@ -12,7 +12,7 @@ import { ControllerError } from "@/utils/connection";
 import { Call, FeeEstimate } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useSwapTransactions } from "@/components/swap/swap";
-import { useTokenSwapData } from "@/hooks/token";
+import { TokenSwapData, useTokenSwapData } from "@/hooks/token";
 import { AdvancedTransactions } from "./AdvancedTransactions";
 import placeholder from "/placeholder.svg?url";
 
@@ -35,10 +35,24 @@ export function ConfirmSwap({
 
   const { isSwap, swapTransactions, additionalMethodCount } =
     useSwapTransactions(transactions);
-  const { tokenSwapData } = useTokenSwapData([
-    ...swapTransactions.selling,
-    ...swapTransactions.buying,
-  ]);
+  const { tokenSwapData: sellingSwapData } = useTokenSwapData(
+    swapTransactions.selling,
+  );
+  const { tokenSwapData: buyingSwapData } = useTokenSwapData(
+    swapTransactions.buying,
+  );
+
+  const formatAmount = (token: TokenSwapData) => {
+    return `${token.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.symbol}`;
+  };
+
+  const formatValue = (token: TokenSwapData) => {
+    return !token.value
+      ? "$0.00"
+      : token.value < 0.01
+        ? "<$0.01"
+        : `~$${token.value.toFixed(2)}`;
+  };
 
   return (
     <ExecutionContainer
@@ -62,6 +76,13 @@ export function ConfirmSwap({
           </Button>
         ) : undefined
       }
+      additionalFees={sellingSwapData.map((token) => ({
+        label: "Cost",
+        contractAddress: token.address,
+        amount: token?.amount ?? 0,
+        usdValue: formatValue(token),
+        decimals: 2,
+      }))}
     >
       <LayoutContent>
         {!isSwap ? (
@@ -69,26 +90,26 @@ export function ConfirmSwap({
         ) : (
           <>
             <TokenSummary title="Simulation Results" className="flex-none">
-              {tokenSwapData.map((token) => (
+              {sellingSwapData.map((token) => (
                 <TokenCard
                   key={token.address}
                   image={token.image || placeholder}
                   title={token.name}
-                  amount={`${token.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.symbol}`}
-                  value={
-                    !token.value
-                      ? "$0.00"
-                      : token.value < 0.01
-                        ? "<$0.01"
-                        : `~$${token.value.toFixed(2)}`
-                  }
-                  increasing={swapTransactions.buying.some(
-                    (t) => t.address === token.address,
-                  )}
-                  decreasing={swapTransactions.selling.some(
-                    (t) => t.address === token.address,
-                  )}
+                  amount={formatAmount(token)}
+                  value={formatValue(token)}
                   clickable={false}
+                  decreasing
+                />
+              ))}
+              {buyingSwapData.map((token) => (
+                <TokenCard
+                  key={token.address}
+                  image={token.image || placeholder}
+                  title={token.name}
+                  amount={formatAmount(token)}
+                  value={formatValue(token)}
+                  clickable={false}
+                  increasing
                 />
               ))}
             </TokenSummary>

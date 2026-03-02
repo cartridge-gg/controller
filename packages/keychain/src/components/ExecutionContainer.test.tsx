@@ -22,6 +22,12 @@ vi.mock("@/hooks/tokens", () => ({
   convertTokenAmountToUSD: vi.fn(() => "$0.01"),
 }));
 
+const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
+  suggestedMaxFee: BigInt(1000),
+}));
+const address = vi.fn().mockImplementation(async () => "0x123456789abcdef");
+const username = vi.fn().mockImplementation(async () => "testuser");
+
 describe("ExecutionContainer", () => {
   const defaultProps = {
     transactions: [],
@@ -45,10 +51,6 @@ describe("ExecutionContainer", () => {
   });
 
   it("estimates fees when transactions are provided", async () => {
-    const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
-      suggestedMaxFee: BigInt(1000),
-    }));
-
     await act(async () => {
       renderWithProviders(
         <ExecutionContainer
@@ -65,6 +67,8 @@ describe("ExecutionContainer", () => {
           connection: {
             controller: {
               estimateInvokeFee,
+              address,
+              username,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
@@ -79,10 +83,6 @@ describe("ExecutionContainer", () => {
 
   it("handles submit action correctly", async () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
-
-    const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
-      suggestedMaxFee: BigInt(1000),
-    }));
 
     await act(async () => {
       renderWithProviders(
@@ -101,6 +101,8 @@ describe("ExecutionContainer", () => {
           connection: {
             controller: {
               estimateInvokeFee,
+              address,
+              username,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
@@ -138,9 +140,6 @@ describe("ExecutionContainer", () => {
       code: 113, // ErrorCode.InsufficientBalance,
       message: "Insufficient balance",
     });
-    const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
-    });
 
     await act(async () => {
       renderWithProviders(
@@ -160,6 +159,8 @@ describe("ExecutionContainer", () => {
           connection: {
             controller: {
               estimateInvokeFee,
+              address,
+              username,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
@@ -197,7 +198,7 @@ describe("ExecutionContainer", () => {
 
   it("shows deploy view when controller is not deployed", async () => {
     await act(async () => {
-      renderWithProviders(
+      renderWithConnection(
         <ExecutionContainer
           {...defaultProps}
           executionError={{
@@ -213,7 +214,7 @@ describe("ExecutionContainer", () => {
 
   it("shows funding view when balance is insufficient", async () => {
     await act(async () => {
-      renderWithConnection(
+      renderWithProviders(
         <ExecutionContainer
           {...defaultProps}
           executionError={{

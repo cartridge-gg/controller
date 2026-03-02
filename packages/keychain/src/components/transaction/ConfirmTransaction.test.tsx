@@ -80,6 +80,8 @@ describe("ConfirmTransaction", () => {
     const estimateInvokeFee = vi.fn().mockResolvedValue({
       suggestedMaxFee: BigInt(1000),
     });
+    const address = vi.fn().mockResolvedValue("0x123456789abcdef");
+    const username = vi.fn().mockResolvedValue("testuser");
 
     await act(async () => {
       renderWithProviders(
@@ -93,6 +95,8 @@ describe("ConfirmTransaction", () => {
               execute: mockExecute,
               estimateInvokeFee,
               isRequestedSession: vi.fn().mockResolvedValue(true),
+              address,
+              username,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
