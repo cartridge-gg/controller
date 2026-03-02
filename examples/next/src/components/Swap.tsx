@@ -33,6 +33,13 @@ export function Swap() {
         >
           LS2 Purchase Game
         </Button>
+        <Button
+          onClick={() =>
+            ctrlConnector.controller.openExecute(LS2_PURCHASE_GAME_ERROR)
+          }
+        >
+          LS2 Error
+        </Button>
       </div>
     </div>
   );
@@ -217,6 +224,78 @@ const LS2_PURCHASE_GAME = [
     calldata: [
       "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
       "0x5bbb37da193af4ba9",
+      "0x0",
+    ],
+  },
+  {
+    contractAddress:
+      "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
+    entrypoint: "multihop_swap",
+    calldata: [
+      "0x1",
+      "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+      "0x0452810188c4cb3aebd63711a3b445755bc0d6c4f27b923fdd99b1a118858136",
+      "0",
+      "0x56a4c",
+      "0x043e4f09c32d13d43a880e85f69f7de93ceda62d6cf2581a582c6db635548fdc",
+      "0x1000003f7f1380b75",
+      "0x0",
+      0,
+      "0x0452810188C4Cb3AEbD63711a3b445755BC0D6C4f27B923fDd99B1A118858136",
+      "0xde0b6b3a7640000",
+      "0x1",
+    ],
+  },
+  {
+    contractAddress:
+      "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
+    entrypoint: "clear_minimum",
+    calldata: [
+      "1955023220287003686908448593668771782622329060199208410425295899940041883958",
+      "1000000000000000000",
+      "0",
+    ],
+  },
+  {
+    contractAddress:
+      "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
+    entrypoint: "clear",
+    calldata: [
+      "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+    ],
+  },
+  {
+    contractAddress:
+      "0x0452810188C4Cb3AEbD63711a3b445755BC0D6C4f27B923fDd99B1A118858136",
+    entrypoint: "approve",
+    calldata: [
+      "294172758298611957878874535440244936028848058202724233951972339591192112194",
+      "1000000000000000000",
+      "0",
+    ],
+  },
+  {
+    contractAddress:
+      "0x00a67ef20b61a9846e1c82b411175e6ab167ea9f8632bd6c2091823c3629ec42",
+    entrypoint: "buy_game",
+    calldata: [
+      "0",
+      "0",
+      "2017717448871504735845",
+      "2403140985568399978641699320335980224292375691718886561247325844102368719999",
+      "0",
+    ],
+  },
+];
+
+const LS2_PURCHASE_GAME_ERROR = [
+  {
+    contractAddress:
+      "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+    entrypoint: "transfer",
+    calldata: [
+      "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
+      "0x5bbb37da193af4ba90000000",
       "0x0",
     ],
   },
