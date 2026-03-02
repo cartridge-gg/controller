@@ -38,7 +38,7 @@ import {
 } from "@cartridge/arcade/marketplace/react";
 import { StatusType } from "@cartridge/arcade";
 import { ArcadeContext } from "@/context/arcade";
-import { CollectionFooter } from "./footer";
+import { usePurchaseFeesData } from "./footer";
 
 export function CollectiblePurchase() {
   const { address: contractAddress, tokenId } = useParams();
@@ -335,6 +335,17 @@ export function CollectiblePurchase() {
     setAmount(amount);
   }, [tokenOrders, setAmount]);
 
+  const feesData = usePurchaseFeesData({
+    token,
+    fees,
+    totalPrice: floatPrice,
+    feeDecimals: 3,
+    orders: props.map((args) => ({
+      name: args.name,
+      amount: args.finalPrice.toFixed(fixedValue),
+    })),
+  });
+
   return (
     <>
       {status === "loading" || !collection ? (
@@ -357,6 +368,7 @@ export function CollectiblePurchase() {
               onSubmit={onSubmitPurchase}
               onCancel={canGoBack ? goBack : closeModal}
               buttonText="Confirm"
+              additionalFees={[feesData]}
             >
               <div className="p-4 pb-0 flex flex-col gap-4 overflow-hidden h-full">
                 <div
@@ -393,17 +405,6 @@ export function CollectiblePurchase() {
                 </div>
 
                 <div className="flex-1" />
-
-                <CollectionFooter
-                  token={token}
-                  fees={fees}
-                  totalPrice={floatPrice}
-                  feeDecimals={3}
-                  orders={props.map((args) => ({
-                    name: args.name,
-                    amount: args.finalPrice.toFixed(fixedValue),
-                  }))}
-                />
               </div>
             </ExecutionContainer>
           ) : null}
