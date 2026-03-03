@@ -62,11 +62,10 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     onApplePaySelect: () => {},
     onCreateCoinbaseOrder: async () => undefined,
     openPaymentPopup: () => {},
-    stopPolling: () => {},
     orderId: undefined,
     orderStatus: undefined,
     orderTxHash: undefined,
-    isPollingOrder: false,
+    popupClosed: false,
     getTransactions: async () => [],
   };
 

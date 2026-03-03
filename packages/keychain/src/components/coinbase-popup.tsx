@@ -4,6 +4,8 @@ import { SpinnerIcon, TimesIcon } from "@cartridge/ui";
 
 /** Timeout for the payment (10 minutes) */
 const PAYMENT_TIMEOUT_MS = 10 * 60 * 1000;
+/** Time to wait after iframe loads for a Coinbase event before assuming an error (15s) */
+const LOAD_EVENT_TIMEOUT_MS = 15_000;
 
 /** Coinbase postMessage event names */
 type CoinbaseEventName =
@@ -77,8 +79,26 @@ export function CoinbasePopup() {
   const [committed, setCommitted] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [failed, setFailed] = useState(false);
+  /** Tracks whether we've received any Coinbase postMessage event */
+  const coinbaseEventReceived = useRef(false);
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const channelRef = useRef<BroadcastChannel | null>(null);
+
+  // Open BroadcastChannel scoped to this orderId
+  useEffect(() => {
+    if (!orderId) return;
+    const channelName = `coinbase-payment-${orderId}`;
+    console.log("[coinbase-popup] Opening BroadcastChannel:", channelName);
+    const channel = new BroadcastChannel(channelName);
+    channelRef.current = channel;
+    return () => {
+      console.log("[coinbase-popup] Closing BroadcastChannel:", channelName);
+      channel.close();
+      channelRef.current = null;
+    };
+  }, [orderId]);
 
   // Listen for Coinbase postMessage events from the iframe
   useEffect(() => {
@@ -125,6 +145,33 @@ export function CoinbasePopup() {
         data.eventName,
         data.data,
       );
+      coinbaseEventReceived.current = true;
+
+      // Clear the load timeout since we got a valid Coinbase event
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = null;
+      }
+
+      // Relay every Coinbase event to the keychain via BroadcastChannel
+      const channel = channelRef.current;
+      console.log(
+        "[coinbase-popup] BroadcastChannel relay:",
+        data.eventName,
+        "channel open:",
+        !!channel,
+      );
+      if (channel) {
+        channel.postMessage({
+          type: data.eventName,
+          data: data.data,
+        });
+        console.log("[coinbase-popup] Message posted to BroadcastChannel");
+      } else {
+        console.error(
+          "[coinbase-popup] BroadcastChannel is null — message NOT relayed!",
+        );
+      }
 
       switch (data.eventName) {
         case "onramp_api.load_pending":
@@ -158,24 +205,26 @@ export function CoinbasePopup() {
 
         case "onramp_api.pending_payment_auth":
           setCommitted(true);
+          setError(undefined);
+          setFailed(false);
           break;
 
         case "onramp_api.payment_authorized":
           setCommitted(true);
+          setError(undefined);
+          setFailed(false);
           break;
 
         case "onramp_api.apple_pay_button_pressed":
           setCommitted(true);
+          setError(undefined);
+          setFailed(false);
           break;
 
         case "onramp_api.commit_error":
-          setError(
-            data.data?.errorMessage ||
-              "Payment could not be processed. Please try again.",
-          );
+          // Don't treat as terminal — Coinbase falls back to QR code
+          // when Apple Pay is unsupported or fails.
           setCommitted(false);
-          setFailed(true);
-          setCompleted(false);
           break;
 
         case "onramp_api.cancel":
@@ -196,7 +245,7 @@ export function CoinbasePopup() {
           setCompleted(true);
           setCommitted(false);
           setFailed(false);
-          setTimeout(() => window.close(), 1500);
+          //setTimeout(() => window.close(), 1500);
           break;
 
         case "onramp_api.polling_error":
@@ -226,6 +275,9 @@ export function CoinbasePopup() {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -237,41 +289,37 @@ export function CoinbasePopup() {
     );
   }
 
+  const showStatusBar =
+    completed || failed || (committed && !completed && !failed);
+
   return (
-    <div className="flex flex-col h-screen bg-[#0F1410]">
-      {/* Status bar */}
-      {(completed || failed) && (
-        <div
-          className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium ${
-            completed
-              ? "bg-[#1a2e1a] text-[#4ade80]"
-              : "bg-[#2e1a1a] text-[#f87171]"
-          }`}
-        >
-          {completed ? (
-            <>
-              <span>✓</span>
-              <span>Payment successful! This window will close shortly.</span>
-            </>
-          ) : (
-            <>
-              <TimesIcon size="sm" />
-              <span>{error}</span>
-            </>
-          )}
-        </div>
-      )}
+    <div className="relative h-screen bg-[#0F1410]">
+      {/* Status bar — overlays top of iframe with slide-down animation */}
+      <div
+        className={`absolute top-0 left-0 right-0 z-20 transition-transform duration-300 ease-out ${
+          showStatusBar ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
+        {completed ? (
+          <div className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#1a2e1a] text-[#4ade80]">
+            <span>✓</span>
+            <span>Payment successful! This window will close shortly.</span>
+          </div>
+        ) : failed ? (
+          <div className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#2e1a1a] text-[#f87171]">
+            <TimesIcon size="sm" />
+            <span>{error}</span>
+          </div>
+        ) : committed ? (
+          <div className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#1a2a2e] text-[#60a5fa]">
+            <SpinnerIcon className="animate-spin" size="sm" />
+            <span>Payment processing...</span>
+          </div>
+        ) : null}
+      </div>
 
-      {/* Committed indicator (payment in progress) */}
-      {committed && !completed && !failed && (
-        <div className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#1a2a2e] text-[#60a5fa]">
-          <SpinnerIcon className="animate-spin" size="sm" />
-          <span>Payment processing...</span>
-        </div>
-      )}
-
-      {/* Iframe */}
-      <div className="flex-1 relative">
+      {/* Iframe — fills the full screen, status bar overlays on top */}
+      <div className="h-full relative">
         {!iframeReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#0F1410] z-10">
             <SpinnerIcon className="animate-spin" size="lg" />
@@ -286,6 +334,27 @@ export function CoinbasePopup() {
           title="Coinbase Onramp"
           onLoad={() => {
             console.log("[coinbase-popup] iframe onLoad fired");
+            setIframeReady(true);
+
+            // If no Coinbase postMessage event arrives within the timeout,
+            // the payment link likely returned an error (e.g. 500).
+            loadTimeoutRef.current = setTimeout(() => {
+              if (!coinbaseEventReceived.current) {
+                const errorMessage =
+                  "Coinbase is having issues right now. Please close this window and try again later.";
+                console.error(
+                  "[coinbase-popup] No Coinbase events received after iframe load — assuming server error",
+                );
+                setError(errorMessage);
+                setFailed(true);
+
+                // Alert the keychain so it can display an appropriate message
+                channelRef.current?.postMessage({
+                  type: "onramp_api.load_error",
+                  data: { errorMessage },
+                });
+              }
+            }, LOAD_EVENT_TIMEOUT_MS);
           }}
         />
       </div>

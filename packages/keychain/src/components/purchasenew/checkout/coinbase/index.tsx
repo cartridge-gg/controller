@@ -19,9 +19,9 @@ export function CoinbaseCheckout() {
     paymentLink,
     isCreatingOrder,
     orderStatus,
+    popupClosed,
     onCreateCoinbaseOrder,
     openPaymentPopup,
-    stopPolling,
   } = useOnchainPurchaseContext();
   const { navigate } = useNavigation();
   const [showPolicies, setShowPolicies] = useState(true);
@@ -40,13 +40,6 @@ export function CoinbaseCheckout() {
       navigate("/purchase/pending", { reset: true });
     }
   }, [orderStatus, navigate]);
-
-  // Clean up polling on unmount
-  useEffect(() => {
-    return () => {
-      stopPolling();
-    };
-  }, [stopPolling]);
 
   const handleContinue = useCallback(async () => {
     if (isOpeningPopup) return;
@@ -78,12 +71,8 @@ export function CoinbaseCheckout() {
       {/* Policies Screen */}
       <div className={cn("flex flex-col h-full", !showPolicies && "hidden")}>
         <HeaderInner
-          title={
-            <div className="flex flex-col">
-              <span className="text-lg font-bold">Coinbase</span>
-              <span className="text-xs text-foreground-300">Policies</span>
-            </div>
-          }
+          title="Coinbase"
+          description="Policies"
           icon={<CoinbaseWalletColorIcon size="lg" />}
         />
         <LayoutContent className="p-4 flex flex-col gap-4">
@@ -126,15 +115,11 @@ export function CoinbaseCheckout() {
         )}
       >
         <HeaderInner
-          title={
-            <div className="flex flex-col">
-              <span className="text-lg font-bold">Apple Pay</span>
-              <span className="text-xs text-foreground-300">via Coinbase</span>
-            </div>
-          }
+          title="Apple Pay"
+          description="via Coinbase"
           icon={<CoinbaseWalletColorIcon size="lg" />}
         />
-        <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6">
+        <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6 pb-24">
           {isFailed ? (
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -149,12 +134,26 @@ export function CoinbaseCheckout() {
                 </p>
               </div>
             </div>
+          ) : popupClosed ? (
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                <TimesIcon size="lg" className="text-foreground-300" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground-100">
+                  Payment Window Closed
+                </p>
+                <p className="text-xs text-foreground-300 mt-1">
+                  The payment window was closed. Go back to try again.
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="flex flex-col items-center gap-4 text-center">
               <SpinnerIcon className="animate-spin" size="lg" />
               <div>
                 <p className="text-sm font-semibold text-foreground-100">
-                  Waiting for Payment
+                  Complete in Popup
                 </p>
                 <p className="text-xs text-foreground-300 mt-1">
                   Complete the payment in the popup window that opened.
@@ -163,10 +162,10 @@ export function CoinbaseCheckout() {
             </div>
           )}
         </LayoutContent>
-        {isFailed && (
+        {(isFailed || popupClosed) && (
           <LayoutFooter>
-            <Button className="w-full" onClick={handleContinue}>
-              TRY AGAIN
+            <Button className="w-full" onClick={() => navigate(-1)}>
+              GO BACK
             </Button>
           </LayoutFooter>
         )}

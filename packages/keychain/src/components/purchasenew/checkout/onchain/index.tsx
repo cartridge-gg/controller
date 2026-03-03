@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AppleIcon,
   Button,
@@ -15,6 +15,7 @@ import {
   isOnchainStarterpack,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
+import { useFeatures } from "@/hooks/features";
 import { useTokenBalance } from "@/hooks/starterpack";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "../../receiving";
@@ -55,15 +56,34 @@ export function OnchainCheckout() {
     isFetchingFees,
     layerswapFees,
     isApplePaySelected,
+    onApplePaySelect,
     onCreateCoinbaseOrder,
     isCreatingOrder,
     usdAmount,
   } = useOnchainPurchaseContext();
 
   const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
+  const { enableFeature } = useFeatures();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Triple-click on the header icon to enable Apple Pay
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const handleIconTripleClick = useCallback(() => {
+    clickCountRef.current += 1;
+    clearTimeout(clickTimerRef.current);
+    if (clickCountRef.current === 3) {
+      clickCountRef.current = 0;
+      enableFeature("apple-pay-support");
+      onApplePaySelect();
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        clickCountRef.current = 0;
+      }, 500);
+    }
+  }, [enableFeature, onApplePaySelect]);
 
   const totalUsdAmount = useMemo(() => {
     return usdAmount * quantity;
@@ -224,7 +244,11 @@ export function OnchainCheckout() {
     <>
       <HeaderInner
         title={isFree ? "Claim" : "Review Purchase"}
-        icon={<GiftIcon variant="solid" />}
+        icon={
+          <div onClick={handleIconTripleClick}>
+            <GiftIcon variant="solid" />
+          </div>
+        }
       />
 
       <LayoutContent>
