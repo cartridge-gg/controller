@@ -31,7 +31,7 @@ export function ContractLink({
         address={contractAddress}
         first={5}
         last={5}
-        className="text-inherit"
+        className="text-inherit font-sans"
       />
     </a>
   );
