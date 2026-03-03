@@ -31,33 +31,44 @@ export function AdvancedTransactions({
     <Accordion
       type="single"
       collapsible
-      className={cn("bg-background-200 rounded", className)}
+      className={cn(
+        "rounded border",
+        isOpened
+          ? "text-foreground-100 bg-background-200 border-transparent"
+          : "text-foreground-300 bg-transparent border-background-200",
+        className,
+      )}
       value={isOpened ? "item" : ""}
       onValueChange={(value) => setisOpened(value === "item")}
     >
       <AccordionItem value="item">
         <AccordionTrigger
           parentClassName="h-11 p-3"
-          className="flex items-center text-sm font-medium text-foreground-100 gap-1.5"
-          color={cn(isOpened ? "text-foreground-100" : "text-foreground-400")}
+          className="flex items-center text-sm font-medium gap-1.5"
+          // color={cn(isOpened ? "text-foreground-100" : "text-foreground-300")}
         >
           <Thumbnail
-            variant={isOpened ? "light" : "ghost"}
+            variant="light"
             size="sm"
             icon={<GearIcon />}
             centered={true}
+            className={cn(
+              isOpened
+                ? "text-foreground-100"
+                : "text-foreground-300 bg-background-200",
+            )}
           />
           <p>Advanced</p>
         </AccordionTrigger>
 
-        <AccordionContent className="flex flex-col gap-3 px-3 pb-3">
+        <AccordionContent className="flex flex-col gap-3 px-3 pb-3 border-t border-background-100 pt-2">
           {transactions.map((call) => (
             <CollapsibleTransactionRow
               key={`${call.contractAddress}-${call.entrypoint}`}
               transaction={call}
               enabled={true}
             >
-              <CallCardContents call={call} />
+              <CallCardContents call={call} className="mt-2" />
               {/* <div className="flex flex-col gap-px rounded overflow-auto border border-background divide-y divide-solid divide-background">
                 <div className="flex flex-col p-3 gap-3 text-xs">
                   <div className="flex items-center justify-between">
@@ -93,9 +104,9 @@ export function CollapsibleTransactionRow({
       <AccordionItem value={transaction.entrypoint} className="flex flex-col">
         <AccordionTrigger
           hideIcon
-          className="hover:bg-background-300 rounded-md text-foreground-100 w-full"
+          className="rounded-md text-foreground-100 w-full"
         >
-          <div className="flex gap-1 py-1 w-full">
+          <div className="flex gap-1 py-1 w-full text-xs items-center">
             <CheckboxIcon
               variant={value ? "minus-line" : "plus-line"}
               size="sm"

@@ -61,7 +61,7 @@ export function FeesRow({
           <Thumbnail
             icon={token.metadata.image || ""}
             size="sm"
-            className="ml-1"
+            className="ml-1 bg-transparent"
           />
           {!!amount && (
             <p
