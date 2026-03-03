@@ -43,9 +43,12 @@ export function TransactionSummary({
     >
       <AccordionItem value="item">
         <AccordionTrigger
-          parentClassName="h-11 p-3"
-          className="flex items-center text-sm font-medium gap-1.5"
-          // color={cn(isOpened ? "text-foreground-100" : "text-foreground-300")}
+          parentClassName="h-11 p-3 transition-none"
+          className={cn(
+            "flex items-center text-sm font-medium gap-1.5",
+            isOpened ? "text-foreground-100" : "text-foreground-300",
+          )}
+          color={cn(isOpened ? "text-foreground-100" : "text-foreground-300")}
         >
           <Thumbnail
             variant="light"
@@ -104,6 +107,7 @@ export function CollapsibleTransactionRow({
       <AccordionItem value={transaction.entrypoint} className="flex flex-col">
         <AccordionTrigger
           hideIcon
+          parentClassName="transition-none"
           className="rounded-md text-foreground-100 w-full"
         >
           <div className="flex gap-1 py-1 w-full text-xs items-center">
