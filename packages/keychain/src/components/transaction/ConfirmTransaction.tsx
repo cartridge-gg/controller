@@ -168,7 +168,7 @@ export function ConfirmTransaction({
       onError={onError}
     >
       <LayoutContent>
-        <TransactionSummary calls={transactions} />
+        <TransactionSummary calls={transactions} isExpanded />
       </LayoutContent>
     </ExecutionContainer>
   );
