@@ -19,7 +19,7 @@ import { useConnection } from "@/hooks/connection";
 import { retryWithBackoff } from "@/utils/retry";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { TransactionFinalityStatus } from "starknet";
-import { CoinbaseOnrampStatus } from "@cartridge/ui/utils/api/cartridge";
+import { CoinbaseOnrampStatus } from "@/utils/api";
 import { useStarterpackPlayHandler } from "@/hooks/starterpack";
 
 interface TransitionStepProps {

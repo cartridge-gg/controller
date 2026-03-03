@@ -9,7 +9,7 @@ import {
   PurchaseType,
   StripePaymentDocument,
   StripePaymentQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@/utils/api";
 
 const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   const { controller } = useConnection();

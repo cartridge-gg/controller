@@ -9,7 +9,7 @@ import {
   CoinbaseOnRampOrderDocument,
   CoinbaseOnRampOrderQuery,
   CoinbaseOnrampStatus,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@/utils/api";
 import { request } from "@/utils/graphql";
 import { useConnection } from "../connection";
 

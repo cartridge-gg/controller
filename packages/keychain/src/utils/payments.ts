@@ -4,7 +4,7 @@ import {
   CreateLayerswapPaymentInput,
   LayerswapDestinationNetwork,
   PurchaseType,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@/utils/api";
 import { mapPlatformToLayerswapSourceNetwork } from "@/hooks/starterpack/layerswap";
 
 /**

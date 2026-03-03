@@ -45,7 +45,7 @@ import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
 import { useNavigation } from "@/context";
 import { Purchase } from "./purchase";
-import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
+import { PurchaseType } from "@/utils/api";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
 import { Collections } from "./purchasenew/starterpack/collections";

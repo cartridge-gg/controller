@@ -1,4 +1,4 @@
-import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
+import { PurchaseType } from "@/utils/api";
 import { AmountSelection } from "../funding/AmountSelection";
 import { Balance, BalanceType } from "./Balance";
 import { PurchaseState } from "./types";
