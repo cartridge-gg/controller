@@ -3,7 +3,7 @@ import {
   LayoutContent,
   Skeleton,
   Empty,
-  TagIcon,
+  ShopIcon,
   Token,
   Thumbnail,
   ThumbnailCollectible,
@@ -344,13 +344,7 @@ export function CollectionPurchase() {
           {buildTransactions ? (
             <ExecutionContainer
               title="Review Purchase"
-              icon={
-                <TagIcon
-                  variant="solid"
-                  size="lg"
-                  className="h-[30px] w-[30px]"
-                />
-              }
+              icon={<ShopIcon size="lg" className="h-[30px] w-[30px]" />}
               transactions={buildTransactions}
               onSubmit={onSubmitPurchase}
               onCancel={canGoBack ? goBack : closeModal}
