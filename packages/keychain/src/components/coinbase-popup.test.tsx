@@ -41,7 +41,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-
 describe("CoinbasePopup", () => {
   it("handles stringified load_success postMessage", async () => {
     const { container } = renderPopup();
