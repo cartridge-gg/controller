@@ -13,7 +13,6 @@ import { Call, FeeEstimate } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useSwapTransactions } from "@/components/swap/swap";
 import { TokenSwapData, useTokenSwapData } from "@/hooks/token";
-import { AdvancedTransactions } from "./AdvancedTransactions";
 import placeholder from "/placeholder.svg?url";
 
 interface ConfirmSwapProps {
@@ -86,7 +85,7 @@ export function ConfirmSwap({
     >
       <LayoutContent>
         {!isSwap ? (
-          <TransactionSummary calls={transactions} />
+          <TransactionSummary calls={transactions} isExpanded />
         ) : (
           <>
             <TokenSummary title="Simulation Results" className="flex-none">
@@ -113,9 +112,7 @@ export function ConfirmSwap({
                 />
               ))}
             </TokenSummary>
-            {advancedVisible && (
-              <AdvancedTransactions transactions={transactions} />
-            )}
+            {advancedVisible && <TransactionSummary calls={transactions} />}
           </>
         )}
       </LayoutContent>
