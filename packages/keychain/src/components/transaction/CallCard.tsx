@@ -9,6 +9,7 @@ import {
   AccordionTrigger,
   Badge,
   Address,
+  cn,
 } from "@cartridge/ui";
 import { humanizeString } from "@cartridge/controller";
 import { ContractLink } from "@/components/ContractLink";
@@ -44,15 +45,20 @@ function copyToClipboard(text: string) {
 // Component for clickable value that can be copied
 function CopyableValue({
   value,
+  className,
   children,
 }: {
   value: string;
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
     <span
       onClick={() => copyToClipboard(value)}
-      className="cursor-pointer hover:opacity-80 relative group"
+      className={cn(
+        "cursor-pointer hover:opacity-80 relative group",
+        className,
+      )}
       title="Click to copy"
     >
       {children}
@@ -243,7 +249,7 @@ export function CallCard({ call, defaultExpanded = false }: CallCardProps) {
           <AccordionItem value="item" className="bg-background-200 rounded-md">
             <AccordionTrigger className="px-1 py-2">
               <div className="flex items-center gap-2">
-                <p className="text-foreground font-bold text-s">
+                <p className="text-foreground font-bold">
                   {humanizeString(call.entrypoint)}
                 </p>
               </div>
@@ -258,18 +264,32 @@ export function CallCard({ call, defaultExpanded = false }: CallCardProps) {
   );
 }
 
-export function CallCardContents({ call }: { call: Call }) {
+export function CallCardContents({
+  call,
+  className,
+}: {
+  call: Call;
+  className?: string;
+}) {
   return (
-    <div className="flex flex-col gap-3 p-3 border border-background-100 rounded-md">
+    <div
+      className={cn(
+        "flex flex-col gap-3 p-3 border border-background-100 rounded-md text-xs",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between">
-        <div className="text-foreground-300">Contract</div>
+        <div className="text-foreground-400">Contract</div>
         <ContractLink contractAddress={call.contractAddress} />
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="text-foreground-300">Entrypoint</div>
+        <div className="text-foreground-400">Entrypoint</div>
         <div className="text-foreground-100">
-          <CopyableValue value={call.entrypoint}>
+          <CopyableValue
+            value={call.entrypoint}
+            className="text-foreground-100"
+          >
             {call.entrypoint}
           </CopyableValue>
         </div>
@@ -277,7 +297,7 @@ export function CallCardContents({ call }: { call: Call }) {
 
       {call.calldata && (
         <>
-          <div className="text-foreground-300 pb-1">Calldata</div>
+          <div className="text-foreground-400 pb-1">Calldata</div>
           <div className="flex flex-col gap-1">
             {Array.isArray(call.calldata)
               ? call.calldata.map((data, i) => (
