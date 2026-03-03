@@ -90,8 +90,7 @@ export function Session() {
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
 
-      // Remove any trailing '=' characters from the encoded response
-      // Telegram doesnt seem to be able to decode the response if there are any
+      // Remove any trailing '=' padding from the base64 encoded response
       const encodedResponse = btoa(JSON.stringify(response)).replace(/=+$/, "");
 
       if (queries.callback_uri) {
