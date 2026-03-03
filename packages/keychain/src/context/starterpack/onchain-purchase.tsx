@@ -21,7 +21,7 @@ import {
 import { Item } from "./types";
 import { useStarterpackContext } from "./starterpack";
 import { ExternalWalletError } from "@/utils/errors";
-import { CoinbaseOnrampStatus } from "@cartridge/ui/utils/api/cartridge";
+import { CoinbaseOnrampStatus } from "@/utils/api";
 import {
   useQuantity,
   useExternalWallet,

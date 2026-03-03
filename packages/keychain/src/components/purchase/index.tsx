@@ -13,7 +13,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import { useMemo } from "react";
 import CheckoutForm from "./StripeCheckout";
-import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
+import { PurchaseType } from "@/utils/api";
 import { PaymentMethod } from "./PaymentMethod";
 import { PurchaseContent } from "./PurchaseContent";
 import { usePurchase } from "@/hooks/purchase";

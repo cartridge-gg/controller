@@ -12,7 +12,7 @@ import {
 } from "@cartridge/ui";
 import { useOnchainPurchaseContext } from "@/context";
 import { useNavigation } from "@/context";
-import { CoinbaseOnrampStatus } from "@cartridge/ui/utils/api/cartridge";
+import { CoinbaseOnrampStatus } from "@/utils/api";
 
 export function CoinbaseCheckout() {
   const {

@@ -1,4 +1,9 @@
-import { useQuery, UseQueryOptions } from "react-query";
+import {
+  useQuery,
+  useMutation,
+  UseQueryOptions,
+  UseMutationOptions,
+} from "react-query";
 import { useFetchData } from "./fetcher";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -7147,6 +7152,463 @@ export type AccountSearchQuery = {
   }>;
 };
 
+export type CryptoPaymentQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type CryptoPaymentQuery = {
+  __typename?: "Query";
+  cryptoPayment?: {
+    __typename?: "CryptoPayment";
+    id: string;
+    tokenAmount: string;
+    status: CryptoPaymentStatus;
+    network: Network;
+    tokenAddress: string;
+    depositAddress: string;
+    expiresAt: string;
+  } | null;
+};
+
+export type StripePaymentQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type StripePaymentQuery = {
+  __typename?: "Query";
+  stripePayment: {
+    __typename?: "StripePayment";
+    id: string;
+    paymentStatus: StripePaymentStatus;
+  };
+};
+
+export type LayerswapSourcesQueryVariables = Exact<{
+  token: Scalars["String"];
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+}>;
+
+export type LayerswapSourcesQuery = {
+  __typename?: "Query";
+  layerswapSources: Array<{
+    __typename?: "LayerswapSource";
+    name: string;
+    displayName: string;
+    logo: string;
+    chainId: string;
+    type: string;
+    depositMethods: Array<string>;
+    tokens: Array<{
+      __typename?: "LayerswapSourceToken";
+      symbol: string;
+      displayAsset: string;
+      decimals: number;
+      priceInUsd: number;
+      status: string;
+    }>;
+  }>;
+};
+
+export type CreateCryptoPaymentMutationVariables = Exact<{
+  input: CreateCryptoPaymentInput;
+}>;
+
+export type CreateCryptoPaymentMutation = {
+  __typename?: "Mutation";
+  createCryptoPayment: {
+    __typename?: "CryptoPayment";
+    id: string;
+    tokenAmount: string;
+    status: CryptoPaymentStatus;
+    network: Network;
+    tokenAddress: string;
+    depositAddress: string;
+    expiresAt: string;
+  };
+};
+
+export type CreateStripePaymentIntentMutationVariables = Exact<{
+  input: CreateStripePaymentIntentInput;
+}>;
+
+export type CreateStripePaymentIntentMutation = {
+  __typename?: "Mutation";
+  createStripePaymentIntent: {
+    __typename?: "StripePaymentIntent";
+    id: string;
+    clientSecret: string;
+    pricing: {
+      __typename?: "StripePricingDetails";
+      baseCostInCents: number;
+      processingFeeInCents: number;
+      totalInCents: number;
+    };
+  };
+};
+
+export type CreateLayerswapPaymentMutationVariables = Exact<{
+  input: CreateLayerswapPaymentInput;
+}>;
+
+export type CreateLayerswapPaymentMutation = {
+  __typename?: "Mutation";
+  createLayerswapPayment: {
+    __typename?: "LayerswapPayment";
+    cryptoPaymentId: string;
+    swapId: string;
+    status: LayerswapStatus;
+    sourceNetwork: LayerswapSourceNetwork;
+    sourceTokenAmount: string;
+    sourceTokenAddress: string;
+    sourceDepositAddress: string;
+    expiresAt: string;
+  };
+};
+
+export type CreateLayerswapDepositMutationVariables = Exact<{
+  input: CreateLayerswapDepositInput;
+}>;
+
+export type CreateLayerswapDepositMutation = {
+  __typename?: "Mutation";
+  createLayerswapDeposit: {
+    __typename?: "LayerswapPayment";
+    cryptoPaymentId: string;
+    swapId: string;
+    status: LayerswapStatus;
+    sourceNetwork: LayerswapSourceNetwork;
+    sourceTokenAmount: string;
+    sourceTokenAddress: string;
+    sourceDepositAddress: string;
+    expiresAt: string;
+  };
+};
+
+export type LayerswapQuoteQueryVariables = Exact<{
+  input: CreateLayerswapDepositInput;
+}>;
+
+export type LayerswapQuoteQuery = {
+  __typename?: "Query";
+  layerswapQuote: {
+    __typename?: "LayerswapQuote";
+    requestedAmount: string;
+    receivedAmount: string;
+    totalFees: string;
+    averageCompletionTime: string;
+  };
+};
+
+export type LayerswapStatusQueryVariables = Exact<{
+  swapId: Scalars["ID"];
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+}>;
+
+export type LayerswapStatusQuery = {
+  __typename?: "Query";
+  layerswapStatus: LayerswapStatus;
+};
+
+export type CoinbaseOnrampTransactionsQueryVariables = Exact<{
+  input: CoinbaseTransactionsInput;
+}>;
+
+export type CoinbaseOnrampTransactionsQuery = {
+  __typename?: "Query";
+  coinbaseOnrampTransactions: {
+    __typename?: "CoinbaseTransactionsResponse";
+    nextPageKey?: string | null;
+    totalCount?: string | null;
+    transactions: Array<{
+      __typename?: "CoinbaseTransaction";
+      transactionId: string;
+      walletAddress?: string | null;
+      type?: string | null;
+      txHash?: string | null;
+      status: CoinbaseTransactionStatus;
+      purchaseCurrency: string;
+      purchaseNetwork: string;
+      purchaseAmount: {
+        __typename?: "CoinbaseAmount";
+        amount: string;
+        currency: string;
+      };
+      paymentTotal: {
+        __typename?: "CoinbaseAmount";
+        amount: string;
+        currency: string;
+      };
+      coinbaseFee: {
+        __typename?: "CoinbaseAmount";
+        amount: string;
+        currency: string;
+      };
+      networkFee: {
+        __typename?: "CoinbaseAmount";
+        amount: string;
+        currency: string;
+      };
+    }>;
+  };
+};
+
+export type CreateCoinbaseOnRampOrderMutationVariables = Exact<{
+  input: CreateCoinbaseOnrampOrderInput;
+}>;
+
+export type CreateCoinbaseOnRampOrderMutation = {
+  __typename?: "Mutation";
+  createCoinbaseOnrampOrder: {
+    __typename?: "CoinbaseOnrampOrderResponse";
+    coinbaseOrder: {
+      __typename?: "CoinbaseOnrampOrder";
+      orderId: string;
+      paymentLink: string;
+      paymentLinkType: string;
+      paymentTotal: string;
+      paymentCurrency: string;
+      purchaseAmount: string;
+      purchaseCurrency: string;
+      destinationAddress: string;
+      destinationNetwork: string;
+      fees: Array<{
+        __typename?: "CoinbaseOnrampFee";
+        type: string;
+        amount: string;
+        currency: string;
+      }>;
+    };
+    layerswapPayment?: {
+      __typename?: "LayerswapPayment";
+      cryptoPaymentId: string;
+      swapId: string;
+      status: LayerswapStatus;
+      sourceNetwork: LayerswapSourceNetwork;
+      sourceTokenAmount: string;
+      sourceTokenAddress: string;
+      sourceDepositAddress: string;
+      expiresAt: string;
+    } | null;
+  };
+};
+
+export type CreateCoinbaseLayerswapOrderMutationVariables = Exact<{
+  input: CreateCoinbaseLayerswapOrderInput;
+}>;
+
+export type CreateCoinbaseLayerswapOrderMutation = {
+  __typename?: "Mutation";
+  createCoinbaseLayerswapOrder: {
+    __typename?: "CoinbaseOnrampOrderResponse";
+    coinbaseOrder: {
+      __typename?: "CoinbaseOnrampOrder";
+      orderId: string;
+      paymentLink: string;
+      paymentLinkType: string;
+      paymentTotal: string;
+      paymentCurrency: string;
+      purchaseAmount: string;
+      purchaseCurrency: string;
+      destinationAddress: string;
+      destinationNetwork: string;
+      fees: Array<{
+        __typename?: "CoinbaseOnrampFee";
+        type: string;
+        amount: string;
+        currency: string;
+      }>;
+    };
+    layerswapPayment?: {
+      __typename?: "LayerswapPayment";
+      cryptoPaymentId: string;
+      swapId: string;
+      status: LayerswapStatus;
+      sourceNetwork: LayerswapSourceNetwork;
+      sourceTokenAmount: string;
+      sourceTokenAddress: string;
+      sourceDepositAddress: string;
+      expiresAt: string;
+    } | null;
+  };
+};
+
+export type CoinbaseOnRampOrderQueryVariables = Exact<{
+  orderId: Scalars["String"];
+}>;
+
+export type CoinbaseOnRampOrderQuery = {
+  __typename?: "Query";
+  coinbaseOnrampOrder: {
+    __typename?: "CoinbaseOnrampOrder";
+    txHash?: string | null;
+    status: CoinbaseOnrampStatus;
+  };
+};
+
+export type CoinbaseOnRampQuoteQueryVariables = Exact<{
+  input: CoinbaseOnrampQuoteInput;
+}>;
+
+export type CoinbaseOnRampQuoteQuery = {
+  __typename?: "Query";
+  coinbaseOnrampQuote: {
+    __typename?: "CoinbaseOnrampQuote";
+    quoteId: string;
+    paymentTotal: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    purchaseAmount: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    layerswapFees: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    coinbaseFee: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    networkFee: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+  };
+};
+
+export type CryptoPaymentFieldsFragment = {
+  __typename?: "CryptoPayment";
+  id: string;
+  tokenAmount: string;
+  status: CryptoPaymentStatus;
+  network: Network;
+  tokenAddress: string;
+  depositAddress: string;
+  expiresAt: string;
+};
+
+export type LayerswapPaymentFieldsFragment = {
+  __typename?: "LayerswapPayment";
+  cryptoPaymentId: string;
+  swapId: string;
+  status: LayerswapStatus;
+  sourceNetwork: LayerswapSourceNetwork;
+  sourceTokenAmount: string;
+  sourceTokenAddress: string;
+  sourceDepositAddress: string;
+  expiresAt: string;
+};
+
+export type CoinbaseOnrampOrderFieldsFragment = {
+  __typename?: "CoinbaseOnrampOrder";
+  orderId: string;
+  paymentLink: string;
+  paymentLinkType: string;
+  paymentTotal: string;
+  paymentCurrency: string;
+  purchaseAmount: string;
+  purchaseCurrency: string;
+  destinationAddress: string;
+  destinationNetwork: string;
+  fees: Array<{
+    __typename?: "CoinbaseOnrampFee";
+    type: string;
+    amount: string;
+    currency: string;
+  }>;
+};
+
+export type CoinbaseOnrampOrderResponseFieldsFragment = {
+  __typename?: "CoinbaseOnrampOrderResponse";
+  coinbaseOrder: {
+    __typename?: "CoinbaseOnrampOrder";
+    orderId: string;
+    paymentLink: string;
+    paymentLinkType: string;
+    paymentTotal: string;
+    paymentCurrency: string;
+    purchaseAmount: string;
+    purchaseCurrency: string;
+    destinationAddress: string;
+    destinationNetwork: string;
+    fees: Array<{
+      __typename?: "CoinbaseOnrampFee";
+      type: string;
+      amount: string;
+      currency: string;
+    }>;
+  };
+  layerswapPayment?: {
+    __typename?: "LayerswapPayment";
+    cryptoPaymentId: string;
+    swapId: string;
+    status: LayerswapStatus;
+    sourceNetwork: LayerswapSourceNetwork;
+    sourceTokenAmount: string;
+    sourceTokenAddress: string;
+    sourceDepositAddress: string;
+    expiresAt: string;
+  } | null;
+};
+
+export const CryptoPaymentFieldsFragmentDoc = `
+    fragment CryptoPaymentFields on CryptoPayment {
+  id
+  tokenAmount
+  status
+  network
+  tokenAddress
+  depositAddress
+  expiresAt
+}
+    `;
+export const CoinbaseOnrampOrderFieldsFragmentDoc = `
+    fragment CoinbaseOnrampOrderFields on CoinbaseOnrampOrder {
+  orderId
+  paymentLink
+  paymentLinkType
+  paymentTotal
+  paymentCurrency
+  purchaseAmount
+  purchaseCurrency
+  destinationAddress
+  destinationNetwork
+  fees {
+    type
+    amount
+    currency
+  }
+}
+    `;
+export const LayerswapPaymentFieldsFragmentDoc = `
+    fragment LayerswapPaymentFields on LayerswapPayment {
+  cryptoPaymentId
+  swapId
+  status
+  sourceNetwork
+  sourceTokenAmount
+  sourceTokenAddress
+  sourceDepositAddress
+  expiresAt
+}
+    `;
+export const CoinbaseOnrampOrderResponseFieldsFragmentDoc = `
+    fragment CoinbaseOnrampOrderResponseFields on CoinbaseOnrampOrderResponse {
+  coinbaseOrder {
+    ...CoinbaseOnrampOrderFields
+  }
+  layerswapPayment {
+    ...LayerswapPaymentFields
+  }
+}
+    ${CoinbaseOnrampOrderFieldsFragmentDoc}
+${LayerswapPaymentFieldsFragmentDoc}`;
 export const AccountDocument = `
     query Account($username: String!) {
   account(username: $username) {
@@ -7309,6 +7771,428 @@ export const useAccountSearchQuery = <
     ["AccountSearch", variables],
     useFetchData<AccountSearchQuery, AccountSearchQueryVariables>(
       AccountSearchDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const CryptoPaymentDocument = `
+    query CryptoPayment($id: ID!) {
+  cryptoPayment(id: $id) {
+    ...CryptoPaymentFields
+  }
+}
+    ${CryptoPaymentFieldsFragmentDoc}`;
+export const useCryptoPaymentQuery = <
+  TData = CryptoPaymentQuery,
+  TError = unknown,
+>(
+  variables: CryptoPaymentQueryVariables,
+  options?: UseQueryOptions<CryptoPaymentQuery, TError, TData>,
+) =>
+  useQuery<CryptoPaymentQuery, TError, TData>(
+    ["CryptoPayment", variables],
+    useFetchData<CryptoPaymentQuery, CryptoPaymentQueryVariables>(
+      CryptoPaymentDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const StripePaymentDocument = `
+    query StripePayment($id: ID!) {
+  stripePayment(id: $id) {
+    id
+    paymentStatus
+  }
+}
+    `;
+export const useStripePaymentQuery = <
+  TData = StripePaymentQuery,
+  TError = unknown,
+>(
+  variables: StripePaymentQueryVariables,
+  options?: UseQueryOptions<StripePaymentQuery, TError, TData>,
+) =>
+  useQuery<StripePaymentQuery, TError, TData>(
+    ["StripePayment", variables],
+    useFetchData<StripePaymentQuery, StripePaymentQueryVariables>(
+      StripePaymentDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const LayerswapSourcesDocument = `
+    query LayerswapSources($token: String!, $isMainnet: Boolean) {
+  layerswapSources(token: $token, isMainnet: $isMainnet) {
+    name
+    displayName
+    logo
+    chainId
+    type
+    tokens {
+      symbol
+      displayAsset
+      decimals
+      priceInUsd
+      status
+    }
+    depositMethods
+  }
+}
+    `;
+export const useLayerswapSourcesQuery = <
+  TData = LayerswapSourcesQuery,
+  TError = unknown,
+>(
+  variables: LayerswapSourcesQueryVariables,
+  options?: UseQueryOptions<LayerswapSourcesQuery, TError, TData>,
+) =>
+  useQuery<LayerswapSourcesQuery, TError, TData>(
+    ["LayerswapSources", variables],
+    useFetchData<LayerswapSourcesQuery, LayerswapSourcesQueryVariables>(
+      LayerswapSourcesDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const CreateCryptoPaymentDocument = `
+    mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
+  createCryptoPayment(input: $input) {
+    ...CryptoPaymentFields
+  }
+}
+    ${CryptoPaymentFieldsFragmentDoc}`;
+export const useCreateCryptoPaymentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCryptoPaymentMutation,
+    TError,
+    CreateCryptoPaymentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCryptoPaymentMutation,
+    TError,
+    CreateCryptoPaymentMutationVariables,
+    TContext
+  >(
+    ["CreateCryptoPayment"],
+    useFetchData<
+      CreateCryptoPaymentMutation,
+      CreateCryptoPaymentMutationVariables
+    >(CreateCryptoPaymentDocument),
+    options,
+  );
+export const CreateStripePaymentIntentDocument = `
+    mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
+  createStripePaymentIntent(input: $input) {
+    id
+    clientSecret
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+  }
+}
+    `;
+export const useCreateStripePaymentIntentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateStripePaymentIntentMutation,
+    TError,
+    CreateStripePaymentIntentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateStripePaymentIntentMutation,
+    TError,
+    CreateStripePaymentIntentMutationVariables,
+    TContext
+  >(
+    ["CreateStripePaymentIntent"],
+    useFetchData<
+      CreateStripePaymentIntentMutation,
+      CreateStripePaymentIntentMutationVariables
+    >(CreateStripePaymentIntentDocument),
+    options,
+  );
+export const CreateLayerswapPaymentDocument = `
+    mutation CreateLayerswapPayment($input: CreateLayerswapPaymentInput!) {
+  createLayerswapPayment(input: $input) {
+    ...LayerswapPaymentFields
+  }
+}
+    ${LayerswapPaymentFieldsFragmentDoc}`;
+export const useCreateLayerswapPaymentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateLayerswapPaymentMutation,
+    TError,
+    CreateLayerswapPaymentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateLayerswapPaymentMutation,
+    TError,
+    CreateLayerswapPaymentMutationVariables,
+    TContext
+  >(
+    ["CreateLayerswapPayment"],
+    useFetchData<
+      CreateLayerswapPaymentMutation,
+      CreateLayerswapPaymentMutationVariables
+    >(CreateLayerswapPaymentDocument),
+    options,
+  );
+export const CreateLayerswapDepositDocument = `
+    mutation CreateLayerswapDeposit($input: CreateLayerswapDepositInput!) {
+  createLayerswapDeposit(input: $input) {
+    ...LayerswapPaymentFields
+  }
+}
+    ${LayerswapPaymentFieldsFragmentDoc}`;
+export const useCreateLayerswapDepositMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateLayerswapDepositMutation,
+    TError,
+    CreateLayerswapDepositMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateLayerswapDepositMutation,
+    TError,
+    CreateLayerswapDepositMutationVariables,
+    TContext
+  >(
+    ["CreateLayerswapDeposit"],
+    useFetchData<
+      CreateLayerswapDepositMutation,
+      CreateLayerswapDepositMutationVariables
+    >(CreateLayerswapDepositDocument),
+    options,
+  );
+export const LayerswapQuoteDocument = `
+    query LayerswapQuote($input: CreateLayerswapDepositInput!) {
+  layerswapQuote(input: $input) {
+    requestedAmount
+    receivedAmount
+    totalFees
+    averageCompletionTime
+  }
+}
+    `;
+export const useLayerswapQuoteQuery = <
+  TData = LayerswapQuoteQuery,
+  TError = unknown,
+>(
+  variables: LayerswapQuoteQueryVariables,
+  options?: UseQueryOptions<LayerswapQuoteQuery, TError, TData>,
+) =>
+  useQuery<LayerswapQuoteQuery, TError, TData>(
+    ["LayerswapQuote", variables],
+    useFetchData<LayerswapQuoteQuery, LayerswapQuoteQueryVariables>(
+      LayerswapQuoteDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const LayerswapStatusDocument = `
+    query LayerswapStatus($swapId: ID!, $isMainnet: Boolean) {
+  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet)
+}
+    `;
+export const useLayerswapStatusQuery = <
+  TData = LayerswapStatusQuery,
+  TError = unknown,
+>(
+  variables: LayerswapStatusQueryVariables,
+  options?: UseQueryOptions<LayerswapStatusQuery, TError, TData>,
+) =>
+  useQuery<LayerswapStatusQuery, TError, TData>(
+    ["LayerswapStatus", variables],
+    useFetchData<LayerswapStatusQuery, LayerswapStatusQueryVariables>(
+      LayerswapStatusDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const CoinbaseOnrampTransactionsDocument = `
+    query CoinbaseOnrampTransactions($input: CoinbaseTransactionsInput!) {
+  coinbaseOnrampTransactions(input: $input) {
+    transactions {
+      transactionId
+      walletAddress
+      type
+      txHash
+      status
+      purchaseCurrency
+      purchaseNetwork
+      purchaseAmount {
+        amount
+        currency
+      }
+      paymentTotal {
+        amount
+        currency
+      }
+      coinbaseFee {
+        amount
+        currency
+      }
+      networkFee {
+        amount
+        currency
+      }
+    }
+    nextPageKey
+    totalCount
+  }
+}
+    `;
+export const useCoinbaseOnrampTransactionsQuery = <
+  TData = CoinbaseOnrampTransactionsQuery,
+  TError = unknown,
+>(
+  variables: CoinbaseOnrampTransactionsQueryVariables,
+  options?: UseQueryOptions<CoinbaseOnrampTransactionsQuery, TError, TData>,
+) =>
+  useQuery<CoinbaseOnrampTransactionsQuery, TError, TData>(
+    ["CoinbaseOnrampTransactions", variables],
+    useFetchData<
+      CoinbaseOnrampTransactionsQuery,
+      CoinbaseOnrampTransactionsQueryVariables
+    >(CoinbaseOnrampTransactionsDocument).bind(null, variables),
+    options,
+  );
+export const CreateCoinbaseOnRampOrderDocument = `
+    mutation CreateCoinbaseOnRampOrder($input: CreateCoinbaseOnrampOrderInput!) {
+  createCoinbaseOnrampOrder(input: $input) {
+    ...CoinbaseOnrampOrderResponseFields
+  }
+}
+    ${CoinbaseOnrampOrderResponseFieldsFragmentDoc}`;
+export const useCreateCoinbaseOnRampOrderMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinbaseOnRampOrderMutation,
+    TError,
+    CreateCoinbaseOnRampOrderMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinbaseOnRampOrderMutation,
+    TError,
+    CreateCoinbaseOnRampOrderMutationVariables,
+    TContext
+  >(
+    ["CreateCoinbaseOnRampOrder"],
+    useFetchData<
+      CreateCoinbaseOnRampOrderMutation,
+      CreateCoinbaseOnRampOrderMutationVariables
+    >(CreateCoinbaseOnRampOrderDocument),
+    options,
+  );
+export const CreateCoinbaseLayerswapOrderDocument = `
+    mutation CreateCoinbaseLayerswapOrder($input: CreateCoinbaseLayerswapOrderInput!) {
+  createCoinbaseLayerswapOrder(input: $input) {
+    ...CoinbaseOnrampOrderResponseFields
+  }
+}
+    ${CoinbaseOnrampOrderResponseFieldsFragmentDoc}`;
+export const useCreateCoinbaseLayerswapOrderMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinbaseLayerswapOrderMutation,
+    TError,
+    CreateCoinbaseLayerswapOrderMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinbaseLayerswapOrderMutation,
+    TError,
+    CreateCoinbaseLayerswapOrderMutationVariables,
+    TContext
+  >(
+    ["CreateCoinbaseLayerswapOrder"],
+    useFetchData<
+      CreateCoinbaseLayerswapOrderMutation,
+      CreateCoinbaseLayerswapOrderMutationVariables
+    >(CreateCoinbaseLayerswapOrderDocument),
+    options,
+  );
+export const CoinbaseOnRampOrderDocument = `
+    query CoinbaseOnRampOrder($orderId: String!) {
+  coinbaseOnrampOrder(orderId: $orderId) {
+    txHash
+    status
+  }
+}
+    `;
+export const useCoinbaseOnRampOrderQuery = <
+  TData = CoinbaseOnRampOrderQuery,
+  TError = unknown,
+>(
+  variables: CoinbaseOnRampOrderQueryVariables,
+  options?: UseQueryOptions<CoinbaseOnRampOrderQuery, TError, TData>,
+) =>
+  useQuery<CoinbaseOnRampOrderQuery, TError, TData>(
+    ["CoinbaseOnRampOrder", variables],
+    useFetchData<CoinbaseOnRampOrderQuery, CoinbaseOnRampOrderQueryVariables>(
+      CoinbaseOnRampOrderDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const CoinbaseOnRampQuoteDocument = `
+    query CoinbaseOnRampQuote($input: CoinbaseOnrampQuoteInput!) {
+  coinbaseOnrampQuote(input: $input) {
+    quoteId
+    paymentTotal {
+      amount
+      currency
+    }
+    purchaseAmount {
+      amount
+      currency
+    }
+    layerswapFees {
+      amount
+      currency
+    }
+    coinbaseFee {
+      amount
+      currency
+    }
+    networkFee {
+      amount
+      currency
+    }
+  }
+}
+    `;
+export const useCoinbaseOnRampQuoteQuery = <
+  TData = CoinbaseOnRampQuoteQuery,
+  TError = unknown,
+>(
+  variables: CoinbaseOnRampQuoteQueryVariables,
+  options?: UseQueryOptions<CoinbaseOnRampQuoteQuery, TError, TData>,
+) =>
+  useQuery<CoinbaseOnRampQuoteQuery, TError, TData>(
+    ["CoinbaseOnRampQuote", variables],
+    useFetchData<CoinbaseOnRampQuoteQuery, CoinbaseOnRampQuoteQueryVariables>(
+      CoinbaseOnRampQuoteDocument,
     ).bind(null, variables),
     options,
   );
