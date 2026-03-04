@@ -159,9 +159,10 @@ export function ExecutionContainer({
         icon={icon}
         right={right}
         hideIcon={!icon}
+        className="pb-2"
       />
       {children}
-      <LayoutFooter>
+      <LayoutFooter className="pt-2">
         {(() => {
           switch (ctrlError?.code) {
             case ErrorCode.CartridgeControllerNotDeployed:
