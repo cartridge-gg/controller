@@ -1,6 +1,5 @@
 import { getAddress } from "ethers/address";
-import { createStore, EIP6963ProviderDetail } from "mipd";
-import { isMobile } from "../utils";
+import { createStore, EIP6963ProviderDetail, Store } from "mipd";
 import { chainIdToPlatform } from "./platform";
 import {
   ExternalPlatform,
@@ -10,6 +9,17 @@ import {
   WalletAdapter,
 } from "./types";
 
+// Shared store across all EthereumWalletBase instances so late EIP-6963
+// announcements are captured once and visible to every wallet adapter.
+let sharedStore: Store | undefined;
+
+function getSharedStore(): Store {
+  if (!sharedStore) {
+    sharedStore = createStore();
+  }
+  return sharedStore;
+}
+
 export abstract class EthereumWalletBase implements WalletAdapter {
   abstract readonly type: ExternalWalletType;
   abstract readonly rdns: string;
@@ -17,7 +27,6 @@ export abstract class EthereumWalletBase implements WalletAdapter {
 
   platform: ExternalPlatform | undefined;
   protected account: string | undefined = undefined;
-  protected store = createStore();
   protected provider: EIP6963ProviderDetail | undefined;
   protected connectedAccounts: string[] = [];
 
@@ -26,10 +35,10 @@ export abstract class EthereumWalletBase implements WalletAdapter {
   }
 
   private getProvider(): EIP6963ProviderDetail | undefined {
-    if (!this.provider) {
-      this.provider = this.store
-        .getProviders()
-        .find((provider) => provider.info.rdns === this.rdns);
+    // Use shared store's findProvider which reflects late announcements
+    const found = getSharedStore().findProvider({ rdns: this.rdns as any });
+    if (found) {
+      this.provider = found;
     }
     return this.provider;
   }
@@ -40,15 +49,14 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       return provider.provider;
     }
 
-    // Fallback for MetaMask when not announced via EIP-6963
-    if (
-      this.rdns === "io.metamask" &&
-      typeof window !== "undefined" &&
-      (window as any).ethereum?.isMetaMask
-    ) {
-      return (window as any).ethereum;
-    }
+    return this.getFallbackProvider();
+  }
 
+  /**
+   * Fallback provider detection when EIP-6963 announcement is missed.
+   * Subclasses can override to provide wallet-specific fallback logic.
+   */
+  protected getFallbackProvider(): any {
     return null;
   }
 
@@ -101,29 +109,20 @@ export abstract class EthereumWalletBase implements WalletAdapter {
   }
 
   isAvailable(): boolean {
-    if (isMobile()) {
-      return false;
-    }
-
     // Check dynamically each time, as the provider might be announced after instantiation
     const provider = this.getProvider();
-
-    // Also check for MetaMask via window.ethereum as a fallback for MetaMask specifically
-    if (
-      !provider &&
-      this.rdns === "io.metamask" &&
-      typeof window !== "undefined"
-    ) {
-      // MetaMask might be available via window.ethereum even if not announced via EIP-6963 yet
-      return !!(window as any).ethereum?.isMetaMask;
-    }
 
     // Initialize if we just found the provider
     if (provider && !this.initialized) {
       this.initializeIfAvailable();
     }
 
-    return typeof window !== "undefined" && !!provider;
+    if (provider) {
+      return true;
+    }
+
+    // Fall back to wallet-specific detection when EIP-6963 announcement is missed
+    return typeof window !== "undefined" && !!this.getFallbackProvider();
   }
 
   getInfo(): ExternalWallet {
@@ -158,18 +157,7 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         throw new Error(`${this.displayName} is not available`);
       }
 
-      let ethereum: any;
-      const provider = this.getProvider();
-
-      if (provider) {
-        ethereum = provider.provider;
-      } else if (
-        this.rdns === "io.metamask" &&
-        (window as any).ethereum?.isMetaMask
-      ) {
-        // Fallback for MetaMask when not announced via EIP-6963
-        ethereum = (window as any).ethereum;
-      }
+      const ethereum = this.getEthereumProvider();
 
       if (!ethereum) {
         throw new Error(`${this.displayName} provider not found`);
@@ -183,15 +171,14 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         this.account = getAddress(accounts[0]);
         this.connectedAccounts = accounts.map(getAddress);
 
-        // If we used the fallback, store the ethereum provider for future use
-        if (!provider && this.rdns === "io.metamask") {
-          // Create a mock EIP6963ProviderDetail for consistency
+        // If we used a fallback provider, store it for future use
+        if (!this.getProvider()) {
           this.provider = {
             info: {
-              uuid: "metamask-fallback",
-              name: "MetaMask",
+              uuid: `${this.rdns}-fallback`,
+              name: this.displayName,
               icon: "data:image/svg+xml;base64,",
-              rdns: "io.metamask",
+              rdns: this.rdns,
             },
             provider: ethereum,
           } as EIP6963ProviderDetail;
