@@ -256,11 +256,6 @@ export function parseChainId(url: URL): ChainId {
   throw new Error(`Chain ${url.toString()} not supported`);
 }
 
-export function isMobile() {
-  return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent,
-  );
-}
 
 // Sanitize image src to prevent XSS
 export function sanitizeImageSrc(src: string): string {
