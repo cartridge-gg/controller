@@ -1,5 +1,5 @@
 import { getAddress } from "ethers/address";
-import { createStore, EIP6963ProviderDetail } from "mipd";
+import { createStore, EIP6963ProviderDetail, Store } from "mipd";
 import { chainIdToPlatform } from "./platform";
 import {
   ExternalPlatform,
@@ -9,6 +9,17 @@ import {
   WalletAdapter,
 } from "./types";
 
+// Shared store across all EthereumWalletBase instances so late EIP-6963
+// announcements are captured once and visible to every wallet adapter.
+let sharedStore: Store | undefined;
+
+function getSharedStore(): Store {
+  if (!sharedStore) {
+    sharedStore = createStore();
+  }
+  return sharedStore;
+}
+
 export abstract class EthereumWalletBase implements WalletAdapter {
   abstract readonly type: ExternalWalletType;
   abstract readonly rdns: string;
@@ -16,7 +27,6 @@ export abstract class EthereumWalletBase implements WalletAdapter {
 
   platform: ExternalPlatform | undefined;
   protected account: string | undefined = undefined;
-  protected store = createStore();
   protected provider: EIP6963ProviderDetail | undefined;
   protected connectedAccounts: string[] = [];
 
@@ -25,10 +35,8 @@ export abstract class EthereumWalletBase implements WalletAdapter {
   }
 
   private getProvider(): EIP6963ProviderDetail | undefined {
-    // Always re-scan providers since extensions may announce after initial load
-    const found = this.store
-      .getProviders()
-      .find((provider) => provider.info.rdns === this.rdns);
+    // Use shared store's findProvider which reflects late announcements
+    const found = getSharedStore().findProvider({ rdns: this.rdns as any });
     if (found) {
       this.provider = found;
     }
