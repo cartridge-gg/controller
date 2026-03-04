@@ -76,7 +76,7 @@ export function ConfirmSwap({
         ) : undefined
       }
       additionalFees={sellingSwapData.map((token) => ({
-        label: "Cost",
+        label: "Total",
         contractAddress: token.address,
         amount: token?.amount ?? 0,
         usdValue: formatValue(token),
