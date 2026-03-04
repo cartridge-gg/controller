@@ -256,7 +256,6 @@ export function parseChainId(url: URL): ChainId {
   throw new Error(`Chain ${url.toString()} not supported`);
 }
 
-
 // Sanitize image src to prevent XSS
 export function sanitizeImageSrc(src: string): string {
   // Allow only http/https URLs (absolute)
