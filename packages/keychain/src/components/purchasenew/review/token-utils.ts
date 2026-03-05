@@ -1,4 +1,5 @@
 import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
+import { USDC_ADDRESSES } from "@/utils/ekubo";
 
 /**
  * Normalize a token address for comparison
@@ -15,12 +16,20 @@ export function normalizeTokenAddress(address: string): string {
   return lower;
 }
 
+export function isUsdcToken(tokenAddress: string): boolean {
+  const normalized = normalizeTokenAddress(tokenAddress);
+  if (normalized === USDC_CONTRACT_ADDRESS) return true;
+  return Object.values(USDC_ADDRESSES).some(
+    (addr) => normalizeTokenAddress(addr) === normalized,
+  );
+}
+
 /**
  * Get the number of decimals for a token address
  * USDC = 6 decimals, everything else = 18 decimals
  */
 export function getTokenDecimals(tokenAddress: string): number {
-  return normalizeTokenAddress(tokenAddress) === USDC_CONTRACT_ADDRESS ? 6 : 18;
+  return isUsdcToken(tokenAddress) ? 6 : 18;
 }
 
 /**
@@ -48,9 +57,15 @@ export function tokenAmountToUsd(amount: bigint, tokenAddress: string): string {
  * Get a human-readable token symbol from address
  */
 export function getTokenSymbol(tokenAddress: string): string {
-  if (normalizeTokenAddress(tokenAddress) === USDC_CONTRACT_ADDRESS) {
+  const normalized = normalizeTokenAddress(tokenAddress);
+  if (normalized === USDC_CONTRACT_ADDRESS) return "USDC.e";
+  if (
+    Object.values(USDC_ADDRESSES).some(
+      (addr) => normalizeTokenAddress(addr) === normalized,
+    )
+  )
     return "USDC";
-  }
+
   // For unknown tokens, show shortened address
   return `${tokenAddress.slice(0, 6)}...${tokenAddress.slice(-4)}`;
 }
@@ -59,7 +74,7 @@ export function getTokenSymbol(tokenAddress: string): string {
  * Get token icon URL
  */
 export function getTokenIcon(tokenAddress: string): string | null {
-  if (normalizeTokenAddress(tokenAddress) === USDC_CONTRACT_ADDRESS) {
+  if (isUsdcToken(tokenAddress)) {
     return "https://static.cartridge.gg/tokens/usdc.svg";
   }
   return null;

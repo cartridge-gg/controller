@@ -14,7 +14,11 @@ import {
 import { Price } from "@cartridge/ui/utils/api/cartridge";
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
-import { fetchSwapQuoteInUsdc, type ExtendedError } from "@/utils/ekubo";
+import {
+  fetchSwapQuoteInUsdc,
+  type ExtendedError,
+  USDC_ADDRESSES,
+} from "@/utils/ekubo";
 
 export const DEFAULT_TOKENS = [
   {
@@ -242,7 +246,10 @@ export function TokensProvider({
 
               // USDC price is always 1:1
               if (
-                checksumAddress === getChecksumAddress(USDC_CONTRACT_ADDRESS)
+                checksumAddress === getChecksumAddress(USDC_CONTRACT_ADDRESS) ||
+                (USDC_ADDRESSES[chainId] &&
+                  checksumAddress ===
+                    getChecksumAddress(USDC_ADDRESSES[chainId]))
               ) {
                 return {
                   base: address,
