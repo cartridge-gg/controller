@@ -279,6 +279,28 @@ describe("Config Loading and Verification Separation", () => {
     });
   });
 
+  describe("Custom URL scheme verification (mobile apps)", () => {
+    it("should verify custom scheme matching allowed origin", () => {
+      expect(
+        isOriginVerified("com.example.myapp://callback", ["com.example.myapp"]),
+      ).toBe(true);
+    });
+
+    it("should verify custom scheme among multiple allowed origins", () => {
+      const allowedOrigins = ["myapp.vercel.app", "xyz.studio.game"];
+
+      expect(
+        isOriginVerified("xyz.studio.game://deeplink", allowedOrigins),
+      ).toBe(true);
+    });
+
+    it("should reject custom scheme not in allowed origins", () => {
+      expect(
+        isOriginVerified("com.other.app://callback", ["com.example.myapp"]),
+      ).toBe(false);
+    });
+  });
+
   describe("Multiple allowed origins verification", () => {
     it("should verify against multiple allowed origins", () => {
       const allowedOrigins = ["example.com", "another.com", "*.subdomain.com"];
