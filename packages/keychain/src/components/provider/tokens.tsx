@@ -18,6 +18,7 @@ import {
   fetchSwapQuoteInUsdc,
   type ExtendedError,
   USDC_ADDRESSES,
+  USDCE_ADDRESSES,
 } from "@/utils/ekubo";
 
 export const DEFAULT_TOKENS = [
@@ -249,7 +250,10 @@ export function TokensProvider({
                 checksumAddress === getChecksumAddress(USDC_CONTRACT_ADDRESS) ||
                 (USDC_ADDRESSES[chainId] &&
                   checksumAddress ===
-                    getChecksumAddress(USDC_ADDRESSES[chainId]))
+                    getChecksumAddress(USDC_ADDRESSES[chainId])) ||
+                (USDCE_ADDRESSES[chainId] &&
+                  checksumAddress ===
+                    getChecksumAddress(USDCE_ADDRESSES[chainId]))
               ) {
                 return {
                   base: address,

@@ -1,5 +1,5 @@
 import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
-import { USDC_ADDRESSES } from "@/utils/ekubo";
+import { USDC_ADDRESSES, USDCE_ADDRESSES } from "@/utils/ekubo";
 
 /**
  * Normalize a token address for comparison
@@ -19,7 +19,13 @@ export function normalizeTokenAddress(address: string): string {
 export function isUsdcToken(tokenAddress: string): boolean {
   const normalized = normalizeTokenAddress(tokenAddress);
   if (normalized === USDC_CONTRACT_ADDRESS) return true;
-  return Object.values(USDC_ADDRESSES).some(
+  if (
+    Object.values(USDC_ADDRESSES).some(
+      (addr) => normalizeTokenAddress(addr) === normalized,
+    )
+  )
+    return true;
+  return Object.values(USDCE_ADDRESSES).some(
     (addr) => normalizeTokenAddress(addr) === normalized,
   );
 }
@@ -65,6 +71,12 @@ export function getTokenSymbol(tokenAddress: string): string {
     )
   )
     return "USDC";
+  if (
+    Object.values(USDCE_ADDRESSES).some(
+      (addr) => normalizeTokenAddress(addr) === normalized,
+    )
+  )
+    return "USDC.e";
 
   // For unknown tokens, show shortened address
   return `${tokenAddress.slice(0, 6)}...${tokenAddress.slice(-4)}`;
