@@ -9,7 +9,12 @@ import {
   DEFAULT_TOKENS,
   type ERC20Metadata,
 } from "@/components/provider/tokens";
-import { fetchSwapQuote, USDC_ADDRESSES, USDCE_ADDRESSES, type SwapQuote } from "@/utils/ekubo";
+import {
+  fetchSwapQuote,
+  USDC_ADDRESSES,
+  USDCE_ADDRESSES,
+  type SwapQuote,
+} from "@/utils/ekubo";
 import {
   fetchTokenMetadata,
   type TokenMetadata as FullTokenMetadata,
@@ -161,8 +166,7 @@ export function useTokenSelection({
       USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN];
 
     const usdceAddress =
-      USDCE_ADDRESSES[controller.chainId()] ||
-      USDC_CONTRACT_ADDRESS;
+      USDCE_ADDRESSES[controller.chainId()] || USDC_CONTRACT_ADDRESS;
 
     const tokens: ERC20Metadata[] = [
       {
