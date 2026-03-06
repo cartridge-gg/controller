@@ -6,7 +6,7 @@ import {
 import { constants } from "starknet";
 import Controller from "./controller";
 
-export const toJsSigner = (signer: CredentialMetadata): Signer => {
+export const toJsSigner = (signer: CredentialMetadata): Signer | undefined => {
   switch (signer.__typename) {
     case "Eip191Credentials":
       return {
@@ -22,8 +22,12 @@ export const toJsSigner = (signer: CredentialMetadata): Signer => {
           credentialId: signer.webauthn?.[0]?.id ?? "",
         },
       };
+    case "SIWSCredentials": // TODO: implement
+    case "StarknetCredentials": // TODO: implement
+    case "PasswordCredentials": // TODO: implement
     default:
-      throw new Error("Unimplemented");
+      console.error(`Unimplemented signer:`, signer.__typename);
+      return undefined;
   }
 };
 
@@ -31,7 +35,9 @@ export const isCurrentSigner = (
   signer: CredentialMetadata,
   controller: Controller,
 ) => {
-  const signerGuid = signerToGuid(toJsSigner(signer));
+  const jsSigner = toJsSigner(signer);
+  if (!jsSigner) return false;
+  const signerGuid = signerToGuid(jsSigner);
   const controllerGuid = controller.ownerGuid();
   return signerGuid === controllerGuid;
 };
