@@ -58,7 +58,10 @@ interface CreateControllerViewProps {
   submitButtonRef: React.RefObject<HTMLButtonElement>;
   isDropdownOpen: boolean;
   onDropdownOpenChange: (isOpen: boolean) => void;
-  webauthnPopup: boolean;
+  webauthnPopup: {
+    create: boolean;
+    get: boolean;
+  };
 }
 
 type CreateControllerFormProps = Omit<

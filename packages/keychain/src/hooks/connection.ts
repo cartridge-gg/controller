@@ -262,30 +262,46 @@ export function useConnectionValue() {
     setOnModalCloseInternal(() => fn);
   }, []);
 
-  // Auto-detect if WebAuthn won't work in this context (e.g. iframe without
-  // publickey-credentials-get permission). When true, WebAuthn uses a popup.
-  const needsWebauthnPopup = useMemo(() => {
-    // Check for explicit popup override URL param (set by controller SDK)
+  // Decide which WebAuthn ceremonies need to escape the iframe.
+  // `create` covers passkey registration, `get` covers passkey login/session auth.
+  const webauthnPopup = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("webauthn_popup") === "true") {
-      return true;
+      return {
+        create: true,
+        get: true,
+      };
     }
 
-    if (!isIframe()) return false;
+    if (!isIframe()) {
+      return {
+        create: false,
+        get: false,
+      };
+    }
 
-    // Safari doesn't expose Permissions Policy API but blocks WebAuthn
-    // in cross-origin iframes unconditionally
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if (isSafari) return true;
+    if (isSafari) {
+      return {
+        create: true,
+        get: false,
+      };
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const doc = document as any;
     const policy = doc.permissionsPolicy ?? doc.featurePolicy;
-    if (!policy) return false;
-    return (
-      !policy.allowsFeature("publickey-credentials-create") ||
-      !policy.allowsFeature("publickey-credentials-get")
-    );
+    if (!policy) {
+      return {
+        create: false,
+        get: false,
+      };
+    }
+
+    return {
+      create: !policy.allowsFeature("publickey-credentials-create"),
+      get: !policy.allowsFeature("publickey-credentials-get"),
+    };
   }, []);
 
   const [searchParams] = useSearchParams();
@@ -918,7 +934,7 @@ export function useConnectionValue() {
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
-    webauthnPopup: needsWebauthnPopup,
+    webauthnPopup,
     preset: urlParams.preset,
     policiesStr: urlParams.policies,
     isConfigLoading,

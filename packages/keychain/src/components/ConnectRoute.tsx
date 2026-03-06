@@ -95,7 +95,7 @@ export function ConnectRoute() {
   );
 
   const requiresWebauthnPopup = useMemo(() => {
-    if (!webauthnPopup || !controller) {
+    if (!webauthnPopup.get || !controller) {
       return false;
     }
 

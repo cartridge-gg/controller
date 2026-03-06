@@ -26,7 +26,10 @@ interface AuthButtonProps extends React.ComponentProps<typeof Button> {
   validation: ReturnType<typeof useUsernameValidation>;
   username: string | undefined;
   signupOptions?: AuthOption[];
-  webauthnPopup?: boolean;
+  webauthnPopup?: {
+    create: boolean;
+    get: boolean;
+  };
 }
 
 export type LoginAuthConfig = {
@@ -174,15 +177,19 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
     }, [validation.signers]);
 
     const usesWebauthnPopup = useMemo(() => {
-      if (!webauthnPopup || option?.label !== AUTH_METHODS_LABELS.webauthn) {
+      if (option?.label !== AUTH_METHODS_LABELS.webauthn) {
         return false;
       }
 
       if (validation.exists) {
-        return isSingleSignerLogin;
+        return !!webauthnPopup?.get && isSingleSignerLogin;
       }
 
-      return signupOptions?.length === 1 && signupOptions[0] === "webauthn";
+      return (
+        !!webauthnPopup?.create &&
+        signupOptions?.length === 1 &&
+        signupOptions[0] === "webauthn"
+      );
     }, [
       webauthnPopup,
       option?.label,

@@ -28,7 +28,7 @@ export function useWebauthnAuthentication() {
     async (username: string) => {
       if (!chainId) throw new Error("No chainId found");
 
-      if (webauthnPopup) {
+      if (webauthnPopup.create) {
         const popupState = await openPopupAuth({
           action: "signup",
           username,
@@ -104,7 +104,7 @@ export function useWebauthnAuthentication() {
       if (!controllerQuery) throw new Error("No controller found");
       if (!chainId) throw new Error("No chainId found");
 
-      if (webauthnPopup) {
+      if (webauthnPopup.get) {
         const popupState = await openPopupAuth({
           action: "login",
           username: controllerQuery.accountID,

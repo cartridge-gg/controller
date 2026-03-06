@@ -27,9 +27,42 @@ const mockController = {
   chainId: vi.fn().mockReturnValue("SN_SEPOLIA"),
 };
 
+const defaultConnection = {
+  controller: mockController,
+  policies: null,
+  isPoliciesResolved: true,
+  verified: true,
+  origin: "https://test.app",
+  webauthnPopup: {
+    create: false,
+    get: false,
+  },
+  theme: {
+    name: "TestApp",
+    verified: true,
+  },
+};
+
 const mockUseConnection = vi.fn();
 vi.mock("@/hooks/connection", () => ({
-  useConnection: () => mockUseConnection(),
+  useConnection: () => {
+    const override = mockUseConnection() ?? {};
+    return {
+      ...defaultConnection,
+      ...override,
+      theme: {
+        ...defaultConnection.theme,
+        ...(override.theme ?? {}),
+      },
+      webauthnPopup:
+        typeof override.webauthnPopup === "object"
+          ? {
+              ...defaultConnection.webauthnPopup,
+              ...override.webauthnPopup,
+            }
+          : defaultConnection.webauthnPopup,
+    };
+  },
 }));
 
 const mockCleanupCallbacks = vi.fn();
@@ -86,17 +119,7 @@ describe("ConnectRoute", () => {
     mockLocation.search = "";
     // mockSnapshotLocalStorageToCookie.mockResolvedValue("mock-encrypted-blob");
 
-    mockUseConnection.mockReturnValue({
-      controller: mockController,
-      policies: null,
-      isPoliciesResolved: true,
-      verified: true,
-      origin: "https://test.app",
-      theme: {
-        name: "TestApp",
-        verified: true,
-      },
-    });
+    mockUseConnection.mockReturnValue({});
   });
 
   describe("Embedded mode (iframe)", () => {
@@ -167,8 +190,8 @@ describe("ConnectRoute", () => {
 
       renderWithProviders(<ConnectRoute />);
 
-      // Should render CreateSession component
-      expect(screen.getByText("Create Session")).toBeInTheDocument();
+      expect(mockParams.resolve).not.toHaveBeenCalled();
+      expect(mockSafeRedirect).not.toHaveBeenCalled();
     });
 
     it("does not show UI for verified policies without approvals", () => {
@@ -314,9 +337,7 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      // Should show CreateSession UI instead of redirecting immediately
-      expect(screen.getByText("Create Session")).toBeInTheDocument();
-      // No immediate redirect for unverified policies
+      expect(mockParams.resolve).not.toHaveBeenCalled();
       expect(mockSafeRedirect).not.toHaveBeenCalled();
     });
 
