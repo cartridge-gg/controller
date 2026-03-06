@@ -4,6 +4,7 @@ import {
   ConnectionContextValue,
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
+import { posthog } from "@/components/provider/posthog";
 import { useNavigation } from "@/context/navigation";
 import { connectToController } from "@/utils/connection";
 import type { HeadlessConnectionState } from "@/utils/connection/headless";
@@ -517,14 +518,23 @@ export function useConnectionValue() {
 
   // Compute verified state separately once config is loaded and origin or redirect_url are available
   useEffect(() => {
+    const isInIframe = isIframe();
+
     if (!configData || isConfigLoading) {
+      posthog.capture("debug_domain_verification", {
+        reason: "config_not_ready",
+        hasConfigData: !!configData,
+        isConfigLoading,
+        isInIframe,
+        locationHref: window.location.href,
+      });
       return;
     }
 
     const allowedOrigins = toArray(configData.origin as string | string[]);
 
     // In standalone mode (not iframe), verify preset if redirect_url matches preset whitelist
-    if (!isIframe()) {
+    if (!isInIframe) {
       const searchParams = new URLSearchParams(window.location.search);
       const redirectUrl = searchParams.get("redirect_url");
 
@@ -540,19 +550,49 @@ export function useConnectionValue() {
           const isOriginAllowed = isOriginVerified(redirectUrl, allowedOrigins);
           const finalVerified = isLocalhost || isOriginAllowed;
 
+          posthog.capture("debug_domain_verification", {
+            reason: "standalone_with_redirect",
+            redirectUrl,
+            redirectOrigin,
+            allowedOrigins,
+            isLocalhost,
+            isOriginAllowed,
+            finalVerified,
+            configOriginRaw: configData.origin,
+            locationHref: window.location.href,
+          });
+
           setVerified(finalVerified);
           return;
         } catch (error) {
+          posthog.capture("debug_domain_verification", {
+            reason: "standalone_redirect_parse_error",
+            redirectUrl,
+            error: String(error),
+            locationHref: window.location.href,
+          });
           console.error("Failed to parse redirect_url:", error);
         }
       }
 
       // No redirect_url or invalid redirect_url - don't verify preset in standalone mode
+      posthog.capture("debug_domain_verification", {
+        reason: "standalone_no_redirect",
+        locationHref: window.location.href,
+        searchParams: window.location.search,
+        allowedOrigins,
+        configOriginRaw: configData.origin,
+      });
       setVerified(false);
       return;
     }
 
     if (!configData.origin) {
+      posthog.capture("debug_domain_verification", {
+        reason: "iframe_no_config_origin",
+        origin,
+        locationHref: window.location.href,
+      });
       setVerified(false);
       return;
     }
@@ -564,8 +604,26 @@ export function useConnectionValue() {
         origin.includes("localhost") || origin === "capacitor://localhost";
       const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
       const finalVerified = isLocalhost || isOriginAllowed;
+
+      posthog.capture("debug_domain_verification", {
+        reason: "iframe_with_origin",
+        origin,
+        allowedOrigins,
+        isLocalhost,
+        isOriginAllowed,
+        finalVerified,
+        configOriginRaw: configData.origin,
+        locationHref: window.location.href,
+      });
+
       setVerified(finalVerified);
     } else {
+      posthog.capture("debug_domain_verification", {
+        reason: "iframe_no_origin",
+        locationHref: window.location.href,
+        allowedOrigins,
+        configOriginRaw: configData.origin,
+      });
       setVerified(false);
     }
   }, [origin, configData, isConfigLoading]);
