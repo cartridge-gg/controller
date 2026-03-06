@@ -167,7 +167,14 @@ export function NavigationProvider({
     });
 
     lastTrackedPath.current = currentPath;
-  }, [getFullPath, location.state, location.pathname, currentIndex]);
+  }, [
+    getFullPath,
+    location.state,
+    location.pathname,
+    setCurrentIndex,
+    setNavigationStack,
+    currentIndex,
+  ]);
 
   // Handle controller navigation events
   useEffect(() => {
@@ -207,7 +214,7 @@ export function NavigationProvider({
         handleControllerNavigate,
       );
     };
-  }, [navigate]);
+  }, [navigate, setNavigationStack, setCurrentIndex]);
 
   // Navigate with tracking
   const navigateWithTracking = useCallback(
@@ -282,7 +289,14 @@ export function NavigationProvider({
         navigate(finalPath, options);
       }
     },
-    [navigate, currentIndex, navigationStack, location.search],
+    [
+      navigate,
+      currentIndex,
+      navigationStack,
+      location.search,
+      setCurrentIndex,
+      setNavigationStack,
+    ],
   );
 
   const setShowClose = useCallback(
@@ -299,7 +313,7 @@ export function NavigationProvider({
         return prev;
       });
     },
-    [currentIndex],
+    [currentIndex, setNavigationStack],
   );
 
   // custom in-page navigation
