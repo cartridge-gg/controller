@@ -526,8 +526,7 @@ export function useConnectionValue() {
     // In standalone mode (not iframe), verify preset if redirect_url matches preset whitelist
     if (!isIframe()) {
       const searchParams = new URLSearchParams(window.location.search);
-      const redirectUrl =
-        searchParams.get("redirect_url") || searchParams.get("redirect_uri");
+      const redirectUrl = searchParams.get("redirect_url");
 
       if (redirectUrl) {
         try {
@@ -727,8 +726,7 @@ export function useConnectionValue() {
 
       // In standalone mode with redirect, use redirect URI's origin for app ID
       const searchParams = new URLSearchParams(window.location.search);
-      const redirectUrl =
-        searchParams.get("redirect_url") || searchParams.get("redirect_uri");
+      const redirectUrl = searchParams.get("redirect_url");
       let appOrigin = window.location.origin;
 
       if (redirectUrl) {
