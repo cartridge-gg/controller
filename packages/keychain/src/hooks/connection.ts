@@ -563,10 +563,7 @@ export function useConnectionValue() {
           const isLocalhost =
             redirectOrigin.includes("localhost") ||
             redirectOrigin === "capacitor://localhost";
-          const isOriginAllowed = isOriginVerified(
-            redirectOrigin,
-            allowedOrigins,
-          );
+          const isOriginAllowed = isOriginVerified(redirectUrl, allowedOrigins);
           const finalVerified = isLocalhost || isOriginAllowed;
 
           setVerified(finalVerified);
@@ -979,6 +976,14 @@ export function isOriginVerified(
   }
   try {
     const originUrl = new URL(origin);
+
+    // For custom URL schemes (e.g. native.app://callback), new URL().origin returns "null".
+    // Match the scheme against allowed origins.
+    if (originUrl.origin === "null") {
+      const scheme = originUrl.protocol.slice(0, -1);
+      return allowedOrigins.includes(scheme);
+    }
+
     const currentHostname = originUrl.hostname;
 
     return allowedOrigins.some((allowedOrigin) => {
