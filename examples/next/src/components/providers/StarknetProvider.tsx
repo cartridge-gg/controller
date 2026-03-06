@@ -214,9 +214,10 @@ export const controllerConnector = new ControllerConnector({
     erc20: ["lords", "strk"],
   },
   // nums (achievements, quests)
-  // slot: "nums-bal",
-  // namespace: "NUMS",
-  // preset: "nums",
+  slot: "nums-bal",
+  namespace: "NUMS",
+  preset: "nums",
+  // tokens: { erc20: ["0x54c9e4dc8d42950774b6a8f0e5186bd88719463807156e444417d981efb60ef"] },
 
   // Pistols (achievements, no quests)
   // slot: "arcade-pistols",
@@ -229,6 +230,9 @@ export const controllerConnector = new ControllerConnector({
   // preset: "loot-survivor",
 
   // Summit (no achievements, no quests)
+  // namespace: "relayer_0_0_1",
+  // slot: "pg-mainnet-10",
+  // preset: "savage-summit",
 });
 
 const session = new SessionConnector({
