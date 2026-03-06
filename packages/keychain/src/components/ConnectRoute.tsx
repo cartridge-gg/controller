@@ -343,7 +343,7 @@ export function ConnectRoute() {
         try {
           if (requiresWebauthnPopup) {
             // When session auth relies on WebAuthn, delegate it to a popup window.
-            await createSessionViaPopup(setController, popupParams);
+            await createSessionViaPopup(controller, setController, popupParams);
           } else {
             await createVerifiedSession({
               controller,
@@ -422,7 +422,7 @@ export function ConnectRoute() {
         setSessionError(undefined);
         try {
           if (requiresWebauthnPopup) {
-            await createSessionViaPopup(setController, popupParams);
+            await createSessionViaPopup(controller, setController, popupParams);
           } else {
             await createVerifiedSession({ controller, origin, policies });
           }
@@ -475,6 +475,7 @@ export function ConnectRoute() {
   if (requiresWebauthnPopup) {
     return (
       <PopupSessionProxy
+        controller={controller}
         onConnect={handleConnect}
         onSkip={handleSkip}
         setController={setController}
@@ -497,10 +498,12 @@ export function ConnectRoute() {
  * The popup handles the CreateSession UI + WebAuthn signing.
  */
 function PopupSessionProxy({
+  controller,
   onConnect,
   setController,
   popupParams,
 }: {
+  controller: Controller;
   onConnect: () => void;
   onSkip?: () => void;
   setController: (controller?: Controller) => void;
@@ -520,14 +523,14 @@ function PopupSessionProxy({
 
     (async () => {
       try {
-        await createSessionViaPopup(setController, popupParams);
+        await createSessionViaPopup(controller, setController, popupParams);
         onConnect();
       } catch (e) {
         console.error("[PopupSessionProxy] Popup session creation failed:", e);
         setError(e instanceof Error ? e.message : String(e));
       }
     })();
-  }, [onConnect, setController, popupParams]);
+  }, [controller, onConnect, setController, popupParams]);
 
   if (error) {
     return (
@@ -564,10 +567,11 @@ function PopupSessionProxy({
 }
 
 /**
- * Opens a popup for session creation, waits for completion,
- * and reloads the controller from shared localStorage.
+ * Opens a popup for WebAuthn-backed session creation and imports the
+ * returned controller/session state into the iframe store.
  */
 async function createSessionViaPopup(
+  currentController: Controller,
   setController: (controller?: Controller) => void,
   params: {
     preset?: string;
@@ -576,18 +580,16 @@ async function createSessionViaPopup(
     origin?: string;
   },
 ): Promise<void> {
-  await openPopupAuth({
-    action: "create-session",
+  const popupState = await openPopupAuth({
+    action: "login",
+    username: currentController.username(),
     preset: params.preset ?? undefined,
     rpcUrl: params.rpcUrl ?? undefined,
     policies: params.policiesStr ?? undefined,
     origin: params.origin ?? undefined,
   });
 
-  // Reload controller from shared localStorage (popup wrote session data)
-  const controller = await Controller.fromStore();
-  if (controller) {
-    window.controller = controller;
-    setController(controller);
-  }
+  const controller = await Controller.importState(popupState);
+  window.controller = controller;
+  setController(controller);
 }

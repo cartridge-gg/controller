@@ -29,8 +29,8 @@ export function useWebauthnAuthentication() {
       if (!chainId) throw new Error("No chainId found");
 
       if (webauthnPopup) {
-        await openPopupAuth({
-          action: "connect",
+        const popupState = await openPopupAuth({
+          action: "signup",
           username,
           preset: preset ?? undefined,
           rpcUrl: rpcUrl ?? undefined,
@@ -38,10 +38,7 @@ export function useWebauthnAuthentication() {
           origin: origin ?? undefined,
         });
 
-        const controller = await Controller.fromStore();
-        if (!controller) {
-          throw new Error("Popup auth completed without a controller");
-        }
+        const controller = await Controller.importState(popupState);
 
         window.controller = controller;
         setController(controller);
@@ -108,8 +105,8 @@ export function useWebauthnAuthentication() {
       if (!chainId) throw new Error("No chainId found");
 
       if (webauthnPopup) {
-        await openPopupAuth({
-          action: "connect",
+        const popupState = await openPopupAuth({
+          action: "login",
           username: controllerQuery.accountID,
           preset: preset ?? undefined,
           rpcUrl: rpcUrl ?? undefined,
@@ -117,10 +114,7 @@ export function useWebauthnAuthentication() {
           origin: origin ?? undefined,
         });
 
-        const controller = await Controller.fromStore();
-        if (!controller) {
-          throw new Error("Popup auth completed without a controller");
-        }
+        const controller = await Controller.importState(popupState);
 
         window.controller = controller;
         setController(controller);

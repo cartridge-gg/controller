@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useConnection } from "@/hooks/connection";
 import { CreateController } from "./connect";
 import { CreateSession } from "./connect/CreateSession";
-import Controller from "@/utils/controller";
+import type { ImportedControllerState } from "@/utils/controller";
 import {
   createVerifiedSession,
   requiresSessionApproval,
@@ -15,8 +15,8 @@ const POPUP_CLOSE_FALLBACK_MS = 2000;
  * Standalone popup page rendered at /auth.
  * Opened by the keychain iframe when WebAuthn is unavailable in the iframe context.
  *
- * - action=connect: Full signup/login flow + session creation
- * - action=create-session: Load controller from shared localStorage, create session
+ * - action=signup: Create account and requested session in the popup
+ * - action=login: Log in and create the requested session in the popup
  *
  * On completion, signals the iframe via postMessage and closes.
  */
@@ -24,18 +24,15 @@ export function PopupAuth() {
   const [searchParams] = useSearchParams();
   const {
     controller,
-    setController,
     policies,
     origin,
     isPoliciesResolved,
     isConfigLoading,
+    preset,
   } = useConnection();
 
   const channelId = searchParams.get("channel_id");
-  const action = searchParams.get("action") as
-    | "connect"
-    | "create-session"
-    | null;
+  const action = searchParams.get("action") as "signup" | "login" | null;
   const popupOrigin = window.location.origin;
 
   const closeTimeoutRef = useRef<number | null>(null);
@@ -65,13 +62,12 @@ export function PopupAuth() {
   }, [channelId, popupOrigin]);
 
   const signalComplete = useCallback(
-    (address: string, username: string) => {
+    (state: ImportedControllerState) => {
       window.opener?.postMessage(
         {
           type: "auth-complete",
           channelId,
-          address,
-          username,
+          state,
         },
         popupOrigin,
       );
@@ -103,14 +99,18 @@ export function PopupAuth() {
     [channelId, popupOrigin],
   );
 
-  // For action=create-session: try to auto-create verified session
+  const completePopupAuth = useCallback(async () => {
+    if (!controller) {
+      return;
+    }
+
+    const state = await controller.exportState(origin || undefined);
+    signalComplete(state);
+    setSessionComplete(true);
+  }, [controller, origin, signalComplete]);
+
   useEffect(() => {
-    if (
-      action !== "create-session" ||
-      !controller ||
-      !policies ||
-      sessionComplete
-    ) {
+    if (!action || !controller || sessionComplete) {
       return;
     }
 
@@ -118,91 +118,32 @@ export function PopupAuth() {
       return;
     }
 
-    // If session doesn't require approval, create it automatically
-    if (!requiresSessionApproval(policies)) {
-      (async () => {
-        try {
-          await createVerifiedSession({ controller, origin, policies });
-          signalComplete(controller.address(), controller.username());
-          setSessionComplete(true);
-        } catch (e) {
-          console.error("[PopupAuth] Failed to auto-create session:", e);
-          signalError(e instanceof Error ? e.message : String(e));
-        }
-      })();
+    if (policies && requiresSessionApproval(policies)) {
+      return;
     }
+
+    void (async () => {
+      try {
+        if (policies) {
+          await createVerifiedSession({ controller, origin, policies });
+        }
+
+        await completePopupAuth();
+      } catch (e) {
+        console.error("[PopupAuth] Failed to complete popup auth:", e);
+        signalError(e instanceof Error ? e.message : String(e));
+      }
+    })();
   }, [
-    action,
     controller,
     policies,
     origin,
+    action,
     isPoliciesResolved,
     isConfigLoading,
     sessionComplete,
-    signalComplete,
+    completePopupAuth,
     signalError,
-  ]);
-
-  // For action=connect: once controller exists (user signed up/logged in),
-  // attempt auto session creation or show CreateSession
-  useEffect(() => {
-    if (action !== "connect" || !controller || !policies || sessionComplete) {
-      return;
-    }
-
-    if (!isPoliciesResolved || isConfigLoading) {
-      return;
-    }
-
-    // If no approval needed, create session and signal completion
-    if (!requiresSessionApproval(policies)) {
-      (async () => {
-        try {
-          await createVerifiedSession({ controller, origin, policies });
-          signalComplete(controller.address(), controller.username());
-          setSessionComplete(true);
-        } catch (e) {
-          console.error(
-            "[PopupAuth] Failed to auto-create session after connect:",
-            e,
-          );
-          // Don't signal error here — fall through to CreateSession UI
-        }
-      })();
-    }
-  }, [
-    action,
-    controller,
-    policies,
-    origin,
-    isPoliciesResolved,
-    isConfigLoading,
-    sessionComplete,
-    signalComplete,
-  ]);
-
-  // Handle no-policy connect: once controller exists and policies are resolved, signal complete
-  useEffect(() => {
-    if (action !== "connect" || !controller || sessionComplete) {
-      return;
-    }
-
-    if (!isPoliciesResolved || isConfigLoading) {
-      return;
-    }
-
-    if (!policies) {
-      signalComplete(controller.address(), controller.username());
-      setSessionComplete(true);
-    }
-  }, [
-    action,
-    controller,
-    policies,
-    sessionComplete,
-    signalComplete,
-    isPoliciesResolved,
-    isConfigLoading,
   ]);
 
   if (!channelId || !action) {
@@ -213,22 +154,17 @@ export function PopupAuth() {
     );
   }
 
-  // action=connect and no controller: show signup/login flow
-  if (action === "connect" && !controller) {
+  if (!controller) {
     const prefillUsername = searchParams.get("username") ?? undefined;
     return (
       <CreateController
-        isSlot={false}
+        isSlot={preset === "slot"}
         signers={["webauthn"]}
         forcedAuthMethod="webauthn"
+        forcedAction={action}
         prefillUsername={prefillUsername}
       />
     );
-  }
-
-  // action=create-session and no controller: load from storage
-  if (action === "create-session" && !controller) {
-    return <CreateSessionLoader setController={setController} />;
   }
 
   // Controller exists but policies need approval UI
@@ -242,55 +178,35 @@ export function PopupAuth() {
       <CreateSession
         policies={policies}
         onConnect={() => {
-          signalComplete(controller.address(), controller.username());
-          setSessionComplete(true);
+          void (async () => {
+            try {
+              await completePopupAuth();
+            } catch (e) {
+              console.error(
+                "[PopupAuth] Failed to export popup auth state:",
+                e,
+              );
+              signalError(e instanceof Error ? e.message : String(e));
+            }
+          })();
         }}
         onSkip={() => {
-          signalComplete(controller.address(), controller.username());
-          setSessionComplete(true);
+          void (async () => {
+            try {
+              await completePopupAuth();
+            } catch (e) {
+              console.error(
+                "[PopupAuth] Failed to export popup auth state:",
+                e,
+              );
+              signalError(e instanceof Error ? e.message : String(e));
+            }
+          })();
         }}
       />
     );
   }
 
   // Loading / waiting state
-  return null;
-}
-
-/**
- * Loads controller from shared localStorage when popup opens for create-session.
- */
-function CreateSessionLoader({
-  setController,
-}: {
-  setController: (controller?: Controller) => void;
-}) {
-  const [error, setError] = useState<string>();
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const ctrl = await Controller.fromStore();
-        if (!ctrl) {
-          setError("No account found. Please sign in first.");
-          return;
-        }
-        window.controller = ctrl;
-        setController(ctrl);
-      } catch (e) {
-        console.error("[PopupAuth] Failed to load controller:", e);
-        setError(e instanceof Error ? e.message : "Failed to load account");
-      }
-    })();
-  }, [setController]);
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen text-foreground-300">
-        <p>{error}</p>
-      </div>
-    );
-  }
-
   return null;
 }

@@ -9,25 +9,18 @@ import Controller from "./utils/controller";
 
 import "./index.css";
 
-function shouldResetPopupAuthStorage(): boolean {
+function isPopupAuthRoute(): boolean {
   if (typeof window === "undefined") {
     return false;
   }
 
   const url = new URL(window.location.href);
-  return (
-    url.pathname === "/auth" && url.searchParams.get("action") === "connect"
-  );
+  return url.pathname === "/auth";
 }
 
 // Controller type is already declared in vite-env.d.ts
 async function bootstrap() {
-  if (shouldResetPopupAuthStorage()) {
-    try {
-      localStorage.clear();
-    } catch (error) {
-      console.error("[bootstrap] Failed to clear popup auth storage:", error);
-    }
+  if (isPopupAuthRoute()) {
     window.controller = undefined;
   } else {
     window.controller = await Controller.fromStore();

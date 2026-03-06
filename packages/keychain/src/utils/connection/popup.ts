@@ -1,15 +1,16 @@
+import type { ImportedControllerState } from "@/utils/controller";
+
 const POPUP_WIDTH = 432;
 const POPUP_HEIGHT = 700;
 const POPUP_POLL_INTERVAL_MS = 500;
 
-export type PopupAuthAction = "connect" | "create-session";
+export type PopupAuthAction = "signup" | "login";
 
 type PopupMessage =
   | {
       type: "auth-complete";
       channelId: string;
-      address: string;
-      username?: string;
+      state: ImportedControllerState;
     }
   | {
       type: "auth-error";
@@ -26,10 +27,7 @@ export interface PopupAuthOptions {
   username?: string;
 }
 
-export interface PopupAuthResult {
-  address: string;
-  username: string;
-}
+export type PopupAuthResult = ImportedControllerState;
 
 let activePopup: Window | null = null;
 
@@ -111,7 +109,7 @@ export function openPopupAuth(
           window.location.origin,
         );
         cleanup();
-        resolve({ address: data.address, username: data.username ?? "" });
+        resolve(data.state);
       } else if (data.type === "auth-error") {
         cleanup();
         reject(new Error(data.error ?? "Popup authentication failed"));

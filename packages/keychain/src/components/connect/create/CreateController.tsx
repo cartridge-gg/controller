@@ -383,6 +383,7 @@ export function CreateController({
   prefillUsername,
   isLoading: externalIsLoading = false,
   forcedAuthMethod,
+  forcedAction,
 }: {
   isSlot?: boolean;
   error?: Error;
@@ -390,6 +391,7 @@ export function CreateController({
   prefillUsername?: string;
   isLoading?: boolean;
   forcedAuthMethod?: AuthOption;
+  forcedAction?: "signup" | "login";
 }) {
   const posthog = usePostHog();
   const hasLoggedFocus = useRef(false);
@@ -455,9 +457,24 @@ export function CreateController({
       }
 
       if (validation.status === "valid") {
-        const accountExists = !!validation.exists;
+        const accountExists =
+          forcedAction === "signup"
+            ? false
+            : forcedAction === "login"
+              ? true
+              : !!validation.exists;
         const selectedAuthenticationMode =
           authenticationMode ?? forcedAuthMethod;
+
+        if (forcedAction === "signup" && validation.exists) {
+          setError(new Error("Username already exists"));
+          return;
+        }
+
+        if (forcedAction === "login" && !validation.exists) {
+          setError(new Error("Account not found"));
+          return;
+        }
 
         if (
           selectedAuthenticationMode === undefined &&
@@ -511,6 +528,8 @@ export function CreateController({
       setAuthenticationStep,
       signupOptions,
       forcedAuthMethod,
+      forcedAction,
+      setError,
     ],
   );
 
