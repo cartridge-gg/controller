@@ -1,42 +1,64 @@
 "use client";
 
-import { FC } from "react";
-
-import { ColorModeToggle } from "components/ColorModeToggle";
-import Header from "components/Header";
-import { DelegateAccount } from "components/DelegateAccount";
-import { InvalidTxn } from "components/InvalidTxn";
-import { LookupControllers } from "components/LookupControllers";
-import { ManualTransferEth } from "components/ManualTransferEth";
-import { PlayButton } from "components/PlayButton";
-import { Profile } from "components/Profile";
-import { SignMessage } from "components/SignMessage";
-import { Transfer } from "components/Transfer";
-import { Starterpack } from "components/Starterpack";
-import { UpdateSession } from "components/UpdateSession";
-import { ControllerToaster } from "@cartridge/ui";
+import { FC, useEffect, useMemo, useState } from "react";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
+import ControllerConnector from "@cartridge/connector/controller";
+import { Button } from "@cartridge/ui";
 
 const Home: FC = () => {
+  const { status } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+  const [isControllerReady, setIsControllerReady] = useState(false);
+
+  const controllerConnector = useMemo(
+    () => ControllerConnector.fromConnectors(connectors),
+    [connectors],
+  );
+
+  useEffect(() => {
+    const checkReady = () => {
+      try {
+        if (controllerConnector) {
+          setIsControllerReady(controllerConnector.isReady());
+        }
+      } catch (e) {
+        console.error("Error checking controller readiness:", e);
+      }
+    };
+
+    checkReady();
+    const interval = setInterval(checkReady, 1000);
+    return () => clearInterval(interval);
+  }, [controllerConnector]);
+
   return (
-    <main className="w-screen overflow-x-hidden flex flex-col p-4 gap-4">
-      <div className="flex justify-between">
-        <h2 className="text-3xl font-bold underline text-primary">
-          Controller Example (Next.js)
-        </h2>
-        <ColorModeToggle />
-      </div>
-      <Header />
-      <PlayButton />
-      <Profile />
-      <Transfer />
-      <ManualTransferEth />
-      <Starterpack />
-      <UpdateSession />
-      <DelegateAccount />
-      <InvalidTxn />
-      <SignMessage />
-      <LookupControllers />
-      <ControllerToaster />
+    <main className="h-screen w-screen flex flex-col items-center justify-center gap-4">
+      {status !== "connected" ? (
+        <Button
+          onClick={() => connect({ connector: controllerConnector })}
+          disabled={!isControllerReady}
+        >
+          {isControllerReady ? "Connect" : "Waiting for keychain..."}
+        </Button>
+      ) : (
+        <div className="flex flex-col items-center gap-4">
+          <Button
+            onClick={() => {
+              controllerConnector.controller.openStarterPack(5);
+            }}
+          >
+            Purchase Starterpack
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => disconnect()}
+            className="mt-4"
+          >
+            Disconnect
+          </Button>
+        </div>
+      )}
     </main>
   );
 };
