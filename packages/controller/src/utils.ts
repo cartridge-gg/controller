@@ -256,14 +256,6 @@ export function parseChainId(url: URL): ChainId {
   throw new Error(`Chain ${url.toString()} not supported`);
 }
 
-export function isMobile() {
-  return (
-    window.matchMedia("(max-width: 768px)").matches ||
-    "ontouchstart" in window ||
-    navigator.maxTouchPoints > 0
-  );
-}
-
 // Sanitize image src to prevent XSS
 export function sanitizeImageSrc(src: string): string {
   // Allow only http/https URLs (absolute)
