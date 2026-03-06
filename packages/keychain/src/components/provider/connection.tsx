@@ -22,6 +22,9 @@ export type ConnectionContextValue = {
   project: string | null;
   namespace: string | null;
   propagateError: boolean;
+  webauthnPopup: boolean;
+  preset: string | null;
+  policiesStr: string | null;
   tokens?: string[];
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;

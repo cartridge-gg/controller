@@ -2,26 +2,50 @@ import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
+import { openPopupAuth } from "@/utils/connection/popup";
 import { Owner } from "@cartridge/controller-wasm";
 import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
 import { shortString } from "starknet";
 
+type WebauthnAuthResult = {
+  controller: Controller;
+  completedInPopup: boolean;
+};
+
 export function useWebauthnAuthentication() {
-  const { origin, rpcUrl, chainId, setController } = useConnection();
+  const {
+    origin,
+    rpcUrl,
+    chainId,
+    setController,
+    webauthnPopup,
+    preset,
+    policiesStr,
+  } = useConnection();
 
   const signup = useCallback(
-    async (username: string, doPopupFlow: (username: string) => void) => {
+    async (username: string) => {
       if (!chainId) throw new Error("No chainId found");
 
-      // Signup flow
-      const isSafari = /^((?!chrome|android).)*safari/i.test(
-        navigator.userAgent,
-      );
+      if (webauthnPopup) {
+        await openPopupAuth({
+          action: "connect",
+          username,
+          preset: preset ?? undefined,
+          rpcUrl: rpcUrl ?? undefined,
+          policies: policiesStr ?? undefined,
+          origin: origin ?? undefined,
+        });
 
-      if (isSafari) {
-        doPopupFlow(username);
-        return;
+        const controller = await Controller.fromStore();
+        if (!controller) {
+          throw new Error("Popup auth completed without a controller");
+        }
+
+        window.controller = controller;
+        setController(controller);
+        return { controller, completedInPopup: true } as WebauthnAuthResult;
       }
 
       const data = await doSignup(
@@ -61,8 +85,17 @@ export function useWebauthnAuthentication() {
 
       window.controller = controller;
       setController(controller);
+      return { controller, completedInPopup: false } as WebauthnAuthResult;
     },
-    [origin, rpcUrl, chainId, setController],
+    [
+      origin,
+      rpcUrl,
+      chainId,
+      setController,
+      webauthnPopup,
+      preset,
+      policiesStr,
+    ],
   );
 
   const login = useCallback(
@@ -73,6 +106,26 @@ export function useWebauthnAuthentication() {
     ) => {
       if (!controllerQuery) throw new Error("No controller found");
       if (!chainId) throw new Error("No chainId found");
+
+      if (webauthnPopup) {
+        await openPopupAuth({
+          action: "connect",
+          username: controllerQuery.accountID,
+          preset: preset ?? undefined,
+          rpcUrl: rpcUrl ?? undefined,
+          policies: policiesStr ?? undefined,
+          origin: origin ?? undefined,
+        });
+
+        const controller = await Controller.fromStore();
+        if (!controller) {
+          throw new Error("Popup auth completed without a controller");
+        }
+
+        window.controller = controller;
+        setController(controller);
+        return { controller, completedInPopup: true } as WebauthnAuthResult;
+      }
 
       let controller: Controller;
       if (isSlot) {
@@ -100,9 +153,17 @@ export function useWebauthnAuthentication() {
 
       window.controller = controller;
       setController(controller);
-      return controller;
+      return { controller, completedInPopup: false } as WebauthnAuthResult;
     },
-    [chainId, rpcUrl, origin, setController],
+    [
+      chainId,
+      rpcUrl,
+      origin,
+      setController,
+      webauthnPopup,
+      preset,
+      policiesStr,
+    ],
   );
 
   return {

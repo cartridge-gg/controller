@@ -206,6 +206,7 @@ export const controllerConnector = new ControllerConnector({
   chains: controllerConnectorChains,
   url: getKeychainUrl(),
   signupOptions,
+  webauthnPopup: true,
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
@@ -213,7 +214,6 @@ export const controllerConnector = new ControllerConnector({
   tokens: {
     erc20: ["lords", "strk"],
   },
-
   // nums (achievements, quests)
   // slot: "nums-bal",
   // namespace: "NUMS",
@@ -230,9 +230,6 @@ export const controllerConnector = new ControllerConnector({
   // preset: "loot-survivor",
 
   // Summit (no achievements, no quests)
-  namespace: "relayer_0_0_1",
-  slot: "pg-mainnet-10",
-  preset: "savage-summit",
 });
 
 const session = new SessionConnector({

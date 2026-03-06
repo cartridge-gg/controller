@@ -26,6 +26,7 @@ interface AuthButtonProps extends React.ComponentProps<typeof Button> {
   validation: ReturnType<typeof useUsernameValidation>;
   username: string | undefined;
   signupOptions?: AuthOption[];
+  webauthnPopup?: boolean;
 }
 
 export type LoginAuthConfig = {
@@ -93,7 +94,14 @@ const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
 
 export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
   (
-    { waitingForConfirmation, validation, username, signupOptions, ...props },
+    {
+      waitingForConfirmation,
+      validation,
+      username,
+      signupOptions,
+      webauthnPopup,
+      ...props
+    },
     ref,
   ) => {
     const { wallets, isExtensionMissing } = useWallets();
@@ -165,7 +173,28 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       );
     }, [validation.signers]);
 
+    const usesWebauthnPopup = useMemo(() => {
+      if (!webauthnPopup || option?.label !== AUTH_METHODS_LABELS.webauthn) {
+        return false;
+      }
+
+      if (validation.exists) {
+        return isSingleSignerLogin;
+      }
+
+      return signupOptions?.length === 1 && signupOptions[0] === "webauthn";
+    }, [
+      webauthnPopup,
+      option?.label,
+      validation.exists,
+      isSingleSignerLogin,
+      signupOptions,
+    ]);
+
     const text = useMemo(() => {
+      if (usesWebauthnPopup && isLoading) {
+        return "complete in popup";
+      }
       if (waitingForConfirmation) {
         return `Waiting for ${option?.label} confirmation`;
       }
@@ -201,6 +230,7 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       username,
       signupOptions,
       isSingleSignerLogin,
+      usesWebauthnPopup,
     ]);
 
     return (

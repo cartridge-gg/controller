@@ -262,6 +262,32 @@ export function useConnectionValue() {
     setOnModalCloseInternal(() => fn);
   }, []);
 
+  // Auto-detect if WebAuthn won't work in this context (e.g. iframe without
+  // publickey-credentials-get permission). When true, WebAuthn uses a popup.
+  const needsWebauthnPopup = useMemo(() => {
+    // Check for explicit popup override URL param (set by controller SDK)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("webauthn_popup") === "true") {
+      return true;
+    }
+
+    if (!isIframe()) return false;
+
+    // Safari doesn't expose Permissions Policy API but blocks WebAuthn
+    // in cross-origin iframes unconditionally
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) return true;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const doc = document as any;
+    const policy = doc.permissionsPolicy ?? doc.featurePolicy;
+    if (!policy) return false;
+    return (
+      !policy.allowsFeature("publickey-credentials-create") ||
+      !policy.allowsFeature("publickey-credentials-get")
+    );
+  }, []);
+
   const [searchParams] = useSearchParams();
 
   // Track if URL explicitly provides an rpc_url that should take priority
@@ -727,18 +753,21 @@ export function useConnectionValue() {
       const localWalletBridge = new WalletBridge();
       const iframeMethods = localWalletBridge.getIFrameMethods();
 
-      // In standalone mode with redirect, use redirect URI's origin for app ID
+      // In standalone mode, use explicit origin param (popup auth), redirect URI's origin,
+      // or fall back to window.location.origin
       const searchParams = new URLSearchParams(window.location.search);
+      const originParam = searchParams.get("origin");
       const redirectUrl = searchParams.get("redirect_url");
       let appOrigin = window.location.origin;
 
-      if (redirectUrl) {
+      if (originParam) {
+        appOrigin = decodeURIComponent(originParam);
+      } else if (redirectUrl) {
         try {
           const redirectUrlObj = new URL(redirectUrl);
           appOrigin = redirectUrlObj.origin;
         } catch (error) {
           console.error("Failed to parse redirect_url for app ID:", error);
-          // Fall back to window.location.origin if redirect URL is invalid
         }
       }
 
@@ -892,6 +921,9 @@ export function useConnectionValue() {
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
+    webauthnPopup: needsWebauthnPopup,
+    preset: urlParams.preset,
+    policiesStr: urlParams.policies,
     isConfigLoading,
     isPoliciesResolved,
     isMainnet,
