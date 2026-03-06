@@ -1,4 +1,5 @@
 import { useNavigation } from "@/context/navigation";
+import { useFeatures } from "@/hooks/features";
 import {
   getInstagramAuthUrl,
   getTikTokAuthUrl,
@@ -16,7 +17,7 @@ import {
   SpinnerIcon,
 } from "@cartridge/ui";
 import { SiInstagram, SiTiktok, SiX } from "@icons-pack/react-simple-icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "react-query";
 
 type ConnectionPending = {
@@ -32,6 +33,17 @@ export function AddConnection({ username }: { username?: string }) {
     useState<ConnectionPending | null>(null);
   const [headerIcon, setHeaderIcon] = useState<React.ReactElement>(
     <AddUserIcon size="lg" />,
+  );
+
+  // Feature flags - connections can be toggled via /feature/connections/enable or /feature/connections/disable
+  const { isFeatureEnabled } = useFeatures();
+  const featureFlags = useMemo(
+    () => ({
+      x: isFeatureEnabled("connection-x"),
+      tiktok: isFeatureEnabled("connection-tiktok"),
+      instagram: isFeatureEnabled("connection-instagram"),
+    }),
+    [isFeatureEnabled],
   );
 
   const handleTikTokConnect = useCallback(() => {
@@ -365,15 +377,24 @@ export function AddConnection({ username }: { username?: string }) {
           />
         ) : (
           <>
-            <ConnectionMethod provider="TIKTOK" onClick={handleTikTokConnect} />
-            <ConnectionMethod
-              provider="INSTAGRAM"
-              onClick={handleInstagramConnect}
-            />
-            <ConnectionMethod
-              provider="TWITTER"
-              onClick={handleTwitterConnect}
-            />
+            {featureFlags.tiktok && (
+              <ConnectionMethod
+                provider="TIKTOK"
+                onClick={handleTikTokConnect}
+              />
+            )}
+            {featureFlags.instagram && (
+              <ConnectionMethod
+                provider="INSTAGRAM"
+                onClick={handleInstagramConnect}
+              />
+            )}
+            {featureFlags.x && (
+              <ConnectionMethod
+                provider="TWITTER"
+                onClick={handleTwitterConnect}
+              />
+            )}
           </>
         )}
       </LayoutContent>

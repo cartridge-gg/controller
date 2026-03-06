@@ -29,7 +29,11 @@ export const ConnectionsSection = () => {
 
   const username = controller?.username();
 
-  const { data, isLoading, isError } = useQuery<OAuthConnection[]>(
+  const {
+    data: connections,
+    isLoading,
+    isError,
+  } = useQuery<OAuthConnection[]>(
     ["oauthConnections", username],
     async () => {
       if (!username) return [];
@@ -54,10 +58,12 @@ export const ConnectionsSection = () => {
   );
 
   const ALL_PROVIDERS: OAuthProvider[] = ["TIKTOK", "INSTAGRAM", "TWITTER"];
-  const connectedProviders = data?.map((c) => c.provider) ?? [];
+  const connectedProviders = connections?.map((c) => c.provider) ?? [];
   const hasAllConnections = ALL_PROVIDERS.every((p) =>
     connectedProviders.includes(p),
   );
+
+  console.log(`connections:`, connections);
 
   return (
     <section className="space-y-4">
@@ -74,7 +80,7 @@ export const ConnectionsSection = () => {
           </div>
         ) : (
           <>
-            {data?.map((connection) => (
+            {connections?.map((connection) => (
               <ConnectionCard
                 key={connection.id}
                 connection={connection}
