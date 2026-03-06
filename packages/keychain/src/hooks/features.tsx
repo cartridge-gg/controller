@@ -10,7 +10,13 @@ import React, {
 
 const LOCAL_STORAGE_KEY = "@cartridge/features";
 
-export type Feature = "none" | "connections" | "apple-pay-support";
+export type Feature =
+  | "none"
+  | "connections"
+  | "connection-x"
+  | "connection-instagram"
+  | "connection-tiktok"
+  | "apple-pay-support";
 
 // --- Helper Functions ---
 
@@ -36,9 +42,9 @@ const saveFeaturesToStorage = (features: Record<string, boolean>): void => {
 
 interface FeaturesContextValue {
   features: Record<string, boolean>;
-  enableFeature: (name: string) => void;
-  disableFeature: (name: string) => void;
-  isFeatureEnabled: (name: string) => boolean;
+  enableFeature: (name: Feature) => void;
+  disableFeature: (name: Feature) => void;
+  isFeatureEnabled: (name: Feature) => boolean;
 }
 
 const FeaturesContext = createContext<FeaturesContextValue | undefined>(

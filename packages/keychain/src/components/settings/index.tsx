@@ -19,7 +19,7 @@ import {
   SignOutIcon,
 } from "@cartridge/ui";
 import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";
 import {
@@ -51,7 +51,12 @@ const registeredAccounts: RegisteredAccount[] = [
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
   const { navigate } = useNavigation();
-  const { isFeatureEnabled } = useFeatures();
+  const { isFeatureEnabled, enableFeature } = useFeatures();
+
+  useEffect(() => {
+    enableFeature("connections");
+    enableFeature("connection-x");
+  }, [enableFeature]);
 
   // Feature flags - connections can be toggled via /feature/connections/enable or /feature/connections/disable
   const featureFlags = useMemo<FeatureFlags>(
