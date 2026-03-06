@@ -236,14 +236,14 @@ export const controllerConnector = new ControllerConnector({
 });
 
 const session = new SessionConnector({
+  policies,
   rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
-  chainId: shortString.encodeShortString("WP_JOKERS_CORE_SEASON2"),
-  redirectUrl: "jokers://open",
+  chainId: constants.StarknetChainId.SN_MAIN,
+  redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   disconnectRedirectUrl: "whatsapp://",
   keychainUrl: getKeychainUrl(),
   apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
   signupOptions,
-  preset: "jokers-of-neon",
 });
 
 export function StarknetProvider({ children }: PropsWithChildren) {
