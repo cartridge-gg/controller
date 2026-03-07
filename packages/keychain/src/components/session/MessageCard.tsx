@@ -1,5 +1,4 @@
-import { useCreateSession } from "@/hooks/session";
-import type { SignMessagePolicy } from "@cartridge/presets";
+import { type PropsWithChildren, useState, useEffect } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -11,12 +10,13 @@ import {
   Thumbnail,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
+import { useCreateSession } from "@/hooks/session";
 import { ArrowTurnDownIcon, Badge } from "@cartridge/ui";
+import type { SignMessagePolicy } from "@cartridge/presets";
 import type {
   StarknetEnumType,
   StarknetMerkleType,
 } from "@starknet-io/types-js";
-import { type PropsWithChildren, useState, useEffect } from "react";
 
 interface MessageCardProps {
   messages: SignMessagePolicyWithEnabled[];
