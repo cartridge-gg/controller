@@ -1,9 +1,10 @@
 import { Call, RpcProvider, shortString, constants } from "starknet";
-import { USDC_ADDRESSES } from "@/utils/ekubo";
+import { USDC_ADDRESSES, USDCE_ADDRESSES } from "@/utils/ekubo";
 import {
   USDT_CONTRACT_ADDRESS,
   STRK_CONTRACT_ADDRESS,
   ETH_CONTRACT_ADDRESS,
+  USDC_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
 
 export interface TokenMetadata {
@@ -31,6 +32,16 @@ const CACHED_TOKEN_METADATA: Record<string, TokenMetadata> = {
   [USDT_CONTRACT_ADDRESS.toLowerCase()]: {
     name: "Tether USD",
     symbol: "USDT",
+    decimals: 6,
+  },
+  [USDC_CONTRACT_ADDRESS.toLowerCase()]: {
+    name: "Bridged USDC",
+    symbol: "USDC.e",
+    decimals: 6,
+  },
+  [USDCE_ADDRESSES[constants.StarknetChainId.SN_SEPOLIA].toLowerCase()]: {
+    name: "Bridged USDC",
+    symbol: "USDC.e",
     decimals: 6,
   },
   [STRK_CONTRACT_ADDRESS.toLowerCase()]: {
