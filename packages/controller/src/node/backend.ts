@@ -13,6 +13,9 @@ interface SessionInfo {
   ownerGuid: string;
   transactionHash?: string;
   expiresAt: string;
+  guardianKeyGuid: string;
+  metadataHash: string;
+  sessionKeyGuid: string;
 }
 
 interface SessionData {
