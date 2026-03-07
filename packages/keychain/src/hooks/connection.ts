@@ -216,7 +216,11 @@ export function resolvePolicies({
 }
 
 export function isNestedIframe(
-  target: Pick<Window, "self" | "parent" | "top"> = window,
+  target: {
+    self: unknown;
+    parent: unknown;
+    top: unknown;
+  } = window,
 ): boolean {
   try {
     if (target.self === target.top) {

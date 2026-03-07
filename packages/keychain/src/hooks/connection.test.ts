@@ -81,7 +81,7 @@ describe("isOriginVerified", () => {
 
 describe("isNestedIframe", () => {
   it("returns false for the top-level window", () => {
-    const top = {} as Window;
+    const top = {};
 
     expect(
       isNestedIframe({
@@ -93,8 +93,8 @@ describe("isNestedIframe", () => {
   });
 
   it("returns false for a direct child iframe", () => {
-    const top = {} as Window;
-    const self = {} as Window;
+    const top = {};
+    const self = {};
 
     expect(
       isNestedIframe({
@@ -106,9 +106,9 @@ describe("isNestedIframe", () => {
   });
 
   it("returns true for a nested iframe", () => {
-    const top = {} as Window;
-    const parent = {} as Window;
-    const self = {} as Window;
+    const top = {};
+    const parent = {};
+    const self = {};
 
     expect(
       isNestedIframe({
@@ -120,8 +120,8 @@ describe("isNestedIframe", () => {
   });
 
   it("fails closed when top access throws", () => {
-    const self = {} as Window;
-    const parent = {} as Window;
+    const self = {};
+    const parent = {};
 
     expect(
       isNestedIframe({
