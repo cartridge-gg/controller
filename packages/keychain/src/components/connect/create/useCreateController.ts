@@ -3,7 +3,6 @@ import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
-import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import {
   AuthOption,
@@ -14,12 +13,10 @@ import {
 } from "@cartridge/controller";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
 import {
-  AccountQuery,
   ControllerQuery,
   CredentialMetadata,
   SignerInput,
   SignerType,
-  useAccountQuery,
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
@@ -62,6 +59,52 @@ export interface LoginResponse {
   signer: Signer;
 }
 
+const resolveConnect = async ({
+  controller,
+  params,
+  handleCompletion,
+  closeModal,
+  searchParams,
+  missingParamsMessage,
+}: {
+  controller: Controller;
+  params?: ReturnType<typeof parseConnectParams>;
+  handleCompletion: () => void;
+  closeModal?: () => void;
+  searchParams: URLSearchParams;
+  missingParamsMessage: string;
+}) => {
+  let currentParams = params;
+  if (!currentParams) {
+    for (let i = 0; i < 5; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      currentParams = parseConnectParams(searchParams);
+      if (currentParams) {
+        break;
+      }
+    }
+  }
+
+  if (!currentParams) {
+    console.warn(missingParamsMessage);
+    closeModal?.();
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  url.search = "";
+  window.history.replaceState(null, "", url.toString());
+
+  currentParams.resolve?.({
+    code: ResponseCodes.SUCCESS,
+    address: controller.address(),
+  });
+  if (currentParams.params.id) {
+    cleanupCallbacks(currentParams.params.id);
+  }
+  handleCompletion();
+};
+
 const createSession = async ({
   controller,
   origin,
@@ -81,23 +124,15 @@ const createSession = async ({
 }) => {
   // Handle no policies case - try to resolve connection, fallback to just closing modal
   if (!policies) {
-    if (params) {
-      // Ideal case: resolve connection promise properly
-      params.resolve?.({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address(),
-      });
-      if (params.params.id) {
-        cleanupCallbacks(params.params.id);
-      }
-      handleCompletion();
-    } else {
-      // Fallback: just close modal if params not available (race condition)
-      console.warn(
+    await resolveConnect({
+      controller,
+      params,
+      handleCompletion,
+      closeModal,
+      searchParams,
+      missingParamsMessage:
         "No params available for no-policies case, falling back to closeModal",
-      );
-      closeModal?.();
-    }
+    });
     return;
   }
 
@@ -143,6 +178,30 @@ const createSession = async ({
   return;
 };
 
+const completePopupConnect = async ({
+  controller,
+  params,
+  handleCompletion,
+  closeModal,
+  searchParams,
+}: {
+  controller: Controller;
+  params?: ReturnType<typeof parseConnectParams>;
+  handleCompletion: () => void;
+  closeModal?: () => void;
+  searchParams: URLSearchParams;
+}) => {
+  await resolveConnect({
+    controller,
+    params,
+    handleCompletion,
+    closeModal,
+    searchParams,
+    missingParamsMessage:
+      "Params not available after popup auth, falling back to closeModal",
+  });
+};
+
 export function useCreateController({
   isSlot,
   signers,
@@ -153,7 +212,6 @@ export function useCreateController({
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
-  const [pendingUsername, setPendingUsername] = useState<string>();
   const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
   const [changeWallet, setChangeWallet] = useState<boolean>(false);
 
@@ -195,85 +253,11 @@ export function useCreateController({
 
   useRouteCallbacks(params, CANCEL_RESPONSE);
 
-  const handleAccountQuerySuccess = useCallback(
-    async (data: AccountQuery) => {
-      try {
-        const { username, credentials, controllers } = data.account ?? {};
-        const { id: credentialId, publicKey } =
-          credentials?.webauthn?.[0] ?? {};
-
-        const controllerNode = controllers?.edges?.[0]?.node;
-        if (
-          controllerNode &&
-          username &&
-          credentialId &&
-          publicKey &&
-          rpcUrl &&
-          chainId &&
-          origin
-        ) {
-          const controller = await Controller.create({
-            rpcUrl,
-            username,
-            classHash: controllerNode.constructorCalldata[0],
-            address: controllerNode.address,
-            owner: {
-              signer: {
-                webauthn: {
-                  rpId: import.meta.env.VITE_RP_ID!,
-                  credentialId,
-                  publicKey,
-                },
-              },
-            },
-          });
-
-          window.controller = controller;
-          setController(controller);
-        }
-      } catch (e: unknown) {
-        console.error(e);
-        setError(e as Error);
-      }
-    },
-    [chainId, origin, rpcUrl, setController],
-  );
-
   useEffect(() => {
     if (error) {
       setAuthenticationStep(AuthenticationStep.FillForm);
     }
   }, [error]);
-
-  useAccountQuery(
-    { username: pendingUsername || "" },
-    {
-      enabled: !!pendingUsername,
-      refetchIntervalInBackground: true,
-      refetchOnWindowFocus: false,
-      staleTime: 10000000,
-      cacheTime: 10000000,
-      refetchInterval: (data) => (!data ? 1000 : false),
-      onSuccess: handleAccountQuerySuccess,
-    },
-  );
-
-  const doPopupFlow = useCallback(
-    (username: string) => {
-      const popupSearchParams = new URLSearchParams(window.location.search);
-      popupSearchParams.set("name", encodeURIComponent(username));
-      popupSearchParams.set("action", "signup");
-      setPendingUsername(username);
-
-      PopupCenter(
-        `/authenticate?${popupSearchParams.toString()}`,
-        "Cartridge Signup",
-        480,
-        640,
-      );
-    },
-    [setPendingUsername],
-  );
 
   const signupOptions: AuthOptions = useMemo(() => {
     return [...EMBEDDED_WALLETS, ...supportedWalletsForAuth].filter(
@@ -398,7 +382,18 @@ export function useCreateController({
       let signer: SignerInput | undefined;
       switch (authenticationMode) {
         case "webauthn": {
-          await signupWithWebauthn(username, doPopupFlow);
+          const webauthnResult = await signupWithWebauthn(username);
+
+          if (webauthnResult?.completedInPopup) {
+            await completePopupConnect({
+              controller: webauthnResult.controller,
+              params,
+              handleCompletion,
+              closeModal,
+              searchParams,
+            });
+            return;
+          }
 
           // Handle redirect_url for webauthn
           const urlSearchParams = new URLSearchParams(window.location.search);
@@ -483,13 +478,16 @@ export function useCreateController({
       chainId,
       rpcUrl,
       origin,
-      doPopupFlow,
       signupWithExternalWallet,
       signupWithSocial,
       signupWithWebauthn,
       signupWithWalletConnect,
       passwordAuth,
       finishSignup,
+      params,
+      handleCompletion,
+      closeModal,
+      searchParams,
     ],
   );
 
@@ -657,9 +655,20 @@ export function useCreateController({
             throw new Error("Login failed");
           }
 
+          if (loginController.completedInPopup) {
+            await completePopupConnect({
+              controller: loginController.controller,
+              params,
+              handleCompletion,
+              closeModal,
+              searchParams,
+            });
+            return;
+          }
+
           if (shouldAutoCreateSession) {
             await createSession({
-              controller: loginController,
+              controller: loginController.controller,
               origin,
               policies,
               params,
@@ -909,15 +918,6 @@ export function useCreateController({
           );
         }
       } catch (e: unknown) {
-        if (
-          e instanceof Error &&
-          (e.message.includes("Invalid 'sameOriginWithAncestors' value") ||
-            e.message.includes("document which is same-origin"))
-        ) {
-          doPopupFlow(username);
-          return;
-        }
-
         console.error(e);
         setError(e as Error);
       } finally {
@@ -930,7 +930,6 @@ export function useCreateController({
     [
       handleLogin,
       handleSignup,
-      doPopupFlow,
       setAuthMethod,
       setError,
       setIsLoading,

@@ -39,6 +39,12 @@ export const defaultMockConnection: ConnectionContextValue = {
     cover: "test-cover",
   },
   propagateError: false,
+  webauthnPopup: {
+    create: false,
+    get: false,
+  },
+  preset: null,
+  policiesStr: null,
   setController: vi.fn(),
   setRpcUrl: vi.fn(),
   openSettings: vi.fn(),
