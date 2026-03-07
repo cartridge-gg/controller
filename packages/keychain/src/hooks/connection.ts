@@ -215,6 +215,20 @@ export function resolvePolicies({
   return { policies: urlPolicies, isPoliciesResolved: true };
 }
 
+export function isNestedIframe(
+  target: Pick<Window, "self" | "parent" | "top"> = window,
+): boolean {
+  try {
+    if (target.self === target.top) {
+      return false;
+    }
+
+    return target.parent !== target.top;
+  } catch {
+    return true;
+  }
+}
+
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
@@ -284,7 +298,7 @@ export function useConnectionValue() {
     if (isSafari) {
       return {
         create: true,
-        get: false,
+        get: isNestedIframe(),
       };
     }
 
