@@ -1,14 +1,7 @@
 import { useConnection } from "@/hooks/connection";
-import { getRedirectDebugProperties } from "@/utils/redirect-debug";
 import { useVersion } from "@/hooks/version";
 import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
-import {
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { PropsWithChildren, useContext, useEffect, useState } from "react";
 
 export const posthog = new PostHogWrapper(
   import.meta.env.VITE_POSTHOG_KEY ?? "api key",
@@ -26,7 +19,6 @@ export function PostHogProvider({ children }: PropsWithChildren) {
   const [lastIdentifiedAddress, setLastIdentifiedAddress] = useState<string>();
 
   const [registered, setRegistered] = useState(false);
-  const lastStandaloneRedirectDebug = useRef<string>();
 
   useEffect(() => {
     if (!registered && controllerVersion) {
@@ -58,28 +50,6 @@ export function PostHogProvider({ children }: PropsWithChildren) {
     if (origin) {
       posthog.group("company", origin);
     }
-  }, [origin]);
-
-  useEffect(() => {
-    const redirectDebug = getRedirectDebugProperties();
-
-    if (!redirectDebug.redirectPresent || redirectDebug.keychainIsIframe) {
-      return;
-    }
-
-    const properties = {
-      ...redirectDebug,
-      connectionOrigin: origin || undefined,
-      connectionOriginIsNull: origin === "null",
-    };
-    const signature = JSON.stringify(properties);
-
-    if (lastStandaloneRedirectDebug.current === signature) {
-      return;
-    }
-
-    posthog.capture("Standalone Redirect Debug", properties);
-    lastStandaloneRedirectDebug.current = signature;
   }, [origin]);
 
   return (
