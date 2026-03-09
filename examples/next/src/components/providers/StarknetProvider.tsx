@@ -195,8 +195,6 @@ const signupOptions: AuthOptions = [
   "phantom-evm",
 ];
 
-console.log(policies);
-
 export const controllerConnector = new ControllerConnector({
   // With the defaults, you can omit chains if you want to use:
   // - chains: [
@@ -211,10 +209,10 @@ export const controllerConnector = new ControllerConnector({
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
+  policies,
   tokens: {
     erc20: ["lords", "strk"],
   },
-
   // nums (achievements, quests)
   // slot: "nums-bal",
   // namespace: "NUMS",
@@ -231,20 +229,17 @@ export const controllerConnector = new ControllerConnector({
   // preset: "loot-survivor",
 
   // Summit (no achievements, no quests)
-  // namespace: "relayer_0_0_1",
-  // slot: "pg-mainnet-10",
-  preset: "cage-calls",
 });
 
 const session = new SessionConnector({
+  policies,
   rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
-  chainId: shortString.encodeShortString("WP_JOKERS_CORE_SEASON2"),
-  redirectUrl: "jokers://open",
+  chainId: constants.StarknetChainId.SN_MAIN,
+  redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   disconnectRedirectUrl: "whatsapp://",
   keychainUrl: getKeychainUrl(),
   apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
   signupOptions,
-  preset: "jokers-of-neon",
 });
 
 export function StarknetProvider({ children }: PropsWithChildren) {
