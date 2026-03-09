@@ -1,4 +1,6 @@
 import {
+  getStandaloneAppOrigin,
+  getStandaloneRedirectUrl,
   isNestedIframe,
   isOriginVerified,
   resolvePolicies,
@@ -76,6 +78,43 @@ describe("isOriginVerified", () => {
       false,
     );
     expect(isOriginVerified("https://example.co", allowedOrigins)).toBe(false);
+  });
+});
+
+describe("getStandaloneAppOrigin", () => {
+  it("should use the URL origin for http redirects", () => {
+    expect(getStandaloneAppOrigin("https://example.com/callback?foo=bar")).toBe(
+      "https://example.com",
+    );
+  });
+
+  it("should preserve custom-scheme redirects instead of collapsing to null", () => {
+    expect(getStandaloneAppOrigin("cagecalls://open")).toBe("cagecalls://open");
+  });
+});
+
+describe("getStandaloneRedirectUrl", () => {
+  it("prefers redirect_url when present", () => {
+    const searchParams = new URLSearchParams({
+      redirect_url: "https://example.com/callback",
+      redirect_uri: "jokers://open",
+    });
+
+    expect(getStandaloneRedirectUrl(searchParams)).toBe(
+      "https://example.com/callback",
+    );
+  });
+
+  it("falls back to redirect_uri when redirect_url is absent", () => {
+    const searchParams = new URLSearchParams({
+      redirect_uri: "jokers://open",
+    });
+
+    expect(getStandaloneRedirectUrl(searchParams)).toBe("jokers://open");
+  });
+
+  it("returns null when no standalone redirect target is present", () => {
+    expect(getStandaloneRedirectUrl(new URLSearchParams())).toBeNull();
   });
 });
 
