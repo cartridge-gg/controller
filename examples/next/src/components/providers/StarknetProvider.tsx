@@ -213,7 +213,6 @@ export const controllerConnector = new ControllerConnector({
   tokens: {
     erc20: ["lords", "strk"],
   },
-
   // nums (achievements, quests)
   // slot: "nums-bal",
   // namespace: "NUMS",
@@ -230,9 +229,6 @@ export const controllerConnector = new ControllerConnector({
   // preset: "loot-survivor",
 
   // Summit (no achievements, no quests)
-  namespace: "relayer_0_0_1",
-  slot: "pg-mainnet-10",
-  preset: "savage-summit",
 });
 
 const session = new SessionConnector({

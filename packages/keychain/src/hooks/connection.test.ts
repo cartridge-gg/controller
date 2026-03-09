@@ -1,4 +1,8 @@
-import { isOriginVerified, resolvePolicies } from "./connection";
+import {
+  isNestedIframe,
+  isOriginVerified,
+  resolvePolicies,
+} from "./connection";
 import { vi } from "vitest";
 
 vi.mock("@cartridge/controller", async () => {
@@ -72,6 +76,62 @@ describe("isOriginVerified", () => {
       false,
     );
     expect(isOriginVerified("https://example.co", allowedOrigins)).toBe(false);
+  });
+});
+
+describe("isNestedIframe", () => {
+  it("returns false for the top-level window", () => {
+    const top = {};
+
+    expect(
+      isNestedIframe({
+        self: top,
+        parent: top,
+        top,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false for a direct child iframe", () => {
+    const top = {};
+    const self = {};
+
+    expect(
+      isNestedIframe({
+        self,
+        parent: top,
+        top,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns true for a nested iframe", () => {
+    const top = {};
+    const parent = {};
+    const self = {};
+
+    expect(
+      isNestedIframe({
+        self,
+        parent,
+        top,
+      }),
+    ).toBe(true);
+  });
+
+  it("fails closed when top access throws", () => {
+    const self = {};
+    const parent = {};
+
+    expect(
+      isNestedIframe({
+        self,
+        parent,
+        get top() {
+          throw new Error("blocked");
+        },
+      }),
+    ).toBe(true);
   });
 });
 

@@ -309,8 +309,9 @@ export default class ControllerProvider extends BaseProvider {
         return this.account;
       }
 
-      // Only open modal if NOT headless
-      this.iframes.keychain.open();
+      if (!headless) {
+        this.iframes.keychain.open();
+      }
 
       // Use connect() parameter if provided, otherwise fall back to constructor options
       const effectiveOptions = Array.isArray(options)
@@ -353,7 +354,6 @@ export default class ControllerProvider extends BaseProvider {
       }
       console.log(e);
     } finally {
-      // Only close modal if it was opened (not headless)
       if (!headless) {
         this.iframes.keychain.close();
       }

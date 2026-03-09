@@ -2,7 +2,7 @@ import { NavigationHeader } from "@/components";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
-import { useControllerTheme } from "@/hooks/connection";
+import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
 import { allUseSameAuth } from "@/utils/controller";
 import { AuthOption, AuthOptions } from "@cartridge/controller";
@@ -58,6 +58,10 @@ interface CreateControllerViewProps {
   submitButtonRef: React.RefObject<HTMLButtonElement>;
   isDropdownOpen: boolean;
   onDropdownOpenChange: (isOpen: boolean) => void;
+  webauthnPopup: {
+    create: boolean;
+    get: boolean;
+  };
 }
 
 type CreateControllerFormProps = Omit<
@@ -95,6 +99,7 @@ function CreateControllerForm({
   onDropdownOpenChange,
   authOptions,
   isSlot,
+  webauthnPopup,
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
   const { isOpen: keyboardIsOpen, viewportHeight } = useDetectKeyboardOpen();
@@ -273,6 +278,7 @@ function CreateControllerForm({
             waitingForConfirmation={waitingForConfirmation}
             username={usernameField.value}
             signupOptions={authOptions}
+            webauthnPopup={webauthnPopup}
             onMouseDown={() => {
               if (keyboardIsOpen) {
                 // If keyboard is open, mark for pending submit after it closes
@@ -311,6 +317,7 @@ export function CreateControllerView({
   isDropdownOpen,
   onDropdownOpenChange,
   isSlot,
+  webauthnPopup,
 }: CreateControllerViewProps) {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -359,6 +366,7 @@ export function CreateControllerView({
           onDropdownOpenChange={onDropdownOpenChange}
           authOptions={authOptions}
           isSlot={isSlot}
+          webauthnPopup={webauthnPopup}
         />
         <ChooseSignupMethodForm
           isLoading={isLoading}
@@ -377,12 +385,16 @@ export function CreateController({
   signers,
   prefillUsername,
   isLoading: externalIsLoading = false,
+  forcedAuthMethod,
+  forcedAction,
 }: {
   isSlot?: boolean;
   error?: Error;
   signers?: AuthOptions;
   prefillUsername?: string;
   isLoading?: boolean;
+  forcedAuthMethod?: AuthOption;
+  forcedAction?: "signup" | "login";
 }) {
   const posthog = usePostHog();
   const hasLoggedFocus = useRef(false);
@@ -429,6 +441,8 @@ export function CreateController({
   // Combine internal and external loading states
   const isLoading = internalIsLoading || externalIsLoading;
 
+  const { webauthnPopup } = useConnection();
+
   const handleFormSubmit = useCallback(
     (authenticationMode?: AuthOption, password?: string) => {
       // Don't submit if dropdown is open - let dropdown handle the Enter key
@@ -446,10 +460,27 @@ export function CreateController({
       }
 
       if (validation.status === "valid") {
-        const accountExists = !!validation.exists;
+        const accountExists =
+          forcedAction === "signup"
+            ? false
+            : forcedAction === "login"
+              ? true
+              : !!validation.exists;
+        const selectedAuthenticationMode =
+          authenticationMode ?? forcedAuthMethod;
+
+        if (forcedAction === "signup" && validation.exists) {
+          setError(new Error("Username already exists"));
+          return;
+        }
+
+        if (forcedAction === "login" && !validation.exists) {
+          setError(new Error("Account not found"));
+          return;
+        }
 
         if (
-          authenticationMode === undefined &&
+          selectedAuthenticationMode === undefined &&
           validation.signers &&
           validation.signers.length > 1 &&
           !allUseSameAuth(validation.signers)
@@ -459,7 +490,7 @@ export function CreateController({
         }
 
         if (
-          authenticationMode === undefined &&
+          selectedAuthenticationMode === undefined &&
           !accountExists &&
           signupOptions.length > 1
         ) {
@@ -473,7 +504,7 @@ export function CreateController({
                 (validation.signers.length == 1 ||
                   allUseSameAuth(validation.signers))
               ? credentialToAuth(validation.signers[0])
-              : authenticationMode;
+              : selectedAuthenticationMode;
 
         // If password auth is detected and no password provided, show the auth method selection
         // which will trigger the password form
@@ -499,6 +530,9 @@ export function CreateController({
       validation.signers,
       setAuthenticationStep,
       signupOptions,
+      forcedAuthMethod,
+      forcedAction,
+      setError,
     ],
   );
 
@@ -633,6 +667,7 @@ export function CreateController({
         submitButtonRef={submitButtonRef}
         isDropdownOpen={isDropdownOpen}
         onDropdownOpenChange={setIsDropdownOpen}
+        webauthnPopup={webauthnPopup}
       />
       {overlay}
     </>

@@ -259,6 +259,8 @@ export type KeychainOptions = IFrameOptions & {
   tokens?: Tokens;
   /** When true, defer iframe mounting until connect() is called. Reduces initial load and resource fetching. */
   lazyload?: boolean;
+  /** When true, force WebAuthn operations to run in a popup window instead of the iframe. Useful for development and testing. */
+  webauthnPopup?: boolean;
 };
 
 export type ProfileContextTypeVariant =

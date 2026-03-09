@@ -215,6 +215,24 @@ export function resolvePolicies({
   return { policies: urlPolicies, isPoliciesResolved: true };
 }
 
+export function isNestedIframe(
+  target: {
+    self: unknown;
+    parent: unknown;
+    top: unknown;
+  } = window,
+): boolean {
+  try {
+    if (target.self === target.top) {
+      return false;
+    }
+
+    return target.parent !== target.top;
+  } catch {
+    return true;
+  }
+}
+
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
@@ -260,6 +278,48 @@ export function useConnectionValue() {
 
   const setOnModalClose = useCallback((fn: (() => void) | undefined) => {
     setOnModalCloseInternal(() => fn);
+  }, []);
+
+  // Decide which WebAuthn ceremonies need to escape the iframe.
+  // `create` covers passkey registration, `get` covers passkey login/session auth.
+  const webauthnPopup = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("webauthn_popup") === "true") {
+      return {
+        create: true,
+        get: true,
+      };
+    }
+
+    if (!isIframe()) {
+      return {
+        create: false,
+        get: false,
+      };
+    }
+
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+      return {
+        create: true,
+        get: isNestedIframe(),
+      };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const doc = document as any;
+    const policy = doc.permissionsPolicy ?? doc.featurePolicy;
+    if (!policy) {
+      return {
+        create: false,
+        get: false,
+      };
+    }
+
+    return {
+      create: !policy.allowsFeature("publickey-credentials-create"),
+      get: !policy.allowsFeature("publickey-credentials-get"),
+    };
   }, []);
 
   const [searchParams] = useSearchParams();
@@ -724,18 +784,21 @@ export function useConnectionValue() {
       const localWalletBridge = new WalletBridge();
       const iframeMethods = localWalletBridge.getIFrameMethods();
 
-      // In standalone mode with redirect, use redirect URI's origin for app ID
+      // In standalone mode, use explicit origin param (popup auth), redirect URI's origin,
+      // or fall back to window.location.origin
       const searchParams = new URLSearchParams(window.location.search);
+      const originParam = searchParams.get("origin");
       const redirectUrl = searchParams.get("redirect_url");
       let appOrigin = window.location.origin;
 
-      if (redirectUrl) {
+      if (originParam) {
+        appOrigin = decodeURIComponent(originParam);
+      } else if (redirectUrl) {
         try {
           const redirectUrlObj = new URL(redirectUrl);
           appOrigin = redirectUrlObj.origin;
         } catch (error) {
           console.error("Failed to parse redirect_url for app ID:", error);
-          // Fall back to window.location.origin if redirect URL is invalid
         }
       }
 
@@ -889,6 +952,9 @@ export function useConnectionValue() {
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
+    webauthnPopup,
+    preset: urlParams.preset,
+    policiesStr: urlParams.policies,
     isConfigLoading,
     isPoliciesResolved,
     isMainnet,
