@@ -10,6 +10,7 @@ import {
 } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/constants";
+import { getRedirectDebugProperties } from "@/utils/redirect-debug";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { usePostHog } from "./provider/posthog";
@@ -38,15 +39,20 @@ export class ErrorBoundary extends React.Component<
 }
 
 export function ErrorPage({ error }: { error: Error }) {
-  const { closeModal } = useConnection();
+  const { closeModal, origin } = useConnection();
 
   const posthog = usePostHog();
 
   useEffect(() => {
+    const redirectDebug = getRedirectDebugProperties();
+
     posthog?.captureException(error, {
       source: "ErrorPage",
+      ...redirectDebug,
+      connectionOrigin: origin || undefined,
+      connectionOriginIsNull: origin === "null",
     });
-  }, [error, posthog]);
+  }, [error, origin, posthog]);
 
   return (
     <div style={{ position: "relative" }}>
