@@ -233,6 +233,12 @@ export function isNestedIframe(
   }
 }
 
+export function getStandaloneRedirectUrl(
+  searchParams: URLSearchParams,
+): string | null {
+  return searchParams.get("redirect_url") || searchParams.get("redirect_uri");
+}
+
 export function getStandaloneAppOrigin(redirectUrl: string): string {
   const redirectUrlObj = new URL(redirectUrl);
   return redirectUrlObj.origin === "null" ? redirectUrl : redirectUrlObj.origin;
@@ -580,7 +586,8 @@ export function useConnectionValue() {
       });
   }, [urlParams.preset]);
 
-  // Compute verified state separately once config is loaded and origin or redirect_url are available
+  // Compute verified state separately once config is loaded and a standalone
+  // redirect target or embedded origin is available.
   useEffect(() => {
     if (!configData || isConfigLoading) {
       return;
@@ -588,10 +595,11 @@ export function useConnectionValue() {
 
     const allowedOrigins = toArray(configData.origin as string | string[]);
 
-    // In standalone mode (not iframe), verify preset if redirect_url matches preset whitelist
+    // In standalone mode (not iframe), verify preset if the redirect target
+    // matches the preset whitelist.
     if (!isIframe()) {
       const searchParams = new URLSearchParams(window.location.search);
-      const redirectUrl = searchParams.get("redirect_url");
+      const redirectUrl = getStandaloneRedirectUrl(searchParams);
 
       if (redirectUrl) {
         try {
@@ -608,11 +616,12 @@ export function useConnectionValue() {
           setVerified(finalVerified);
           return;
         } catch (error) {
-          console.error("Failed to parse redirect_url:", error);
+          console.error("Failed to parse standalone redirect target:", error);
         }
       }
 
-      // No redirect_url or invalid redirect_url - don't verify preset in standalone mode
+      // No redirect target or an invalid redirect target - don't verify preset
+      // in standalone mode.
       setVerified(false);
       return;
     }
@@ -793,7 +802,7 @@ export function useConnectionValue() {
       // or fall back to window.location.origin
       const searchParams = new URLSearchParams(window.location.search);
       const originParam = searchParams.get("origin");
-      const redirectUrl = searchParams.get("redirect_url");
+      const redirectUrl = getStandaloneRedirectUrl(searchParams);
       let appOrigin = window.location.origin;
 
       if (originParam) {
@@ -802,7 +811,7 @@ export function useConnectionValue() {
         try {
           appOrigin = getStandaloneAppOrigin(redirectUrl);
         } catch (error) {
-          console.error("Failed to parse redirect_url for app ID:", error);
+          console.error("Failed to parse standalone redirect target:", error);
         }
       }
 
