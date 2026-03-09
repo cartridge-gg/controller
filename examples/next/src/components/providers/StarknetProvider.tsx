@@ -2,7 +2,7 @@
 
 import ControllerConnector from "@cartridge/connector/controller";
 import SessionConnector from "@cartridge/connector/session";
-import { AuthOptions, SessionPolicies } from "@cartridge/controller";
+import { AuthOptions } from "@cartridge/controller";
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import {
   cartridge,
@@ -44,48 +44,6 @@ const messageForChain = (chainId: constants.StarknetChainId) => {
       chainId: chainId,
     },
   };
-};
-
-const policies: SessionPolicies = {
-  contracts: {
-    [ETH_CONTRACT_ADDRESS]: {
-      methods: [
-        {
-          name: "approve",
-          entrypoint: "approve",
-          // amount: "0xffffffffffffffffffffffffffffffff",
-          amount: "0x1774160BC6690000",
-          description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-        },
-        { name: "transfer", entrypoint: "transfer" },
-        { name: "mint", entrypoint: "mint" },
-        { name: "burn", entrypoint: "burn" },
-      ],
-    },
-    [STRK_CONTRACT_ADDRESS]: {
-      methods: [
-        {
-          name: "approve",
-          entrypoint: "approve",
-          amount: "0xffffffffffffffffffffffffffffffff",
-          description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-        },
-        { name: "transfer", entrypoint: "transfer" },
-        { name: "mint", entrypoint: "mint" },
-        { name: "burn", entrypoint: "burn" },
-        { name: "allowance", entrypoint: "allowance" },
-      ],
-    },
-    "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e": {
-      methods: [{ name: "new_game", entrypoint: "new_game" }],
-    },
-  },
-  messages: [
-    messageForChain(constants.StarknetChainId.SN_MAIN),
-    messageForChain(constants.StarknetChainId.SN_SEPOLIA),
-  ],
 };
 
 let localKatanaChain: Chain | undefined = undefined;
@@ -204,7 +162,6 @@ export const controllerConnector = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  policies,
   url: getKeychainUrl(),
   signupOptions,
   // By default, preset policies take precedence over manually provided policies
