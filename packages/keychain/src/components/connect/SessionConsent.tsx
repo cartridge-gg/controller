@@ -11,10 +11,17 @@ export function SessionConsent({
   variant?: "default" | "slot" | "signup";
 }) {
   const { origin } = useConnection();
-  const hostname = useMemo(
-    () => (origin ? new URL(origin).hostname : undefined),
-    [origin],
-  );
+  const hostname = useMemo(() => {
+    if (!origin) {
+      return undefined;
+    }
+
+    try {
+      return new URL(origin).hostname;
+    } catch {
+      return undefined;
+    }
+  }, [origin]);
 
   switch (variant) {
     case "slot":

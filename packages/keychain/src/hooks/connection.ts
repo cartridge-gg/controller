@@ -263,6 +263,11 @@ function computeVerifiedState(
   return false;
 }
 
+export function getStandaloneAppOrigin(redirectUrl: string): string {
+  const redirectUrlObj = new URL(redirectUrl);
+  return redirectUrlObj.origin === "null" ? redirectUrl : redirectUrlObj.origin;
+}
+
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
@@ -762,8 +767,7 @@ export function useConnectionValue() {
 
       if (redirectUrl) {
         try {
-          const redirectUrlObj = new URL(redirectUrl);
-          appOrigin = redirectUrlObj.origin;
+          appOrigin = getStandaloneAppOrigin(redirectUrl);
         } catch (error) {
           console.error("Failed to parse redirect_url for app ID:", error);
           // Fall back to window.location.origin if redirect URL is invalid

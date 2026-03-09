@@ -1,4 +1,8 @@
-import { isOriginVerified, resolvePolicies } from "./connection";
+import {
+  getStandaloneAppOrigin,
+  isOriginVerified,
+  resolvePolicies,
+} from "./connection";
 import { vi } from "vitest";
 
 vi.mock("@cartridge/controller", async () => {
@@ -72,6 +76,18 @@ describe("isOriginVerified", () => {
       false,
     );
     expect(isOriginVerified("https://example.co", allowedOrigins)).toBe(false);
+  });
+});
+
+describe("getStandaloneAppOrigin", () => {
+  it("should use the URL origin for http redirects", () => {
+    expect(getStandaloneAppOrigin("https://example.com/callback?foo=bar")).toBe(
+      "https://example.com",
+    );
+  });
+
+  it("should preserve custom-scheme redirects instead of collapsing to null", () => {
+    expect(getStandaloneAppOrigin("cagecalls://open")).toBe("cagecalls://open");
   });
 });
 
