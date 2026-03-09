@@ -1,21 +1,25 @@
 import { ec, encode, stark, WalletAccount } from "starknet";
-import { SessionPolicies } from "@cartridge/presets";
+import { loadConfig, SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
 import { signerToGuid } from "@cartridge/controller-wasm";
 
 import SessionAccount from "./account";
 import { KEYCHAIN_URL } from "../constants";
 import BaseProvider from "../provider";
-import { toWasmPolicies } from "../utils";
-import { ParsedSessionPolicies } from "../policies";
+import { getPresetSessionPolicies, toWasmPolicies } from "../utils";
+import { parsePolicies, ParsedSessionPolicies } from "../policies";
+import { AuthOptions } from "../types";
 import { NodeBackend } from "./backend";
 
 export type SessionOptions = {
   rpc: string;
   chainId: string;
-  policies: SessionPolicies;
+  policies?: SessionPolicies;
+  preset?: string;
+  shouldOverridePresetPolicies?: boolean;
   basePath: string;
   keychainUrl?: string;
+  signupOptions?: AuthOptions;
 };
 
 export default class SessionProvider extends BaseProvider {
@@ -26,47 +30,112 @@ export default class SessionProvider extends BaseProvider {
   protected _rpcUrl: string;
   protected _username?: string;
   protected _policies: ParsedSessionPolicies;
+  protected _preset?: string;
   protected _keychainUrl: string;
+  protected _signupOptions?: AuthOptions;
   protected _backend: NodeBackend;
+  private _readyPromise: Promise<void>;
 
   constructor({
     rpc,
     chainId,
     policies,
+    preset,
+    shouldOverridePresetPolicies,
     basePath,
     keychainUrl,
+    signupOptions,
   }: SessionOptions) {
     super();
 
-    this._policies = {
-      verified: false,
-      contracts: policies.contracts
-        ? Object.fromEntries(
-            Object.entries(policies.contracts).map(([address, contract]) => [
-              address,
-              {
-                ...contract,
-                methods: contract.methods.map((method) => ({
-                  ...method,
-                  authorized: true,
-                })),
-              },
-            ]),
-          )
-        : undefined,
-      messages: policies.messages?.map((message) => ({
-        ...message,
-        authorized: true,
-      })),
-    };
+    if (!policies && !preset) {
+      throw new Error("Either `policies` or `preset` must be provided");
+    }
+
+    // Policy precedence logic (matching SessionProvider):
+    // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
+    // 2. Otherwise, if preset is defined, resolve policies from preset
+    // 3. Otherwise, use provided policies
+    if ((!preset || shouldOverridePresetPolicies) && policies) {
+      this._policies = parsePolicies(policies);
+    } else {
+      this._preset = preset;
+      if (policies) {
+        console.warn(
+          "[Controller] Both `preset` and `policies` provided to SessionProvider. " +
+            "Policies are ignored when preset is set. " +
+            "Use `shouldOverridePresetPolicies: true` to override.",
+        );
+      }
+      this._policies = { verified: false };
+    }
 
     this._rpcUrl = rpc;
     this._chainId = chainId;
     this._keychainUrl = keychainUrl || KEYCHAIN_URL;
+    this._signupOptions = signupOptions;
     this._backend = new NodeBackend(basePath);
+
+    this._readyPromise = this._resolvePreset();
+  }
+
+  private async _resolvePreset(): Promise<void> {
+    if (!this._preset) return;
+
+    const config = await loadConfig(this._preset);
+    if (!config) {
+      throw new Error(`Failed to load preset: ${this._preset}`);
+    }
+
+    const sessionPolicies = getPresetSessionPolicies(config, this._chainId);
+    if (!sessionPolicies) {
+      throw new Error(
+        `No policies found for chain ${this._chainId} in preset ${this._preset}`,
+      );
+    }
+
+    this._policies = parsePolicies(sessionPolicies);
+  }
+
+  private validatePoliciesSubset(
+    newPolicies: ParsedSessionPolicies,
+    existingPolicies: ParsedSessionPolicies,
+  ): boolean {
+    if (newPolicies.contracts) {
+      if (!existingPolicies.contracts) return false;
+
+      for (const [address, contract] of Object.entries(newPolicies.contracts)) {
+        const existingContract = existingPolicies.contracts[address];
+        if (!existingContract) return false;
+
+        for (const method of contract.methods) {
+          const existingMethod = existingContract.methods.find(
+            (m) => m.entrypoint === method.entrypoint,
+          );
+          if (!existingMethod || !existingMethod.authorized) return false;
+        }
+      }
+    }
+
+    if (newPolicies.messages) {
+      if (!existingPolicies.messages) return false;
+
+      for (const message of newPolicies.messages) {
+        const existingMessage = existingPolicies.messages.find(
+          (m) =>
+            JSON.stringify(m.domain) === JSON.stringify(message.domain) &&
+            JSON.stringify(m.types) === JSON.stringify(message.types),
+        );
+        if (!existingMessage || !existingMessage.authorized) return false;
+      }
+    }
+
+    return true;
   }
 
   async username() {
+    await this._readyPromise;
+
     const sessionStr = await this._backend.get("session");
     if (sessionStr) {
       const session = JSON.parse(sessionStr);
@@ -76,6 +145,8 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async probe(): Promise<WalletAccount | undefined> {
+    await this._readyPromise;
+
     if (this.account) {
       return this.account;
     }
@@ -99,6 +170,19 @@ export default class SessionProvider extends BaseProvider {
       return undefined;
     }
 
+    // Check stored policies are a superset of current policies
+    const storedPoliciesStr = await this._backend.get("policies");
+    if (storedPoliciesStr) {
+      const storedPolicies = JSON.parse(
+        storedPoliciesStr,
+      ) as ParsedSessionPolicies;
+
+      if (!this.validatePoliciesSubset(this._policies, storedPolicies)) {
+        await this.disconnect();
+        return undefined;
+      }
+    }
+
     this._username = session.username;
     this.account = new SessionAccount(this, {
       rpcUrl: this._rpcUrl,
@@ -117,6 +201,8 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async connect(): Promise<WalletAccount | undefined> {
+    await this._readyPromise;
+
     if (this.account) {
       return this.account;
     }
@@ -140,13 +226,22 @@ export default class SessionProvider extends BaseProvider {
     // Get redirect URI from local server
     const redirectUri = await this._backend.getRedirectUri();
 
-    const url = `${
-      this._keychainUrl
-    }/session?public_key=${encodeURIComponent(publicKey)}&redirect_uri=${encodeURIComponent(
-      redirectUri,
-    )}&redirect_query_name=startapp&policies=${encodeURIComponent(
-      JSON.stringify(this._policies),
-    )}&rpc_url=${encodeURIComponent(this._rpcUrl)}`;
+    let url =
+      `${this._keychainUrl}/session` +
+      `?public_key=${encodeURIComponent(publicKey)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&redirect_query_name=startapp` +
+      `&rpc_url=${encodeURIComponent(this._rpcUrl)}`;
+
+    if (this._preset) {
+      url += `&preset=${encodeURIComponent(this._preset)}`;
+    } else {
+      url += `&policies=${encodeURIComponent(JSON.stringify(this._policies))}`;
+    }
+
+    if (this._signupOptions) {
+      url += `&signers=${encodeURIComponent(JSON.stringify(this._signupOptions))}`;
+    }
 
     this._backend.openLink(url);
 
@@ -165,6 +260,7 @@ export default class SessionProvider extends BaseProvider {
         starknet: { privateKey: formattedPk },
       });
       await this._backend.set("session", JSON.stringify(sessionRegistration));
+      await this._backend.set("policies", JSON.stringify(this._policies));
       return this.probe();
     }
 
@@ -174,6 +270,7 @@ export default class SessionProvider extends BaseProvider {
   async disconnect(): Promise<void> {
     await this._backend.delete("signer");
     await this._backend.delete("session");
+    await this._backend.delete("policies");
     this.account = undefined;
     this._username = undefined;
   }
