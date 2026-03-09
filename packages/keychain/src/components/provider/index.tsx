@@ -26,7 +26,6 @@ import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
-import { SpinnerIcon } from "@cartridge/ui";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -59,16 +58,6 @@ export function Provider({ children }: PropsWithChildren) {
     }),
     [connection.controller, connection.project],
   );
-
-  // Wait for preset config to load before rendering UI to prevent
-  // flash of default theme and unverified domain warning
-  if (connection.isConfigLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen w-screen bg-background">
-        <SpinnerIcon className="animate-spin text-muted-foreground" size="lg" />
-      </div>
-    );
-  }
 
   return (
     <FeatureProvider>

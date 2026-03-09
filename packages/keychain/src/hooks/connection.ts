@@ -215,52 +215,22 @@ export function resolvePolicies({
   return { policies: urlPolicies, isPoliciesResolved: true };
 }
 
-/**
- * Computes the verified state from config data and origin.
- * Extracted as a pure function so it can be called both synchronously
- * (in the loadConfig callback) and in the verified useEffect.
- */
-function computeVerifiedState(
-  configData: Record<string, unknown>,
-  currentOrigin: string | undefined,
+export function isNestedIframe(
+  target: {
+    self: unknown;
+    parent: unknown;
+    top: unknown;
+  } = window,
 ): boolean {
-  const allowedOrigins = toArray(configData.origin as string | string[]);
-
-  if (!isIframe()) {
-    const searchParams = new URLSearchParams(window.location.search);
-    const redirectUrl =
-      searchParams.get("redirect_url") || searchParams.get("redirect_uri");
-
-    if (redirectUrl) {
-      try {
-        const redirectUrlObj = new URL(redirectUrl);
-        const redirectOrigin = redirectUrlObj.origin;
-        const isLocalhost =
-          redirectOrigin.includes("localhost") ||
-          redirectOrigin === "capacitor://localhost";
-        const isOriginAllowed = isOriginVerified(redirectUrl, allowedOrigins);
-        return isLocalhost || isOriginAllowed;
-      } catch (error) {
-        console.error("Failed to parse redirect_url:", error);
-      }
+  try {
+    if (target.self === target.top) {
+      return false;
     }
 
-    return false;
+    return target.parent !== target.top;
+  } catch {
+    return true;
   }
-
-  if (!configData.origin) {
-    return false;
-  }
-
-  if (currentOrigin) {
-    const isLocalhost =
-      currentOrigin.includes("localhost") ||
-      currentOrigin === "capacitor://localhost";
-    const isOriginAllowed = isOriginVerified(currentOrigin, allowedOrigins);
-    return isLocalhost || isOriginAllowed;
-  }
-
-  return false;
 }
 
 export function getStandaloneAppOrigin(redirectUrl: string): string {
@@ -307,16 +277,54 @@ export function useConnectionValue() {
     isPoliciesResolved,
     isConfigLoading,
   });
-  // Ref to track origin synchronously for use in async callbacks (e.g. loadConfig)
-  // where the state value may not yet be available via closure.
-  const originRef = useRef<string | undefined>(undefined);
-
   const [onModalClose, setOnModalCloseInternal] = useState<
     (() => void) | undefined
   >();
 
   const setOnModalClose = useCallback((fn: (() => void) | undefined) => {
     setOnModalCloseInternal(() => fn);
+  }, []);
+
+  // Decide which WebAuthn ceremonies need to escape the iframe.
+  // `create` covers passkey registration, `get` covers passkey login/session auth.
+  const webauthnPopup = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("webauthn_popup") === "true") {
+      return {
+        create: true,
+        get: true,
+      };
+    }
+
+    if (!isIframe()) {
+      return {
+        create: false,
+        get: false,
+      };
+    }
+
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+      return {
+        create: true,
+        get: isNestedIframe(),
+      };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const doc = document as any;
+    const policy = doc.permissionsPolicy ?? doc.featurePolicy;
+    if (!policy) {
+      return {
+        create: false,
+        get: false,
+      };
+    }
+
+    return {
+      create: !policy.allowsFeature("publickey-credentials-create"),
+      get: !policy.allowsFeature("publickey-credentials-get"),
+    };
   }, []);
 
   const [searchParams] = useSearchParams();
@@ -561,26 +569,7 @@ export function useConnectionValue() {
     setIsConfigLoading(true);
     loadConfig(urlParams.preset)
       .then((config) => {
-        const configObj = (config as Record<string, unknown>) || null;
-        setConfigData(configObj);
-
-        if (configObj) {
-          // Compute verified and theme immediately so React 18 batches
-          // all state updates into a single render, preventing a flash
-          // of default theme / unverified domain warning.
-          const computedVerified = computeVerifiedState(
-            configObj,
-            originRef.current,
-          );
-          setVerified(computedVerified);
-
-          if ("theme" in configObj) {
-            setTheme({
-              verified: computedVerified,
-              ...(configObj.theme as ControllerTheme),
-            });
-          }
-        }
+        setConfigData((config as Record<string, unknown>) || null);
       })
       .catch((error: Error) => {
         console.error("Failed to load config:", error);
@@ -591,16 +580,59 @@ export function useConnectionValue() {
       });
   }, [urlParams.preset]);
 
-  // Compute verified state when config is loaded and origin or redirect_url change.
-  // Initial computation also happens in the loadConfig callback above to avoid
-  // a flash, but this effect handles subsequent changes (e.g. origin arriving
-  // later in iframe mode).
+  // Compute verified state separately once config is loaded and origin or redirect_url are available
   useEffect(() => {
     if (!configData || isConfigLoading) {
       return;
     }
 
-    setVerified(computeVerifiedState(configData, origin));
+    const allowedOrigins = toArray(configData.origin as string | string[]);
+
+    // In standalone mode (not iframe), verify preset if redirect_url matches preset whitelist
+    if (!isIframe()) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get("redirect_url");
+
+      if (redirectUrl) {
+        try {
+          const redirectUrlObj = new URL(redirectUrl);
+          const redirectOrigin = redirectUrlObj.origin;
+
+          // Always consider localhost and default capacitor as verified for development
+          const isLocalhost =
+            redirectOrigin.includes("localhost") ||
+            redirectOrigin === "capacitor://localhost";
+          const isOriginAllowed = isOriginVerified(redirectUrl, allowedOrigins);
+          const finalVerified = isLocalhost || isOriginAllowed;
+
+          setVerified(finalVerified);
+          return;
+        } catch (error) {
+          console.error("Failed to parse redirect_url:", error);
+        }
+      }
+
+      // No redirect_url or invalid redirect_url - don't verify preset in standalone mode
+      setVerified(false);
+      return;
+    }
+
+    if (!configData.origin) {
+      setVerified(false);
+      return;
+    }
+
+    // Embedded mode: verify against parent origin
+    // Always consider localhost and default capacitor as verified for development (not 127.0.0.1)
+    if (origin) {
+      const isLocalhost =
+        origin.includes("localhost") || origin === "capacitor://localhost";
+      const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
+      const finalVerified = isLocalhost || isOriginAllowed;
+      setVerified(finalVerified);
+    } else {
+      setVerified(false);
+    }
   }, [origin, configData, isConfigLoading]);
 
   // Store referral data when URL params are available
@@ -740,9 +772,7 @@ export function useConnectionValue() {
 
       connection.promise
         .then((parentConnection) => {
-          const normalizedOrigin = normalizeOrigin(parentConnection.origin);
-          originRef.current = normalizedOrigin;
-          setOrigin(normalizedOrigin);
+          setOrigin(normalizeOrigin(parentConnection.origin));
           // Extract origin and spread the rest to match ParentMethods type
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { origin: _, ...methods } = parentConnection;
@@ -759,22 +789,23 @@ export function useConnectionValue() {
       const localWalletBridge = new WalletBridge();
       const iframeMethods = localWalletBridge.getIFrameMethods();
 
-      // In standalone mode with redirect, use redirect URI's origin for app ID
+      // In standalone mode, use explicit origin param (popup auth), redirect URI's origin,
+      // or fall back to window.location.origin
       const searchParams = new URLSearchParams(window.location.search);
-      const redirectUrl =
-        searchParams.get("redirect_url") || searchParams.get("redirect_uri");
+      const originParam = searchParams.get("origin");
+      const redirectUrl = searchParams.get("redirect_url");
       let appOrigin = window.location.origin;
 
-      if (redirectUrl) {
+      if (originParam) {
+        appOrigin = decodeURIComponent(originParam);
+      } else if (redirectUrl) {
         try {
           appOrigin = getStandaloneAppOrigin(redirectUrl);
         } catch (error) {
           console.error("Failed to parse redirect_url for app ID:", error);
-          // Fall back to window.location.origin if redirect URL is invalid
         }
       }
 
-      originRef.current = appOrigin;
       setOrigin(appOrigin);
 
       setParent({
@@ -925,6 +956,9 @@ export function useConnectionValue() {
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
+    webauthnPopup,
+    preset: urlParams.preset,
+    policiesStr: urlParams.policies,
     isConfigLoading,
     isPoliciesResolved,
     isMainnet,

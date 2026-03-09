@@ -240,7 +240,6 @@ const session = new SessionConnector({
   keychainUrl: getKeychainUrl(),
   apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
   signupOptions,
-  preset: "cage-calls",
 });
 
 export function StarknetProvider({ children }: PropsWithChildren) {

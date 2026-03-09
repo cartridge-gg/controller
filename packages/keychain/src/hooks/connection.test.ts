@@ -1,5 +1,6 @@
 import {
   getStandaloneAppOrigin,
+  isNestedIframe,
   isOriginVerified,
   resolvePolicies,
 } from "./connection";
@@ -88,6 +89,62 @@ describe("getStandaloneAppOrigin", () => {
 
   it("should preserve custom-scheme redirects instead of collapsing to null", () => {
     expect(getStandaloneAppOrigin("cagecalls://open")).toBe("cagecalls://open");
+  });
+});
+
+describe("isNestedIframe", () => {
+  it("returns false for the top-level window", () => {
+    const top = {};
+
+    expect(
+      isNestedIframe({
+        self: top,
+        parent: top,
+        top,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false for a direct child iframe", () => {
+    const top = {};
+    const self = {};
+
+    expect(
+      isNestedIframe({
+        self,
+        parent: top,
+        top,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns true for a nested iframe", () => {
+    const top = {};
+    const parent = {};
+    const self = {};
+
+    expect(
+      isNestedIframe({
+        self,
+        parent,
+        top,
+      }),
+    ).toBe(true);
+  });
+
+  it("fails closed when top access throws", () => {
+    const self = {};
+    const parent = {};
+
+    expect(
+      isNestedIframe({
+        self,
+        parent,
+        get top() {
+          throw new Error("blocked");
+        },
+      }),
+    ).toBe(true);
   });
 });
 

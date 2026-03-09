@@ -9,9 +9,22 @@ import Controller from "./utils/controller";
 
 import "./index.css";
 
+function isPopupAuthRoute(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const url = new URL(window.location.href);
+  return url.pathname === "/auth";
+}
+
 // Controller type is already declared in vite-env.d.ts
 async function bootstrap() {
-  window.controller = await Controller.fromStore();
+  if (isPopupAuthRoute()) {
+    window.controller = undefined;
+  } else {
+    window.controller = await Controller.fromStore();
+  }
 
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
