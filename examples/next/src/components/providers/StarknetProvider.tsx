@@ -204,12 +204,12 @@ export const controllerConnector = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
+  policies,
   url: getKeychainUrl(),
   signupOptions,
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
-  policies,
   tokens: {
     erc20: ["lords", "strk"],
   },
@@ -230,9 +230,9 @@ export const controllerConnector = new ControllerConnector({
   // preset: "loot-survivor",
 
   // Summit (no achievements, no quests)
-  namespace: "relayer_0_0_1",
-  slot: "pg-mainnet-10",
-  preset: "savage-summit",
+  // namespace: "relayer_0_0_1",
+  // slot: "pg-mainnet-10",
+  preset: "cage-calls",
 });
 
 const session = new SessionConnector({
