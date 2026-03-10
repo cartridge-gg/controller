@@ -49,12 +49,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   );
 
   const createPaymentIntent = useCallback(
-    async (
-      wholeCredits: number,
-      _username: string,
-      teamId?: string,
-      _starterpackId?: string,
-    ) => {
+    async (wholeCredits: number, teamId?: string, _starterpackId?: string) => {
       void _starterpackId;
 
       if (!controller) {
