@@ -6,7 +6,6 @@ import { client } from "@/utils/graphql";
 import {
   CreateStripePaymentIntentDocument,
   CreateStripePaymentIntentMutation,
-  PurchaseType,
   StripePaymentDocument,
   StripePaymentQuery,
 } from "@/utils/api";
@@ -52,10 +51,12 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   const createPaymentIntent = useCallback(
     async (
       wholeCredits: number,
-      username: string,
+      _username: string,
       teamId?: string,
-      starterpackId?: string,
+      _starterpackId?: string,
     ) => {
+      void _starterpackId;
+
       if (!controller) {
         throw new Error("Controller not connected");
       }
@@ -67,16 +68,11 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
           CreateStripePaymentIntentDocument,
           {
             input: {
-              username,
               credits: {
                 amount: wholeCredits,
                 decimals: 0,
               },
               teamId,
-              starterpackId,
-              purchaseType: starterpackId
-                ? PurchaseType.Starterpack
-                : PurchaseType.Credits,
               isMainnet: isLiveMode,
             },
           },
