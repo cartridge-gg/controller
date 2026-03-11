@@ -12,8 +12,6 @@ const LOCAL_STORAGE_KEY = "@cartridge/features";
 
 export type Feature =
   | "none"
-  | "connections"
-  | "connection-x"
   | "connection-instagram"
   | "connection-tiktok"
   | "apple-pay-support";
