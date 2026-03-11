@@ -24,11 +24,12 @@ export function SocialClaimCheckout({
 }) {
   const {
     // connection,
+    isExpired,
+    connectedHandle,
     socialClaimStep,
     onSocialConnect,
     onSocialFollow,
     onSocialShare,
-    isExpired,
   } = useSocialClaim(provider, accountToShare);
 
   const providerName = provider === "TWITTER" ? "X" : provider;
@@ -36,7 +37,9 @@ export function SocialClaimCheckout({
   return (
     <>
       <SocialStepButton
-        label={`Connect ${providerName}`}
+        label={
+          connectedHandle ? `@${connectedHandle}` : `Connect ${providerName}`
+        }
         icon={<XIcon />}
         isCurrent={socialClaimStep === "connect"}
         isCompleted={socialClaimStep !== "connect"}
