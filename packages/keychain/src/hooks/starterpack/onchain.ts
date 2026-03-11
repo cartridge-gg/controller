@@ -9,6 +9,7 @@ import {
   fetchTokenMetadata,
   getCachedTokenMetadata,
 } from "@/utils/token-metadata";
+import { OAuthProvider } from "@/utils/api/oauth-connections";
 
 // Raw JSON from contract (snake_case)
 interface ItemOnchainRaw {
@@ -32,12 +33,13 @@ interface ItemOnchain {
   imageUri: string;
 }
 
-interface StarterPackMetadataOnchain {
+export interface StarterPackMetadataOnchain {
   name: string;
   description: string;
   imageUri: string;
   items: ItemOnchain[];
   additionalPaymentTokens?: string[];
+  conditions?: string[];
 }
 
 // Convert snake_case JSON from contract to camelCase TypeScript
@@ -58,6 +60,29 @@ function convertMetadata(
     ),
   };
 }
+
+export const useStarterPackConditions = (
+  metadata: StarterPackMetadataOnchain | null,
+) => {
+  const [socialClaimProvider, socialAccountToShare] = useMemo<
+    [OAuthProvider | null, string | null]
+  >(() => {
+    const conditions = metadata?.conditions ?? [];
+    switch (conditions[0] as OAuthProvider) {
+      case "TWITTER":
+        return [conditions[0] as OAuthProvider, conditions[1] ?? null];
+      case "TIKTOK": // not implemented
+      case "INSTAGRAM": // not implemented
+      default:
+        return [null, null];
+    }
+  }, [metadata]);
+
+  return {
+    socialClaimProvider,
+    socialAccountToShare,
+  };
+};
 
 export const useOnchainStarterpack = (
   starterpackId?: number,
@@ -125,7 +150,16 @@ export const useOnchainStarterpack = (
         // Convert snake_case to camelCase
         const metadata = convertMetadata(rawMetadata);
 
-        setMetadata(metadata);
+        // TEMP: TESTING....
+        // setMetadata(metadata);
+        setMetadata(
+          metadata
+            ? ({
+                ...metadata,
+                conditions: ["TWITTER", "numsgg"],
+              } as StarterPackMetadataOnchain)
+            : null,
+        );
       } catch (error) {
         console.error("Failed to fetch starterpack metadata:", error);
         setError(error as Error);
