@@ -1,5 +1,9 @@
 import { useState, useCallback } from "react";
-import { OAuthProvider } from "@/utils/api/generated";
+import {
+  type OAuthConnection,
+  OAuthProvider,
+} from "@/utils/api/oauth-connections";
+import { useOAuthConnection } from "@/components/settings/connections/use-connections";
 
 export type SocialClaimStep =
   | "connect"
@@ -9,22 +13,23 @@ export type SocialClaimStep =
   | "claimed";
 
 interface UseSocialClaimResults {
-  isSocialClaim: boolean;
-  socialProvider?: OAuthProvider;
-  socialShareAccount?: string;
+  connection: OAuthConnection | undefined;
   socialClaimStep: SocialClaimStep;
   onSocialConnect?: () => void;
   onSocialFollow?: () => void;
   onSocialShare?: () => void;
+  isExpired: boolean;
 }
 
 export const useSocialClaim = (
-  starterpackId?: number,
+  // starterpackId?: number,
+  provider: OAuthProvider,
+  accountToShare: string,
 ): UseSocialClaimResults => {
   const [socialClaimStep, setSocialClaimStep] =
     useState<SocialClaimStep>("connect");
 
-  const isSocialClaim = starterpackId !== undefined;
+  const { connection } = useOAuthConnection(provider);
 
   const onConnect = useCallback(() => {
     setSocialClaimStep("follow");
@@ -39,9 +44,8 @@ export const useSocialClaim = (
   }, [setSocialClaimStep]);
 
   return {
-    isSocialClaim,
-    socialProvider: OAuthProvider.Twitter,
-    socialShareAccount: "numsgg",
+    connection,
+    isExpired: connection?.isExpired ?? false,
     socialClaimStep,
     onSocialConnect: socialClaimStep == "connect" ? onConnect : undefined,
     onSocialFollow: socialClaimStep == "follow" ? onFollow : undefined,

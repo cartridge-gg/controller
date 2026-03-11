@@ -1,49 +1,26 @@
 import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
-import { useQuery, useQueryClient, useMutation } from "react-query";
+import { useQueryClient, useMutation } from "react-query";
 import { SectionHeader } from "../section-header";
 import { ConnectionCard } from "./connection-card";
-import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
 import { useFetchData } from "@/utils/api/fetcher";
 import {
-  type OAuthConnection,
-  type OAuthConnectionsData,
   type DisconnectOAuthData,
   type OAuthProvider,
-  GET_OAUTH_CONNECTIONS,
   DISCONNECT_OAUTH,
 } from "@/utils/api/oauth-connections";
+import { useOAuthConnections } from "./use-connections";
 
 export const ConnectionsSection = () => {
-  const { controller } = useConnection();
   const { navigate } = useNavigation();
   const queryClient = useQueryClient();
-  const fetchConnections = useFetchData<
-    OAuthConnectionsData,
-    { username: string }
-  >(GET_OAUTH_CONNECTIONS);
   const fetchDisconnect = useFetchData<
     DisconnectOAuthData,
     { provider: string }
   >(DISCONNECT_OAUTH);
 
-  const username = controller?.username();
-
-  const {
-    data: connections,
-    isLoading,
-    isError,
-  } = useQuery<OAuthConnection[]>(
-    ["oauthConnections", username],
-    async () => {
-      if (!username) return [];
-      const result = await fetchConnections({ username });
-      return result.account?.oauthConnections ?? [];
-    },
-    {
-      enabled: !!username,
-    },
-  );
+  const { connections, isLoading, isError } = useOAuthConnections();
+  console.log(`CONNECITONS:`, connections);
 
   const disconnectMutation = useMutation<boolean, Error, string>(
     async (provider: string) => {

@@ -1,13 +1,5 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  AddUserIcon,
   AppleIcon,
   Button,
   CreditCardIcon,
@@ -15,9 +7,6 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-  Thumbnail,
-  XIcon,
-  CheckIcon,
 } from "@cartridge/ui";
 import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useAccountPrivateQuery } from "@/utils/api";
@@ -40,6 +29,7 @@ import { ErrorCard } from "./error";
 import { WalletSelector } from "./selector";
 import { QuantityControls } from "./quantity";
 import { WalletSelectionDrawer } from "./wallet-drawer";
+import { SocialClaimCheckout } from "./social-claim";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { num } from "starknet";
 
@@ -52,13 +42,8 @@ export function OnchainCheckout() {
     displayError,
     clearError,
     setDisplayError,
-    isSocialClaim,
-    socialClaimStep,
-    socialProvider,
-    socialShareAccount,
-    onSocialConnect,
-    onSocialFollow,
-    onSocialShare,
+    socialClaimProvider,
+    socialAccountToShare,
   } = useStarterpackContext();
   const {
     isFetchingConversion,
@@ -131,10 +116,9 @@ export function OnchainCheckout() {
 
   const wallet = getWallet(selectedWallet?.type || "controller");
 
-  // const isFree = useMemo(() => {
-  //   return quote?.totalCost === BigInt(0);
-  // }, [quote]);
-  const isFree = true;
+  const isFree = useMemo(() => {
+    return quote?.totalCost === BigInt(0);
+  }, [quote]);
 
   const isStripeStarterpackSupported = useMemo(() => {
     if (!controller || !quote) {
@@ -338,61 +322,23 @@ export function OnchainCheckout() {
           <ControllerErrorAlert error={displayError} />
         )}
 
-        {isFree ? (
-          isSocialClaim ? (
-            <>
-              <SocialStepButton
-                label={`Connect ${socialProvider === "TWITTER" ? "X" : socialProvider}`}
-                icon={<XIcon />}
-                isCurrent={socialClaimStep === "connect"}
-                isCompleted={socialClaimStep !== "connect"}
-              />
-              <SocialStepButton
-                label={`Follow @${socialShareAccount}`}
-                icon={<AddUserIcon />}
-                isCurrent={socialClaimStep === "follow"}
-                isCompleted={
-                  socialClaimStep !== "connect" && socialClaimStep !== "follow"
-                }
-              />
-              <SocialStepButton
-                label="Spread The Word"
-                icon={<AddUserIcon />}
-                isCurrent={socialClaimStep === "share"}
-                isCompleted={
-                  socialClaimStep !== "connect" &&
-                  socialClaimStep !== "follow" &&
-                  socialClaimStep !== "share"
-                }
-              />
-              <Button
-                className="w-full"
-                isLoading={isLoading}
-                onClick={
-                  onSocialConnect ??
-                  onSocialFollow ??
-                  onSocialShare ??
-                  handlePurchase
-                }
-              >
-                {socialClaimStep === "connect"
-                  ? `Connect ${socialProvider === "TWITTER" ? "X" : socialProvider}`
-                  : socialClaimStep === "follow"
-                    ? `Follow @${socialShareAccount}`
-                    : socialClaimStep === "share"
-                      ? "Spread The Word"
-                      : "Claim"}
-              </Button>
-            </>
-          ) : (
-            <Button
-              className="w-full"
-              isLoading={isLoading}
-              onClick={handlePurchase}
-            >
-              Claim
-            </Button>
-          )
+        {socialClaimProvider != null ? (
+          <SocialClaimCheckout
+            provider={socialClaimProvider}
+            accountToShare={socialAccountToShare as string}
+            isLoading={isLoading}
+            handlePurchase={handlePurchase}
+            // isFree={isFree}
+            isFree={true} // TEMP: TESTING...
+          />
+        ) : isFree ? (
+          <Button
+            className="w-full"
+            isLoading={isLoading}
+            onClick={handlePurchase}
+          >
+            Claim
+          </Button>
         ) : (
           <>
             {balanceError && (
@@ -498,35 +444,3 @@ export function OnchainCheckout() {
     </>
   );
 }
-
-const SocialStepButton = ({
-  label,
-  icon,
-  isCurrent,
-  isCompleted,
-}: {
-  label: string;
-  icon: ReactNode;
-  isCurrent: boolean;
-  isCompleted: boolean;
-}) => {
-  return (
-    <Button
-      className="w-full justify-start pointer-events-none"
-      variant="secondary"
-      onClick={undefined}
-      disabled={!isCurrent}
-    >
-      <div className="flex gap-2">
-        <Thumbnail
-          className={!isCurrent ? "text-foreground-400" : ""}
-          icon={isCompleted ? <CheckIcon className="w-4 h-4" /> : icon}
-          variant="light"
-          size="sm"
-          rounded
-        />
-        {label}
-      </div>
-    </Button>
-  );
-};

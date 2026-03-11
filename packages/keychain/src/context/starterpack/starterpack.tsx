@@ -16,8 +16,8 @@ import {
   Item,
   ItemType,
 } from "./types";
-import { SocialClaimStep, useSocialClaim } from "@/hooks/starterpack/social";
-import { OAuthProvider } from "@/utils/api";
+import { useStarterPackConditions } from "@/hooks/starterpack/onchain";
+import { OAuthProvider } from "@/utils/api/oauth-connections";
 
 export interface StarterpackContextType {
   // Starterpack identification
@@ -42,13 +42,8 @@ export interface StarterpackContextType {
   clearError: () => void;
 
   // Social claim
-  isSocialClaim: boolean;
-  socialClaimStep?: SocialClaimStep;
-  socialProvider?: OAuthProvider;
-  socialShareAccount?: string;
-  onSocialConnect?: () => void;
-  onSocialFollow?: () => void;
-  onSocialShare?: () => void;
+  socialClaimProvider: OAuthProvider | null;
+  socialAccountToShare: string | null;
 }
 
 export const StarterpackContext = createContext<
@@ -149,6 +144,9 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     isOnchainQuoteLoading,
   ]);
 
+  const { socialClaimProvider, socialAccountToShare } =
+    useStarterPackConditions(onchainMetadata);
+
   // Sync errors from hooks to displayError
   useEffect(() => {
     if (starterpackError) {
@@ -170,20 +168,6 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     setClaimItemsState(items);
   }, []);
 
-  const {
-    isSocialClaim,
-    socialClaimStep,
-    socialProvider,
-    socialShareAccount,
-    onSocialConnect,
-    onSocialFollow,
-    onSocialShare,
-  } = useSocialClaim(
-    type === "onchain" && starterpackId !== undefined
-      ? Number(starterpackId)
-      : undefined,
-  );
-
   const contextValue: StarterpackContextType = {
     starterpackId,
     setStarterpackId,
@@ -196,13 +180,8 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     displayError,
     setDisplayError,
     clearError,
-    isSocialClaim,
-    socialClaimStep,
-    socialProvider,
-    socialShareAccount,
-    onSocialConnect,
-    onSocialFollow,
-    onSocialShare,
+    socialClaimProvider,
+    socialAccountToShare,
   };
 
   return (
