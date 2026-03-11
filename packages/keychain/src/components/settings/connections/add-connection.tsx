@@ -39,7 +39,7 @@ export function AddConnection({ username }: { username?: string }) {
   const { isFeatureEnabled } = useFeatures();
   const featureFlags = useMemo(
     () => ({
-      x: isFeatureEnabled("connection-x"),
+      twitter: true,
       tiktok: isFeatureEnabled("connection-tiktok"),
       instagram: isFeatureEnabled("connection-instagram"),
     }),
@@ -389,7 +389,7 @@ export function AddConnection({ username }: { username?: string }) {
                 onClick={handleInstagramConnect}
               />
             )}
-            {featureFlags.x && (
+            {featureFlags.twitter && (
               <ConnectionMethod
                 provider="TWITTER"
                 onClick={handleTwitterConnect}
