@@ -1,4 +1,18 @@
 {
+  "redirects": [
+    {
+      "source": "/((?!ofac\\.html$).*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "x-vercel-ip-country",
+          "value": "(CU|IR|KP|SY)"
+        }
+      ],
+      "destination": "/ofac.html",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
