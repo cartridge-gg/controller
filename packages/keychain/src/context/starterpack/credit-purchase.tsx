@@ -30,6 +30,7 @@ export interface CreditPurchaseContextType {
   setUsdAmount: (amount: number) => void;
 
   // Stripe state
+  stripePaymentId: string | undefined;
   clientSecret: string | undefined;
   costDetails: CostDetails | undefined;
   stripePromise: Promise<Stripe | null>;
@@ -58,6 +59,7 @@ export const CreditPurchaseProvider = ({
   const { quantity } = useOnchainPurchaseContext();
 
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
+  const [stripePaymentId, setStripePaymentId] = useState<string | undefined>();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
 
@@ -117,6 +119,7 @@ export const CreditPurchaseProvider = ({
         );
       }
 
+      setStripePaymentId(paymentIntent.id);
       setClientSecret(paymentIntent.clientSecret);
       setCostDetails(paymentIntent.pricing);
     } catch (e) {
@@ -135,9 +138,16 @@ export const CreditPurchaseProvider = ({
     setDisplayError,
   ]);
 
+  useEffect(() => {
+    setStripePaymentId(undefined);
+    setClientSecret(undefined);
+    setCostDetails(undefined);
+  }, [starterpackId]);
+
   const contextValue: CreditPurchaseContextType = {
     usdAmount,
     setUsdAmount,
+    stripePaymentId,
     clientSecret,
     costDetails,
     stripePromise,

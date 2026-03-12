@@ -7199,6 +7199,13 @@ export type StripePaymentQuery = {
     __typename?: "StripePayment";
     id: string;
     paymentStatus: StripePaymentStatus;
+    purchaseFulfillment?: {
+      __typename?: "PurchaseFulfillment";
+      id: string;
+      status: PurchaseFulfillmentStatus;
+      transactionHash?: string | null;
+      lastError?: string | null;
+    } | null;
   };
 };
 
@@ -7838,6 +7845,12 @@ export const StripePaymentDocument = `
   stripePayment(id: $id) {
     id
     paymentStatus
+    purchaseFulfillment {
+      id
+      status
+      transactionHash
+      lastError
+    }
   }
 }
     `;

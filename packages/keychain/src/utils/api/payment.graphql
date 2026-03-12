@@ -8,6 +8,12 @@ query StripePayment($id: ID!) {
   stripePayment(id: $id) {
     id
     paymentStatus
+    purchaseFulfillment {
+      id
+      status
+      transactionHash
+      lastError
+    }
   }
 }
 
