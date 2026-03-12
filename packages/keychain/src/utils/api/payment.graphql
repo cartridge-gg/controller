@@ -47,6 +47,20 @@ mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
   }
 }
 
+mutation CreateStripeStarterpackIntent(
+  $input: CreateStripeStarterpackIntentInput!
+) {
+  createStripeStarterpackIntent(input: $input) {
+    id
+    clientSecret
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+  }
+}
+
 mutation CreateLayerswapPayment($input: CreateLayerswapPaymentInput!) {
   createLayerswapPayment(input: $input) {
     ...LayerswapPaymentFields

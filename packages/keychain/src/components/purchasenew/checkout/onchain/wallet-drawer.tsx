@@ -3,6 +3,7 @@ import {
   AppleIcon,
   Button,
   cn,
+  CreditCardIcon,
   GlobeIcon,
   PurchaseCard,
   Sheet,
@@ -32,11 +33,16 @@ export function WalletSelectionDrawer({
   onClose,
 }: WalletSelectionDrawerProps) {
   const isApplePayEnabled = useFeature("apple-pay-support");
+  const isStripeCheckoutEnabled = useFeature("stripe-checkout-support");
 
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
-  const { onExternalConnect, clearSelectedWallet, onApplePaySelect } =
-    useOnchainPurchaseContext();
+  const {
+    onExternalConnect,
+    clearSelectedWallet,
+    onApplePaySelect,
+    onStripeSelect,
+  } = useOnchainPurchaseContext();
 
   const [step, setStep] = useState<DrawerStep>("network");
   const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
@@ -145,6 +151,11 @@ export function WalletSelectionDrawer({
     onApplePaySelect();
     onClose();
   }, [onApplePaySelect, onClose]);
+
+  const handleStripeCheckoutSelect = useCallback(async () => {
+    onStripeSelect();
+    onClose();
+  }, [onStripeSelect, onClose]);
 
   const onControllerWalletSelect = useCallback(() => {
     clearSelectedWallet();
@@ -267,6 +278,27 @@ export function WalletSelectionDrawer({
           {step === "network" ? (
             // Network selection step
             <>
+              {isStripeCheckoutEnabled && (
+                <div
+                  key="stripe-checkout"
+                  onClick={handleStripeCheckoutSelect}
+                  className={cn(
+                    "group flex flex-row gap-2 bg-background-200 hover:bg-background-300 rounded-lg p-3 justify-between cursor-pointer",
+                    "rounded-lg",
+                    isApplePayLoading && "opacity-50 pointer-events-none",
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <Thumbnail
+                      icon={<CreditCardIcon variant="solid" />}
+                      size="md"
+                      className="bg-background-300 group-hover:bg-background-400"
+                      rounded
+                    />
+                    <span>Stripe Checkout</span>
+                  </div>
+                </div>
+              )}
               {isApplePayEnabled && (
                 <div
                   key="apple-pay"

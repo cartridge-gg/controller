@@ -6,6 +6,9 @@ import { client } from "@/utils/graphql";
 import {
   CreateStripePaymentIntentDocument,
   CreateStripePaymentIntentMutation,
+  CreateStripeStarterpackIntentDocument,
+  CreateStripeStarterpackIntentInput,
+  CreateStripeStarterpackIntentMutation,
   StripePaymentDocument,
   StripePaymentQuery,
 } from "@/utils/api";
@@ -84,6 +87,37 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
     [controller, isLiveMode],
   );
 
+  const createStarterpackPaymentIntent = useCallback(
+    async (input: CreateStripeStarterpackIntentInput) => {
+      if (!controller) {
+        throw new Error("Controller not connected");
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const result =
+          await client.request<CreateStripeStarterpackIntentMutation>(
+            CreateStripeStarterpackIntentDocument,
+            {
+              input: {
+                ...input,
+                isMainnet: isLiveMode,
+              },
+            },
+          );
+
+        return result.createStripeStarterpackIntent;
+      } catch (e) {
+        setError(e as Error);
+        throw e;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [controller, isLiveMode],
+  );
+
   const waitForPayment = useCallback(async (paymentIntentId: string) => {
     const MAX_WAIT_TIME = 60 * 1000; // 1 minute
     const POLL_INTERVAL = 3000; // 3 seconds
@@ -121,6 +155,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
     error,
     stripePromise,
     createPaymentIntent,
+    createStarterpackPaymentIntent,
     waitForPayment,
   };
 };
