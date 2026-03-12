@@ -554,7 +554,8 @@ export const OnchainPurchaseProvider = ({
     convertedPrice,
     swapQuote,
     isFetchingConversion,
-    isTokenSelectionLocked: isTokenSelectionLocked || isApplePaySelected,
+    isTokenSelectionLocked:
+      isTokenSelectionLocked || isApplePaySelected || isStripeSelected,
     conversionError,
     usdAmount,
     layerswapFees,
