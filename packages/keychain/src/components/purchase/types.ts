@@ -1,6 +1,10 @@
 import { StarterpackDetails } from "@/context";
 import { ExternalWallet } from "@cartridge/controller";
-import { PurchaseType } from "@/utils/api";
+
+export enum PurchaseType {
+  Credits = "CREDITS",
+  Starterpack = "STARTERPACK",
+}
 
 export enum PurchaseState {
   SELECTION = 0,

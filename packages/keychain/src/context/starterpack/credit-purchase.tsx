@@ -74,7 +74,6 @@ export const CreditPurchaseProvider = ({
     try {
       const paymentIntent = await createPaymentIntent(
         usdToCredits(usdAmount),
-        controller.username(),
         undefined,
         typeof starterpackId === "string" ? starterpackId : undefined,
       );
