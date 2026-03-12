@@ -156,6 +156,11 @@ export function NavigationProvider({
         }
       }
 
+      // if equals to the last path, keep new one
+      if (prev[currentPosition]?.path === newEntry.path) {
+        currentPosition--;
+      }
+
       // Truncate any forward history and add new entry
       const newStack = [...prev.slice(0, currentPosition + 1), newEntry];
 
@@ -167,14 +172,7 @@ export function NavigationProvider({
     });
 
     lastTrackedPath.current = currentPath;
-  }, [
-    getFullPath,
-    location.state,
-    location.pathname,
-    setCurrentIndex,
-    setNavigationStack,
-    currentIndex,
-  ]);
+  }, [getFullPath, location.state, location.pathname, currentIndex]);
 
   // Handle controller navigation events
   useEffect(() => {
@@ -214,7 +212,7 @@ export function NavigationProvider({
         handleControllerNavigate,
       );
     };
-  }, [navigate, setNavigationStack, setCurrentIndex]);
+  }, [navigate]);
 
   // Navigate with tracking
   const navigateWithTracking = useCallback(
@@ -294,7 +292,6 @@ export function NavigationProvider({
       currentIndex,
       navigationStack,
       location.search,
-      setCurrentIndex,
       setNavigationStack,
     ],
   );
