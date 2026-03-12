@@ -62,7 +62,6 @@ export function usePurchase({
     try {
       const paymentIntent = await createPaymentIntent(
         wholeCredits,
-        controller.username(),
         teamId,
         starterpackDetails?.id?.toString(),
       );

@@ -26,6 +26,7 @@ import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
+import { SpinnerIcon } from "@cartridge/ui";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -58,6 +59,14 @@ export function Provider({ children }: PropsWithChildren) {
     }),
     [connection.controller, connection.project],
   );
+
+  if (connection.isConfigLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <SpinnerIcon className="animate-spin text-muted-foreground" size="lg" />
+      </div>
+    );
+  }
 
   return (
     <FeatureProvider>
