@@ -8,32 +8,33 @@ import {
 } from "@cartridge/ui";
 import { convertCentsToDollars } from "./cost";
 import { useMemo } from "react";
-
-const STRIPE_FIXED_FEE_CENTS = 30; // $0.30
+import { getStripeFeeInCents } from "./stripe-pricing";
 
 export const FeesTooltip = ({
   trigger,
   defaultOpen,
   isStripe,
   costDetails,
+  hideCartridgeFee = false,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
   isStripe: boolean;
   costDetails: CostDetails;
+  hideCartridgeFee?: boolean;
 }) => {
   const { layerswapFees } = useOnchainPurchaseContext();
 
   const cartridgeFeeInCents = useMemo(() => {
+    if (hideCartridgeFee) return 0;
     const percent = isStripe ? 0.05 : 0.025;
     // round to nearest cent
     return Math.round(costDetails.baseCostInCents * percent);
-  }, [costDetails.baseCostInCents, isStripe]);
+  }, [costDetails.baseCostInCents, hideCartridgeFee, isStripe]);
 
   const stripeFeeInCents = useMemo(() => {
     if (!isStripe) return 0;
-    const percentFee = Math.round(costDetails.baseCostInCents * 0.039); // 3.9% percent part
-    return percentFee + STRIPE_FIXED_FEE_CENTS; // include fixed fee
+    return getStripeFeeInCents(costDetails.baseCostInCents);
   }, [costDetails.baseCostInCents, isStripe]);
 
   const cartridgeFee = convertCentsToDollars(cartridgeFeeInCents);
@@ -59,10 +60,12 @@ export const FeesTooltip = ({
               <span>{stripeFee}</span>
             </div>
           )}
-          <div className="flex flex-row justify-between text-foreground-300">
-            <span>Cartridge Fee:</span>
-            <span>{cartridgeFee}</span>
-          </div>
+          {!hideCartridgeFee && (
+            <div className="flex flex-row justify-between text-foreground-300">
+              <span>Cartridge Fee:</span>
+              <span>{cartridgeFee}</span>
+            </div>
+          )}
           {layerswapFees && (
             <div className="flex flex-row justify-between text-foreground-300">
               Layerswap Bridging Fee:{" "}

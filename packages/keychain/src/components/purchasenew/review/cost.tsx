@@ -28,6 +28,7 @@ import type { Quote } from "@/context";
 import { useCallback, useMemo, useEffect } from "react";
 import { useOnchainPurchaseContext } from "@/context";
 import { num } from "starknet";
+import { getStarterpackStripeCostDetails } from "./stripe-pricing";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -43,6 +44,7 @@ export function CostBreakdown({
   platform,
   paymentUnit,
   openFeesTooltip = false,
+  hideCartridgeFee = false,
 }: {
   rails: PaymentRails;
   costDetails?: CostDetails;
@@ -50,6 +52,7 @@ export function CostBreakdown({
   platform?: ExternalPlatform;
   paymentUnit?: PaymentUnit;
   openFeesTooltip?: boolean;
+  hideCartridgeFee?: boolean;
 }) {
   if (rails === "crypto" && !walletType) {
     return;
@@ -80,6 +83,7 @@ export function CostBreakdown({
                   isStripe={rails === "stripe"}
                   defaultOpen={openFeesTooltip}
                   costDetails={costDetails}
+                  hideCartridgeFee={hideCartridgeFee}
                 />
               )}
             </div>
@@ -119,10 +123,18 @@ export function OnchainCostBreakdown({
     feeEstimationError,
     quantity,
     isApplePaySelected,
+    isStripeSelected,
     coinbaseQuote,
     isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
   const { decimals } = quote.paymentTokenMetadata;
+  const stripeCostDetails = useMemo(() => {
+    if (!isStripeSelected) {
+      return undefined;
+    }
+
+    return getStarterpackStripeCostDetails(quote, quantity);
+  }, [isStripeSelected, quantity, quote]);
 
   // Get default token (matching quote if available) or fallback to the first available token
   const defaultToken =
@@ -218,13 +230,22 @@ export function OnchainCostBreakdown({
                 quantity={quantity}
                 layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
                 coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
+                stripeFeeInCents={stripeCostDetails?.processingFeeInCents}
               />
             </div>
             {isFetchingConversion || isFetchingCoinbaseQuote ? (
               <Spinner />
             ) : (
               <div className="flex items-center gap-1.5">
-                {isApplePaySelected ? (
+                {isStripeSelected ? (
+                  stripeCostDetails ? (
+                    <span className="text-foreground-100">
+                      {formatAmount(stripeCostDetails.totalInCents / 100)}
+                    </span>
+                  ) : (
+                    <span className="text-foreground-400">—</span>
+                  )
+                ) : isApplePaySelected ? (
                   coinbaseQuote ? (
                     <span className="text-foreground-100">
                       {`$${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)}`}

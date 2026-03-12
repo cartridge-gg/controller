@@ -17,6 +17,7 @@ import { getCurrentReferral } from "@/utils/referral";
 import { isOnchainStarterpack } from "./types";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { num } from "starknet";
+import { getStarterpackStripeCostDetails } from "@/components/purchasenew/review/stripe-pricing";
 
 export interface CostDetails {
   baseCostInCents: number;
@@ -85,15 +86,16 @@ export const CreditPurchaseProvider = ({
       let paymentIntent;
 
       if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
-        if (!starterpackDetails.quote) {
+        const starterpackQuote = starterpackDetails.quote;
+
+        if (!starterpackQuote) {
           throw new Error("Quote not loaded yet");
         }
 
         const usdcAddress = USDC_ADDRESSES[controller.chainId()];
         if (
           !usdcAddress ||
-          num.toHex(starterpackDetails.quote.paymentToken) !==
-            num.toHex(usdcAddress)
+          num.toHex(starterpackQuote.paymentToken) !== num.toHex(usdcAddress)
         ) {
           throw new Error(
             "Stripe checkout is only available for starterpacks priced in USDC.",
@@ -121,7 +123,11 @@ export const CreditPurchaseProvider = ({
 
       setStripePaymentId(paymentIntent.id);
       setClientSecret(paymentIntent.clientSecret);
-      setCostDetails(paymentIntent.pricing);
+      setCostDetails(
+        starterpackDetails && isOnchainStarterpack(starterpackDetails)
+          ? getStarterpackStripeCostDetails(starterpackDetails.quote!, quantity)
+          : paymentIntent.pricing,
+      );
     } catch (e) {
       setDisplayError(e as Error);
       throw e;

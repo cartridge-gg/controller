@@ -138,7 +138,13 @@ export const StripeCheckoutContainer = ({
             description={error.message}
           />
         )}
-        {!error && <CostBreakdown rails="stripe" costDetails={cost} />}
+        {!error && (
+          <CostBreakdown
+            rails="stripe"
+            costDetails={cost}
+            hideCartridgeFee={true}
+          />
+        )}
         <Button
           isLoading={isLoading}
           disabled={isSubmitting || !stripe || !elements || isLoading}

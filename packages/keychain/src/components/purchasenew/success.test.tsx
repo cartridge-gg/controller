@@ -205,4 +205,51 @@ describe("StripePurchaseSuccess", () => {
 
     expect(mocks.handlePlay).toHaveBeenCalledTimes(1);
   });
+
+  it("shows Purchase Failure and reveals lastError when expanded", () => {
+    const lastError =
+      "Starterpack fulfillment failed after payment confirmation.";
+
+    vi.useFakeTimers();
+
+    mocks.useStripePaymentQuery.mockReturnValue({
+      data: {
+        stripePayment: {
+          paymentStatus: "SUCCEEDED",
+          purchaseFulfillment: {
+            id: "fulfillment-1",
+            status: "FAILED",
+            transactionHash: null,
+            lastError,
+          },
+        },
+      },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
+
+    render(
+      <StripePurchaseSuccess
+        items={[
+          {
+            title: "Village Pass",
+            subtitle: "NFT",
+            icon: "https://example.com/pass.png",
+            type: ItemType.NFT,
+          },
+        ]}
+        name="Starterpack"
+        stripePaymentId="stripe_123"
+      />,
+    );
+
+    expect(screen.getByText("Purchase Failure")).toBeInTheDocument();
+    expect(screen.queryByText(lastError)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Purchase Failure"));
+
+    expect(screen.getByText(lastError)).toBeInTheDocument();
+  });
 });

@@ -5,7 +5,7 @@ import {
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/ui";
-import { ControllerErrorAlert } from "@/components/ErrorAlert";
+import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "./receiving";
 import { useConnection } from "@/hooks/connection";
 import {
@@ -205,14 +205,11 @@ export function StripePurchaseSuccess({
     }
 
     if (isFulfillmentFailed) {
-      return new Error(
-        fulfillment?.lastError ||
-          "Onchain purchase failed after Stripe payment confirmation.",
-      );
+      return undefined;
     }
 
     return undefined;
-  }, [error, fulfillment?.lastError, isFulfillmentFailed, isPaymentFailed]);
+  }, [error, isFulfillmentFailed, isPaymentFailed]);
 
   const paymentStage = getStripePaymentStage(paymentStatus);
   const fulfillmentStage = getFulfillmentStage(fulfillmentStatus);
@@ -232,7 +229,18 @@ export function StripePurchaseSuccess({
         />
       </LayoutContent>
       <LayoutFooter>
-        {statusError && <ControllerErrorAlert error={statusError} />}
+        {isFulfillmentFailed ? (
+          <ErrorAlert
+            title="Purchase Failure"
+            description={
+              fulfillment?.lastError ||
+              "Onchain purchase failed after Stripe payment confirmation."
+            }
+            variant="error"
+          />
+        ) : statusError ? (
+          <ControllerErrorAlert error={statusError} />
+        ) : null}
         <div className="space-y-2">
           <ConfirmingTransaction
             title={paymentStage.title}
