@@ -20,7 +20,6 @@ export const ConnectionsSection = () => {
   >(DISCONNECT_OAUTH);
 
   const { connections, isLoading, isError } = useOAuthConnections();
-  console.log(`CONNECITONS:`, connections);
 
   const disconnectMutation = useMutation<boolean, Error, string>(
     async (provider: string) => {
@@ -39,8 +38,6 @@ export const ConnectionsSection = () => {
   const hasAllConnections = ALL_PROVIDERS.every((p) =>
     connectedProviders.includes(p),
   );
-
-  console.log(`connections:`, connections);
 
   return (
     <section className="space-y-4">

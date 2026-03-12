@@ -66,7 +66,7 @@ export function PurchaseStarterpack() {
         .join(";");
 
       navigate(`/purchase/claim/${keys}/${preimage}/preimage`, {
-        replace: true,
+        reset: true,
       });
     }
 
@@ -76,7 +76,7 @@ export function PurchaseStarterpack() {
       isOnchainStarterpack(details) &&
       !displayError
     ) {
-      navigate(`/purchase/checkout/onchain`, { replace: true });
+      navigate(`/purchase/checkout/onchain`, { reset: true });
     }
   }, [isStarterpackLoading, details, preimage, displayError, navigate]);
 

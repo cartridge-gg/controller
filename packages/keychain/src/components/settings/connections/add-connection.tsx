@@ -28,7 +28,6 @@ type ConnectionPending = {
 };
 
 export function AddConnection({ username }: { username?: string }) {
-  const [navigateBackTo, setNavigateBackTo] = useState(-1);
   const { navigate } = useNavigation();
 
   const queryClient = useQueryClient();
@@ -37,6 +36,12 @@ export function AddConnection({ username }: { username?: string }) {
   const [headerIcon, setHeaderIcon] = useState<React.ReactElement>(
     <AddUserIcon size="lg" />,
   );
+
+  // if provider param is provider, skip selection
+  const [searchParams] = useSearchParams();
+  const defaultProvider = searchParams.get("provider") as
+    | OAuthProvider
+    | undefined;
 
   // Feature flags - connections can be toggled via /feature/connections/enable or /feature/connections/disable
   const { isFeatureEnabled } = useFeatures();
@@ -48,25 +53,6 @@ export function AddConnection({ username }: { username?: string }) {
     }),
     [isFeatureEnabled],
   );
-
-  const [searchParams] = useSearchParams();
-  const defaultProvider = searchParams.get("provider") as
-    | OAuthProvider
-    | undefined;
-  useEffect(() => {
-    if (username) {
-      if (defaultProvider === "TIKTOK") {
-        handleTikTokConnect();
-        setNavigateBackTo(-2);
-      } else if (defaultProvider === "INSTAGRAM") {
-        handleInstagramConnect();
-        setNavigateBackTo(-2);
-      } else if (defaultProvider === "TWITTER") {
-        handleTwitterConnect();
-        setNavigateBackTo(-2);
-      }
-    }
-  }, [defaultProvider, username]);
 
   const handleTikTokConnect = useCallback(() => {
     if (!username) {
@@ -365,6 +351,25 @@ export function AddConnection({ username }: { username?: string }) {
     }
   }, [username, queryClient]);
 
+  useEffect(() => {
+    if (username && !connectionPending) {
+      if (defaultProvider === "TIKTOK") {
+        handleTikTokConnect();
+      } else if (defaultProvider === "INSTAGRAM") {
+        handleInstagramConnect();
+      } else if (defaultProvider === "TWITTER") {
+        handleTwitterConnect();
+      }
+    }
+  }, [
+    defaultProvider,
+    username,
+    handleTikTokConnect,
+    handleInstagramConnect,
+    handleTwitterConnect,
+    connectionPending,
+  ]);
+
   // Navigate back to settings after successful connection
   useEffect(() => {
     if (
@@ -373,7 +378,7 @@ export function AddConnection({ username }: { username?: string }) {
       !connectionPending.error
     ) {
       setTimeout(() => {
-        navigate(navigateBackTo);
+        navigate(-1);
       }, 2000);
     }
   }, [connectionPending, navigate]);
@@ -434,7 +439,7 @@ export function AddConnection({ username }: { username?: string }) {
           </Button>
         )}
         {!connectionPending && (
-          <Button variant="secondary" onClick={() => navigate(navigateBackTo)}>
+          <Button variant="secondary" onClick={() => navigate(-1)}>
             Back
           </Button>
         )}

@@ -83,6 +83,7 @@ vi.mock("@/components/provider/data", () => ({
 
 vi.mock("@/context", () => ({
   ToastProvider: ({ children }: PropsWithChildren) => <>{children}</>,
+  StarterpackProviders: ({ children }: PropsWithChildren) => <>{children}</>,
 }));
 
 vi.mock("@/context/quest", () => ({
