@@ -15,12 +15,14 @@ export const FeesTooltip = ({
   defaultOpen,
   isStripe,
   costDetails,
+  lineItemLabel = "Credits",
   hideCartridgeFee = false,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
   isStripe: boolean;
   costDetails: CostDetails;
+  lineItemLabel?: string;
   hideCartridgeFee?: boolean;
 }) => {
   const { layerswapFees } = useOnchainPurchaseContext();
@@ -50,7 +52,7 @@ export const FeesTooltip = ({
           className="flex flex-col gap-2 bg-spacer-100 border border-background-150 text-foreground-400 min-w-[240px]"
         >
           <div className="flex flex-row justify-between text-foreground-300">
-            <span>Credits:</span>
+            <span>{lineItemLabel}:</span>
             <span>{convertCentsToDollars(costDetails.baseCostInCents)}</span>
           </div>
           <Separator className="bg-background-125" />

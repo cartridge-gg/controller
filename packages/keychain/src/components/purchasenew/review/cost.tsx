@@ -43,6 +43,7 @@ export function CostBreakdown({
   walletType,
   platform,
   paymentUnit,
+  lineItemLabel = "Credits",
   openFeesTooltip = false,
   hideCartridgeFee = false,
 }: {
@@ -51,6 +52,7 @@ export function CostBreakdown({
   walletType?: ExternalWalletType;
   platform?: ExternalPlatform;
   paymentUnit?: PaymentUnit;
+  lineItemLabel?: string;
   openFeesTooltip?: boolean;
   hideCartridgeFee?: boolean;
 }) {
@@ -83,6 +85,7 @@ export function CostBreakdown({
                   isStripe={rails === "stripe"}
                   defaultOpen={openFeesTooltip}
                   costDetails={costDetails}
+                  lineItemLabel={lineItemLabel}
                   hideCartridgeFee={hideCartridgeFee}
                 />
               )}

@@ -22,10 +22,15 @@ import { CostBreakdown } from "../../review/cost";
 
 type CheckoutFormProps = {
   cost: CostDetails;
+  lineItemLabel?: string;
   onComplete: () => void;
 };
 
-export default function CheckoutForm({ cost, onComplete }: CheckoutFormProps) {
+export default function CheckoutForm({
+  cost,
+  lineItemLabel,
+  onComplete,
+}: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
 
@@ -85,6 +90,7 @@ export default function CheckoutForm({ cost, onComplete }: CheckoutFormProps) {
   return (
     <StripeCheckoutContainer
       cost={cost}
+      lineItemLabel={lineItemLabel}
       stripe={stripe}
       elements={elements}
       error={error}
@@ -106,6 +112,7 @@ export default function CheckoutForm({ cost, onComplete }: CheckoutFormProps) {
 
 export const StripeCheckoutContainer = ({
   cost,
+  lineItemLabel,
   stripe,
   elements,
   error,
@@ -115,6 +122,7 @@ export const StripeCheckoutContainer = ({
   handleSubmit,
 }: {
   cost: CostDetails;
+  lineItemLabel?: string;
   stripe: Stripe | null;
   elements: StripeElements | null;
   error: Error | undefined;
@@ -142,6 +150,7 @@ export const StripeCheckoutContainer = ({
           <CostBreakdown
             rails="stripe"
             costDetails={cost}
+            lineItemLabel={lineItemLabel}
             hideCartridgeFee={true}
           />
         )}
