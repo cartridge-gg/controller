@@ -5,6 +5,7 @@ import {
 } from "@/utils/api/oauth-connections";
 import { useOAuthConnection } from "@/components/settings/connections/use-connections";
 import { useNavigation } from "@/context/navigation";
+import { useLocation } from "react-router-dom";
 
 export type SocialClaimStep =
   | "connect"
@@ -52,17 +53,23 @@ export const useSocialClaim = (
   }, [isConnected, isExpired, hasFollowed, hasShared]);
 
   const { navigate } = useNavigation();
+  const location = useLocation();
+
   const onConnect = useCallback(() => {
-    navigate(`/settings/add-connection?provider=${provider}`);
-  }, [isConnected, isExpired, setSocialClaimStep]);
+    navigate(
+      `/settings/add-connection?provider=${provider}&returnTo=${location.pathname}`,
+    );
+  }, [provider, location.pathname, navigate]);
 
   const onFollow = useCallback(() => {
     setHasFollowed(true);
-  }, [setSocialClaimStep]);
+    console.log(`TODO: follow ${accountToShare}`);
+  }, [setHasFollowed, accountToShare]);
 
   const onShare = useCallback(() => {
     setHasShared(true);
-  }, [setSocialClaimStep]);
+    console.log(`TODO: share ${accountToShare}`);
+  }, [setHasShared, accountToShare]);
 
   return {
     connection,

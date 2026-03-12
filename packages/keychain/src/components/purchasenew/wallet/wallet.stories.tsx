@@ -22,7 +22,8 @@ const mockStarterpackValue = {
   displayError: undefined,
   setDisplayError: () => {},
   clearError: () => {},
-  isSocialClaim: false,
+  socialClaimProvider: null,
+  socialAccountToShare: null,
 };
 
 // Mock onchain purchase context

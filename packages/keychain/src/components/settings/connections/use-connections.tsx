@@ -45,7 +45,7 @@ export const useOAuthConnection = (provider: OAuthProvider) => {
   const { connections, isLoading, isError } = useOAuthConnections();
   const connection = useMemo(
     () => connections?.find((c) => c.provider === provider),
-    [connections],
+    [connections, provider],
   );
   return {
     connection,
