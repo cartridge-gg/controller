@@ -14,7 +14,7 @@ import {
   useCreditPurchaseContext,
   Item,
 } from "@/context";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ConfirmingTransaction } from "./pending";
 import { getExplorer } from "@/hooks/starterpack/layerswap";
 import { StarterpackType } from "@/context";
@@ -143,14 +143,26 @@ export function StripePurchaseSuccess({
   const fulfillment = payment?.purchaseFulfillment;
   const fulfillmentStatus = fulfillment?.status;
   const transactionHash = fulfillment?.transactionHash ?? undefined;
+  const [showOnchainStatus, setShowOnchainStatus] = useState(false);
 
   const isPaymentFailed = paymentStatus === StripePaymentStatus.Failed;
   const isPurchaseComplete =
     fulfillmentStatus === PurchaseFulfillmentStatus.Confirmed;
   const isFulfillmentFailed =
     fulfillmentStatus === PurchaseFulfillmentStatus.Failed;
-  const shouldShowOnchainStatus =
-    paymentStatus === StripePaymentStatus.Succeeded || !!fulfillment;
+
+  useEffect(() => {
+    if (paymentStatus !== StripePaymentStatus.Succeeded) {
+      setShowOnchainStatus(false);
+      return;
+    }
+
+    const revealTimer = window.setTimeout(() => {
+      setShowOnchainStatus(true);
+    }, 300);
+
+    return () => window.clearTimeout(revealTimer);
+  }, [paymentStatus]);
 
   useEffect(() => {
     if (
@@ -226,7 +238,7 @@ export function StripePurchaseSuccess({
             title={paymentStage.title}
             status={paymentStage.status}
           />
-          {shouldShowOnchainStatus && (
+          {showOnchainStatus && (
             <ConfirmingTransaction
               title={fulfillmentStage.title}
               status={fulfillmentStage.status}
