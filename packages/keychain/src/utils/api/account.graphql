@@ -69,6 +69,17 @@ query AddressByUsername($username: String!) {
   }
 }
 
+query AccountPrivate {
+  accountPrivate {
+    phoneNumber
+    phoneNumberVerifiedAt
+    firstName
+    lastName
+    proveVerifiedAt
+    verificationStatus
+  }
+}
+
 query AccountSearch($query: String!, $limit: Int = 5) {
   searchAccounts(query: $query, limit: $limit) {
     username

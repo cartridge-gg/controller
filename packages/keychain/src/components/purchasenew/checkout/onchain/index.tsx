@@ -9,6 +9,7 @@ import {
   LayoutFooter,
 } from "@cartridge/ui";
 import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
+import { useAccountPrivateQuery } from "@/utils/api";
 import {
   useNavigation,
   useStarterpackContext,
@@ -69,6 +70,9 @@ export function OnchainCheckout() {
   const { onCreditCardPurchase, isStripeLoading } = useCreditPurchaseContext();
 
   const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
+  const { refetch: refetchAccountPrivate } = useAccountPrivateQuery(undefined, {
+    enabled: false,
+  });
   const { enableFeature } = useFeatures();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -222,10 +226,14 @@ export function OnchainCheckout() {
         await onCreditCardPurchase();
         navigate("/purchase/checkout/stripe");
       } else if (isApplePaySelected) {
-        const { data } = await refetchMe();
-        const me = data?.me;
+        const [{ data: meData }, { data: accountPrivateData }] =
+          await Promise.all([refetchMe(), refetchAccountPrivate()]);
+        const me = meData?.me;
+        const accountPrivate = accountPrivateData?.accountPrivate;
         const needsVerification =
-          !me?.email || !me?.phoneNumber || !me?.phoneNumberVerifiedAt;
+          !me?.email ||
+          !accountPrivate?.phoneNumber ||
+          !accountPrivate?.phoneNumberVerifiedAt;
 
         if (needsVerification) {
           navigate("/purchase/verification?method=apple-pay", {
@@ -253,6 +261,7 @@ export function OnchainCheckout() {
     isApplePaySelected,
     onCreditCardPurchase,
     refetchMe,
+    refetchAccountPrivate,
     onCreateCoinbaseOrder,
     onOnchainPurchase,
     navigate,
