@@ -46,8 +46,6 @@ export type Account = Node & {
   membership: AccountTeamConnection;
   name?: Maybe<Scalars["String"]>;
   oauthConnections?: Maybe<Array<OAuthConnection>>;
-  phoneNumber?: Maybe<Scalars["String"]>;
-  phoneNumberVerifiedAt?: Maybe<Scalars["String"]>;
   /** If true, the account is billed for paid slot deployments */
   slotBilling: Scalars["Boolean"];
   starterpackMint: StarterpackMintConnection;
@@ -140,6 +138,16 @@ export type AccountOrder = {
 export enum AccountOrderField {
   CreatedAt = "CREATED_AT",
 }
+
+export type AccountPrivate = {
+  __typename?: "AccountPrivate";
+  firstName?: Maybe<Scalars["String"]>;
+  lastName?: Maybe<Scalars["String"]>;
+  phoneNumber?: Maybe<Scalars["String"]>;
+  phoneNumberVerifiedAt?: Maybe<Scalars["Time"]>;
+  proveVerifiedAt?: Maybe<Scalars["Time"]>;
+  verificationStatus?: Maybe<Scalars["String"]>;
+};
 
 export type AccountTeam = Node & {
   __typename?: "AccountTeam";
@@ -4443,6 +4451,7 @@ export enum PurchaseFulfillmentStatus {
 export type Query = {
   __typename?: "Query";
   account?: Maybe<Account>;
+  accountPrivate?: Maybe<AccountPrivate>;
   accounts?: Maybe<AccountConnection>;
   achievements: AchievementResult;
   activities: ActivityResult;
@@ -7156,6 +7165,21 @@ export type AddressByUsernameQuery = {
   } | null;
 };
 
+export type AccountPrivateQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AccountPrivateQuery = {
+  __typename?: "Query";
+  accountPrivate?: {
+    __typename?: "AccountPrivate";
+    phoneNumber?: string | null;
+    phoneNumberVerifiedAt?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    proveVerifiedAt?: string | null;
+    verificationStatus?: string | null;
+  } | null;
+};
+
 export type AccountSearchQueryVariables = Exact<{
   query: Scalars["String"];
   limit?: InputMaybe<Scalars["Int"]>;
@@ -7790,6 +7814,34 @@ export const useAddressByUsernameQuery = <
     ["AddressByUsername", variables],
     useFetchData<AddressByUsernameQuery, AddressByUsernameQueryVariables>(
       AddressByUsernameDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const AccountPrivateDocument = `
+    query AccountPrivate {
+  accountPrivate {
+    phoneNumber
+    phoneNumberVerifiedAt
+    firstName
+    lastName
+    proveVerifiedAt
+    verificationStatus
+  }
+}
+    `;
+export const useAccountPrivateQuery = <
+  TData = AccountPrivateQuery,
+  TError = unknown,
+>(
+  variables?: AccountPrivateQueryVariables,
+  options?: UseQueryOptions<AccountPrivateQuery, TError, TData>,
+) =>
+  useQuery<AccountPrivateQuery, TError, TData>(
+    variables === undefined
+      ? ["AccountPrivate"]
+      : ["AccountPrivate", variables],
+    useFetchData<AccountPrivateQuery, AccountPrivateQueryVariables>(
+      AccountPrivateDocument,
     ).bind(null, variables),
     options,
   );
