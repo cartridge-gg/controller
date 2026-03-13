@@ -193,3 +193,5 @@ keystore.json
 
 # Claude Code local settings
 .claude/settings.local.json
+.dmux/
+.dmux-hooks/
