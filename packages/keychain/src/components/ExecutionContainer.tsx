@@ -1,3 +1,5 @@
+import type { Call, FeeEstimate } from "starknet";
+import { useNavigation } from "@/context/navigation";
 import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import type { ControllerError } from "@/utils/connection";
@@ -11,11 +13,8 @@ import {
 } from "@cartridge/ui";
 import { isEqual } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import type { Call, FeeEstimate } from "starknet";
-import { Fees } from "./Fees";
-import { useNavigation } from "@/context/navigation";
 import { createDeployUrl } from "@/utils/connection/deploy";
+import { Fees, FeesData } from "@/components/Fees";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -27,6 +26,7 @@ interface ExecutionContainerProps {
   buttonText?: string;
   children: React.ReactNode;
   right?: React.ReactElement;
+  additionalFees?: FeesData[];
 }
 
 export function ExecutionContainer({
@@ -41,6 +41,7 @@ export function ExecutionContainer({
   onCancel,
   buttonText = "SUBMIT",
   right,
+  additionalFees,
   children,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
@@ -157,10 +158,11 @@ export function ExecutionContainer({
         description={description}
         icon={icon}
         right={right}
-        hideIcon
+        hideIcon={!icon}
+        className="pb-2"
       />
       {children}
-      <LayoutFooter>
+      <LayoutFooter className="pt-2">
         {(() => {
           switch (ctrlError?.code) {
             case ErrorCode.CartridgeControllerNotDeployed:
@@ -175,11 +177,14 @@ export function ExecutionContainer({
             case ErrorCode.InsufficientBalance:
               return (
                 <>
-                  {ctrlError ? (
-                    <ControllerErrorAlert error={ctrlError} />
-                  ) : (
-                    <Fees isLoading={isEstimating} maxFee={maxFee} />
-                  )}
+                  <Fees
+                    isLoading={isEstimating}
+                    maxFee={maxFee}
+                    ctrlError={
+                      ctrlError && <ControllerErrorAlert error={ctrlError} />
+                    }
+                    additionalFees={additionalFees}
+                  />
                   <FundingButton />
                 </>
               );
@@ -232,7 +237,11 @@ export function ExecutionContainer({
               // Paymaster not available, fallback to user pays flow
               return (
                 <>
-                  <Fees isLoading={isEstimating} maxFee={maxFee} />
+                  <Fees
+                    isLoading={isEstimating}
+                    maxFee={maxFee}
+                    additionalFees={additionalFees}
+                  />
                   <Button
                     onClick={handleSubmit}
                     isLoading={isLoading}
@@ -265,10 +274,14 @@ export function ExecutionContainer({
 
               return (
                 <>
-                  {ctrlError && <ControllerErrorAlert error={ctrlError} />}
-                  {!ctrlError && (
-                    <Fees isLoading={isEstimating} maxFee={maxFee} />
-                  )}
+                  <Fees
+                    isLoading={isEstimating}
+                    maxFee={maxFee}
+                    ctrlError={
+                      ctrlError && <ControllerErrorAlert error={ctrlError} />
+                    }
+                    additionalFees={additionalFees}
+                  />
                   <LayoutButtons onCancel={onCancel}>
                     <Button
                       onClick={handleSubmit}

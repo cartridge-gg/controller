@@ -15,7 +15,6 @@ const meta: Meta<typeof CallCard> = {
     },
   },
   argTypes: {
-    address: { control: "text" },
     title: { control: "text" },
     call: { control: "object" },
   },
@@ -34,8 +33,6 @@ type Story = StoryObj<typeof meta>;
 
 export const SimpleCalldata: Story = {
   args: {
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     title: "Transfer",
     call: {
       contractAddress:
@@ -53,8 +50,6 @@ export const SimpleCalldata: Story = {
 
 export const ObjectCalldata: Story = {
   args: {
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     title: "Swap",
     call: {
       contractAddress:
@@ -77,8 +72,6 @@ export const ObjectCalldata: Story = {
 
 export const ComplexTypes: Story = {
   args: {
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     title: "Complex Transaction",
     call: {
       contractAddress:
@@ -113,8 +106,6 @@ export const ComplexTypes: Story = {
 
 export const WithUint256: Story = {
   args: {
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     title: "With Uint256",
     call: {
       contractAddress:
@@ -132,8 +123,6 @@ export const WithUint256: Story = {
 
 export const WithEnum: Story = {
   args: {
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     title: "With Enum",
     call: {
       contractAddress:
@@ -150,8 +139,6 @@ export const WithEnum: Story = {
 
 export const NestedObjects: Story = {
   args: {
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     title: "Nested Objects",
     call: {
       contractAddress:
@@ -184,8 +171,6 @@ export const NestedObjects: Story = {
 
 export const LongArrays: Story = {
   args: {
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     title: "Long Arrays",
     call: {
       contractAddress:
