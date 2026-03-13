@@ -10,7 +10,11 @@ import React, {
 
 const LOCAL_STORAGE_KEY = "@cartridge/features";
 
-export type Feature = "none" | "connections" | "apple-pay-support";
+export type Feature =
+  | "none"
+  | "connections"
+  | "apple-pay-support"
+  | "stripe-checkout-support";
 
 // --- Helper Functions ---
 

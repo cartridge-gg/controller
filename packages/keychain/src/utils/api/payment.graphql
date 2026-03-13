@@ -8,6 +8,12 @@ query StripePayment($id: ID!) {
   stripePayment(id: $id) {
     id
     paymentStatus
+    purchaseFulfillment {
+      id
+      status
+      transactionHash
+      lastError
+    }
   }
 }
 
@@ -37,6 +43,20 @@ mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
 
 mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
   createStripePaymentIntent(input: $input) {
+    id
+    clientSecret
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+  }
+}
+
+mutation CreateStripeStarterpackIntent(
+  $input: CreateStripeStarterpackIntentInput!
+) {
+  createStripeStarterpackIntent(input: $input) {
     id
     clientSecret
     pricing {
