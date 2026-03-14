@@ -1,4 +1,4 @@
-import { useState, ReactNode, useMemo } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import { useAchievements } from "@/hooks/achievements";
 import { DataContext } from "@/context/data";
 import {
@@ -11,6 +11,13 @@ import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/ui/utils";
 import makeBlockie from "ethereum-blockies-base64";
+import { useLocation } from "react-router-dom";
+
+export const TRANSFER_HISTORY_LIMIT = 100;
+
+export function shouldFetchProfileHistory(pathname: string) {
+  return pathname.startsWith("/account/");
+}
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
@@ -35,11 +42,12 @@ export interface CardProps {
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
+  const location = useLocation();
   const controllerTheme = useControllerTheme();
   const theme = useMemo(
     () => ({
       color:
-        typeof controllerTheme?.colors?.primary == "string"
+        typeof controllerTheme?.colors?.primary === "string"
           ? (controllerTheme?.colors?.primary as string)
           : "#ffffff",
       icon: controllerTheme?.icon ?? "",
@@ -58,15 +66,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [account],
   );
   const { project } = useConnection();
+  const shouldFetchHistory = useMemo(
+    () => shouldFetchProfileHistory(location.pathname),
+    [location.pathname],
+  );
 
-  const projects = useMemo(() => {
-    const projects = project ? [project] : [];
-    return projects.map((project) => {
+  const transferProjects = useMemo(() => {
+    const transferProjects = project ? [project] : [];
+    return transferProjects.map((project) => {
       return {
         project,
         address,
-        limit: 0,
+        limit: TRANSFER_HISTORY_LIMIT,
         date: "",
+      };
+    });
+  }, [project, address]);
+
+  const activityProjects = useMemo(() => {
+    const activityProjects = project ? [project] : [];
+    return activityProjects.map((project) => {
+      return {
+        project,
+        address,
+        limit: TRANSFER_HISTORY_LIMIT,
       };
     });
   }, [project, address]);
@@ -79,11 +102,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refetch: refetchTransfers,
   } = useTransfersQuery(
     {
-      projects,
+      projects: transferProjects,
     },
     {
       queryKey: ["transfers", address, project],
-      enabled: !!address && projects.length > 0,
+      enabled: shouldFetchHistory && !!address && transferProjects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
@@ -94,11 +117,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refetch: refetchTransactions,
   } = useActivitiesQuery(
     {
-      projects: projects.map((p) => ({ ...p, date: undefined })),
+      projects: activityProjects,
     },
     {
       queryKey: ["activities", address, project],
-      enabled: !!address && projects.length > 0,
+      enabled: shouldFetchHistory && !!address && activityProjects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
@@ -113,14 +136,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addresses = useMemo<string[]>(() => {
     const accounts =
       transfers?.transfers?.items.flatMap((item) =>
-        item.transfers.reduce(
-          (acc, item) => [
-            ...acc,
+        item.transfers.reduce((acc, item) => {
+          acc.push(
             `0x${BigInt(item.fromAddress).toString(16)}`,
             `0x${BigInt(item.toAddress).toString(16)}`,
-          ],
-          [] as string[],
-        ),
+          );
+          return acc;
+        }, [] as string[]),
       ) ?? [];
     return Array.from(new Set(accounts));
   }, [transfers]);
@@ -185,18 +207,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
           .map((transfer) => {
             const timestamp = new Date(transfer.executedAt).getTime();
             const date = getDate(timestamp);
-            let metadata;
+            let metadata: {
+              attributes?: Array<{ trait?: string; value?: string }>;
+              name?: string;
+            } = {};
             try {
               metadata = JSON.parse(
                 !transfer.metadata ? "{}" : transfer.metadata,
-              );
+              ) as {
+                attributes?: Array<{ trait?: string; value?: string }>;
+                name?: string;
+              };
             } catch (error) {
               console.warn(error);
             }
             const name =
               metadata.attributes?.find(
-                (attribute: { trait: string; value: string }) =>
-                  attribute?.trait?.toLowerCase() === "name",
+                (attribute) => attribute.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
             const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/${addAddressPadding(transfer.contractAddress)}/${transfer.tokenId}/image`;
             const userAddress =
