@@ -11,7 +11,12 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import React, { useState } from "react";
-import { SiInstagram, SiTiktok, SiX } from "@icons-pack/react-simple-icons";
+import {
+  SiGithub,
+  SiInstagram,
+  SiTiktok,
+  SiX,
+} from "@icons-pack/react-simple-icons";
 import type {
   OAuthConnection,
   OAuthProvider,
@@ -144,6 +149,8 @@ const ConnectionIcon = ({
   const iconSize = size === "lg" ? 24 : 16;
 
   switch (provider) {
+    case "GITHUB":
+      return <SiGithub size={iconSize} />;
     case "TIKTOK":
       return <SiTiktok size={iconSize} />;
     case "INSTAGRAM":
@@ -157,6 +164,8 @@ const ConnectionIcon = ({
 
 const getProviderDisplayName = (provider: OAuthProvider): string => {
   switch (provider) {
+    case "GITHUB":
+      return "GitHub";
     case "TIKTOK":
       return "TikTok";
     case "INSTAGRAM":
