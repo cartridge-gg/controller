@@ -90,3 +90,7 @@ query AccountSearch($query: String!, $limit: Int = 5) {
     updatedAt
   }
 }
+
+mutation AccountVerify($input: AccountVerifyInput!) {
+  accountVerify(input: $input)
+}

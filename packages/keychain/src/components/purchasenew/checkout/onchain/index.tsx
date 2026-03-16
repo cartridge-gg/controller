@@ -224,7 +224,16 @@ export function OnchainCheckout() {
     try {
       if (isStripeSelected) {
         await onCreditCardPurchase();
-        navigate("/purchase/checkout/stripe");
+
+        const { data: accountPrivateData } = await refetchAccountPrivate();
+        const needsVerification =
+          !accountPrivateData?.accountPrivate?.proveVerifiedAt;
+
+        if (needsVerification) {
+          navigate("/purchase/verification/stripe");
+        } else {
+          navigate("/purchase/checkout/stripe");
+        }
       } else if (isApplePaySelected) {
         const [{ data: meData }, { data: accountPrivateData }] =
           await Promise.all([refetchMe(), refetchAccountPrivate()]);
