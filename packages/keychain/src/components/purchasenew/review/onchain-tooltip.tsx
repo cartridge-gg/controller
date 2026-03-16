@@ -27,6 +27,7 @@ export const OnchainFeesTooltip = ({
   quantity = 1,
   layerswapFees,
   coinbaseQuote,
+  stripeFeeInCents,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
@@ -34,8 +35,11 @@ export const OnchainFeesTooltip = ({
   quantity?: number;
   layerswapFees?: string;
   coinbaseQuote?: CoinbaseQuoteResult;
+  stripeFeeInCents?: number;
 }) => {
   const { decimals, symbol } = quote.paymentTokenMetadata;
+  const baseTotal =
+    Number(quote.totalCost * BigInt(quantity)) / Math.pow(10, decimals);
 
   // Format layerswap fees in USDC (6 decimals)
   const formattedBridgeFee = layerswapFees
@@ -47,6 +51,16 @@ export const OnchainFeesTooltip = ({
   const formattedCoinbaseFee = coinbaseQuote?.coinbaseFee
     ? `${Number(coinbaseQuote.coinbaseFee.amount).toFixed(2)} ${coinbaseQuote.coinbaseFee.currency}`
     : null;
+
+  const formattedStripeFee =
+    stripeFeeInCents !== undefined
+      ? `${(stripeFeeInCents / 100).toFixed(2)} ${symbol}`
+      : null;
+
+  const totalWithStripeFee =
+    stripeFeeInCents !== undefined
+      ? `${(baseTotal + stripeFeeInCents / 100).toFixed(2)} ${symbol}`
+      : null;
 
   return (
     <TooltipProvider>
@@ -101,18 +115,26 @@ export const OnchainFeesTooltip = ({
               <span>{formattedCoinbaseFee}</span>
             </div>
           )}
+          {formattedStripeFee && (
+            <div className="flex flex-row justify-between text-foreground-300">
+              <span>Stripe Fee:</span>
+              <span>{formattedStripeFee}</span>
+            </div>
+          )}
           <Separator className="bg-background-125" />
           <div className="flex flex-row justify-between text-foreground-100 font-medium">
             <span>Total:</span>
             <span>
               {coinbaseQuote?.paymentTotal
                 ? `${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)} ${coinbaseQuote.paymentTotal.currency}`
-                : formatTokenAmount(
-                    quote.totalCost * BigInt(quantity) +
-                      (layerswapFees ? BigInt(layerswapFees) : 0n),
-                    decimals,
-                    symbol,
-                  )}
+                : totalWithStripeFee
+                  ? totalWithStripeFee
+                  : formatTokenAmount(
+                      quote.totalCost * BigInt(quantity) +
+                        (layerswapFees ? BigInt(layerswapFees) : 0n),
+                      decimals,
+                      symbol,
+                    )}
             </span>
           </div>
         </TooltipContent>

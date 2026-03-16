@@ -46,8 +46,6 @@ export type Account = Node & {
   membership: AccountTeamConnection;
   name?: Maybe<Scalars["String"]>;
   oauthConnections?: Maybe<Array<OAuthConnection>>;
-  phoneNumber?: Maybe<Scalars["String"]>;
-  phoneNumberVerifiedAt?: Maybe<Scalars["String"]>;
   /** If true, the account is billed for paid slot deployments */
   slotBilling: Scalars["Boolean"];
   starterpackMint: StarterpackMintConnection;
@@ -140,6 +138,16 @@ export type AccountOrder = {
 export enum AccountOrderField {
   CreatedAt = "CREATED_AT",
 }
+
+export type AccountPrivate = {
+  __typename?: "AccountPrivate";
+  firstName?: Maybe<Scalars["String"]>;
+  lastName?: Maybe<Scalars["String"]>;
+  phoneNumber?: Maybe<Scalars["String"]>;
+  phoneNumberVerifiedAt?: Maybe<Scalars["Time"]>;
+  proveVerifiedAt?: Maybe<Scalars["Time"]>;
+  verificationStatus?: Maybe<Scalars["String"]>;
+};
 
 export type AccountTeam = Node & {
   __typename?: "AccountTeam";
@@ -1470,7 +1478,6 @@ export type CreateStripePaymentIntentInput = {
 };
 
 export type CreateStripeStarterpackIntentInput = {
-  chainId: Scalars["String"];
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   quantity: Scalars["Int"];
   referral?: InputMaybe<Scalars["String"]>;
@@ -4424,9 +4431,27 @@ export type ProveVerifyResponse = {
   verified?: Maybe<Scalars["Boolean"]>;
 };
 
+export type PurchaseFulfillment = {
+  __typename?: "PurchaseFulfillment";
+  id: Scalars["ID"];
+  lastError?: Maybe<Scalars["String"]>;
+  status: PurchaseFulfillmentStatus;
+  transactionHash?: Maybe<Scalars["String"]>;
+};
+
+export enum PurchaseFulfillmentStatus {
+  AwaitingPayment = "AWAITING_PAYMENT",
+  Confirmed = "CONFIRMED",
+  Failed = "FAILED",
+  Processing = "PROCESSING",
+  Queued = "QUEUED",
+  Submitted = "SUBMITTED",
+}
+
 export type Query = {
   __typename?: "Query";
   account?: Maybe<Account>;
+  accountPrivate?: Maybe<AccountPrivate>;
   accounts?: Maybe<AccountConnection>;
   achievements: AchievementResult;
   activities: ActivityResult;
@@ -6390,6 +6415,7 @@ export type StripePayment = {
   __typename?: "StripePayment";
   id: Scalars["ID"];
   paymentStatus: StripePaymentStatus;
+  purchaseFulfillment?: Maybe<PurchaseFulfillment>;
 };
 
 export type StripePaymentIntent = {
@@ -7139,6 +7165,21 @@ export type AddressByUsernameQuery = {
   } | null;
 };
 
+export type AccountPrivateQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AccountPrivateQuery = {
+  __typename?: "Query";
+  accountPrivate?: {
+    __typename?: "AccountPrivate";
+    phoneNumber?: string | null;
+    phoneNumberVerifiedAt?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    proveVerifiedAt?: string | null;
+    verificationStatus?: string | null;
+  } | null;
+};
+
 export type AccountSearchQueryVariables = Exact<{
   query: Scalars["String"];
   limit?: InputMaybe<Scalars["Int"]>;
@@ -7182,6 +7223,13 @@ export type StripePaymentQuery = {
     __typename?: "StripePayment";
     id: string;
     paymentStatus: StripePaymentStatus;
+    purchaseFulfillment?: {
+      __typename?: "PurchaseFulfillment";
+      id: string;
+      status: PurchaseFulfillmentStatus;
+      transactionHash?: string | null;
+      lastError?: string | null;
+    } | null;
   };
 };
 
@@ -7236,6 +7284,25 @@ export type CreateStripePaymentIntentMutationVariables = Exact<{
 export type CreateStripePaymentIntentMutation = {
   __typename?: "Mutation";
   createStripePaymentIntent: {
+    __typename?: "StripePaymentIntent";
+    id: string;
+    clientSecret: string;
+    pricing: {
+      __typename?: "StripePricingDetails";
+      baseCostInCents: number;
+      processingFeeInCents: number;
+      totalInCents: number;
+    };
+  };
+};
+
+export type CreateStripeStarterpackIntentMutationVariables = Exact<{
+  input: CreateStripeStarterpackIntentInput;
+}>;
+
+export type CreateStripeStarterpackIntentMutation = {
+  __typename?: "Mutation";
+  createStripeStarterpackIntent: {
     __typename?: "StripePaymentIntent";
     id: string;
     clientSecret: string;
@@ -7750,6 +7817,34 @@ export const useAddressByUsernameQuery = <
     ).bind(null, variables),
     options,
   );
+export const AccountPrivateDocument = `
+    query AccountPrivate {
+  accountPrivate {
+    phoneNumber
+    phoneNumberVerifiedAt
+    firstName
+    lastName
+    proveVerifiedAt
+    verificationStatus
+  }
+}
+    `;
+export const useAccountPrivateQuery = <
+  TData = AccountPrivateQuery,
+  TError = unknown,
+>(
+  variables?: AccountPrivateQueryVariables,
+  options?: UseQueryOptions<AccountPrivateQuery, TError, TData>,
+) =>
+  useQuery<AccountPrivateQuery, TError, TData>(
+    variables === undefined
+      ? ["AccountPrivate"]
+      : ["AccountPrivate", variables],
+    useFetchData<AccountPrivateQuery, AccountPrivateQueryVariables>(
+      AccountPrivateDocument,
+    ).bind(null, variables),
+    options,
+  );
 export const AccountSearchDocument = `
     query AccountSearch($query: String!, $limit: Int = 5) {
   searchAccounts(query: $query, limit: $limit) {
@@ -7802,6 +7897,12 @@ export const StripePaymentDocument = `
   stripePayment(id: $id) {
     id
     paymentStatus
+    purchaseFulfillment {
+      id
+      status
+      transactionHash
+      lastError
+    }
   }
 }
     `;
@@ -7918,6 +8019,43 @@ export const useCreateStripePaymentIntentMutation = <
       CreateStripePaymentIntentMutation,
       CreateStripePaymentIntentMutationVariables
     >(CreateStripePaymentIntentDocument),
+    options,
+  );
+export const CreateStripeStarterpackIntentDocument = `
+    mutation CreateStripeStarterpackIntent($input: CreateStripeStarterpackIntentInput!) {
+  createStripeStarterpackIntent(input: $input) {
+    id
+    clientSecret
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+  }
+}
+    `;
+export const useCreateStripeStarterpackIntentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateStripeStarterpackIntentMutation,
+    TError,
+    CreateStripeStarterpackIntentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateStripeStarterpackIntentMutation,
+    TError,
+    CreateStripeStarterpackIntentMutationVariables,
+    TContext
+  >(
+    ["CreateStripeStarterpackIntent"],
+    useFetchData<
+      CreateStripeStarterpackIntentMutation,
+      CreateStripeStarterpackIntentMutationVariables
+    >(CreateStripeStarterpackIntentDocument),
     options,
   );
 export const CreateLayerswapPaymentDocument = `

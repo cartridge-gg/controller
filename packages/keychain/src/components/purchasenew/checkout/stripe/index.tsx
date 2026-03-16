@@ -2,6 +2,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import CheckoutForm from "./form";
 import {
+  isOnchainStarterpack,
   useNavigation,
   useStarterpackContext,
   useCreditPurchaseContext,
@@ -9,10 +10,14 @@ import {
 import { useEffect } from "react";
 
 export function StripeCheckout() {
-  const { clearError } = useStarterpackContext();
+  const { clearError, starterpackDetails } = useStarterpackContext();
   const { stripePromise, clientSecret, costDetails } =
     useCreditPurchaseContext();
   const { navigate } = useNavigation();
+  const lineItemLabel =
+    starterpackDetails && isOnchainStarterpack(starterpackDetails)
+      ? "Starterpack"
+      : "Credits";
 
   useEffect(() => {
     clearError();
@@ -44,6 +49,7 @@ export function StripeCheckout() {
     >
       <CheckoutForm
         cost={costDetails!}
+        lineItemLabel={lineItemLabel}
         onComplete={() => navigate("/purchase/success", { reset: true })}
       />
     </Elements>

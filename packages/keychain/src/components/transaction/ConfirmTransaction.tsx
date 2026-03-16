@@ -81,6 +81,7 @@ export function ConfirmTransaction({
       const submitError = e as ControllerError;
       console.error("Transaction execution failed:", submitError);
       setError(submitError);
+      onError?.(submitError);
       toast.error("", {
         message: "Transaction execution failed",
         toastId,

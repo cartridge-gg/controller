@@ -159,6 +159,11 @@ describe("ConfirmTransaction", () => {
     await waitFor(() => {
       expect(screen.getAllByText("Account validation failed")).toHaveLength(2);
     });
+
+    // Submit errors must be propagated so caller promises can resolve/reject
+    await waitFor(() => {
+      expect(defaultProps.onError).toHaveBeenCalledWith(validationError);
+    });
   });
 
   it("skips session UI when skipSession is used", async () => {

@@ -7,6 +7,7 @@ import {
   useSendPhoneVerificationMutation,
   useVerifyPhoneMutation,
 } from "@cartridge/ui/utils/api/cartridge";
+import { useAccountPrivateQuery } from "@/utils/api";
 import {
   Button,
   Input,
@@ -180,6 +181,11 @@ export function Verification() {
     isLoading: isMeLoading,
     refetch: refetchMe,
   } = useMeQuery();
+  const {
+    data: accountPrivateData,
+    isLoading: isAccountPrivateLoading,
+    refetch: refetchAccountPrivate,
+  } = useAccountPrivateQuery();
 
   const [step, setStep] = useState<Step | null>(null);
   const [email, setEmail] = useState("");
@@ -196,17 +202,22 @@ export function Verification() {
   const verifyPhoneMutation = useVerifyPhoneMutation();
 
   useEffect(() => {
-    if (meData?.me && step === null) {
+    if (meData?.me && accountPrivateData && step === null) {
+      const accountPrivate = accountPrivateData.accountPrivate;
+
       if (!meData.me.email) {
         setStep("EMAIL_INPUT");
-      } else if (!meData.me.phoneNumber || !meData.me.phoneNumberVerifiedAt) {
+      } else if (
+        !accountPrivate?.phoneNumber ||
+        !accountPrivate?.phoneNumberVerifiedAt
+      ) {
         setStep("PHONE_INPUT");
-        setPhone(meData.me.phoneNumber || "");
+        setPhone(accountPrivate?.phoneNumber || "");
       } else {
         setStep("SUCCESS");
       }
     }
-  }, [meData, step]);
+  }, [meData, accountPrivateData, step]);
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -221,8 +232,8 @@ export function Verification() {
   useEffect(() => {
     const isVerified =
       meData?.me?.email &&
-      meData?.me?.phoneNumber &&
-      meData?.me?.phoneNumberVerifiedAt;
+      accountPrivateData?.accountPrivate?.phoneNumber &&
+      accountPrivateData?.accountPrivate?.phoneNumberVerifiedAt;
 
     if (step === "SUCCESS" && method && isVerified && !isTransientSuccess) {
       const timer = setTimeout(() => {
@@ -236,7 +247,7 @@ export function Verification() {
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [step, method, navigate, meData, isTransientSuccess]);
+  }, [step, method, navigate, meData, accountPrivateData, isTransientSuccess]);
 
   const handleSendEmail = async () => {
     setError(null);
@@ -271,14 +282,19 @@ export function Verification() {
         setIsTransientSuccess(true);
         setStep("SUCCESS");
         setTimeout(async () => {
-          const { data: updatedMe } = await refetchMe();
+          const [, { data: updatedAccountPrivate }] = await Promise.all([
+            refetchMe(),
+            refetchAccountPrivate(),
+          ]);
+
           if (
-            !updatedMe?.me?.phoneNumber ||
-            !updatedMe?.me?.phoneNumberVerifiedAt
+            !updatedAccountPrivate?.accountPrivate?.phoneNumber ||
+            !updatedAccountPrivate?.accountPrivate?.phoneNumberVerifiedAt
           ) {
             setStep("PHONE_INPUT");
-            setPhone(updatedMe?.me?.phoneNumber || "");
+            setPhone(updatedAccountPrivate?.accountPrivate?.phoneNumber || "");
           }
+
           setIsTransientSuccess(false);
         }, 1500);
       } else {
@@ -335,7 +351,7 @@ export function Verification() {
         input: { phoneNumber: formattedPhone, code },
       });
       if (res.verifyPhone.success) {
-        await refetchMe();
+        await Promise.all([refetchMe(), refetchAccountPrivate()]);
         setStep("SUCCESS");
       } else {
         setError(res.verifyPhone.message);
@@ -357,7 +373,7 @@ export function Verification() {
     }
   };
 
-  if (isMeLoading && step === null) {
+  if ((isMeLoading || isAccountPrivateLoading) && step === null) {
     return (
       <div className="flex items-center justify-center h-full">
         <SpinnerIcon className="animate-spin" />
@@ -462,7 +478,8 @@ export function Verification() {
                 <div className="flex flex-col gap-1">
                   <h2 className="text-xl font-bold">Success!</h2>
                   <p className="text-sm text-foreground-300">
-                    {email || meData?.me?.phoneNumber} Connected
+                    {email || accountPrivateData?.accountPrivate?.phoneNumber}{" "}
+                    Connected
                   </p>
                 </div>
               </CardContent>
