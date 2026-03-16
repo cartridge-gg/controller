@@ -156,6 +156,11 @@ export function NavigationProvider({
         }
       }
 
+      // if equals to the last path, keep new one
+      if (prev[currentPosition]?.path === newEntry.path) {
+        currentPosition--;
+      }
+
       // Truncate any forward history and add new entry
       const newStack = [...prev.slice(0, currentPosition + 1), newEntry];
 
@@ -282,7 +287,13 @@ export function NavigationProvider({
         navigate(finalPath, options);
       }
     },
-    [navigate, currentIndex, navigationStack, location.search],
+    [
+      navigate,
+      currentIndex,
+      navigationStack,
+      location.search,
+      setNavigationStack,
+    ],
   );
 
   const setShowClose = useCallback(
@@ -299,7 +310,7 @@ export function NavigationProvider({
         return prev;
       });
     },
-    [currentIndex],
+    [currentIndex, setNavigationStack],
   );
 
   // custom in-page navigation
