@@ -3,8 +3,8 @@ import { useLocation } from "react-router-dom";
 import { useMutation } from "react-query";
 import {
   getTwitterFollowUrl,
-  type OAuthConnection,
   OAuthProvider,
+  type OAuthConnection,
 } from "@/utils/api/oauth-connections";
 import { useOAuthConnection } from "@/components/settings/connections/use-connections";
 import { useNavigation } from "@/context/navigation";
@@ -33,7 +33,8 @@ interface UseSocialClaimResults {
 export const useSocialClaim = (
   // starterpackId?: number,
   provider: OAuthProvider,
-  accountToShare: string,
+  targetAccount: string,
+  targetAccountId: string,
 ): UseSocialClaimResults => {
   const { controller } = useConnection();
   const username = controller?.username();
@@ -44,7 +45,8 @@ export const useSocialClaim = (
   const { connection } = useOAuthConnection(provider);
   const isConnected = connection != null;
   const isExpired = connection?.isExpired ?? false;
-  const connectedHandle = connection?.profile.username || connection?.profile.providerUserId || null;
+  const connectedHandle =
+    connection?.profile.username || connection?.profile.providerUserId || null;
 
   const [hasFollowed, setHasFollowed] = useState(false);
   const [hasShared, setHasShared] = useState(false);
@@ -71,8 +73,16 @@ export const useSocialClaim = (
   }, [provider, location.pathname, navigate]);
 
   const followMutation = useMutation(
-    async ({ username, accountToShare }: { username: string, accountToShare: string }) => {
-      const url = getTwitterFollowUrl(username, accountToShare);
+    async ({
+      username,
+      targetAccount,
+      targetAccountId,
+    }: {
+      username: string;
+      targetAccount: string;
+      targetAccountId: string;
+    }) => {
+      const url = getTwitterFollowUrl(username, targetAccount, targetAccountId);
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(await response.text());
@@ -83,22 +93,49 @@ export const useSocialClaim = (
       onSuccess: () => {
         setHasFollowed(true);
       },
-      onError: (error: Error) => {
-        // console.error(`FOLLOW ERROR:`, error.toString());
-      }
     },
   );
-  
+
   const onFollow = useCallback(() => {
-    if (username && accountToShare) {
-      followMutation.mutate({ username, accountToShare });
+    if (username && targetAccount) {
+      followMutation.mutate({ username, targetAccount, targetAccountId });
     }
-  }, [followMutation, username, accountToShare, setHasFollowed]);
+  }, [followMutation, username, targetAccount, targetAccountId]);
+
+  const shareMessage = useMemo(() => {
+    return `I got got a free game from @${targetAccount}! Check it out!`;
+  }, [targetAccount]);
+
+  const [isSharing, setIsSharing] = useState(false);
 
   const onShare = useCallback(() => {
-    setHasShared(true);
-    console.log(`TODO: share ${accountToShare}`);
-  }, [setHasShared, accountToShare]);
+    setIsSharing(true);
+    try {
+      const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}`;
+
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      const popup = window.open(
+        shareUrl,
+        "twitter-share",
+        `width=${width},height=${height},left=${left},top=${top}`,
+      );
+
+      // poll for popup closure
+      const pollTimer = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(pollTimer);
+          setIsSharing(false);
+          setHasShared(true);
+        }
+      }, 500);
+    } catch (error) {
+      console.error(error);
+      setIsSharing(false);
+    }
+  }, [setHasShared, shareMessage]);
 
   const error = useMemo(() => {
     if (followMutation.isError) {
@@ -112,7 +149,7 @@ export const useSocialClaim = (
     isExpired,
     connectedHandle,
     socialClaimStep,
-    isLoading: followMutation.isLoading,
+    isLoading: followMutation.isLoading || isSharing,
     isError: followMutation.isError,
     error,
     onSocialConnect: socialClaimStep == "connect" ? onConnect : undefined,

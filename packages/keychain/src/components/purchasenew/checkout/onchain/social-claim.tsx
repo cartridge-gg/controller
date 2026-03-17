@@ -10,19 +10,23 @@ import { OAuthProvider } from "@/utils/api/oauth-connections";
 import { useSocialClaim } from "@/hooks/starterpack/social";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
-export function SocialClaimCheckout({
-  provider,
-  accountToShare,
-  isFree,
-  isLoading,
-  handlePurchase,
-}: {
+interface SocialClaimCheckoutProps {
   provider: OAuthProvider;
-  accountToShare: string;
+  targetAccount: string;
+  targetAccountId: string;
   isFree: boolean;
   isLoading: boolean;
   handlePurchase: () => void;
-}) {
+}
+
+export function SocialClaimCheckout({
+  provider,
+  targetAccount,
+  targetAccountId,
+  isFree,
+  isLoading,
+  handlePurchase,
+}: SocialClaimCheckoutProps) {
   const {
     // connection,
     isExpired,
@@ -33,7 +37,7 @@ export function SocialClaimCheckout({
     onSocialConnect,
     onSocialFollow,
     onSocialShare,
-  } = useSocialClaim(provider, accountToShare);
+  } = useSocialClaim(provider, targetAccount, targetAccountId);
 
   const providerName = provider === "TWITTER" ? "X" : provider;
 
@@ -49,7 +53,9 @@ export function SocialClaimCheckout({
       )}
       <SocialStepButton
         label={
-          connectedHandle ? `Connected @${connectedHandle}` : `Connect ${providerName}`
+          connectedHandle
+            ? `Connected @${connectedHandle}`
+            : `Connect ${providerName}`
         }
         icon={<XIcon />}
         isCurrent={socialClaimStep === "connect"}
@@ -57,7 +63,7 @@ export function SocialClaimCheckout({
         isExpired={isExpired}
       />
       <SocialStepButton
-        label={`Follow @${accountToShare}`}
+        label={`Follow @${targetAccount}`}
         icon={<AddUserIcon />}
         isCurrent={socialClaimStep === "follow"}
         isCompleted={
@@ -87,7 +93,7 @@ export function SocialClaimCheckout({
           : socialClaimStep === "connect"
             ? `Connect ${providerName}`
             : socialClaimStep === "follow"
-              ? `Follow @${accountToShare}`
+              ? `Follow @${targetAccount}`
               : socialClaimStep === "share"
                 ? "Spread The Word"
                 : "Claim"}

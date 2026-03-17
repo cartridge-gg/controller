@@ -64,23 +64,27 @@ function convertMetadata(
 export const useStarterPackConditions = (
   metadata: StarterPackMetadataOnchain | null,
 ) => {
-  const [socialClaimProvider, socialAccountToShare] = useMemo<
-    [OAuthProvider | null, string | null]
-  >(() => {
-    const conditions = metadata?.conditions ?? [];
-    switch (conditions[0] as OAuthProvider) {
-      case "TWITTER":
-        return [conditions[0] as OAuthProvider, conditions[1] ?? null];
-      case "TIKTOK": // not implemented
-      case "INSTAGRAM": // not implemented
-      default:
-        return [null, null];
-    }
-  }, [metadata]);
+  const [socialClaimProvider, socialTargetAccount, socialTargetAccountId] =
+    useMemo<[OAuthProvider | null, string | null, string | null]>(() => {
+      const conditions = metadata?.conditions ?? [];
+      switch (conditions[0] as OAuthProvider) {
+        case "TWITTER":
+          return [
+            conditions[0] as OAuthProvider,
+            conditions[1] ?? null,
+            conditions[2] ?? null,
+          ];
+        case "TIKTOK": // not implemented
+        case "INSTAGRAM": // not implemented
+        default:
+          return [null, null, null];
+      }
+    }, [metadata]);
 
   return {
     socialClaimProvider,
-    socialAccountToShare,
+    socialTargetAccount,
+    socialTargetAccountId,
   };
 };
 
@@ -156,7 +160,7 @@ export const useOnchainStarterpack = (
           metadata
             ? ({
                 ...metadata,
-                conditions: ["TWITTER", "numsgg"],
+                conditions: ["TWITTER", "numsgg", "1884657985219403776"],
               } as StarterPackMetadataOnchain)
             : null,
         );
