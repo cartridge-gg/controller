@@ -103,7 +103,7 @@ export function ConfirmTransaction({
         onSubmit={onSubmit}
         onError={onError}
         transactions={transactions}
-        error={error || executionError}
+        executionError={error || executionError}
         origin={origin}
       />
     );

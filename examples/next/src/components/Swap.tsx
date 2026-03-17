@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback } from "react";
+import { Call } from "starknet";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button } from "@cartridge/ui";
@@ -8,36 +10,28 @@ export function Swap() {
   const { account, connector } = useAccount();
   const ctrlConnector = connector as unknown as ControllerConnector;
 
-  if (!account) {
-    return null;
-  }
+  const execute = useCallback(
+    (transactions: Call[]) => {
+      if (account) {
+        account.execute(transactions);
+      } else {
+        // this is causing the controller to close on validation error
+        ctrlConnector.controller.openExecute(transactions);
+      }
+    },
+    [account, ctrlConnector],
+  );
 
   return (
     <div className="flex flex-col gap-4">
       <h2>Token Swaps</h2>
       <div className="flex flex-wrap gap-1">
-        <Button
-          onClick={() => ctrlConnector.controller.openExecute(SWAP_SINGLE)}
-        >
-          Swap Single
-        </Button>
-        <Button
-          onClick={() => ctrlConnector.controller.openExecute(SWAP_MULTIPLE)}
-        >
-          Swap Multiple
-        </Button>
-        <Button
-          onClick={() =>
-            ctrlConnector.controller.openExecute(LS2_PURCHASE_GAME)
-          }
-        >
+        <Button onClick={() => execute(SWAP_SINGLE)}>Swap Single</Button>
+        <Button onClick={() => execute(SWAP_MULTIPLE)}>Swap Multiple</Button>
+        <Button onClick={() => execute(LS2_PURCHASE_GAME)}>
           LS2 Purchase Game
         </Button>
-        <Button
-          onClick={() =>
-            ctrlConnector.controller.openExecute(LS2_PURCHASE_GAME_ERROR)
-          }
-        >
+        <Button onClick={() => execute(LS2_PURCHASE_GAME_ERROR)}>
           LS2 Error
         </Button>
       </div>

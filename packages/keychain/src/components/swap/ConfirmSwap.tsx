@@ -19,7 +19,7 @@ interface ConfirmSwapProps {
   onSubmit: (maxFee?: FeeEstimate) => Promise<void>;
   onError?: (error: ControllerError) => void;
   transactions: Call[];
-  error?: ControllerError;
+  executionError?: ControllerError;
   origin: string;
 }
 
@@ -27,7 +27,7 @@ export function ConfirmSwap({
   onSubmit,
   onError,
   transactions,
-  error,
+  executionError,
   origin,
 }: ConfirmSwapProps) {
   const [advancedVisible, setAdvancedVisible] = useState(false);
@@ -58,8 +58,8 @@ export function ConfirmSwap({
       icon={<TransferIcon />}
       title={"Review Swap"}
       description={origin}
-      executionError={error}
       transactions={transactions}
+      executionError={executionError}
       onSubmit={onSubmit}
       onError={onError}
       buttonText={`Swap ${additionalMethodCount > 0 ? `+ ${additionalMethodCount}` : ""}`}
