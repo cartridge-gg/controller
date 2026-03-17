@@ -43,7 +43,8 @@ export interface StarterpackContextType {
 
   // Social claim
   socialClaimProvider: OAuthProvider | null;
-  socialAccountToShare: string | null;
+  socialTargetAccount: string | null;
+  socialTargetAccountId: string | null;
 }
 
 export const StarterpackContext = createContext<
@@ -144,7 +145,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     isOnchainQuoteLoading,
   ]);
 
-  const { socialClaimProvider, socialAccountToShare } =
+  const { socialClaimProvider, socialTargetAccount, socialTargetAccountId } =
     useStarterPackConditions(onchainMetadata);
 
   // Sync errors from hooks to displayError
@@ -181,7 +182,8 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     setDisplayError,
     clearError,
     socialClaimProvider,
-    socialAccountToShare,
+    socialTargetAccount,
+    socialTargetAccountId,
   };
 
   return (
