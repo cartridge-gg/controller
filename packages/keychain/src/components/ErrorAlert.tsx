@@ -7,6 +7,7 @@ import {
   type GraphQLErrorDetails,
   type ErrorWithGraphQL,
 } from "@/utils/errors";
+import { humanizeString } from "@cartridge/controller";
 import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
   Accordion,
@@ -485,16 +486,4 @@ export function isControllerError(
   error: ControllerError | Error,
 ): error is ControllerError {
   return !!(error as ControllerError).code;
-}
-
-export function humanizeString(str: string): string {
-  return (
-    str
-      // Convert from camelCase or snake_case
-      .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase to spaces
-      .replace(/_/g, " ") // snake_case to spaces
-      .toLowerCase()
-      // Capitalize first letter
-      .replace(/^\w/, (c) => c.toUpperCase())
-  );
 }

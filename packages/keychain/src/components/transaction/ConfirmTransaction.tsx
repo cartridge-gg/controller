@@ -1,16 +1,18 @@
+import { useEffect, useState } from "react";
 import { LayoutContent } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ControllerError } from "@/utils/connection";
 import { Call, FeeEstimate } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { CreateSession } from "../connect";
 import { executeCore } from "@/utils/connection/execute";
-import { useEffect, useState } from "react";
-import { PageLoading } from "../Loading";
+import { CreateSession } from "@/components/connect";
+import { PageLoading } from "@/components/Loading";
 import { ErrorCode } from "@cartridge/controller-wasm";
 import { useToast } from "@/context/toast";
 import { humanizeString } from "@cartridge/controller";
+import { useIsSwapTransaction } from "@/components/swap/swap";
+import { ConfirmSwap } from "@/components/swap/ConfirmSwap";
 
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
@@ -89,8 +91,22 @@ export function ConfirmTransaction({
     }
   };
 
+  const { isSwap } = useIsSwapTransaction(transactions);
+
   if (loading) {
     return <PageLoading />;
+  }
+
+  if (isSwap) {
+    return (
+      <ConfirmSwap
+        onSubmit={onSubmit}
+        onError={onError}
+        transactions={transactions}
+        executionError={error || executionError}
+        origin={origin}
+      />
+    );
   }
 
   // Show session refresh UI if SessionRefreshRequired error occurred
@@ -153,7 +169,7 @@ export function ConfirmTransaction({
       onError={onError}
     >
       <LayoutContent>
-        <TransactionSummary calls={transactions} />
+        <TransactionSummary calls={transactions} isExpanded />
       </LayoutContent>
     </ExecutionContainer>
   );
