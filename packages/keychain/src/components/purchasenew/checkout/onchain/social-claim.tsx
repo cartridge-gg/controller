@@ -8,6 +8,7 @@ import {
 } from "@cartridge/ui";
 import { OAuthProvider } from "@/utils/api/oauth-connections";
 import { useSocialClaim } from "@/hooks/starterpack/social";
+import { ErrorAlert } from "@/components/ErrorAlert";
 
 export function SocialClaimCheckout({
   provider,
@@ -27,6 +28,8 @@ export function SocialClaimCheckout({
     isExpired,
     connectedHandle,
     socialClaimStep,
+    isLoading: isSocialLoading,
+    error: socialError,
     onSocialConnect,
     onSocialFollow,
     onSocialShare,
@@ -36,9 +39,17 @@ export function SocialClaimCheckout({
 
   return (
     <>
+      {socialError && (
+        <ErrorAlert
+          title="Social link error"
+          description={socialError}
+          variant="error"
+          isExpanded
+        />
+      )}
       <SocialStepButton
         label={
-          connectedHandle ? `@${connectedHandle}` : `Connect ${providerName}`
+          connectedHandle ? `Connected @${connectedHandle}` : `Connect ${providerName}`
         }
         icon={<XIcon />}
         isCurrent={socialClaimStep === "connect"}
@@ -65,7 +76,7 @@ export function SocialClaimCheckout({
       />
       <Button
         className="w-full"
-        isLoading={isLoading}
+        isLoading={isLoading || isSocialLoading}
         onClick={
           onSocialConnect ?? onSocialFollow ?? onSocialShare ?? handlePurchase
         }

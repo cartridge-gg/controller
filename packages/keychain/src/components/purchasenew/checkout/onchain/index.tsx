@@ -16,6 +16,7 @@ import {
   useOnchainPurchaseContext,
   useCreditPurchaseContext,
   isOnchainStarterpack,
+  OnchainStarterpackDetails,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { useFeatures } from "@/hooks/features";
@@ -112,6 +113,10 @@ export function OnchainCheckout() {
     }
     return starterpackDetails.quote;
   }, [starterpackDetails]);
+
+  const imageUrl = useMemo(() => (
+    socialClaimProvider ? (starterpackDetails as OnchainStarterpackDetails).imageUri : null
+  ), [starterpackDetails, socialClaimProvider])
 
   const wallet = getWallet(selectedWallet?.type || "controller");
 
@@ -301,11 +306,15 @@ export function OnchainCheckout() {
   return (
     <>
       <HeaderInner
-        title={isFree ? "Claim" : "Review Purchase"}
+        title={socialClaimProvider ? `Claim ${starterpackDetails?.name}` : isFree ? "Claim" : "Review Purchase"}
         icon={
-          <div onClick={handleIconTripleClick}>
-            <GiftIcon variant="solid" />
-          </div>
+          imageUrl ? (
+            <img src={imageUrl} alt={starterpackDetails?.name} />
+          ) : (
+            <div onClick={handleIconTripleClick}>
+              <GiftIcon variant="solid" />
+            </div>
+          )
         }
       />
 
