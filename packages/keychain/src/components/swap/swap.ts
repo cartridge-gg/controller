@@ -1,10 +1,39 @@
 import { useMemo } from "react";
 import { getChecksumAddress, type Call } from "starknet";
-import { useDecodeTransactionInputs } from "@/hooks/calldata-decode";
 import { TokenSwap } from "@/hooks/token";
+import {
+  decodeErc20TransferInputs,
+  decodeEkuboClearMinimumInputs,
+  decodeAvnuMultiRouteSwapInputs,
+} from "@/hooks/calldata-decode";
 
-const findTransactions = (transactions: Call[], entrypoint: string) => {
-  return transactions.filter((t) => t.entrypoint === entrypoint);
+// Each entry is an ordered sequence of entrypoints that constitutes a swap group.
+// Add new DEX patterns here without changing any other logic.
+const swapPatterns: string[][] = [
+  ["transfer", "multihop_swap", "clear_minimum", "clear"], // Ekubo
+  ["approve", "multi_route_swap"], // Avnu
+];
+
+const detectSwapGroups = (transactions: Call[]): Call[][] => {
+  const groups: Call[][] = [];
+  let i = 0;
+
+  while (i < transactions.length) {
+    const pattern = swapPatterns.find(
+      (p) =>
+        i + p.length <= transactions.length &&
+        p.every((method, j) => transactions[i + j].entrypoint === method),
+    );
+
+    if (pattern) {
+      groups.push(transactions.slice(i, i + pattern.length));
+      i += pattern.length;
+    } else {
+      i++;
+    }
+  }
+
+  return groups;
 };
 
 // detect swap transaction
@@ -14,19 +43,11 @@ export const useIsSwapTransaction = (
 ): {
   isSwap: boolean;
 } => {
-  const isSwap = useMemo(
-    () =>
-      transactions.length >= 4 &&
-      findTransactions(transactions, "transfer").length > 0 &&
-      findTransactions(transactions, "multihop_swap").length > 0 &&
-      findTransactions(transactions, "clear_minimum").length > 0 &&
-      findTransactions(transactions, "clear").length > 0,
-    [transactions],
-  );
-  return { isSwap };
+  const swaps = useMemo(() => detectSwapGroups(transactions), [transactions]);
+  return { isSwap: swaps.length > 0 };
 };
 
-export type SwapTransactions = {
+export type SwapTransfers = {
   selling: TokenSwap[];
   buying: TokenSwap[];
 };
@@ -35,33 +56,13 @@ export const useSwapTransactions = (
   transactions: Call[],
 ): {
   isSwap: boolean;
-  swapTransactions: SwapTransactions;
-  swapMethodCount: number;
-  additionalMethodCount: number;
+  swapTransfers: SwapTransfers;
+  swapCount: number;
 } => {
-  const { isSwap } = useIsSwapTransaction(transactions);
+  const swaps = useMemo(() => detectSwapGroups(transactions), [transactions]);
 
-  const { decodeTransferInputs, decodeClearMinimumInputs } =
-    useDecodeTransactionInputs();
-
-  const [swapTransactions, swapMethodCount] = useMemo(() => {
-    const swapTransactions: SwapTransactions = {
-      selling: [],
-      buying: [],
-    };
-    if (!isSwap) return [swapTransactions, 0];
-
-    const transfers = findTransactions(transactions, "transfer");
-    const multihop_swaps = findTransactions(transactions, "multihop_swap");
-    const clear_minimuns = findTransactions(transactions, "clear_minimum");
-    const clears = findTransactions(transactions, "clear");
-
-    const transferInputs = transfers.map((transfer) =>
-      decodeTransferInputs(transfer.calldata as string[]),
-    );
-    const clearInputs = clear_minimuns.map((clear_minimum) =>
-      decodeClearMinimumInputs(clear_minimum.calldata as string[]),
-    );
+  const swapTransfers = useMemo(() => {
+    const result: SwapTransfers = { selling: [], buying: [] };
 
     const addToken = (acc: TokenSwap[], address: string, amount: bigint) => {
       const token = acc.find((t) => t.address === address);
@@ -70,38 +71,61 @@ export const useSwapTransactions = (
       } else {
         acc.push({ address, amount });
       }
-      return acc;
     };
 
-    swapTransactions.selling = transferInputs.reduce((acc, input, index) => {
-      return addToken(
-        acc,
-        getChecksumAddress(transfers[index].contractAddress),
-        input.amount,
-      );
-    }, [] as TokenSwap[]);
+    for (const group of swaps) {
+      for (const call of group) {
+        try {
+          if (call.entrypoint === "transfer") {
+            const input = decodeErc20TransferInputs(call.calldata as string[]);
+            addToken(
+              result.selling,
+              getChecksumAddress(call.contractAddress),
+              input.amount,
+            );
+          } else if (call.entrypoint === "clear_minimum") {
+            const input = decodeEkuboClearMinimumInputs(
+              call.calldata as string[],
+            );
+            addToken(
+              result.buying,
+              getChecksumAddress(input.token.contract_address),
+              input.minimum,
+            );
+          } else if (call.entrypoint === "multi_route_swap") {
+            const input = decodeAvnuMultiRouteSwapInputs(
+              call.calldata as string[],
+            );
+            addToken(
+              result.selling,
+              getChecksumAddress(input.sell_token_address),
+              input.sell_token_amount,
+            );
+            addToken(
+              result.buying,
+              getChecksumAddress(input.buy_token_address),
+              input.buy_token_amount,
+            );
+          }
+        } catch (error) {
+          console.error(
+            `[useSwapTransactions] Error decoding transaction inputs:`,
+            call,
+            error,
+          );
+          return null;
+        }
+      }
+    }
 
-    swapTransactions.buying = clearInputs.reduce((acc, input) => {
-      return addToken(
-        acc,
-        getChecksumAddress(input.token.contract_address),
-        input.minimum,
-      );
-    }, [] as TokenSwap[]);
+    return result;
+  }, [swaps]);
 
-    const count =
-      transfers.length +
-      multihop_swaps.length +
-      clear_minimuns.length +
-      clears.length;
-
-    return [swapTransactions, count];
-  }, [isSwap, transactions, decodeClearMinimumInputs, decodeTransferInputs]);
+  const swapCount = swapTransfers != null ? swaps.length : 0;
 
   return {
-    isSwap,
-    swapTransactions,
-    swapMethodCount,
-    additionalMethodCount: transactions.length - swapMethodCount,
+    isSwap: swapCount > 0,
+    swapTransfers: swapTransfers ?? { selling: [], buying: [] },
+    swapCount,
   };
 };
