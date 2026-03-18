@@ -58,6 +58,8 @@ export const useSwapTransactions = (
   isSwap: boolean;
   swapTransfers: SwapTransfers;
   swapCount: number;
+  swapTransactionCount: number;
+  additionalTransactionCount: number;
 } => {
   const swaps = useMemo(() => detectSwapGroups(transactions), [transactions]);
 
@@ -122,10 +124,17 @@ export const useSwapTransactions = (
   }, [swaps]);
 
   const swapCount = swapTransfers != null ? swaps.length : 0;
+  const swapTransactionCount = swaps.reduce(
+    (acc, group) => acc + group.length,
+    0,
+  );
+  const additionalTransactionCount = transactions.length - swapTransactionCount;
 
   return {
     isSwap: swapCount > 0,
     swapTransfers: swapTransfers ?? { selling: [], buying: [] },
     swapCount,
+    swapTransactionCount,
+    additionalTransactionCount,
   };
 };
