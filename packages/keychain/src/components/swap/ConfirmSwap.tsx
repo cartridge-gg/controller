@@ -53,6 +53,8 @@ export function ConfirmSwap({
         : `~$${token.value.toFixed(2)}`;
   };
 
+  const advancedCount = additionalMethodCount;
+
   return (
     <ExecutionContainer
       icon={<TransferIcon />}
@@ -62,16 +64,17 @@ export function ConfirmSwap({
       executionError={executionError}
       onSubmit={onSubmit}
       onError={onError}
-      buttonText={`Swap ${additionalMethodCount > 0 ? `+ ${additionalMethodCount}` : ""}`}
+      buttonText="Swap"
       right={
         !advancedVisible ? (
           <Button
             onClick={() => setAdvancedVisible(true)}
             size="thumbnail"
             variant="icon"
-            className="rounded-full text-foreground-300"
+            className="rounded-full text-foreground-300 font-sans"
           >
-            <GearIcon />
+            <GearIcon size="sm" />
+            {advancedCount || ""}
           </Button>
         ) : undefined
       }
@@ -112,7 +115,9 @@ export function ConfirmSwap({
                 />
               ))}
             </TokenSummary>
-            {advancedVisible && <TransactionSummary calls={transactions} />}
+            {advancedVisible && (
+              <TransactionSummary calls={transactions} count={advancedCount} />
+            )}
           </>
         )}
       </LayoutContent>
