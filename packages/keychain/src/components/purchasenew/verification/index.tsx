@@ -167,15 +167,12 @@ const CodeStepView = ({
 );
 
 export function Verification() {
-  const { navigate, setShowClose } = useNavigation();
+  const { navigate } = useNavigation();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const method = searchParams.get("method");
   const { toast } = useToast();
 
-  useEffect(() => {
-    setShowClose(true);
-  }, [setShowClose]);
   const {
     data: meData,
     isLoading: isMeLoading,
