@@ -1,5 +1,5 @@
 import { PACKAGE_VERSION } from "@/version";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import eq from "semver/functions/eq";
 import gt from "semver/functions/gt";
 import gte from "semver/functions/gte";
@@ -12,6 +12,12 @@ export const useVersion = () => {
 
   const { controllerVersion } = useConnection();
 
+  // In standalone mode (no controller version provided), assume latest
+  const effectiveVersion = useMemo(
+    () => controllerVersion ?? PACKAGE_VERSION,
+    [controllerVersion],
+  );
+
   useEffect(() => {
     if (controllerVersion) {
       setReady(true);
@@ -20,37 +26,37 @@ export const useVersion = () => {
 
   const isControllerGt = useCallback(
     (version: string) => {
-      return gt(controllerVersion!, version);
+      return gt(effectiveVersion, version);
     },
-    [controllerVersion],
+    [effectiveVersion],
   );
 
   const isControllerGte = useCallback(
     (version: string) => {
-      return gte(controllerVersion!, version);
+      return gte(effectiveVersion, version);
     },
-    [controllerVersion],
+    [effectiveVersion],
   );
 
   const isControllerLt = useCallback(
     (version: string) => {
-      return lt(controllerVersion!, version);
+      return lt(effectiveVersion, version);
     },
-    [controllerVersion],
+    [effectiveVersion],
   );
 
   const isControllerLte = useCallback(
     (version: string) => {
-      return lte(controllerVersion!, version);
+      return lte(effectiveVersion, version);
     },
-    [controllerVersion],
+    [effectiveVersion],
   );
 
   const isControllerEq = useCallback(
     (version: string) => {
-      return eq(controllerVersion!, version);
+      return eq(effectiveVersion, version);
     },
-    [controllerVersion],
+    [effectiveVersion],
   );
 
   return {
