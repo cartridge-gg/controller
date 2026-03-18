@@ -1,7 +1,4 @@
-import { useState } from "react";
 import {
-  Button,
-  GearIcon,
   LayoutContent,
   TokenCard,
   TokenSummary,
@@ -30,15 +27,12 @@ export function ConfirmSwap({
   executionError,
   origin,
 }: ConfirmSwapProps) {
-  const [advancedVisible, setAdvancedVisible] = useState(false);
-
-  const { isSwap, swapTransactions, additionalMethodCount } =
-    useSwapTransactions(transactions);
+  const { isSwap, swapTransfers } = useSwapTransactions(transactions);
   const { tokenSwapData: sellingSwapData } = useTokenSwapData(
-    swapTransactions.selling,
+    swapTransfers.selling,
   );
   const { tokenSwapData: buyingSwapData } = useTokenSwapData(
-    swapTransactions.buying,
+    swapTransfers.buying,
   );
 
   const formatAmount = (token: TokenSwapData) => {
@@ -53,8 +47,6 @@ export function ConfirmSwap({
         : `~$${token.value.toFixed(2)}`;
   };
 
-  const advancedCount = additionalMethodCount;
-
   return (
     <ExecutionContainer
       icon={<TransferIcon />}
@@ -65,19 +57,6 @@ export function ConfirmSwap({
       onSubmit={onSubmit}
       onError={onError}
       buttonText="Swap"
-      right={
-        !advancedVisible ? (
-          <Button
-            onClick={() => setAdvancedVisible(true)}
-            size="thumbnail"
-            variant="icon"
-            className="rounded-full text-foreground-300 font-sans"
-          >
-            <GearIcon size="sm" />
-            {advancedCount || ""}
-          </Button>
-        ) : undefined
-      }
       additionalFees={sellingSwapData.map((token) => ({
         label: "Total",
         contractAddress: token.address,
@@ -115,9 +94,7 @@ export function ConfirmSwap({
                 />
               ))}
             </TokenSummary>
-            {advancedVisible && (
-              <TransactionSummary calls={transactions} count={advancedCount} />
-            )}
+            <TransactionSummary calls={transactions} />
           </>
         )}
       </LayoutContent>
