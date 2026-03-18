@@ -247,6 +247,11 @@ const LS2_PURCHASE_GAME: Call[] = [
   },
 ];
 
+const EKUBO_SWAP_WITH_EXTRA: Call[] = [
+  ...EKUBO_SWAP_SINGLE,
+  { contractAddress: "0x4", entrypoint: "buy_game", calldata: [] },
+];
+
 const AVNU_SWAP: Call[] = [
   {
     contractAddress:
@@ -449,6 +454,32 @@ describe("useSwapTransactions", () => {
   });
 
   it("Ekubo swap with extra transactions", () => {
+    const { result } = renderHook(() =>
+      useSwapTransactions(EKUBO_SWAP_WITH_EXTRA),
+    );
+    expect(result.current.isSwap).toBe(true);
+    expect(result.current.swapCount).toBe(1);
+    expect(result.current.swapTransfers.selling).toHaveLength(1);
+    expect(result.current.swapTransfers.selling[0].address).toBe(
+      getChecksumAddress(
+        "0x0124aeb495b947201f5faC96fD1138E326AD86195B98df6DEc9009158A533B49",
+      ),
+    );
+    expect(result.current.swapTransfers.selling[0].amount).toBe(
+      BigInt("0x32a03ab37fef8ba51"),
+    );
+    expect(result.current.swapTransfers.buying).toHaveLength(1);
+    expect(result.current.swapTransfers.buying[0].address).toBe(
+      getChecksumAddress(
+        "0x016dea82a6588ca9fb7200125fa05631b1c1735a313e24afe9c90301e441a796",
+      ),
+    );
+    expect(result.current.swapTransfers.buying[0].amount).toBe(
+      BigInt("0xa4de3d0e9ba40000"),
+    );
+  });
+
+  it("LS2 purchase game", () => {
     const { result } = renderHook(() => useSwapTransactions(LS2_PURCHASE_GAME));
     expect(result.current.isSwap).toBe(true);
     expect(result.current.swapCount).toBe(1);
@@ -458,12 +489,16 @@ describe("useSwapTransactions", () => {
         "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
       ),
     );
+    expect(result.current.swapTransfers.selling[0].amount).toBe(
+      BigInt("0x5bbb37da193af4ba9"),
+    );
     expect(result.current.swapTransfers.buying).toHaveLength(1);
     expect(result.current.swapTransfers.buying[0].address).toBe(
       getChecksumAddress(
-        "0x0452810188c4cb3aebd63711a3b445755bc0d6c4f27b923fdd99b1a118858136",
+        "0x036017e69d21d6d8c13e266eabb73ef1f1d02722d86bdcabe5f168f8e549d3cd",
       ),
     );
+    expect(result.current.swapTransfers.buying[0].amount).toBe(BigInt("1"));
   });
 
   it("Avnu swap", () => {

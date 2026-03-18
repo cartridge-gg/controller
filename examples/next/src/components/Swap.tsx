@@ -267,7 +267,7 @@ const LS2_PURCHASE_GAME = [
     entrypoint: "transfer",
     calldata: [
       "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
-      "0x5bbb37da193af4ba9",
+      "0x155ee7c39a3d69a76",
       "0x0",
     ],
   },
@@ -339,7 +339,7 @@ const LS2_PURCHASE_GAME_ERROR = [
     entrypoint: "transfer",
     calldata: [
       "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
-      "0x5bbb37da193af4ba90000000",
+      "0x5bbb37d193af4ba",
       "0x0",
     ],
   },
