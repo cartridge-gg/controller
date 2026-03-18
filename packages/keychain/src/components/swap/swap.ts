@@ -10,6 +10,14 @@ import {
 // Each entry is an ordered sequence of entrypoints that constitutes a swap group.
 // Add new DEX patterns here without changing any other logic.
 const swapPatterns: string[][] = [
+  [
+    "transfer",
+    "multihop_swap",
+    "clear_minimum",
+    "clear",
+    "approve",
+    "buy_game",
+  ], // LS2
   ["transfer", "multihop_swap", "clear_minimum", "clear"], // Ekubo
   ["approve", "multi_route_swap"], // Avnu
 ];
@@ -107,6 +115,15 @@ export const useSwapTransactions = (
               result.buying,
               getChecksumAddress(input.buy_token_address),
               input.buy_token_amount,
+            );
+          } else if (call.entrypoint === "buy_game") {
+            result.buying = [];
+            addToken(
+              result.buying,
+              getChecksumAddress(
+                "0x036017e69d21d6d8c13e266eabb73ef1f1d02722d86bdcabe5f168f8e549d3cd",
+              ),
+              1n,
             );
           }
         } catch (error) {

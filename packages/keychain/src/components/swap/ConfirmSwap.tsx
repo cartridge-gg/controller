@@ -74,8 +74,9 @@ export function ConfirmSwap({
               {sellingSwapData.map((token) => (
                 <TokenCard
                   key={token.address}
-                  image={token.image || placeholder}
                   title={token.name}
+                  image={token.image || placeholder}
+                  squaredImage={!token.rounded}
                   amount={formatAmount(token)}
                   value={formatValue(token)}
                   clickable={false}
@@ -85,8 +86,9 @@ export function ConfirmSwap({
               {buyingSwapData.map((token) => (
                 <TokenCard
                   key={token.address}
-                  image={token.image || placeholder}
                   title={token.name}
+                  image={token.image || placeholder}
+                  squaredImage={!token.rounded}
                   amount={formatAmount(token)}
                   value={formatValue(token)}
                   clickable={false}
