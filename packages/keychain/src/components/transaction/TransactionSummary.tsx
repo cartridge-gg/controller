@@ -18,12 +18,14 @@ interface TransactionSummaryProps {
   calls: Call[];
   isExpanded?: boolean;
   className?: string;
+  count?: number;
 }
 
 export function TransactionSummary({
   calls,
   isExpanded = false,
   className,
+  count,
 }: TransactionSummaryProps) {
   const [isOpened, setisOpened] = useState(isExpanded);
 
@@ -53,9 +55,15 @@ export function TransactionSummary({
           <Thumbnail
             variant="light"
             size="sm"
-            icon={<GearIcon />}
+            icon={
+              <>
+                <GearIcon size="sm" />
+                {count || ""}
+              </>
+            }
             centered={true}
             className={cn(
+              `w-[${(count?.toString() ?? "").length + 1}em]`,
               isOpened
                 ? "text-foreground-100"
                 : "text-foreground-300 bg-background-200",
