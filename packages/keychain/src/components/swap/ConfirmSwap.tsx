@@ -94,7 +94,10 @@ export function ConfirmSwap({
                 />
               ))}
             </TokenSummary>
-            <TransactionSummary calls={transactions} />
+            <TransactionSummary
+              calls={transactions}
+              count={transactions.length}
+            />
           </>
         )}
       </LayoutContent>
