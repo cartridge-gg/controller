@@ -245,9 +245,7 @@ export function OnchainCheckout() {
           !accountPrivate?.phoneNumberVerifiedAt;
 
         if (needsVerification) {
-          navigate("/purchase/verification?method=apple-pay", {
-            showClose: true,
-          });
+          navigate("/purchase/verification?method=apple-pay");
           return;
         }
 
