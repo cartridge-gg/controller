@@ -18,7 +18,7 @@ import { useAccountVerifyMutation, useAccountPrivateQuery } from "@/utils/api";
 import { useConnection } from "@/hooks/connection";
 
 export function StripeVerification() {
-  const { navigate, setShowClose } = useNavigation();
+  const { navigate } = useNavigation();
   const { isMainnet } = useConnection();
   const accountVerifyMutation = useAccountVerifyMutation();
   const { refetch: refetchAccountPrivate } = useAccountPrivateQuery(undefined, {
@@ -30,10 +30,6 @@ export function StripeVerification() {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-
-  useEffect(() => {
-    setShowClose(true);
-  }, [setShowClose]);
 
   useEffect(() => {
     if (isSuccess) {
