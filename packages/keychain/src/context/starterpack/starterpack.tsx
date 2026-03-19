@@ -16,8 +16,11 @@ import {
   Item,
   ItemType,
 } from "./types";
-import { useStarterPackConditions } from "@/hooks/starterpack/onchain";
-import { OAuthProvider } from "@/utils/api/oauth-connections";
+import {
+  useStarterPackConditions,
+  SocialClaimConditions,
+} from "@/hooks/starterpack/onchain";
+import { SocialClaimOptions } from "@cartridge/controller";
 
 export interface StarterpackContextType {
   // Starterpack identification
@@ -42,9 +45,9 @@ export interface StarterpackContextType {
   clearError: () => void;
 
   // Social claim
-  socialClaimProvider: OAuthProvider | null;
-  socialTargetAccount: string | null;
-  socialTargetAccountId: string | null;
+  setSocialClaimOptions: (options: SocialClaimOptions) => void;
+  socialClaimOptions: SocialClaimOptions | undefined;
+  socialClaimConditions: SocialClaimConditions | undefined;
 }
 
 export const StarterpackContext = createContext<
@@ -145,8 +148,11 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     isOnchainQuoteLoading,
   ]);
 
-  const { socialClaimProvider, socialTargetAccount, socialTargetAccountId } =
-    useStarterPackConditions(onchainMetadata);
+  // conditional starter packs
+  const [socialClaimOptions, setSocialClaimOptions] = useState<
+    SocialClaimOptions | undefined
+  >();
+  const { socialClaimConditions } = useStarterPackConditions(onchainMetadata);
 
   // Sync errors from hooks to displayError
   useEffect(() => {
@@ -181,9 +187,9 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     displayError,
     setDisplayError,
     clearError,
-    socialClaimProvider,
-    socialTargetAccount,
-    socialTargetAccountId,
+    setSocialClaimOptions,
+    socialClaimOptions,
+    socialClaimConditions,
   };
 
   return (

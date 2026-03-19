@@ -42,6 +42,12 @@ export interface StarterPackMetadataOnchain {
   conditions?: string[];
 }
 
+export interface SocialClaimConditions {
+  provider: OAuthProvider;
+  targetAccount: string;
+  targetAccountId: string | null;
+}
+
 // Convert snake_case JSON from contract to camelCase TypeScript
 function convertMetadata(
   raw: StarterPackMetadataOnchainRaw,
@@ -64,27 +70,26 @@ function convertMetadata(
 export const useStarterPackConditions = (
   metadata: StarterPackMetadataOnchain | null,
 ) => {
-  const [socialClaimProvider, socialTargetAccount, socialTargetAccountId] =
-    useMemo<[OAuthProvider | null, string | null, string | null]>(() => {
-      const conditions = metadata?.conditions ?? [];
-      switch (conditions[0] as OAuthProvider) {
-        case "TWITTER":
-          return [
-            conditions[0] as OAuthProvider,
-            conditions[1] ?? null,
-            conditions[2] ?? null,
-          ];
-        case "TIKTOK": // not implemented
-        case "INSTAGRAM": // not implemented
-        default:
-          return [null, null, null];
-      }
-    }, [metadata]);
+  const socialClaimConditions = useMemo<
+    SocialClaimConditions | undefined
+  >(() => {
+    const conditions = metadata?.conditions ?? [];
+    switch (conditions[0] as OAuthProvider) {
+      case "TWITTER":
+        return {
+          provider: conditions[0] as OAuthProvider,
+          targetAccount: conditions[1],
+          targetAccountId: conditions[2] ?? null,
+        };
+      case "TIKTOK": // not implemented
+      case "INSTAGRAM": // not implemented
+      default:
+        return undefined;
+    }
+  }, [metadata]);
 
   return {
-    socialClaimProvider,
-    socialTargetAccount,
-    socialTargetAccountId,
+    socialClaimConditions,
   };
 };
 

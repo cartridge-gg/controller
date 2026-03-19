@@ -74,20 +74,34 @@ export function Profile() {
   return (
     <div className="flex flex-col gap-4">
       <h2>Open Starterpack</h2>
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap gap-1">
-          <Button
-            onClick={() =>
+      <div className="flex flex-wrap gap-1">
+        <Button
+          onClick={() =>
+            ctrlConnector.controller.openStarterPack(0, {
+              onPurchaseComplete: () => {
+                console.log("Starterpack play callback fired.");
+              },
+            })
+          }
+        >
+          Nums
+        </Button>
+        <Button
+          onClick={() =>
+            ctrlConnector.controller.username()?.then((username) => {
               ctrlConnector.controller.openStarterPack(0, {
                 onPurchaseComplete: () => {
                   console.log("Starterpack play callback fired.");
                 },
-              })
-            }
-          >
-            Nums
-          </Button>
-        </div>
+                socialClaimOptions: {
+                  shareMessage: `Check out @numsgg!\nhttps://sepolia.nums.gg/game/10?ref=${username}`,
+                },
+              });
+            })
+          }
+        >
+          Social Claim
+        </Button>
       </div>
 
       <h2>Toast Demo</h2>

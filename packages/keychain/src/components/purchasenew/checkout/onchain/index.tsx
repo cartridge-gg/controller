@@ -43,9 +43,8 @@ export function OnchainCheckout() {
     displayError,
     clearError,
     setDisplayError,
-    socialClaimProvider,
-    socialTargetAccount,
-    socialTargetAccountId,
+    socialClaimOptions,
+    socialClaimConditions,
   } = useStarterpackContext();
   const {
     isFetchingConversion,
@@ -117,10 +116,10 @@ export function OnchainCheckout() {
 
   const imageUrl = useMemo(
     () =>
-      socialClaimProvider
+      socialClaimConditions
         ? (starterpackDetails as OnchainStarterpackDetails).imageUri
         : null,
-    [starterpackDetails, socialClaimProvider],
+    [starterpackDetails, socialClaimConditions],
   );
 
   const wallet = getWallet(selectedWallet?.type || "controller");
@@ -312,7 +311,7 @@ export function OnchainCheckout() {
     <>
       <HeaderInner
         title={
-          socialClaimProvider
+          socialClaimConditions
             ? `Claim ${starterpackDetails?.name}`
             : isFree
               ? "Claim"
@@ -341,11 +340,10 @@ export function OnchainCheckout() {
           <ControllerErrorAlert error={displayError} />
         )}
 
-        {socialClaimProvider != null ? (
+        {socialClaimConditions ? (
           <SocialClaimCheckout
-            provider={socialClaimProvider}
-            targetAccount={socialTargetAccount as string}
-            targetAccountId={socialTargetAccountId as string}
+            options={socialClaimOptions!}
+            conditions={socialClaimConditions}
             isLoading={isLoading}
             handlePurchase={handlePurchase}
             // isFree={isFree}
