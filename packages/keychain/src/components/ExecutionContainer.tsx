@@ -10,9 +10,10 @@ import {
   HeaderInner,
   type HeaderProps,
   LayoutFooter,
+  VerifiedIcon,
 } from "@cartridge/ui";
 import { isEqual } from "@/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createDeployUrl } from "@/utils/connection/deploy";
 import { Fees, FeesData } from "@/components/Fees";
 
@@ -45,7 +46,7 @@ export function ExecutionContainer({
   children,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
-  const { controller } = useConnection();
+  const { controller, policies } = useConnection();
   const { navigate } = useNavigation();
   const [maxFee, setMaxFee] = useState<FeeEstimate | undefined>();
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
@@ -151,11 +152,28 @@ export function ExecutionContainer({
     }
   }, [ctaState, ctrlError, controller, navigate, onDeploy, resetState]);
 
+  const isVerified = useMemo(
+    () =>
+      typeof description === "string" && description.startsWith("http")
+        ? policies?.verified === true
+        : undefined,
+    [policies, description],
+  );
+
   return (
     <>
       <HeaderInner
         title={title}
-        description={description}
+        description={
+          isVerified === true ? (
+            <div className="flex items-center gap-1">
+              <VerifiedIcon size="xs" />
+              {description}
+            </div>
+          ) : (
+            description
+          )
+        }
         icon={icon}
         right={right}
         hideIcon={!icon}
