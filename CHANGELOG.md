@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.13.10] - 2026-03-19
+
+### ✨ New Features
+- **@cartridge/keychain**: Added identity verification for Stripe purchases, enabling enhanced security and compliance for payment processing (#2492)
+- **@cartridge/keychain**: Added geofencing for OFAC countries on Vercel, ensuring compliance with international sanctions requirements (#2484)
+- **@cartridge/keychain**: Added Stripe checkout for starterpacks, providing seamless payment integration for starter pack purchases (#2485)
+- **@cartridge/keychain**: Added BroadcastChannel-based communication for Coinbase popup, replacing GraphQL polling for more efficient real-time updates (#2451)
+- **@cartridge/keychain**: Added embedded Coinbase payment in keychain popup with status polling for streamlined payment experience (#2445)
+- **@cartridge/keychain**: Added Apple Pay triple-click functionality on review purchase icon for faster mobile payments (#2457)
+- **@cartridge/controller**: Added `updateSession` API for runtime session policy updates, enabling dynamic modification of session policies (#2440)
+- **@cartridge/keychain**: Added account parameter support on session page for improved session flow configuration (#2439)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced Stripe payment integration with improved Coinbase popup handling, message validation, and status polling (#2449, #2447, #2453, #2454)
+- **@cartridge/keychain**: Improved token selection with split USDC and USDC.e support in starterpack flows for better token identification (#2470)
+- **@cartridge/keychain**: Enhanced popup authentication for restrictive iframe environments with better fallback handling (#2462)
+- **@cartridge/keychain**: Improved mobile authentication with better Chrome iOS handling and WebAuthn debugging capabilities (#2429, #2428, #2427)
+- **@cartridge/controller**: Enhanced EVM wallet detection and provider discovery for improved multi-wallet compatibility (#2468)
+- **@cartridge/keychain**: Streamlined payment GraphQL migration to controller for better architecture (#2464)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed human-readable error messages for FailedPrecondition errors, showing clearer user-facing messages instead of generic service errors (#2496)
+- **@cartridge/keychain**: Fixed back button functionality on verification pages for better navigation experience (#2495)
+- **@cartridge/keychain**: Fixed profile history query performance by adding caps and gating fetches to prevent excessive API calls (#2490)
+- **@cartridge/keychain**: Fixed execute submit error propagation to prevent hanging during transaction execution (#2488)
+- **@cartridge/keychain**: Fixed credits purchase alignment with Stripe GraphQL for consistent payment processing (#2483)
+- **@cartridge/controller**: Fixed WebAuthn permissions in Permissions-Policy header for proper passkey functionality (#2482)
+- **@cartridge/controller**: Fixed custom-scheme redirect_uri preservation in standalone session flows for mobile app compatibility (#2481)
+- **@cartridge/controller**: Fixed domain verification to check both redirect_url and redirect_uri parameters (#2474)
+- **@cartridge/controller**: Fixed unknown signers error handling to prevent error screens (#2472)
+- **@cartridge/controller**: Fixed custom URL scheme verification for mobile app integration (#2471)
+- **@cartridge/controller**: Fixed loading spinner display while preset config loads (#2477)
+- **@cartridge/controller**: Fixed connect flow reliability and removed console errors for cleaner operation (#2438, #2437)
+- **@cartridge/controller**: Fixed disconnect method to properly reset iframe state (#2434)
+
+### 📦 Dependencies
+- **controller-wasm**: Updated to version 0.9.6 for improved backend functionality (#2479)
+- **controller-rs**: Updated to version 0.9.5 for enhanced performance (#2465)
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#2489, #61e0634d)
+
 ## [0.13.10-alpha.1] - 2026-02-25
 
 ### ✨ New Features
