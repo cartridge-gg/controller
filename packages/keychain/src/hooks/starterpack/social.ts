@@ -3,9 +3,10 @@ import { useLocation } from "react-router-dom";
 import { useMutation } from "react-query";
 import {
   getTwitterFollowUrl,
-  OAuthProvider,
   type OAuthConnection,
 } from "@/utils/api/oauth-connections";
+import { SocialClaimOptions } from "@cartridge/controller";
+import { SocialClaimConditions } from "@/hooks/starterpack/onchain";
 import { useOAuthConnection } from "@/components/settings/connections/use-connections";
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "../connection";
@@ -32,9 +33,8 @@ interface UseSocialClaimResults {
 
 export const useSocialClaim = (
   // starterpackId?: number,
-  provider: OAuthProvider,
-  targetAccount: string,
-  targetAccountId: string,
+  options: SocialClaimOptions,
+  conditions: SocialClaimConditions,
 ): UseSocialClaimResults => {
   const { controller } = useConnection();
   const username = controller?.username();
@@ -42,7 +42,7 @@ export const useSocialClaim = (
   const [socialClaimStep, setSocialClaimStep] =
     useState<SocialClaimStep>("connect");
 
-  const { connection } = useOAuthConnection(provider);
+  const { connection } = useOAuthConnection(conditions.provider);
   const isConnected = connection != null;
   const isExpired = connection?.isExpired ?? false;
   const connectedHandle =
@@ -68,9 +68,9 @@ export const useSocialClaim = (
 
   const onConnect = useCallback(() => {
     navigate(
-      `/settings/add-connection?provider=${provider}&returnTo=${location.pathname}`,
+      `/settings/add-connection?provider=${conditions.provider}&returnTo=${location.pathname}`,
     );
-  }, [provider, location.pathname, navigate]);
+  }, [conditions.provider, location.pathname, navigate]);
 
   const followMutation = useMutation(
     async ({
@@ -97,14 +97,26 @@ export const useSocialClaim = (
   );
 
   const onFollow = useCallback(() => {
-    if (username && targetAccount) {
-      followMutation.mutate({ username, targetAccount, targetAccountId });
+    if (username && conditions.targetAccount) {
+      followMutation.mutate({
+        username,
+        targetAccount: conditions.targetAccount,
+        targetAccountId: conditions.targetAccountId ?? "",
+      });
     }
-  }, [followMutation, username, targetAccount, targetAccountId]);
+  }, [
+    followMutation,
+    username,
+    conditions.targetAccount,
+    conditions.targetAccountId,
+  ]);
 
   const shareMessage = useMemo(() => {
-    return `I got got a free game from @${targetAccount}! Check it out!`;
-  }, [targetAccount]);
+    const result =
+      options?.shareMessage ||
+      `I got got a free game from @${conditions.targetAccount}! Check it out!`;
+    return result;
+  }, [options?.shareMessage, conditions.targetAccount]);
 
   const [isSharing, setIsSharing] = useState(false);
 
@@ -114,7 +126,7 @@ export const useSocialClaim = (
       const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}`;
 
       const width = 600;
-      const height = 700;
+      const height = 450;
       const left = window.screenX + (window.outerWidth - width) / 2;
       const top = window.screenY + (window.outerHeight - height) / 2;
       const popup = window.open(

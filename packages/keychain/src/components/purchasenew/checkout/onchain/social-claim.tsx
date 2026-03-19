@@ -5,24 +5,24 @@ import {
   Thumbnail,
   XIcon,
   CheckIcon,
+  ChatIcon,
 } from "@cartridge/ui";
-import { OAuthProvider } from "@/utils/api/oauth-connections";
 import { useSocialClaim } from "@/hooks/starterpack/social";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { SocialClaimOptions } from "@cartridge/controller";
+import { SocialClaimConditions } from "@/hooks/starterpack/onchain";
 
 interface SocialClaimCheckoutProps {
-  provider: OAuthProvider;
-  targetAccount: string;
-  targetAccountId: string;
+  options: SocialClaimOptions;
+  conditions: SocialClaimConditions;
   isFree: boolean;
   isLoading: boolean;
   handlePurchase: () => void;
 }
 
 export function SocialClaimCheckout({
-  provider,
-  targetAccount,
-  targetAccountId,
+  options,
+  conditions,
   isFree,
   isLoading,
   handlePurchase,
@@ -37,9 +37,10 @@ export function SocialClaimCheckout({
     onSocialConnect,
     onSocialFollow,
     onSocialShare,
-  } = useSocialClaim(provider, targetAccount, targetAccountId);
+  } = useSocialClaim(options, conditions);
 
-  const providerName = provider === "TWITTER" ? "X" : provider;
+  const providerName =
+    conditions.provider === "TWITTER" ? "X" : conditions.provider;
 
   return (
     <>
@@ -63,7 +64,7 @@ export function SocialClaimCheckout({
         isExpired={isExpired}
       />
       <SocialStepButton
-        label={`Follow @${targetAccount}`}
+        label={`Follow @${conditions.targetAccount}`}
         icon={<AddUserIcon />}
         isCurrent={socialClaimStep === "follow"}
         isCompleted={
@@ -72,7 +73,7 @@ export function SocialClaimCheckout({
       />
       <SocialStepButton
         label="Spread The Word"
-        icon={<AddUserIcon />}
+        icon={<ChatIcon variant="line" />}
         isCurrent={socialClaimStep === "share"}
         isCompleted={
           socialClaimStep !== "connect" &&
@@ -93,7 +94,7 @@ export function SocialClaimCheckout({
           : socialClaimStep === "connect"
             ? `Connect ${providerName}`
             : socialClaimStep === "follow"
-              ? `Follow @${targetAccount}`
+              ? `Follow @${conditions.targetAccount}`
               : socialClaimStep === "share"
                 ? "Spread The Word"
                 : "Claim"}
