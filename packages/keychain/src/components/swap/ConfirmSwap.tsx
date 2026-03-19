@@ -1,7 +1,4 @@
-import { useState } from "react";
 import {
-  Button,
-  GearIcon,
   LayoutContent,
   TokenCard,
   TokenSummary,
@@ -30,15 +27,12 @@ export function ConfirmSwap({
   executionError,
   origin,
 }: ConfirmSwapProps) {
-  const [advancedVisible, setAdvancedVisible] = useState(false);
-
-  const { isSwap, swapTransactions, additionalMethodCount } =
-    useSwapTransactions(transactions);
+  const { isSwap, swapTransfers } = useSwapTransactions(transactions);
   const { tokenSwapData: sellingSwapData } = useTokenSwapData(
-    swapTransactions.selling,
+    swapTransfers.selling,
   );
   const { tokenSwapData: buyingSwapData } = useTokenSwapData(
-    swapTransactions.buying,
+    swapTransfers.buying,
   );
 
   const formatAmount = (token: TokenSwapData) => {
@@ -62,19 +56,7 @@ export function ConfirmSwap({
       executionError={executionError}
       onSubmit={onSubmit}
       onError={onError}
-      buttonText={`Swap ${additionalMethodCount > 0 ? `+ ${additionalMethodCount}` : ""}`}
-      right={
-        !advancedVisible ? (
-          <Button
-            onClick={() => setAdvancedVisible(true)}
-            size="thumbnail"
-            variant="icon"
-            className="rounded-full text-foreground-300"
-          >
-            <GearIcon />
-          </Button>
-        ) : undefined
-      }
+      buttonText="Swap"
       additionalFees={sellingSwapData.map((token) => ({
         label: "Total",
         contractAddress: token.address,
@@ -92,8 +74,9 @@ export function ConfirmSwap({
               {sellingSwapData.map((token) => (
                 <TokenCard
                   key={token.address}
-                  image={token.image || placeholder}
                   title={token.name}
+                  image={token.image || placeholder}
+                  squaredImage={!token.rounded}
                   amount={formatAmount(token)}
                   value={formatValue(token)}
                   clickable={false}
@@ -103,8 +86,9 @@ export function ConfirmSwap({
               {buyingSwapData.map((token) => (
                 <TokenCard
                   key={token.address}
-                  image={token.image || placeholder}
                   title={token.name}
+                  image={token.image || placeholder}
+                  squaredImage={!token.rounded}
                   amount={formatAmount(token)}
                   value={formatValue(token)}
                   clickable={false}
@@ -112,7 +96,10 @@ export function ConfirmSwap({
                 />
               ))}
             </TokenSummary>
-            {advancedVisible && <TransactionSummary calls={transactions} />}
+            <TransactionSummary
+              calls={transactions}
+              count={transactions.length}
+            />
           </>
         )}
       </LayoutContent>
