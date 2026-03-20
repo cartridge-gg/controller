@@ -3,6 +3,7 @@ import { useQuery, useQueryClient, useMutation } from "react-query";
 import { SectionHeader } from "../section-header";
 import { ConnectionCard } from "./connection-card";
 import { useConnection } from "@/hooks/connection";
+import { useFeature } from "@/hooks/features";
 import { useNavigation } from "@/context/navigation";
 import { useFetchData } from "@/utils/api/fetcher";
 import {
@@ -18,6 +19,7 @@ export const ConnectionsSection = () => {
   const { controller } = useConnection();
   const { navigate } = useNavigation();
   const queryClient = useQueryClient();
+  const githubConnectionsEnabled = useFeature("github-connections");
   const fetchConnections = useFetchData<
     OAuthConnectionsData,
     { username: string }
@@ -53,7 +55,9 @@ export const ConnectionsSection = () => {
     },
   );
 
-  const ALL_PROVIDERS: OAuthProvider[] = ["TIKTOK", "INSTAGRAM", "TWITTER"];
+  const ALL_PROVIDERS: OAuthProvider[] = githubConnectionsEnabled
+    ? ["TIKTOK", "INSTAGRAM", "TWITTER", "GITHUB"]
+    : ["TIKTOK", "INSTAGRAM", "TWITTER"];
   const connectedProviders = data?.map((c) => c.provider) ?? [];
   const hasAllConnections = ALL_PROVIDERS.every((p) =>
     connectedProviders.includes(p),

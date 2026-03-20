@@ -1,5 +1,7 @@
 import { useNavigation } from "@/context/navigation";
+import { useFeature } from "@/hooks/features";
 import {
+  getGitHubAuthUrl,
   getInstagramAuthUrl,
   getTikTokAuthUrl,
   getTwitterAuthUrl,
@@ -15,7 +17,12 @@ import {
   LayoutFooter,
   SpinnerIcon,
 } from "@cartridge/ui";
-import { SiInstagram, SiTiktok, SiX } from "@icons-pack/react-simple-icons";
+import {
+  SiGithub,
+  SiInstagram,
+  SiTiktok,
+  SiX,
+} from "@icons-pack/react-simple-icons";
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 
@@ -28,6 +35,7 @@ type ConnectionPending = {
 export function AddConnection({ username }: { username?: string }) {
   const { navigate } = useNavigation();
   const queryClient = useQueryClient();
+  const githubConnectionsEnabled = useFeature("github-connections");
   const [connectionPending, setConnectionPending] =
     useState<ConnectionPending | null>(null);
   const [headerIcon, setHeaderIcon] = useState<React.ReactElement>(
@@ -331,6 +339,98 @@ export function AddConnection({ username }: { username?: string }) {
     }
   }, [username, queryClient]);
 
+  const handleGitHubConnect = useCallback(() => {
+    if (!username) {
+      setConnectionPending({
+        provider: "GITHUB",
+        inProgress: false,
+        error: "No username available",
+      });
+      return;
+    }
+
+    try {
+      setConnectionPending({
+        provider: "GITHUB",
+        inProgress: true,
+      });
+
+      setHeaderIcon(<SpinnerIcon className="animate-spin" size="lg" />);
+
+      const authUrl = getGitHubAuthUrl(username);
+
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      const popup = window.open(
+        authUrl,
+        "github-oauth",
+        `width=${width},height=${height},left=${left},top=${top}`,
+      );
+
+      const handleMessage = (event: MessageEvent) => {
+        try {
+          const hostname = new URL(event.origin).hostname;
+          const isValidOrigin =
+            hostname === "cartridge.gg" || hostname.endsWith(".cartridge.gg");
+          if (!isValidOrigin) return;
+        } catch {
+          return;
+        }
+        if (event.data?.type !== "github-oauth") return;
+
+        window.removeEventListener("message", handleMessage);
+
+        if (event.data.status === "connected") {
+          setHeaderIcon(<CheckIcon size="lg" />);
+          setConnectionPending({
+            provider: "GITHUB",
+            inProgress: false,
+          });
+          queryClient.invalidateQueries("oauthConnections");
+        } else {
+          setHeaderIcon(<AlertIcon size="lg" />);
+          setConnectionPending({
+            provider: "GITHUB",
+            inProgress: false,
+            error: event.data.error || "Connection failed",
+          });
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      const pollTimer = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(pollTimer);
+          window.removeEventListener("message", handleMessage);
+          setConnectionPending((current) => {
+            if (current?.inProgress) {
+              setHeaderIcon(<AlertIcon size="lg" />);
+              return {
+                provider: "GITHUB",
+                inProgress: false,
+                error: "Popup closed before completing authorization",
+              };
+            }
+            return current;
+          });
+        }
+      }, 500);
+    } catch (error) {
+      console.error(error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      setHeaderIcon(<AlertIcon size="lg" />);
+      setConnectionPending({
+        provider: "GITHUB",
+        inProgress: false,
+        error: errorMessage,
+      });
+    }
+  }, [username, queryClient]);
+
   // Navigate back to settings after successful connection
   useEffect(() => {
     if (
@@ -349,7 +449,7 @@ export function AddConnection({ username }: { username?: string }) {
       <HeaderInner
         icon={headerIcon}
         variant="compressed"
-        title={`Connect${connectionPending?.provider ? ` ${connectionPending.provider.charAt(0) + connectionPending.provider.slice(1).toLowerCase()}` : " Social"}`}
+        title={`Connect${connectionPending?.provider ? ` ${getProviderLabel(connectionPending.provider)}` : " Social"}`}
       />
       <LayoutContent className="flex flex-col gap-3 w-full h-fit">
         {!connectionPending && (
@@ -374,6 +474,12 @@ export function AddConnection({ username }: { username?: string }) {
               provider="TWITTER"
               onClick={handleTwitterConnect}
             />
+            {githubConnectionsEnabled && (
+              <ConnectionMethod
+                provider="GITHUB"
+                onClick={handleGitHubConnect}
+              />
+            )}
           </>
         )}
       </LayoutContent>
@@ -400,6 +506,19 @@ export function AddConnection({ username }: { username?: string }) {
   );
 }
 
+function getProviderLabel(provider: OAuthProvider): string {
+  switch (provider) {
+    case "TIKTOK":
+      return "TikTok";
+    case "INSTAGRAM":
+      return "Instagram";
+    case "TWITTER":
+      return "X";
+    case "GITHUB":
+      return "GitHub";
+  }
+}
+
 function ConnectionMethod({
   provider,
   onClick,
@@ -408,18 +527,21 @@ function ConnectionMethod({
   onClick: () => void;
 }) {
   const icons: Record<OAuthProvider, React.ReactNode> = {
+    GITHUB: <SiGithub size={20} />,
     TIKTOK: <SiTiktok size={20} />,
     INSTAGRAM: <SiInstagram size={20} />,
     TWITTER: <SiX size={20} />,
   };
 
   const labels: Record<OAuthProvider, string> = {
+    GITHUB: "GitHub",
     TIKTOK: "TikTok",
     INSTAGRAM: "Instagram",
     TWITTER: "X",
   };
 
   const descriptions: Record<OAuthProvider, string> = {
+    GITHUB: "Connect to link your GitHub identity",
     TIKTOK: "Connect to enable video publishing",
     INSTAGRAM: "Connect to enable content publishing",
     TWITTER: "Connect to enable tweet publishing",
@@ -456,12 +578,14 @@ function ConnectionPendingCard({
   error?: string;
 }) {
   const icons: Record<OAuthProvider, React.ReactNode> = {
+    GITHUB: <SiGithub size={20} />,
     TIKTOK: <SiTiktok size={20} />,
     INSTAGRAM: <SiInstagram size={20} />,
     TWITTER: <SiX size={20} />,
   };
 
   const labels: Record<OAuthProvider, string> = {
+    GITHUB: "GitHub",
     TIKTOK: "TikTok",
     INSTAGRAM: "Instagram",
     TWITTER: "X",
