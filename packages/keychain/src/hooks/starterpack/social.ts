@@ -18,8 +18,16 @@ export type SocialClaimStep =
   | "ready"
   | "claimed";
 
+interface UseSocialClaimConnectionResults {
+  connection: OAuthConnection | undefined;
+  isConnected: boolean;
+  isExpired: boolean;
+  connectedHandle: string | null;
+}
+
 interface UseSocialClaimResults {
   connection: OAuthConnection | undefined;
+  isConnected: boolean;
   isExpired: boolean;
   connectedHandle: string | null;
   socialClaimStep: SocialClaimStep;
@@ -31,9 +39,25 @@ interface UseSocialClaimResults {
   onSocialShare?: () => void;
 }
 
+export const useSocialClaimConnection = (
+  conditions: SocialClaimConditions | undefined,
+): UseSocialClaimConnectionResults => {
+  const { connection } = useOAuthConnection(conditions?.provider);
+  const isConnected = connection != null;
+  const isExpired = connection?.isExpired ?? false;
+  const connectedHandle =
+    connection?.profile.username || connection?.profile.providerUserId || null;
+  return {
+    connection,
+    isConnected,
+    isExpired,
+    connectedHandle,
+  };
+};
+
 export const useSocialClaim = (
   // starterpackId?: number,
-  options: SocialClaimOptions,
+  options: SocialClaimOptions | undefined,
   conditions: SocialClaimConditions,
 ): UseSocialClaimResults => {
   const { controller } = useConnection();
@@ -42,11 +66,8 @@ export const useSocialClaim = (
   const [socialClaimStep, setSocialClaimStep] =
     useState<SocialClaimStep>("connect");
 
-  const { connection } = useOAuthConnection(conditions.provider);
-  const isConnected = connection != null;
-  const isExpired = connection?.isExpired ?? false;
-  const connectedHandle =
-    connection?.profile.username || connection?.profile.providerUserId || null;
+  const { connection, isConnected, isExpired, connectedHandle } =
+    useSocialClaimConnection(conditions);
 
   const [hasFollowed, setHasFollowed] = useState(false);
   const [hasShared, setHasShared] = useState(false);
@@ -158,6 +179,7 @@ export const useSocialClaim = (
 
   return {
     connection,
+    isConnected,
     isExpired,
     connectedHandle,
     socialClaimStep,

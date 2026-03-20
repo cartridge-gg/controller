@@ -133,6 +133,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
         quote: onchainQuote,
         isQuoteLoading: isOnchainQuoteLoading,
         additionalPaymentTokens: onchainMetadata.additionalPaymentTokens,
+        isConditional: (onchainMetadata.conditions ?? []).length > 0,
       });
     }
   }, [
