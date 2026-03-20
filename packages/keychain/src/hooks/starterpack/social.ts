@@ -135,7 +135,7 @@ export const useSocialClaim = (
   const shareMessage = useMemo(() => {
     const result =
       options?.shareMessage ||
-      `I got got a free game from @${conditions.targetAccount}! Check it out!`;
+      `I got a free game from @${conditions.targetAccount}! Check it out!`;
     return result;
   }, [options?.shareMessage, conditions.targetAccount]);
 

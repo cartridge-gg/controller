@@ -74,18 +74,22 @@ export const useStarterPackConditions = (
     SocialClaimConditions | undefined
   >(() => {
     const conditions = metadata?.conditions ?? [];
-    switch (conditions[0] as OAuthProvider) {
-      case "TWITTER":
-        return {
-          provider: conditions[0] as OAuthProvider,
-          targetAccount: conditions[1],
-          targetAccountId: conditions[2] ?? null,
-        };
-      case "TIKTOK": // not implemented
-      case "INSTAGRAM": // not implemented
-      default:
-        return undefined;
+    if (conditions[0] === "social-claim") {
+      const provider = conditions[1] as OAuthProvider;
+      switch (provider) {
+        case "TWITTER":
+          return {
+            provider,
+            targetAccount: conditions[2],
+            targetAccountId: conditions[3] ?? null,
+          };
+        case "TIKTOK": // not implemented
+        case "INSTAGRAM": // not implemented
+        default:
+          return undefined;
+      }
     }
+    return undefined;
   }, [metadata]);
 
   return {
