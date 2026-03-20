@@ -159,16 +159,7 @@ export const useOnchainStarterpack = (
         // Convert snake_case to camelCase
         const metadata = convertMetadata(rawMetadata);
 
-        // TEMP: TESTING....
-        // setMetadata(metadata);
-        setMetadata(
-          metadata
-            ? ({
-                ...metadata,
-                conditions: ["TWITTER", "numsgg", "1884657985219403776"],
-              } as StarterPackMetadataOnchain)
-            : null,
-        );
+        setMetadata(metadata);
       } catch (error) {
         console.error("Failed to fetch starterpack metadata:", error);
         setError(error as Error);

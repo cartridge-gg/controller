@@ -347,8 +347,7 @@ export function OnchainCheckout() {
             conditions={socialClaimConditions}
             isLoading={isLoading}
             handlePurchase={handlePurchase}
-            // isFree={isFree}
-            isFree={true} // TEMP: TESTING...
+            isFree={isFree}
           />
         ) : isFree ? (
           <Button
