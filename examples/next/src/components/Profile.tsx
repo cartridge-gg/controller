@@ -2,6 +2,7 @@
 
 import { toast } from "@cartridge/controller";
 import { useAccount } from "@starknet-react/core";
+import { mainnet } from "@starknet-react/chains";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button } from "@cartridge/ui";
 import {
@@ -10,8 +11,9 @@ import {
 } from "./providers/StarknetProvider";
 
 export function Profile() {
-  const { account, connector } = useAccount();
+  const { account, connector, chainId } = useAccount();
   const ctrlConnector = connector as unknown as ControllerConnector;
+  const isMainnet = chainId === mainnet.id;
 
   const handleToastDemo = () => {
     // Demonstrate different toast variants
@@ -74,20 +76,34 @@ export function Profile() {
   return (
     <div className="flex flex-col gap-4">
       <h2>Open Starterpack</h2>
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap gap-1">
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openStarterPack(0, {
+      <div className="flex flex-wrap gap-1">
+        <Button
+          onClick={() =>
+            ctrlConnector.controller.openStarterPack(0, {
+              onPurchaseComplete: () => {
+                console.log("Starterpack play callback fired.");
+              },
+            })
+          }
+        >
+          Nums
+        </Button>
+        <Button
+          onClick={() =>
+            ctrlConnector.controller.username()?.then((username) => {
+              ctrlConnector.controller.openStarterPack(isMainnet ? 1 : 16, {
                 onPurchaseComplete: () => {
                   console.log("Starterpack play callback fired.");
                 },
-              })
-            }
-          >
-            Nums
-          </Button>
-        </div>
+                socialClaimOptions: {
+                  shareMessage: `Check out @numsgg!\nhttps://sepolia.nums.gg/?ref=${username}`,
+                },
+              });
+            })
+          }
+        >
+          Social Claim
+        </Button>
       </div>
 
       <h2>Toast Demo</h2>

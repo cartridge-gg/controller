@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useFeatures } from "@/hooks/features";
+import { Feature, useFeatures } from "@/hooks/features";
 
 type FeatureParams = {
-  name: string;
+  name: Feature;
   action: "enable" | "disable" | string; // Allow string initially for validation
 };
 

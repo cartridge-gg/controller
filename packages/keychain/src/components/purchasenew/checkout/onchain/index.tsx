@@ -16,6 +16,7 @@ import {
   useOnchainPurchaseContext,
   useCreditPurchaseContext,
   isOnchainStarterpack,
+  OnchainStarterpackDetails,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { useFeatures } from "@/hooks/features";
@@ -29,6 +30,7 @@ import { ErrorCard } from "./error";
 import { WalletSelector } from "./selector";
 import { QuantityControls } from "./quantity";
 import { WalletSelectionDrawer } from "./wallet-drawer";
+import { SocialClaimCheckout } from "./social-claim";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { num } from "starknet";
 
@@ -41,6 +43,8 @@ export function OnchainCheckout() {
     displayError,
     clearError,
     setDisplayError,
+    socialClaimOptions,
+    socialClaimConditions,
   } = useStarterpackContext();
   const {
     isFetchingConversion,
@@ -110,6 +114,14 @@ export function OnchainCheckout() {
     }
     return starterpackDetails.quote;
   }, [starterpackDetails]);
+
+  const imageUrl = useMemo(
+    () =>
+      socialClaimConditions
+        ? (starterpackDetails as OnchainStarterpackDetails).imageUri
+        : null,
+    [starterpackDetails, socialClaimConditions],
+  );
 
   const wallet = getWallet(selectedWallet?.type || "controller");
 
@@ -215,6 +227,7 @@ export function OnchainCheckout() {
     if (isStripeSelected) {
       if (!isStripeStarterpackSupported) return;
     } else if (!hasSufficientBalance && !isFree && !isApplePaySelected) {
+      console.warn("no means to pay");
       return;
     }
 
@@ -299,11 +312,21 @@ export function OnchainCheckout() {
   return (
     <>
       <HeaderInner
-        title={isFree ? "Claim" : "Review Purchase"}
+        title={
+          socialClaimConditions
+            ? `Claim ${starterpackDetails?.name}`
+            : isFree
+              ? "Claim"
+              : "Review Purchase"
+        }
         icon={
-          <div onClick={handleIconTripleClick}>
-            <GiftIcon variant="solid" />
-          </div>
+          imageUrl ? (
+            <img src={imageUrl} alt={starterpackDetails?.name} />
+          ) : (
+            <div onClick={handleIconTripleClick}>
+              <GiftIcon variant="solid" />
+            </div>
+          )
         }
       />
 
@@ -319,7 +342,15 @@ export function OnchainCheckout() {
           <ControllerErrorAlert error={displayError} />
         )}
 
-        {isFree ? (
+        {socialClaimConditions ? (
+          <SocialClaimCheckout
+            options={socialClaimOptions}
+            conditions={socialClaimConditions}
+            isLoading={isLoading}
+            handlePurchase={handlePurchase}
+            isFree={isFree}
+          />
+        ) : isFree ? (
           <Button
             className="w-full"
             isLoading={isLoading}

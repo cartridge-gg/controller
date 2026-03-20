@@ -118,8 +118,17 @@ export function connectToController<
       },
       openStarterPack:
         () => (id: string | number, options?: StarterpackOptions) => {
+          const searchParams: string[] = [];
+          if (options?.preimage) {
+            searchParams.push(`preimage=${options.preimage}`);
+          }
+          if (options?.socialClaimOptions) {
+            searchParams.push(
+              `shareMessage=${encodeURIComponent(options.socialClaimOptions.shareMessage)}`,
+            );
+          }
           navigate(
-            `/purchase/starterpack/${id}${options?.preimage ? `?preimage=${options.preimage}` : ""}`,
+            `/purchase/starterpack/${id}${searchParams.length > 0 ? `?${searchParams.join("&")}` : ""}`,
             { replace: true },
           );
         },

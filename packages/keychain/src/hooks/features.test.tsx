@@ -34,7 +34,7 @@ describe("Feature Flags Hooks and Provider", () => {
     const { result } = renderHook(() => useFeatures(), { wrapper });
 
     act(() => {
-      result.current.enableFeature("newFeature");
+      result.current.enableFeature("newFeature" as Feature);
     });
 
     expect(result.current.features).toEqual({ newFeature: true });
@@ -51,7 +51,7 @@ describe("Feature Flags Hooks and Provider", () => {
     const { result } = renderHook(() => useFeatures(), { wrapper });
 
     act(() => {
-      result.current.disableFeature("existingFeature");
+      result.current.disableFeature("existingFeature" as Feature);
     });
 
     expect(result.current.features).toEqual({ existingFeature: false });
@@ -100,7 +100,7 @@ describe("Feature Flags Hooks and Provider", () => {
 
     // Enable the feature using the controls from the same render context
     act(() => {
-      result.current.featuresHook.enableFeature("dynamicFeature");
+      result.current.featuresHook.enableFeature("dynamicFeature" as Feature);
     });
 
     // Wait for the update to be reflected in featureValue from the same render
@@ -110,7 +110,7 @@ describe("Feature Flags Hooks and Provider", () => {
 
     // Disable the feature
     act(() => {
-      result.current.featuresHook.disableFeature("dynamicFeature");
+      result.current.featuresHook.disableFeature("dynamicFeature" as Feature);
     });
 
     // Wait for the update

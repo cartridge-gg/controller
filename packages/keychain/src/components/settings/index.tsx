@@ -1,6 +1,6 @@
+import { useCallback } from "react";
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
-import { useFeatures } from "@/hooks/features";
 import { processControllerQuery } from "@/utils/signers";
 import {
   Button,
@@ -19,7 +19,6 @@ import {
   SignOutIcon,
 } from "@cartridge/ui";
 import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
-import { useCallback, useMemo } from "react";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";
 import {
@@ -31,16 +30,6 @@ import { SessionsSection } from "./sessions/sessions-section";
 import { SignersSection } from "./signers/signers-section";
 import { ConnectionsSection } from "./connections/connections-section";
 
-// Feature flag configuration
-interface FeatureFlags {
-  signers: boolean;
-  connections: boolean;
-  registeredAccounts: boolean;
-  currency: boolean;
-  recovery: boolean;
-  delegate: boolean;
-}
-
 const registeredAccounts: RegisteredAccount[] = [
   {
     accountName: "clicksave.stark",
@@ -51,20 +40,6 @@ const registeredAccounts: RegisteredAccount[] = [
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
   const { navigate } = useNavigation();
-  const { isFeatureEnabled } = useFeatures();
-
-  // Feature flags - connections can be toggled via /feature/connections/enable or /feature/connections/disable
-  const featureFlags = useMemo<FeatureFlags>(
-    () => ({
-      signers: true,
-      connections: isFeatureEnabled("connections"),
-      registeredAccounts: false,
-      currency: false,
-      recovery: false,
-      delegate: true,
-    }),
-    [isFeatureEnabled],
-  );
 
   const controllerQuery = useControllerQuery(
     {
@@ -91,31 +66,27 @@ export function Settings() {
     <Sheet>
       <HeaderInner variant="compressed" title="Settings" Icon={GearIcon} />
       <LayoutContent>
-        {featureFlags.signers && (
-          <SignersSection controllerQuery={controllerQuery} />
-        )}
+        <SignersSection controllerQuery={controllerQuery} />
 
-        {featureFlags.connections && <ConnectionsSection />}
+        <ConnectionsSection />
 
-        {featureFlags.recovery && (
-          <section className="space-y-4">
-            <SectionHeader
-              title="Recovery Accounts"
-              description="Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="py-2.5 px-3 text-foreground-300 gap-1"
-              onClick={() => navigate("/settings/recovery")}
-            >
-              <PlusIcon size="sm" variant="line" />
-              <span className="normal-case font-normal font-sans text-sm">
-                Add Recovery Account
-              </span>
-            </Button>
-          </section>
-        )}
+        <section className="space-y-4">
+          <SectionHeader
+            title="Recovery Accounts"
+            description="Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
+          />
+          <Button
+            type="button"
+            variant="outline"
+            className="py-2.5 px-3 text-foreground-300 gap-1"
+            onClick={() => navigate("/settings/recovery")}
+          >
+            <PlusIcon size="sm" variant="line" />
+            <span className="normal-case font-normal font-sans text-sm">
+              Add Recovery Account
+            </span>
+          </Button>
+        </section>
 
         {/* {featureFlags.delegate && (
           <section className="space-y-4">
@@ -137,43 +108,39 @@ export function Settings() {
           </section>
         )} */}
 
-        {featureFlags.registeredAccounts && (
-          <section className="space-y-4">
-            <SectionHeader
-              title="Registered Account"
-              description="Information associated with registered accounts can be made available to games and applications."
-            />
-            <div className="space-y-3">
-              {registeredAccounts.map((i, index) => (
-                <RegisteredAccountCard
-                  key={index}
-                  accountName={i.accountName}
-                  accountAddress={i.accountAddress}
-                />
-              ))}
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="py-2.5 px-3 text-foreground-300 gap-1"
-            >
-              <PlusIcon size="sm" variant="line" />
-              <span className="normal-case font-normal font-sans text-sm">
-                Add Account
-              </span>
-            </Button>
-          </section>
-        )}
+        <section className="space-y-4">
+          <SectionHeader
+            title="Registered Account"
+            description="Information associated with registered accounts can be made available to games and applications."
+          />
+          <div className="space-y-3">
+            {registeredAccounts.map((i, index) => (
+              <RegisteredAccountCard
+                key={index}
+                accountName={i.accountName}
+                accountAddress={i.accountAddress}
+              />
+            ))}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="py-2.5 px-3 text-foreground-300 gap-1"
+          >
+            <PlusIcon size="sm" variant="line" />
+            <span className="normal-case font-normal font-sans text-sm">
+              Add Account
+            </span>
+          </Button>
+        </section>
 
-        {featureFlags.currency && (
-          <section className="space-y-4">
-            <SectionHeader
-              title="Currency"
-              description="Set your default currency for denomination"
-            />
-            <CurrencySelect />
-          </section>
-        )}
+        <section className="space-y-4">
+          <SectionHeader
+            title="Currency"
+            description="Set your default currency for denomination"
+          />
+          <CurrencySelect />
+        </section>
 
         <SessionsSection />
       </LayoutContent>

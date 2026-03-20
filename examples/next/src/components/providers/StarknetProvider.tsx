@@ -217,7 +217,6 @@ export const controllerConnector = new ControllerConnector({
   slot: "nums-bal",
   namespace: "NUMS",
   preset: "nums",
-  // tokens: { erc20: ["0x54c9e4dc8d42950774b6a8f0e5186bd88719463807156e444417d981efb60ef"] },
 
   // Pistols (achievements, no quests)
   // slot: "arcade-pistols",

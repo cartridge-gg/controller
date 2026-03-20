@@ -43,13 +43,28 @@ export function PurchaseStarterpack() {
     starterpackDetails: details,
     displayError,
     setStarterpackId,
+    setSocialClaimOptions,
   } = useStarterpackContext();
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
+      // store starterpack info into provider before navigating to checkout
       setStarterpackId(starterpackId);
+
+      const shareMessage = searchParams.get("shareMessage");
+      if (shareMessage) {
+        setSocialClaimOptions({
+          shareMessage,
+        });
+      }
     }
-  }, [starterpackId, isStarterpackLoading, setStarterpackId]);
+  }, [
+    starterpackId,
+    isStarterpackLoading,
+    setStarterpackId,
+    setSocialClaimOptions,
+    searchParams,
+  ]);
 
   // Auto-redirect to claim page if preimage is available
   useEffect(() => {
@@ -66,7 +81,7 @@ export function PurchaseStarterpack() {
         .join(";");
 
       navigate(`/purchase/claim/${keys}/${preimage}/preimage`, {
-        replace: true,
+        reset: true,
       });
     }
 
@@ -76,7 +91,7 @@ export function PurchaseStarterpack() {
       isOnchainStarterpack(details) &&
       !displayError
     ) {
-      navigate(`/purchase/checkout/onchain`, { replace: true });
+      navigate(`/purchase/checkout/onchain`, { reset: true });
     }
   }, [isStarterpackLoading, details, preimage, displayError, navigate]);
 

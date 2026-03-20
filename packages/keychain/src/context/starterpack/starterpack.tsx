@@ -16,6 +16,11 @@ import {
   Item,
   ItemType,
 } from "./types";
+import {
+  useStarterPackConditions,
+  SocialClaimConditions,
+} from "@/hooks/starterpack/onchain";
+import { SocialClaimOptions } from "@cartridge/controller";
 
 export interface StarterpackContextType {
   // Starterpack identification
@@ -38,6 +43,11 @@ export interface StarterpackContextType {
   displayError: Error | undefined;
   setDisplayError: (error: Error | undefined) => void;
   clearError: () => void;
+
+  // Social claim
+  setSocialClaimOptions: (options: SocialClaimOptions) => void;
+  socialClaimOptions: SocialClaimOptions | undefined;
+  socialClaimConditions: SocialClaimConditions | undefined;
 }
 
 export const StarterpackContext = createContext<
@@ -123,6 +133,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
         quote: onchainQuote,
         isQuoteLoading: isOnchainQuoteLoading,
         additionalPaymentTokens: onchainMetadata.additionalPaymentTokens,
+        isConditional: (onchainMetadata.conditions ?? []).length > 0,
       });
     }
   }, [
@@ -137,6 +148,12 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     onchainQuote,
     isOnchainQuoteLoading,
   ]);
+
+  // conditional starter packs
+  const [socialClaimOptions, setSocialClaimOptions] = useState<
+    SocialClaimOptions | undefined
+  >();
+  const { socialClaimConditions } = useStarterPackConditions(onchainMetadata);
 
   // Sync errors from hooks to displayError
   useEffect(() => {
@@ -171,6 +188,9 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     displayError,
     setDisplayError,
     clearError,
+    setSocialClaimOptions,
+    socialClaimOptions,
+    socialClaimConditions,
   };
 
   return (

@@ -110,3 +110,13 @@ export function getTwitterAuthUrl(username: string): string {
     import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
   return `${baseUrl}/twitter/init?username=${encodeURIComponent(username)}`;
 }
+
+export function getTwitterFollowUrl(
+  username: string,
+  targetAccount: string,
+  targetAccountId: string,
+): string {
+  const baseUrl =
+    import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
+  return `${baseUrl}/twitter/follow?username=${encodeURIComponent(username)}&target_account=${encodeURIComponent(targetAccount)}&target_account_id=${encodeURIComponent(targetAccountId)}`;
+}

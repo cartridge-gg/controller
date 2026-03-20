@@ -20,7 +20,7 @@ import { UIProvider } from "./ui";
 import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
 import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
-import { ToastProvider } from "@/context";
+import { ToastProvider, StarterpackProviders } from "@/context";
 import { QuestProvider } from "@/context/quest";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
@@ -95,7 +95,9 @@ export function Provider({ children }: PropsWithChildren) {
                                     >
                                       <ProfileDataProvider>
                                         <QuestProvider>
-                                          {children}
+                                          <StarterpackProviders>
+                                            {children}
+                                          </StarterpackProviders>
                                         </QuestProvider>
                                       </ProfileDataProvider>
                                     </MarketplaceClientProvider>
