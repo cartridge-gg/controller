@@ -119,10 +119,13 @@ const HEADLESS_AUTH_OPTIONS: AuthOption[] = [
   "discord",
   "walletconnect",
   "password",
+  "sms",
   "metamask",
   "rabby",
   "phantom-evm",
-].filter((option) => IMPLEMENTED_AUTH_OPTIONS.includes(option));
+].filter((option) =>
+  IMPLEMENTED_AUTH_OPTIONS.includes(option as AuthOption),
+) as AuthOption[];
 
 function normalizeSignerOptions(
   signers: LookupSigner[] | undefined,

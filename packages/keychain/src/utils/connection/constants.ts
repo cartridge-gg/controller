@@ -13,4 +13,5 @@ export const AUTH_METHODS_LABELS: Record<AuthOption, string> = {
   google: "Google",
   base: "Base Wallet",
   password: "Password",
+  sms: "SMS",
 };
