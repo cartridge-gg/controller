@@ -535,9 +535,7 @@ function ConnectionPendingCard({
         )}
         {error && <span className="text-destructive-100 text-sm">{error}</span>}
         {!inProgress && !error && (
-          <span className="text-foreground-400 text-sm">
-            Redirecting to settings...
-          </span>
+          <span className="text-foreground-400 text-sm">Redirecting...</span>
         )}
       </div>
       {inProgress && (

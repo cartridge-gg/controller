@@ -226,6 +226,7 @@ export function OnchainCheckout() {
     if (isStripeSelected) {
       if (!isStripeStarterpackSupported) return;
     } else if (!hasSufficientBalance && !isFree && !isApplePaySelected) {
+      console.warn("no means to pay");
       return;
     }
 
@@ -342,7 +343,7 @@ export function OnchainCheckout() {
 
         {socialClaimConditions ? (
           <SocialClaimCheckout
-            options={socialClaimOptions!}
+            options={socialClaimOptions}
             conditions={socialClaimConditions}
             isLoading={isLoading}
             handlePurchase={handlePurchase}

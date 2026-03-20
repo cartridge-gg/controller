@@ -10,7 +10,7 @@ import { useLocation } from "react-router-dom";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
-import { uint256, Call, num, cairo } from "starknet";
+import { uint256, Call, num, cairo, shortString } from "starknet";
 import { isOnchainStarterpack } from "./types";
 import { getCurrentReferral } from "@/utils/referral";
 import {
@@ -33,6 +33,7 @@ import {
   type CoinbaseTransactionResult,
   type CoinbaseQuoteResult,
 } from "@/hooks/starterpack";
+import { useSocialClaimConnection } from "@/hooks/starterpack/social";
 import { Explorer } from "@/hooks/starterpack/layerswap";
 
 export type { TokenOption } from "@/hooks/starterpack";
@@ -128,7 +129,9 @@ export const OnchainPurchaseProvider = ({
     starterpackDetails,
     setTransactionHash,
     setDisplayError,
+    socialClaimConditions,
   } = useStarterpackContext();
+  const { connectedHandle } = useSocialClaimConnection(socialClaimConditions);
 
   // Purchase items and USD amount
   const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
@@ -438,6 +441,11 @@ export const OnchainPurchaseProvider = ({
           ...(referralData?.refGroup
             ? [0x0, num.toHex(cairo.felt(referralData.refGroup))]
             : [0x1]),
+          ...(!isMainnet // voucher_key currently only on SEPOLIA
+            ? starterpackDetails.isConditional && connectedHandle
+              ? [0x0, shortString.encodeShortString(connectedHandle)]
+              : [0x1]
+            : []),
         ],
       };
 
@@ -498,6 +506,8 @@ export const OnchainPurchaseProvider = ({
     swapQuote,
     selectedWallet,
     quantity,
+    connectedHandle,
+    isMainnet,
     externalSendTransaction,
     setTransactionHash,
     setDisplayError,

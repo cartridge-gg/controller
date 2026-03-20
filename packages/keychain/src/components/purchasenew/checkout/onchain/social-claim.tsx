@@ -13,7 +13,7 @@ import { SocialClaimOptions } from "@cartridge/controller";
 import { SocialClaimConditions } from "@/hooks/starterpack/onchain";
 
 interface SocialClaimCheckoutProps {
-  options: SocialClaimOptions;
+  options: SocialClaimOptions | undefined;
   conditions: SocialClaimConditions;
   isFree: boolean;
   isLoading: boolean;
@@ -28,7 +28,6 @@ export function SocialClaimCheckout({
   handlePurchase,
 }: SocialClaimCheckoutProps) {
   const {
-    // connection,
     isExpired,
     connectedHandle,
     socialClaimStep,
