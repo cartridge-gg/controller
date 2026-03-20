@@ -10,12 +10,13 @@ import {
   IconProps,
   LockIcon,
   MetaMaskColorIcon,
+  MobileIcon,
   PasskeyIcon,
   PhantomColorIcon,
   RabbyColorIcon,
   WalletConnectColorIcon,
 } from "@cartridge/ui";
-import { ComponentType } from "react";
+import { ComponentType, createElement } from "react";
 
 /**
  * Gets a user-friendly display name for an authentication method
@@ -60,6 +61,12 @@ export function getAuthMethodIcon(
       return BraavosColorIcon;
     case "password":
       return LockIcon;
+    case "sms":
+      return ((props: IconProps) =>
+        createElement(MobileIcon, {
+          ...props,
+          variant: "solid",
+        })) as unknown as ComponentType<IconProps>;
     case "base":
     default:
       return undefined;

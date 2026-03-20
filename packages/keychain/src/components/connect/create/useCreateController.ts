@@ -20,7 +20,7 @@ import {
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { constants, shortString } from "starknet";
 import {
@@ -30,6 +30,7 @@ import {
 } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { usePasswordAuthentication } from "./password";
+import { useSmsAuthentication } from "./sms";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
@@ -249,6 +250,7 @@ export function useCreateController({
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
+  const smsAuth = useSmsAuthentication();
   const { supportedWalletsForAuth } = useWallets();
 
   useRouteCallbacks(params, CANCEL_RESPONSE);
@@ -464,6 +466,75 @@ export function useCreateController({
           };
           break;
         }
+        case "sms": {
+          // SMS requires multi-step UI. We stop loading to show the form,
+          // then drive the rest of the flow from the overlay callbacks.
+          setIsLoading(false);
+
+          const { SmsOtpForm } = await import("./sms/SmsOtpForm");
+
+          const smsResult = await new Promise<SignupResponse | undefined>(
+            (resolve, reject) => {
+              let phoneNumber = "";
+              let otpId = "";
+
+              const showForm = (phone: string, error?: string) => {
+                setOverlay(
+                  React.createElement(SmsOtpForm, {
+                    phoneNumber: phone,
+                    onSubmitPhone: async (p: string) => {
+                      phoneNumber = p;
+                      try {
+                        const initResponse = await smsAuth.initSms(p);
+                        otpId = initResponse.otpId;
+                        showForm(p);
+                      } catch (e) {
+                        showForm("", (e as Error).message);
+                      }
+                    },
+                    onSubmitOtp: async (otpCode: string) => {
+                      try {
+                        const result = await smsAuth.completeSms(
+                          username,
+                          phoneNumber,
+                          otpId,
+                          otpCode,
+                        );
+                        setOverlay(null);
+                        resolve(result);
+                      } catch (e) {
+                        reject(e);
+                      }
+                    },
+                    onBack: () => {
+                      setOverlay(null);
+                      resolve(undefined);
+                    },
+                    isLoading: false,
+                    error,
+                  }),
+                );
+              };
+
+              showForm("");
+            },
+          );
+
+          if (!smsResult) {
+            return;
+          }
+
+          setIsLoading(true);
+          signupResponse = smsResult;
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: "sms",
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        }
         default:
           break;
       }
@@ -483,6 +554,8 @@ export function useCreateController({
       signupWithWebauthn,
       signupWithWalletConnect,
       passwordAuth,
+      smsAuth,
+      setOverlay,
       finishSignup,
       params,
       handleCompletion,
@@ -743,6 +816,65 @@ export function useCreateController({
           );
           break;
         }
+        case "sms": {
+          setIsLoading(false);
+
+          const { SmsOtpForm } = await import("./sms/SmsOtpForm");
+
+          const smsLoginResult = await new Promise<LoginResponse | undefined>(
+            (resolve, reject) => {
+              let phoneNumber = "";
+              let otpId = "";
+
+              const showForm = (phone: string, error?: string) => {
+                setOverlay(
+                  React.createElement(SmsOtpForm, {
+                    phoneNumber: phone,
+                    onSubmitPhone: async (p: string) => {
+                      phoneNumber = p;
+                      try {
+                        const initResponse = await smsAuth.initSms(p);
+                        otpId = initResponse.otpId;
+                        showForm(p);
+                      } catch (e) {
+                        showForm("", (e as Error).message);
+                      }
+                    },
+                    onSubmitOtp: async (otpCode: string) => {
+                      try {
+                        const result = await smsAuth.completeSms(
+                          username,
+                          phoneNumber,
+                          otpId,
+                          otpCode,
+                        );
+                        setOverlay(null);
+                        resolve({ signer: result.signer });
+                      } catch (e) {
+                        reject(e);
+                      }
+                    },
+                    onBack: () => {
+                      setOverlay(null);
+                      resolve(undefined);
+                    },
+                    isLoading: false,
+                    error,
+                  }),
+                );
+              };
+
+              showForm("");
+            },
+          );
+
+          if (!smsLoginResult) {
+            return;
+          }
+          setIsLoading(true);
+          loginResponse = smsLoginResult;
+          break;
+        }
         case "phantom":
         case "argent":
         default:
@@ -777,6 +909,8 @@ export function useCreateController({
       shouldAutoCreateSession,
       finishLogin,
       passwordAuth,
+      smsAuth,
+      setOverlay,
       setWaitingForConfirmation,
     ],
   );
