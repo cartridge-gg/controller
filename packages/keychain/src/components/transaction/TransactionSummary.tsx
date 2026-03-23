@@ -4,7 +4,6 @@ import {
   AccordionItem,
   AccordionTrigger,
   CheckboxIcon,
-  GearIcon,
   Thumbnail,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
@@ -18,14 +17,12 @@ interface TransactionSummaryProps {
   calls: Call[];
   isExpanded?: boolean;
   className?: string;
-  count?: number;
 }
 
 export function TransactionSummary({
   calls,
   isExpanded = false,
   className,
-  count,
 }: TransactionSummaryProps) {
   const [isOpened, setisOpened] = useState(isExpanded);
 
@@ -56,14 +53,14 @@ export function TransactionSummary({
           <Thumbnail
             variant="light"
             size="sm"
-            icon={count || <GearIcon size="sm" />}
+            icon={calls.length}
             centered={true}
             className={cn(
               isExpanded ? "text-foreground-100" : "text-foreground-300",
               isOpened ? "bg-background-300" : "bg-background-200",
             )}
           />
-          <p>Advanced</p>
+          <p>Operations</p>
         </AccordionTrigger>
 
         <AccordionContent className="flex flex-col gap-3 px-3 pb-3 border-t border-background-100 pt-2">

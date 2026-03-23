@@ -70,7 +70,7 @@ export function ConfirmSwap({
           <TransactionSummary calls={transactions} isExpanded />
         ) : (
           <>
-            <TokenSummary title="Actual values may vary" className="flex-none">
+            <TokenSummary title="Simulation Results" className="flex-none">
               {sellingSwapData.map((token) => (
                 <TokenCard
                   key={token.address}
@@ -96,10 +96,7 @@ export function ConfirmSwap({
                 />
               ))}
             </TokenSummary>
-            <TransactionSummary
-              calls={transactions}
-              count={transactions.length}
-            />
+            <TransactionSummary calls={transactions} />
           </>
         )}
       </LayoutContent>
