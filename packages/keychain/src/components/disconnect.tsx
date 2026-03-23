@@ -13,6 +13,11 @@ export const Disconnect = () => {
     (async () => {
       if (!controller || isDone) return;
       await controller.disconnect();
+      try {
+        localStorage.clear();
+      } catch {
+        // Ignore if localStorage is unavailable
+      }
       setIsDone(true);
       if (urlSearchParams) {
         const redirectUrl = urlSearchParams.get("redirect_url");

@@ -102,14 +102,28 @@ export function connectToController<
       disconnect: () => async () => {
         // First clear the React state
         setController(undefined);
-        // Then cleanup the controller
+        // Then cleanup the controller (WASM clears its storage backend)
         await window.controller?.disconnect();
+        // Also clear localStorage directly from JS to handle storage partition
+        // mismatches caused by requestStorageAccess() switching between
+        // partitioned and unpartitioned storage contexts.
+        try {
+          localStorage.clear();
+        } catch {
+          // Ignore if localStorage is unavailable
+        }
       },
       logout: () => async () => {
         // First clear the React state
         setController(undefined);
-        // Then cleanup the controller
+        // Then cleanup the controller (WASM clears its storage backend)
         await window.controller?.disconnect();
+        // Also clear localStorage directly from JS (see disconnect above)
+        try {
+          localStorage.clear();
+        } catch {
+          // Ignore if localStorage is unavailable
+        }
       },
       username: () => () => window.controller?.username(),
       delegateAccount: () => () => window.controller?.delegateAccount(),

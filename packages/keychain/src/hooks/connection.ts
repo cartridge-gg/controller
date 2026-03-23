@@ -402,6 +402,11 @@ export function useConnectionValue() {
 
     (async () => {
       await controller.disconnect();
+      try {
+        localStorage.clear();
+      } catch {
+        // Ignore if localStorage is unavailable
+      }
       setController(undefined);
     })();
   }, [controller, urlRpcUrl, setController, setRpcUrl]);
@@ -854,6 +859,13 @@ export function useConnectionValue() {
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
+    // Clear localStorage directly to handle storage partition mismatches
+    // caused by requestStorageAccess() switching contexts
+    try {
+      localStorage.clear();
+    } catch {
+      // Ignore if localStorage is unavailable
+    }
     window.location.reload();
     if (parent) {
       parent.close();
