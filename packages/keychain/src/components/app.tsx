@@ -66,8 +66,6 @@ import { StandaloneSessionCreation } from "./connect/StandaloneSessionCreation";
 import { StandaloneConnect } from "./connect/StandaloneConnect";
 import { hasApprovalPolicies } from "@/hooks/session";
 import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
-import { Quests } from "./quests";
-import { QuestClaim } from "./quests/claim";
 import { CoinbasePopup } from "./coinbase-popup";
 import { PopupAuth } from "./PopupAuth";
 
@@ -399,8 +397,6 @@ export function App() {
           />
           <Route path="activity" element={<Activity />} />
           <Route path="achievements" element={<Achievements />} />
-          <Route path="quests" element={<Quests />} />
-          <Route path="quests/:id/claim" element={<QuestClaim />} />
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="trophies" element={<RedirectAchievements />} />
 
@@ -477,11 +473,6 @@ export function App() {
           <Route
             path="slot/:project/achievements/:address"
             element={<Achievements />}
-          />
-          <Route path="slot/:project/quests" element={<Quests />} />
-          <Route
-            path="slot/:project/quests/:id/claim"
-            element={<QuestClaim />}
           />
           <Route path="slot/:project/leaderboard" element={<Leaderboard />} />
           <Route

@@ -29,6 +29,8 @@ export interface TransactionPendingBaseProps {
   buttonText: string;
   /** Optional quantity text to show in Receiving component */
   quantityText?: string;
+  /** Callback function to handle completion */
+  onCompleted?: () => void;
 }
 
 /**
@@ -43,6 +45,7 @@ export function TransactionPendingBase({
   completedTitle,
   buttonText,
   quantityText,
+  onCompleted,
 }: TransactionPendingBaseProps) {
   const { isMainnet, controller } = useConnection();
   const handlePlay = useStarterpackPlayHandler();
@@ -68,6 +71,14 @@ export function TransactionPendingBase({
         });
     }
   }, [controller, transactionHash]);
+
+  useEffect(() => {
+    if (!isPending && onCompleted) {
+      setTimeout(() => {
+        onCompleted();
+      }, 1000);
+    }
+  }, [isPending, onCompleted]);
 
   const receivingTitle = quantityText
     ? `Receiving ${quantityText}`
