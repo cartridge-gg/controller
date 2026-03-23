@@ -43,6 +43,7 @@ import {
   canAutoCreateSession,
   createVerifiedSession,
 } from "@/utils/connection/session-creation";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -790,6 +791,13 @@ export function useCreateController({
       (async () => {
         setIsLoading(true);
         try {
+          // Request storage access before controller creation from redirect
+          try {
+            await requestStorageAccess();
+          } catch {
+            // Non-fatal
+          }
+
           const turnkeyWallet = new TurnkeyWallet(
             "unknown",
             constants.StarknetChainId.SN_SEPOLIA,
@@ -902,6 +910,15 @@ export function useCreateController({
       setIsLoading(true);
 
       setAuthMethod(authenticationMethod);
+
+      // Request storage access before any controller creation so that
+      // localStorage writes and future clear() calls operate on the
+      // same storage partition. Must be called during a user gesture.
+      try {
+        await requestStorageAccess();
+      } catch {
+        // Non-fatal: storage may still work in partitioned mode
+      }
 
       try {
         if (exists) {

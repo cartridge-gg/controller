@@ -16,7 +16,6 @@ import {
 } from "@/hooks/route";
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
-import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { openPopupAuth } from "@/utils/connection/popup";
 import Controller from "@/utils/controller";
 import {
@@ -145,16 +144,6 @@ export function ConnectRoute() {
       return;
     }
 
-    // In iframe context, request storage access on user gesture so
-    // third-party storage can persist across app restarts.
-    if (!isStandalone) {
-      try {
-        await requestStorageAccess();
-      } catch (error) {
-        console.error("[ConnectRoute] Storage access request failed:", error);
-      }
-    }
-
     params.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -207,14 +196,6 @@ export function ConnectRoute() {
   const handleSkip = useCallback(async () => {
     if (!params || !controller) {
       return;
-    }
-
-    if (!isStandalone) {
-      try {
-        await requestStorageAccess();
-      } catch (error) {
-        console.error("[ConnectRoute] Storage access request failed:", error);
-      }
     }
 
     params.resolve?.({

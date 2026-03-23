@@ -3,6 +3,7 @@ import { doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
 import { openPopupAuth } from "@/utils/connection/popup";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { Owner } from "@cartridge/controller-wasm";
 import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
@@ -27,6 +28,14 @@ export function useWebauthnAuthentication() {
   const signup = useCallback(
     async (username: string) => {
       if (!chainId) throw new Error("No chainId found");
+
+      // Request storage access before controller creation so writes
+      // and future clear() calls use the same storage partition.
+      try {
+        await requestStorageAccess();
+      } catch {
+        // Non-fatal
+      }
 
       if (webauthnPopup.create) {
         const popupState = await openPopupAuth({
@@ -103,6 +112,14 @@ export function useWebauthnAuthentication() {
     ) => {
       if (!controllerQuery) throw new Error("No controller found");
       if (!chainId) throw new Error("No chainId found");
+
+      // Request storage access before controller creation so writes
+      // and future clear() calls use the same storage partition.
+      try {
+        await requestStorageAccess();
+      } catch {
+        // Non-fatal
+      }
 
       if (webauthnPopup.get) {
         const popupState = await openPopupAuth({
