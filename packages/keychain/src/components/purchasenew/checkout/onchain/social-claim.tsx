@@ -13,6 +13,7 @@ import { SocialClaimOptions } from "@cartridge/controller";
 import { SocialClaimConditions } from "@/hooks/starterpack/onchain";
 
 interface SocialClaimCheckoutProps {
+  starterpackId: number;
   options: SocialClaimOptions | undefined;
   conditions: SocialClaimConditions;
   isFree: boolean;
@@ -21,6 +22,7 @@ interface SocialClaimCheckoutProps {
 }
 
 export function SocialClaimCheckout({
+  starterpackId,
   options,
   conditions,
   isFree,
@@ -36,7 +38,7 @@ export function SocialClaimCheckout({
     onSocialConnect,
     onSocialFollow,
     onSocialShare,
-  } = useSocialClaim(options, conditions);
+  } = useSocialClaim(starterpackId, options, conditions);
 
   const providerName =
     conditions.provider === "TWITTER" ? "X" : conditions.provider;
@@ -89,7 +91,7 @@ export function SocialClaimCheckout({
         disabled={!isFree}
       >
         {!isFree
-          ? "Not Implmenented"
+          ? "Paid Not Implemented"
           : socialClaimStep === "connect"
             ? `Connect ${providerName}`
             : socialClaimStep === "follow"

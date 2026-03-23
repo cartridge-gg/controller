@@ -56,7 +56,7 @@ export const useSocialClaimConnection = (
 };
 
 export const useSocialClaim = (
-  // starterpackId?: number,
+  starterpackId: number,
   options: SocialClaimOptions | undefined,
   conditions: SocialClaimConditions,
 ): UseSocialClaimResults => {
@@ -103,7 +103,12 @@ export const useSocialClaim = (
       targetAccount: string;
       targetAccountId: string;
     }) => {
-      const url = getTwitterFollowUrl(username, targetAccount, targetAccountId);
+      const url = getTwitterFollowUrl(
+        username,
+        targetAccount,
+        targetAccountId,
+        starterpackId,
+      );
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(await response.text());

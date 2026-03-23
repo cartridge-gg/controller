@@ -343,6 +343,7 @@ export function OnchainCheckout() {
 
         {socialClaimConditions ? (
           <SocialClaimCheckout
+            starterpackId={(starterpackDetails as OnchainStarterpackDetails).id}
             options={socialClaimOptions}
             conditions={socialClaimConditions}
             isLoading={isLoading}

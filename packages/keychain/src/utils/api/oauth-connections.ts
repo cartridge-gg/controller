@@ -1,4 +1,5 @@
 import { gql } from "graphql-request";
+import { num } from "starknet";
 
 // Local types until backend is deployed and codegen updated
 // These match the backend schema definitions
@@ -115,8 +116,9 @@ export function getTwitterFollowUrl(
   username: string,
   targetAccount: string,
   targetAccountId: string,
+  starterpackId?: number,
 ): string {
   const baseUrl =
     import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
-  return `${baseUrl}/twitter/follow?username=${encodeURIComponent(username)}&target_account=${encodeURIComponent(targetAccount)}&target_account_id=${encodeURIComponent(targetAccountId)}`;
+  return `${baseUrl}/twitter/follow?username=${encodeURIComponent(username)}&target_account=${encodeURIComponent(targetAccount)}&target_account_id=${encodeURIComponent(targetAccountId)}${starterpackId !== undefined ? `&starterpack_id=${num.toHex(starterpackId)}` : ""}`;
 }
