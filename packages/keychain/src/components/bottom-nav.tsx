@@ -11,7 +11,6 @@ import {
 import { useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useData } from "@/hooks/data";
-import { useQuestContext } from "@/context/quest";
 
 export function LayoutBottomNav() {
   const { namespace, project } = useConnection();
@@ -22,7 +21,8 @@ export function LayoutBottomNav() {
   const {
     trophies: { supportsAchievements },
   } = useData();
-  const { supportsQuests } = useQuestContext();
+  // const { supportsQuests } = useQuestContext();
+  const supportsQuests = false;
 
   const active = useMemo<
     | "inventory"
