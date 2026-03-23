@@ -391,7 +391,6 @@ export default class ControllerProvider extends BaseProvider {
 
   async disconnect() {
     this.account = undefined;
-    this.emitAccountsChanged([]);
 
     try {
       if (typeof localStorage !== "undefined") {
@@ -413,8 +412,13 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
+    // Disconnect the keychain (clears iframe localStorage) before emitting
+    // state changes, because emitAccountsChanged can trigger framework
+    // re-renders that navigate or reload the page.
     await this.keychain.disconnect();
-    return this.close();
+    this.close();
+
+    this.emitAccountsChanged([]);
   }
 
   async openProfile(tab: ProfileContextTypeVariant = "inventory") {
