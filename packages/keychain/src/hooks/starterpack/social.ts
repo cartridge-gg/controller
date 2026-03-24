@@ -10,6 +10,8 @@ import { SocialClaimConditions } from "@/hooks/starterpack/bundle";
 import { useOAuthConnection } from "@/components/settings/connections/use-connections";
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "../connection";
+import { shortString } from "starknet";
+import { useOnchainPurchaseContext } from "@/context";
 
 export type SocialClaimStep =
   | "connect"
@@ -56,12 +58,11 @@ export const useSocialClaimConnection = (
 };
 
 export const useSocialClaim = (
-  starterpackId: number,
+  bundleId: number,
   options: SocialClaimOptions | undefined,
   conditions: SocialClaimConditions,
 ): UseSocialClaimResults => {
   const { controller } = useConnection();
-  const username = controller?.username();
 
   const [socialClaimStep, setSocialClaimStep] =
     useState<SocialClaimStep>("connect");
@@ -71,6 +72,8 @@ export const useSocialClaim = (
 
   const [hasFollowed, setHasFollowed] = useState(false);
   const [hasShared, setHasShared] = useState(false);
+
+  const { setIssueSignature } = useOnchainPurchaseContext();
 
   useEffect(() => {
     if (!isConnected || isExpired) {
@@ -98,43 +101,58 @@ export const useSocialClaim = (
       username,
       targetAccount,
       targetAccountId,
+      bundleId,
+      chainId,
     }: {
       username: string;
       targetAccount: string;
-      targetAccountId: string;
+      targetAccountId?: string;
+      bundleId?: number;
+      chainId?: string;
     }) => {
-      const url = getTwitterFollowUrl(
+      const { url, body } = getTwitterFollowUrl(
         username,
         targetAccount,
         targetAccountId,
-        starterpackId,
+        bundleId,
+        chainId,
       );
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body,
+      });
       if (!response.ok) {
         throw new Error(await response.text());
       }
-      return response;
+      return (await response.json()) as { signature: string[] };
     },
     {
-      onSuccess: () => {
+      onSuccess: ({ signature }) => {
+        setIssueSignature(signature);
         setHasFollowed(true);
       },
     },
   );
 
   const onFollow = useCallback(() => {
-    if (username && conditions.targetAccount) {
+    if (conditions.targetAccount && controller) {
       followMutation.mutate({
-        username,
+        username: controller.username(),
         targetAccount: conditions.targetAccount,
-        targetAccountId: conditions.targetAccountId ?? "",
+        targetAccountId: conditions.targetAccountId ?? undefined,
+        bundleId,
+        chainId: shortString.decodeShortString(controller.chainId()),
       });
     }
   }, [
     followMutation,
-    username,
+    controller,
     conditions.targetAccount,
     conditions.targetAccountId,
+    bundleId,
   ]);
 
   const shareMessage = useMemo(() => {

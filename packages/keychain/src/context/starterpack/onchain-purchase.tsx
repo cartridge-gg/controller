@@ -10,7 +10,7 @@ import { useLocation } from "react-router-dom";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
-import { uint256, Call, num, cairo, shortString } from "starknet";
+import { uint256, Call, num, cairo, hash, shortString } from "starknet";
 import { isOnchainStarterpack } from "./types";
 import { getCurrentReferral } from "@/utils/referral";
 import {
@@ -46,6 +46,9 @@ export interface OnchainPurchaseContextType {
   quantity: number;
   incrementQuantity: () => void;
   decrementQuantity: () => void;
+
+  // Conditional bundles / social claim
+  setIssueSignature: (signature: string[] | undefined) => void;
 
   // Wallet state
   selectedWallet: ExternalWallet | undefined;
@@ -125,18 +128,24 @@ export const OnchainPurchaseProvider = ({
     useConnection();
   const location = useLocation();
   const {
+    bundleId,
     starterpackId,
     starterpackDetails,
     setTransactionHash,
     setDisplayError,
-    socialClaimConditions,
     registryAddress,
+    socialClaimConditions,
   } = useStarterpackContext();
   const { connectedHandle } = useSocialClaimConnection(socialClaimConditions);
 
   // Purchase items and USD amount
   const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
   const [usdAmount, setUsdAmount] = useState(0);
+
+  // Conditional bundles / social claim
+  const [issueSignature, setIssueSignature] = useState<string[] | undefined>(
+    undefined,
+  );
 
   // Compose hooks
   const { quantity, incrementQuantity, decrementQuantity, resetQuantity } =
@@ -248,7 +257,8 @@ export const OnchainPurchaseProvider = ({
     resetTokenSelection();
     resetQuantity();
     setPurchaseItems([]);
-  }, [starterpackId, resetTokenSelection, resetQuantity]);
+    setIssueSignature(undefined);
+  }, [bundleId, starterpackId, resetTokenSelection, resetQuantity]);
 
   // Update purchase items and USD amount when starterpack details change
   useEffect(() => {
@@ -427,25 +437,50 @@ export const OnchainPurchaseProvider = ({
 
       const referralData = getCurrentReferral(origin);
 
+      // global registry calldata (starterpacks)
+      let calldata = [
+        recipient,
+        packId,
+        quantity,
+        ...(referralData?.refAddress
+          ? [0x0, num.toHex(referralData.refAddress)]
+          : [0x1]),
+        ...(referralData?.refGroup
+          ? [0x0, num.toHex(cairo.felt(referralData.refGroup))]
+          : [0x1]),
+      ];
+
+      // new registry calldata (bundles)
+      if (bundleId !== undefined) {
+        const hasSignature =
+          starterpackDetails.isConditional &&
+          Array.isArray(issueSignature) &&
+          issueSignature.length > 0;
+        const voucherKey = hash.computePoseidonHashOnElements([
+          bundleId,
+          shortString.encodeShortString(connectedHandle ?? ""),
+        ]);
+        calldata = [
+          ...calldata,
+          1, // client: Option<ContractAddress>
+          0, // client_percentage: u8
+          ...(hasSignature // voucher_key: Option<felt252>
+            ? [0x0, voucherKey]
+            : [0x1]),
+          ...(hasSignature // signature: Option<Span<felt252>>
+            ? [
+                0x0,
+                num.toHex(issueSignature.length),
+                ...issueSignature.map((s) => num.toHex(s)),
+              ]
+            : [0x1]),
+        ];
+      }
+
       const issueCall: Call = {
         contractAddress: registryAddress,
         entrypoint: "issue",
-        calldata: [
-          recipient,
-          packId,
-          quantity,
-          ...(referralData?.refAddress
-            ? [0x0, num.toHex(referralData.refAddress)]
-            : [0x1]),
-          ...(referralData?.refGroup
-            ? [0x0, num.toHex(cairo.felt(referralData.refGroup))]
-            : [0x1]),
-          ...(!isMainnet // voucher_key currently only on SEPOLIA
-            ? starterpackDetails.isConditional && connectedHandle
-              ? [0x0, shortString.encodeShortString(connectedHandle)]
-              : [0x1]
-            : []),
-        ],
+        calldata,
       };
 
       allCalls = [...allCalls, approvePaymentTokenCall, issueCall];
@@ -506,8 +541,9 @@ export const OnchainPurchaseProvider = ({
     swapQuote,
     selectedWallet,
     quantity,
+    bundleId,
     connectedHandle,
-    isMainnet,
+    issueSignature,
     externalSendTransaction,
     setTransactionHash,
     setDisplayError,
@@ -554,6 +590,7 @@ export const OnchainPurchaseProvider = ({
     quantity,
     incrementQuantity,
     decrementQuantity,
+    setIssueSignature,
     selectedWallet,
     selectedPlatform,
     walletAddress,

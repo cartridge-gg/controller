@@ -10,6 +10,11 @@ import {
   ETH_CONTRACT_ADDRESS,
 } from "./providers/StarknetProvider";
 
+export const BUNDLE_REGISTRY_MAINNET =
+  "0x1c53584fdbebd996c163fa2d5d5ad37f4b2f06643ea2bb897c5bee578a2e715";
+export const BUNDLE_REGISTRY_SEPOLIA =
+  "0x6361108a877e3bf74e3d92242907d40315824555d50bd7cad08a021021ed8a4";
+
 export function Profile() {
   const { account, connector, chainId } = useAccount();
   const ctrlConnector = connector as unknown as ControllerConnector;
@@ -93,9 +98,7 @@ export function Profile() {
             ctrlConnector.controller.username()?.then((username) => {
               ctrlConnector.controller.openBundle(
                 isMainnet ? 0 : 0, // bundleId
-                isMainnet
-                  ? "0x1234"
-                  : "0x6361108a877e3bf74e3d92242907d40315824555d50bd7cad08a021021ed8a4", // registryAddress
+                isMainnet ? BUNDLE_REGISTRY_MAINNET : BUNDLE_REGISTRY_SEPOLIA,
                 {
                   onPurchaseComplete: () => {
                     console.log("Bundle play callback fired.");

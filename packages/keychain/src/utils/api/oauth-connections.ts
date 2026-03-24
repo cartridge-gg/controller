@@ -115,10 +115,19 @@ export function getTwitterAuthUrl(username: string): string {
 export function getTwitterFollowUrl(
   username: string,
   targetAccount: string,
-  targetAccountId: string,
-  starterpackId?: number,
-): string {
+  targetAccountId?: string,
+  bundleId?: number,
+  chainId?: string,
+): { url: string; body: string } {
   const baseUrl =
     import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
-  return `${baseUrl}/twitter/follow?username=${encodeURIComponent(username)}&target_account=${encodeURIComponent(targetAccount)}&target_account_id=${encodeURIComponent(targetAccountId)}${starterpackId !== undefined ? `&starterpack_id=${num.toHex(starterpackId)}` : ""}`;
+  const url = `${baseUrl}/twitter/follow`;
+  const body = {
+    username,
+    target_account: targetAccount,
+    target_account_id: targetAccountId,
+    bundle_id: bundleId !== undefined ? num.toHex(bundleId) : undefined,
+    chain_id: bundleId !== undefined ? chainId : undefined,
+  };
+  return { url, body: JSON.stringify(body) };
 }

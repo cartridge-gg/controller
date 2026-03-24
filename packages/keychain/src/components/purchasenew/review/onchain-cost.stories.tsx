@@ -28,6 +28,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     quantity: 1,
     incrementQuantity: () => {},
     decrementQuantity: () => {},
+    setIssueSignature: () => {},
     selectedWallet: undefined,
     selectedPlatform: undefined,
     walletAddress: undefined,

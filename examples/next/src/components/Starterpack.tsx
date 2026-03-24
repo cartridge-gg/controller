@@ -1,10 +1,11 @@
 "use client";
 
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { constants, num } from "starknet";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button, Input } from "@cartridge/ui";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { constants, num } from "starknet";
+import { BUNDLE_REGISTRY_MAINNET, BUNDLE_REGISTRY_SEPOLIA } from "./Profile";
 
 export const Starterpack = () => {
   const { account, connector } = useAccount();
@@ -18,15 +19,14 @@ export const Starterpack = () => {
         bundleId: 0,
         purchaseOnchain: 0,
         claim: "claim-dopewars-mainnet",
-        registryAddress: "0x1234",
+        registryAddress: BUNDLE_REGISTRY_MAINNET,
       };
     }
     return {
       bundleId: 0,
       purchaseOnchain: 0,
       claim: "claim-dopewars-sepolia",
-      registryAddress:
-        "0x6361108a877e3bf74e3d92242907d40315824555d50bd7cad08a021021ed8a4",
+      registryAddress: BUNDLE_REGISTRY_SEPOLIA,
     };
   }, [chain]);
 
