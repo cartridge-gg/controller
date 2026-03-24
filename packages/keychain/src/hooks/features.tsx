@@ -13,6 +13,7 @@ const LOCAL_STORAGE_KEY = "@cartridge/features";
 export type Feature =
   | "none"
   | "connections"
+  | "github-connections"
   | "apple-pay-support"
   | "stripe-checkout-support";
 
