@@ -193,6 +193,7 @@ const signupOptions: AuthOptions = [
   "password",
   "rabby",
   "phantom-evm",
+  "sms",
 ];
 
 export const controllerConnector = new ControllerConnector({

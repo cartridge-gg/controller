@@ -10,6 +10,7 @@ import {
   IconProps,
   LockIcon,
   MetaMaskIcon,
+  MobileIcon,
   PasskeyIcon,
   PhantomIcon,
   RabbyIcon,
@@ -92,6 +93,10 @@ const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
   password: {
     Icon: LockIcon,
     label: AUTH_METHODS_LABELS.password,
+  },
+  sms: {
+    Icon: (props: IconProps) => <MobileIcon {...props} variant="solid" />,
+    label: AUTH_METHODS_LABELS.sms,
   },
 };
 

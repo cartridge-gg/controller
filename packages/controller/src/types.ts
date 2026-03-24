@@ -38,6 +38,7 @@ export const EMBEDDED_WALLETS = [
   "discord",
   "walletconnect",
   "password",
+  "sms",
 ] as const;
 
 export type EmbeddedWallet = (typeof EMBEDDED_WALLETS)[number];
