@@ -10,7 +10,7 @@ import {
 import { useSocialClaim } from "@/hooks/starterpack/social";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { SocialClaimOptions } from "@cartridge/controller";
-import { SocialClaimConditions } from "@/hooks/starterpack/onchain";
+import { SocialClaimConditions } from "@/hooks/starterpack/bundle";
 
 interface SocialClaimCheckoutProps {
   starterpackId: number;

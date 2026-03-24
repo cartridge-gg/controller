@@ -11,8 +11,11 @@ import {
 
 // Mock starterpack context
 const mockStarterpackValue = {
+  registryAddress: undefined,
+  bundleId: undefined,
+  setBundle: () => {},
   starterpackId: undefined,
-  setStarterpackId: () => {},
+  setStarterpack: () => {},
   starterpackDetails: undefined,
   isStarterpackLoading: false,
   claimItems: [],
@@ -22,7 +25,6 @@ const mockStarterpackValue = {
   displayError: undefined,
   setDisplayError: () => {},
   clearError: () => {},
-  setSocialClaimOptions: () => {},
   socialClaimOptions: undefined,
   socialClaimConditions: undefined,
 };

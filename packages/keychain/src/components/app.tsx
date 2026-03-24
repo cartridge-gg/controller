@@ -252,6 +252,7 @@ export function App() {
             path="credits"
             element={<Purchase type={PurchaseType.Credits} />}
           />
+          <Route path="bundle/:bundleId" element={<PurchaseStarterpack />} />
           <Route
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}

@@ -130,6 +130,7 @@ export const OnchainPurchaseProvider = ({
     setTransactionHash,
     setDisplayError,
     socialClaimConditions,
+    registryAddress,
   } = useStarterpackContext();
   const { connectedHandle } = useSocialClaimConnection(socialClaimConditions);
 
@@ -351,7 +352,7 @@ export const OnchainPurchaseProvider = ({
   ]);
 
   const onOnchainPurchase = useCallback(async () => {
-    if (!controller || !starterpackDetails) return;
+    if (!controller || !starterpackDetails || !registryAddress) return;
 
     if (!isOnchainStarterpack(starterpackDetails)) {
       throw new Error("Not an onchain starterpack");
@@ -364,8 +365,6 @@ export const OnchainPurchaseProvider = ({
     }
 
     try {
-      const registryContract = import.meta.env
-        .VITE_STARTERPACK_REGISTRY_CONTRACT;
       const recipient = controller.address();
 
       const walletType =
@@ -423,13 +422,13 @@ export const OnchainPurchaseProvider = ({
       const approvePaymentTokenCall: Call = {
         contractAddress: quote.paymentToken,
         entrypoint: "approve",
-        calldata: [registryContract, amount256.low, amount256.high],
+        calldata: [registryAddress, amount256.low, amount256.high],
       };
 
       const referralData = getCurrentReferral(origin);
 
       const issueCall: Call = {
-        contractAddress: registryContract,
+        contractAddress: registryAddress,
         entrypoint: "issue",
         calldata: [
           recipient,
@@ -501,6 +500,7 @@ export const OnchainPurchaseProvider = ({
   }, [
     controller,
     starterpackDetails,
+    registryAddress,
     origin,
     selectedToken,
     swapQuote,

@@ -15,13 +15,18 @@ export const Starterpack = () => {
   const getDefaultStarterpackIds = useCallback(() => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       return {
+        bundleId: 0,
         purchaseOnchain: 0,
         claim: "claim-dopewars-mainnet",
+        registryAddress: "0x1234",
       };
     }
     return {
+      bundleId: 0,
       purchaseOnchain: 0,
       claim: "claim-dopewars-sepolia",
+      registryAddress:
+        "0x6361108a877e3bf74e3d92242907d40315824555d50bd7cad08a021021ed8a4",
     };
   }, [chain]);
 
@@ -33,6 +38,10 @@ export const Starterpack = () => {
   const [claimPreimage, setClaimPreimage] = useState<string>("");
   const [purchaseOnchainSpId, setPurchaseOnchainSpId] = useState<number>(
     defaultIds.purchaseOnchain,
+  );
+  const [bundleId, setBundleId] = useState<number>(defaultIds.bundleId);
+  const [registryAddress, setRegistryAddress] = useState<string>(
+    defaultIds.registryAddress,
   );
 
   // Track the current expected defaults to detect network changes
@@ -59,6 +68,18 @@ export const Starterpack = () => {
         : currentPurchaseOnchainSpId;
     });
 
+    setBundleId((currentBundleId) => {
+      return currentBundleId === currentExpected.bundleId
+        ? newDefaults.bundleId
+        : currentBundleId;
+    });
+
+    setRegistryAddress((currentRegistryAddress) => {
+      return currentRegistryAddress === currentExpected.registryAddress
+        ? newDefaults.registryAddress
+        : currentRegistryAddress;
+    });
+
     // Update our references after successful comparison and update
     expectedDefaultsRef.current = newDefaults;
     previousChainRef.current = chain;
@@ -70,34 +91,60 @@ export const Starterpack = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2>Starterpacks</h2>
+      <h2>Bundles / Starterpacks</h2>
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h3>Purchase Starterpack</h3>
+          <h3>Purchase Bundle</h3>
           <div className="flex items-center gap-2">
             <Input
               className="max-w-80"
               type="text"
-              value={purchaseOnchainSpId}
-              onChange={(e) => setPurchaseOnchainSpId(Number(e.target.value))}
-              placeholder="Enter starterpack ID"
+              value={bundleId}
+              onChange={(e) => setBundleId(Number(e.target.value))}
+              placeholder="Enter bundle ID"
             />
             <Button
               onClick={() => {
-                controllerConnector.controller.openStarterPack(
-                  purchaseOnchainSpId,
+                controllerConnector.controller.openBundle(
+                  bundleId,
+                  registryAddress,
                   {
                     onPurchaseComplete: () => {
-                      console.log("Starterpack play callback fired.");
+                      console.log("Bundle play callback fired.");
                     },
                   },
                 );
               }}
             >
-              Purchase
+              Purchase Bundle
             </Button>
           </div>
+        </div>
+
+        <h3>Purchase Starterpack</h3>
+        <div className="flex items-center gap-2">
+          <Input
+            className="max-w-80"
+            type="text"
+            value={purchaseOnchainSpId}
+            onChange={(e) => setPurchaseOnchainSpId(Number(e.target.value))}
+            placeholder="Enter starterpack ID"
+          />
+          <Button
+            onClick={() => {
+              controllerConnector.controller.openStarterPack(
+                purchaseOnchainSpId,
+                {
+                  onPurchaseComplete: () => {
+                    console.log("Starterpack play callback fired.");
+                  },
+                },
+              );
+            }}
+          >
+            Purchase Starterpack
+          </Button>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -123,7 +170,7 @@ export const Starterpack = () => {
                   }
                 }}
               >
-                Claim
+                Claim Starterpack with preimage
               </Button>
             </div>
             <Input

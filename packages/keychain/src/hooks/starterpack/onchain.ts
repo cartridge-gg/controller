@@ -9,7 +9,6 @@ import {
   fetchTokenMetadata,
   getCachedTokenMetadata,
 } from "@/utils/token-metadata";
-import { OAuthProvider } from "@/utils/api/oauth-connections";
 
 // Raw JSON from contract (snake_case)
 interface ItemOnchainRaw {
@@ -24,6 +23,7 @@ interface StarterPackMetadataOnchainRaw {
   image_uri: string;
   items: ItemOnchainRaw[];
   additional_payment_tokens?: string[];
+  conditions?: string[];
 }
 
 // TypeScript interface (camelCase)
@@ -42,12 +42,6 @@ export interface StarterPackMetadataOnchain {
   conditions?: string[];
 }
 
-export interface SocialClaimConditions {
-  provider: OAuthProvider;
-  targetAccount: string;
-  targetAccountId: string | null;
-}
-
 // Convert snake_case JSON from contract to camelCase TypeScript
 function convertMetadata(
   raw: StarterPackMetadataOnchainRaw,
@@ -64,44 +58,23 @@ function convertMetadata(
     additionalPaymentTokens: raw.additional_payment_tokens?.map((token) =>
       getChecksumAddress(`0x${BigInt(token).toString(16)}`),
     ),
+    conditions: raw.conditions,
   };
 }
 
-export const useStarterPackConditions = (
-  metadata: StarterPackMetadataOnchain | null,
-) => {
-  const socialClaimConditions = useMemo<
-    SocialClaimConditions | undefined
-  >(() => {
-    const conditions = metadata?.conditions ?? [];
-    if (conditions[0] === "social-claim") {
-      const provider = conditions[1] as OAuthProvider;
-      switch (provider) {
-        case "TWITTER":
-          return {
-            provider,
-            targetAccount: conditions[2],
-            targetAccountId: conditions[3] ?? null,
-          };
-        case "TIKTOK": // not implemented
-        case "INSTAGRAM": // not implemented
-        default:
-          return undefined;
-      }
-    }
-    return undefined;
-  }, [metadata]);
-
-  return {
-    socialClaimConditions,
-  };
-};
-
-export const useOnchainStarterpack = (
-  starterpackId?: number,
-  amount?: number,
-  targetToken?: string, // Token to convert prices to (defaults to USDC)
-) => {
+export const useOnchainStarterpack = ({
+  starterpackId,
+  amount,
+  targetToken,
+  registryAddress = import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
+  isBundle,
+}: {
+  starterpackId?: number;
+  amount?: number;
+  targetToken?: string; // Token to convert prices to (defaults to USDC)
+  registryAddress?: string;
+  isBundle?: boolean;
+}) => {
   const { controller } = useController();
   const { origin } = useConnection();
 
@@ -133,8 +106,8 @@ export const useOnchainStarterpack = (
 
       try {
         const metadataRes = await controller.provider.callContract({
-          contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
-          entrypoint: "metadata",
+          contractAddress: registryAddress,
+          entrypoint: isBundle ? "get_metadata" : "metadata",
           calldata: [starterpackId],
         } as Call);
 
@@ -173,7 +146,7 @@ export const useOnchainStarterpack = (
     };
 
     fetchMetadata();
-  }, [controller, starterpackId]);
+  }, [controller, starterpackId, registryAddress, isBundle]);
 
   // Fetch quote separately (can be slower due to Ekubo conversion)
   useEffect(() => {
@@ -186,9 +159,14 @@ export const useOnchainStarterpack = (
     const fetchQuote = async () => {
       try {
         const quoteRes = await controller.provider.callContract({
-          contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
+          contractAddress: registryAddress,
           entrypoint: "quote",
-          calldata: [starterpackId, amount ? amount : 1, hasReferral ? 1 : 0],
+          calldata: [
+            starterpackId,
+            amount ? amount : 1,
+            hasReferral ? 1 : 0,
+            ...(isBundle ? [0] : []), // client_percentage
+          ],
         } as Call);
 
         // Parse quote with u256 values (2 felts each) + paymentToken (1 felt)
@@ -262,23 +240,32 @@ export const useOnchainStarterpack = (
       } catch (error) {
         console.error("Failed to fetch quote:", error);
         // Don't set error state for quote failures to allow metadata to still be shown
+        // setError(new Error("Failed to fetch quote"));
       } finally {
         setIsQuoteLoading(false);
       }
     };
 
     fetchQuote();
-  }, [controller, starterpackId, amount, hasReferral, targetToken]);
+  }, [
+    controller,
+    starterpackId,
+    registryAddress,
+    isBundle,
+    amount,
+    hasReferral,
+    targetToken,
+  ]);
 
   // Refetch supply function (can be called manually)
   const refetchSupply = useCallback(async () => {
-    if (!controller || starterpackId === undefined) {
+    if (!controller || starterpackId === undefined || isBundle) {
       return;
     }
 
     try {
       const supplyRes = await controller.provider.callContract({
-        contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
+        contractAddress: registryAddress,
         entrypoint: "supply",
         calldata: [starterpackId],
       } as Call);
@@ -293,7 +280,7 @@ export const useOnchainStarterpack = (
       console.error("Failed to fetch supply:", error);
       // Don't set error state for supply failures, just log it
     }
-  }, [controller, starterpackId]);
+  }, [controller, starterpackId, registryAddress, isBundle]);
 
   // Fetch supply separately (reactive/dynamic data)
   useEffect(() => {

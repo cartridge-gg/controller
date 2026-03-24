@@ -55,8 +55,12 @@ export const CreditPurchaseProvider = ({
   isSlot = false,
 }: CreditPurchaseProviderProps) => {
   const { controller, origin } = useConnection();
-  const { starterpackId, starterpackDetails, setDisplayError } =
-    useStarterpackContext();
+  const {
+    registryAddress,
+    starterpackId,
+    starterpackDetails,
+    setDisplayError,
+  } = useStarterpackContext();
   const { quantity } = useOnchainPurchaseContext();
 
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
@@ -80,7 +84,7 @@ export const CreditPurchaseProvider = ({
   }, [stripeError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onCreditCardPurchase = useCallback(async () => {
-    if (!controller) return;
+    if (!controller || !registryAddress) return;
 
     try {
       let paymentIntent;
@@ -109,9 +113,7 @@ export const CreditPurchaseProvider = ({
           quantity,
           referral: referralData?.refAddress || referralData?.ref,
           referralGroup: referralData?.refGroup,
-          registryAddress: num.toHex(
-            import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
-          ),
+          registryAddress,
         });
       } else {
         paymentIntent = await createPaymentIntent(
@@ -136,6 +138,7 @@ export const CreditPurchaseProvider = ({
     usdAmount,
     controller,
     origin,
+    registryAddress,
     starterpackId,
     starterpackDetails,
     quantity,

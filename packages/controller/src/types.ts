@@ -172,6 +172,11 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
+  openBundle(
+    id: number,
+    registryAddress: string,
+    options?: BundleOptions,
+  ): Promise<void>;
   openStarterPack(
     id: string | number,
     options?: StarterpackOptions,
@@ -287,13 +292,18 @@ export type SocialClaimOptions = {
   shareMessage: string;
 };
 
+export type BundleOptions = {
+  /** Callback fired after the Play button closes the starterpack modal */
+  onPurchaseComplete?: () => void;
+  /** Options for social claim conditional starterpack */
+  socialClaimOptions?: SocialClaimOptions;
+};
+
 export type StarterpackOptions = {
   /** The preimage to use */
   preimage?: string;
   /** Callback fired after the Play button closes the starterpack modal */
   onPurchaseComplete?: () => void;
-  /** Options for social claim conditional starterpack */
-  socialClaimOptions?: SocialClaimOptions;
 };
 
 // Connect options (used by controller.connect)

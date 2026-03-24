@@ -6,7 +6,7 @@ import {
   type OAuthConnection,
 } from "@/utils/api/oauth-connections";
 import { SocialClaimOptions } from "@cartridge/controller";
-import { SocialClaimConditions } from "@/hooks/starterpack/onchain";
+import { SocialClaimConditions } from "@/hooks/starterpack/bundle";
 import { useOAuthConnection } from "@/components/settings/connections/use-connections";
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "../connection";

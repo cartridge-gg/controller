@@ -32,6 +32,7 @@ import {
   HeadlessUsernameLookupResult,
   StarterpackOptions,
   UpdateSessionOptions,
+  BundleOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
@@ -609,6 +610,31 @@ export default class ControllerProvider extends BaseProvider {
     this.keychain.navigate("/purchase/credits").then(() => {
       this.iframes!.keychain?.open();
     });
+  }
+
+  async openBundle(
+    id: number,
+    registryAddress: string,
+    options?: BundleOptions,
+  ): Promise<void> {
+    if (!this.iframes) {
+      return;
+    }
+
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    const { onPurchaseComplete, ...bundleOptions } = options ?? {};
+    this.iframes.keychain.setOnStarterpackPlay(onPurchaseComplete);
+    const sanitizedOptions =
+      Object.keys(bundleOptions).length > 0
+        ? (bundleOptions as Omit<BundleOptions, "onPurchaseComplete">)
+        : undefined;
+
+    await this.keychain.openBundle(id, registryAddress, sanitizedOptions);
+    this.iframes.keychain?.open();
   }
 
   async openStarterPack(

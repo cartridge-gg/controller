@@ -91,18 +91,24 @@ export function Profile() {
         <Button
           onClick={() =>
             ctrlConnector.controller.username()?.then((username) => {
-              ctrlConnector.controller.openStarterPack(isMainnet ? 1 : 16, {
-                onPurchaseComplete: () => {
-                  console.log("Starterpack play callback fired.");
+              ctrlConnector.controller.openBundle(
+                isMainnet ? 0 : 0, // bundleId
+                isMainnet
+                  ? "0x1234"
+                  : "0x6361108a877e3bf74e3d92242907d40315824555d50bd7cad08a021021ed8a4", // registryAddress
+                {
+                  onPurchaseComplete: () => {
+                    console.log("Bundle play callback fired.");
+                  },
+                  socialClaimOptions: {
+                    shareMessage: `Check out @numsgg!\nhttps://sepolia.nums.gg/?ref=${username}`,
+                  },
                 },
-                socialClaimOptions: {
-                  shareMessage: `Check out @numsgg!\nhttps://sepolia.nums.gg/?ref=${username}`,
-                },
-              });
+              );
             })
           }
         >
-          Social Claim
+          Social Bundle
         </Button>
       </div>
 

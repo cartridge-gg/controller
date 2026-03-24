@@ -17,15 +17,26 @@ import {
   ItemType,
 } from "./types";
 import {
-  useStarterPackConditions,
+  useBundleConditions,
   SocialClaimConditions,
-} from "@/hooks/starterpack/onchain";
+} from "@/hooks/starterpack/bundle";
 import { SocialClaimOptions } from "@cartridge/controller";
 
 export interface StarterpackContextType {
+  // Registry contract address
+  registryAddress: string | undefined;
+
+  // Bundle identification (starterpack V2)
+  bundleId: number | undefined;
+  setBundle: (
+    id: number,
+    registryAddress: string,
+    socialClaimOptions?: SocialClaimOptions,
+  ) => void;
+
   // Starterpack identification
   starterpackId: string | number | undefined;
-  setStarterpackId: (id: string | number) => void;
+  setStarterpack: (id: string | number, registryAddress: string) => void;
 
   // Starterpack details (loaded from backend or onchain)
   starterpackDetails: StarterpackDetails | undefined;
@@ -44,8 +55,7 @@ export interface StarterpackContextType {
   setDisplayError: (error: Error | undefined) => void;
   clearError: () => void;
 
-  // Social claim
-  setSocialClaimOptions: (options: SocialClaimOptions) => void;
+  // Conditional bundles info
   socialClaimOptions: SocialClaimOptions | undefined;
   socialClaimConditions: SocialClaimConditions | undefined;
 }
@@ -59,6 +69,8 @@ export interface StarterpackProviderProps {
 }
 
 export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
+  const [registryAddress, setRegistryAddress] = useState<string | undefined>();
+  const [bundleId, setBundleId] = useState<number | undefined>();
   const [starterpackId, setStarterpackId] = useState<string | number>();
   const [starterpackDetails, setStarterpackDetails] = useState<
     StarterpackDetails | undefined
@@ -68,7 +80,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   const [claimItemsState, setClaimItemsState] = useState<Item[]>([]);
 
   // Detect which source (claimed or onchain) based on starterpack ID
-  const type = detectStarterpackType(starterpackId);
+  const type = detectStarterpackType(starterpackId ?? bundleId);
 
   // Claim hook (GraphQL) - only run if claimed source
   const {
@@ -84,17 +96,24 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   );
 
   // Onchain hook (Smart contract) - only run if onchain source
+  const isStarterPack = type === "onchain" && starterpackId !== undefined;
+  const isBundle = type === "onchain" && bundleId !== undefined;
+
   const {
     metadata: onchainMetadata,
     quote: onchainQuote,
     isLoading: isOnchainLoading,
     isQuoteLoading: isOnchainQuoteLoading,
     error: onchainError,
-  } = useOnchainStarterpack(
-    type === "onchain" && starterpackId !== undefined
+  } = useOnchainStarterpack({
+    starterpackId: isStarterPack
       ? Number(starterpackId)
-      : undefined,
-  );
+      : isBundle
+        ? Number(bundleId)
+        : undefined,
+    registryAddress,
+    isBundle,
+  });
 
   // Unified loading and error state
   const isStarterpackLoading =
@@ -149,11 +168,35 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     isOnchainQuoteLoading,
   ]);
 
-  // conditional starter packs
+  // conditional bundles
   const [socialClaimOptions, setSocialClaimOptions] = useState<
     SocialClaimOptions | undefined
   >();
-  const { socialClaimConditions } = useStarterPackConditions(onchainMetadata);
+  const { socialClaimConditions } = useBundleConditions(onchainMetadata);
+
+  const setBundle = useCallback(
+    (
+      id: number,
+      registryAddress: string,
+      socialClaimOptions?: SocialClaimOptions,
+    ) => {
+      setBundleId(id);
+      setRegistryAddress(registryAddress);
+      setSocialClaimOptions(socialClaimOptions);
+      setStarterpackId(undefined);
+    },
+    [],
+  );
+
+  const setStarterpack = useCallback(
+    (id: number | string, registryAddress: string) => {
+      setStarterpackId(id);
+      setRegistryAddress(registryAddress);
+      setBundleId(undefined);
+      setSocialClaimOptions(undefined);
+    },
+    [],
+  );
 
   // Sync errors from hooks to displayError
   useEffect(() => {
@@ -177,8 +220,11 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   }, []);
 
   const contextValue: StarterpackContextType = {
+    setBundle,
+    setStarterpack,
+    registryAddress,
+    bundleId,
     starterpackId,
-    setStarterpackId,
     starterpackDetails,
     isStarterpackLoading,
     claimItems,
@@ -188,7 +234,6 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     displayError,
     setDisplayError,
     clearError,
-    setSocialClaimOptions,
     socialClaimOptions,
     socialClaimConditions,
   };

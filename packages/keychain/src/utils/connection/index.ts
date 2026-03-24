@@ -18,6 +18,7 @@ import { navigateFactory } from "./navigate";
 import { updateSession } from "./update-session";
 import type {
   AuthOptions,
+  BundleOptions,
   ConnectOptions,
   SessionPolicies,
   StarterpackOptions,
@@ -116,16 +117,24 @@ export function connectToController<
       openPurchaseCredits: () => () => {
         navigate("/funding", { replace: true });
       },
+      openBundle:
+        () => (id: number, registryAddress: string, options: BundleOptions) => {
+          const searchParams: string[] = [`registryAddress=${registryAddress}`];
+          if (options?.socialClaimOptions) {
+            searchParams.push(
+              `shareMessage=${encodeURIComponent(options.socialClaimOptions.shareMessage)}`,
+            );
+          }
+          navigate(
+            `/purchase/bundle/${id}${searchParams.length > 0 ? `?${searchParams.join("&")}` : ""}`,
+            { replace: true },
+          );
+        },
       openStarterPack:
         () => (id: string | number, options?: StarterpackOptions) => {
           const searchParams: string[] = [];
           if (options?.preimage) {
             searchParams.push(`preimage=${options.preimage}`);
-          }
-          if (options?.socialClaimOptions) {
-            searchParams.push(
-              `shareMessage=${encodeURIComponent(options.socialClaimOptions.shareMessage)}`,
-            );
           }
           navigate(
             `/purchase/starterpack/${id}${searchParams.length > 0 ? `?${searchParams.join("&")}` : ""}`,
