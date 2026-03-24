@@ -400,6 +400,7 @@ export type TokenSwap = {
 export type TokenSwapData = Metadata & {
   amount: number;
   value: number | null | undefined;
+  rounded: boolean;
 };
 
 export type UseTokenSwapDataResponse = {
@@ -414,8 +415,28 @@ export function useTokenSwapData(
     addresses: tokens.map((token) => token.address),
   });
 
-  const tokenSwapData = useMemo(() => {
+  const tokenSwapData = useMemo<TokenSwapData[]>(() => {
     return tokens.map((token) => {
+      if (
+        token.address ==
+        getChecksumAddress(
+          "0x036017e69d21d6d8c13e266eabb73ef1f1d02722d86bdcabe5f168f8e549d3cd",
+        )
+      ) {
+        // special treatment for LS2 games
+        // to be replaced for balance simulation
+        return {
+          amount: 1,
+          name: "Adventurer",
+          symbol: "Adventurer",
+          decimals: 0,
+          address: token.address,
+          image:
+            "https://api.cartridge.gg/x/arcade-main/torii/static/0x036017e69d21d6d8c13e266eabb73ef1f1d02722d86bdcabe5f168f8e549d3cd/0x0000000000000000000000000000000000000000000000000000000000000001/image",
+          value: undefined,
+          rounded: false,
+        };
+      }
       const metadata = erc20Metadata.find(
         (m) => BigInt(m.l2_token_address) === BigInt(token.address),
       );
@@ -434,6 +455,7 @@ export function useTokenSwapData(
         value: price
           ? (Number(price.amount) / 10 ** (price.decimals || 18)) * amount
           : undefined,
+        rounded: true,
       };
       return tokenData;
     });

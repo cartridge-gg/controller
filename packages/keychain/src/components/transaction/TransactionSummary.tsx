@@ -4,7 +4,6 @@ import {
   AccordionItem,
   AccordionTrigger,
   CheckboxIcon,
-  GearIcon,
   Thumbnail,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
@@ -33,9 +32,10 @@ export function TransactionSummary({
       collapsible
       className={cn(
         "rounded border",
+        isExpanded ? "text-foreground-100" : "text-foreground-300",
         isOpened
-          ? "text-foreground-100 bg-background-200 border-transparent"
-          : "text-foreground-300 bg-transparent border-background-200",
+          ? "bg-background-200 border-transparent"
+          : "bg-transparent border-background-200",
         className,
       )}
       value={isOpened ? "item" : ""}
@@ -46,43 +46,33 @@ export function TransactionSummary({
           parentClassName="h-11 p-3 transition-none"
           className={cn(
             "flex items-center text-sm font-medium gap-1.5",
-            isOpened ? "text-foreground-100" : "text-foreground-300",
+            isExpanded ? "text-foreground-100" : "text-foreground-300",
           )}
-          color={cn(isOpened ? "text-foreground-100" : "text-foreground-300")}
+          color={cn(isExpanded ? "text-foreground-100" : "text-foreground-300")}
         >
           <Thumbnail
             variant="light"
             size="sm"
-            icon={<GearIcon />}
+            icon={calls.length}
             centered={true}
             className={cn(
-              isOpened
-                ? "text-foreground-100"
-                : "text-foreground-300 bg-background-200",
+              "text-xs",
+              isExpanded ? "text-foreground-100" : "text-foreground-300",
+              isOpened ? "bg-background-300" : "bg-background-200",
             )}
           />
-          <p>Advanced</p>
+          <p>Operations</p>
         </AccordionTrigger>
 
         <AccordionContent className="flex flex-col gap-3 px-3 pb-3 border-t border-background-100 pt-2">
-          {calls.map((call) => (
+          {calls.map((call, index) => (
             <CollapsibleTransactionRow
-              key={`${call.contractAddress}-${call.entrypoint}`}
+              key={`${index}-${call.entrypoint}`}
               transaction={call}
               enabled={true}
+              highlighted={isExpanded}
             >
               <CallCardContents call={call} className="mt-2" />
-              {/* <div className="flex flex-col gap-px rounded overflow-auto border border-background divide-y divide-solid divide-background">
-                <div className="flex flex-col p-3 gap-3 text-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-row items-center gap-2 text-foreground-300">
-                      <p className="font-medium text-xs">
-                        {humanizeString(call.entrypoint)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div> */}
             </CollapsibleTransactionRow>
           ))}
         </AccordionContent>
@@ -94,11 +84,13 @@ export function TransactionSummary({
 interface CollapsibleTransactionProps extends PropsWithChildren {
   transaction: Call;
   enabled: boolean;
+  highlighted?: boolean;
 }
 
 export function CollapsibleTransactionRow({
   transaction,
   children,
+  highlighted,
 }: CollapsibleTransactionProps) {
   const [value, setValue] = useState("");
 
@@ -108,7 +100,10 @@ export function CollapsibleTransactionRow({
         <AccordionTrigger
           hideIcon
           parentClassName="transition-none"
-          className="rounded-md text-foreground-100 w-full"
+          className={cn(
+            "rounded-md w-full",
+            highlighted ? "text-foreground-100" : "text-foreground-300",
+          )}
         >
           <div className="flex gap-1 py-1 w-full text-xs items-center">
             <CheckboxIcon

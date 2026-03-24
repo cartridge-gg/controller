@@ -22,12 +22,19 @@ export function Swap() {
     [account, ctrlConnector],
   );
 
+  if (!account) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <h2>Token Swaps</h2>
       <div className="flex flex-wrap gap-1">
-        <Button onClick={() => execute(SWAP_SINGLE)}>Swap Single</Button>
-        <Button onClick={() => execute(SWAP_MULTIPLE)}>Swap Multiple</Button>
+        <Button onClick={() => execute(AVNU_SWAP_SINGLE)}>Avnu</Button>
+        <Button onClick={() => execute(EKUBO_SWAP_SINGLE)}>Ekubo</Button>
+        <Button onClick={() => execute(EKUBO_SWAP_MULTIPLE)}>
+          Ekubo Multi
+        </Button>
         <Button onClick={() => execute(LS2_PURCHASE_GAME)}>
           LS2 Purchase Game
         </Button>
@@ -39,7 +46,50 @@ export function Swap() {
   );
 }
 
-const SWAP_SINGLE = [
+const AVNU_SWAP_SINGLE = [
+  {
+    contractAddress:
+      "0x124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+    entrypoint: "approve",
+    calldata: [
+      "0x4270219d365d6b017231b52e92b3fb5d7c8378b05e9abc97724537a80e93b0f",
+      "0x8ac7230489e80000",
+      "0x0",
+    ],
+  },
+  {
+    contractAddress:
+      "0x4270219d365d6b017231b52e92b3fb5d7c8378b05e9abc97724537a80e93b0f",
+    entrypoint: "multi_route_swap",
+    calldata: [
+      "0x124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+      "0x8ac7230489e80000",
+      "0x0",
+      "0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+      "0x1c7af15aad8a1b00",
+      "0x0",
+      "0x1c73a6df73828b19",
+      "0x0",
+      "0x76a3565794db7894484718be7f51ad5b2e76605e22722887c1260e2451ad945",
+      "0x0",
+      "0x0",
+      "0x1",
+      "0x124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+      "0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+      "0x5dd3d2f4429af886cd1a3b08289dbcea99a294197e9eb43b0e0325b4b",
+      "0xe8d4a51000",
+      "0x6",
+      "0x124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+      "0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+      "0x28f5c28f5c28f5c28f5c28f5c28f5c2",
+      "0x4d5a",
+      "0x0",
+      "0xa26ea81948000000000000000000",
+    ],
+  },
+];
+
+const EKUBO_SWAP_SINGLE = [
   {
     contractAddress:
       "0x0124aeb495b947201f5faC96fD1138E326AD86195B98df6DEc9009158A533B49",
@@ -97,7 +147,7 @@ const SWAP_SINGLE = [
   },
 ];
 
-const SWAP_MULTIPLE = [
+const EKUBO_SWAP_MULTIPLE = [
   {
     contractAddress:
       "0x0124aeb495b947201f5faC96fD1138E326AD86195B98df6DEc9009158A533B49",
@@ -217,7 +267,7 @@ const LS2_PURCHASE_GAME = [
     entrypoint: "transfer",
     calldata: [
       "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
-      "0x5bbb37da193af4ba9",
+      "0x155ee7c39a3d69a76",
       "0x0",
     ],
   },
@@ -289,7 +339,7 @@ const LS2_PURCHASE_GAME_ERROR = [
     entrypoint: "transfer",
     calldata: [
       "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
-      "0x5bbb37da193af4ba90000000",
+      "0x5bbb37d193af4ba",
       "0x0",
     ],
   },

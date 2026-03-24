@@ -79,7 +79,7 @@ export function usePurchaseFeesData({
   );
 
   return {
-    label: "Total",
+    label: "Cost",
     contractAddress: token?.metadata.address ?? "0x0",
     amount: totalPrice,
     decimals: feeDecimals,

@@ -293,13 +293,14 @@ export function OnchainStarterPackInner({
         )}
 
         <div
-          className={`flex justify-between border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2 transition-colors ${
+          className={`flex h-[40px] justify-between border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2 transition-colors ${
             !disableActions ? "cursor-pointer hover:bg-background-200" : ""
           }`}
           onClick={onWalletSelect}
         >
           <div className="flex gap-2">
-            {wallet.subIcon} Purchase with {wallet.name}
+            <span className="m-auto">{wallet.subIcon}</span>
+            <span className="m-auto text-sm">Purchase with {wallet.name}</span>
           </div>
           <ListIcon size="xs" variant="solid" />
         </div>
