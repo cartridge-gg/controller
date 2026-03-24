@@ -205,7 +205,9 @@ export class TurnkeyWallet {
 
       if (!popup) {
         console.error("[Turnkey] Failed to open popup");
-        throw new Error("Should be able to open a popup in an iFrame");
+        throw new Error(
+          "Unable to open a pop-up window needed for authentication. Please allow pop-ups for this site in your browser settings and try again.",
+        );
       }
 
       console.log(
