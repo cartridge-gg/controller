@@ -76,7 +76,7 @@ export function Fees({
         />
       )}
       {ctrlError}
-      {(displayFees || additionalFees?.length !== 0) && (
+      {(displayFees || (additionalFees && additionalFees.length > 0)) && (
         <div
           className={cn(
             "w-full rounded pt-2",
