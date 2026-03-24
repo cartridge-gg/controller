@@ -14,7 +14,8 @@ export type Feature =
   | "none"
   | "connections"
   | "apple-pay-support"
-  | "stripe-checkout-support";
+  | "stripe-checkout-support"
+  | "sms";
 
 // --- Helper Functions ---
 
