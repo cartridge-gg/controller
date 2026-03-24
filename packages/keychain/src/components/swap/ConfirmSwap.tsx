@@ -58,7 +58,7 @@ export function ConfirmSwap({
       onError={onError}
       buttonText="Swap"
       additionalFees={sellingSwapData.map((token) => ({
-        label: "Total",
+        label: "Cost",
         contractAddress: token.address,
         amount: token?.amount ?? 0,
         usdValue: formatValue(token),
