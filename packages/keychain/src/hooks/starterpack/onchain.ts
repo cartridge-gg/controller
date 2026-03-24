@@ -63,13 +63,13 @@ function convertMetadata(
 }
 
 export const useOnchainStarterpack = ({
-  starterpackId,
+  onchainId,
   amount,
   targetToken,
   registryAddress = import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
   isBundle,
 }: {
-  starterpackId?: number;
+  onchainId?: number;
   amount?: number;
   targetToken?: string; // Token to convert prices to (defaults to USDC)
   registryAddress?: string;
@@ -95,7 +95,7 @@ export const useOnchainStarterpack = ({
 
   // Fetch metadata first (fast)
   useEffect(() => {
-    if (!controller || starterpackId === undefined) {
+    if (!controller || onchainId === undefined) {
       setIsLoading(false);
       return;
     }
@@ -108,7 +108,7 @@ export const useOnchainStarterpack = ({
         const metadataRes = await controller.provider.callContract({
           contractAddress: registryAddress,
           entrypoint: isBundle ? "get_metadata" : "metadata",
-          calldata: [starterpackId],
+          calldata: [onchainId],
         } as Call);
 
         // Parse metadata ByteArray
@@ -146,11 +146,11 @@ export const useOnchainStarterpack = ({
     };
 
     fetchMetadata();
-  }, [controller, starterpackId, registryAddress, isBundle]);
+  }, [controller, onchainId, registryAddress, isBundle]);
 
   // Fetch quote separately (can be slower due to Ekubo conversion)
   useEffect(() => {
-    if (!controller || starterpackId === undefined) {
+    if (!controller || onchainId === undefined) {
       setIsQuoteLoading(false);
       return;
     }
@@ -158,19 +158,59 @@ export const useOnchainStarterpack = ({
     setIsQuoteLoading(true);
     const fetchQuote = async () => {
       try {
+        const parseStarterpackQuote = (quote: string[]) => {
+          // pub struct StarterpackQuote {
+          //     pub base_price: u256, // 0,1
+          //     pub referral_fee: u256, // 2,3
+          //     pub protocol_fee: u256, // 4,5
+          //     pub total_cost: u256, // 6,7
+          //     pub payment_token: ContractAddress, // 8
+          // }
+          return {
+            basePrice: uint256.uint256ToBN({ low: quote[0], high: quote[1] }),
+            referralFee: uint256.uint256ToBN({ low: quote[2], high: quote[3] }),
+            protocolFee: uint256.uint256ToBN({ low: quote[4], high: quote[5] }),
+            totalCost: uint256.uint256ToBN({ low: quote[6], high: quote[7] }),
+            paymentToken: quote[8],
+          };
+        };
+
+        const parseBundleQuote = (quote: string[]) => {
+          // pub struct BundleQuote {
+          //     pub base_price: u256, // 0,1
+          //     pub referral_fee: u256, // 2,3
+          //     pub client_fee: u256, // 4,5
+          //     pub protocol_fee: u256, // 6,7
+          //     pub total_cost: u256, // 8,9
+          //     pub payment_token: ContractAddress, // 10
+          //     pub contract: ContractAddress, // 11
+          // }
+          return {
+            basePrice: uint256.uint256ToBN({ low: quote[0], high: quote[1] }),
+            referralFee: uint256.uint256ToBN({ low: quote[2], high: quote[3] }),
+            // clientFee: uint256.uint256ToBN({ low: quote[4], high: quote[5] }),
+            protocolFee: uint256.uint256ToBN({ low: quote[6], high: quote[7] }),
+            totalCost: uint256.uint256ToBN({ low: quote[8], high: quote[9] }),
+            paymentToken: quote[10],
+            // contract: quote[11],
+          };
+        };
+
         const quoteRes = await controller.provider.callContract({
           contractAddress: registryAddress,
           entrypoint: "quote",
           calldata: [
-            starterpackId,
+            onchainId,
             amount ? amount : 1,
             hasReferral ? 1 : 0,
             ...(isBundle ? [0] : []), // client_percentage
           ],
         } as Call);
 
-        // Parse quote with u256 values (2 felts each) + paymentToken (1 felt)
-        const paymentToken = quoteRes[8];
+        const { basePrice, referralFee, protocolFee, totalCost, paymentToken } =
+          isBundle
+            ? parseBundleQuote(quoteRes)
+            : parseStarterpackQuote(quoteRes);
 
         // Fetch payment token metadata via RPC
         const paymentTokenMetadata = await fetchTokenMetadata(
@@ -178,24 +218,10 @@ export const useOnchainStarterpack = ({
           controller.provider,
         );
 
-        const totalCost = uint256.uint256ToBN({
-          low: quoteRes[6],
-          high: quoteRes[7],
-        });
-
         const quote: Quote = {
-          basePrice: uint256.uint256ToBN({
-            low: quoteRes[0],
-            high: quoteRes[1],
-          }),
-          referralFee: uint256.uint256ToBN({
-            low: quoteRes[2],
-            high: quoteRes[3],
-          }),
-          protocolFee: uint256.uint256ToBN({
-            low: quoteRes[4],
-            high: quoteRes[5],
-          }),
+          basePrice,
+          referralFee,
+          protocolFee,
           totalCost,
           paymentToken,
           paymentTokenMetadata,
@@ -206,7 +232,8 @@ export const useOnchainStarterpack = ({
         const targetTokenAddress = targetToken || USDC_ADDRESSES[chainId];
         if (
           targetTokenAddress &&
-          paymentToken.toLowerCase() !== targetTokenAddress.toLowerCase()
+          paymentToken.toLowerCase() !== targetTokenAddress.toLowerCase() &&
+          totalCost > 0n
         ) {
           try {
             const swapQuote = await fetchSwapQuote(
@@ -240,7 +267,7 @@ export const useOnchainStarterpack = ({
       } catch (error) {
         console.error("Failed to fetch quote:", error);
         // Don't set error state for quote failures to allow metadata to still be shown
-        // setError(new Error("Failed to fetch quote"));
+        setError(new Error("Failed to fetch quote"));
       } finally {
         setIsQuoteLoading(false);
       }
@@ -249,7 +276,7 @@ export const useOnchainStarterpack = ({
     fetchQuote();
   }, [
     controller,
-    starterpackId,
+    onchainId,
     registryAddress,
     isBundle,
     amount,
@@ -259,7 +286,7 @@ export const useOnchainStarterpack = ({
 
   // Refetch supply function (can be called manually)
   const refetchSupply = useCallback(async () => {
-    if (!controller || starterpackId === undefined || isBundle) {
+    if (!controller || onchainId === undefined || isBundle) {
       return;
     }
 
@@ -267,7 +294,7 @@ export const useOnchainStarterpack = ({
       const supplyRes = await controller.provider.callContract({
         contractAddress: registryAddress,
         entrypoint: "supply",
-        calldata: [starterpackId],
+        calldata: [onchainId],
       } as Call);
 
       // Supply is Option<u32>
@@ -280,7 +307,7 @@ export const useOnchainStarterpack = ({
       console.error("Failed to fetch supply:", error);
       // Don't set error state for supply failures, just log it
     }
-  }, [controller, starterpackId, registryAddress, isBundle]);
+  }, [controller, onchainId, registryAddress, isBundle]);
 
   // Fetch supply separately (reactive/dynamic data)
   useEffect(() => {

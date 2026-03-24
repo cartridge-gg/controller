@@ -82,6 +82,18 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   // Detect which source (claimed or onchain) based on starterpack ID
   const type = detectStarterpackType(starterpackId ?? bundleId);
 
+  const isClaimed = type === "claimed" && starterpackId !== undefined;
+  const isStarterPack = type === "onchain" && starterpackId !== undefined;
+  const isBundle = type === "onchain" && bundleId !== undefined;
+
+  const claimId = isClaimed ? String(starterpackId) : undefined;
+
+  const onchainId = isStarterPack
+    ? Number(starterpackId)
+    : isBundle
+      ? Number(bundleId)
+      : undefined;
+
   // Claim hook (GraphQL) - only run if claimed source
   const {
     name: claimName,
@@ -89,16 +101,9 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     merkleDrops,
     isLoading: isClaimLoading,
     error: claimError,
-  } = useClaimStarterpack(
-    type === "claimed" && starterpackId !== undefined
-      ? String(starterpackId)
-      : undefined,
-  );
+  } = useClaimStarterpack(claimId);
 
   // Onchain hook (Smart contract) - only run if onchain source
-  const isStarterPack = type === "onchain" && starterpackId !== undefined;
-  const isBundle = type === "onchain" && bundleId !== undefined;
-
   const {
     metadata: onchainMetadata,
     quote: onchainQuote,
@@ -106,11 +111,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     isQuoteLoading: isOnchainQuoteLoading,
     error: onchainError,
   } = useOnchainStarterpack({
-    starterpackId: isStarterPack
-      ? Number(starterpackId)
-      : isBundle
-        ? Number(bundleId)
-        : undefined,
+    onchainId,
     registryAddress,
     isBundle,
   });
@@ -122,17 +123,15 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
 
   // Transform data based on source (claimed vs onchain)
   useEffect(() => {
-    if (starterpackId === undefined) return;
-
-    if (type === "claimed") {
+    if (claimId !== undefined) {
       setStarterpackDetails({
         type: "claimed",
-        id: String(starterpackId),
+        id: claimId,
         name: claimName,
         items: claimHookItems,
         merkleDrops,
       });
-    } else if (type === "onchain" && onchainMetadata) {
+    } else if (onchainId !== undefined && onchainMetadata) {
       // Onchain flow - show metadata as soon as it's available
       const purchaseItems: Item[] = onchainMetadata.items.map((item) => ({
         title: item.name,
@@ -144,7 +143,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
 
       setStarterpackDetails({
         type: "onchain",
-        id: Number(starterpackId),
+        id: onchainId,
         name: onchainMetadata.name,
         description: onchainMetadata.description,
         imageUri: onchainMetadata.imageUri,
@@ -156,13 +155,13 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
       });
     }
   }, [
-    starterpackId,
-    type,
     // Claim dependencies
+    claimId,
     claimName,
     claimHookItems,
     merkleDrops,
     // Onchain dependencies
+    onchainId,
     onchainMetadata,
     onchainQuote,
     isOnchainQuoteLoading,
