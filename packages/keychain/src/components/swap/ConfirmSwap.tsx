@@ -78,7 +78,11 @@ export function ConfirmSwap({
                   image={token.image || placeholder}
                   squaredImage={!token.rounded}
                   amount={formatAmount(token)}
-                  value={formatValue(token)}
+                  value={
+                    typeof token.value === "number"
+                      ? formatValue(token)
+                      : undefined
+                  }
                   clickable={false}
                   decreasing
                 />
@@ -90,7 +94,11 @@ export function ConfirmSwap({
                   image={token.image || placeholder}
                   squaredImage={!token.rounded}
                   amount={formatAmount(token)}
-                  value={formatValue(token)}
+                  value={
+                    typeof token.value === "number"
+                      ? formatValue(token)
+                      : undefined
+                  }
                   clickable={false}
                   increasing
                 />

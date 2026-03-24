@@ -56,6 +56,7 @@ export function TransactionSummary({
             icon={calls.length}
             centered={true}
             className={cn(
+              "text-xs",
               isExpanded ? "text-foreground-100" : "text-foreground-300",
               isOpened ? "bg-background-300" : "bg-background-200",
             )}
