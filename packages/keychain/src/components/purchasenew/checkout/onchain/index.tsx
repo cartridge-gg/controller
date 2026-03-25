@@ -379,7 +379,7 @@ export function OnchainCheckout() {
             <WalletSelector
               walletName={
                 isStripeSelected
-                  ? "Stripe Checkout"
+                  ? "Credit Card"
                   : isApplePaySelected
                     ? "Apple Pay"
                     : wallet.name

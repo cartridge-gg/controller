@@ -293,7 +293,7 @@ export function WalletSelectionDrawer({
                     className="bg-background-300 group-hover:bg-background-400"
                     rounded
                   />
-                  <span>Stripe Checkout</span>
+                  <span>Credit Card</span>
                 </div>
               </div>
               {isApplePayEnabled && (
