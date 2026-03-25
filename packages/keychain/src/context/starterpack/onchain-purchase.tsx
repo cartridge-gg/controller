@@ -456,15 +456,18 @@ export const OnchainPurchaseProvider = ({
           starterpackDetails.isConditional &&
           Array.isArray(issueSignature) &&
           issueSignature.length > 0;
-        const voucherKey = hash.computePoseidonHashOnElements([
-          bundleId,
-          shortString.encodeShortString(connectedHandle ?? ""),
-        ]);
+        const voucherKey =
+          hasSignature && connectedHandle
+            ? hash.computePoseidonHashOnElements([
+                bundleId,
+                shortString.encodeShortString(connectedHandle),
+              ])
+            : undefined;
         calldata = [
           ...calldata,
           1, // client: Option<ContractAddress>
           0, // client_percentage: u8
-          ...(hasSignature // voucher_key: Option<felt252>
+          ...(voucherKey // voucher_key: Option<felt252>
             ? [0x0, voucherKey]
             : [0x1]),
           ...(hasSignature // signature: Option<Span<felt252>>
