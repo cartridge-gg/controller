@@ -215,7 +215,7 @@ export const controllerConnector = new ControllerConnector({
     erc20: ["lords", "strk"],
   },
   // nums (achievements, quests)
-  slot: "nums-bal",
+  slot: "nums-mainnet",
   namespace: "NUMS",
   preset: "nums",
 
