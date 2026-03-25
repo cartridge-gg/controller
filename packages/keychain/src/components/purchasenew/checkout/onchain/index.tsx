@@ -87,7 +87,6 @@ export function OnchainCheckout() {
     if (clickCountRef.current === 3) {
       clickCountRef.current = 0;
       enableFeature("apple-pay-support");
-      enableFeature("stripe-checkout-support");
       onApplePaySelect();
     } else {
       clickTimerRef.current = setTimeout(() => {
