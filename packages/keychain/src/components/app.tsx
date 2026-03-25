@@ -56,7 +56,6 @@ import { HeadlessApprovalRoute } from "./connect/HeadlessApprovalRoute";
 import { useUpgrade } from "./provider/upgrade";
 import { Layout } from "@/components/layout";
 import { Disconnect } from "./disconnect";
-import { StarterpackProviders } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { CoinbaseCheckout } from "./purchasenew/checkout/coinbase";
 import { useAccount } from "@/hooks/account";
@@ -248,18 +247,12 @@ export function App() {
         <Route path="success" element={<Success />} />
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />
-        <Route
-          path="/purchase"
-          element={
-            <StarterpackProviders>
-              <Outlet />
-            </StarterpackProviders>
-          }
-        >
+        <Route path="/purchase" element={<Outlet />}>
           <Route
             path="credits"
             element={<Purchase type={PurchaseType.Credits} />}
           />
+          <Route path="bundle/:bundleId" element={<PurchaseStarterpack />} />
           <Route
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}

@@ -1,4 +1,5 @@
 import { gql } from "graphql-request";
+import { num } from "starknet";
 
 // Local types until backend is deployed and codegen updated
 // These match the backend schema definitions
@@ -109,4 +110,24 @@ export function getTwitterAuthUrl(username: string): string {
   const baseUrl =
     import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
   return `${baseUrl}/twitter/init?username=${encodeURIComponent(username)}`;
+}
+
+export function getTwitterFollowUrl(
+  username: string,
+  targetAccount: string,
+  targetAccountId?: string,
+  bundleId?: number,
+  chainId?: string,
+): { url: string; body: string } {
+  const baseUrl =
+    import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
+  const url = `${baseUrl}/twitter/follow`;
+  const body = {
+    username,
+    target_account: targetAccount,
+    target_account_id: targetAccountId,
+    bundle_id: bundleId !== undefined ? num.toHex(bundleId) : undefined,
+    chain_id: bundleId !== undefined ? chainId : undefined,
+  };
+  return { url, body: JSON.stringify(body) };
 }

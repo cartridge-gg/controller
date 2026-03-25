@@ -11,8 +11,11 @@ import {
 
 // Mock starterpack context
 const mockStarterpackValue = {
+  registryAddress: undefined,
+  bundleId: undefined,
+  setBundle: () => {},
   starterpackId: undefined,
-  setStarterpackId: () => {},
+  setStarterpack: () => {},
   starterpackDetails: undefined,
   isStarterpackLoading: false,
   claimItems: [],
@@ -22,6 +25,8 @@ const mockStarterpackValue = {
   displayError: undefined,
   setDisplayError: () => {},
   clearError: () => {},
+  socialClaimOptions: undefined,
+  socialClaimConditions: undefined,
 };
 
 // Mock onchain purchase context
@@ -30,6 +35,7 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   quantity: 1,
   incrementQuantity: () => {},
   decrementQuantity: () => {},
+  setIssueSignature: () => {},
   selectedWallet: undefined,
   selectedPlatform: undefined,
   walletAddress: undefined,
