@@ -104,7 +104,9 @@ const CreateSessionLayout = ({
     if (policies && !hasTrackedRequest.current) {
       hasTrackedRequest.current = true;
       captureAnalyticsEvent(posthog, "session_requested", {
-        policy_count: policies.contracts ? Object.keys(policies.contracts).length : 0,
+        policy_count: policies.contracts
+          ? Object.keys(policies.contracts).length
+          : 0,
         has_spending_limits: hasTokenApprovals,
         verified: !!policies.verified,
       });
@@ -143,7 +145,9 @@ const CreateSessionLayout = ({
         const processedPolicies = processPolicies(policies, toggleOff);
         await controller.createSession(origin, expiresAt, processedPolicies);
         captureAnalyticsEvent(posthog, "session_approved", {
-          policy_count: policies.contracts ? Object.keys(policies.contracts).length : 0,
+          policy_count: policies.contracts
+            ? Object.keys(policies.contracts).length
+            : 0,
           duration_ms: Math.round(performance.now() - sessionStartTime.current),
         });
         successCallback?.();
