@@ -181,6 +181,13 @@ export function ChooseSignupMethodForm({
     setSelectedAuth(undefined);
   };
 
+  useEffect(() => {
+    // sheet closed from password form
+    if (!isOpen && showPasswordInput) {
+      handlePasswordCancel();
+    }
+  }, [isOpen, showPasswordInput]);
+
   return (
     <SheetContent
       side="bottom"
