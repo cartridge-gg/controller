@@ -2,15 +2,19 @@ import { Policy, SessionPolicies } from "@cartridge/presets";
 import {
   AddInvokeTransactionResult,
   ChainId,
+  RequestFn,
   Signature,
   TypedData,
+  WalletEventListener,
 } from "@starknet-io/types-js";
+import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
 import {
   Abi,
   BigNumberish,
   Call,
   constants,
   InvocationsDetails,
+  WalletAccount,
 } from "starknet";
 import { KeychainIFrame } from "./iframe";
 import {
@@ -342,3 +346,71 @@ export type HeadlessConnectReply =
       message?: string;
     }
   | ConnectError;
+
+/**
+ * Public interface for the Controller.
+ * Both `ControllerProvider` (bundled) and the remote SDK satisfy this contract.
+ */
+export interface Controller {
+  // Identity (from BaseProvider / StarknetWindowObject)
+  id: string;
+  name: string;
+  version: string;
+  icon: string;
+  account?: WalletAccount;
+
+  // Lifecycle
+  isReady(): boolean;
+  probe(): Promise<WalletAccount | undefined>;
+  connect(
+    options?: AuthOptions | ConnectOptions,
+  ): Promise<WalletAccount | undefined>;
+  disconnect(): Promise<void>;
+  logout(): Promise<void>;
+
+  // Chain
+  switchStarknetChain(chainId: string): Promise<boolean>;
+  rpcUrl(): string;
+
+  // UI
+  openProfile(tab?: ProfileContextTypeVariant): Promise<void>;
+  openProfileTo(to: string): Promise<void>;
+  openProfileAt(at: string): Promise<void>;
+  openSettings(): void;
+  close(): Promise<void>;
+
+  // Session
+  updateSession(
+    options?: UpdateSessionOptions,
+  ): Promise<ConnectReply | undefined>;
+  revoke(origin: string, policy: Policy[]): Promise<void | null>;
+
+  // User info
+  username(): string | undefined | Promise<string | undefined>;
+  lookupUsername(username: string): Promise<HeadlessUsernameLookupResult>;
+  delegateAccount(): Promise<string | null | undefined>;
+
+  // Purchases / bundles
+  openPurchaseCredits(): void;
+  openBundle(
+    id: number,
+    registryAddress: string,
+    options?: BundleOptions,
+  ): Promise<void>;
+  openStarterPack(
+    id: string | number,
+    options?: StarterpackOptions,
+  ): Promise<void>;
+  openExecute(calls: Call | Call[], chainId?: string): Promise<any>;
+
+  // Auth redirect
+  open(options?: OpenOptions): void;
+
+  // Wallet standard
+  asWalletStandard(): WalletWithStarknetFeatures;
+
+  // Events (from StarknetWindowObject)
+  on: WalletEventListener;
+  off: WalletEventListener;
+  request: RequestFn;
+}

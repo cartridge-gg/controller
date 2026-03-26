@@ -22,6 +22,7 @@ import {
   ConnectError,
   ConnectReply,
   ConnectOptions,
+  Controller,
   ControllerOptions,
   IFrames,
   Keychain,
@@ -37,7 +38,10 @@ import {
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
 
-export default class ControllerProvider extends BaseProvider {
+export default class ControllerProvider
+  extends BaseProvider
+  implements Controller
+{
   private keychain?: AsyncMethodReturns<Keychain>;
   private options: ControllerOptions;
   private iframes?: IFrames;

@@ -11,10 +11,11 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build:deps": "pnpm build:browser && pnpm build:node",
+    "build:deps": "pnpm build:browser && pnpm build:node && pnpm build:sdk",
     "dev": "vite build --watch",
     "build:browser": "vite build",
     "build:node": "tsup --config tsup.node.config.ts",
+    "build:sdk": "vite build --config vite.sdk.config.js",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",

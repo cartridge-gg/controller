@@ -7,3 +7,5 @@ export * from "./policies";
 export * from "./wallets";
 export * from "./toast";
 export * from "@cartridge/presets";
+export { init } from "./loader";
+export type { InitOptions } from "./loader";
