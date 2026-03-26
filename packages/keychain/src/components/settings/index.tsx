@@ -64,7 +64,12 @@ export function Settings() {
 
   return (
     <Sheet>
-      <HeaderInner variant="compressed" title="Settings" Icon={GearIcon} />
+      <HeaderInner
+        className="pb-2"
+        variant="compressed"
+        title="Settings"
+        Icon={GearIcon}
+      />
       <LayoutContent>
         <SignersSection controllerQuery={controllerQuery} />
 
@@ -145,7 +150,7 @@ export function Settings() {
         <SessionsSection />
       </LayoutContent>
 
-      <LayoutFooter>
+      <LayoutFooter className="pt-2">
         <SheetTrigger asChild>
           <Button type="button" variant="secondary" className="gap-2">
             <SignOutIcon />
