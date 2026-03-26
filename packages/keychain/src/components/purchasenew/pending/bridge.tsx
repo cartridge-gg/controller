@@ -226,42 +226,38 @@ export function BridgePending({
                   isLoading={!depositCompleted}
                 />
               </div>
-              {/* TODO: temporarily hidden for apple-pay, only showing Coinbase confirmation */}
-              {paymentMethod !== "apple-pay" && (
-                <>
-                  <TransitionStep isVisible={showBridging}>
-                    <ConfirmingTransaction
-                      title={
-                        paymentCompleted
-                          ? "Bridged to Starknet"
-                          : "Bridging to Starknet"
-                      }
-                      externalLink={
-                        orderTxHash || initialBridgeHash
-                          ? `https://layerswap.io/explorer/${orderTxHash || initialBridgeHash}`
-                          : undefined
-                      }
-                      isLoading={!paymentCompleted}
-                    />
-                  </TransitionStep>
-                  <TransitionStep isVisible={showPurchasing}>
-                    <ConfirmingTransaction
-                      title={
-                        purchaseCompleted
-                          ? "Purchased on Starknet"
-                          : "Purchasing on Starknet"
-                      }
-                      externalLink={
-                        purchaseTxHash
-                          ? getExplorer("starknet", purchaseTxHash, isMainnet)
-                              ?.url
-                          : undefined
-                      }
-                      isLoading={!purchaseCompleted}
-                    />
-                  </TransitionStep>
-                </>
-              )}
+              <TransitionStep
+                isVisible={showBridging || paymentMethod === "apple-pay"}
+              >
+                <ConfirmingTransaction
+                  title={
+                    paymentCompleted
+                      ? "Bridged to Starknet"
+                      : "Bridging to Starknet"
+                  }
+                  externalLink={
+                    orderTxHash || initialBridgeHash
+                      ? `https://layerswap.io/explorer/${orderTxHash || initialBridgeHash}`
+                      : undefined
+                  }
+                  isLoading={!paymentCompleted}
+                />
+              </TransitionStep>
+              <TransitionStep isVisible={showPurchasing}>
+                <ConfirmingTransaction
+                  title={
+                    purchaseCompleted
+                      ? "Purchased on Starknet"
+                      : "Purchasing on Starknet"
+                  }
+                  externalLink={
+                    purchaseTxHash
+                      ? getExplorer("starknet", purchaseTxHash, isMainnet)?.url
+                      : undefined
+                  }
+                  isLoading={!purchaseCompleted}
+                />
+              </TransitionStep>
             </div>
           )}
         <Button
