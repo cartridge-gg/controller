@@ -31,6 +31,8 @@ import { Quote } from "@/context";
 import { Receiving } from "../receiving";
 import { getWallet } from "../wallet/config";
 import { num } from "starknet";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent } from "@/types/analytics";
 
 export function PurchaseStarterpack() {
   const { starterpackId, bundleId } = useParams();
@@ -45,6 +47,13 @@ export function PurchaseStarterpack() {
     setBundle,
     setStarterpack,
   } = useStarterpackContext();
+
+  useEffect(() => {
+    captureAnalyticsEvent(posthog, "purchase_started", {
+      type: bundleId ? "bundle" : "starterpack",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isStarterpackLoading) return;

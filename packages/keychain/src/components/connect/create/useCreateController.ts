@@ -45,6 +45,8 @@ import {
   canAutoCreateSession,
   createVerifiedSession,
 } from "@/utils/connection/session-creation";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -1041,23 +1043,52 @@ export function useCreateController({
 
       setAuthMethod(authenticationMethod);
 
+      const method = authenticationMethod ?? "webauthn";
+      const startTime = performance.now();
+
+      if (exists) {
+        captureAnalyticsEvent(posthog, "login_started", {});
+      } else {
+        captureAnalyticsEvent(posthog, "signup_started", {
+          has_existing_account: false,
+        });
+        captureAnalyticsEvent(posthog, "signup_method_selected", { method });
+      }
+
       try {
         if (exists) {
-          await handleLogin(
-            username,
-            authenticationMethod ?? "webauthn",
-            password,
-          );
+          await handleLogin(username, method, password);
+          // Only emit completed if controller was actually set
+          // (handleLogin may return early for popup/redirect/cancel)
+          if (window.controller) {
+            captureAnalyticsEvent(posthog, "login_completed", {
+              method,
+              duration_ms: Math.round(performance.now() - startTime),
+            });
+          }
         } else {
-          await handleSignup(
-            username,
-            authenticationMethod ?? "webauthn",
-            password,
-          );
+          await handleSignup(username, method, password);
+          if (window.controller) {
+            captureAnalyticsEvent(posthog, "signup_completed", {
+              method,
+              duration_ms: Math.round(performance.now() - startTime),
+            });
+          }
         }
       } catch (e: unknown) {
         console.error(e);
         setError(e as Error);
+        if (exists) {
+          captureAnalyticsEvent(posthog, "login_failed", {
+            method,
+            error_code: sanitizeErrorCode(e),
+          });
+        } else {
+          captureAnalyticsEvent(posthog, "signup_failed", {
+            method,
+            error_code: sanitizeErrorCode(e),
+          });
+        }
       } finally {
         if (exists) {
           setWaitingForConfirmation(false);

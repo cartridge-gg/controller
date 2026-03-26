@@ -24,6 +24,8 @@ import {
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { SpendingLimitPage } from "./SpendingLimitPage";
 import { useNavigation } from "@/context/navigation";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -76,6 +78,7 @@ const CreateSessionLayout = ({
     useCreateSession();
 
   const { controller, theme, origin } = useConnection();
+  const sessionStartTime = useRef(performance.now());
 
   const hasTokenApprovals = useMemo(
     () => hasApprovalPolicies(policies),
@@ -94,6 +97,22 @@ const CreateSessionLayout = ({
   useEffect(() => {
     setStep(defaultStep);
   }, [defaultStep]);
+
+  // Track session requested once when policies are available
+  const hasTrackedRequest = useRef(false);
+  useEffect(() => {
+    if (policies && !hasTrackedRequest.current) {
+      hasTrackedRequest.current = true;
+      captureAnalyticsEvent(posthog, "session_requested", {
+        policy_count: policies.contracts
+          ? Object.keys(policies.contracts).length
+          : 0,
+        has_spending_limits: hasTokenApprovals,
+        verified: !!policies.verified,
+      });
+      sessionStartTime.current = performance.now();
+    }
+  }, [policies, hasTokenApprovals]);
 
   useEffect(() => {
     const callback = (): void => {
@@ -125,9 +144,18 @@ const CreateSessionLayout = ({
 
         const processedPolicies = processPolicies(policies, toggleOff);
         await controller.createSession(origin, expiresAt, processedPolicies);
+        captureAnalyticsEvent(posthog, "session_approved", {
+          policy_count: policies.contracts
+            ? Object.keys(policies.contracts).length
+            : 0,
+          duration_ms: Math.round(performance.now() - sessionStartTime.current),
+        });
         successCallback?.();
       } catch (e) {
         setError(e as unknown as Error);
+        captureAnalyticsEvent(posthog, "session_register_failed", {
+          error_code: sanitizeErrorCode(e),
+        });
       } finally {
         setIsConnecting(false);
       }
