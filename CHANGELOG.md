@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.13.11-alpha.1] - 2026-03-26
+
+### ✨ New Features
+- **@cartridge/keychain**: Added starter pack social claim functionality for enhanced social integration and reward distribution (#2498)
+- **@cartridge/keychain**: Added SMS authentication to signup/login flows, providing an additional authentication method for improved accessibility (#2500)
+- **@cartridge/keychain**: Added swap detection for AVNU and LayerSwap (LS2) protocols, enabling better transaction recognition and user experience (#2493)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced Safari popup blocked error messaging to provide clearer guidance for Safari users experiencing popup issues (#2506)
+- **@cartridge/keychain**: Improved payment UI by renaming "Stripe Checkout" to "Credit Card" for clearer user understanding (#2509)
+- **@cartridge/keychain**: Removed feature gate for Stripe checkout in starterpacks, making credit card payments generally available (#2508)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed keychain disconnection to properly disconnect before emitting state changes, preventing race conditions (#2505)
+- **@cartridge/keychain**: Enhanced WASM error handling and updated controller-wasm to v0.10.0 for improved stability (#2502)
+- **@cartridge/keychain**: Removed Storage Access console logs to reduce console noise in production environments (#2507)
+- **@cartridge/keychain**: Removed quests functionality to streamline the user interface (#2501)
+
+### 📦 Dependencies
+- **controller-wasm**: Updated to version 0.10.0 for improved WASM functionality and error handling (#2502)
+- **Turnkey browser SDKs**: Upgraded to version 5 for enhanced security and performance (#2499)
+
 ## [0.13.10] - 2026-03-19
 
 ### ✨ New Features
