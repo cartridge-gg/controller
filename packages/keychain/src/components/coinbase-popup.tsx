@@ -188,6 +188,13 @@ export function CoinbasePopup() {
 
         case "onramp_api.load_error":
           setIframeReady(true); // hide spinner even on error
+          // Ignore "not supported" errors — Coinbase falls back to QR code
+          // when Apple Pay is unavailable (e.g. Chrome on non-Safari browsers).
+          if (
+            data.data?.errorMessage?.toLowerCase().includes("not supported")
+          ) {
+            break;
+          }
           setError(
             data.data?.errorMessage ||
               "Failed to load payment. Please close and try again.",
