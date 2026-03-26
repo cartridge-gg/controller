@@ -332,6 +332,15 @@ export function useCoinbase({
 
           case "onramp_api.polling_error":
           case "onramp_api.load_error":
+            // Ignore "not supported" errors — Coinbase falls back to QR code
+            // when Apple Pay is unavailable (e.g. Chrome on non-Safari browsers).
+            if (data?.errorMessage?.toLowerCase().includes("not supported")) {
+              console.warn(
+                "[coinbase-hook] Ignoring 'not supported' error (non-terminal):",
+                data?.errorMessage,
+              );
+              break;
+            }
             setOrderStatus(CoinbaseOnrampStatus.Failed);
             terminalReachedRef.current = true;
             stopPoll();
