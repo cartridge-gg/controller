@@ -32,7 +32,7 @@ export function SpendingLimitCard({
   policies,
   showCost = true,
 }: SpendingLimitCardProps) {
-  const { tokens, registerPair } = useTokens();
+  const { tokens, registerPair, isLoading } = useTokens();
   const registeredAddresses = useRef<Set<string>>(new Set());
 
   const processedTokens = useMemo(() => {
@@ -149,7 +149,7 @@ export function SpendingLimitCard({
                     </p>
                   </div>
                 ) : (
-                  <Skeleton className="w-16 h-5" />
+                  isLoading && <Skeleton className="w-16 h-5" />
                 )
               ) : null}
             </div>
