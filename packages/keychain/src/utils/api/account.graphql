@@ -75,6 +75,7 @@ query AccountPrivate {
     phoneNumberVerifiedAt
     firstName
     lastName
+    dob
     proveVerifiedAt
     verificationStatus
   }

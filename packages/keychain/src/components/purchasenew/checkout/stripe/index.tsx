@@ -13,16 +13,32 @@ export function StripeCheckout() {
   const { clearError, starterpackDetails } = useStarterpackContext();
   const { stripePromise, clientSecret, costDetails } =
     useCreditPurchaseContext();
-  const { navigate } = useNavigation();
-  const lineItemLabel =
-    starterpackDetails && isOnchainStarterpack(starterpackDetails)
-      ? "Starterpack"
-      : "Credits";
+  const { navigate, setOnBackCallback } = useNavigation();
+  const isOnchainStarterpackCheckout =
+    !!starterpackDetails && isOnchainStarterpack(starterpackDetails);
+  const lineItemLabel = isOnchainStarterpackCheckout
+    ? "Starterpack"
+    : "Credits";
 
   useEffect(() => {
     clearError();
     return () => clearError();
   }, [clearError]);
+
+  useEffect(() => {
+    if (!isOnchainStarterpackCheckout) {
+      setOnBackCallback(undefined);
+      return;
+    }
+
+    setOnBackCallback(
+      () => () => navigate("/purchase/checkout/onchain", { replace: true }),
+    );
+
+    return () => {
+      setOnBackCallback(undefined);
+    };
+  }, [isOnchainStarterpackCheckout, navigate, setOnBackCallback]);
 
   const appearance = {
     theme: "flat",

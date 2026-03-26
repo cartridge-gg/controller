@@ -141,6 +141,8 @@ export enum AccountOrderField {
 
 export type AccountPrivate = {
   __typename?: "AccountPrivate";
+  /** Date of birth in YYYY-MM-DD format. */
+  dob?: Maybe<Scalars["String"]>;
   firstName?: Maybe<Scalars["String"]>;
   lastName?: Maybe<Scalars["String"]>;
   phoneNumber?: Maybe<Scalars["String"]>;
@@ -216,6 +218,8 @@ export type AccountUpdateInput = {
 };
 
 export type AccountVerifyInput = {
+  /** Date of birth in YYYY-MM-DD format. */
+  dob?: InputMaybe<Scalars["String"]>;
   emailAddress?: InputMaybe<Scalars["String"]>;
   firstName?: InputMaybe<Scalars["String"]>;
   lastName?: InputMaybe<Scalars["String"]>;
@@ -7109,6 +7113,7 @@ export type AccountPrivateQuery = {
     phoneNumberVerifiedAt?: string | null;
     firstName?: string | null;
     lastName?: string | null;
+    dob?: string | null;
     proveVerifiedAt?: string | null;
     verificationStatus?: string | null;
   } | null;
@@ -7767,6 +7772,7 @@ export const AccountPrivateDocument = `
     phoneNumberVerifiedAt
     firstName
     lastName
+    dob
     proveVerifiedAt
     verificationStatus
   }

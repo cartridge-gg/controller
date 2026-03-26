@@ -19,26 +19,11 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   const [error, setError] = useState<Error | null>(null);
 
   const isLiveMode = useMemo(() => {
-    if (import.meta.env.DEV) {
-      // Always use test mode in local dev
-      return false;
-    }
-
     if (isSlot) {
-      // Slot is live now and should always use live mode
       return true;
     }
 
-    if (
-      import.meta.env.PROD &&
-      controller?.chainId() === constants.StarknetChainId.SN_MAIN
-    ) {
-      // In prod, only use live mode if on mainnet
-      return true;
-    }
-
-    // Default to test mode
-    return false;
+    return controller?.chainId() === constants.StarknetChainId.SN_MAIN;
   }, [controller, isSlot]);
 
   const stripePromise = useMemo(
