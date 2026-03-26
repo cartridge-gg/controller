@@ -2,7 +2,6 @@
 
 import { toast } from "@cartridge/controller";
 import { useAccount } from "@starknet-react/core";
-import { mainnet } from "@starknet-react/chains";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button } from "@cartridge/ui";
 import {
@@ -16,9 +15,8 @@ export const BUNDLE_REGISTRY_SEPOLIA =
   "0x6361108a877e3bf74e3d92242907d40315824555d50bd7cad08a021021ed8a4";
 
 export function Profile() {
-  const { account, connector, chainId } = useAccount();
+  const { account, connector } = useAccount();
   const ctrlConnector = connector as unknown as ControllerConnector;
-  const isMainnet = chainId === mainnet.id;
 
   const handleToastDemo = () => {
     // Demonstrate different toast variants
@@ -80,48 +78,6 @@ export function Profile() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2>Open Starterpack</h2>
-      <div className="flex flex-wrap gap-1">
-        <Button
-          onClick={() =>
-            ctrlConnector.controller.openStarterPack(0, {
-              onPurchaseComplete: () => {
-                console.log("Starterpack play callback fired.");
-              },
-            })
-          }
-        >
-          Nums
-        </Button>
-        <Button
-          onClick={() =>
-            ctrlConnector.controller.username()?.then((username) => {
-              ctrlConnector.controller.openBundle(
-                isMainnet ? 0 : 0, // bundleId
-                isMainnet ? BUNDLE_REGISTRY_MAINNET : BUNDLE_REGISTRY_SEPOLIA,
-                {
-                  onPurchaseComplete: () => {
-                    console.log("Bundle play callback fired.");
-                  },
-                  socialClaimOptions: {
-                    shareMessage: `Check out @numsgg!\nhttps://sepolia.nums.gg/?ref=${username}`,
-                  },
-                },
-              );
-            })
-          }
-        >
-          Social Bundle
-        </Button>
-      </div>
-
-      <h2>Toast Demo</h2>
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap gap-1">
-          <Button onClick={handleToastDemo}>Run demo</Button>
-        </div>
-      </div>
-
       <h2>Open Profile</h2>
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap gap-1">
@@ -230,6 +186,13 @@ export function Profile() {
           >
             Close after 3 seconds...
           </Button>
+        </div>
+      </div>
+
+      <h2>Toast Demo</h2>
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-wrap gap-1">
+          <Button onClick={handleToastDemo}>Run demo</Button>
         </div>
       </div>
     </div>

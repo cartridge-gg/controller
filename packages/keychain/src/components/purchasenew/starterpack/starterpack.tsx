@@ -1,3 +1,4 @@
+import React from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import {
   useNavigation,
@@ -322,7 +323,11 @@ export function OnchainStarterPackInner({
           onClick={onWalletSelect}
         >
           <div className="flex gap-2">
-            <span className="m-auto">{wallet.subIcon}</span>
+            <span className="m-auto">
+              {React.cloneElement(wallet.subIcon as React.ReactElement, {
+                size: "sm",
+              })}
+            </span>
             <span className="m-auto text-sm">Purchase with {wallet.name}</span>
           </div>
           <ListIcon size="xs" variant="solid" />
