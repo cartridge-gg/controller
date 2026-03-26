@@ -1,3 +1,4 @@
+import React from "react";
 import { ListIcon } from "@cartridge/ui";
 
 interface WalletSelectorProps {
@@ -19,7 +20,9 @@ export function WalletSelector({
       onClick={onClick}
     >
       <div className="flex gap-2">
-        <span className="m-auto">{walletIcon}</span>
+        <span className="m-auto">
+          {React.cloneElement(walletIcon as React.ReactElement, { size: "sm" })}
+        </span>
         <span className="m-auto text-sm">Purchase with {walletName}</span>
         {bridgeFrom ? `(${bridgeFrom})` : ""}
       </div>
