@@ -234,7 +234,12 @@ export const CreateAccount = React.forwardRef<
           className,
         )}
       >
-        <div className="flex items-center justify-between gap-1 bg-background-200 rounded z-10">
+        <div
+          className={cn(
+            "flex items-center justify-between gap-1 bg-background-200 rounded z-10",
+            selectedAccount?.type === "create-new" && "rounded-b-none",
+          )}
+        >
           <div
             className="h-12 flex items-center justify-between gap-1 flex-1 cursor-pointer p-2"
             onClick={() => {
