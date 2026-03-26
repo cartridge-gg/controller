@@ -15,6 +15,8 @@ import { useState } from "react";
 import { ControllerErrorAlert } from "../ErrorAlert";
 import { networkWalletData } from "./wallet/config";
 import { useParams } from "react-router-dom";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent } from "@/types/analytics";
 
 export function PaymentMethod() {
   const { platforms } = useParams();
@@ -36,6 +38,9 @@ export function PaymentMethod() {
             text="Credit Card"
             icon={<CreditCardIcon variant="solid" />}
             onClick={async () => {
+              captureAnalyticsEvent(posthog, "purchase_method_selected", {
+                method: "stripe",
+              });
               setIsLoading(true);
               await onCreditCardPurchase();
               navigate("/purchase/checkout/stripe");
@@ -53,7 +58,12 @@ export function PaymentMethod() {
               key={network.platform}
               text={network.name}
               icon={network.icon}
-              onClick={() => navigate(`/purchase/wallet/${network.platform}`)}
+              onClick={() => {
+                captureAnalyticsEvent(posthog, "purchase_method_selected", {
+                  method: network.platform,
+                });
+                navigate(`/purchase/wallet/${network.platform}`);
+              }}
             />
           );
         })}

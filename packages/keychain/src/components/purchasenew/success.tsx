@@ -14,7 +14,7 @@ import {
   useCreditPurchaseContext,
   Item,
 } from "@/context";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ConfirmingTransaction } from "./pending";
 import { getExplorer } from "@/hooks/starterpack/layerswap";
 import { StarterpackType } from "@/context";
@@ -24,6 +24,8 @@ import {
   StripePaymentStatus,
   useStripePaymentQuery,
 } from "@/utils/api";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent } from "@/types/analytics";
 
 export function Success() {
   const { starterpackDetails, transactionHash, claimItems } =
@@ -150,6 +152,17 @@ export function StripePurchaseSuccess({
     fulfillmentStatus === PurchaseFulfillmentStatus.Confirmed;
   const isFulfillmentFailed =
     fulfillmentStatus === PurchaseFulfillmentStatus.Failed;
+
+  const hasCapturedPurchase = useRef(false);
+
+  useEffect(() => {
+    if (isPurchaseComplete && !hasCapturedPurchase.current) {
+      hasCapturedPurchase.current = true;
+      captureAnalyticsEvent(posthog, "purchase_completed", {
+        method: "stripe",
+      });
+    }
+  }, [isPurchaseComplete]);
 
   useEffect(() => {
     if (paymentStatus !== StripePaymentStatus.Succeeded) {
@@ -279,6 +292,12 @@ export function PurchaseSuccessInner({
   const { isMainnet } = useConnection();
   const handlePlay = useStarterpackPlayHandler();
   const quantityText = quantity > 1 ? `(${quantity})` : "";
+
+  useEffect(() => {
+    captureAnalyticsEvent(posthog, "purchase_completed", {
+      method: "onchain",
+    });
+  }, []);
 
   return (
     <>
