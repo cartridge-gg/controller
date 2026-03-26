@@ -76,7 +76,7 @@ export function ConfirmSwap({
                   key={token.address}
                   title={token.name}
                   image={token.image || placeholder}
-                  squaredImage={!token.rounded}
+                  roundedImage={token.rounded}
                   amount={formatAmount(token)}
                   value={
                     typeof token.value === "number"
@@ -92,7 +92,7 @@ export function ConfirmSwap({
                   key={token.address}
                   title={token.name}
                   image={token.image || placeholder}
-                  squaredImage={!token.rounded}
+                  roundedImage={token.rounded}
                   amount={formatAmount(token)}
                   value={
                     typeof token.value === "number"
