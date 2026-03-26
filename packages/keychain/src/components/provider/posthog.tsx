@@ -7,7 +7,7 @@ export const posthog = new PostHogWrapper(
   import.meta.env.VITE_POSTHOG_KEY ?? "api key",
   {
     host: import.meta.env.VITE_POSTHOG_HOST,
-    autocapture: true,
+    autocapture: false,
   },
 );
 
@@ -49,8 +49,15 @@ export function PostHogProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (origin) {
       posthog.group("company", origin);
+      posthog.register({ origin });
     }
   }, [origin]);
+
+  useEffect(() => {
+    if (controller) {
+      posthog.register({ chain_id: controller.chainId });
+    }
+  }, [controller]);
 
   return (
     <PostHogContext.Provider value={{ posthog }}>
