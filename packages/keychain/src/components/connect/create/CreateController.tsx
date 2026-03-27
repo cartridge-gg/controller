@@ -5,6 +5,7 @@ import { usePostHog } from "@/components/provider/posthog";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
 import { allUseSameAuth } from "@/utils/controller";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { AuthOption, AuthOptions } from "@cartridge/controller";
 import {
   CartridgeLogo,
@@ -31,6 +32,7 @@ import {
 } from "@/hooks/viewport";
 import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
+import { isIframe } from "@cartridge/ui/utils";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -46,6 +48,7 @@ interface CreateControllerViewProps {
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
   onSubmit: (authenticationMode?: AuthOption) => void;
+  onStorageAccessRequest: () => Promise<void>;
   onKeyDown: (e: React.KeyboardEvent) => void;
   isSlot?: boolean;
   authenticationStep: AuthenticationStep;
@@ -87,6 +90,7 @@ function CreateControllerForm({
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
+  onStorageAccessRequest,
   onKeyDown,
   onSubmit,
   waitingForConfirmation,
@@ -202,12 +206,14 @@ function CreateControllerForm({
           height: layoutHeight,
         }}
         ref={layoutRef}
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           // Don't submit if dropdown is open
           if (isDropdownOpen) {
             return;
           }
+
+          await onStorageAccessRequest();
 
           if (keyboardIsOpen) {
             // If keyboard is open, mark for pending submit after it closes
@@ -305,6 +311,7 @@ export function CreateControllerView({
   onUsernameFocus,
   onUsernameClear,
   onSubmit,
+  onStorageAccessRequest,
   onKeyDown,
   authenticationStep,
   setAuthenticationStep,
@@ -354,6 +361,7 @@ export function CreateControllerView({
           onUsernameChange={onUsernameChange}
           onUsernameFocus={onUsernameFocus}
           onUsernameClear={onUsernameClear}
+          onStorageAccessRequest={onStorageAccessRequest}
           onSubmit={onSubmit}
           onKeyDown={onKeyDown}
           waitingForConfirmation={waitingForConfirmation}
@@ -372,6 +380,7 @@ export function CreateControllerView({
           isLoading={isLoading}
           validation={validation}
           onSubmit={onSubmit}
+          onStorageAccessRequest={onStorageAccessRequest}
           authOptions={authOptions}
           isOpen={authenticationStep === AuthenticationStep.ChooseMethod}
         />
@@ -536,6 +545,21 @@ export function CreateController({
     ],
   );
 
+  const handleStorageAccessRequest = useCallback(async () => {
+    if (!isIframe()) {
+      return;
+    }
+
+    try {
+      await requestStorageAccess();
+    } catch (error) {
+      console.error(
+        "[CreateController] Storage access request failed:",
+        error,
+      );
+    }
+  }, []);
+
   useEffect(() => {
     if (
       pendingSubmitRef.current &&
@@ -630,8 +654,6 @@ export function CreateController({
     canSubmit,
     authenticationStep,
     isDropdownOpen,
-    setAuthMethod,
-    handleFormSubmit,
   ]);
 
   // Reset authMethod and pendingSubmit when sheet is closed
@@ -656,6 +678,7 @@ export function CreateController({
         onUsernameFocus={handleUsernameFocus}
         onUsernameClear={handleUsernameClear}
         onSubmit={handleFormSubmit}
+        onStorageAccessRequest={handleStorageAccessRequest}
         onKeyDown={handleKeyDown}
         authenticationStep={authenticationStep}
         setAuthenticationStep={setAuthenticationStep}
