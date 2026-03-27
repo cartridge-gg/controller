@@ -21,6 +21,11 @@ import {
   Card,
   CardContent,
   HeaderInner,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@cartridge/ui";
 import { useNavigation } from "@/context";
 import { useLocation } from "react-router-dom";
@@ -192,6 +197,8 @@ export function Verification() {
   const [error, setError] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isTransientSuccess, setIsTransientSuccess] = useState(false);
+
+  const COUNTRY_CODE = "+1";
 
   const sendEmailMutation = useSendEmailVerificationMutation();
   const verifyEmailMutation = useVerifyEmailMutation();
@@ -416,23 +423,75 @@ export function Verification() {
       );
     case "PHONE_INPUT":
       return (
-        <VerificationStepView
-          title="Phone Verification"
-          icon={<MobileIcon variant="solid" />}
-          label="Phone Number"
-          value={phone}
-          placeholder="111-222-333"
-          onChange={(val) => {
-            setPhone(val);
-            setError(null);
-          }}
-          onContinue={handleSendPhone}
-          isLoading={sendPhoneMutation.isLoading}
-          type="tel"
-          autoComplete="tel"
-          name="phone"
-          error={error}
-        />
+        <>
+          <HeaderInner
+            title="Phone Verification"
+            icon={<MobileIcon variant="solid" />}
+            variant="compressed"
+          />
+          <LayoutContent className="p-4 gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs text-foreground-300 font-medium">
+                Phone Number
+              </label>
+              <div className="flex w-full gap-2">
+                <Select value={COUNTRY_CODE} disabled>
+                  <SelectTrigger className="w-16 shrink-0 h-10 justify-between">
+                    <SelectValue placeholder={COUNTRY_CODE} />
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 10 6"
+                      className="h-1.5 w-2.5 shrink-0 text-foreground-300"
+                      fill="none"
+                    >
+                      <path
+                        d="M1 1L5 5L9 1"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={COUNTRY_CODE}>{COUNTRY_CODE}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="min-w-0 flex-1">
+                  <Input
+                    className="w-full"
+                    name="phone"
+                    autoComplete="tel-national"
+                    placeholder="111-222-3333"
+                    value={phone}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setPhone(e.target.value);
+                      setError(null);
+                    }}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                      e.key === "Enter" && phone && handleSendPhone()
+                    }
+                    type="tel"
+                  />
+                </div>
+              </div>
+            </div>
+          </LayoutContent>
+          <LayoutFooter>
+            {error && (
+              <ErrorAlert title="Error" description={error} isExpanded={true} />
+            )}
+            <Button
+              variant="primary"
+              className="w-full"
+              onClick={handleSendPhone}
+              isLoading={sendPhoneMutation.isLoading}
+              disabled={!phone}
+            >
+              CONTINUE
+            </Button>
+          </LayoutFooter>
+        </>
       );
     case "PHONE_CODE":
       return (
