@@ -73,12 +73,16 @@ export function TransactionPendingBase({
   }, [controller, transactionHash]);
 
   useEffect(() => {
-    if (!isPending && onCompleted) {
+    if (!isPending && onCompleted && handlePlay) {
+      setTimeout(() => {
+        handlePlay();
+      }, 1000);
+    } else if (!isPending && onCompleted) {
       setTimeout(() => {
         onCompleted();
       }, 1000);
     }
-  }, [isPending, onCompleted]);
+  }, [isPending, onCompleted, handlePlay]);
 
   const receivingTitle = quantityText
     ? `Receiving ${quantityText}`
