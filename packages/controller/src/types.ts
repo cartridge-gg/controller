@@ -283,8 +283,6 @@ export type KeychainOptions = IFrameOptions & {
   feeSource?: FeeSource;
   /** Signup options (the order of the options is reflected in the UI. It's recommended to group socials and wallets together ) */
   signupOptions?: AuthOptions;
-  /** Optional location gating to enforce allowed regions before connect. */
-  locationGate?: LocationGateOptions;
   /** When true, manually provided policies will override preset policies. Default is false. */
   shouldOverridePresetPolicies?: boolean;
   /** The project name of Slot instance. */
@@ -345,8 +343,6 @@ export type StarterpackOptions = {
 export interface ConnectOptions {
   /** Signup options (shown in UI when not headless) */
   signupOptions?: AuthOptions;
-  /** Optional location gating to enforce allowed regions before connect. */
-  locationGate?: LocationGateOptions;
   /** Headless mode username (when combined with signer) */
   username?: string;
   /** Headless mode signer option (auth method) */

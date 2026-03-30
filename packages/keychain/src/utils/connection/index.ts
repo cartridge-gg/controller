@@ -20,6 +20,7 @@ import type {
   AuthOptions,
   BundleOptions,
   ConnectOptions,
+  LocationGateOptions,
   SessionPolicies,
   StarterpackOptions,
 } from "@cartridge/controller";
@@ -39,6 +40,7 @@ export function connectToController<
   errorDisplayMode,
   getParent,
   getConnectionState,
+  getLocationGate,
 }: {
   setRpcUrl: (url: string) => void;
   setController: (controller?: Controller) => void;
@@ -50,10 +52,12 @@ export function connectToController<
   errorDisplayMode?: "modal" | "notification" | "silent";
   getParent: () => ParentMethods | undefined;
   getConnectionState: () => HeadlessConnectionState;
+  getLocationGate?: () => LocationGateOptions | undefined;
 }) {
   const uiConnect = connect({
     navigate,
     setRpcUrl,
+    getLocationGate,
   });
 
   const headlessConnectImpl = headlessConnect({

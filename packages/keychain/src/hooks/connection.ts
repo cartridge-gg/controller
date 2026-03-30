@@ -13,6 +13,7 @@ import {
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
+  LocationGateOptions,
   toArray,
   Token,
   getPresetSessionPolicies,
@@ -310,6 +311,7 @@ export function useConnectionValue() {
   const [configData, setConfigData] = useState<Record<string, unknown> | null>(
     null,
   );
+  const locationGateRef = useRef<LocationGateOptions | undefined>();
   const [theme, setTheme] = useState<VerifiableControllerTheme>({
     verified: true,
     ...defaultTheme,
@@ -621,6 +623,11 @@ export function useConnectionValue() {
         const configObj = (config as Record<string, unknown>) || null;
         setConfigData(configObj);
 
+        // Extract locationGate from preset config for use during connect
+        locationGateRef.current = configObj?.locationGate as
+          | LocationGateOptions
+          | undefined;
+
         if (configObj) {
           const computedVerified = computeVerifiedState(
             configObj,
@@ -789,6 +796,7 @@ export function useConnectionValue() {
         errorDisplayMode: urlParams.errorDisplayMode,
         getParent: () => parentRef.current,
         getConnectionState: () => connectionStateRef.current,
+        getLocationGate: () => locationGateRef.current,
       });
 
       connection.promise

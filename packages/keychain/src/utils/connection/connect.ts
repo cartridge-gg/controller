@@ -15,7 +15,6 @@ export interface ConnectParams {
   policies: SessionPolicies | undefined;
   rpcUrl: string;
   signupOptions?: AuthOptions;
-  locationGate?: LocationGateOptions;
 }
 
 type ConnectCallback = {
@@ -139,12 +138,14 @@ export function parseConnectParams(searchParams: URLSearchParams): {
 export function connect({
   navigate,
   setRpcUrl,
+  getLocationGate,
 }: {
   navigate: (
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
   ) => void;
   setRpcUrl: (url: string) => void;
+  getLocationGate?: () => LocationGateOptions | undefined;
 }) {
   return () => {
     // Support both old and new signatures for backwards compatibility
@@ -182,8 +183,7 @@ export function connect({
         ("signupOptions" in policiesOrOptions ||
           "username" in policiesOrOptions ||
           "signer" in policiesOrOptions ||
-          "password" in policiesOrOptions ||
-          "locationGate" in policiesOrOptions)
+          "password" in policiesOrOptions)
       ) {
         // New signature: connect(options: ConnectOptions)
         options = policiesOrOptions as ConnectOptions;
@@ -210,16 +210,17 @@ export function connect({
           reject,
         });
 
+        const locationGate = getLocationGate?.();
         const hasLocationGate =
-          !!options.locationGate &&
-          ((options.locationGate.allowedCountries?.length ?? 0) > 0 ||
-            (options.locationGate.allowedRegions?.length ?? 0) > 0 ||
-            (options.locationGate.allowedStates?.length ?? 0) > 0);
+          !!locationGate &&
+          ((locationGate.allowedCountries?.length ?? 0) > 0 ||
+            (locationGate.allowedRegions?.length ?? 0) > 0 ||
+            (locationGate.allowedStates?.length ?? 0) > 0);
 
         const destination = hasLocationGate
           ? createLocationGateUrl({
               returnTo: url,
-              gate: options.locationGate!,
+              gate: locationGate!,
             })
           : url;
 

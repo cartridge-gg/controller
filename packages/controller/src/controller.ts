@@ -51,29 +51,6 @@ export default class ControllerProvider extends BaseProvider {
     return !!this.keychain;
   }
 
-  private normalizeConnectOptions(
-    options?: AuthOptions | ConnectOptions,
-  ): ConnectOptions {
-    if (Array.isArray(options)) {
-      return {
-        signupOptions: options,
-        locationGate: this.options.locationGate,
-      };
-    }
-
-    if (options && typeof options === "object") {
-      return {
-        signupOptions: options.signupOptions ?? this.options.signupOptions,
-        locationGate: options.locationGate ?? this.options.locationGate,
-      };
-    }
-
-    return {
-      signupOptions: this.options.signupOptions,
-      locationGate: this.options.locationGate,
-    };
-  }
-
   constructor(options: ControllerOptions = {}) {
     super();
 
@@ -338,12 +315,15 @@ export default class ControllerProvider extends BaseProvider {
         this.iframes.keychain.open();
       }
 
-      const effectiveOptions = this.normalizeConnectOptions(options);
-      const connectPayload =
-        effectiveOptions.signupOptions || effectiveOptions.locationGate
-          ? effectiveOptions
-          : undefined;
-      let response = await this.keychain.connect(connectPayload);
+      // Use connect() parameter if provided, otherwise fall back to constructor options
+      const effectiveOptions = Array.isArray(options)
+        ? options
+        : (connectOptions?.signupOptions ?? this.options.signupOptions);
+
+      // Pass options to keychain
+      let response = await this.keychain.connect({
+        signupOptions: effectiveOptions,
+      });
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
