@@ -52,6 +52,59 @@ export const getClientIp = async (): Promise<string> => {
  * Falls back to ipinfo.io for local development.
  * Returns null if detection fails — callers should treat this as "unknown".
  */
+/**
+ * IP-based geolocation fallback for when browser geolocation is denied
+ * (e.g. cross-origin iframes in Brave, mobile WebViews).
+ * Returns country code and region code in the same format as reverseGeocodeLocation.
+ */
+export async function getIpGeo(): Promise<{
+  countryCode: string | null;
+  regionCode: string | null;
+}> {
+  try {
+    const res = await fetch("https://ipinfo.io/json");
+    if (!res.ok) return { countryCode: null, regionCode: null };
+    const data = (await res.json()) as {
+      country?: string;
+      region?: string;
+      loc?: string;
+    };
+
+    const countryCode = data.country?.toUpperCase() ?? null;
+
+    // ipinfo.io doesn't return ISO region codes directly, but the
+    // BigDataCloud reverse-geocode endpoint does. If we have coordinates
+    // from ipinfo.io (loc: "lat,lng"), use them to get a proper region code.
+    let regionCode: string | null = null;
+    if (data.loc && countryCode) {
+      const [lat, lng] = data.loc.split(",");
+      if (lat && lng) {
+        try {
+          const geoUrl = new URL(
+            "https://api.bigdatacloud.net/data/reverse-geocode-client",
+          );
+          geoUrl.searchParams.set("latitude", lat);
+          geoUrl.searchParams.set("longitude", lng);
+          geoUrl.searchParams.set("localityLanguage", "en");
+          const geoRes = await fetch(geoUrl.toString());
+          if (geoRes.ok) {
+            const geoData = (await geoRes.json()) as {
+              principalSubdivisionCode?: string;
+            };
+            regionCode = geoData.principalSubdivisionCode ?? null;
+          }
+        } catch {
+          // Region lookup failed — country-only is still useful
+        }
+      }
+    }
+
+    return { countryCode, regionCode };
+  } catch {
+    return { countryCode: null, regionCode: null };
+  }
+}
+
 export async function getIpCountry(): Promise<string | null> {
   try {
     const res = await fetch("/api/geo");
