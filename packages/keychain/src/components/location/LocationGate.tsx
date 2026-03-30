@@ -16,6 +16,8 @@ import {
   evaluateLocationGate,
   reverseGeocodeLocation,
 } from "@/utils/location-gate";
+import { getIpCountry } from "@/utils/ip";
+import { USMap } from "./USMap";
 
 type GateState = "idle" | "requesting";
 
@@ -36,10 +38,15 @@ export function LocationGate() {
   const navigate = useNavigate();
   const [state, setState] = useState<GateState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [isUS, setIsUS] = useState<boolean | null>(null);
 
   useEffect(() => {
     setShowClose(true);
   }, [setShowClose]);
+
+  useEffect(() => {
+    getIpCountry().then((country) => setIsUS(country === "US"));
+  }, []);
 
   const { returnTo, gate } = useMemo(() => {
     const searchParams = new URLSearchParams(search);
@@ -146,6 +153,15 @@ export function LocationGate() {
     );
   }, [gate, navigate, returnTo, resolveConnect]);
 
+  const blockedUSStates = useMemo(() => {
+    if (!gate?.blocked) return [];
+    return gate.blocked.filter((code) => code.toUpperCase().startsWith("US-"));
+  }, [gate]);
+
+  // Show map if there are blocked US states and we haven't confirmed the user is outside the US.
+  // isUS: null = still loading/failed, true = confirmed US, false = confirmed non-US
+  const showMap = blockedUSStates.length > 0 && isUS !== false;
+
   if (!gate) {
     return null;
   }
@@ -157,6 +173,11 @@ export function LocationGate() {
         icon={<GlobeIcon variant="solid" size="lg" />}
       />
       <LayoutContent className="p-4">
+        {showMap && (
+          <div className="mb-3">
+            <USMap blockedStates={blockedUSStates} />
+          </div>
+        )}
         <p className="text-sm text-foreground-300 leading-relaxed">
           This game needs your location to confirm availability in your region.
         </p>
