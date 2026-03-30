@@ -1,14 +1,18 @@
+import { useEffect, useState } from "react";
 import { LayoutContent } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ControllerError } from "@/utils/connection";
 import { Call, FeeEstimate } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { CreateSession } from "../connect";
 import { executeCore } from "@/utils/connection/execute";
-import { useEffect, useState } from "react";
-import { PageLoading } from "../Loading";
+import { CreateSession } from "@/components/connect";
+import { PageLoading } from "@/components/Loading";
 import { ErrorCode } from "@cartridge/controller-wasm";
+import { useToast } from "@/context/toast";
+import { humanizeString } from "@cartridge/controller";
+import { useIsSwapTransaction } from "@/components/swap/swap";
+import { ConfirmSwap } from "@/components/swap/ConfirmSwap";
 
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
@@ -25,6 +29,7 @@ export function ConfirmTransaction({
 }: ConfirmTransactionProps) {
   const { controller, origin, policies } = useConnection();
   const account = controller;
+  const { toast } = useToast();
 
   const [hasSession, setHasSession] = useState(false);
   const [skipSession, setSkipSession] = useState(false);
@@ -60,18 +65,48 @@ export function ConfirmTransaction({
       return;
     }
 
+    const toastId = JSON.stringify(transactions);
+    toast.transaction("", {
+      status: "confirming",
+      label: `${humanizeString(transactions[0].entrypoint)}${transactions.length > 1 ? ` +${transactions.length - 1}` : ""}`,
+      toastId,
+    });
+
     try {
       const { transaction_hash } = await account.execute(transactions, maxFee);
       onComplete(transaction_hash);
+      toast.transaction("", {
+        status: "confirmed",
+        toastId,
+      });
     } catch (e) {
       const submitError = e as ControllerError;
       console.error("Transaction execution failed:", submitError);
       setError(submitError);
+      onError?.(submitError);
+      toast.error("", {
+        message: "Transaction execution failed",
+        toastId,
+      });
     }
   };
 
+  const { isSwap } = useIsSwapTransaction(transactions);
+
   if (loading) {
     return <PageLoading />;
+  }
+
+  if (isSwap) {
+    return (
+      <ConfirmSwap
+        onSubmit={onSubmit}
+        onError={onError}
+        transactions={transactions}
+        executionError={error || executionError}
+        origin={origin}
+      />
+    );
   }
 
   // Show session refresh UI if SessionRefreshRequired error occurred
@@ -134,7 +169,7 @@ export function ConfirmTransaction({
       onError={onError}
     >
       <LayoutContent>
-        <TransactionSummary calls={transactions} />
+        <TransactionSummary calls={transactions} isExpanded />
       </LayoutContent>
     </ExecutionContainer>
   );

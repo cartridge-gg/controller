@@ -38,6 +38,7 @@ export const EMBEDDED_WALLETS = [
   "discord",
   "walletconnect",
   "password",
+  "sms",
 ] as const;
 
 export type EmbeddedWallet = (typeof EMBEDDED_WALLETS)[number];
@@ -126,11 +127,6 @@ export type LocationGateOptions = {
   allowedStates?: string[];
 };
 
-export type ConnectOptions = {
-  signupOptions?: AuthOptions;
-  locationGate?: LocationGateOptions;
-};
-
 export type IFrames = {
   keychain?: KeychainIFrame;
   version?: number;
@@ -150,6 +146,12 @@ export interface LookupResponse {
   results: LookupResult[];
 }
 
+export interface HeadlessUsernameLookupResult {
+  username: string;
+  exists: boolean;
+  signers: AuthOption[];
+}
+
 export enum FeeSource {
   PAYMASTER = "PAYMASTER",
   CREDITS = "CREDITS",
@@ -161,9 +163,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(
-    options?: AuthOptions | ConnectOptions,
-  ): Promise<ConnectReply | ConnectError>;
+  connect(options?: ConnectOptions): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -183,6 +183,10 @@ export interface Keychain {
     account: string,
     async?: boolean,
   ): Promise<Signature | ConnectError>;
+  updateSession(
+    policies?: SessionPolicies,
+    preset?: string,
+  ): Promise<ConnectReply | ConnectError>;
   openSettings(): Promise<void | ConnectError>;
   session(): Promise<KeychainSession>;
   sessions(): Promise<{
@@ -196,6 +200,11 @@ export interface Keychain {
     options?: LocationPromptOptions,
   ): Promise<LocationPromptReply | ConnectError>;
   switchChain(rpcUrl: string): Promise<void>;
+  openBundle(
+    id: number,
+    registryAddress: string,
+    options?: BundleOptions,
+  ): Promise<void>;
   openStarterPack(
     id: string | number,
     options?: StarterpackOptions,
@@ -286,6 +295,8 @@ export type KeychainOptions = IFrameOptions & {
   tokens?: Tokens;
   /** When true, defer iframe mounting until connect() is called. Reduces initial load and resource fetching. */
   lazyload?: boolean;
+  /** When true, force WebAuthn operations to run in a popup window instead of the iframe. Useful for development and testing. */
+  webauthnPopup?: boolean;
 };
 
 export type ProfileContextTypeVariant =
@@ -312,7 +323,59 @@ export type LocationPromptOptions = {
   returnTo?: string;
 };
 
+export type SocialClaimOptions = {
+  shareMessage: string;
+};
+
+export type BundleOptions = {
+  /** Callback fired after the Play button closes the starterpack modal */
+  onPurchaseComplete?: () => void;
+  /** Options for social claim conditional starterpack */
+  socialClaimOptions?: SocialClaimOptions;
+};
+
 export type StarterpackOptions = {
   /** The preimage to use */
   preimage?: string;
+  /** Callback fired after the Play button closes the starterpack modal */
+  onPurchaseComplete?: () => void;
 };
+
+// Connect options (used by controller.connect)
+export interface ConnectOptions {
+  /** Signup options (shown in UI when not headless) */
+  signupOptions?: AuthOptions;
+  /** Optional location gating to enforce allowed regions before connect. */
+  locationGate?: LocationGateOptions;
+  /** Headless mode username (when combined with signer) */
+  username?: string;
+  /** Headless mode signer option (auth method) */
+  signer?: AuthOption;
+  /** Required when signer is "password" */
+  password?: string;
+}
+
+/** Options for updating session policies at runtime */
+export type UpdateSessionOptions = {
+  /** Session policies to set */
+  policies?: SessionPolicies;
+  /** Preset name to resolve policies from */
+  preset?: string;
+};
+
+export type HeadlessConnectOptions = Required<
+  Pick<ConnectOptions, "username" | "signer">
+> &
+  Pick<ConnectOptions, "password">;
+
+export type HeadlessConnectReply =
+  | {
+      code: ResponseCodes.SUCCESS;
+      address: string;
+    }
+  | {
+      code: ResponseCodes.USER_INTERACTION_REQUIRED;
+      requestId: string;
+      message?: string;
+    }
+  | ConnectError;

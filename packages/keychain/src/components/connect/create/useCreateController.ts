@@ -3,7 +3,6 @@ import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
-import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import {
   AuthOption,
@@ -14,15 +13,14 @@ import {
 } from "@cartridge/controller";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
 import {
-  AccountQuery,
   ControllerQuery,
   CredentialMetadata,
   SignerInput,
   SignerType,
-  useAccountQuery,
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { getAddress } from "ethers";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { constants, shortString } from "starknet";
 import {
@@ -32,16 +30,21 @@ import {
 } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { usePasswordAuthentication } from "./password";
+import { useSmsAuthentication } from "./sms";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
-import { processPolicies } from "../CreateSession";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
+import { useFeature } from "@/hooks/features";
 import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
-import { ParsedSessionPolicies, hasApprovalPolicies } from "@/hooks/session";
+import { ParsedSessionPolicies } from "@/hooks/session";
 import { safeRedirect } from "@/utils/url-validator";
+import {
+  canAutoCreateSession,
+  createVerifiedSession,
+} from "@/utils/connection/session-creation";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -57,6 +60,52 @@ export interface SignupResponse {
 export interface LoginResponse {
   signer: Signer;
 }
+
+const resolveConnect = async ({
+  controller,
+  params,
+  handleCompletion,
+  closeModal,
+  searchParams,
+  missingParamsMessage,
+}: {
+  controller: Controller;
+  params?: ReturnType<typeof parseConnectParams>;
+  handleCompletion: () => void;
+  closeModal?: () => void;
+  searchParams: URLSearchParams;
+  missingParamsMessage: string;
+}) => {
+  let currentParams = params;
+  if (!currentParams) {
+    for (let i = 0; i < 5; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      currentParams = parseConnectParams(searchParams);
+      if (currentParams) {
+        break;
+      }
+    }
+  }
+
+  if (!currentParams) {
+    console.warn(missingParamsMessage);
+    closeModal?.();
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  url.search = "";
+  window.history.replaceState(null, "", url.toString());
+
+  currentParams.resolve?.({
+    code: ResponseCodes.SUCCESS,
+    address: controller.address(),
+  });
+  if (currentParams.params.id) {
+    cleanupCallbacks(currentParams.params.id);
+  }
+  handleCompletion();
+};
 
 const createSession = async ({
   controller,
@@ -77,23 +126,15 @@ const createSession = async ({
 }) => {
   // Handle no policies case - try to resolve connection, fallback to just closing modal
   if (!policies) {
-    if (params) {
-      // Ideal case: resolve connection promise properly
-      params.resolve?.({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address(),
-      });
-      if (params.params.id) {
-        cleanupCallbacks(params.params.id);
-      }
-      handleCompletion();
-    } else {
-      // Fallback: just close modal if params not available (race condition)
-      console.warn(
+    await resolveConnect({
+      controller,
+      params,
+      handleCompletion,
+      closeModal,
+      searchParams,
+      missingParamsMessage:
         "No params available for no-policies case, falling back to closeModal",
-      );
-      closeModal?.();
-    }
+    });
     return;
   }
 
@@ -118,12 +159,11 @@ const createSession = async ({
   }
 
   try {
-    // Use a default duration for verified sessions (24 hours)
-    const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-    const expiresAt = duration + now();
-
-    const processedPolicies = processPolicies(policies, false);
-    await controller.createSession(origin, expiresAt, processedPolicies);
+    await createVerifiedSession({
+      controller,
+      origin,
+      policies,
+    });
     currentParams.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -140,6 +180,30 @@ const createSession = async ({
   return;
 };
 
+const completePopupConnect = async ({
+  controller,
+  params,
+  handleCompletion,
+  closeModal,
+  searchParams,
+}: {
+  controller: Controller;
+  params?: ReturnType<typeof parseConnectParams>;
+  handleCompletion: () => void;
+  closeModal?: () => void;
+  searchParams: URLSearchParams;
+}) => {
+  await resolveConnect({
+    controller,
+    params,
+    handleCompletion,
+    closeModal,
+    searchParams,
+    missingParamsMessage:
+      "Params not available after popup auth, falling back to closeModal",
+  });
+};
+
 export function useCreateController({
   isSlot,
   signers,
@@ -150,7 +214,6 @@ export function useCreateController({
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
-  const [pendingUsername, setPendingUsername] = useState<string>();
   const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
   const [changeWallet, setChangeWallet] = useState<boolean>(false);
 
@@ -160,14 +223,24 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController, policies, closeModal } =
-    useConnection();
+  const {
+    origin,
+    rpcUrl,
+    chainId,
+    setController,
+    policies,
+    closeModal,
+    isConfigLoading,
+    isPoliciesResolved,
+  } = useConnection();
 
   // Import route params and completion for connection resolution
   const params = useMemo(() => {
     return parseConnectParams(searchParams);
   }, [searchParams]);
   const handleCompletion = useRouteCompletion();
+  const hasPolicies = !!policies;
+  const shouldAutoCreateSession = canAutoCreateSession(policies);
 
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
@@ -178,53 +251,11 @@ export function useCreateController({
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
+  const smsAuth = useSmsAuthentication();
+  const isSmsEnabled = useFeature("sms");
   const { supportedWalletsForAuth } = useWallets();
 
   useRouteCallbacks(params, CANCEL_RESPONSE);
-
-  const handleAccountQuerySuccess = useCallback(
-    async (data: AccountQuery) => {
-      try {
-        const { username, credentials, controllers } = data.account ?? {};
-        const { id: credentialId, publicKey } =
-          credentials?.webauthn?.[0] ?? {};
-
-        const controllerNode = controllers?.edges?.[0]?.node;
-        if (
-          controllerNode &&
-          username &&
-          credentialId &&
-          publicKey &&
-          rpcUrl &&
-          chainId &&
-          origin
-        ) {
-          const controller = await Controller.create({
-            rpcUrl,
-            username,
-            classHash: controllerNode.constructorCalldata[0],
-            address: controllerNode.address,
-            owner: {
-              signer: {
-                webauthn: {
-                  rpId: import.meta.env.VITE_RP_ID!,
-                  credentialId,
-                  publicKey,
-                },
-              },
-            },
-          });
-
-          window.controller = controller;
-          setController(controller);
-        }
-      } catch (e: unknown) {
-        console.error(e);
-        setError(e as Error);
-      }
-    },
-    [chainId, origin, rpcUrl, setController],
-  );
 
   useEffect(() => {
     if (error) {
@@ -232,41 +263,13 @@ export function useCreateController({
     }
   }, [error]);
 
-  useAccountQuery(
-    { username: pendingUsername || "" },
-    {
-      enabled: !!pendingUsername,
-      refetchIntervalInBackground: true,
-      refetchOnWindowFocus: false,
-      staleTime: 10000000,
-      cacheTime: 10000000,
-      refetchInterval: (data) => (!data ? 1000 : false),
-      onSuccess: handleAccountQuerySuccess,
-    },
-  );
-
-  const doPopupFlow = useCallback(
-    (username: string) => {
-      const popupSearchParams = new URLSearchParams(window.location.search);
-      popupSearchParams.set("name", encodeURIComponent(username));
-      popupSearchParams.set("action", "signup");
-      setPendingUsername(username);
-
-      PopupCenter(
-        `/authenticate?${popupSearchParams.toString()}`,
-        "Cartridge Signup",
-        480,
-        640,
-      );
-    },
-    [setPendingUsername],
-  );
-
   const signupOptions: AuthOptions = useMemo(() => {
     return [...EMBEDDED_WALLETS, ...supportedWalletsForAuth].filter(
-      (option) => !signers || signers.includes(option),
+      (option) =>
+        (!signers || signers.includes(option)) &&
+        (option !== "sms" || isSmsEnabled),
     );
-  }, [supportedWalletsForAuth, signers]);
+  }, [supportedWalletsForAuth, signers, isSmsEnabled]);
 
   const finishSignup = useCallback(
     async ({
@@ -342,9 +345,6 @@ export function useCreateController({
         // }
 
         // Normal embedded flow: handle session creation for auto-close cases
-        const shouldAutoCreateSession =
-          !policies || (policies.verified && !hasApprovalPolicies(policies));
-
         if (shouldAutoCreateSession) {
           await createSession({
             controller,
@@ -370,6 +370,7 @@ export function useCreateController({
       params,
       closeModal,
       searchParams,
+      shouldAutoCreateSession,
     ],
   );
 
@@ -387,7 +388,18 @@ export function useCreateController({
       let signer: SignerInput | undefined;
       switch (authenticationMode) {
         case "webauthn": {
-          await signupWithWebauthn(username, doPopupFlow);
+          const webauthnResult = await signupWithWebauthn(username);
+
+          if (webauthnResult?.completedInPopup) {
+            await completePopupConnect({
+              controller: webauthnResult.controller,
+              params,
+              handleCompletion,
+              closeModal,
+              searchParams,
+            });
+            return;
+          }
 
           // Handle redirect_url for webauthn
           const urlSearchParams = new URLSearchParams(window.location.search);
@@ -458,6 +470,75 @@ export function useCreateController({
           };
           break;
         }
+        case "sms": {
+          // SMS requires multi-step UI. We stop loading to show the form,
+          // then drive the rest of the flow from the overlay callbacks.
+          setIsLoading(false);
+
+          const { SmsOtpForm } = await import("./sms/SmsOtpForm");
+
+          const smsResult = await new Promise<SignupResponse | undefined>(
+            (resolve, reject) => {
+              let phoneNumber = "";
+              let otpId = "";
+
+              const showForm = (phone: string, error?: string) => {
+                setOverlay(
+                  React.createElement(SmsOtpForm, {
+                    phoneNumber: phone,
+                    onSubmitPhone: async (p: string) => {
+                      phoneNumber = p;
+                      try {
+                        const initResponse = await smsAuth.initSms(p);
+                        otpId = initResponse.otpId;
+                        showForm(p);
+                      } catch (e) {
+                        showForm("", (e as Error).message);
+                      }
+                    },
+                    onSubmitOtp: async (otpCode: string) => {
+                      try {
+                        const result = await smsAuth.completeSms(
+                          username,
+                          phoneNumber,
+                          otpId,
+                          otpCode,
+                        );
+                        setOverlay(null);
+                        resolve(result);
+                      } catch (e) {
+                        reject(e);
+                      }
+                    },
+                    onBack: () => {
+                      setOverlay(null);
+                      resolve(undefined);
+                    },
+                    isLoading: false,
+                    error,
+                  }),
+                );
+              };
+
+              showForm("");
+            },
+          );
+
+          if (!smsResult) {
+            return;
+          }
+
+          setIsLoading(true);
+          signupResponse = smsResult;
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: "sms",
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        }
         default:
           break;
       }
@@ -472,13 +553,18 @@ export function useCreateController({
       chainId,
       rpcUrl,
       origin,
-      doPopupFlow,
       signupWithExternalWallet,
       signupWithSocial,
       signupWithWebauthn,
       signupWithWalletConnect,
       passwordAuth,
+      smsAuth,
+      setOverlay,
       finishSignup,
+      params,
+      handleCompletion,
+      closeModal,
+      searchParams,
     ],
   );
 
@@ -496,7 +582,18 @@ export function useCreateController({
     }) => {
       // Verify correct EVM wallet account is selected
       if (authenticationMethod !== "password") {
-        const connectedAddress = signerToAddress(loginResponse.signer);
+        const normalizeAddress = (address?: string) => {
+          if (!address) return undefined;
+          try {
+            return getAddress(address);
+          } catch {
+            return address.toLowerCase();
+          }
+        };
+
+        const connectedAddress = normalizeAddress(
+          signerToAddress(loginResponse.signer),
+        );
         const possibleSigners = controller.signers?.filter(
           (signer) =>
             credentialToAuth(signer.metadata as CredentialMetadata) ===
@@ -514,8 +611,9 @@ export function useCreateController({
         if (
           !possibleSigners.find(
             (signer) =>
-              credentialToAddress(signer.metadata as CredentialMetadata) ===
-              connectedAddress,
+              normalizeAddress(
+                credentialToAddress(signer.metadata as CredentialMetadata),
+              ) === connectedAddress,
           )
         ) {
           setChangeWallet(true);
@@ -562,9 +660,6 @@ export function useCreateController({
       // }
 
       // Normal embedded flow: handle session creation for auto-close cases
-      const shouldAutoCreateSession =
-        !policies || (policies.verified && !hasApprovalPolicies(policies));
-
       if (shouldAutoCreateSession) {
         await createSession({
           controller: loginRet.controller,
@@ -589,6 +684,7 @@ export function useCreateController({
       params,
       closeModal,
       searchParams,
+      shouldAutoCreateSession,
     ],
   );
 
@@ -616,7 +712,7 @@ export function useCreateController({
           if (!webauthnSigners || webauthnSigners.length === 0) {
             throw new Error("Signer not found for controller");
           }
-          await loginWithWebauthn(
+          const loginController = await loginWithWebauthn(
             controller,
             {
               signer: {
@@ -632,6 +728,32 @@ export function useCreateController({
             },
             !!isSlot,
           );
+          if (!loginController) {
+            throw new Error("Login failed");
+          }
+
+          if (loginController.completedInPopup) {
+            await completePopupConnect({
+              controller: loginController.controller,
+              params,
+              handleCompletion,
+              closeModal,
+              searchParams,
+            });
+            return;
+          }
+
+          if (shouldAutoCreateSession) {
+            await createSession({
+              controller: loginController.controller,
+              origin,
+              policies,
+              params,
+              handleCompletion,
+              closeModal,
+              searchParams,
+            });
+          }
 
           // Handle redirect_url for webauthn
           const urlSearchParams = new URLSearchParams(window.location.search);
@@ -698,6 +820,65 @@ export function useCreateController({
           );
           break;
         }
+        case "sms": {
+          setIsLoading(false);
+
+          const { SmsOtpForm } = await import("./sms/SmsOtpForm");
+
+          const smsLoginResult = await new Promise<LoginResponse | undefined>(
+            (resolve, reject) => {
+              let phoneNumber = "";
+              let otpId = "";
+
+              const showForm = (phone: string, error?: string) => {
+                setOverlay(
+                  React.createElement(SmsOtpForm, {
+                    phoneNumber: phone,
+                    onSubmitPhone: async (p: string) => {
+                      phoneNumber = p;
+                      try {
+                        const initResponse = await smsAuth.initSms(p);
+                        otpId = initResponse.otpId;
+                        showForm(p);
+                      } catch (e) {
+                        showForm("", (e as Error).message);
+                      }
+                    },
+                    onSubmitOtp: async (otpCode: string) => {
+                      try {
+                        const result = await smsAuth.completeSms(
+                          username,
+                          phoneNumber,
+                          otpId,
+                          otpCode,
+                        );
+                        setOverlay(null);
+                        resolve({ signer: result.signer });
+                      } catch (e) {
+                        reject(e);
+                      }
+                    },
+                    onBack: () => {
+                      setOverlay(null);
+                      resolve(undefined);
+                    },
+                    isLoading: false,
+                    error,
+                  }),
+                );
+              };
+
+              showForm("");
+            },
+          );
+
+          if (!smsLoginResult) {
+            return;
+          }
+          setIsLoading(true);
+          loginResponse = smsLoginResult;
+          break;
+        }
         case "phantom":
         case "argent":
         default:
@@ -722,9 +903,18 @@ export function useCreateController({
       loginWithWalletConnect,
       loginWithExternalWallet,
       chainId,
+      origin,
       rpcUrl,
+      policies,
+      params,
+      handleCompletion,
+      closeModal,
+      searchParams,
+      shouldAutoCreateSession,
       finishLogin,
       passwordAuth,
+      smsAuth,
+      setOverlay,
       setWaitingForConfirmation,
     ],
   );
@@ -866,15 +1056,6 @@ export function useCreateController({
           );
         }
       } catch (e: unknown) {
-        if (
-          e instanceof Error &&
-          (e.message.includes("Invalid 'sameOriginWithAncestors' value") ||
-            e.message.includes("document which is same-origin"))
-        ) {
-          doPopupFlow(username);
-          return;
-        }
-
         console.error(e);
         setError(e as Error);
       } finally {
@@ -887,7 +1068,6 @@ export function useCreateController({
     [
       handleLogin,
       handleSignup,
-      doPopupFlow,
       setAuthMethod,
       setError,
       setIsLoading,
@@ -911,5 +1091,9 @@ export function useCreateController({
     signupOptions,
     authMethod,
     setAuthMethod,
+    shouldAutoCreateSession,
+    isConfigLoading,
+    isPoliciesResolved,
+    hasPolicies,
   };
 }

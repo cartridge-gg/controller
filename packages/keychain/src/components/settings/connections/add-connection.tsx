@@ -1,4 +1,5 @@
 import { useNavigation } from "@/context/navigation";
+import { useFeatures } from "@/hooks/features";
 import {
   getInstagramAuthUrl,
   getTikTokAuthUrl,
@@ -16,8 +17,9 @@ import {
   SpinnerIcon,
 } from "@cartridge/ui";
 import { SiInstagram, SiTiktok, SiX } from "@icons-pack/react-simple-icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "react-query";
+import { useSearchParams } from "react-router-dom";
 
 type ConnectionPending = {
   provider: OAuthProvider;
@@ -27,11 +29,29 @@ type ConnectionPending = {
 
 export function AddConnection({ username }: { username?: string }) {
   const { navigate } = useNavigation();
+
   const queryClient = useQueryClient();
   const [connectionPending, setConnectionPending] =
     useState<ConnectionPending | null>(null);
   const [headerIcon, setHeaderIcon] = useState<React.ReactElement>(
     <AddUserIcon size="lg" />,
+  );
+
+  // if provider param is provider, skip selection
+  const [searchParams] = useSearchParams();
+  const defaultProvider = searchParams.get("provider") as
+    | OAuthProvider
+    | undefined;
+
+  // Feature flags - connections can be toggled via /feature/connections/enable or /feature/connections/disable
+  const { isFeatureEnabled } = useFeatures();
+  const featureFlags = useMemo(
+    () => ({
+      twitter: true,
+      tiktok: isFeatureEnabled("connection-tiktok"),
+      instagram: isFeatureEnabled("connection-instagram"),
+    }),
+    [isFeatureEnabled],
   );
 
   const handleTikTokConnect = useCallback(() => {
@@ -331,6 +351,25 @@ export function AddConnection({ username }: { username?: string }) {
     }
   }, [username, queryClient]);
 
+  useEffect(() => {
+    if (username && !connectionPending) {
+      if (defaultProvider === "TIKTOK") {
+        handleTikTokConnect();
+      } else if (defaultProvider === "INSTAGRAM") {
+        handleInstagramConnect();
+      } else if (defaultProvider === "TWITTER") {
+        handleTwitterConnect();
+      }
+    }
+  }, [
+    defaultProvider,
+    username,
+    handleTikTokConnect,
+    handleInstagramConnect,
+    handleTwitterConnect,
+    connectionPending,
+  ]);
+
   // Navigate back to settings after successful connection
   useEffect(() => {
     if (
@@ -339,7 +378,7 @@ export function AddConnection({ username }: { username?: string }) {
       !connectionPending.error
     ) {
       setTimeout(() => {
-        navigate("/settings");
+        navigate(-1);
       }, 2000);
     }
   }, [connectionPending, navigate]);
@@ -365,15 +404,24 @@ export function AddConnection({ username }: { username?: string }) {
           />
         ) : (
           <>
-            <ConnectionMethod provider="TIKTOK" onClick={handleTikTokConnect} />
-            <ConnectionMethod
-              provider="INSTAGRAM"
-              onClick={handleInstagramConnect}
-            />
-            <ConnectionMethod
-              provider="TWITTER"
-              onClick={handleTwitterConnect}
-            />
+            {featureFlags.tiktok && (
+              <ConnectionMethod
+                provider="TIKTOK"
+                onClick={handleTikTokConnect}
+              />
+            )}
+            {featureFlags.instagram && (
+              <ConnectionMethod
+                provider="INSTAGRAM"
+                onClick={handleInstagramConnect}
+              />
+            )}
+            {featureFlags.twitter && (
+              <ConnectionMethod
+                provider="TWITTER"
+                onClick={handleTwitterConnect}
+              />
+            )}
           </>
         )}
       </LayoutContent>
@@ -391,7 +439,7 @@ export function AddConnection({ username }: { username?: string }) {
           </Button>
         )}
         {!connectionPending && (
-          <Button variant="secondary" onClick={() => navigate("/settings")}>
+          <Button variant="secondary" onClick={() => navigate(-1)}>
             Back
           </Button>
         )}
@@ -487,9 +535,7 @@ function ConnectionPendingCard({
         )}
         {error && <span className="text-destructive-100 text-sm">{error}</span>}
         {!inProgress && !error && (
-          <span className="text-foreground-400 text-sm">
-            Redirecting to settings...
-          </span>
+          <span className="text-foreground-400 text-sm">Redirecting...</span>
         )}
       </div>
       {inProgress && (

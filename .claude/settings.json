@@ -17,6 +17,7 @@
       "Bash(pnpm:storybook:*)",
       "Bash(pnpm:e2e:*)",
       "Bash(pnpm:--filter:*)",
+      "Bash(gh:pr:*)",
       "Bash(git:status)",
       "Bash(git:diff)",
       "Bash(git:log)",

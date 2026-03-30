@@ -9,11 +9,7 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "@cartridge/controller";
-import {
-  JsAddSignerInput,
-  JsControllerError,
-  Signer,
-} from "@cartridge/controller-wasm";
+import { JsAddSignerInput, Signer } from "@cartridge/controller-wasm";
 import {
   AddUserIcon,
   AlertIcon,
@@ -43,6 +39,23 @@ type SignerPending = {
   error?: string;
   authedAddress?: string;
 };
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+
+  return "Unknown error";
+}
 
 export function AddSigner({
   controllerQuery,
@@ -88,10 +101,7 @@ export function AddSigner({
         });
       } catch (error) {
         console.error(error);
-        const errorMessage =
-          error instanceof Error || error instanceof JsControllerError
-            ? error.message
-            : "Unknown error";
+        const errorMessage = getErrorMessage(error);
         setHeaderIcon(<AlertIcon size="lg" />);
         setSignerPending({
           kind: auth,

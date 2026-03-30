@@ -12,7 +12,10 @@ import { PlayButton } from "components/PlayButton";
 import { Profile } from "components/Profile";
 import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
+import { Swap } from "components/Swap";
 import { Starterpack } from "components/Starterpack";
+import { UpdateSession } from "components/UpdateSession";
+import { ControllerToaster } from "@cartridge/ui";
 
 const Home: FC = () => {
   return (
@@ -27,12 +30,15 @@ const Home: FC = () => {
       <PlayButton />
       <Profile />
       <Transfer />
+      <Swap />
       <ManualTransferEth />
       <Starterpack />
+      <UpdateSession />
       <DelegateAccount />
       <InvalidTxn />
       <SignMessage />
       <LookupControllers />
+      <ControllerToaster />
     </main>
   );
 };

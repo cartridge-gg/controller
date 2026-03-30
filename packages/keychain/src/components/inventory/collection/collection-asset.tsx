@@ -30,7 +30,7 @@ import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useUsername } from "@/hooks/username";
 import { useMarketplace } from "@/hooks/marketplace";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
 import { useAccount } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
@@ -51,6 +51,7 @@ export function CollectionAsset() {
   const { tokens } = useTokens();
   const { provider, selfOrders, order, setAmount } = useMarketplace();
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const { address: contractAddress, tokenId } = useParams();
   const {
@@ -155,6 +156,7 @@ export function CollectionAsset() {
     isOwner,
     navigate,
     selfOrders,
+    toast,
   ]);
 
   const events = useMemo(() => {
@@ -249,7 +251,7 @@ export function CollectionAsset() {
                   />
                 </TabsContent>
                 <TabsContent
-                  className="m-0 p-0 flex flex-col gap-px"
+                  className="m-0 p-0 flex flex-col gap-2"
                   value="activity"
                 >
                   {events.map((props: CardProps, index: number) => (

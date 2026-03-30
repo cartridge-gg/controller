@@ -3,7 +3,7 @@ import {
   LayoutContent,
   Skeleton,
   Empty,
-  TagIcon,
+  ShopIcon,
   Token,
   Thumbnail,
   ThumbnailCollectible,
@@ -21,7 +21,7 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useToriiCollection, useToriiCollections } from "@/hooks/collection";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
 import { useNavigation } from "@/context/navigation";
 import { useCollection } from "@/hooks/collection";
@@ -38,7 +38,7 @@ import {
 } from "@cartridge/arcade/marketplace/react";
 import { StatusType } from "@cartridge/arcade";
 import { ArcadeContext } from "@/context/arcade";
-import { CollectionFooter } from "./footer";
+import { usePurchaseFeesData } from "./footer";
 
 export function CollectiblePurchase() {
   const { address: contractAddress, tokenId } = useParams();
@@ -49,6 +49,7 @@ export function CollectiblePurchase() {
   const [amount, setAmount] = useState<number>(0);
   const arcadeContext = useContext(ArcadeContext);
   const provider = arcadeContext?.provider;
+  const { toast } = useToast();
 
   const { data: marketplaceFeeConfig } = useMarketplaceFees();
 
@@ -288,6 +289,15 @@ export function CollectiblePurchase() {
     return calls;
   }, [token, tokenOrders, totalPrice, marketplaceAddress]);
 
+  const submitToast = useCallback(() => {
+    toast.marketplace("Purchase completed successfully!", {
+      action: "purchased",
+      itemNames: props.map((prop) => prop.name),
+      itemImages: props.map((prop) => prop.images[0]),
+      collectionName: collection?.name ?? "",
+    });
+  }, [toast, props, collection?.name]);
+
   const onSubmitPurchase = useCallback(
     async (maxFee?: FeeEstimate) => {
       if (!maxFee || !buildTransactions || !controller) {
@@ -296,11 +306,7 @@ export function CollectiblePurchase() {
 
       try {
         await controller.execute(buildTransactions, maxFee);
-
-        toast.success("Purchase completed successfully!", {
-          duration: 10000,
-        });
-
+        submitToast();
         // Navigate back
         goBack();
       } catch (error) {
@@ -309,7 +315,7 @@ export function CollectiblePurchase() {
         throw error;
       }
     },
-    [buildTransactions, controller, goBack],
+    [buildTransactions, controller, goBack, toast, submitToast],
   );
 
   const status = useMemo(() => {
@@ -329,6 +335,17 @@ export function CollectiblePurchase() {
     setAmount(amount);
   }, [tokenOrders, setAmount]);
 
+  const feesData = usePurchaseFeesData({
+    token,
+    fees,
+    totalPrice: floatPrice,
+    feeDecimals: 3,
+    orders: props.map((args) => ({
+      name: args.name,
+      amount: args.finalPrice.toFixed(fixedValue),
+    })),
+  });
+
   return (
     <>
       {status === "loading" || !collection ? (
@@ -340,17 +357,12 @@ export function CollectiblePurchase() {
           {buildTransactions ? (
             <ExecutionContainer
               title="Review Purchase"
-              icon={
-                <TagIcon
-                  variant="solid"
-                  size="lg"
-                  className="h-[30px] w-[30px]"
-                />
-              }
+              icon={<ShopIcon size="lg" className="h-[30px] w-[30px]" />}
               transactions={buildTransactions}
               onSubmit={onSubmitPurchase}
               onCancel={canGoBack ? goBack : closeModal}
               buttonText="Confirm"
+              additionalFees={[feesData]}
             >
               <div className="p-4 pb-0 flex flex-col gap-4 overflow-hidden h-full">
                 <div
@@ -387,17 +399,6 @@ export function CollectiblePurchase() {
                 </div>
 
                 <div className="flex-1" />
-
-                <CollectionFooter
-                  token={token}
-                  fees={fees}
-                  totalPrice={floatPrice}
-                  feeDecimals={3}
-                  orders={props.map((args) => ({
-                    name: args.name,
-                    amount: args.finalPrice.toFixed(fixedValue),
-                  }))}
-                />
               </div>
             </ExecutionContainer>
           ) : null}

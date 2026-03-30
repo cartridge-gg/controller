@@ -1,4 +1,5 @@
-import { useConnection } from "@/hooks/connection";
+import { useState, useEffect } from "react";
+import { Call } from "starknet";
 import {
   Card,
   CardContent,
@@ -8,13 +9,12 @@ import {
   AccordionTrigger,
   Badge,
   Address,
+  cn,
 } from "@cartridge/ui";
-import { useExplorer } from "@starknet-react/core";
-import { constants, Call } from "starknet";
-import { useState, useEffect } from "react";
+import { humanizeString } from "@cartridge/controller";
+import { ContractLink } from "@/components/ContractLink";
 
 interface CallCardProps {
-  address: string;
   title: string;
   call: Call;
   icon?: React.ReactNode;
@@ -45,15 +45,20 @@ function copyToClipboard(text: string) {
 // Component for clickable value that can be copied
 function CopyableValue({
   value,
+  className,
   children,
 }: {
   value: string;
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
     <span
       onClick={() => copyToClipboard(value)}
-      className="cursor-pointer hover:opacity-80 relative group"
+      className={cn(
+        "cursor-pointer hover:opacity-80 relative group",
+        className,
+      )}
       title="Click to copy"
     >
       {children}
@@ -223,35 +228,13 @@ function CalldataKeyValue({ keyName, value }: { keyName: string; value: any }) {
   );
 }
 
-export function CallCard({
-  address,
-  call,
-  defaultExpanded = false,
-}: CallCardProps) {
-  const { controller } = useConnection();
-  const explorer = useExplorer();
+export function CallCard({ call, defaultExpanded = false }: CallCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   // Update expansion state when defaultExpanded prop changes
   useEffect(() => {
     setIsExpanded(defaultExpanded);
   }, [defaultExpanded]);
-
-  const explorerLink = (
-    <a
-      className="text-xs text-foreground cursor-pointer hover:underline"
-      href={
-        controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
-        controller?.chainId() === constants.StarknetChainId.SN_SEPOLIA
-          ? explorer.contract(address)
-          : `#`
-      }
-      target="_blank"
-      rel="noreferrer"
-    >
-      <Address address={address} first={5} last={5} />
-    </a>
-  );
 
   return (
     <Card>
@@ -266,54 +249,13 @@ export function CallCard({
           <AccordionItem value="item" className="bg-background-200 rounded-md">
             <AccordionTrigger className="px-1 py-2">
               <div className="flex items-center gap-2">
-                <p className="text-foreground font-bold text-s">
+                <p className="text-foreground font-bold">
                   {humanizeString(call.entrypoint)}
                 </p>
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="flex flex-col gap-2 p-1">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-foreground-200 font-bold">
-                    Contract
-                  </div>
-                  {explorerLink}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-foreground-200 font-bold">
-                    Entrypoint
-                  </div>
-                  <div className="text-xs text-foreground">
-                    <CopyableValue value={call.entrypoint}>
-                      {call.entrypoint}
-                    </CopyableValue>
-                  </div>
-                </div>
-
-                {call.calldata && (
-                  <div className="flex flex-col gap-1">
-                    <div className="text-xs text-foreground-200 font-bold pb-1">
-                      Calldata
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      {Array.isArray(call.calldata)
-                        ? call.calldata.map((data, i) => (
-                            <CalldataItem key={i} data={data} index={i} />
-                          ))
-                        : Object.entries(call.calldata).map(
-                            ([key, value], i) => (
-                              <CalldataKeyValue
-                                key={i}
-                                keyName={key}
-                                value={value}
-                              />
-                            ),
-                          )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <CallCardContents call={call} />
             </AccordionContent>
           </AccordionItem>
         </Accordion>
@@ -322,10 +264,51 @@ export function CallCard({
   );
 }
 
-function humanizeString(str: string): string {
-  return str
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/^\w/, (c) => c.toUpperCase());
+export function CallCardContents({
+  call,
+  className,
+}: {
+  call: Call;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-3 p-3 border border-background-100 rounded-md text-xs",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <div className="text-foreground-400">Contract</div>
+        <ContractLink contractAddress={call.contractAddress} />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="text-foreground-400">Entrypoint</div>
+        <div className="text-foreground-100">
+          <CopyableValue
+            value={call.entrypoint}
+            className="text-foreground-100"
+          >
+            {call.entrypoint}
+          </CopyableValue>
+        </div>
+      </div>
+
+      {call.calldata && (
+        <>
+          <div className="text-foreground-400 pb-1">Calldata</div>
+          <div className="flex flex-col gap-1">
+            {Array.isArray(call.calldata)
+              ? call.calldata.map((data, i) => (
+                  <CalldataItem key={i} data={data} index={i} />
+                ))
+              : Object.entries(call.calldata).map(([key, value], i) => (
+                  <CalldataKeyValue key={i} keyName={key} value={value} />
+                ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }

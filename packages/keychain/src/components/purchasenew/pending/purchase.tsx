@@ -5,6 +5,7 @@ export interface PurchasePendingProps {
   name: string;
   items: Item[];
   transactionHash: string;
+  onCompleted?: () => void;
 }
 
 /**
@@ -14,6 +15,7 @@ export function PurchasePending({
   name,
   items,
   transactionHash,
+  onCompleted,
 }: PurchasePendingProps) {
   return (
     <TransactionPendingBase
@@ -23,6 +25,7 @@ export function PurchasePending({
       confirmingTitle="Confirming on Starknet"
       completedTitle="Confirmed on Starknet"
       buttonText="Play"
+      onCompleted={onCompleted}
     />
   );
 }

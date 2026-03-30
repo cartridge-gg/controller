@@ -1,5 +1,270 @@
 # Changelog
 
+## [0.13.11-alpha.1] - 2026-03-26
+
+### ✨ New Features
+- **@cartridge/keychain**: Added starter pack social claim functionality for enhanced social integration and reward distribution (#2498)
+- **@cartridge/keychain**: Added SMS authentication to signup/login flows, providing an additional authentication method for improved accessibility (#2500)
+- **@cartridge/keychain**: Added swap detection for AVNU and LayerSwap (LS2) protocols, enabling better transaction recognition and user experience (#2493)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced Safari popup blocked error messaging to provide clearer guidance for Safari users experiencing popup issues (#2506)
+- **@cartridge/keychain**: Improved payment UI by renaming "Stripe Checkout" to "Credit Card" for clearer user understanding (#2509)
+- **@cartridge/keychain**: Removed feature gate for Stripe checkout in starterpacks, making credit card payments generally available (#2508)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed keychain disconnection to properly disconnect before emitting state changes, preventing race conditions (#2505)
+- **@cartridge/keychain**: Enhanced WASM error handling and updated controller-wasm to v0.10.0 for improved stability (#2502)
+- **@cartridge/keychain**: Removed Storage Access console logs to reduce console noise in production environments (#2507)
+- **@cartridge/keychain**: Removed quests functionality to streamline the user interface (#2501)
+
+### 📦 Dependencies
+- **controller-wasm**: Updated to version 0.10.0 for improved WASM functionality and error handling (#2502)
+- **Turnkey browser SDKs**: Upgraded to version 5 for enhanced security and performance (#2499)
+
+## [0.13.10] - 2026-03-19
+
+### ✨ New Features
+- **@cartridge/keychain**: Added identity verification for Stripe purchases, enabling enhanced security and compliance for payment processing (#2492)
+- **@cartridge/keychain**: Added geofencing for OFAC countries on Vercel, ensuring compliance with international sanctions requirements (#2484)
+- **@cartridge/keychain**: Added Stripe checkout for starterpacks, providing seamless payment integration for starter pack purchases (#2485)
+- **@cartridge/keychain**: Added BroadcastChannel-based communication for Coinbase popup, replacing GraphQL polling for more efficient real-time updates (#2451)
+- **@cartridge/keychain**: Added embedded Coinbase payment in keychain popup with status polling for streamlined payment experience (#2445)
+- **@cartridge/keychain**: Added Apple Pay triple-click functionality on review purchase icon for faster mobile payments (#2457)
+- **@cartridge/controller**: Added `updateSession` API for runtime session policy updates, enabling dynamic modification of session policies (#2440)
+- **@cartridge/keychain**: Added account parameter support on session page for improved session flow configuration (#2439)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced Stripe payment integration with improved Coinbase popup handling, message validation, and status polling (#2449, #2447, #2453, #2454)
+- **@cartridge/keychain**: Improved token selection with split USDC and USDC.e support in starterpack flows for better token identification (#2470)
+- **@cartridge/keychain**: Enhanced popup authentication for restrictive iframe environments with better fallback handling (#2462)
+- **@cartridge/keychain**: Improved mobile authentication with better Chrome iOS handling and WebAuthn debugging capabilities (#2429, #2428, #2427)
+- **@cartridge/controller**: Enhanced EVM wallet detection and provider discovery for improved multi-wallet compatibility (#2468)
+- **@cartridge/keychain**: Streamlined payment GraphQL migration to controller for better architecture (#2464)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed human-readable error messages for FailedPrecondition errors, showing clearer user-facing messages instead of generic service errors (#2496)
+- **@cartridge/keychain**: Fixed back button functionality on verification pages for better navigation experience (#2495)
+- **@cartridge/keychain**: Fixed profile history query performance by adding caps and gating fetches to prevent excessive API calls (#2490)
+- **@cartridge/keychain**: Fixed execute submit error propagation to prevent hanging during transaction execution (#2488)
+- **@cartridge/keychain**: Fixed credits purchase alignment with Stripe GraphQL for consistent payment processing (#2483)
+- **@cartridge/controller**: Fixed WebAuthn permissions in Permissions-Policy header for proper passkey functionality (#2482)
+- **@cartridge/controller**: Fixed custom-scheme redirect_uri preservation in standalone session flows for mobile app compatibility (#2481)
+- **@cartridge/controller**: Fixed domain verification to check both redirect_url and redirect_uri parameters (#2474)
+- **@cartridge/controller**: Fixed unknown signers error handling to prevent error screens (#2472)
+- **@cartridge/controller**: Fixed custom URL scheme verification for mobile app integration (#2471)
+- **@cartridge/controller**: Fixed loading spinner display while preset config loads (#2477)
+- **@cartridge/controller**: Fixed connect flow reliability and removed console errors for cleaner operation (#2438, #2437)
+- **@cartridge/controller**: Fixed disconnect method to properly reset iframe state (#2434)
+
+### 📦 Dependencies
+- **controller-wasm**: Updated to version 0.9.6 for improved backend functionality (#2479)
+- **controller-rs**: Updated to version 0.9.5 for enhanced performance (#2465)
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#2489, #61e0634d)
+
+## [0.13.10-alpha.1] - 2026-02-25
+
+### ✨ New Features
+- **@cartridge/controller**: Added `updateSession` API for runtime session policy updates, enabling dynamic modification of session policies during runtime for improved flexibility (#2440)
+- **@cartridge/keychain**: Added account parameter support on session page, allowing developers to pass account information directly to session flows (#2439)
+- **@cartridge/keychain**: Enhanced activity tab with comprehensive review functionality for improved user activity tracking (#2413)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed connect flow to ensure reliable connection establishment and prevent connection failures (#2438)
+- **@cartridge/controller**: Removed console errors for cleaner debugging experience and improved production logging (#2437)
+- **@cartridge/controller**: Fixed disconnect method to properly call `close()` and reset iframe state, ensuring clean disconnection and preventing stale iframe issues (#2434)
+- **@cartridge/keychain**: Fixed Stripe.js Content Security Policy by adding script-src allowlist entry, enabling proper Stripe integration for payment processing (#2433)
+- **@cartridge/keychain**: Fixed Continue button display on Chrome iOS when automatic session creation fails, ensuring users can still proceed with manual session creation (#2429)
+- **@cartridge/keychain**: Prioritized iOS detection before hasPlatformAuthenticator check for WebAuthn, improving passkey creation reliability on iOS devices (#2428)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced WebAuthn debugging by capturing options via PostHog for iOS troubleshooting and analytics (#2427)
+- **@cartridge/keychain**: Removed WebAuthn debug logging to reduce console noise in production environments (#2430)
+
+### 🔧 Development
+- **CI/CD**: Added auto-merge functionality for docs-sync PRs after checks pass for improved documentation workflow (#2432)
+- **CI/CD**: Refined docs-sync process for more concise and accurate documentation updates (#2431)
+
+## [0.13.9] - 2026-02-16
+
+### 🚀 Improvements
+- **@cartridge/controller**: Enhanced iOS WebAuthn support with explicit creation options and improved debug logging for more reliable passkey creation on iOS devices (#2421)
+- **@cartridge/controller**: Streamlined build process by removing redundant build script in controller package for improved development workflow (#2423)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed quest toast notifications by removing them to prevent user interface clutter and improve user experience (#2425)
+- **@cartridge/controller**: Improved passkey creation flow for Chrome iOS by implementing direct iframe approach instead of popup flow for better mobile compatibility (#2419, #2420)
+- **@cartridge/controller**: Enhanced iOS passkey creation reliability by setting authenticatorAttachment to platform for improved device authentication (#2417)
+
+### 🔧 Testing
+- **@cartridge/controller**: Added comprehensive Capacitor session redirect E2E tests to prevent regressions in session ingestion and account creation flows (#2424)
+- **@cartridge/controller**: Added regression tests for controller disconnect localStorage cleanup functionality (#2414)
+
+### 📦 Dependencies
+- **controller-wasm**: Updated to version 0.9.4 for improved backend functionality (#2418)
+- **Dependencies**: Updated ERC metadata dependencies for better token support (#2422)
+
+## [0.13.8] - 2026-02-13
+
+### ✨ New Features
+- **@cartridge/controller**: Added new mainnet USDC token support with legacy USDC.e labeling for improved token identification (#94dae94e)
+
+### 🚀 Improvements
+- **@cartridge/controller**: Enhanced connection policy resolution by fixing preset theme and custom policy override precedence, allowing apps to maintain preset-derived configuration while explicitly overriding preset policies (#2408)
+- **@cartridge/controller**: Improved maintainability by extracting hardcoded "startapp" query parameter into `REDIRECT_QUERY_NAME` constant following Telegram mini app convention (#2412)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed `SessionProvider.probe()` returning undefined after `ingestSessionFromRedirect()` by restoring on-demand session retrieval for deep link redirects in Capacitor and mobile apps (#2409)
+- **Token Configuration**: Reverted mainnet USDC token support changes to restore legacy behavior for token metadata and mainnet token indexing entries (#2410)
+
+### 🔧 Testing
+- **@cartridge/controller**: Added comprehensive regression tests for controller disconnect localStorage cleanup functionality (#2414)
+
+## [0.13.7] - 2026-02-12
+
+### ✨ New Features
+- **@cartridge/controller**: Added `lookupUsername(username)` method for headless flows, returning account existence status and normalized signer options for the controller's configured chain (#2400)
+- **@cartridge/controller**: Added auto-signup functionality for headless connect when a username is missing, while maintaining strict signer matching for existing accounts (#2400)
+- **@cartridge/connector**: Exposed `lookupUsername` helper method through ControllerConnector for easier integration with starknet-react applications (#2400)
+
+### 🚀 Improvements
+- **Documentation**: Updated HEADLESS_MODE.md with recommended lookup-first flow patterns for improved developer guidance (#2400)
+- **Testing**: Added comprehensive test coverage for username lookup normalization, error handling, and password-based headless auto-signup flows (#2400)
+
+## [0.13.6] - 2026-02-12
+
+### 🚀 Improvements
+- **@cartridge/controller**: Enhanced SessionProvider preset support with automatic policy resolution from `@cartridge/presets`, enabling developers to use `preset: "my-game"` instead of manually duplicating policies and ensuring consistent policy hashing between SDK and keychain (#2401)
+- **Documentation**: Updated project structure documentation with comprehensive provider flows, clarified ControllerProvider (web) and SessionProvider (native) architecture, and improved examples directory guidance (#2404)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed `session/not-registered` errors by normalizing contract addresses in policy hashing and consolidating async initialization to prevent policy hash divergence between SDK and keychain (#2401)
+- **@cartridge/keychain**: Fixed theme copy button visibility in ErrorAlert component by replacing hardcoded black icons with theme-aware styling, ensuring proper visibility on dark backgrounds (#2402)
+
+## [0.13.5] - 2026-02-10
+
+### ✨ New Features
+- **@cartridge/controller**: Added headless mode support to controller SDK for seamless authentication, allowing `connect({ username, signer, password? })` with hidden keychain iframe and UI-less authentication flows (#2315)
+- **@cartridge/controller**: Added `close()` method to ControllerProvider for programmatic cleanup of controller instances (#2373)
+- **@cartridge/controller**: Moved `asWalletStandard()` method from connector to controller package, enabling wallet standard usage without starknet-react dependency (#2364)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced session management with exposed session GUID fields (`allowedPoliciesRoot`, `metadataHash`, `sessionKeyGuid`, `guardianKeyGuid`) in keychain callback payloads for registered sessions (#2396)
+- **@cartridge/keychain**: Consolidated policy handling by refactoring `toWasmPolicies` into single source of truth for improved consistency (#2394)
+- **@cartridge/keychain**: Enhanced quests and achievements display to only show tabs when game/application supports them (#2392)
+- **@cartridge/keychain**: Improved starterpack purchase UI to always show quantity in purchase button for better user clarity (#2390)
+- **@cartridge/connector**: Improved disconnect handling to keep `@starknet-react/core` state in sync with controller state (#2315)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed session authentication to properly disconnect and re-authenticate when session `rpc_url` differs from stored controller, ensuring correct chain targeting (#2395)
+- **@cartridge/controller**: Enhanced iframe security by hardening keychain iframe loading with URL validation, origin pinning, and reduced feature grants by default (#2384)
+- **@cartridge/keychain**: Added keychain CSP/security headers and removed inline scripts from index.html for improved security posture (#2384)
+
+### 📦 Dependencies
+- **controller-rs**: Updated to v0.9.3 for improved backend functionality (#2397)
+
+## [0.13.4] - 2026-02-06
+
+### 🐛 Bug Fixes
+- **CI/CD**: Fixed npm publishing with catalog resolution by reverting to pnpm publish, which correctly handles pnpm catalog: protocol that npm publish doesn't support, ensuring proper package resolution in published packages (#77210c65)
+
+### 🔧 Development
+- **Agent Tooling**: Added standardized agent/dev tooling with `.agents/` directory as source of truth, Claude/Cursor skill compatibility symlinks, and enhanced pre-commit hooks for improved development workflow (#2388)
+
+## [0.13.3] - 2026-02-06
+
+### ✨ New Features
+- **@cartridge/controller**: Added starterpack play callback functionality enabling custom game launch behavior and improved gaming integration (#2362)
+- **@cartridge/controller**: Added specialized controller toast notifications with improved messaging and user feedback for iframe-embedded applications (#2358)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced iframe connect flow with automatic Storage Access API request for improved cross-domain authentication in WebView environments (#2374)
+- **@cartridge/keychain**: Tightened Capacitor origin verification to only auto-verify localhost, requiring explicit authorization for custom hostnames in presets for enhanced security (#2375)
+- **@cartridge/controller**: Improved policy handling with canonical sorting before hashing to ensure consistent policy processing and prevent non-deterministic merkle root calculations (#2359)
+- **@cartridge/controller**: Enhanced preset verification for Capacitor environments with better validation and support for capacitor:// scheme (#2369)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Added ApprovalPolicy support to controller toWasmPolicies for proper merkle root calculation across different connectors, fixing session registration mismatches (#2372)
+- **@cartridge/controller**: Fixed aggregate contracts display on unverified session to properly group methods into "Approve <game>" expendable cards (#2304)
+- **@cartridge/controller**: Fixed controller re-initialization issues by reusing existing controller instances to prevent duplicate iframes and message channels (#2360)
+- **@cartridge/controller**: Fixed chain ID lookup to support non-Cartridge chain configurations for better multi-chain compatibility (#2361)
+- **@cartridge/keychain**: Fixed Coinbase sandbox configuration to ensure proper sandbox environment setup (#2371)
+- **@cartridge/keychain**: Fixed password login button alignment with primary theme for consistent UI styling (#2385)
+
+## [0.13.2] - 2026-02-06
+
+### 🐛 Bug Fixes
+- **@cartridge/controller, @cartridge/connector**: Added repository field to package.json files for npm OIDC trusted publishing, ensuring proper package verification and supply chain security (#c9c6f25d)
+
+## [0.13.1] - 2026-02-06
+
+### 🐛 Bug Fixes
+- **CI/CD**: Fixed npm publishing with OIDC authentication by switching from pnpm publish to npm publish and removing registry-url from setup-node to prevent .npmrc conflicts that block OIDC token exchange (#3880e8ba)
+
+## [0.13.0] - 2026-02-06
+
+### ✨ New Features
+- **@cartridge/controller**: Added ApprovalPolicy support to controller toWasmPolicies for enhanced policy management and proper merkle root calculation across different connectors (#2372)
+- **@cartridge/controller**: Added starterpack play callback functionality enabling custom game launch behavior and improved gaming integration (#2362)
+- **@cartridge/controller**: Added specialized controller toast notifications with improved messaging and user feedback for iframe-embedded applications (#2358)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced iframe connect flow with automatic Storage Access API request for improved cross-domain authentication in WebView environments (#2374)
+- **@cartridge/keychain**: Tightened Capacitor origin verification to only auto-verify localhost, requiring explicit authorization for custom hostnames in presets for enhanced security (#2375)
+- **@cartridge/controller**: Improved policy handling with canonical sorting before hashing to ensure consistent policy processing and prevent non-deterministic merkle root calculations (#2359)
+- **@cartridge/controller**: Enhanced preset verification for Capacitor environments with better validation and support for capacitor:// scheme (#2369)
+- **Development**: Migrated npm publishing to OIDC authentication with supply chain provenance attestation for enhanced security (#2381)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed aggregate contracts display on unverified session to properly group methods into "Approve <game>" expendable cards (#2304)
+- **@cartridge/controller**: Fixed controller re-initialization issues by reusing existing controller instances to prevent duplicate iframes and message channels (#2360)
+- **@cartridge/controller**: Fixed chain ID lookup to support non-Cartridge chain configurations for better multi-chain compatibility (#2361)
+- **@cartridge/keychain**: Fixed Coinbase sandbox configuration to ensure proper sandbox environment setup (#2371)
+- **CI/CD**: Fixed release workflow race conditions by inlining changelog generation into release dispatch workflow (#2379)
+
+## [0.12.3] - 2026-02-05
+
+### ✨ New Features
+- **@cartridge/keychain**: Added Capacitor origin verification tightening for enhanced security in mobile environments (#2375)
+- **@cartridge/controller**: Added specialized controller toast notifications with improved messaging and user feedback (#2358)
+- **@cartridge/controller**: Added ApprovalPolicy support to controller toWasmPolicies for enhanced policy management (#2372)
+- **@cartridge/controller**: Added starterpack play callback functionality for improved gaming integration (#2362)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Enhanced iframe connect flow with automatic storage access request for improved cross-domain authentication (#2374)
+- **@cartridge/controller**: Improved policy handling with canonical sorting before hashing to ensure consistent policy processing (#2359)
+- **@cartridge/controller**: Enhanced preset verification for Capacitor environments with better validation (#2369)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed aggregate contracts on unverified session to prevent session-related issues (#2304)
+- **@cartridge/keychain**: Fixed Coinbase sandbox configuration to ensure proper sandbox environment setup (#2371)
+- **@cartridge/controller**: Fixed controller re-initialization issues by reusing existing controller instances (#2360)
+- **@cartridge/controller**: Fixed chain ID lookup to support non-Cartridge chain configurations (#2361)
+
+## [0.12.2] - 2026-01-29
+
+### ✨ New Features
+- **Examples**: Added Capacitor session example with iOS app integration, demonstrating mobile session management and providing comprehensive cross-platform development guidance (#2355)
+- **@cartridge/keychain**: Enhanced Coinbase onramp integration with `createCoinbaseLayerswapOrder` mutation for improved order creation and processing (#2354)
+- **@cartridge/keychain**: Added comprehensive cost breakdown display for Apple Pay purchases, showing detailed fee structure including Coinbase fees and bridge fees with real-time pricing from Coinbase Onramp API (#2352)
+- **@cartridge/keychain**: Added starterpack Apple Pay checkout functionality for streamlined mobile payments (#2339)
+- **@cartridge/keychain**: Implemented verification autofill functionality for improved user experience during authentication flows (#2342)
+- **@cartridge/keychain**: Added order fetching by IDs capability for enhanced order management and tracking (#2334)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Removed supported-platforms feature gate, making platform detection generally available (#2335)
+- **Development**: Migrated skills documentation to centralized `.agents/skills` directory for better organization and AI-assisted development workflows (#2353)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed 'proceed with caution' warning visibility for slot login flows, improving user experience (#2351)
+- **@cartridge/keychain**: Fixed purchase token layout issues for better visual consistency (#2343)
+- **@cartridge/keychain**: Fixed Layerswap username retrieval from authentication context for proper user identification (#2347)
+- **@cartridge/keychain**: Fixed Coinbase Terms of Service link for proper legal compliance (#2341)
+- **@cartridge/keychain**: Fixed Coinbase query handling for improved API integration (#2338)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#2350, #2348, #2346, #2345, #2344, #2337)
+
 ## [0.12.1] - 2026-01-07
 
 ### ✨ New Features

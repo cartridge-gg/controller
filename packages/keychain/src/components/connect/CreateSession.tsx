@@ -1,5 +1,4 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
-import { SessionConsent } from "@/components/connect";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { now } from "@/constants";
@@ -11,6 +10,7 @@ import {
   useCreateSession,
   hasApprovalPolicies,
 } from "@/hooks/session";
+import { processPolicies } from "@/utils/session/policies";
 import type { ControllerError } from "@/utils/connection";
 import {
   Button,
@@ -23,6 +23,7 @@ import {
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { SpendingLimitPage } from "./SpendingLimitPage";
+import { useNavigation } from "@/context/navigation";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -31,11 +32,13 @@ export function CreateSession({
   onConnect,
   onSkip,
   isUpdate,
+  expiresAt: expiresAtOverride,
 }: {
   policies: ParsedSessionPolicies;
   onConnect: () => void;
   onSkip?: () => void;
   isUpdate?: boolean;
+  expiresAt?: bigint;
 }) {
   return (
     <CreateSessionProvider
@@ -46,6 +49,7 @@ export function CreateSession({
         isUpdate={isUpdate}
         onConnect={onConnect}
         onSkip={onSkip}
+        expiresAtOverride={expiresAtOverride}
       />
     </CreateSessionProvider>
   );
@@ -55,18 +59,22 @@ const CreateSessionLayout = ({
   isUpdate,
   onConnect,
   onSkip,
+  expiresAtOverride,
 }: {
   isUpdate?: boolean;
   onConnect: () => void;
   onSkip?: () => void;
+  expiresAtOverride?: bigint;
 }) => {
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
   const createButtonRef = useRef<HTMLButtonElement>(null);
+  const { setOnBackCallback } = useNavigation();
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
+
   const { controller, theme, origin } = useConnection();
 
   const hasTokenApprovals = useMemo(
@@ -75,6 +83,7 @@ const CreateSessionLayout = ({
   );
 
   const defaultStep = useMemo<"summary" | "spending-limit">(() => {
+    // Only show spending limit page for verified sessions with token approvals
     return policies?.verified && hasTokenApprovals
       ? "spending-limit"
       : "summary";
@@ -86,9 +95,20 @@ const CreateSessionLayout = ({
     setStep(defaultStep);
   }, [defaultStep]);
 
+  useEffect(() => {
+    const callback = (): void => {
+      setStep("summary");
+    };
+    // function state setters treat functions as updater callback, returning the actual value to store
+    setOnBackCallback(() => (step === "spending-limit" ? callback : undefined));
+    return () => {
+      setOnBackCallback(undefined);
+    };
+  }, [step, setOnBackCallback]);
+
   const expiresAt = useMemo(() => {
-    return duration + now();
-  }, [duration]);
+    return expiresAtOverride ?? duration + now();
+  }, [expiresAtOverride, duration]);
 
   const createSession = useCallback(
     async ({
@@ -125,7 +145,8 @@ const CreateSessionLayout = ({
       return;
     }
 
-    if (hasTokenApprovals && step === "summary") {
+    // Only transition to spending limit page for VERIFIED sessions with token approvals
+    if (policies.verified && hasTokenApprovals && step === "summary") {
       setStep("spending-limit");
       return;
     }
@@ -185,13 +206,19 @@ const CreateSessionLayout = ({
     return null;
   }
 
-  if (hasTokenApprovals && step === "spending-limit") {
+  // Show SpendingLimitPage only for VERIFIED sessions with token approvals
+  if (policies.verified && hasTokenApprovals && step === "spending-limit") {
     return (
       <SpendingLimitPage
         policies={policies}
         isConnecting={isConnecting}
         error={error}
-        onBack={() => setStep("summary")}
+        onSkip={async () => {
+          await createSession({
+            toggleOff: true,
+            successCallback: onSkip,
+          });
+        }}
         onConnect={() => {
           void handlePrimaryAction();
         }}
@@ -203,25 +230,27 @@ const CreateSessionLayout = ({
     <>
       <HeaderInner
         className="pb-0"
-        title={!isUpdate ? "Create Session" : "Update Session"}
+        title={
+          !isUpdate
+            ? theme
+              ? `Play ${theme.name}`
+              : "Create Session"
+            : "Update Session"
+        }
         description={isUpdate ? "The policies were updated" : undefined}
         right={
           !isEditable ? (
             <Button
               variant="icon"
-              className="size-10 relative bg-background-200 hover:bg-background-300"
+              className="bg-background-150 hover:bg-background-200 w-auto h-auto p-1.5 text-foreground-300 hover:text-foreground"
               onClick={onToggleEditable}
             >
-              <SliderIcon
-                color="white"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              />
+              <SliderIcon className="!w-5 !h-5" />
             </Button>
           ) : undefined
         }
       />
       <LayoutContent className="pb-0">
-        <SessionConsent isVerified={policies.verified} />
         {policies.verified ? (
           <VerifiedSessionSummary
             game={theme.name}
@@ -230,6 +259,7 @@ const CreateSessionLayout = ({
           />
         ) : (
           <UnverifiedSessionSummary
+            game={theme?.name}
             contracts={policies.contracts}
             messages={policies.messages}
           />
@@ -262,30 +292,15 @@ const CreateSessionLayout = ({
               }}
             />
             <h1 className="text-xs font-normal select-none">
-              I agree to grant this application permission to execute the
-              actions listed above.
+              These contracts are not verified. I agree to grant this game
+              permission to execute the actions listed above.
             </h1>
           </div>
         )}
 
         {error && <ControllerErrorAlert className="mb-3" error={error} />}
 
-        <div className="flex items-center gap-3">
-          {!policies.verified && (
-            <Button
-              variant="secondary"
-              onClick={async () => {
-                await createSession({
-                  toggleOff: true,
-                  successCallback: onSkip,
-                });
-              }}
-              disabled={isConnecting}
-              className="px-8"
-            >
-              Skip
-            </Button>
-          )}
+        <div className="flex flex-col gap-2">
           <Button
             ref={createButtonRef}
             className={cn("flex-1", policies.verified && "w-full")}
@@ -297,48 +312,24 @@ const CreateSessionLayout = ({
           >
             {isUpdate ? "update session" : "continue"}
           </Button>
+          <Button
+            variant="secondary"
+            onClick={async () => {
+              await createSession({
+                toggleOff: true,
+                successCallback: onSkip,
+              });
+            }}
+            disabled={isConnecting}
+            className="px-8"
+          >
+            Skip
+          </Button>
         </div>
       </LayoutFooter>
     </>
   );
 };
 
-/**
- * Deep copy the policies and remove the id fields
- * @param policies The policies to clean
- * @param toggleOff Optional. When true, sets all policies to unauthorized (false)
- */
-export const processPolicies = (
-  policies: ParsedSessionPolicies,
-  toggleOff?: boolean,
-): ParsedSessionPolicies => {
-  // Deep copy the policies
-  const processPolicies: ParsedSessionPolicies = JSON.parse(
-    JSON.stringify(policies),
-  );
-
-  // Remove the id fields from the methods and optionally set authorized to false
-  if (processPolicies.contracts) {
-    Object.values(processPolicies.contracts).forEach((contract) => {
-      contract.methods.forEach((method) => {
-        delete method.id;
-        if (toggleOff !== undefined) {
-          method.authorized = !toggleOff;
-        }
-      });
-    });
-  }
-
-  // Remove the id fields from the messages and optionally set authorized to false
-  if (processPolicies.messages) {
-    processPolicies.messages.forEach((message) => {
-      delete message.id;
-      if (toggleOff !== undefined) {
-        message.authorized = !toggleOff;
-      }
-    });
-  }
-
-  // Return the cleaned policies
-  return processPolicies;
-};
+// Backwards compat: other modules import `processPolicies` from this component.
+export { processPolicies };

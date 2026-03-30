@@ -1,8 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/ui/utils/api/cartridge";
-import { Purchase } from "../purchase";
-import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
+import { Purchase, PurchaseType } from "../purchase";
 import {
   Button,
   Card,

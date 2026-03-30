@@ -11,7 +11,7 @@ import {
   LayerswapStatusQuery,
   LayerswapStatusDocument,
   LayerswapStatusQueryVariables,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@/utils/api";
 import { request } from "@/utils/graphql";
 import { useConnection } from "../connection";
 import {
@@ -32,7 +32,6 @@ import {
 import { ethers } from "ethers";
 import erc20abi from "./erc20abi.json" assert { type: "json" };
 import { depositToLayerswapInput } from "@/utils/payments";
-import Controller from "@/utils/controller";
 import { ExternalWalletError } from "@/utils/errors";
 
 const DEPOSIT_MAX_WAIT_TIME = 10 * 60 * 1000; // 10 minutes
@@ -51,8 +50,6 @@ export interface Explorer {
 }
 
 export interface UseLayerswapOptions {
-  controller: Controller | undefined;
-  isMainnet: boolean;
   selectedPlatform: ExternalPlatform | undefined;
   walletAddress: string | undefined;
   selectedWallet: ExternalWallet | undefined;
@@ -377,15 +374,13 @@ export function mapPlatformToLayerswapSourceNetwork(
  * Hook for managing Layerswap deposit/bridge functionality
  */
 export function useLayerswap({
-  controller,
-  isMainnet,
   selectedPlatform,
   walletAddress,
   selectedWallet,
   onTransactionHash,
   onError,
 }: UseLayerswapOptions): UseLayerswapReturn {
-  const { externalSendTransaction } = useConnection();
+  const { controller, externalSendTransaction, isMainnet } = useConnection();
   const [requestedAmount, setRequestedAmount] = useState<number | undefined>();
   const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
   const [swapId, setSwapId] = useState<string | undefined>();

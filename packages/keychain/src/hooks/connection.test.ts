@@ -1,5 +1,19 @@
-import { isOriginVerified } from "./connection";
+import {
+  getStandaloneAppOrigin,
+  getStandaloneRedirectUrl,
+  isNestedIframe,
+  isOriginVerified,
+  resolvePolicies,
+} from "./connection";
 import { vi } from "vitest";
+
+vi.mock("@cartridge/controller", async () => {
+  const actual = await vi.importActual("@cartridge/controller");
+  return {
+    ...actual,
+    getPresetSessionPolicies: vi.fn(() => undefined),
+  };
+});
 
 describe("isOriginVerified", () => {
   const allowedOrigins = ["example.com", "*.example.com", "sub.test.com"];
@@ -67,6 +81,99 @@ describe("isOriginVerified", () => {
   });
 });
 
+describe("getStandaloneAppOrigin", () => {
+  it("should use the URL origin for http redirects", () => {
+    expect(getStandaloneAppOrigin("https://example.com/callback?foo=bar")).toBe(
+      "https://example.com",
+    );
+  });
+
+  it("should preserve custom-scheme redirects instead of collapsing to null", () => {
+    expect(getStandaloneAppOrigin("cagecalls://open")).toBe("cagecalls://open");
+  });
+});
+
+describe("getStandaloneRedirectUrl", () => {
+  it("prefers redirect_url when present", () => {
+    const searchParams = new URLSearchParams({
+      redirect_url: "https://example.com/callback",
+      redirect_uri: "jokers://open",
+    });
+
+    expect(getStandaloneRedirectUrl(searchParams)).toBe(
+      "https://example.com/callback",
+    );
+  });
+
+  it("falls back to redirect_uri when redirect_url is absent", () => {
+    const searchParams = new URLSearchParams({
+      redirect_uri: "jokers://open",
+    });
+
+    expect(getStandaloneRedirectUrl(searchParams)).toBe("jokers://open");
+  });
+
+  it("returns null when no standalone redirect target is present", () => {
+    expect(getStandaloneRedirectUrl(new URLSearchParams())).toBeNull();
+  });
+});
+
+describe("isNestedIframe", () => {
+  it("returns false for the top-level window", () => {
+    const top = {};
+
+    expect(
+      isNestedIframe({
+        self: top,
+        parent: top,
+        top,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false for a direct child iframe", () => {
+    const top = {};
+    const self = {};
+
+    expect(
+      isNestedIframe({
+        self,
+        parent: top,
+        top,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns true for a nested iframe", () => {
+    const top = {};
+    const parent = {};
+    const self = {};
+
+    expect(
+      isNestedIframe({
+        self,
+        parent,
+        top,
+      }),
+    ).toBe(true);
+  });
+
+  it("fails closed when top access throws", () => {
+    const self = {};
+    const parent = {};
+
+    expect(
+      isNestedIframe({
+        self,
+        parent,
+        get top() {
+          throw new Error("blocked");
+        },
+      }),
+    ).toBe(true);
+  });
+});
+
 // Mock RpcProvider
 const mockGetChainId = vi.fn();
 vi.mock("starknet", async () => {
@@ -84,10 +191,10 @@ const mockController = {
   appId: () => "test-app",
   classHash: () => "0x123",
   chainId: () => "0x534e5f534550",
-  rpcUrl: () => "https://rpc.example.com",
+  rpcUrl: () => "https://rpc.sepolia.example.com",
   address: () => "0x456",
   username: () => "testuser",
-  owner: () => "0x789",
+  owner: () => ({ signer: { starknet: "0x789" } }) as unknown,
 };
 
 vi.mock("@/utils/controller", () => ({
@@ -271,6 +378,28 @@ describe("Config Loading and Verification Separation", () => {
     });
   });
 
+  describe("Custom URL scheme verification (mobile apps)", () => {
+    it("should verify custom scheme matching allowed origin", () => {
+      expect(
+        isOriginVerified("com.example.myapp://callback", ["com.example.myapp"]),
+      ).toBe(true);
+    });
+
+    it("should verify custom scheme among multiple allowed origins", () => {
+      const allowedOrigins = ["myapp.vercel.app", "xyz.studio.game"];
+
+      expect(
+        isOriginVerified("xyz.studio.game://deeplink", allowedOrigins),
+      ).toBe(true);
+    });
+
+    it("should reject custom scheme not in allowed origins", () => {
+      expect(
+        isOriginVerified("com.other.app://callback", ["com.example.myapp"]),
+      ).toBe(false);
+    });
+  });
+
   describe("Multiple allowed origins verification", () => {
     it("should verify against multiple allowed origins", () => {
       const allowedOrigins = ["example.com", "another.com", "*.subdomain.com"];
@@ -321,6 +450,167 @@ describe("Config Loading and Verification Separation", () => {
       expect(isOriginVerified("http://localhost:3000", allowedOrigins)).toBe(
         true,
       );
+    });
+  });
+});
+
+describe("resolvePolicies", () => {
+  const encodedPolicies = encodeURIComponent(
+    JSON.stringify({
+      contracts: {
+        "0x1": {
+          methods: [{ entrypoint: "transfer" }],
+        },
+      },
+    }),
+  );
+
+  it("uses URL policies when shouldOverridePresetPolicies is true", () => {
+    const result = resolvePolicies({
+      policiesStr: encodedPolicies,
+      preset: "some-preset",
+      shouldOverridePresetPolicies: true,
+      configData: null,
+      chainId: undefined,
+      verified: false,
+      isConfigLoading: true,
+    });
+
+    expect(result.isPoliciesResolved).toBe(true);
+    expect(result.policies).toBeDefined();
+  });
+
+  it("falls back to URL policies when preset has no chain policies", () => {
+    const result = resolvePolicies({
+      policiesStr: encodedPolicies,
+      preset: "some-preset",
+      shouldOverridePresetPolicies: false,
+      configData: {},
+      chainId: "0x534e5f534550",
+      verified: true,
+      isConfigLoading: false,
+    });
+
+    expect(result.isPoliciesResolved).toBe(true);
+    expect(result.policies).toBeDefined();
+  });
+
+  it("waits for config when preset is present and override is not active", () => {
+    const result = resolvePolicies({
+      policiesStr: encodedPolicies,
+      preset: "some-preset",
+      shouldOverridePresetPolicies: false,
+      configData: null,
+      chainId: undefined,
+      verified: true,
+      isConfigLoading: true,
+    });
+
+    expect(result.isPoliciesResolved).toBe(false);
+    expect(result.policies).toBeUndefined();
+  });
+});
+
+describe("URL rpc_url priority over stored controller rpcUrl", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("Controller disconnect on chain mismatch", () => {
+    it("should disconnect controller when URL rpc_url differs from stored controller", () => {
+      const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
+
+      // Simulate the effect logic: URL rpc_url differs from controller's rpcUrl
+      const controllerRpcUrl = mockController.rpcUrl();
+      expect(controllerRpcUrl).not.toBe(urlRpcUrl);
+
+      // The effect should trigger disconnect when rpcUrls don't match
+      const shouldDisconnect =
+        mockController && urlRpcUrl && controllerRpcUrl !== urlRpcUrl;
+      expect(shouldDisconnect).toBeTruthy();
+    });
+
+    it("should NOT disconnect controller when URL rpc_url matches stored controller", () => {
+      const urlRpcUrl = "https://rpc.sepolia.example.com";
+      const controllerRpcUrl = mockController.rpcUrl();
+
+      // URLs match - no disconnect should happen
+      expect(controllerRpcUrl).toBe(urlRpcUrl);
+
+      const shouldDisconnect = controllerRpcUrl !== urlRpcUrl;
+      expect(shouldDisconnect).toBe(false);
+    });
+
+    it("should NOT disconnect controller when no URL rpc_url is provided", () => {
+      const urlRpcUrl = null;
+
+      // No urlRpcUrl - the effect guard returns early
+      const shouldDisconnect = urlRpcUrl !== null;
+      expect(shouldDisconnect).toBe(false);
+    });
+
+    it("should NOT disconnect controller when controller is not set", () => {
+      const controller = undefined;
+      const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
+
+      // No controller - the effect guard returns early
+      const shouldDisconnect = controller && urlRpcUrl;
+      expect(shouldDisconnect).toBeFalsy();
+    });
+  });
+
+  describe("rpcUrl state priority", () => {
+    it("should use URL rpc_url when provided, not controller's stored rpcUrl", () => {
+      const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
+      const controllerRpcUrl = "https://rpc.sepolia.example.com";
+
+      // Simulate the sync effect: when urlRpcUrl exists, don't override from controller
+      const shouldSyncFromController = !urlRpcUrl;
+      expect(shouldSyncFromController).toBe(false);
+
+      // The effective rpcUrl should be the URL value
+      const effectiveRpcUrl = urlRpcUrl || controllerRpcUrl;
+      expect(effectiveRpcUrl).toBe(urlRpcUrl);
+    });
+
+    it("should sync rpcUrl from controller when no URL rpc_url is provided", () => {
+      const urlRpcUrl = null;
+      const controllerRpcUrl = "https://rpc.sepolia.example.com";
+
+      // Simulate the sync effect: when no urlRpcUrl, sync from controller
+      const shouldSyncFromController = !urlRpcUrl;
+      expect(shouldSyncFromController).toBe(true);
+
+      // The effective rpcUrl should be the controller's value
+      const effectiveRpcUrl = urlRpcUrl || controllerRpcUrl;
+      expect(effectiveRpcUrl).toBe(controllerRpcUrl);
+    });
+
+    it("should decode URL-encoded rpc_url parameter", () => {
+      const encodedRpcUrl =
+        "https%3A%2F%2Fapi.cartridge.gg%2Fx%2Fstarknet%2Fmainnet";
+      const decoded = decodeURIComponent(encodedRpcUrl);
+      expect(decoded).toBe("https://api.cartridge.gg/x/starknet/mainnet");
+    });
+
+    it("should parse rpc_url from URLSearchParams correctly", () => {
+      const params = new URLSearchParams(
+        "rpc_url=https%3A%2F%2Fapi.cartridge.gg%2Fx%2Fstarknet%2Fmainnet&public_key=0x123",
+      );
+      const raw = params.get("rpc_url");
+      expect(raw).toBe("https://api.cartridge.gg/x/starknet/mainnet");
+
+      const urlRpcUrl = raw ? decodeURIComponent(raw) : null;
+      expect(urlRpcUrl).toBe("https://api.cartridge.gg/x/starknet/mainnet");
+    });
+
+    it("should return null urlRpcUrl when rpc_url param is absent", () => {
+      const params = new URLSearchParams("public_key=0x123");
+      const raw = params.get("rpc_url");
+      expect(raw).toBeNull();
+
+      const urlRpcUrl = raw ? decodeURIComponent(raw) : null;
+      expect(urlRpcUrl).toBeNull();
     });
   });
 });

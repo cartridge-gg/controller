@@ -1,12 +1,20 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { erc20Metadata, ExternalPlatform } from "@cartridge/controller";
 import { num, getChecksumAddress, constants } from "starknet";
-import { ERC20 as ERC20Contract } from "@cartridge/ui/utils";
+import {
+  ERC20 as ERC20Contract,
+  USDC_CONTRACT_ADDRESS,
+} from "@cartridge/ui/utils";
 import {
   DEFAULT_TOKENS,
   type ERC20Metadata,
 } from "@/components/provider/tokens";
-import { fetchSwapQuote, USDC_ADDRESSES, type SwapQuote } from "@/utils/ekubo";
+import {
+  fetchSwapQuote,
+  USDC_ADDRESSES,
+  USDCE_ADDRESSES,
+  type SwapQuote,
+} from "@/utils/ekubo";
 import {
   fetchTokenMetadata,
   type TokenMetadata as FullTokenMetadata,
@@ -16,7 +24,7 @@ import {
   isOnchainStarterpack,
   type OnchainStarterpackDetails,
 } from "@/context/starterpack/types";
-import Controller from "@/utils/controller";
+import { useConnection } from "../connection";
 
 export interface TokenOption {
   name: string;
@@ -40,7 +48,6 @@ export interface ConvertedPrice {
 }
 
 export interface UseTokenSelectionOptions {
-  controller: Controller | undefined;
   starterpackDetails: OnchainStarterpackDetails | undefined;
   quantity: number;
   selectedPlatform: ExternalPlatform | undefined;
@@ -71,11 +78,11 @@ export interface UseTokenSelectionReturn {
  * Hook for managing token selection and price conversion for onchain purchases
  */
 export function useTokenSelection({
-  controller,
   starterpackDetails,
   quantity,
   selectedPlatform,
 }: UseTokenSelectionOptions): UseTokenSelectionReturn {
+  const { controller } = useConnection();
   const [selectedToken, setSelectedTokenState] = useState<
     TokenOption | undefined
   >();
@@ -153,16 +160,26 @@ export function useTokenSelection({
   const availableTokens = useMemo(() => {
     if (!controller) return [];
 
-    // Start with default tokens (ETH, STRK, USDC)
+    // Start with default tokens (ETH, STRK, USDC, USDC.e)
     const usdcAddress =
       USDC_ADDRESSES[controller.chainId()] ||
       USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN];
+
+    const usdceAddress =
+      USDCE_ADDRESSES[controller.chainId()] || USDC_CONTRACT_ADDRESS;
 
     const tokens: ERC20Metadata[] = [
       {
         address: usdcAddress,
         name: "USD Coin",
         symbol: "USDC",
+        decimals: 6,
+        icon: "https://static.cartridge.gg/tokens/usdc.svg",
+      },
+      {
+        address: usdceAddress,
+        name: "Bridged USDC",
+        symbol: "USDC.e",
         decimals: 6,
         icon: "https://static.cartridge.gg/tokens/usdc.svg",
       },

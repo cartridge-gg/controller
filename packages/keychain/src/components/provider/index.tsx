@@ -20,12 +20,12 @@ import { UIProvider } from "./ui";
 import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
 import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
-import { ToastProvider } from "@/context";
-import { QuestProvider } from "@/context/quest";
+import { ToastProvider, StarterpackProviders } from "@/context";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
+import { SpinnerIcon } from "@cartridge/ui";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -59,6 +59,14 @@ export function Provider({ children }: PropsWithChildren) {
     [connection.controller, connection.project],
   );
 
+  if (connection.isConfigLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <SpinnerIcon className="animate-spin text-muted-foreground" size="lg" />
+      </div>
+    );
+  }
+
   return (
     <FeatureProvider>
       <CartridgeAPIProvider url={ENDPOINT}>
@@ -85,9 +93,9 @@ export function Provider({ children }: PropsWithChildren) {
                                       config={marketplaceConfig}
                                     >
                                       <ProfileDataProvider>
-                                        <QuestProvider>
+                                        <StarterpackProviders>
                                           {children}
-                                        </QuestProvider>
+                                        </StarterpackProviders>
                                       </ProfileDataProvider>
                                     </MarketplaceClientProvider>
                                   </ProfileArcadeProvider>

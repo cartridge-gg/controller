@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require("path");
+
 const nextConfig = {
   productionBrowserSourceMaps: true,
   reactStrictMode: true,
@@ -23,6 +25,14 @@ const nextConfig = {
       config.output.webassemblyModuleFilename = "chunks/[id].wasm";
       config.plugins.push(new WasmChunksFixPlugin());
     }
+
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      [path.resolve(__dirname, "src/assets")]: path.resolve(
+        path.dirname(require.resolve("@cartridge/ui")),
+        "assets",
+      ),
+    };
 
     return config;
   },

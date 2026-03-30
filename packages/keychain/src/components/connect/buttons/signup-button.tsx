@@ -6,6 +6,7 @@ import {
   GoogleColorIcon,
   IconProps,
   MetaMaskColorIcon,
+  MobileIcon,
   PasskeyIcon,
   PhantomColorIcon,
   RabbyColorIcon,
@@ -81,6 +82,11 @@ const OPTIONS: Partial<
     variant: "secondary",
     Icon: LockIcon,
     label: AUTH_METHODS_LABELS.password,
+  },
+  sms: {
+    variant: "secondary",
+    Icon: (props: IconProps) => <MobileIcon {...props} variant="solid" />,
+    label: AUTH_METHODS_LABELS.sms,
   },
 };
 

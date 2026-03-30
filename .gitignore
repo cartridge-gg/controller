@@ -55,6 +55,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+**/coverage/
 *.cover
 *.py,cover
 .hypothesis/
@@ -192,3 +193,5 @@ keystore.json
 
 # Claude Code local settings
 .claude/settings.local.json
+.dmux/
+.dmux-hooks/

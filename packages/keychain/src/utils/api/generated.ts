@@ -1,4 +1,9 @@
-import { useQuery, UseQueryOptions } from "react-query";
+import {
+  useQuery,
+  useMutation,
+  UseQueryOptions,
+  UseMutationOptions,
+} from "react-query";
 import { useFetchData } from "./fetcher";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -30,6 +35,7 @@ export type Scalars = {
 export type Account = Node & {
   __typename?: "Account";
   activities: ActivityConnection;
+  attestations: AttestationConnection;
   controllers: ControllerConnection;
   createdAt: Scalars["Time"];
   credentials: Credentials;
@@ -40,8 +46,6 @@ export type Account = Node & {
   membership: AccountTeamConnection;
   name?: Maybe<Scalars["String"]>;
   oauthConnections?: Maybe<Array<OAuthConnection>>;
-  phoneNumber?: Maybe<Scalars["String"]>;
-  phoneNumberVerifiedAt?: Maybe<Scalars["String"]>;
   /** If true, the account is billed for paid slot deployments */
   slotBilling: Scalars["Boolean"];
   starterpackMint: StarterpackMintConnection;
@@ -57,6 +61,15 @@ export type AccountActivitiesArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<ActivityOrder>;
   where?: InputMaybe<ActivityWhereInput>;
+};
+
+export type AccountAttestationsArgs = {
+  after?: InputMaybe<Scalars["Cursor"]>;
+  before?: InputMaybe<Scalars["Cursor"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<AttestationOrder>;
+  where?: InputMaybe<AttestationWhereInput>;
 };
 
 export type AccountControllersArgs = {
@@ -126,6 +139,18 @@ export enum AccountOrderField {
   CreatedAt = "CREATED_AT",
 }
 
+export type AccountPrivate = {
+  __typename?: "AccountPrivate";
+  /** Date of birth in YYYY-MM-DD format. */
+  dob?: Maybe<Scalars["String"]>;
+  firstName?: Maybe<Scalars["String"]>;
+  lastName?: Maybe<Scalars["String"]>;
+  phoneNumber?: Maybe<Scalars["String"]>;
+  phoneNumberVerifiedAt?: Maybe<Scalars["Time"]>;
+  proveVerifiedAt?: Maybe<Scalars["Time"]>;
+  verificationStatus?: Maybe<Scalars["String"]>;
+};
+
 export type AccountTeam = Node & {
   __typename?: "AccountTeam";
   account: Account;
@@ -190,6 +215,17 @@ export type AccountTeamWhereInput = {
 export type AccountUpdateInput = {
   /** Set the email for the account. */
   email?: InputMaybe<Scalars["String"]>;
+};
+
+export type AccountVerifyInput = {
+  /** Date of birth in YYYY-MM-DD format. */
+  dob?: InputMaybe<Scalars["String"]>;
+  emailAddress?: InputMaybe<Scalars["String"]>;
+  firstName?: InputMaybe<Scalars["String"]>;
+  lastName?: InputMaybe<Scalars["String"]>;
+  phoneNumber?: InputMaybe<Scalars["String"]>;
+  /** Use the UAT sandbox environment instead of production. */
+  sandbox?: InputMaybe<Scalars["Boolean"]>;
 };
 
 /**
@@ -699,6 +735,279 @@ export type AssetEdge = {
   tokenId: Scalars["String"];
 };
 
+export type Attestation = Node & {
+  __typename?: "Attestation";
+  account: Account;
+  chainID?: Maybe<Scalars["String"]>;
+  controller?: Maybe<Controller>;
+  createdAt: Scalars["Time"];
+  /** Document SHA-256 hash (0x-prefixed, 32 bytes) */
+  docHashHex?: Maybe<Scalars["String"]>;
+  documentVersion?: Maybe<DocumentVersion>;
+  expiresAt?: Maybe<Scalars["Time"]>;
+  id: Scalars["ID"];
+  issuerRef?: Maybe<Scalars["String"]>;
+  issuerType: AttestationIssuerType;
+  /** Typed-data message hash (felt hex string) */
+  messageHash?: Maybe<Scalars["String"]>;
+  publicClaims?: Maybe<Scalars["JSON"]>;
+  revokedAt?: Maybe<Scalars["Time"]>;
+  /** Array of field elements represented as hex strings */
+  signature?: Maybe<Array<Scalars["String"]>>;
+  signedAt?: Maybe<Scalars["Long"]>;
+  subjectKey: Scalars["String"];
+  type: AttestationType;
+  updatedAt: Scalars["Time"];
+  verifiedAt: Scalars["Time"];
+  visibility: AttestationVisibility;
+};
+
+/** A connection to a list of items. */
+export type AttestationConnection = {
+  __typename?: "AttestationConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<AttestationEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type AttestationEdge = {
+  __typename?: "AttestationEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["Cursor"];
+  /** The item at the end of the edge. */
+  node?: Maybe<Attestation>;
+};
+
+export type AttestationInput = {
+  docHashHex: Scalars["String"];
+  docType: Scalars["String"];
+  signature: Array<Scalars["Felt"]>;
+  signedAt: Scalars["Long"];
+  version: Scalars["String"];
+};
+
+/** AttestationIssuerType is enum for the field issuer_type */
+export enum AttestationIssuerType {
+  Oauth = "OAUTH",
+  Provider = "PROVIDER",
+  SelfSignature = "SELF_SIGNATURE",
+}
+
+/** Ordering options for Attestation connections */
+export type AttestationOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Attestations. */
+  field: AttestationOrderField;
+};
+
+/** Properties by which Attestation connections can be ordered. */
+export enum AttestationOrderField {
+  CreatedAt = "CREATED_AT",
+  VerifiedAt = "VERIFIED_AT",
+}
+
+/** AttestationType is enum for the field type */
+export enum AttestationType {
+  AgeOver_18 = "AGE_OVER_18",
+  Document = "DOCUMENT",
+  Location = "LOCATION",
+  OauthIdentity = "OAUTH_IDENTITY",
+}
+
+/** AttestationVisibility is enum for the field visibility */
+export enum AttestationVisibility {
+  Private = "PRIVATE",
+  Public = "PUBLIC",
+}
+
+/**
+ * AttestationWhereInput is used for filtering Attestation objects.
+ * Input was generated by ent.
+ */
+export type AttestationWhereInput = {
+  and?: InputMaybe<Array<AttestationWhereInput>>;
+  /** chain_id field predicates */
+  chainID?: InputMaybe<Scalars["String"]>;
+  chainIDContains?: InputMaybe<Scalars["String"]>;
+  chainIDContainsFold?: InputMaybe<Scalars["String"]>;
+  chainIDEqualFold?: InputMaybe<Scalars["String"]>;
+  chainIDGT?: InputMaybe<Scalars["String"]>;
+  chainIDGTE?: InputMaybe<Scalars["String"]>;
+  chainIDHasPrefix?: InputMaybe<Scalars["String"]>;
+  chainIDHasSuffix?: InputMaybe<Scalars["String"]>;
+  chainIDIn?: InputMaybe<Array<Scalars["String"]>>;
+  chainIDIsNil?: InputMaybe<Scalars["Boolean"]>;
+  chainIDLT?: InputMaybe<Scalars["String"]>;
+  chainIDLTE?: InputMaybe<Scalars["String"]>;
+  chainIDNEQ?: InputMaybe<Scalars["String"]>;
+  chainIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  chainIDNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars["Time"]>;
+  createdAtGT?: InputMaybe<Scalars["Time"]>;
+  createdAtGTE?: InputMaybe<Scalars["Time"]>;
+  createdAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  createdAtLT?: InputMaybe<Scalars["Time"]>;
+  createdAtLTE?: InputMaybe<Scalars["Time"]>;
+  createdAtNEQ?: InputMaybe<Scalars["Time"]>;
+  createdAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  /** doc_hash_hex field predicates */
+  docHashHex?: InputMaybe<Scalars["String"]>;
+  docHashHexContains?: InputMaybe<Scalars["String"]>;
+  docHashHexContainsFold?: InputMaybe<Scalars["String"]>;
+  docHashHexEqualFold?: InputMaybe<Scalars["String"]>;
+  docHashHexGT?: InputMaybe<Scalars["String"]>;
+  docHashHexGTE?: InputMaybe<Scalars["String"]>;
+  docHashHexHasPrefix?: InputMaybe<Scalars["String"]>;
+  docHashHexHasSuffix?: InputMaybe<Scalars["String"]>;
+  docHashHexIn?: InputMaybe<Array<Scalars["String"]>>;
+  docHashHexIsNil?: InputMaybe<Scalars["Boolean"]>;
+  docHashHexLT?: InputMaybe<Scalars["String"]>;
+  docHashHexLTE?: InputMaybe<Scalars["String"]>;
+  docHashHexNEQ?: InputMaybe<Scalars["String"]>;
+  docHashHexNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  docHashHexNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** expires_at field predicates */
+  expiresAt?: InputMaybe<Scalars["Time"]>;
+  expiresAtGT?: InputMaybe<Scalars["Time"]>;
+  expiresAtGTE?: InputMaybe<Scalars["Time"]>;
+  expiresAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  expiresAtIsNil?: InputMaybe<Scalars["Boolean"]>;
+  expiresAtLT?: InputMaybe<Scalars["Time"]>;
+  expiresAtLTE?: InputMaybe<Scalars["Time"]>;
+  expiresAtNEQ?: InputMaybe<Scalars["Time"]>;
+  expiresAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  expiresAtNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** account edge predicates */
+  hasAccount?: InputMaybe<Scalars["Boolean"]>;
+  hasAccountWith?: InputMaybe<Array<AccountWhereInput>>;
+  /** controller edge predicates */
+  hasController?: InputMaybe<Scalars["Boolean"]>;
+  hasControllerWith?: InputMaybe<Array<ControllerWhereInput>>;
+  /** document_version edge predicates */
+  hasDocumentVersion?: InputMaybe<Scalars["Boolean"]>;
+  hasDocumentVersionWith?: InputMaybe<Array<DocumentVersionWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars["ID"]>;
+  idContainsFold?: InputMaybe<Scalars["ID"]>;
+  idEqualFold?: InputMaybe<Scalars["ID"]>;
+  idGT?: InputMaybe<Scalars["ID"]>;
+  idGTE?: InputMaybe<Scalars["ID"]>;
+  idIn?: InputMaybe<Array<Scalars["ID"]>>;
+  idLT?: InputMaybe<Scalars["ID"]>;
+  idLTE?: InputMaybe<Scalars["ID"]>;
+  idNEQ?: InputMaybe<Scalars["ID"]>;
+  idNotIn?: InputMaybe<Array<Scalars["ID"]>>;
+  /** issuer_ref field predicates */
+  issuerRef?: InputMaybe<Scalars["String"]>;
+  issuerRefContains?: InputMaybe<Scalars["String"]>;
+  issuerRefContainsFold?: InputMaybe<Scalars["String"]>;
+  issuerRefEqualFold?: InputMaybe<Scalars["String"]>;
+  issuerRefGT?: InputMaybe<Scalars["String"]>;
+  issuerRefGTE?: InputMaybe<Scalars["String"]>;
+  issuerRefHasPrefix?: InputMaybe<Scalars["String"]>;
+  issuerRefHasSuffix?: InputMaybe<Scalars["String"]>;
+  issuerRefIn?: InputMaybe<Array<Scalars["String"]>>;
+  issuerRefIsNil?: InputMaybe<Scalars["Boolean"]>;
+  issuerRefLT?: InputMaybe<Scalars["String"]>;
+  issuerRefLTE?: InputMaybe<Scalars["String"]>;
+  issuerRefNEQ?: InputMaybe<Scalars["String"]>;
+  issuerRefNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  issuerRefNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** issuer_type field predicates */
+  issuerType?: InputMaybe<AttestationIssuerType>;
+  issuerTypeIn?: InputMaybe<Array<AttestationIssuerType>>;
+  issuerTypeNEQ?: InputMaybe<AttestationIssuerType>;
+  issuerTypeNotIn?: InputMaybe<Array<AttestationIssuerType>>;
+  /** message_hash field predicates */
+  messageHash?: InputMaybe<Scalars["String"]>;
+  messageHashContains?: InputMaybe<Scalars["String"]>;
+  messageHashContainsFold?: InputMaybe<Scalars["String"]>;
+  messageHashEqualFold?: InputMaybe<Scalars["String"]>;
+  messageHashGT?: InputMaybe<Scalars["String"]>;
+  messageHashGTE?: InputMaybe<Scalars["String"]>;
+  messageHashHasPrefix?: InputMaybe<Scalars["String"]>;
+  messageHashHasSuffix?: InputMaybe<Scalars["String"]>;
+  messageHashIn?: InputMaybe<Array<Scalars["String"]>>;
+  messageHashIsNil?: InputMaybe<Scalars["Boolean"]>;
+  messageHashLT?: InputMaybe<Scalars["String"]>;
+  messageHashLTE?: InputMaybe<Scalars["String"]>;
+  messageHashNEQ?: InputMaybe<Scalars["String"]>;
+  messageHashNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  messageHashNotNil?: InputMaybe<Scalars["Boolean"]>;
+  not?: InputMaybe<AttestationWhereInput>;
+  or?: InputMaybe<Array<AttestationWhereInput>>;
+  /** revoked_at field predicates */
+  revokedAt?: InputMaybe<Scalars["Time"]>;
+  revokedAtGT?: InputMaybe<Scalars["Time"]>;
+  revokedAtGTE?: InputMaybe<Scalars["Time"]>;
+  revokedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  revokedAtIsNil?: InputMaybe<Scalars["Boolean"]>;
+  revokedAtLT?: InputMaybe<Scalars["Time"]>;
+  revokedAtLTE?: InputMaybe<Scalars["Time"]>;
+  revokedAtNEQ?: InputMaybe<Scalars["Time"]>;
+  revokedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  revokedAtNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** signed_at field predicates */
+  signedAt?: InputMaybe<Scalars["Long"]>;
+  signedAtGT?: InputMaybe<Scalars["Long"]>;
+  signedAtGTE?: InputMaybe<Scalars["Long"]>;
+  signedAtIn?: InputMaybe<Array<Scalars["Long"]>>;
+  signedAtIsNil?: InputMaybe<Scalars["Boolean"]>;
+  signedAtLT?: InputMaybe<Scalars["Long"]>;
+  signedAtLTE?: InputMaybe<Scalars["Long"]>;
+  signedAtNEQ?: InputMaybe<Scalars["Long"]>;
+  signedAtNotIn?: InputMaybe<Array<Scalars["Long"]>>;
+  signedAtNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** subject_key field predicates */
+  subjectKey?: InputMaybe<Scalars["String"]>;
+  subjectKeyContains?: InputMaybe<Scalars["String"]>;
+  subjectKeyContainsFold?: InputMaybe<Scalars["String"]>;
+  subjectKeyEqualFold?: InputMaybe<Scalars["String"]>;
+  subjectKeyGT?: InputMaybe<Scalars["String"]>;
+  subjectKeyGTE?: InputMaybe<Scalars["String"]>;
+  subjectKeyHasPrefix?: InputMaybe<Scalars["String"]>;
+  subjectKeyHasSuffix?: InputMaybe<Scalars["String"]>;
+  subjectKeyIn?: InputMaybe<Array<Scalars["String"]>>;
+  subjectKeyLT?: InputMaybe<Scalars["String"]>;
+  subjectKeyLTE?: InputMaybe<Scalars["String"]>;
+  subjectKeyNEQ?: InputMaybe<Scalars["String"]>;
+  subjectKeyNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  /** type field predicates */
+  type?: InputMaybe<AttestationType>;
+  typeIn?: InputMaybe<Array<AttestationType>>;
+  typeNEQ?: InputMaybe<AttestationType>;
+  typeNotIn?: InputMaybe<Array<AttestationType>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars["Time"]>;
+  updatedAtGT?: InputMaybe<Scalars["Time"]>;
+  updatedAtGTE?: InputMaybe<Scalars["Time"]>;
+  updatedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  updatedAtLT?: InputMaybe<Scalars["Time"]>;
+  updatedAtLTE?: InputMaybe<Scalars["Time"]>;
+  updatedAtNEQ?: InputMaybe<Scalars["Time"]>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  /** verified_at field predicates */
+  verifiedAt?: InputMaybe<Scalars["Time"]>;
+  verifiedAtGT?: InputMaybe<Scalars["Time"]>;
+  verifiedAtGTE?: InputMaybe<Scalars["Time"]>;
+  verifiedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  verifiedAtLT?: InputMaybe<Scalars["Time"]>;
+  verifiedAtLTE?: InputMaybe<Scalars["Time"]>;
+  verifiedAtNEQ?: InputMaybe<Scalars["Time"]>;
+  verifiedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  /** visibility field predicates */
+  visibility?: InputMaybe<AttestationVisibility>;
+  visibilityIn?: InputMaybe<Array<AttestationVisibility>>;
+  visibilityNEQ?: InputMaybe<AttestationVisibility>;
+  visibilityNotIn?: InputMaybe<Array<AttestationVisibility>>;
+};
+
 export type Balance = {
   __typename?: "Balance";
   amount: Scalars["Float"];
@@ -1101,11 +1410,9 @@ export type CreateCoinbaseOnrampOrderInput = {
 };
 
 export type CreateCryptoPaymentInput = {
-  credits?: InputMaybe<CreditsInput>;
+  credits: CreditsInput;
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   network: Network;
-  purchaseType: PurchaseType;
-  starterpackId?: InputMaybe<Scalars["ID"]>;
   teamId?: InputMaybe<Scalars["ID"]>;
   username: Scalars["String"];
 };
@@ -1118,12 +1425,10 @@ export type CreateLayerswapDepositInput = {
 };
 
 export type CreateLayerswapPaymentInput = {
-  credits?: InputMaybe<CreditsInput>;
+  credits: CreditsInput;
   destinationNetwork: LayerswapDestinationNetwork;
   layerswapFees?: InputMaybe<Scalars["BigInt"]>;
-  purchaseType: PurchaseType;
   sourceNetwork: LayerswapSourceNetwork;
-  starterpackId?: InputMaybe<Scalars["ID"]>;
   teamId?: InputMaybe<Scalars["ID"]>;
 };
 
@@ -1180,12 +1485,18 @@ export type CreateServiceInput = {
 };
 
 export type CreateStripePaymentIntentInput = {
-  credits?: InputMaybe<CreditsInput>;
+  credits: CreditsInput;
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
-  purchaseType: PurchaseType;
-  starterpackId?: InputMaybe<Scalars["ID"]>;
   teamId?: InputMaybe<Scalars["ID"]>;
-  username: Scalars["String"];
+};
+
+export type CreateStripeStarterpackIntentInput = {
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  quantity: Scalars["Int"];
+  referral?: InputMaybe<Scalars["String"]>;
+  referralGroup?: InputMaybe<Scalars["String"]>;
+  registryAddress: Scalars["String"];
+  starterpackId: Scalars["String"];
 };
 
 export type CredentialMetadata =
@@ -1715,6 +2026,131 @@ export type DeploymentWhereInput = {
   tierIn?: InputMaybe<Array<DeploymentTier>>;
   tierNEQ?: InputMaybe<DeploymentTier>;
   tierNotIn?: InputMaybe<Array<DeploymentTier>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars["Time"]>;
+  updatedAtGT?: InputMaybe<Scalars["Time"]>;
+  updatedAtGTE?: InputMaybe<Scalars["Time"]>;
+  updatedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  updatedAtLT?: InputMaybe<Scalars["Time"]>;
+  updatedAtLTE?: InputMaybe<Scalars["Time"]>;
+  updatedAtNEQ?: InputMaybe<Scalars["Time"]>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  /** version field predicates */
+  version?: InputMaybe<Scalars["String"]>;
+  versionContains?: InputMaybe<Scalars["String"]>;
+  versionContainsFold?: InputMaybe<Scalars["String"]>;
+  versionEqualFold?: InputMaybe<Scalars["String"]>;
+  versionGT?: InputMaybe<Scalars["String"]>;
+  versionGTE?: InputMaybe<Scalars["String"]>;
+  versionHasPrefix?: InputMaybe<Scalars["String"]>;
+  versionHasSuffix?: InputMaybe<Scalars["String"]>;
+  versionIn?: InputMaybe<Array<Scalars["String"]>>;
+  versionLT?: InputMaybe<Scalars["String"]>;
+  versionLTE?: InputMaybe<Scalars["String"]>;
+  versionNEQ?: InputMaybe<Scalars["String"]>;
+  versionNotIn?: InputMaybe<Array<Scalars["String"]>>;
+};
+
+export type DocumentVersion = Node & {
+  __typename?: "DocumentVersion";
+  createdAt: Scalars["Time"];
+  docType: Scalars["String"];
+  id: Scalars["ID"];
+  /** SHA-256 hash of content (0x-prefixed, 32 bytes) */
+  sha256Hex: Scalars["String"];
+  updatedAt: Scalars["Time"];
+  version: Scalars["String"];
+};
+
+/** A connection to a list of items. */
+export type DocumentVersionConnection = {
+  __typename?: "DocumentVersionConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<DocumentVersionEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type DocumentVersionEdge = {
+  __typename?: "DocumentVersionEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["Cursor"];
+  /** The item at the end of the edge. */
+  node?: Maybe<DocumentVersion>;
+};
+
+/** Ordering options for DocumentVersion connections */
+export type DocumentVersionOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order DocumentVersions. */
+  field: DocumentVersionOrderField;
+};
+
+/** Properties by which DocumentVersion connections can be ordered. */
+export enum DocumentVersionOrderField {
+  CreatedAt = "CREATED_AT",
+}
+
+/**
+ * DocumentVersionWhereInput is used for filtering DocumentVersion objects.
+ * Input was generated by ent.
+ */
+export type DocumentVersionWhereInput = {
+  and?: InputMaybe<Array<DocumentVersionWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars["Time"]>;
+  createdAtGT?: InputMaybe<Scalars["Time"]>;
+  createdAtGTE?: InputMaybe<Scalars["Time"]>;
+  createdAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  createdAtLT?: InputMaybe<Scalars["Time"]>;
+  createdAtLTE?: InputMaybe<Scalars["Time"]>;
+  createdAtNEQ?: InputMaybe<Scalars["Time"]>;
+  createdAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  /** doc_type field predicates */
+  docType?: InputMaybe<Scalars["String"]>;
+  docTypeContains?: InputMaybe<Scalars["String"]>;
+  docTypeContainsFold?: InputMaybe<Scalars["String"]>;
+  docTypeEqualFold?: InputMaybe<Scalars["String"]>;
+  docTypeGT?: InputMaybe<Scalars["String"]>;
+  docTypeGTE?: InputMaybe<Scalars["String"]>;
+  docTypeHasPrefix?: InputMaybe<Scalars["String"]>;
+  docTypeHasSuffix?: InputMaybe<Scalars["String"]>;
+  docTypeIn?: InputMaybe<Array<Scalars["String"]>>;
+  docTypeLT?: InputMaybe<Scalars["String"]>;
+  docTypeLTE?: InputMaybe<Scalars["String"]>;
+  docTypeNEQ?: InputMaybe<Scalars["String"]>;
+  docTypeNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars["ID"]>;
+  idContainsFold?: InputMaybe<Scalars["ID"]>;
+  idEqualFold?: InputMaybe<Scalars["ID"]>;
+  idGT?: InputMaybe<Scalars["ID"]>;
+  idGTE?: InputMaybe<Scalars["ID"]>;
+  idIn?: InputMaybe<Array<Scalars["ID"]>>;
+  idLT?: InputMaybe<Scalars["ID"]>;
+  idLTE?: InputMaybe<Scalars["ID"]>;
+  idNEQ?: InputMaybe<Scalars["ID"]>;
+  idNotIn?: InputMaybe<Array<Scalars["ID"]>>;
+  not?: InputMaybe<DocumentVersionWhereInput>;
+  or?: InputMaybe<Array<DocumentVersionWhereInput>>;
+  /** sha256_hex field predicates */
+  sha256Hex?: InputMaybe<Scalars["String"]>;
+  sha256HexContains?: InputMaybe<Scalars["String"]>;
+  sha256HexContainsFold?: InputMaybe<Scalars["String"]>;
+  sha256HexEqualFold?: InputMaybe<Scalars["String"]>;
+  sha256HexGT?: InputMaybe<Scalars["String"]>;
+  sha256HexGTE?: InputMaybe<Scalars["String"]>;
+  sha256HexHasPrefix?: InputMaybe<Scalars["String"]>;
+  sha256HexHasSuffix?: InputMaybe<Scalars["String"]>;
+  sha256HexIn?: InputMaybe<Array<Scalars["String"]>>;
+  sha256HexLT?: InputMaybe<Scalars["String"]>;
+  sha256HexLTE?: InputMaybe<Scalars["String"]>;
+  sha256HexNEQ?: InputMaybe<Scalars["String"]>;
+  sha256HexNotIn?: InputMaybe<Array<Scalars["String"]>>;
   /** updated_at field predicates */
   updatedAt?: InputMaybe<Scalars["Time"]>;
   updatedAtGT?: InputMaybe<Scalars["Time"]>;
@@ -2537,6 +2973,7 @@ export type MintAllowance = {
 
 export type Mutation = {
   __typename?: "Mutation";
+  accountVerify: Scalars["Boolean"];
   addOwner: Scalars["Boolean"];
   addPolicies?: Maybe<Array<PaymasterPolicy>>;
   addToTeam: Scalars["Boolean"];
@@ -2563,6 +3000,7 @@ export type Mutation = {
   createRpcCorsDomain: RpcCorsDomain;
   createSession: Scalars["String"];
   createStripePaymentIntent: StripePaymentIntent;
+  createStripeStarterpackIntent: StripePaymentIntent;
   createTeam: Team;
   decreaseBudget: Paymaster;
   deleteDeployment: Scalars["Boolean"];
@@ -2591,6 +3029,7 @@ export type Mutation = {
    * The code expires after 10 minutes.
    */
   sendPhoneVerification: SendVerificationResponse;
+  signDocument: Attestation;
   transfer: TransferResponse;
   transferDeployment: Scalars["Boolean"];
   updateDeployment: Deployment;
@@ -2609,6 +3048,10 @@ export type Mutation = {
    * Updates the user's phone number and verification timestamp on success.
    */
   verifyPhone: VerifyResponse;
+};
+
+export type MutationAccountVerifyArgs = {
+  input: AccountVerifyInput;
 };
 
 export type MutationAddOwnerArgs = {
@@ -2683,6 +3126,7 @@ export type MutationCreateMerkleDropArgs = {
 export type MutationCreatePaymasterArgs = {
   budget: Scalars["Int"];
   name: Scalars["String"];
+  sponsorCapBps?: InputMaybe<Scalars["Int"]>;
   teamName: Scalars["String"];
   unit: FeeUnit;
 };
@@ -2707,6 +3151,10 @@ export type MutationCreateSessionArgs = {
 
 export type MutationCreateStripePaymentIntentArgs = {
   input: CreateStripePaymentIntentInput;
+};
+
+export type MutationCreateStripeStarterpackIntentArgs = {
+  input: CreateStripeStarterpackIntentInput;
 };
 
 export type MutationCreateTeamArgs = {
@@ -2809,6 +3257,10 @@ export type MutationSendPhoneVerificationArgs = {
   input: SendPhoneVerificationInput;
 };
 
+export type MutationSignDocumentArgs = {
+  input: AttestationInput;
+};
+
 export type MutationTransferArgs = {
   data: TransferInput;
 };
@@ -2835,6 +3287,7 @@ export type MutationUpdatePaymasterArgs = {
   active?: InputMaybe<Scalars["Boolean"]>;
   newName?: InputMaybe<Scalars["String"]>;
   paymasterName: Scalars["ID"];
+  sponsorCapBps?: InputMaybe<Scalars["Int"]>;
   teamName?: InputMaybe<Scalars["String"]>;
 };
 
@@ -3156,6 +3609,8 @@ export type Paymaster = Node & {
   policies: PaymasterPolicyConnection;
   /** Number of reverted transactions */
   revertedTransactions: Scalars["Int"];
+  /** Per-transaction sponsor cap in basis points (0-10000) */
+  sponsorCapBps?: Maybe<Scalars["Int"]>;
   starterpacks: StarterpackConnection;
   /** Accumulated STRK fees in 6 decimal precision */
   strkFees: Scalars["Int"];
@@ -3764,6 +4219,17 @@ export type PaymasterWhereInput = {
   revertedTransactionsLTE?: InputMaybe<Scalars["Int"]>;
   revertedTransactionsNEQ?: InputMaybe<Scalars["Int"]>;
   revertedTransactionsNotIn?: InputMaybe<Array<Scalars["Int"]>>;
+  /** sponsor_cap_bps field predicates */
+  sponsorCapBps?: InputMaybe<Scalars["Int"]>;
+  sponsorCapBpsGT?: InputMaybe<Scalars["Int"]>;
+  sponsorCapBpsGTE?: InputMaybe<Scalars["Int"]>;
+  sponsorCapBpsIn?: InputMaybe<Array<Scalars["Int"]>>;
+  sponsorCapBpsIsNil?: InputMaybe<Scalars["Boolean"]>;
+  sponsorCapBpsLT?: InputMaybe<Scalars["Int"]>;
+  sponsorCapBpsLTE?: InputMaybe<Scalars["Int"]>;
+  sponsorCapBpsNEQ?: InputMaybe<Scalars["Int"]>;
+  sponsorCapBpsNotIn?: InputMaybe<Array<Scalars["Int"]>>;
+  sponsorCapBpsNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** strk_fees field predicates */
   strkFees?: InputMaybe<Scalars["Int"]>;
   strkFeesGT?: InputMaybe<Scalars["Int"]>;
@@ -3903,15 +4369,27 @@ export type Project = {
   project: Scalars["String"];
 };
 
-export enum PurchaseType {
-  Credits = "CREDITS",
-  /** @deprecated Starterpack purchases are now handled client-side */
-  Starterpack = "STARTERPACK",
+export type PurchaseFulfillment = {
+  __typename?: "PurchaseFulfillment";
+  id: Scalars["ID"];
+  lastError?: Maybe<Scalars["String"]>;
+  status: PurchaseFulfillmentStatus;
+  transactionHash?: Maybe<Scalars["String"]>;
+};
+
+export enum PurchaseFulfillmentStatus {
+  AwaitingPayment = "AWAITING_PAYMENT",
+  Confirmed = "CONFIRMED",
+  Failed = "FAILED",
+  Processing = "PROCESSING",
+  Queued = "QUEUED",
+  Submitted = "SUBMITTED",
 }
 
 export type Query = {
   __typename?: "Query";
   account?: Maybe<Account>;
+  accountPrivate?: Maybe<AccountPrivate>;
   accounts?: Maybe<AccountConnection>;
   achievements: AchievementResult;
   activities: ActivityResult;
@@ -4957,6 +5435,7 @@ export type Session = Node & {
   /** Whether the session has been revoked */
   isRevoked: Scalars["Boolean"];
   metadata?: Maybe<SessionMetadata>;
+  sessionKeyGUID?: Maybe<Scalars["String"]>;
   signer?: Maybe<Signer>;
   updatedAt: Scalars["Time"];
 };
@@ -5096,6 +5575,22 @@ export type SessionWhereInput = {
   isRevokedNEQ?: InputMaybe<Scalars["Boolean"]>;
   not?: InputMaybe<SessionWhereInput>;
   or?: InputMaybe<Array<SessionWhereInput>>;
+  /** session_key_guid field predicates */
+  sessionKeyGUID?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDContains?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDContainsFold?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDEqualFold?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDGT?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDGTE?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDHasPrefix?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDHasSuffix?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDIn?: InputMaybe<Array<Scalars["String"]>>;
+  sessionKeyGUIDIsNil?: InputMaybe<Scalars["Boolean"]>;
+  sessionKeyGUIDLT?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDLTE?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDNEQ?: InputMaybe<Scalars["String"]>;
+  sessionKeyGUIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  sessionKeyGUIDNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** updated_at field predicates */
   updatedAt?: InputMaybe<Scalars["Time"]>;
   updatedAtGT?: InputMaybe<Scalars["Time"]>;
@@ -5858,6 +6353,7 @@ export type StripePayment = {
   __typename?: "StripePayment";
   id: Scalars["ID"];
   paymentStatus: StripePaymentStatus;
+  purchaseFulfillment?: Maybe<PurchaseFulfillment>;
 };
 
 export type StripePaymentIntent = {
@@ -6607,6 +7103,22 @@ export type AddressByUsernameQuery = {
   } | null;
 };
 
+export type AccountPrivateQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AccountPrivateQuery = {
+  __typename?: "Query";
+  accountPrivate?: {
+    __typename?: "AccountPrivate";
+    phoneNumber?: string | null;
+    phoneNumberVerifiedAt?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    dob?: string | null;
+    proveVerifiedAt?: string | null;
+    verificationStatus?: string | null;
+  } | null;
+};
+
 export type AccountSearchQueryVariables = Exact<{
   query: Scalars["String"];
   limit?: InputMaybe<Scalars["Int"]>;
@@ -6622,6 +7134,498 @@ export type AccountSearchQuery = {
   }>;
 };
 
+export type AccountVerifyMutationVariables = Exact<{
+  input: AccountVerifyInput;
+}>;
+
+export type AccountVerifyMutation = {
+  __typename?: "Mutation";
+  accountVerify: boolean;
+};
+
+export type CryptoPaymentQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type CryptoPaymentQuery = {
+  __typename?: "Query";
+  cryptoPayment?: {
+    __typename?: "CryptoPayment";
+    id: string;
+    tokenAmount: string;
+    status: CryptoPaymentStatus;
+    network: Network;
+    tokenAddress: string;
+    depositAddress: string;
+    expiresAt: string;
+  } | null;
+};
+
+export type StripePaymentQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type StripePaymentQuery = {
+  __typename?: "Query";
+  stripePayment: {
+    __typename?: "StripePayment";
+    id: string;
+    paymentStatus: StripePaymentStatus;
+    purchaseFulfillment?: {
+      __typename?: "PurchaseFulfillment";
+      id: string;
+      status: PurchaseFulfillmentStatus;
+      transactionHash?: string | null;
+      lastError?: string | null;
+    } | null;
+  };
+};
+
+export type LayerswapSourcesQueryVariables = Exact<{
+  token: Scalars["String"];
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+}>;
+
+export type LayerswapSourcesQuery = {
+  __typename?: "Query";
+  layerswapSources: Array<{
+    __typename?: "LayerswapSource";
+    name: string;
+    displayName: string;
+    logo: string;
+    chainId: string;
+    type: string;
+    depositMethods: Array<string>;
+    tokens: Array<{
+      __typename?: "LayerswapSourceToken";
+      symbol: string;
+      displayAsset: string;
+      decimals: number;
+      priceInUsd: number;
+      status: string;
+    }>;
+  }>;
+};
+
+export type CreateCryptoPaymentMutationVariables = Exact<{
+  input: CreateCryptoPaymentInput;
+}>;
+
+export type CreateCryptoPaymentMutation = {
+  __typename?: "Mutation";
+  createCryptoPayment: {
+    __typename?: "CryptoPayment";
+    id: string;
+    tokenAmount: string;
+    status: CryptoPaymentStatus;
+    network: Network;
+    tokenAddress: string;
+    depositAddress: string;
+    expiresAt: string;
+  };
+};
+
+export type CreateStripePaymentIntentMutationVariables = Exact<{
+  input: CreateStripePaymentIntentInput;
+}>;
+
+export type CreateStripePaymentIntentMutation = {
+  __typename?: "Mutation";
+  createStripePaymentIntent: {
+    __typename?: "StripePaymentIntent";
+    id: string;
+    clientSecret: string;
+    pricing: {
+      __typename?: "StripePricingDetails";
+      baseCostInCents: number;
+      processingFeeInCents: number;
+      totalInCents: number;
+    };
+  };
+};
+
+export type CreateStripeStarterpackIntentMutationVariables = Exact<{
+  input: CreateStripeStarterpackIntentInput;
+}>;
+
+export type CreateStripeStarterpackIntentMutation = {
+  __typename?: "Mutation";
+  createStripeStarterpackIntent: {
+    __typename?: "StripePaymentIntent";
+    id: string;
+    clientSecret: string;
+    pricing: {
+      __typename?: "StripePricingDetails";
+      baseCostInCents: number;
+      processingFeeInCents: number;
+      totalInCents: number;
+    };
+  };
+};
+
+export type CreateLayerswapPaymentMutationVariables = Exact<{
+  input: CreateLayerswapPaymentInput;
+}>;
+
+export type CreateLayerswapPaymentMutation = {
+  __typename?: "Mutation";
+  createLayerswapPayment: {
+    __typename?: "LayerswapPayment";
+    cryptoPaymentId: string;
+    swapId: string;
+    status: LayerswapStatus;
+    sourceNetwork: LayerswapSourceNetwork;
+    sourceTokenAmount: string;
+    sourceTokenAddress: string;
+    sourceDepositAddress: string;
+    expiresAt: string;
+  };
+};
+
+export type CreateLayerswapDepositMutationVariables = Exact<{
+  input: CreateLayerswapDepositInput;
+}>;
+
+export type CreateLayerswapDepositMutation = {
+  __typename?: "Mutation";
+  createLayerswapDeposit: {
+    __typename?: "LayerswapPayment";
+    cryptoPaymentId: string;
+    swapId: string;
+    status: LayerswapStatus;
+    sourceNetwork: LayerswapSourceNetwork;
+    sourceTokenAmount: string;
+    sourceTokenAddress: string;
+    sourceDepositAddress: string;
+    expiresAt: string;
+  };
+};
+
+export type LayerswapQuoteQueryVariables = Exact<{
+  input: CreateLayerswapDepositInput;
+}>;
+
+export type LayerswapQuoteQuery = {
+  __typename?: "Query";
+  layerswapQuote: {
+    __typename?: "LayerswapQuote";
+    requestedAmount: string;
+    receivedAmount: string;
+    totalFees: string;
+    averageCompletionTime: string;
+  };
+};
+
+export type LayerswapStatusQueryVariables = Exact<{
+  swapId: Scalars["ID"];
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+}>;
+
+export type LayerswapStatusQuery = {
+  __typename?: "Query";
+  layerswapStatus: LayerswapStatus;
+};
+
+export type CoinbaseOnrampTransactionsQueryVariables = Exact<{
+  input: CoinbaseTransactionsInput;
+}>;
+
+export type CoinbaseOnrampTransactionsQuery = {
+  __typename?: "Query";
+  coinbaseOnrampTransactions: {
+    __typename?: "CoinbaseTransactionsResponse";
+    nextPageKey?: string | null;
+    totalCount?: string | null;
+    transactions: Array<{
+      __typename?: "CoinbaseTransaction";
+      transactionId: string;
+      walletAddress?: string | null;
+      type?: string | null;
+      txHash?: string | null;
+      status: CoinbaseTransactionStatus;
+      purchaseCurrency: string;
+      purchaseNetwork: string;
+      purchaseAmount: {
+        __typename?: "CoinbaseAmount";
+        amount: string;
+        currency: string;
+      };
+      paymentTotal: {
+        __typename?: "CoinbaseAmount";
+        amount: string;
+        currency: string;
+      };
+      coinbaseFee: {
+        __typename?: "CoinbaseAmount";
+        amount: string;
+        currency: string;
+      };
+      networkFee: {
+        __typename?: "CoinbaseAmount";
+        amount: string;
+        currency: string;
+      };
+    }>;
+  };
+};
+
+export type CreateCoinbaseOnRampOrderMutationVariables = Exact<{
+  input: CreateCoinbaseOnrampOrderInput;
+}>;
+
+export type CreateCoinbaseOnRampOrderMutation = {
+  __typename?: "Mutation";
+  createCoinbaseOnrampOrder: {
+    __typename?: "CoinbaseOnrampOrderResponse";
+    coinbaseOrder: {
+      __typename?: "CoinbaseOnrampOrder";
+      orderId: string;
+      paymentLink: string;
+      paymentLinkType: string;
+      paymentTotal: string;
+      paymentCurrency: string;
+      purchaseAmount: string;
+      purchaseCurrency: string;
+      destinationAddress: string;
+      destinationNetwork: string;
+      fees: Array<{
+        __typename?: "CoinbaseOnrampFee";
+        type: string;
+        amount: string;
+        currency: string;
+      }>;
+    };
+    layerswapPayment?: {
+      __typename?: "LayerswapPayment";
+      cryptoPaymentId: string;
+      swapId: string;
+      status: LayerswapStatus;
+      sourceNetwork: LayerswapSourceNetwork;
+      sourceTokenAmount: string;
+      sourceTokenAddress: string;
+      sourceDepositAddress: string;
+      expiresAt: string;
+    } | null;
+  };
+};
+
+export type CreateCoinbaseLayerswapOrderMutationVariables = Exact<{
+  input: CreateCoinbaseLayerswapOrderInput;
+}>;
+
+export type CreateCoinbaseLayerswapOrderMutation = {
+  __typename?: "Mutation";
+  createCoinbaseLayerswapOrder: {
+    __typename?: "CoinbaseOnrampOrderResponse";
+    coinbaseOrder: {
+      __typename?: "CoinbaseOnrampOrder";
+      orderId: string;
+      paymentLink: string;
+      paymentLinkType: string;
+      paymentTotal: string;
+      paymentCurrency: string;
+      purchaseAmount: string;
+      purchaseCurrency: string;
+      destinationAddress: string;
+      destinationNetwork: string;
+      fees: Array<{
+        __typename?: "CoinbaseOnrampFee";
+        type: string;
+        amount: string;
+        currency: string;
+      }>;
+    };
+    layerswapPayment?: {
+      __typename?: "LayerswapPayment";
+      cryptoPaymentId: string;
+      swapId: string;
+      status: LayerswapStatus;
+      sourceNetwork: LayerswapSourceNetwork;
+      sourceTokenAmount: string;
+      sourceTokenAddress: string;
+      sourceDepositAddress: string;
+      expiresAt: string;
+    } | null;
+  };
+};
+
+export type CoinbaseOnRampOrderQueryVariables = Exact<{
+  orderId: Scalars["String"];
+}>;
+
+export type CoinbaseOnRampOrderQuery = {
+  __typename?: "Query";
+  coinbaseOnrampOrder: {
+    __typename?: "CoinbaseOnrampOrder";
+    txHash?: string | null;
+    status: CoinbaseOnrampStatus;
+  };
+};
+
+export type CoinbaseOnRampQuoteQueryVariables = Exact<{
+  input: CoinbaseOnrampQuoteInput;
+}>;
+
+export type CoinbaseOnRampQuoteQuery = {
+  __typename?: "Query";
+  coinbaseOnrampQuote: {
+    __typename?: "CoinbaseOnrampQuote";
+    quoteId: string;
+    paymentTotal: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    purchaseAmount: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    layerswapFees: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    coinbaseFee: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+    networkFee: {
+      __typename?: "CoinbaseAmount";
+      amount: string;
+      currency: string;
+    };
+  };
+};
+
+export type CryptoPaymentFieldsFragment = {
+  __typename?: "CryptoPayment";
+  id: string;
+  tokenAmount: string;
+  status: CryptoPaymentStatus;
+  network: Network;
+  tokenAddress: string;
+  depositAddress: string;
+  expiresAt: string;
+};
+
+export type LayerswapPaymentFieldsFragment = {
+  __typename?: "LayerswapPayment";
+  cryptoPaymentId: string;
+  swapId: string;
+  status: LayerswapStatus;
+  sourceNetwork: LayerswapSourceNetwork;
+  sourceTokenAmount: string;
+  sourceTokenAddress: string;
+  sourceDepositAddress: string;
+  expiresAt: string;
+};
+
+export type CoinbaseOnrampOrderFieldsFragment = {
+  __typename?: "CoinbaseOnrampOrder";
+  orderId: string;
+  paymentLink: string;
+  paymentLinkType: string;
+  paymentTotal: string;
+  paymentCurrency: string;
+  purchaseAmount: string;
+  purchaseCurrency: string;
+  destinationAddress: string;
+  destinationNetwork: string;
+  fees: Array<{
+    __typename?: "CoinbaseOnrampFee";
+    type: string;
+    amount: string;
+    currency: string;
+  }>;
+};
+
+export type CoinbaseOnrampOrderResponseFieldsFragment = {
+  __typename?: "CoinbaseOnrampOrderResponse";
+  coinbaseOrder: {
+    __typename?: "CoinbaseOnrampOrder";
+    orderId: string;
+    paymentLink: string;
+    paymentLinkType: string;
+    paymentTotal: string;
+    paymentCurrency: string;
+    purchaseAmount: string;
+    purchaseCurrency: string;
+    destinationAddress: string;
+    destinationNetwork: string;
+    fees: Array<{
+      __typename?: "CoinbaseOnrampFee";
+      type: string;
+      amount: string;
+      currency: string;
+    }>;
+  };
+  layerswapPayment?: {
+    __typename?: "LayerswapPayment";
+    cryptoPaymentId: string;
+    swapId: string;
+    status: LayerswapStatus;
+    sourceNetwork: LayerswapSourceNetwork;
+    sourceTokenAmount: string;
+    sourceTokenAddress: string;
+    sourceDepositAddress: string;
+    expiresAt: string;
+  } | null;
+};
+
+export const CryptoPaymentFieldsFragmentDoc = `
+    fragment CryptoPaymentFields on CryptoPayment {
+  id
+  tokenAmount
+  status
+  network
+  tokenAddress
+  depositAddress
+  expiresAt
+}
+    `;
+export const CoinbaseOnrampOrderFieldsFragmentDoc = `
+    fragment CoinbaseOnrampOrderFields on CoinbaseOnrampOrder {
+  orderId
+  paymentLink
+  paymentLinkType
+  paymentTotal
+  paymentCurrency
+  purchaseAmount
+  purchaseCurrency
+  destinationAddress
+  destinationNetwork
+  fees {
+    type
+    amount
+    currency
+  }
+}
+    `;
+export const LayerswapPaymentFieldsFragmentDoc = `
+    fragment LayerswapPaymentFields on LayerswapPayment {
+  cryptoPaymentId
+  swapId
+  status
+  sourceNetwork
+  sourceTokenAmount
+  sourceTokenAddress
+  sourceDepositAddress
+  expiresAt
+}
+    `;
+export const CoinbaseOnrampOrderResponseFieldsFragmentDoc = `
+    fragment CoinbaseOnrampOrderResponseFields on CoinbaseOnrampOrderResponse {
+  coinbaseOrder {
+    ...CoinbaseOnrampOrderFields
+  }
+  layerswapPayment {
+    ...LayerswapPaymentFields
+  }
+}
+    ${CoinbaseOnrampOrderFieldsFragmentDoc}
+${LayerswapPaymentFieldsFragmentDoc}`;
 export const AccountDocument = `
     query Account($username: String!) {
   account(username: $username) {
@@ -6761,6 +7765,35 @@ export const useAddressByUsernameQuery = <
     ).bind(null, variables),
     options,
   );
+export const AccountPrivateDocument = `
+    query AccountPrivate {
+  accountPrivate {
+    phoneNumber
+    phoneNumberVerifiedAt
+    firstName
+    lastName
+    dob
+    proveVerifiedAt
+    verificationStatus
+  }
+}
+    `;
+export const useAccountPrivateQuery = <
+  TData = AccountPrivateQuery,
+  TError = unknown,
+>(
+  variables?: AccountPrivateQueryVariables,
+  options?: UseQueryOptions<AccountPrivateQuery, TError, TData>,
+) =>
+  useQuery<AccountPrivateQuery, TError, TData>(
+    variables === undefined
+      ? ["AccountPrivate"]
+      : ["AccountPrivate", variables],
+    useFetchData<AccountPrivateQuery, AccountPrivateQueryVariables>(
+      AccountPrivateDocument,
+    ).bind(null, variables),
+    options,
+  );
 export const AccountSearchDocument = `
     query AccountSearch($query: String!, $limit: Int = 5) {
   searchAccounts(query: $query, limit: $limit) {
@@ -6784,6 +7817,496 @@ export const useAccountSearchQuery = <
     ["AccountSearch", variables],
     useFetchData<AccountSearchQuery, AccountSearchQueryVariables>(
       AccountSearchDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const AccountVerifyDocument = `
+    mutation AccountVerify($input: AccountVerifyInput!) {
+  accountVerify(input: $input)
+}
+    `;
+export const useAccountVerifyMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    AccountVerifyMutation,
+    TError,
+    AccountVerifyMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    AccountVerifyMutation,
+    TError,
+    AccountVerifyMutationVariables,
+    TContext
+  >(
+    ["AccountVerify"],
+    useFetchData<AccountVerifyMutation, AccountVerifyMutationVariables>(
+      AccountVerifyDocument,
+    ),
+    options,
+  );
+export const CryptoPaymentDocument = `
+    query CryptoPayment($id: ID!) {
+  cryptoPayment(id: $id) {
+    ...CryptoPaymentFields
+  }
+}
+    ${CryptoPaymentFieldsFragmentDoc}`;
+export const useCryptoPaymentQuery = <
+  TData = CryptoPaymentQuery,
+  TError = unknown,
+>(
+  variables: CryptoPaymentQueryVariables,
+  options?: UseQueryOptions<CryptoPaymentQuery, TError, TData>,
+) =>
+  useQuery<CryptoPaymentQuery, TError, TData>(
+    ["CryptoPayment", variables],
+    useFetchData<CryptoPaymentQuery, CryptoPaymentQueryVariables>(
+      CryptoPaymentDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const StripePaymentDocument = `
+    query StripePayment($id: ID!) {
+  stripePayment(id: $id) {
+    id
+    paymentStatus
+    purchaseFulfillment {
+      id
+      status
+      transactionHash
+      lastError
+    }
+  }
+}
+    `;
+export const useStripePaymentQuery = <
+  TData = StripePaymentQuery,
+  TError = unknown,
+>(
+  variables: StripePaymentQueryVariables,
+  options?: UseQueryOptions<StripePaymentQuery, TError, TData>,
+) =>
+  useQuery<StripePaymentQuery, TError, TData>(
+    ["StripePayment", variables],
+    useFetchData<StripePaymentQuery, StripePaymentQueryVariables>(
+      StripePaymentDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const LayerswapSourcesDocument = `
+    query LayerswapSources($token: String!, $isMainnet: Boolean) {
+  layerswapSources(token: $token, isMainnet: $isMainnet) {
+    name
+    displayName
+    logo
+    chainId
+    type
+    tokens {
+      symbol
+      displayAsset
+      decimals
+      priceInUsd
+      status
+    }
+    depositMethods
+  }
+}
+    `;
+export const useLayerswapSourcesQuery = <
+  TData = LayerswapSourcesQuery,
+  TError = unknown,
+>(
+  variables: LayerswapSourcesQueryVariables,
+  options?: UseQueryOptions<LayerswapSourcesQuery, TError, TData>,
+) =>
+  useQuery<LayerswapSourcesQuery, TError, TData>(
+    ["LayerswapSources", variables],
+    useFetchData<LayerswapSourcesQuery, LayerswapSourcesQueryVariables>(
+      LayerswapSourcesDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const CreateCryptoPaymentDocument = `
+    mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
+  createCryptoPayment(input: $input) {
+    ...CryptoPaymentFields
+  }
+}
+    ${CryptoPaymentFieldsFragmentDoc}`;
+export const useCreateCryptoPaymentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCryptoPaymentMutation,
+    TError,
+    CreateCryptoPaymentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCryptoPaymentMutation,
+    TError,
+    CreateCryptoPaymentMutationVariables,
+    TContext
+  >(
+    ["CreateCryptoPayment"],
+    useFetchData<
+      CreateCryptoPaymentMutation,
+      CreateCryptoPaymentMutationVariables
+    >(CreateCryptoPaymentDocument),
+    options,
+  );
+export const CreateStripePaymentIntentDocument = `
+    mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
+  createStripePaymentIntent(input: $input) {
+    id
+    clientSecret
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+  }
+}
+    `;
+export const useCreateStripePaymentIntentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateStripePaymentIntentMutation,
+    TError,
+    CreateStripePaymentIntentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateStripePaymentIntentMutation,
+    TError,
+    CreateStripePaymentIntentMutationVariables,
+    TContext
+  >(
+    ["CreateStripePaymentIntent"],
+    useFetchData<
+      CreateStripePaymentIntentMutation,
+      CreateStripePaymentIntentMutationVariables
+    >(CreateStripePaymentIntentDocument),
+    options,
+  );
+export const CreateStripeStarterpackIntentDocument = `
+    mutation CreateStripeStarterpackIntent($input: CreateStripeStarterpackIntentInput!) {
+  createStripeStarterpackIntent(input: $input) {
+    id
+    clientSecret
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+  }
+}
+    `;
+export const useCreateStripeStarterpackIntentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateStripeStarterpackIntentMutation,
+    TError,
+    CreateStripeStarterpackIntentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateStripeStarterpackIntentMutation,
+    TError,
+    CreateStripeStarterpackIntentMutationVariables,
+    TContext
+  >(
+    ["CreateStripeStarterpackIntent"],
+    useFetchData<
+      CreateStripeStarterpackIntentMutation,
+      CreateStripeStarterpackIntentMutationVariables
+    >(CreateStripeStarterpackIntentDocument),
+    options,
+  );
+export const CreateLayerswapPaymentDocument = `
+    mutation CreateLayerswapPayment($input: CreateLayerswapPaymentInput!) {
+  createLayerswapPayment(input: $input) {
+    ...LayerswapPaymentFields
+  }
+}
+    ${LayerswapPaymentFieldsFragmentDoc}`;
+export const useCreateLayerswapPaymentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateLayerswapPaymentMutation,
+    TError,
+    CreateLayerswapPaymentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateLayerswapPaymentMutation,
+    TError,
+    CreateLayerswapPaymentMutationVariables,
+    TContext
+  >(
+    ["CreateLayerswapPayment"],
+    useFetchData<
+      CreateLayerswapPaymentMutation,
+      CreateLayerswapPaymentMutationVariables
+    >(CreateLayerswapPaymentDocument),
+    options,
+  );
+export const CreateLayerswapDepositDocument = `
+    mutation CreateLayerswapDeposit($input: CreateLayerswapDepositInput!) {
+  createLayerswapDeposit(input: $input) {
+    ...LayerswapPaymentFields
+  }
+}
+    ${LayerswapPaymentFieldsFragmentDoc}`;
+export const useCreateLayerswapDepositMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateLayerswapDepositMutation,
+    TError,
+    CreateLayerswapDepositMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateLayerswapDepositMutation,
+    TError,
+    CreateLayerswapDepositMutationVariables,
+    TContext
+  >(
+    ["CreateLayerswapDeposit"],
+    useFetchData<
+      CreateLayerswapDepositMutation,
+      CreateLayerswapDepositMutationVariables
+    >(CreateLayerswapDepositDocument),
+    options,
+  );
+export const LayerswapQuoteDocument = `
+    query LayerswapQuote($input: CreateLayerswapDepositInput!) {
+  layerswapQuote(input: $input) {
+    requestedAmount
+    receivedAmount
+    totalFees
+    averageCompletionTime
+  }
+}
+    `;
+export const useLayerswapQuoteQuery = <
+  TData = LayerswapQuoteQuery,
+  TError = unknown,
+>(
+  variables: LayerswapQuoteQueryVariables,
+  options?: UseQueryOptions<LayerswapQuoteQuery, TError, TData>,
+) =>
+  useQuery<LayerswapQuoteQuery, TError, TData>(
+    ["LayerswapQuote", variables],
+    useFetchData<LayerswapQuoteQuery, LayerswapQuoteQueryVariables>(
+      LayerswapQuoteDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const LayerswapStatusDocument = `
+    query LayerswapStatus($swapId: ID!, $isMainnet: Boolean) {
+  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet)
+}
+    `;
+export const useLayerswapStatusQuery = <
+  TData = LayerswapStatusQuery,
+  TError = unknown,
+>(
+  variables: LayerswapStatusQueryVariables,
+  options?: UseQueryOptions<LayerswapStatusQuery, TError, TData>,
+) =>
+  useQuery<LayerswapStatusQuery, TError, TData>(
+    ["LayerswapStatus", variables],
+    useFetchData<LayerswapStatusQuery, LayerswapStatusQueryVariables>(
+      LayerswapStatusDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const CoinbaseOnrampTransactionsDocument = `
+    query CoinbaseOnrampTransactions($input: CoinbaseTransactionsInput!) {
+  coinbaseOnrampTransactions(input: $input) {
+    transactions {
+      transactionId
+      walletAddress
+      type
+      txHash
+      status
+      purchaseCurrency
+      purchaseNetwork
+      purchaseAmount {
+        amount
+        currency
+      }
+      paymentTotal {
+        amount
+        currency
+      }
+      coinbaseFee {
+        amount
+        currency
+      }
+      networkFee {
+        amount
+        currency
+      }
+    }
+    nextPageKey
+    totalCount
+  }
+}
+    `;
+export const useCoinbaseOnrampTransactionsQuery = <
+  TData = CoinbaseOnrampTransactionsQuery,
+  TError = unknown,
+>(
+  variables: CoinbaseOnrampTransactionsQueryVariables,
+  options?: UseQueryOptions<CoinbaseOnrampTransactionsQuery, TError, TData>,
+) =>
+  useQuery<CoinbaseOnrampTransactionsQuery, TError, TData>(
+    ["CoinbaseOnrampTransactions", variables],
+    useFetchData<
+      CoinbaseOnrampTransactionsQuery,
+      CoinbaseOnrampTransactionsQueryVariables
+    >(CoinbaseOnrampTransactionsDocument).bind(null, variables),
+    options,
+  );
+export const CreateCoinbaseOnRampOrderDocument = `
+    mutation CreateCoinbaseOnRampOrder($input: CreateCoinbaseOnrampOrderInput!) {
+  createCoinbaseOnrampOrder(input: $input) {
+    ...CoinbaseOnrampOrderResponseFields
+  }
+}
+    ${CoinbaseOnrampOrderResponseFieldsFragmentDoc}`;
+export const useCreateCoinbaseOnRampOrderMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinbaseOnRampOrderMutation,
+    TError,
+    CreateCoinbaseOnRampOrderMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinbaseOnRampOrderMutation,
+    TError,
+    CreateCoinbaseOnRampOrderMutationVariables,
+    TContext
+  >(
+    ["CreateCoinbaseOnRampOrder"],
+    useFetchData<
+      CreateCoinbaseOnRampOrderMutation,
+      CreateCoinbaseOnRampOrderMutationVariables
+    >(CreateCoinbaseOnRampOrderDocument),
+    options,
+  );
+export const CreateCoinbaseLayerswapOrderDocument = `
+    mutation CreateCoinbaseLayerswapOrder($input: CreateCoinbaseLayerswapOrderInput!) {
+  createCoinbaseLayerswapOrder(input: $input) {
+    ...CoinbaseOnrampOrderResponseFields
+  }
+}
+    ${CoinbaseOnrampOrderResponseFieldsFragmentDoc}`;
+export const useCreateCoinbaseLayerswapOrderMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinbaseLayerswapOrderMutation,
+    TError,
+    CreateCoinbaseLayerswapOrderMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinbaseLayerswapOrderMutation,
+    TError,
+    CreateCoinbaseLayerswapOrderMutationVariables,
+    TContext
+  >(
+    ["CreateCoinbaseLayerswapOrder"],
+    useFetchData<
+      CreateCoinbaseLayerswapOrderMutation,
+      CreateCoinbaseLayerswapOrderMutationVariables
+    >(CreateCoinbaseLayerswapOrderDocument),
+    options,
+  );
+export const CoinbaseOnRampOrderDocument = `
+    query CoinbaseOnRampOrder($orderId: String!) {
+  coinbaseOnrampOrder(orderId: $orderId) {
+    txHash
+    status
+  }
+}
+    `;
+export const useCoinbaseOnRampOrderQuery = <
+  TData = CoinbaseOnRampOrderQuery,
+  TError = unknown,
+>(
+  variables: CoinbaseOnRampOrderQueryVariables,
+  options?: UseQueryOptions<CoinbaseOnRampOrderQuery, TError, TData>,
+) =>
+  useQuery<CoinbaseOnRampOrderQuery, TError, TData>(
+    ["CoinbaseOnRampOrder", variables],
+    useFetchData<CoinbaseOnRampOrderQuery, CoinbaseOnRampOrderQueryVariables>(
+      CoinbaseOnRampOrderDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const CoinbaseOnRampQuoteDocument = `
+    query CoinbaseOnRampQuote($input: CoinbaseOnrampQuoteInput!) {
+  coinbaseOnrampQuote(input: $input) {
+    quoteId
+    paymentTotal {
+      amount
+      currency
+    }
+    purchaseAmount {
+      amount
+      currency
+    }
+    layerswapFees {
+      amount
+      currency
+    }
+    coinbaseFee {
+      amount
+      currency
+    }
+    networkFee {
+      amount
+      currency
+    }
+  }
+}
+    `;
+export const useCoinbaseOnRampQuoteQuery = <
+  TData = CoinbaseOnRampQuoteQuery,
+  TError = unknown,
+>(
+  variables: CoinbaseOnRampQuoteQueryVariables,
+  options?: UseQueryOptions<CoinbaseOnRampQuoteQuery, TError, TData>,
+) =>
+  useQuery<CoinbaseOnRampQuoteQuery, TError, TData>(
+    ["CoinbaseOnRampQuote", variables],
+    useFetchData<CoinbaseOnRampQuoteQuery, CoinbaseOnRampQuoteQueryVariables>(
+      CoinbaseOnRampQuoteDocument,
     ).bind(null, variables),
     options,
   );

@@ -22,10 +22,17 @@ export type ConnectionContextValue = {
   project: string | null;
   namespace: string | null;
   propagateError: boolean;
+  webauthnPopup: {
+    create: boolean;
+    get: boolean;
+  };
+  preset: string | null;
+  policiesStr: string | null;
   tokens?: string[];
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
   isConfigLoading: boolean;
+  isPoliciesResolved: boolean;
   isMainnet: boolean;
   verified: boolean;
   chainId?: string;

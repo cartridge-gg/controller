@@ -11,8 +11,11 @@ import {
 
 // Mock starterpack context
 const mockStarterpackValue = {
+  registryAddress: undefined,
+  bundleId: undefined,
+  setBundle: () => {},
   starterpackId: undefined,
-  setStarterpackId: () => {},
+  setStarterpack: () => {},
   starterpackDetails: undefined,
   isStarterpackLoading: false,
   claimItems: [],
@@ -22,6 +25,8 @@ const mockStarterpackValue = {
   displayError: undefined,
   setDisplayError: () => {},
   clearError: () => {},
+  socialClaimOptions: undefined,
+  socialClaimConditions: undefined,
 };
 
 // Mock onchain purchase context
@@ -30,6 +35,7 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   quantity: 1,
   incrementQuantity: () => {},
   decrementQuantity: () => {},
+  setIssueSignature: () => {},
   selectedWallet: undefined,
   selectedPlatform: undefined,
   walletAddress: undefined,
@@ -57,12 +63,19 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   onSendDeposit: async () => {},
   waitForDeposit: async () => false,
   isApplePaySelected: false,
+  isStripeSelected: false,
   paymentLink: undefined,
   isCreatingOrder: false,
   coinbaseQuote: undefined,
   isFetchingCoinbaseQuote: false,
   onApplePaySelect: () => {},
-  onCreateCoinbaseOrder: async () => {},
+  onStripeSelect: () => {},
+  onCreateCoinbaseOrder: async () => undefined,
+  openPaymentPopup: () => {},
+  orderId: undefined,
+  orderStatus: undefined,
+  orderTxHash: undefined,
+  popupClosed: false,
   getTransactions: async () => [],
 };
 

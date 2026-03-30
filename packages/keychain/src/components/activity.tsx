@@ -1,3 +1,5 @@
+import { useCallback, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   ActivityAchievementCard,
   ActivityCollectibleCard,
@@ -12,29 +14,9 @@ import {
 import { cn } from "@cartridge/ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import { useData } from "@/hooks/data";
-import { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { CardProps } from "@/components/provider/data";
 
 const OFFSET = 100;
-
-interface CardProps {
-  variant: "token" | "collectible" | "game" | "achievement";
-  key: string;
-  transactionHash: string;
-  amount: string;
-  address: string;
-  value: string;
-  name: string;
-  collection: string;
-  image: string;
-  title: string;
-  website: string;
-  certified: boolean;
-  action: "send" | "receive" | "mint";
-  timestamp: number;
-  date: string;
-  points?: number;
-}
 
 export function Activity() {
   const [cap, setCap] = useState(OFFSET);
@@ -66,8 +48,10 @@ export function Activity() {
       {dates.map((current) => {
         return (
           <div key={current} className="flex flex-col gap-y-2 select-none">
-            <p className="text-foreground-300 text-sm font-medium">{current}</p>
-            <div className="flex flex-col gap-y-px">
+            <p className="text-foreground-400 text-xs font-bold uppercase mb-2 leading-none">
+              {current}
+            </p>
+            <div className="flex flex-col gap-y-2">
               {events
                 .filter((event) => event.date === current)
                 .map((props: CardProps, index: number) => {
@@ -75,16 +59,18 @@ export function Activity() {
                     case "token":
                       return (
                         <Link
-                          key={`${index}-${props.key}`}
+                          key={`${index}-${props.key}-${props.username}`}
                           to={to(props.transactionHash)}
                           target="_blank"
                         >
                           <ActivityTokenCard
                             amount={props.amount}
                             address={props.address}
+                            username={props.username}
                             value={props.value}
                             image={props.image}
                             action={props.action}
+                            timestamp={props.timestamp * 1000}
                           />
                         </Link>
                       );
@@ -99,8 +85,10 @@ export function Activity() {
                             name={props.name}
                             collection={props.collection}
                             address={props.address}
+                            username={props.username}
                             image={props.image}
                             action={props.action}
+                            timestamp={props.timestamp * 1000}
                           />
                         </Link>
                       );
@@ -112,10 +100,12 @@ export function Activity() {
                           target="_blank"
                         >
                           <ActivityGameCard
-                            title={props.title}
+                            action={props.title}
+                            name={props.name}
+                            themeColor={props.color}
                             website={props.website}
-                            image={props.image}
                             certified={props.certified}
+                            timestamp={props.timestamp * 1000}
                           />
                         </Link>
                       );
@@ -125,10 +115,12 @@ export function Activity() {
                           key={`${index}-${props.key}`}
                           title={"Achievement"}
                           topic={props.title}
-                          website={props.website}
                           image={props.image}
-                          certified={props.certified}
                           points={props.points || 0}
+                          themeColor={props.color}
+                          website={props.website}
+                          certified={props.certified}
+                          timestamp={props.timestamp * 1000}
                         />
                       );
                   }
@@ -152,12 +144,12 @@ export function Activity() {
   );
 }
 
-const LoadingState = () => {
+export const LoadingState = ({ rowCount = 5 }: { rowCount?: number }) => {
   return (
     <LayoutContent>
       <Skeleton className="w-1/5 h-4 py-4 rounded" />
       <div className="flex flex-col gap-2">
-        {Array.from({ length: 20 }).map((_, index) => (
+        {Array.from({ length: rowCount }).map((_, index) => (
           <Skeleton key={index} className="w-full h-16 rounded" />
         ))}
       </div>
@@ -165,7 +157,7 @@ const LoadingState = () => {
   );
 };
 
-const EmptyState = () => {
+export const EmptyState = () => {
   return (
     <LayoutContent>
       <Empty

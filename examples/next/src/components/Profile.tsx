@@ -10,6 +10,11 @@ import {
   ETH_CONTRACT_ADDRESS,
 } from "./providers/StarknetProvider";
 
+export const BUNDLE_REGISTRY_MAINNET =
+  "0x1c53584fdbebd996c163fa2d5d5ad37f4b2f06643ea2bb897c5bee578a2e715";
+export const BUNDLE_REGISTRY_SEPOLIA =
+  "0x6361108a877e3bf74e3d92242907d40315824555d50bd7cad08a021021ed8a4";
+
 export function Profile() {
   const { account, connector } = useAccount();
   const ctrlConnector = connector as unknown as ControllerConnector;
@@ -60,6 +65,7 @@ export function Profile() {
         title: "First Achievement!",
         subtitle: "Earned!",
         xpAmount: 50,
+        progress: 100,
         isDraft: true,
       });
     }, 3000);
@@ -76,8 +82,9 @@ export function Profile() {
       toast({
         variant: "marketplace",
         action: "purchased",
-        itemName: "Cool NFT #123",
-        itemImage: "https://picsum.photos/seed/adventurer/200/200",
+        itemNames: ["Cool NFT #123"],
+        itemImages: ["https://picsum.photos/seed/adventurer/200/200"],
+        collectionName: "Cool Collection",
       });
     }, 5000);
   };
@@ -130,13 +137,6 @@ export function Profile() {
           <Button onClick={() => ctrlConnector.controller.openStarterPack(0)}>
             Nums
           </Button>
-        </div>
-      </div>
-
-      <h2>Toast Demo</h2>
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap gap-1">
-          <Button onClick={handleToastDemo}>Run demo</Button>
         </div>
       </div>
 
@@ -237,12 +237,49 @@ export function Profile() {
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileAt(
-                "account/bal7hazar/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/token/0x000000000000000000000000000000000000000000000000000000000000c527?ps=arcade-main&preset=arcade&address=0x027917d3084dC0dcd3C4ED5189733d14b0c4C13E762829BD3D1D761aa36201AB&purchaseView=true&tokenIds=0x000000000000000000000000000000000000000000000000000000000000c527",
+                // "account/bal7hazar/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/token/0x000000000000000000000000000000000000000000000000000000000000c527?ps=arcade-main&preset=loot-survivor&address=0x027917d3084dC0dcd3C4ED5189733d14b0c4C13E762829BD3D1D761aa36201AB&purchaseView=true&tokenIds=0x000000000000000000000000000000000000000000000000000000000000c527",
+                // "account/mataleone/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/purchase?ps=arcade-main&preset=loot-survivor&orders=2674",
+                "account/mataleone/inventory/collection/0x046dA8955829ADF2bDa310099A0063451923f02E648cF25A1203aac6335CF0e4/purchase?ps=arcade-main&preset=loot-survivor&orders=8772",
               )
             }
           >
-            Open at Purchase
+            Purchase 1
           </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                "account/mataleone/inventory/collection/0x07aAa9866750A0db82a54bA8674c38620Fa2F967D2FBb31133DEF48E0527c87f/purchase?ps=arcade-main&preset=pistols&orders=2474",
+              )
+            }
+          >
+            Purchase 2
+          </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                "account/mataleone/inventory/collection/0x0107AEfe535adaD25D91F77744BB37eca24D997e8216517736f06BBaEA22d214/purchase?ps=arcade-main&preset=arcade&orders=8832",
+              )
+            }
+          >
+            Purchase erc1155
+          </Button>
+          <Button
+            onClick={() => {
+              ctrlConnector.controller.openProfile("inventory");
+              setTimeout(() => {
+                ctrlConnector.controller.close();
+              }, 3000);
+            }}
+          >
+            Close after 3 seconds...
+          </Button>
+        </div>
+      </div>
+
+      <h2>Toast Demo</h2>
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-wrap gap-1">
+          <Button onClick={handleToastDemo}>Run demo</Button>
         </div>
       </div>
     </div>

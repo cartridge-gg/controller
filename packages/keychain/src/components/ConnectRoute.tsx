@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
-import { CreateSession, processPolicies } from "./connect/CreateSession";
-import { now } from "@/constants";
+import { CreateSession } from "./connect/CreateSession";
+import {
+  createVerifiedSession,
+  requiresSessionApproval,
+} from "@/utils/connection/session-creation";
 import {
   useRouteParams,
   useRouteCompletion,
@@ -13,15 +16,57 @@ import {
 } from "@/hooks/route";
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
+import { openPopupAuth } from "@/utils/connection/popup";
+import Controller from "@/utils/controller";
+import {
+  Button,
+  HeaderInner,
+  LayoutContent,
+  LayoutFooter,
+} from "@cartridge/ui";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
   message: "Canceled",
 };
 
+// Chrome on iOS uses WebKit under the hood and requires a user gesture
+// for navigator.credentials.get(). Auto session creation in useEffect
+// fails silently, so we show a "Continue" button instead.
+const isChromeIOS =
+  typeof navigator !== "undefined" && /CriOS/i.test(navigator.userAgent);
+
 export function ConnectRoute() {
-  const { controller, policies, origin } = useConnection();
+  const {
+    controller,
+    policies,
+    origin,
+    theme,
+    webauthnPopup,
+    setController,
+    preset,
+    policiesStr,
+    rpcUrl,
+  } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
+  const [isSessionCreating, setIsSessionCreating] = useState(false);
+  const [sessionError, setSessionError] = useState<Error>();
+  const [showContinueButton, setShowContinueButton] = useState(false);
+  const [hasRequestedSession, setHasRequestedSession] = useState<
+    boolean | undefined
+  >(undefined);
+
+  const popupParams = useMemo(
+    () => ({
+      preset: preset ?? undefined,
+      rpcUrl,
+      policiesStr: policiesStr ?? undefined,
+      origin,
+    }),
+    [preset, rpcUrl, policiesStr, origin],
+  );
 
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
@@ -49,11 +94,65 @@ export function ConnectRoute() {
     [policies],
   );
 
-  console.log(isStandalone, redirectUrl);
+  const requiresWebauthnPopup = useMemo(() => {
+    if (!webauthnPopup.get || !controller) {
+      return false;
+    }
+
+    const owner = controller.owner();
+    return Boolean(owner.signer?.webauthn || owner.signer?.webauthns?.length);
+  }, [webauthnPopup, controller]);
+
+  useEffect(() => {
+    if (!requiresWebauthnPopup || !controller || !policies) {
+      setHasRequestedSession(undefined);
+      return;
+    }
+
+    let cancelled = false;
+    setHasRequestedSession(undefined);
+
+    controller
+      .isRequestedSession(origin, policies)
+      .then((hasSession) => {
+        if (!cancelled) {
+          setHasRequestedSession(hasSession);
+        }
+      })
+      .catch((error) => {
+        console.error(
+          "[ConnectRoute] Failed to check existing session:",
+          error,
+        );
+        if (!cancelled) {
+          setHasRequestedSession(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [requiresWebauthnPopup, controller, policies, origin]);
+
+  const clearConnectParams = useCallback(() => {
+    const url = new URL(window.location.href);
+    url.search = "";
+    window.history.replaceState(null, "", url.toString());
+  }, []);
 
   const handleConnect = useCallback(async () => {
     if (!params || !controller) {
       return;
+    }
+
+    // In iframe context, request storage access on user gesture so
+    // third-party storage can persist across app restarts.
+    if (!isStandalone) {
+      try {
+        await requestStorageAccess();
+      } catch (error) {
+        console.error("[ConnectRoute] Storage access request failed:", error);
+      }
     }
 
     params.resolve?.({
@@ -63,6 +162,7 @@ export function ConnectRoute() {
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
+    clearConnectParams();
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
@@ -95,11 +195,26 @@ export function ConnectRoute() {
     }
 
     handleCompletion();
-  }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
+  }, [
+    params,
+    controller,
+    clearConnectParams,
+    handleCompletion,
+    isStandalone,
+    redirectUrl,
+  ]);
 
   const handleSkip = useCallback(async () => {
     if (!params || !controller) {
       return;
+    }
+
+    if (!isStandalone) {
+      try {
+        await requestStorageAccess();
+      } catch (error) {
+        console.error("[ConnectRoute] Storage access request failed:", error);
+      }
     }
 
     params.resolve?.({
@@ -109,6 +224,7 @@ export function ConnectRoute() {
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
+    clearConnectParams();
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     // Add lastUsedConnector query param to indicate controller was used
@@ -141,12 +257,40 @@ export function ConnectRoute() {
     }
 
     handleCompletion();
-  }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
+  }, [
+    params,
+    controller,
+    clearConnectParams,
+    handleCompletion,
+    isStandalone,
+    redirectUrl,
+  ]);
 
   // Handle cases where we can connect immediately (embedded mode only)
   useEffect(() => {
     if (!params || !controller || hasAutoConnected) {
       return;
+    }
+
+    if (requiresWebauthnPopup && policies) {
+      if (hasRequestedSession === undefined) {
+        return;
+      }
+
+      if (hasRequestedSession) {
+        setHasAutoConnected(true);
+        clearConnectParams();
+        params.resolve?.({
+          code: ResponseCodes.SUCCESS,
+          address: controller.address(),
+        });
+
+        if (params.params.id) {
+          cleanupCallbacks(params.params.id);
+        }
+        handleCompletion();
+        return;
+      }
     }
 
     // In standalone mode with redirect_url, redirect immediately
@@ -194,19 +338,19 @@ export function ConnectRoute() {
 
     // Bypass session approval screen for verified sessions in embedded mode
     // Note: This is a fallback - main logic is handled in useCreateController
-    if (policies.verified) {
-      if (hasTokenApprovals) {
-        return;
-      }
-
+    if (!requiresSessionApproval(policies)) {
       const createSessionForVerifiedPolicies = async () => {
         try {
-          // Use a default duration for verified sessions (24 hours)
-          const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-          const expiresAt = duration + now();
-
-          const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(origin, expiresAt, processedPolicies);
+          if (requiresWebauthnPopup) {
+            // When session auth relies on WebAuthn, delegate it to a popup window.
+            await createSessionViaPopup(controller, setController, popupParams);
+          } else {
+            await createVerifiedSession({
+              controller,
+              origin,
+              policies,
+            });
+          }
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
@@ -217,8 +361,15 @@ export function ConnectRoute() {
           handleCompletion();
         } catch (e) {
           console.error("Failed to create verified session:", e);
-          // Fall back to showing the UI if auto-creation fails
-          params.reject?.(e);
+
+          if (isChromeIOS) {
+            // Chrome iOS requires a user gesture for navigator.credentials.get().
+            // Show a "Continue" button so the user tap provides the gesture.
+            setShowContinueButton(true);
+          } else {
+            // Fall back to rejecting on other browsers
+            params.reject?.(e);
+          }
         }
       };
 
@@ -234,6 +385,11 @@ export function ConnectRoute() {
     hasAutoConnected,
     hasTokenApprovals,
     origin,
+    requiresWebauthnPopup,
+    hasRequestedSession,
+    setController,
+    popupParams,
+    clearConnectParams,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
@@ -248,12 +404,85 @@ export function ConnectRoute() {
     return null;
   }
 
-  if (policies.verified && !hasTokenApprovals) {
-    // This should not be reached as verified policies are handled in useCreateController
+  if (requiresWebauthnPopup && hasRequestedSession === undefined) {
     return null;
   }
 
-  // Show CreateSession for sessions that require approval UI
+  if (requiresWebauthnPopup && hasRequestedSession) {
+    return null;
+  }
+
+  if (policies.verified && !hasTokenApprovals) {
+    // Auto session creation failed on Chrome iOS — show a "Continue" button
+    // so the user tap provides the gesture required by WebAuthn.
+    if (showContinueButton) {
+      const handleContinue = async () => {
+        if (!controller) return;
+        setIsSessionCreating(true);
+        setSessionError(undefined);
+        try {
+          if (requiresWebauthnPopup) {
+            await createSessionViaPopup(controller, setController, popupParams);
+          } else {
+            await createVerifiedSession({ controller, origin, policies });
+          }
+          params?.resolve?.({
+            code: ResponseCodes.SUCCESS,
+            address: controller.address(),
+          });
+          if (params?.params.id) {
+            cleanupCallbacks(params.params.id);
+          }
+          handleCompletion();
+        } catch (e) {
+          console.error("Failed to create verified session:", e);
+          setSessionError(e instanceof Error ? e : new Error(String(e)));
+        } finally {
+          setIsSessionCreating(false);
+        }
+      };
+
+      return (
+        <>
+          <HeaderInner
+            className="pb-0"
+            title={theme ? theme.name : "Create Session"}
+          />
+          <LayoutContent />
+          <LayoutFooter>
+            {sessionError && (
+              <ControllerErrorAlert className="mb-3" error={sessionError} />
+            )}
+            <Button
+              className="w-full"
+              disabled={isSessionCreating}
+              isLoading={isSessionCreating}
+              onClick={() => void handleContinue()}
+            >
+              continue
+            </Button>
+          </LayoutFooter>
+        </>
+      );
+    }
+
+    // Auto-creation either succeeded or is in progress
+    return null;
+  }
+
+  // Show CreateSession for sessions that require approval UI.
+  // Only WebAuthn-backed controllers need to proxy this through a popup.
+  if (requiresWebauthnPopup) {
+    return (
+      <PopupSessionProxy
+        controller={controller}
+        onConnect={handleConnect}
+        onSkip={handleSkip}
+        setController={setController}
+        popupParams={popupParams}
+      />
+    );
+  }
 
   return (
     <CreateSession
@@ -262,4 +491,105 @@ export function ConnectRoute() {
       onSkip={handleSkip}
     />
   );
+}
+
+/**
+ * In popup mode, opens a popup for session creation that requires user approval.
+ * The popup handles the CreateSession UI + WebAuthn signing.
+ */
+function PopupSessionProxy({
+  controller,
+  onConnect,
+  setController,
+  popupParams,
+}: {
+  controller: Controller;
+  onConnect: () => void;
+  onSkip?: () => void;
+  setController: (controller?: Controller) => void;
+  popupParams: {
+    preset?: string;
+    rpcUrl?: string;
+    policiesStr?: string;
+    origin?: string;
+  };
+}) {
+  const [error, setError] = useState<string>();
+  const hasOpened = useRef(false);
+
+  useEffect(() => {
+    if (hasOpened.current) return;
+    hasOpened.current = true;
+
+    (async () => {
+      try {
+        await createSessionViaPopup(controller, setController, popupParams);
+        onConnect();
+      } catch (e) {
+        console.error("[PopupSessionProxy] Popup session creation failed:", e);
+        setError(e instanceof Error ? e.message : String(e));
+      }
+    })();
+  }, [controller, onConnect, setController, popupParams]);
+
+  if (error) {
+    return (
+      <>
+        <HeaderInner className="pb-0" title="Session Creation" />
+        <LayoutContent />
+        <LayoutFooter>
+          <ControllerErrorAlert className="mb-3" error={new Error(error)} />
+          <Button
+            className="w-full"
+            onClick={() => {
+              setError(undefined);
+              hasOpened.current = false;
+            }}
+          >
+            retry
+          </Button>
+        </LayoutFooter>
+      </>
+    );
+  }
+
+  // Loading state while popup is open
+  return (
+    <>
+      <HeaderInner
+        className="pb-0"
+        title="Complete in popup"
+        description="Please complete the authentication in the popup window."
+      />
+      <LayoutContent />
+    </>
+  );
+}
+
+/**
+ * Opens a popup for WebAuthn-backed session creation and imports the
+ * returned controller/session state into the iframe store.
+ */
+async function createSessionViaPopup(
+  currentController: Controller,
+  setController: (controller?: Controller) => void,
+  params: {
+    preset?: string;
+    rpcUrl?: string;
+    policiesStr?: string;
+    origin?: string;
+  },
+): Promise<void> {
+  const popupState = await openPopupAuth({
+    action: "login",
+    username: currentController.username(),
+    preset: params.preset ?? undefined,
+    rpcUrl: params.rpcUrl ?? undefined,
+    policies: params.policiesStr ?? undefined,
+    origin: params.origin ?? undefined,
+  });
+
+  const controller = await Controller.importState(popupState);
+  window.controller = controller;
+  setController(controller);
 }

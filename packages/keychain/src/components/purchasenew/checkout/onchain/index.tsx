@@ -1,20 +1,25 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AppleIcon,
   Button,
+  CreditCardIcon,
   GiftIcon,
   HeaderInner,
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/ui";
 import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
+import { useAccountPrivateQuery } from "@/utils/api";
 import {
   useNavigation,
   useStarterpackContext,
   useOnchainPurchaseContext,
+  useCreditPurchaseContext,
   isOnchainStarterpack,
+  OnchainStarterpackDetails,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
+import { useFeatures } from "@/hooks/features";
 import { useTokenBalance } from "@/hooks/starterpack";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "../../receiving";
@@ -25,6 +30,9 @@ import { ErrorCard } from "./error";
 import { WalletSelector } from "./selector";
 import { QuantityControls } from "./quantity";
 import { WalletSelectionDrawer } from "./wallet-drawer";
+import { SocialClaimCheckout } from "./social-claim";
+import { USDC_ADDRESSES } from "@/utils/ekubo";
+import { num } from "starknet";
 
 export function OnchainCheckout() {
   const { navigate } = useNavigation();
@@ -35,6 +43,8 @@ export function OnchainCheckout() {
     displayError,
     clearError,
     setDisplayError,
+    socialClaimOptions,
+    socialClaimConditions,
   } = useStarterpackContext();
   const {
     isFetchingConversion,
@@ -55,15 +65,39 @@ export function OnchainCheckout() {
     isFetchingFees,
     layerswapFees,
     isApplePaySelected,
+    isStripeSelected,
+    onApplePaySelect,
     onCreateCoinbaseOrder,
     isCreatingOrder,
     usdAmount,
   } = useOnchainPurchaseContext();
+  const { onCreditCardPurchase, isStripeLoading } = useCreditPurchaseContext();
 
   const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
+  const { refetch: refetchAccountPrivate } = useAccountPrivateQuery(undefined, {
+    enabled: false,
+  });
+  const { enableFeature } = useFeatures();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Triple-click on the header icon to enable hidden payment methods.
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const handleIconTripleClick = useCallback(() => {
+    clickCountRef.current += 1;
+    clearTimeout(clickTimerRef.current);
+    if (clickCountRef.current === 3) {
+      clickCountRef.current = 0;
+      enableFeature("apple-pay-support");
+      onApplePaySelect();
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        clickCountRef.current = 0;
+      }, 500);
+    }
+  }, [enableFeature, onApplePaySelect]);
 
   const totalUsdAmount = useMemo(() => {
     return usdAmount * quantity;
@@ -80,11 +114,30 @@ export function OnchainCheckout() {
     return starterpackDetails.quote;
   }, [starterpackDetails]);
 
+  const imageUrl = useMemo(
+    () =>
+      socialClaimConditions
+        ? (starterpackDetails as OnchainStarterpackDetails).imageUri
+        : null,
+    [starterpackDetails, socialClaimConditions],
+  );
+
   const wallet = getWallet(selectedWallet?.type || "controller");
 
   const isFree = useMemo(() => {
     return quote?.totalCost === BigInt(0);
   }, [quote]);
+
+  const isStripeStarterpackSupported = useMemo(() => {
+    if (!controller || !quote) {
+      return true;
+    }
+
+    const usdcAddress = USDC_ADDRESSES[controller.chainId()];
+    return (
+      !!usdcAddress && num.toHex(quote.paymentToken) === num.toHex(usdcAddress)
+    );
+  }, [controller, quote]);
 
   const {
     balanceError,
@@ -107,6 +160,10 @@ export function OnchainCheckout() {
   });
 
   const globalDisabled = useMemo(() => {
+    if (isStripeSelected) {
+      return !isStripeStarterpackSupported || isStripeLoading;
+    }
+
     // Disable if there's a fee estimation error (e.g., bridge amount too low)
     if (feeEstimationError) return true;
 
@@ -137,6 +194,9 @@ export function OnchainCheckout() {
     isCreatingOrder,
     isApplePaySelected,
     isApplePayAmountTooLow,
+    isStripeSelected,
+    isStripeStarterpackSupported,
+    isStripeLoading,
   ]);
 
   const showInsufficientBalance =
@@ -144,13 +204,18 @@ export function OnchainCheckout() {
     !hasSufficientBalance &&
     !balanceError &&
     !bridgeFrom &&
-    !isApplePaySelected;
+    !isApplePaySelected &&
+    !isStripeSelected;
 
   const showConversionError =
-    conversionError && needsConversion && !isApplePaySelected;
+    conversionError &&
+    needsConversion &&
+    !isApplePaySelected &&
+    !isStripeSelected;
 
   const showBridgeAmountTooLow =
-    feeEstimationError?.message?.includes("too low") ?? false;
+    !isStripeSelected &&
+    (feeEstimationError?.message?.includes("too low") ?? false);
 
   const handleWalletSelect = useCallback(() => {
     setIsDrawerOpen(true);
@@ -158,22 +223,41 @@ export function OnchainCheckout() {
 
   const handlePurchase = useCallback(async () => {
     if (isApplePayAmountTooLow) return;
-    if (!hasSufficientBalance && !isFree && !isApplePaySelected) return;
+    if (isStripeSelected) {
+      if (!isStripeStarterpackSupported) return;
+    } else if (!hasSufficientBalance && !isFree && !isApplePaySelected) {
+      console.warn("no means to pay");
+      return;
+    }
 
     setIsLoading(true);
     clearError();
 
     try {
-      if (isApplePaySelected) {
-        const { data } = await refetchMe();
-        const me = data?.me;
+      if (isStripeSelected) {
+        await onCreditCardPurchase();
+
+        const { data: accountPrivateData } = await refetchAccountPrivate();
         const needsVerification =
-          !me?.email || !me?.phoneNumber || !me?.phoneNumberVerifiedAt;
+          !accountPrivateData?.accountPrivate?.proveVerifiedAt;
 
         if (needsVerification) {
-          navigate("/purchase/verification?method=apple-pay", {
-            showClose: true,
-          });
+          navigate("/purchase/verification/stripe");
+        } else {
+          navigate("/purchase/checkout/stripe");
+        }
+      } else if (isApplePaySelected) {
+        const [{ data: meData }, { data: accountPrivateData }] =
+          await Promise.all([refetchMe(), refetchAccountPrivate()]);
+        const me = meData?.me;
+        const accountPrivate = accountPrivateData?.accountPrivate;
+        const needsVerification =
+          !me?.email ||
+          !accountPrivate?.phoneNumber ||
+          !accountPrivate?.phoneNumberVerifiedAt;
+
+        if (needsVerification) {
+          navigate("/purchase/verification?method=apple-pay");
           return;
         }
 
@@ -191,8 +275,12 @@ export function OnchainCheckout() {
   }, [
     hasSufficientBalance,
     isFree,
+    isStripeSelected,
+    isStripeStarterpackSupported,
     isApplePaySelected,
+    onCreditCardPurchase,
     refetchMe,
+    refetchAccountPrivate,
     onCreateCoinbaseOrder,
     onOnchainPurchase,
     navigate,
@@ -223,8 +311,22 @@ export function OnchainCheckout() {
   return (
     <>
       <HeaderInner
-        title={isFree ? "Claim" : "Review Purchase"}
-        icon={<GiftIcon variant="solid" />}
+        title={
+          socialClaimConditions
+            ? `Claim ${starterpackDetails?.name}`
+            : isFree
+              ? "Claim"
+              : "Review Purchase"
+        }
+        icon={
+          imageUrl ? (
+            <img src={imageUrl} alt={starterpackDetails?.name} />
+          ) : (
+            <div onClick={handleIconTripleClick}>
+              <GiftIcon variant="solid" />
+            </div>
+          )
+        }
       />
 
       <LayoutContent>
@@ -239,7 +341,16 @@ export function OnchainCheckout() {
           <ControllerErrorAlert error={displayError} />
         )}
 
-        {isFree ? (
+        {socialClaimConditions ? (
+          <SocialClaimCheckout
+            bundleId={(starterpackDetails as OnchainStarterpackDetails).id}
+            options={socialClaimOptions}
+            conditions={socialClaimConditions}
+            isLoading={isLoading}
+            handlePurchase={handlePurchase}
+            isFree={isFree}
+          />
+        ) : isFree ? (
           <Button
             className="w-full"
             isLoading={isLoading}
@@ -281,6 +392,14 @@ export function OnchainCheckout() {
               />
             )}
 
+            {isStripeSelected && !isStripeStarterpackSupported && (
+              <ErrorCard
+                variant="error"
+                title="Stripe Checkout Unavailable"
+                message="Stripe checkout is only available for starterpacks priced in USDC."
+              />
+            )}
+
             {isApplePayAmountTooLow && (
               <ErrorCard
                 variant="warning"
@@ -290,9 +409,21 @@ export function OnchainCheckout() {
             )}
 
             <WalletSelector
-              walletName={isApplePaySelected ? "Apple Pay" : wallet.name}
+              walletName={
+                isStripeSelected
+                  ? "Credit Card"
+                  : isApplePaySelected
+                    ? "Apple Pay"
+                    : wallet.name
+              }
               walletIcon={
-                isApplePaySelected ? <AppleIcon size="xs" /> : wallet.subIcon
+                isStripeSelected ? (
+                  <CreditCardIcon size="xs" variant="solid" />
+                ) : isApplePaySelected ? (
+                  <AppleIcon size="xs" />
+                ) : (
+                  wallet.subIcon
+                )
               }
               bridgeFrom={bridgeFrom}
               onClick={handleWalletSelect}
@@ -305,17 +436,21 @@ export function OnchainCheckout() {
               isLoading={
                 isLoading ||
                 (bridgeFrom !== null && isFetchingFees) ||
-                isCreatingOrder
+                isCreatingOrder ||
+                isStripeLoading
               }
               isSendingDeposit={isSendingDeposit}
               globalDisabled={globalDisabled}
-              hasSufficientBalance={hasSufficientBalance || isApplePaySelected}
+              hasSufficientBalance={
+                hasSufficientBalance || isApplePaySelected || isStripeSelected
+              }
               bridgeFrom={bridgeFrom}
               onIncrement={incrementQuantity}
               onDecrement={decrementQuantity}
               onPurchase={handlePurchase}
               onBridge={handleBridge}
               isApplePayAmountTooLow={isApplePayAmountTooLow}
+              purchaseLabel={isStripeSelected ? "Continue" : undefined}
             />
           </>
         )}

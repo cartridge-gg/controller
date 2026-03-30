@@ -6,10 +6,12 @@ import { client } from "@/utils/graphql";
 import {
   CreateStripePaymentIntentDocument,
   CreateStripePaymentIntentMutation,
-  PurchaseType,
+  CreateStripeStarterpackIntentDocument,
+  CreateStripeStarterpackIntentInput,
+  CreateStripeStarterpackIntentMutation,
   StripePaymentDocument,
   StripePaymentQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@/utils/api";
 
 const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   const { controller } = useConnection();
@@ -17,26 +19,11 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   const [error, setError] = useState<Error | null>(null);
 
   const isLiveMode = useMemo(() => {
-    if (import.meta.env.DEV) {
-      // Always use test mode in local dev
-      return false;
-    }
-
     if (isSlot) {
-      // Slot is live now and should always use live mode
       return true;
     }
 
-    if (
-      import.meta.env.PROD &&
-      controller?.chainId() === constants.StarknetChainId.SN_MAIN
-    ) {
-      // In prod, only use live mode if on mainnet
-      return true;
-    }
-
-    // Default to test mode
-    return false;
+    return controller?.chainId() === constants.StarknetChainId.SN_MAIN;
   }, [controller, isSlot]);
 
   const stripePromise = useMemo(
@@ -50,12 +37,9 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   );
 
   const createPaymentIntent = useCallback(
-    async (
-      wholeCredits: number,
-      username: string,
-      teamId?: string,
-      starterpackId?: string,
-    ) => {
+    async (wholeCredits: number, teamId?: string, _starterpackId?: string) => {
+      void _starterpackId;
+
       if (!controller) {
         throw new Error("Controller not connected");
       }
@@ -67,22 +51,48 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
           CreateStripePaymentIntentDocument,
           {
             input: {
-              username,
               credits: {
                 amount: wholeCredits,
                 decimals: 0,
               },
               teamId,
-              starterpackId,
-              purchaseType: starterpackId
-                ? PurchaseType.Starterpack
-                : PurchaseType.Credits,
               isMainnet: isLiveMode,
             },
           },
         );
 
         return result.createStripePaymentIntent;
+      } catch (e) {
+        setError(e as Error);
+        throw e;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [controller, isLiveMode],
+  );
+
+  const createStarterpackPaymentIntent = useCallback(
+    async (input: CreateStripeStarterpackIntentInput) => {
+      if (!controller) {
+        throw new Error("Controller not connected");
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const result =
+          await client.request<CreateStripeStarterpackIntentMutation>(
+            CreateStripeStarterpackIntentDocument,
+            {
+              input: {
+                ...input,
+                isMainnet: isLiveMode,
+              },
+            },
+          );
+
+        return result.createStripeStarterpackIntent;
       } catch (e) {
         setError(e as Error);
         throw e;
@@ -130,6 +140,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
     error,
     stripePromise,
     createPaymentIntent,
+    createStarterpackPaymentIntent,
     waitForPayment,
   };
 };

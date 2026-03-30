@@ -1,3 +1,4 @@
+import React from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import {
   useNavigation,
@@ -33,7 +34,7 @@ import { getWallet } from "../wallet/config";
 import { num } from "starknet";
 
 export function PurchaseStarterpack() {
-  const { starterpackId } = useParams();
+  const { starterpackId, bundleId } = useParams();
   const [searchParams] = useSearchParams();
   const preimage = searchParams.get("preimage");
   const { navigate } = useNavigation();
@@ -42,14 +43,37 @@ export function PurchaseStarterpack() {
     isStarterpackLoading,
     starterpackDetails: details,
     displayError,
-    setStarterpackId,
+    setBundle,
+    setStarterpack,
   } = useStarterpackContext();
 
   useEffect(() => {
-    if (!isStarterpackLoading && starterpackId) {
-      setStarterpackId(starterpackId);
+    if (isStarterpackLoading) return;
+
+    if (bundleId) {
+      // store bundle info into provider before navigating to checkout
+      const registryAddress = searchParams.get("registryAddress");
+      const shareMessage = searchParams.get("shareMessage");
+      setBundle(
+        Number(bundleId),
+        registryAddress!,
+        shareMessage ? { shareMessage } : undefined,
+      );
+    } else if (starterpackId) {
+      // store starterpack info into provider before navigating to checkout
+      setStarterpack(
+        starterpackId,
+        import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
+      );
     }
-  }, [starterpackId, isStarterpackLoading, setStarterpackId]);
+  }, [
+    isStarterpackLoading,
+    bundleId,
+    setBundle,
+    starterpackId,
+    setStarterpack,
+    searchParams,
+  ]);
 
   // Auto-redirect to claim page if preimage is available
   useEffect(() => {
@@ -66,7 +90,7 @@ export function PurchaseStarterpack() {
         .join(";");
 
       navigate(`/purchase/claim/${keys}/${preimage}/preimage`, {
-        replace: true,
+        reset: true,
       });
     }
 
@@ -76,7 +100,7 @@ export function PurchaseStarterpack() {
       isOnchainStarterpack(details) &&
       !displayError
     ) {
-      navigate(`/purchase/checkout/onchain`, { replace: true });
+      navigate(`/purchase/checkout/onchain`, { reset: true });
     }
   }, [isStarterpackLoading, details, preimage, displayError, navigate]);
 
@@ -293,13 +317,18 @@ export function OnchainStarterPackInner({
         )}
 
         <div
-          className={`flex justify-between border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2 transition-colors ${
+          className={`flex h-[40px] justify-between border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2 transition-colors ${
             !disableActions ? "cursor-pointer hover:bg-background-200" : ""
           }`}
           onClick={onWalletSelect}
         >
           <div className="flex gap-2">
-            {wallet.subIcon} Purchase with {wallet.name}
+            <span className="m-auto">
+              {React.cloneElement(wallet.subIcon as React.ReactElement, {
+                size: "sm",
+              })}
+            </span>
+            <span className="m-auto text-sm">Purchase with {wallet.name}</span>
           </div>
           <ListIcon size="xs" variant="solid" />
         </div>

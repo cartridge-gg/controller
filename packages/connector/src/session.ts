@@ -18,7 +18,12 @@ export default class SessionConnector extends InjectedConnector {
   }
 
   async disconnect() {
-    this.controller.disconnect();
+    await this.controller.disconnect();
+    try {
+      await super.disconnect();
+    } catch {
+      // Best-effort: disconnect should not throw if the injected wallet isn't available.
+    }
   }
 
   static fromConnectors(connectors: Connector[]): SessionConnector {

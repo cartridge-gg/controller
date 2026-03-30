@@ -16,6 +16,8 @@ const defaultMockController: any = {
     suggestedMaxFee: BigInt(1000),
   })),
   chainId: vi.fn().mockImplementation(() => constants.StarknetChainId.SN_MAIN),
+  address: vi.fn().mockImplementation(async () => "0x123456789abcdef"),
+  username: vi.fn().mockImplementation(async () => "testuser"),
 } as const;
 
 export const defaultMockConnection: ConnectionContextValue = {
@@ -30,6 +32,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   namespace: null,
   verified: false,
   isConfigLoading: false,
+  isPoliciesResolved: true,
   isMainnet: false,
   theme: {
     verified: true,
@@ -38,6 +41,12 @@ export const defaultMockConnection: ConnectionContextValue = {
     cover: "test-cover",
   },
   propagateError: false,
+  webauthnPopup: {
+    create: false,
+    get: false,
+  },
+  preset: null,
+  policiesStr: null,
   setController: vi.fn(),
   setRpcUrl: vi.fn(),
   openSettings: vi.fn(),

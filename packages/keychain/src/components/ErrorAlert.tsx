@@ -7,6 +7,7 @@ import {
   type GraphQLErrorDetails,
   type ErrorWithGraphQL,
 } from "@/utils/errors";
+import { humanizeString } from "@cartridge/controller";
 import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
   Accordion,
@@ -85,7 +86,7 @@ export function ErrorAlert({
       <AccordionItem
         value="item-1"
         className={cn(
-          "flex flex-col rounded px-3 py-2.5 gap-3 h-fit box-border",
+          "flex flex-col rounded gap-3 h-fit box-border",
           styles.bg,
           styles.text,
         )}
@@ -94,9 +95,10 @@ export function ErrorAlert({
           hideIcon={!collapsible}
           color={"text-destructive-100"}
           tabIndex={collapsible ? undefined : -1}
-          className={`items-start gap-1`}
+          className={`px-3 pt-2.5 pb-2 items-start gap-1`}
           parentClassName={`${collapsible ? "" : "cursor-auto"}`}
           wedgeIconSize={"sm"}
+          wedgeClassName="mr-2.5"
         >
           {variant && variant !== "default" && (
             <div className="w-5">
@@ -110,21 +112,21 @@ export function ErrorAlert({
           </div>
         </AccordionTrigger>
 
-        <AccordionContent>
+        <AccordionContent className="relative px-3 pb-2.5">
           {copyText && (
             <Button
               size="icon"
               variant="icon"
-              className="absolute right-5 w-5 h-5 bg-[rgba(0,0,0,0.1)]"
+              className="absolute right-8 w-8 h-8"
               onClick={() => {
                 setCopied(true);
                 navigator.clipboard.writeText(copyText);
               }}
             >
               {copied ? (
-                <CheckIcon size="xs" className="text-[black]" />
+                <CheckIcon size="sm" className={cn(styles.text, "m-auto")} />
               ) : (
-                <CopyIcon size="xs" className="text-[black]" />
+                <CopyIcon size="sm" className={cn(styles.text, "m-auto")} />
               )}
             </Button>
           )}
@@ -485,16 +487,4 @@ export function isControllerError(
   error: ControllerError | Error,
 ): error is ControllerError {
   return !!(error as ControllerError).code;
-}
-
-export function humanizeString(str: string): string {
-  return (
-    str
-      // Convert from camelCase or snake_case
-      .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase to spaces
-      .replace(/_/g, " ") // snake_case to spaces
-      .toLowerCase()
-      // Capitalize first letter
-      .replace(/^\w/, (c) => c.toUpperCase())
-  );
 }

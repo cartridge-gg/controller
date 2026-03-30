@@ -1,10 +1,11 @@
 "use client";
 
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { constants, num } from "starknet";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button, Input } from "@cartridge/ui";
-import { useState, useEffect, useRef } from "react";
-import { constants, num } from "starknet";
+import { BUNDLE_REGISTRY_MAINNET, BUNDLE_REGISTRY_SEPOLIA } from "./Profile";
 
 export const Starterpack = () => {
   const { account, connector } = useAccount();
@@ -12,24 +13,40 @@ export const Starterpack = () => {
 
   const controllerConnector = connector as unknown as ControllerConnector;
 
-  const getDefaultStarterpackIds = () => {
+  const getDefaultStarterpackIds = useCallback(() => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       return {
-        purchaseOnchain: 0,
+        bundleId: 1,
+        socialBundleId: 0,
+        starterpackId: 0,
         claim: "claim-dopewars-mainnet",
+        registryAddress: BUNDLE_REGISTRY_MAINNET,
       };
     }
     return {
-      purchaseOnchain: 0,
+      bundleId: 1,
+      socialBundleId: 0,
+      starterpackId: 0,
       claim: "claim-dopewars-sepolia",
+      registryAddress: BUNDLE_REGISTRY_SEPOLIA,
     };
-  };
+  }, [chain]);
 
-  const defaultIds = getDefaultStarterpackIds();
+  const defaultIds = useMemo(
+    () => getDefaultStarterpackIds(),
+    [getDefaultStarterpackIds],
+  );
   const [claimSpId, setClaimSpId] = useState<string>(defaultIds.claim);
   const [claimPreimage, setClaimPreimage] = useState<string>("");
   const [purchaseOnchainSpId, setPurchaseOnchainSpId] = useState<number>(
-    defaultIds.purchaseOnchain,
+    defaultIds.starterpackId,
+  );
+  const [bundleId, setBundleId] = useState<number>(defaultIds.bundleId);
+  const [socialBundleId, setSocialBundleId] = useState<number>(
+    defaultIds.socialBundleId,
+  );
+  const [registryAddress, setRegistryAddress] = useState<string>(
+    defaultIds.registryAddress,
   );
 
   // Track the current expected defaults to detect network changes
@@ -51,45 +68,157 @@ export const Starterpack = () => {
     });
 
     setPurchaseOnchainSpId((currentPurchaseOnchainSpId) => {
-      return currentPurchaseOnchainSpId === currentExpected.purchaseOnchain
-        ? newDefaults.purchaseOnchain
+      return currentPurchaseOnchainSpId === currentExpected.starterpackId
+        ? newDefaults.starterpackId
         : currentPurchaseOnchainSpId;
+    });
+
+    setBundleId((currentBundleId) => {
+      return currentBundleId === currentExpected.bundleId
+        ? newDefaults.bundleId
+        : currentBundleId;
+    });
+
+    setSocialBundleId((currentSocialBundleId) => {
+      return currentSocialBundleId === currentExpected.socialBundleId
+        ? newDefaults.socialBundleId
+        : currentSocialBundleId;
+    });
+
+    setRegistryAddress((currentRegistryAddress) => {
+      return currentRegistryAddress === currentExpected.registryAddress
+        ? newDefaults.registryAddress
+        : currentRegistryAddress;
     });
 
     // Update our references after successful comparison and update
     expectedDefaultsRef.current = newDefaults;
     previousChainRef.current = chain;
-  }, [chain]);
+  }, [chain, getDefaultStarterpackIds]);
 
   if (!account) {
     return null;
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2>Starterpacks</h2>
+    <div className="flex flex-col gap-4 p-4 bg-background-400 rounded">
+      <h2>Bundles / Starterpacks</h2>
+
+      <div className="flex flex-wrap gap-1">
+        <Button
+          onClick={() => {
+            console.log(`bundleId:`, bundleId);
+            controllerConnector.controller.username()?.then((username) => {
+              controllerConnector.controller.openBundle(
+                bundleId,
+                registryAddress,
+                {
+                  onPurchaseComplete: () => {
+                    console.log("Bundle play callback fired.");
+                  },
+                  socialClaimOptions: {
+                    shareMessage: `Check out @numsgg!\nhttps://sepolia.nums.gg/?ref=${username}`,
+                  },
+                },
+              );
+            });
+          }}
+        >
+          Nums Bundle
+        </Button>
+        <Button
+          onClick={() => {
+            console.log(`socialBundleId:`, socialBundleId);
+            controllerConnector.controller.username()?.then((username) => {
+              controllerConnector.controller.openBundle(
+                socialBundleId,
+                registryAddress,
+                {
+                  onPurchaseComplete: () => {
+                    console.log("Bundle play callback fired.");
+                  },
+                  socialClaimOptions: {
+                    shareMessage: `Check out @numsgg!\nhttps://sepolia.nums.gg/?ref=${username}`,
+                  },
+                },
+              );
+            });
+          }}
+        >
+          Nums Social Bundle
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap gap-1">
+        <Button
+          onClick={() => {
+            console.log(`purchaseOnchainSpId:`, purchaseOnchainSpId);
+            controllerConnector.controller.openStarterPack(
+              purchaseOnchainSpId,
+              {
+                onPurchaseComplete: () => {
+                  console.log("Starterpack play callback fired.");
+                },
+              },
+            );
+          }}
+        >
+          Nums Starterpack (old)
+        </Button>
+      </div>
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h3>Purchase Starterpack</h3>
+          <h3>Purchase Bundle</h3>
           <div className="flex items-center gap-2">
             <Input
               className="max-w-80"
               type="text"
-              value={purchaseOnchainSpId}
-              onChange={(e) => setPurchaseOnchainSpId(Number(e.target.value))}
-              placeholder="Enter starterpack ID"
+              value={bundleId}
+              onChange={(e) => setBundleId(Number(e.target.value))}
+              placeholder="Enter bundle ID"
             />
             <Button
               onClick={() => {
-                controllerConnector.controller.openStarterPack(
-                  purchaseOnchainSpId,
+                controllerConnector.controller.openBundle(
+                  bundleId,
+                  registryAddress,
+                  {
+                    onPurchaseComplete: () => {
+                      console.log("Bundle play callback fired.");
+                    },
+                  },
                 );
               }}
             >
-              Purchase
+              Purchase Bundle
             </Button>
           </div>
+        </div>
+
+        <h3>Purchase Starterpack</h3>
+        <div className="flex items-center gap-2">
+          <Input
+            className="max-w-80"
+            type="text"
+            value={purchaseOnchainSpId}
+            onChange={(e) => setPurchaseOnchainSpId(Number(e.target.value))}
+            placeholder="Enter starterpack ID"
+          />
+          <Button
+            onClick={() => {
+              controllerConnector.controller.openStarterPack(
+                purchaseOnchainSpId,
+                {
+                  onPurchaseComplete: () => {
+                    console.log("Starterpack play callback fired.");
+                  },
+                },
+              );
+            }}
+          >
+            Purchase Starterpack
+          </Button>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -115,7 +244,7 @@ export const Starterpack = () => {
                   }
                 }}
               >
-                Claim
+                Claim Starterpack with preimage
               </Button>
             </div>
             <Input

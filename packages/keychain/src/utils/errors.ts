@@ -268,6 +268,15 @@ function parseGraphQLErrorMessage(
         summary: description || "Internal server error",
         details,
       };
+    } else if (code === "FailedPrecondition") {
+      // Extract human-readable message from wrapped API errors
+      // e.g., "coinbase API error [...] (correlation: ...): The user has reached..."
+      const humanMatch = description.match(/\):\s*(.+)/);
+      return {
+        raw: raw || message,
+        summary: humanMatch ? humanMatch[1] : description,
+        details,
+      };
     } else {
       return {
         raw: raw || message,

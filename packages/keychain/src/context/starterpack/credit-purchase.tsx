@@ -12,6 +12,12 @@ import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useStarterpackContext } from "./starterpack";
+import { useOnchainPurchaseContext } from "./onchain-purchase";
+import { getCurrentReferral } from "@/utils/referral";
+import { isOnchainStarterpack } from "./types";
+import { USDC_ADDRESSES } from "@/utils/ekubo";
+import { num } from "starknet";
+import { getStarterpackStripeCostDetails } from "@/components/purchasenew/review/stripe-pricing";
 
 export interface CostDetails {
   baseCostInCents: number;
@@ -25,6 +31,7 @@ export interface CreditPurchaseContextType {
   setUsdAmount: (amount: number) => void;
 
   // Stripe state
+  stripePaymentId: string | undefined;
   clientSecret: string | undefined;
   costDetails: CostDetails | undefined;
   stripePromise: Promise<Stripe | null>;
@@ -47,10 +54,17 @@ export const CreditPurchaseProvider = ({
   children,
   isSlot = false,
 }: CreditPurchaseProviderProps) => {
-  const { controller } = useConnection();
-  const { starterpackId, setDisplayError } = useStarterpackContext();
+  const { controller, origin } = useConnection();
+  const {
+    registryAddress,
+    starterpackId,
+    starterpackDetails,
+    setDisplayError,
+  } = useStarterpackContext();
+  const { quantity } = useOnchainPurchaseContext();
 
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
+  const [stripePaymentId, setStripePaymentId] = useState<string | undefined>();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
 
@@ -59,6 +73,7 @@ export const CreditPurchaseProvider = ({
     isLoading: isStripeLoading,
     error: stripeError,
     createPaymentIntent,
+    createStarterpackPaymentIntent,
   } = useStripePayment({ isSlot });
 
   // Sync stripe error
@@ -69,17 +84,52 @@ export const CreditPurchaseProvider = ({
   }, [stripeError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onCreditCardPurchase = useCallback(async () => {
-    if (!controller) return;
+    if (!controller || !registryAddress) return;
 
     try {
-      const paymentIntent = await createPaymentIntent(
-        usdToCredits(usdAmount),
-        controller.username(),
-        undefined,
-        typeof starterpackId === "string" ? starterpackId : undefined,
-      );
+      let paymentIntent;
+
+      if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
+        const starterpackQuote = starterpackDetails.quote;
+
+        if (!starterpackQuote) {
+          throw new Error("Quote not loaded yet");
+        }
+
+        const usdcAddress = USDC_ADDRESSES[controller.chainId()];
+        if (
+          !usdcAddress ||
+          num.toHex(starterpackQuote.paymentToken) !== num.toHex(usdcAddress)
+        ) {
+          throw new Error(
+            "Stripe checkout is only available for starterpacks priced in USDC.",
+          );
+        }
+
+        const referralData = getCurrentReferral(origin);
+
+        paymentIntent = await createStarterpackPaymentIntent({
+          starterpackId: starterpackDetails.id.toString(),
+          quantity,
+          referral: referralData?.refAddress || referralData?.ref,
+          referralGroup: referralData?.refGroup,
+          registryAddress,
+        });
+      } else {
+        paymentIntent = await createPaymentIntent(
+          usdToCredits(usdAmount),
+          undefined,
+          typeof starterpackId === "string" ? starterpackId : undefined,
+        );
+      }
+
+      setStripePaymentId(paymentIntent.id);
       setClientSecret(paymentIntent.clientSecret);
-      setCostDetails(paymentIntent.pricing);
+      setCostDetails(
+        starterpackDetails && isOnchainStarterpack(starterpackDetails)
+          ? getStarterpackStripeCostDetails(starterpackDetails.quote!, quantity)
+          : paymentIntent.pricing,
+      );
     } catch (e) {
       setDisplayError(e as Error);
       throw e;
@@ -87,14 +137,26 @@ export const CreditPurchaseProvider = ({
   }, [
     usdAmount,
     controller,
+    origin,
+    registryAddress,
     starterpackId,
+    starterpackDetails,
+    quantity,
     createPaymentIntent,
+    createStarterpackPaymentIntent,
     setDisplayError,
   ]);
+
+  useEffect(() => {
+    setStripePaymentId(undefined);
+    setClientSecret(undefined);
+    setCostDetails(undefined);
+  }, [starterpackId]);
 
   const contextValue: CreditPurchaseContextType = {
     usdAmount,
     setUsdAmount,
+    stripePaymentId,
     clientSecret,
     costDetails,
     stripePromise,

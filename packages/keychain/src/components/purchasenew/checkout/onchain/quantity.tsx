@@ -29,8 +29,7 @@ export function QuantityControls({
   purchaseLabel: customPurchaseLabel,
   isApplePayAmountTooLow,
 }: QuantityControlsProps) {
-  const purchaseLabel =
-    customPurchaseLabel || (quantity > 1 ? `Buy ${quantity}` : "Buy");
+  const purchaseLabel = customPurchaseLabel || `Buy ${quantity}`;
   const isQuantityDisabled =
     (globalDisabled && hasSufficientBalance && !isApplePayAmountTooLow) ||
     isSendingDeposit;

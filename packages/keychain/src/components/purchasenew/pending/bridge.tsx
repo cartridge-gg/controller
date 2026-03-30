@@ -15,12 +15,12 @@ import {
 import { Explorer, getExplorer } from "@/hooks/starterpack/layerswap";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useEffect, useState, useRef } from "react";
-import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { retryWithBackoff } from "@/utils/retry";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { TransactionFinalityStatus } from "starknet";
-import { CoinbaseTransactionStatus } from "@/utils/api";
+import { CoinbaseOnrampStatus } from "@/utils/api";
+import { useStarterpackPlayHandler } from "@/hooks/starterpack";
 
 interface TransitionStepProps {
   isVisible: boolean;
@@ -73,18 +73,18 @@ export function BridgePending({
   selectedPlatform: selectedPlatformProp,
   waitForDeposit: waitForDepositProp,
 }: BridgePendingProps) {
-  const { navigateToRoot } = useNavigation();
   const onchainContext = useOnchainPurchaseContext();
   const { transactionHash: currentTxHash } = useStarterpackContext();
-  const { externalWaitForTransaction, controller, isMainnet, closeModal } =
-    useConnection();
+  const { externalWaitForTransaction, controller, isMainnet } = useConnection();
+  const handlePlay = useStarterpackPlayHandler();
 
   // Use props if provided (for stories), otherwise use context
   const selectedPlatform =
     selectedPlatformProp ?? onchainContext.selectedPlatform;
   const waitForDeposit = waitForDepositProp ?? onchainContext.waitForDeposit;
   const onOnchainPurchase = onchainContext.onOnchainPurchase;
-  const getCoinbaseTransactions = onchainContext.getTransactions;
+  const orderStatus = onchainContext.orderStatus;
+  const orderTxHash = onchainContext.orderTxHash;
 
   const [initialBridgeHash, setInitialBridgeHash] = useState(bridgeTxHash);
 
@@ -107,35 +107,17 @@ export function BridgePending({
 
   const purchaseTriggered = useRef(false);
 
-  // Handle Apple Pay (Coinbase) polling
+  // Handle Apple Pay (Coinbase) order status from context polling
   useEffect(() => {
-    if (
-      paymentMethod === "apple-pay" &&
-      controller?.username() &&
-      !paymentCompleted
-    ) {
-      const pollCoinbase = async () => {
-        try {
-          const transactions = await getCoinbaseTransactions(
-            controller.username(),
-          );
-          const completedTx = transactions.find(
-            (tx) => tx.status === CoinbaseTransactionStatus.Success,
-          );
-
-          if (completedTx) {
-            setDepositCompleted(true);
-            setPaymentCompleted(true);
-          }
-        } catch (err) {
-          console.error("Failed to poll Coinbase transactions:", err);
-        }
-      };
-
-      const interval = setInterval(pollCoinbase, 5000);
-      return () => clearInterval(interval);
+    if (paymentMethod === "apple-pay" && !paymentCompleted) {
+      if (orderStatus === CoinbaseOnrampStatus.Completed) {
+        setDepositCompleted(true);
+        setPaymentCompleted(true);
+      } else if (orderStatus === CoinbaseOnrampStatus.Failed) {
+        setError(new Error("Coinbase payment failed. Please try again."));
+      }
     }
-  }, [paymentMethod, controller, getCoinbaseTransactions, paymentCompleted]);
+  }, [paymentMethod, orderStatus, paymentCompleted]);
 
   useEffect(() => {
     if (wallet && initialBridgeHash) {
@@ -254,8 +236,8 @@ export function BridgePending({
                       : "Bridging to Starknet"
                   }
                   externalLink={
-                    initialBridgeHash
-                      ? `https://layerswap.io/explorer/${initialBridgeHash}`
+                    orderTxHash || initialBridgeHash
+                      ? `https://layerswap.io/explorer/${orderTxHash || initialBridgeHash}`
                       : undefined
                   }
                   isLoading={!paymentCompleted}
@@ -282,10 +264,7 @@ export function BridgePending({
           className="w-full"
           variant="primary"
           disabled={!purchaseCompleted}
-          onClick={() => {
-            closeModal?.();
-            navigateToRoot();
-          }}
+          onClick={handlePlay}
         >
           Play
         </Button>

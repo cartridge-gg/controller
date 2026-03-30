@@ -31,6 +31,7 @@ interface NavigationContextType {
     },
   ) => void;
   setShowClose: (show: boolean) => void;
+  setOnBackCallback: (callback: (() => void) | undefined) => void;
   navigateToRoot: () => void;
   goBack: () => void;
   goForward: () => void;
@@ -153,6 +154,11 @@ export function NavigationProvider({
           currentPosition = i;
           break;
         }
+      }
+
+      // if equals to the last path, keep new one
+      if (prev[currentPosition]?.path === newEntry.path) {
+        currentPosition--;
       }
 
       // Truncate any forward history and add new entry
@@ -281,7 +287,13 @@ export function NavigationProvider({
         navigate(finalPath, options);
       }
     },
-    [navigate, currentIndex, navigationStack, location.search],
+    [
+      navigate,
+      currentIndex,
+      navigationStack,
+      location.search,
+      setNavigationStack,
+    ],
   );
 
   const setShowClose = useCallback(
@@ -298,13 +310,22 @@ export function NavigationProvider({
         return prev;
       });
     },
-    [currentIndex],
+    [currentIndex, setNavigationStack],
   );
+
+  // custom in-page navigation
+  const [onBackCallback, setOnBackCallback] = useState<
+    (() => void) | undefined
+  >();
 
   // Go back helper
   const goBack = useCallback(() => {
-    navigateWithTracking(-1);
-  }, [navigateWithTracking]);
+    if (onBackCallback !== undefined) {
+      onBackCallback();
+    } else {
+      navigateWithTracking(-1);
+    }
+  }, [navigateWithTracking, onBackCallback]);
 
   // Go forward helper
   const goForward = useCallback(() => {
@@ -325,12 +346,13 @@ export function NavigationProvider({
   }, [navigateToRoot]);
 
   const value: NavigationContextType = {
-    canGoBack: currentIndex > 0,
+    canGoBack: currentIndex > 0 || onBackCallback !== undefined,
     canGoForward: currentIndex < navigationStack.length - 1,
     navigationDepth: currentIndex,
     showClose: navigationStack[currentIndex]?.showClose || false,
     navigate: navigateWithTracking,
     setShowClose,
+    setOnBackCallback,
     navigateToRoot,
     goBack,
     goForward,

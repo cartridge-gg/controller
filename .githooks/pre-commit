@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMRT)
+
+if [[ -z "$STAGED_FILES" ]]; then
+  exit 0
+fi
+
+# Node (.)
+NODE_FILES="$STAGED_FILES"
+if echo "$NODE_FILES" | grep -qE '\.(ts|tsx|js|jsx|json|css|scss|yml|yaml)$|^package\.json$|^pnpm-lock\.yaml$|^bun\.lockb?$|^biome\.json$|^tsconfig\..*\.json$'; then
+  echo 'Running Node checks (.)...'
+  pnpm run lint:check
+  pnpm run test:ci
+  pnpm run build
+
+  if ! git diff --quiet; then
+    echo 'Pre-commit modified files (likely formatting). Stage the changes and retry.'
+    git diff --name-only
+    exit 1
+  fi
+fi
+
+echo 'Pre-commit checks complete.'

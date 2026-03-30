@@ -76,7 +76,18 @@ export function parseConnectParams(searchParams: URLSearchParams): {
         const decoded = decodeURIComponent(signersParam);
         // Handle case where signupOptions was undefined and got stringified as "undefined"
         if (decoded !== "undefined" && decoded !== "null") {
-          signers = JSON.parse(decoded) as AuthOptions;
+          const parsed = JSON.parse(decoded) as AuthOptions | ConnectOptions;
+          if (Array.isArray(parsed)) {
+            signers = parsed as AuthOptions;
+          } else if (parsed && typeof parsed === "object") {
+            const maybeOptions = parsed as ConnectOptions;
+            if (
+              "signupOptions" in maybeOptions &&
+              Array.isArray(maybeOptions.signupOptions)
+            ) {
+              signers = maybeOptions.signupOptions;
+            }
+          }
         }
       } catch (e) {
         console.error("Failed to parse signers parameter:", e);
@@ -138,28 +149,48 @@ export function connect({
   return () => {
     // Support both old and new signatures for backwards compatibility
     // Old: connect(policies: SessionPolicies, rpcUrl: string, signupOptions?: AuthOptions)
-    // New: connect(signupOptions?: AuthOptions)
+    // New: connect(options?: ConnectOptions)
     return (
-      policiesOrSigners?: SessionPolicies | AuthOptions | ConnectOptions,
+      policiesOrOptions?: SessionPolicies | AuthOptions | ConnectOptions,
       rpcUrl?: string,
       signupOptions?: AuthOptions,
     ): Promise<ConnectReply> => {
       let options: ConnectOptions = {};
+      const isValidUrl = (value: string) => {
+        try {
+          const url = new URL(value);
+          return url.protocol === "http:" || url.protocol === "https:";
+        } catch {
+          return false;
+        }
+      };
 
       // Detect which signature is being used
-      if (rpcUrl !== undefined) {
+      // Check if it's the old 3-parameter signature (policies, rpcUrl, signupOptions)
+      if (
+        rpcUrl !== undefined &&
+        typeof rpcUrl === "string" &&
+        isValidUrl(rpcUrl)
+      ) {
         // Old signature: connect(policies, rpcUrl, signupOptions)
-        // In the old signature, the first arg is policies (not used in new flow)
-        // and the third arg is signupOptions
         options.signupOptions = signupOptions;
-        // Set the RPC URL for backwards compatibility
         setRpcUrl(rpcUrl);
+      } else if (
+        policiesOrOptions &&
+        typeof policiesOrOptions === "object" &&
+        !Array.isArray(policiesOrOptions) &&
+        ("signupOptions" in policiesOrOptions ||
+          "username" in policiesOrOptions ||
+          "signer" in policiesOrOptions ||
+          "password" in policiesOrOptions ||
+          "locationGate" in policiesOrOptions)
+      ) {
+        // New signature: connect(options: ConnectOptions)
+        options = policiesOrOptions as ConnectOptions;
       } else {
-        // New signature: connect(signupOptions)
-        if (Array.isArray(policiesOrSigners)) {
-          options.signupOptions = policiesOrSigners;
-        } else if (policiesOrSigners && typeof policiesOrSigners === "object") {
-          options = policiesOrSigners as ConnectOptions;
+        // Assume it's just AuthOptions passed directly (backwards compatibility)
+        if (Array.isArray(policiesOrOptions)) {
+          options.signupOptions = policiesOrOptions as AuthOptions;
         }
       }
 

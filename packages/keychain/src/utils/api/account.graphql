@@ -69,6 +69,18 @@ query AddressByUsername($username: String!) {
   }
 }
 
+query AccountPrivate {
+  accountPrivate {
+    phoneNumber
+    phoneNumberVerifiedAt
+    firstName
+    lastName
+    dob
+    proveVerifiedAt
+    verificationStatus
+  }
+}
+
 query AccountSearch($query: String!, $limit: Int = 5) {
   searchAccounts(query: $query, limit: $limit) {
     username
@@ -78,4 +90,8 @@ query AccountSearch($query: String!, $limit: Int = 5) {
     }
     updatedAt
   }
+}
+
+mutation AccountVerify($input: AccountVerifyInput!) {
+  accountVerify(input: $input)
 }

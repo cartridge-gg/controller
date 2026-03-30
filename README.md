@@ -9,18 +9,24 @@ It supports transaction signing using Passkeys and Session Tokens.
 
 ## Project structure
 
-The project consists of several subfolders located in the `packages` directory:
+The project consists of several packages in the `packages` directory:
 
-- **[keychain](packages/keychain)** - a sandboxed application hosted at
-  https://x.cartridge.gg/ and responsible for sensitive operations, such as
-  signing transactions. When an application requests to sign or execute a
-  transaction, keychain enforces client side authorization logic and displays UI
-  for user approval if necessary and responsible for displaying the state of
-  Controller account, such as token balances, activities, and achievement.
-- **[controller](packages/controller)** sdk. Controller implements the account
+- **[keychain](packages/keychain)** - Sandboxed iframe hosted at
+  https://x.cartridge.gg/ that fills the same role as an injected wallet like
+  MetaMask or Rabby: holds keys, signs transactions, and prompts user for approval.
+  Also displays account state (balances, activities, achievements).
+- **[controller](packages/controller)** - Main SDK implementing the account
   interfaces required by [starknet.js](https://github.com/0xs34n/starknet.js).
-  Underneath, the implementation communicates with an embedded sandboxed
-  keychain iframe.
+  Ships two provider modes:
+  - **ControllerProvider** (web apps) - Full-featured web wallet communicating with an
+    embedded keychain iframe. Supports sessions as well as per-transaction approval.
+  - **SessionProvider** (native apps) - Creates ephemeral session keys with pre-configured
+    policies so transactions can execute without per-call approval.
+- **[connector](packages/connector)** - Thin adapter that wraps providers
+  as [starknet-react](https://github.com/apibara/starknet-react) connectors,
+  making them drop-in compatible with `<StarknetConfig>`.
+
+Integration examples live in `examples/` (Next.js, Svelte, Node.js).
 
 ## Development
 

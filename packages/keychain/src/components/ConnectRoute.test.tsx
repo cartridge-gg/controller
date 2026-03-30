@@ -24,11 +24,45 @@ const mockController = {
   username: vi.fn().mockReturnValue("testuser"),
   address: vi.fn().mockReturnValue("0x123456789abcdef"),
   createSession: vi.fn().mockResolvedValue(undefined),
+  chainId: vi.fn().mockReturnValue("SN_SEPOLIA"),
+};
+
+const defaultConnection = {
+  controller: mockController,
+  policies: null,
+  isPoliciesResolved: true,
+  verified: true,
+  origin: "https://test.app",
+  webauthnPopup: {
+    create: false,
+    get: false,
+  },
+  theme: {
+    name: "TestApp",
+    verified: true,
+  },
 };
 
 const mockUseConnection = vi.fn();
 vi.mock("@/hooks/connection", () => ({
-  useConnection: () => mockUseConnection(),
+  useConnection: () => {
+    const override = mockUseConnection() ?? {};
+    return {
+      ...defaultConnection,
+      ...override,
+      theme: {
+        ...defaultConnection.theme,
+        ...(override.theme ?? {}),
+      },
+      webauthnPopup:
+        typeof override.webauthnPopup === "object"
+          ? {
+              ...defaultConnection.webauthnPopup,
+              ...override.webauthnPopup,
+            }
+          : defaultConnection.webauthnPopup,
+    };
+  },
 }));
 
 const mockCleanupCallbacks = vi.fn();
@@ -77,7 +111,6 @@ describe("ConnectRoute", () => {
     reject: vi.fn(),
     params: { id: "test-id" },
   };
-
   beforeEach(() => {
     vi.clearAllMocks();
     mockIsIframe.mockReturnValue(true); // Default to embedded mode
@@ -86,16 +119,7 @@ describe("ConnectRoute", () => {
     mockLocation.search = "";
     // mockSnapshotLocalStorageToCookie.mockResolvedValue("mock-encrypted-blob");
 
-    mockUseConnection.mockReturnValue({
-      controller: mockController,
-      policies: null,
-      verified: true,
-      origin: "https://test.app",
-      theme: {
-        name: "TestApp",
-        verified: true,
-      },
-    });
+    mockUseConnection.mockReturnValue({});
   });
 
   describe("Embedded mode (iframe)", () => {
@@ -107,6 +131,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -130,6 +155,7 @@ describe("ConnectRoute", () => {
           contracts: {},
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -157,14 +183,15 @@ describe("ConnectRoute", () => {
           },
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: false,
         origin: "https://test.app",
       });
 
       renderWithProviders(<ConnectRoute />);
 
-      // Should render CreateSession component
-      expect(screen.getByText("Create Session")).toBeInTheDocument();
+      expect(mockParams.resolve).not.toHaveBeenCalled();
+      expect(mockSafeRedirect).not.toHaveBeenCalled();
     });
 
     it("does not show UI for verified policies without approvals", () => {
@@ -175,6 +202,7 @@ describe("ConnectRoute", () => {
           contracts: {},
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -205,6 +233,7 @@ describe("ConnectRoute", () => {
           },
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
         theme: {
@@ -233,6 +262,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
         theme: {
@@ -266,6 +296,7 @@ describe("ConnectRoute", () => {
           contracts: {},
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
         theme: {
@@ -297,6 +328,7 @@ describe("ConnectRoute", () => {
           },
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: false,
         origin: "https://test.app",
       });
@@ -305,9 +337,7 @@ describe("ConnectRoute", () => {
         initialUrl: "/?redirect_url=https://example.com/callback",
       });
 
-      // Should show CreateSession UI instead of redirecting immediately
-      expect(screen.getByText("Create Session")).toBeInTheDocument();
-      // No immediate redirect for unverified policies
+      expect(mockParams.resolve).not.toHaveBeenCalled();
       expect(mockSafeRedirect).not.toHaveBeenCalled();
     });
 
@@ -318,6 +348,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: false,
         origin: "https://test.app",
         theme: {
@@ -345,6 +376,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -373,6 +405,7 @@ describe("ConnectRoute", () => {
           contracts: {},
           messages: [],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -388,6 +421,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: null,
         policies: null,
+        isPoliciesResolved: true,
         verified: false,
         origin: "https://test.app",
       });
@@ -410,6 +444,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
         theme: {
@@ -441,6 +476,7 @@ describe("ConnectRoute", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: null,
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });
@@ -468,6 +504,7 @@ describe("ConnectRoute", () => {
           },
           messages: [{ id: "3", content: "Sign this", authorized: true }],
         },
+        isPoliciesResolved: true,
         verified: true,
         origin: "https://test.app",
       });

@@ -10,7 +10,7 @@ import { useLocation } from "react-router-dom";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
-import { uint256, Call, num, cairo } from "starknet";
+import { uint256, Call, num, cairo, hash, shortString } from "starknet";
 import { isOnchainStarterpack } from "./types";
 import { getCurrentReferral } from "@/utils/referral";
 import {
@@ -21,6 +21,7 @@ import {
 import { Item } from "./types";
 import { useStarterpackContext } from "./starterpack";
 import { ExternalWalletError } from "@/utils/errors";
+import { CoinbaseOnrampStatus } from "@/utils/api";
 import {
   useQuantity,
   useExternalWallet,
@@ -28,9 +29,11 @@ import {
   useTokenSelection,
   useCoinbase,
   type TokenOption,
+  type CoinbaseOrderResult,
   type CoinbaseTransactionResult,
   type CoinbaseQuoteResult,
 } from "@/hooks/starterpack";
+import { useSocialClaimConnection } from "@/hooks/starterpack/social";
 import { Explorer } from "@/hooks/starterpack/layerswap";
 
 export type { TokenOption } from "@/hooks/starterpack";
@@ -43,6 +46,9 @@ export interface OnchainPurchaseContextType {
   quantity: number;
   incrementQuantity: () => void;
   decrementQuantity: () => void;
+
+  // Conditional bundles / social claim
+  setIssueSignature: (signature: string[] | undefined) => void;
 
   // Wallet state
   selectedWallet: ExternalWallet | undefined;
@@ -79,10 +85,15 @@ export interface OnchainPurchaseContextType {
 
   // Coinbase / Apple Pay state
   isApplePaySelected: boolean;
+  isStripeSelected: boolean;
   paymentLink: string | undefined;
   isCreatingOrder: boolean;
   coinbaseQuote: CoinbaseQuoteResult | undefined;
   isFetchingCoinbaseQuote: boolean;
+  orderId: string | undefined;
+  orderStatus: CoinbaseOnrampStatus | undefined;
+  orderTxHash: string | undefined;
+  popupClosed: boolean;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -94,7 +105,11 @@ export interface OnchainPurchaseContextType {
   onSendDeposit: () => Promise<void>;
   waitForDeposit: (swapId: string) => Promise<boolean>;
   onApplePaySelect: () => void;
-  onCreateCoinbaseOrder: () => Promise<void>;
+  onStripeSelect: () => void;
+  onCreateCoinbaseOrder: (opts?: {
+    force?: boolean;
+  }) => Promise<CoinbaseOrderResult | undefined>;
+  openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
 }
 
@@ -113,15 +128,24 @@ export const OnchainPurchaseProvider = ({
     useConnection();
   const location = useLocation();
   const {
+    bundleId,
     starterpackId,
     starterpackDetails,
     setTransactionHash,
     setDisplayError,
+    registryAddress,
+    socialClaimConditions,
   } = useStarterpackContext();
+  const { connectedHandle } = useSocialClaimConnection(socialClaimConditions);
 
   // Purchase items and USD amount
   const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
   const [usdAmount, setUsdAmount] = useState(0);
+
+  // Conditional bundles / social claim
+  const [issueSignature, setIssueSignature] = useState<string[] | undefined>(
+    undefined,
+  );
 
   // Compose hooks
   const { quantity, incrementQuantity, decrementQuantity, resetQuantity } =
@@ -135,13 +159,13 @@ export const OnchainPurchaseProvider = ({
     clearSelectedWallet: clearSelectedWalletInternal,
     walletError,
   } = useExternalWallet({
-    controller,
     onError: setDisplayError,
   });
 
   const clearSelectedWallet = useCallback(() => {
     clearSelectedWalletInternal();
     setIsApplePaySelected(false);
+    setIsStripeSelected(false);
   }, [clearSelectedWalletInternal]);
 
   const onExternalConnect = useCallback(
@@ -151,6 +175,7 @@ export const OnchainPurchaseProvider = ({
       chainId?: string,
     ) => {
       setIsApplePaySelected(false);
+      setIsStripeSelected(false);
       return onExternalConnectInternal(wallet, platform, chainId);
     },
     [onExternalConnectInternal],
@@ -173,7 +198,6 @@ export const OnchainPurchaseProvider = ({
     isTokenSelectionLocked,
     resetTokenSelection,
   } = useTokenSelection({
-    controller,
     starterpackDetails: onchainDetails,
     quantity,
     selectedPlatform,
@@ -193,8 +217,6 @@ export const OnchainPurchaseProvider = ({
     onSendDeposit: onSendDepositInternal,
     waitForDeposit,
   } = useLayerswap({
-    controller,
-    isMainnet,
     selectedPlatform,
     walletAddress,
     selectedWallet,
@@ -203,7 +225,9 @@ export const OnchainPurchaseProvider = ({
   });
 
   const [isApplePaySelected, setIsApplePaySelected] = useState(false);
+  const [isStripeSelected, setIsStripeSelected] = useState(false);
   const {
+    orderId,
     paymentLink,
     isCreatingOrder,
     createOrder: createCoinbaseOrder,
@@ -211,8 +235,11 @@ export const OnchainPurchaseProvider = ({
     getQuote: getCoinbaseQuote,
     coinbaseQuote,
     isFetchingQuote: isFetchingCoinbaseQuote,
+    orderStatus,
+    orderTxHash,
+    popupClosed,
+    openPaymentPopup,
   } = useCoinbase({
-    controller,
     onError: setDisplayError,
   });
 
@@ -230,7 +257,8 @@ export const OnchainPurchaseProvider = ({
     resetTokenSelection();
     resetQuantity();
     setPurchaseItems([]);
-  }, [starterpackId, resetTokenSelection, resetQuantity]);
+    setIssueSignature(undefined);
+  }, [bundleId, starterpackId, resetTokenSelection, resetQuantity]);
 
   // Update purchase items and USD amount when starterpack details change
   useEffect(() => {
@@ -259,11 +287,20 @@ export const OnchainPurchaseProvider = ({
   // Clear errors when token or wallet selection changes
   useEffect(() => {
     setDisplayError(undefined);
-  }, [selectedToken, selectedWallet, setDisplayError]);
+  }, [
+    selectedToken,
+    selectedWallet,
+    isApplePaySelected,
+    isStripeSelected,
+    setDisplayError,
+  ]);
 
-  // Auto-select USDC when Apple Pay is selected
+  // Auto-select USDC when a card-based flow is selected
   useEffect(() => {
-    if (isApplePaySelected && availableTokens.length > 0) {
+    if (
+      (isApplePaySelected || isStripeSelected) &&
+      availableTokens.length > 0
+    ) {
       const usdcToken = availableTokens.find(
         (token) => token.symbol === "USDC",
       );
@@ -271,7 +308,13 @@ export const OnchainPurchaseProvider = ({
         setSelectedToken(usdcToken);
       }
     }
-  }, [isApplePaySelected, availableTokens, selectedToken, setSelectedToken]);
+  }, [
+    isApplePaySelected,
+    isStripeSelected,
+    availableTokens,
+    selectedToken,
+    setSelectedToken,
+  ]);
 
   // Wrap onSendDeposit to clear errors before sending
   const onSendDeposit = useCallback(async () => {
@@ -319,7 +362,7 @@ export const OnchainPurchaseProvider = ({
   ]);
 
   const onOnchainPurchase = useCallback(async () => {
-    if (!controller || !starterpackDetails) return;
+    if (!controller || !starterpackDetails || !registryAddress) return;
 
     if (!isOnchainStarterpack(starterpackDetails)) {
       throw new Error("Not an onchain starterpack");
@@ -332,8 +375,6 @@ export const OnchainPurchaseProvider = ({
     }
 
     try {
-      const registryContract = import.meta.env
-        .VITE_STARTERPACK_REGISTRY_CONTRACT;
       const recipient = controller.address();
 
       const walletType =
@@ -391,25 +432,58 @@ export const OnchainPurchaseProvider = ({
       const approvePaymentTokenCall: Call = {
         contractAddress: quote.paymentToken,
         entrypoint: "approve",
-        calldata: [registryContract, amount256.low, amount256.high],
+        calldata: [registryAddress, amount256.low, amount256.high],
       };
 
       const referralData = getCurrentReferral(origin);
 
+      // global registry calldata (starterpacks)
+      let calldata = [
+        recipient,
+        packId,
+        quantity,
+        ...(referralData?.refAddress
+          ? [0x0, num.toHex(referralData.refAddress)]
+          : [0x1]),
+        ...(referralData?.refGroup
+          ? [0x0, num.toHex(cairo.felt(referralData.refGroup))]
+          : [0x1]),
+      ];
+
+      // new registry calldata (bundles)
+      if (bundleId !== undefined) {
+        const hasSignature =
+          starterpackDetails.isConditional &&
+          Array.isArray(issueSignature) &&
+          issueSignature.length > 0;
+        const voucherKey =
+          hasSignature && connectedHandle
+            ? hash.computePoseidonHashOnElements([
+                bundleId,
+                shortString.encodeShortString(connectedHandle),
+              ])
+            : undefined;
+        calldata = [
+          ...calldata,
+          1, // client: Option<ContractAddress>
+          0, // client_percentage: u8
+          ...(voucherKey // voucher_key: Option<felt252>
+            ? [0x0, voucherKey]
+            : [0x1]),
+          ...(hasSignature // signature: Option<Span<felt252>>
+            ? [
+                0x0,
+                num.toHex(issueSignature.length),
+                ...issueSignature.map((s) => num.toHex(s)),
+              ]
+            : [0x1]),
+        ];
+      }
+
       const issueCall: Call = {
-        contractAddress: registryContract,
+        contractAddress: registryAddress,
         entrypoint: "issue",
-        calldata: [
-          recipient,
-          packId,
-          quantity,
-          ...(referralData?.refAddress
-            ? [0x0, num.toHex(referralData.refAddress)]
-            : [0x1]),
-          ...(referralData?.refGroup
-            ? [0x0, num.toHex(cairo.felt(referralData.refGroup))]
-            : [0x1]),
-        ],
+        calldata,
       };
 
       allCalls = [...allCalls, approvePaymentTokenCall, issueCall];
@@ -464,11 +538,15 @@ export const OnchainPurchaseProvider = ({
   }, [
     controller,
     starterpackDetails,
+    registryAddress,
     origin,
     selectedToken,
     swapQuote,
     selectedWallet,
     quantity,
+    bundleId,
+    connectedHandle,
+    issueSignature,
     externalSendTransaction,
     setTransactionHash,
     setDisplayError,
@@ -476,34 +554,46 @@ export const OnchainPurchaseProvider = ({
 
   const onApplePaySelect = useCallback(() => {
     setIsApplePaySelected(true);
+    setIsStripeSelected(false);
     clearSelectedWalletInternal();
   }, [clearSelectedWalletInternal]);
 
-  const onCreateCoinbaseOrder = useCallback(async () => {
-    if (!onchainDetails?.quote) {
-      throw new Error("Quote not loaded yet");
-    }
+  const onStripeSelect = useCallback(() => {
+    setIsStripeSelected(true);
+    setIsApplePaySelected(false);
+    clearSelectedWalletInternal();
+  }, [clearSelectedWalletInternal]);
 
-    if (isCreatingOrder || paymentLink) return;
+  const onCreateCoinbaseOrder = useCallback(
+    async (opts?: { force?: boolean }) => {
+      if (!onchainDetails?.quote) {
+        throw new Error("Quote not loaded yet");
+      }
 
-    const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
+      const force = opts?.force ?? false;
+      if (isCreatingOrder || (paymentLink && !force)) return;
 
-    await createCoinbaseOrder({
-      purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
-    });
-  }, [
-    onchainDetails,
-    quantity,
-    isCreatingOrder,
-    paymentLink,
-    createCoinbaseOrder,
-  ]);
+      const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
+
+      return createCoinbaseOrder({
+        purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
+      });
+    },
+    [
+      onchainDetails,
+      quantity,
+      isCreatingOrder,
+      paymentLink,
+      createCoinbaseOrder,
+    ],
+  );
 
   const contextValue: OnchainPurchaseContextType = {
     purchaseItems,
     quantity,
     incrementQuantity,
     decrementQuantity,
+    setIssueSignature,
     selectedWallet,
     selectedPlatform,
     walletAddress,
@@ -514,7 +604,8 @@ export const OnchainPurchaseProvider = ({
     convertedPrice,
     swapQuote,
     isFetchingConversion,
-    isTokenSelectionLocked: isTokenSelectionLocked || isApplePaySelected,
+    isTokenSelectionLocked:
+      isTokenSelectionLocked || isApplePaySelected || isStripeSelected,
     conversionError,
     usdAmount,
     layerswapFees,
@@ -527,16 +618,23 @@ export const OnchainPurchaseProvider = ({
     depositAmount,
     feeEstimationError,
     isApplePaySelected,
+    isStripeSelected,
     paymentLink,
     isCreatingOrder,
     coinbaseQuote,
     isFetchingCoinbaseQuote,
+    orderId,
+    orderStatus,
+    orderTxHash,
+    popupClosed,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,
     waitForDeposit,
     onApplePaySelect,
+    onStripeSelect,
     onCreateCoinbaseOrder,
+    openPaymentPopup,
     getTransactions,
   };
 

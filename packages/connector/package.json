@@ -1,13 +1,20 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.12.1",
+  "version": "0.13.11-alpha.1",
   "description": "Cartridge Controller Connector",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cartridge-gg/controller.git",
+    "directory": "packages/connector"
+  },
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "sideEffects": false,
   "scripts": {
     "build:deps": "tsup --dts-resolve",
+    "test": "vitest",
+    "test:ci": "vitest run",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },
@@ -44,13 +51,14 @@
     "@starknet-react/core": "^5.0.1"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:*",
-    "@starknet-io/get-starknet-wallet-standard": "5.0.0-beta.0"
+    "@cartridge/controller": "workspace:*"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
+    "@vitest/coverage-v8": "2.1.8",
     "prettier": "catalog:",
     "tsup": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "2.1.8"
   }
 }

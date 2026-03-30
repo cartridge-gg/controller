@@ -10,6 +10,8 @@ export type ToastPosition =
 export interface BaseToastOptions {
   duration?: number; // in milliseconds, 0 means persistent
   position?: ToastPosition;
+  preset?: string;
+  safeToClose?: boolean;
   onClick?: () => void; // Optional click handler for the entire toast
 }
 
@@ -40,6 +42,7 @@ export interface AchievementToastOptions extends BaseToastOptions {
   title: string;
   subtitle?: string;
   xpAmount: number;
+  progress: number;
   isDraft?: boolean;
 }
 
@@ -53,9 +56,10 @@ export interface QuestToastOptions extends BaseToastOptions {
 // Marketplace Toast
 export interface MarketplaceToastOptions extends BaseToastOptions {
   variant: "marketplace";
-  itemName: string;
-  itemImage: string;
-  action: "purchased" | "sold";
+  itemNames: string[];
+  itemImages: string[];
+  collectionName: string;
+  action: "purchased" | "sold" | "sent" | "listed" | "unlisted";
 }
 
 // Union type for all toast variants

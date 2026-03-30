@@ -13,13 +13,12 @@ import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import { useMemo } from "react";
 import CheckoutForm from "./StripeCheckout";
-import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { PaymentMethod } from "./PaymentMethod";
 import { PurchaseContent } from "./PurchaseContent";
 import { usePurchase } from "@/hooks/purchase";
-import { PurchaseState, PurchaseCreditsProps } from "./types";
+import { PurchaseState, PurchaseCreditsProps, PurchaseType } from "./types";
 
-export { PurchaseState } from "./types";
+export { PurchaseState, PurchaseType } from "./types";
 export type {
   PurchaseCreditsProps,
   PricingDetails,

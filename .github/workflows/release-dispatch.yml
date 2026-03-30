@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Configure Git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Set up Node.js
@@ -38,6 +40,56 @@ jobs:
         run: |
           VERSION=${{ github.event.inputs.version }}
           pnpm -r exec -- bash -c "npm version $VERSION --no-git-tag-version"
+
+      - name: Get commit range for changelog
+        id: commit_range
+        run: |
+          LATEST_TAG=$(gh release list --limit 1 --exclude-pre-releases --exclude-drafts --json tagName --jq '.[0].tagName' || echo "")
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG=$(git log --oneline -n 50 | tail -1 | cut -d' ' -f1)
+          fi
+          echo "RANGE=${LATEST_TAG}..HEAD" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Changelog with Claude
+        id: changelog
+        uses: anthropics/claude-code-action@beta
+        with:
+          mode: agent
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          direct_prompt: |
+            Generate a changelog entry for version ${{ github.event.inputs.version }} of the Cartridge Controller SDK.
+
+            This is a monorepo containing:
+            - @cartridge/controller - Main SDK implementing Starknet account interfaces
+            - @cartridge/connector - Lightweight connector interface for Starknet React applications
+
+            Analyze the git commit range: ${{ steps.commit_range.outputs.RANGE }}
+
+            Create a changelog entry in this format and update CHANGELOG.md:
+
+            ## [${{ github.event.inputs.version }}] - $(date +%Y-%m-%d)
+
+            ### ✨ New Features
+            - [List new features with brief descriptions]
+
+            ### 🚀 Improvements
+            - [List improvements and enhancements]
+
+            ### 🐛 Bug Fixes
+            - [List bug fixes]
+
+            ### ⚠️ Breaking Changes
+            - [List any breaking changes with migration guidance]
+
+            ### 📦 Dependencies
+            - [List significant dependency updates]
+
+            Focus on user-facing changes and be professional. Group changes by package (@cartridge/controller vs @cartridge/connector) when relevant.
+          allowed_tools: "Read,Write,Bash"
+
       - name: Create Release Pull Request
         if: ${{ github.event.inputs.tag == 'latest' }}
         id: cpr

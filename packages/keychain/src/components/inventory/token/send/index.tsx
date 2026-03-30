@@ -21,7 +21,7 @@ import { RecipientCard } from "@/components/modules/RecipientCard";
 import { SendAmount } from "./amount";
 import { useConnection } from "@/hooks/connection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{
@@ -48,6 +48,7 @@ export function SendToken() {
   const [selectedToken, setSelectedToken] = useState<Token | undefined>(token);
   const [recipientLoading, setRecipientLoading] = useState(false);
   const [sendConfirmed, setSendConfirmed] = useState(false);
+  const { toast } = useToast();
 
   const disabled = useMemo(() => {
     return (
@@ -114,6 +115,15 @@ export function SendToken() {
     return calls;
   }, [sendConfirmed, selectedToken, to, amount, toError, amountError]);
 
+  const submitToast = useCallback(() => {
+    toast.marketplace("Tokens sent successfully!", {
+      action: "sent",
+      itemNames: [`${amount} ${selectedToken?.metadata.name ?? ""}`],
+      itemImages: [selectedToken?.metadata.image ?? ""],
+      collectionName: selectedToken?.metadata.name ?? "",
+    });
+  }, [toast, amount, selectedToken?.metadata]);
+
   const onSubmitSend = useCallback(
     async (maxFee?: FeeEstimate) => {
       if (!maxFee || !transactions || !controller) {
@@ -122,11 +132,7 @@ export function SendToken() {
 
       try {
         await controller.execute(transactions, maxFee);
-
-        toast.success("Tokens sent successfully!", {
-          duration: 10000,
-        });
-
+        submitToast();
         // Navigate back to inventory
         goBack();
       } catch (error) {
@@ -135,7 +141,7 @@ export function SendToken() {
         throw error;
       }
     },
-    [transactions, controller, goBack],
+    [transactions, controller, goBack, toast, submitToast],
   );
 
   if (!token) {

@@ -23,6 +23,7 @@ const initialState: DataContextType = {
     achievements: [],
     players: [],
     status: "loading",
+    supportsAchievements: false,
   },
   setAccountAddress: () => {},
   refetchTransfers: () => {},

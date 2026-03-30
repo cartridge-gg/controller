@@ -2,6 +2,7 @@ import { useStarterpackContext, useOnchainPurchaseContext } from "@/context";
 import { ClaimPending } from "./claim";
 import { PurchasePending } from "./purchase";
 import { BridgePending } from "./bridge";
+import { useConnection } from "@/hooks/connection";
 
 // Re-export components for external use
 export { ClaimPending } from "./claim";
@@ -30,6 +31,7 @@ export function Pending() {
     selectedPlatform,
     isApplePaySelected,
   } = useOnchainPurchaseContext();
+  const { closeModal } = useConnection();
 
   // Claim flow (merkle drop)
   if (starterpackDetails?.type === "claimed") {
@@ -77,6 +79,7 @@ export function Pending() {
       name={starterpackDetails?.name || "Items"}
       items={purchaseItems}
       transactionHash={transactionHash!}
+      onCompleted={closeModal}
     />
   );
 }

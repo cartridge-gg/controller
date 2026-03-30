@@ -25,7 +25,7 @@ Execute commands in specific packages within the monorepo.
 pnpm --filter @cartridge/keychain test
 
 # Build specific package
-pnpm --filter @cartridge/controller build
+pnpm --filter @cartridge/controller build:deps
 
 # Run dev server for keychain only
 pnpm --filter @cartridge/keychain dev

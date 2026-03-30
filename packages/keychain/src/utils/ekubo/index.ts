@@ -15,7 +15,7 @@ import { ExternalWalletError } from "@/utils/errors";
 /**
  * Extended Error type with retry control
  */
-interface ExtendedError extends Error {
+export interface ExtendedError extends Error {
   noRetry?: boolean;
 }
 
@@ -35,6 +35,13 @@ export const EKUBO_ROUTER_ADDRESSES: Record<string, string> = {
 export const USDC_ADDRESSES: Record<string, string> = {
   [constants.StarknetChainId.SN_MAIN]:
     "0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
+  [constants.StarknetChainId.SN_SEPOLIA]:
+    "0x0512feac6339ff7889822cb5aa2a86c848e9d392bb0e3e237c008674feed8343",
+};
+
+export const USDCE_ADDRESSES: Record<string, string> = {
+  [constants.StarknetChainId.SN_MAIN]:
+    "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
   [constants.StarknetChainId.SN_SEPOLIA]:
     "0x053b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080",
 };
@@ -319,7 +326,11 @@ export async function fetchSwapQuoteInUsdc(
 ): Promise<bigint> {
   const usdcAddress = USDC_ADDRESSES[chainId];
   if (!usdcAddress) {
-    throw new Error(`USDC address not found for chain ID: ${chainId}`);
+    const error = new Error(
+      `USDC address not found for chain ID: ${chainId}`,
+    ) as ExtendedError;
+    error.noRetry = true;
+    throw error;
   }
   const quote = await fetchSwapQuote(
     amount,

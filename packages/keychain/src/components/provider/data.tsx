@@ -1,16 +1,23 @@
-import { useState, ReactNode, useMemo } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import { useAchievements } from "@/hooks/achievements";
 import { DataContext } from "@/context/data";
 import {
   useActivitiesQuery,
   useTransfersQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useAccount } from "@/hooks/account";
+import { useAccount, useUsernames } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/ui/utils";
 import makeBlockie from "ethereum-blockies-base64";
+import { useLocation } from "react-router-dom";
+
+export const TRANSFER_HISTORY_LIMIT = 100;
+
+export function shouldFetchProfileHistory(pathname: string) {
+  return pathname.startsWith("/account/");
+}
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
@@ -19,11 +26,13 @@ export interface CardProps {
   transactionHash: string;
   amount: string;
   address: string;
+  username: string;
   value: string;
   name: string;
   collection: string;
   image: string;
   title: string;
+  color: string;
   website: string;
   certified: boolean;
   action: "send" | "receive" | "mint";
@@ -33,22 +42,54 @@ export interface CardProps {
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const theme = useControllerTheme();
+  const location = useLocation();
+  const controllerTheme = useControllerTheme();
+  const theme = useMemo(
+    () => ({
+      color:
+        typeof controllerTheme?.colors?.primary === "string"
+          ? (controllerTheme?.colors?.primary as string)
+          : "#ffffff",
+      icon: controllerTheme?.icon ?? "",
+      certified: controllerTheme?.verified ?? false,
+    }),
+    [controllerTheme],
+  );
+
   const [accountAddress, setAccountAddress] = useState<string | undefined>(
     undefined,
   );
 
   const account = useAccount();
-  const address = account?.address || "";
+  const address = useMemo(
+    () => (account ? addAddressPadding(account.address) : ""),
+    [account],
+  );
   const { project } = useConnection();
+  const shouldFetchHistory = useMemo(
+    () => shouldFetchProfileHistory(location.pathname),
+    [location.pathname],
+  );
 
-  const projects = useMemo(() => {
-    const projects = project ? [project] : [];
-    return projects.map((proejct) => {
+  const transferProjects = useMemo(() => {
+    const transferProjects = project ? [project] : [];
+    return transferProjects.map((project) => {
       return {
-        project: proejct,
+        project,
         address,
-        limit: 0,
+        limit: TRANSFER_HISTORY_LIMIT,
+        date: "",
+      };
+    });
+  }, [project, address]);
+
+  const activityProjects = useMemo(() => {
+    const activityProjects = project ? [project] : [];
+    return activityProjects.map((project) => {
+      return {
+        project,
+        address,
+        limit: TRANSFER_HISTORY_LIMIT,
       };
     });
   }, [project, address]);
@@ -61,11 +102,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refetch: refetchTransfers,
   } = useTransfersQuery(
     {
-      projects: projects.map((p) => ({ ...p, date: "" })),
+      projects: transferProjects,
     },
     {
       queryKey: ["transfers", address, project],
-      enabled: !!address && projects.length > 0,
+      enabled: shouldFetchHistory && !!address && transferProjects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
@@ -76,22 +117,36 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refetch: refetchTransactions,
   } = useActivitiesQuery(
     {
-      projects,
+      projects: activityProjects,
     },
     {
       queryKey: ["activities", address, project],
-      enabled: !!address && projects.length > 0,
+      enabled: shouldFetchHistory && !!address && activityProjects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
 
   const status = useMemo(() => {
-    return transfersStatus === "loading" && activitiesStatus === "loading"
+    return transfersStatus === "loading" || activitiesStatus === "loading"
       ? "loading"
-      : transfersStatus === "error" || activitiesStatus === "error"
+      : transfersStatus === "error" && activitiesStatus === "error"
         ? "error"
         : "success";
   }, [transfersStatus, activitiesStatus]);
+  const addresses = useMemo<string[]>(() => {
+    const accounts =
+      transfers?.transfers?.items.flatMap((item) =>
+        item.transfers.reduce((acc, item) => {
+          acc.push(
+            `0x${BigInt(item.fromAddress).toString(16)}`,
+            `0x${BigInt(item.toAddress).toString(16)}`,
+          );
+          return acc;
+        }, [] as string[]),
+      ) ?? [];
+    return Array.from(new Set(accounts));
+  }, [transfers]);
+  const { getUsername } = useUsernames({ addresses });
 
   const erc20s: CardProps[] = useMemo(() => {
     return (
@@ -109,18 +164,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
                   getChecksumAddress(transfer.contractAddress),
               )?.logo_url ||
               makeBlockie(getChecksumAddress(transfer.contractAddress));
-            return {
+            const userAddress =
+              BigInt(transfer.fromAddress) === BigInt(address)
+                ? transfer.toAddress
+                : transfer.fromAddress;
+            const result: CardProps = {
               variant: "token",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
               contractAddress: transfer.contractAddress,
               transactionHash: transfer.transactionHash,
               amount: value,
-              address:
-                BigInt(transfer.fromAddress) === BigInt(address)
-                  ? transfer.toAddress
-                  : transfer.fromAddress,
+              address: userAddress,
+              username: getUsername(userAddress) ?? "",
               value: "$-",
+              name: "",
+              collection: "",
               image: image || "",
+              title: "",
+              color: theme.color,
+              website: "",
+              certified: theme.certified,
               action:
                 BigInt(transfer.fromAddress) === 0n
                   ? "mint"
@@ -129,11 +192,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
                     : "receive",
               timestamp: timestamp / 1000,
               date: date,
-            } as CardProps;
+            };
+            return result;
           }),
       ) || []
     );
-  }, [transfers, address]);
+  }, [transfers, address, getUsername, theme]);
 
   const erc721s: CardProps[] = useMemo(() => {
     return (
@@ -143,34 +207,45 @@ export function DataProvider({ children }: { children: ReactNode }) {
           .map((transfer) => {
             const timestamp = new Date(transfer.executedAt).getTime();
             const date = getDate(timestamp);
-            let metadata;
+            let metadata: {
+              attributes?: Array<{ trait?: string; value?: string }>;
+              name?: string;
+            } = {};
             try {
               metadata = JSON.parse(
                 !transfer.metadata ? "{}" : transfer.metadata,
-              );
+              ) as {
+                attributes?: Array<{ trait?: string; value?: string }>;
+                name?: string;
+              };
             } catch (error) {
               console.warn(error);
             }
             const name =
               metadata.attributes?.find(
-                (attribute: { trait: string; value: string }) =>
-                  attribute?.trait?.toLowerCase() === "name",
+                (attribute) => attribute.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
             const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/${addAddressPadding(transfer.contractAddress)}/${transfer.tokenId}/image`;
-            return {
+            const userAddress =
+              BigInt(transfer.fromAddress) === BigInt(address)
+                ? transfer.toAddress
+                : transfer.fromAddress;
+            const result: CardProps = {
               variant: "collectible",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
               contractAddress: transfer.contractAddress,
               transactionHash: transfer.transactionHash,
+              amount: "",
+              address: userAddress,
+              username: getUsername(userAddress) ?? "",
+              value: "",
               name: name || "",
               collection: transfer.name,
-              amount: "",
-              address:
-                BigInt(transfer.fromAddress) === BigInt(address)
-                  ? transfer.toAddress
-                  : transfer.fromAddress,
-              value: "",
               image: image,
+              title: "",
+              color: theme.color,
+              website: "",
+              certified: theme.certified,
               action:
                 BigInt(transfer.fromAddress) === 0n
                   ? "mint"
@@ -179,11 +254,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
                     : "receive",
               timestamp: timestamp / 1000,
               date: date,
-            } as CardProps;
+            };
+            return result;
           });
       }) || []
     );
-  }, [transfers, address]);
+  }, [transfers, address, getUsername, theme]);
 
   const actions: CardProps[] = useMemo(() => {
     return (
@@ -192,18 +268,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
           ({ transactionHash, contractAddress, entrypoint, executedAt }) => {
             const timestamp = new Date(executedAt).getTime();
             const date = getDate(timestamp);
-            return {
+            const result: CardProps = {
               variant: "game",
               key: `${transactionHash}-${entrypoint}`,
               contractAddress: contractAddress,
               transactionHash: transactionHash,
+              amount: "",
+              address: "",
+              username: "",
+              value: "",
+              name: "",
+              collection: "",
+              image: theme.icon,
               title: entrypoint.replace(/_/g, " "),
-              image: theme?.icon || "",
+              color: theme.color,
               website: "",
-              certified: false,
+              certified: theme.certified,
+              action: "mint",
               timestamp: timestamp / 1000,
               date: date,
-            } as CardProps;
+            };
+            return result;
           },
         ),
       ) || []
@@ -215,27 +300,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .filter((item) => item.completed)
       .map((item) => {
         const date = getDate(item.timestamp * 1000);
-        return {
+        const result: CardProps = {
           variant: "achievement",
           key: item.id,
-          transactionHash: "",
           contractAddress: "",
-          title: item.title,
-          image: item.icon,
-          timestamp: item.timestamp,
-          date: date,
-          website: "",
-          certified: false,
-          points: item.earning,
+          transactionHash: "",
           amount: "",
           address: "",
+          username: "",
           value: "",
           name: "",
           collection: "",
+          image: item.icon,
+          title: item.title,
+          color: theme.color,
+          website: "",
+          certified: theme.certified,
           action: "mint",
-        } as CardProps;
+          timestamp: item.timestamp,
+          date: date,
+          points: item.earning,
+        };
+        return result;
       });
-  }, [trophies]);
+  }, [trophies, theme]);
 
   const events = useMemo(() => {
     return [...erc20s, ...erc721s, ...actions, ...achievements].sort(

@@ -260,6 +260,7 @@ function LazyAsset({
                 : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
             }
             images={[...asset.imageUrls, placeholder]}
+            clickable
             selectable
             selected={isSelected}
             listingCount={listingCount}

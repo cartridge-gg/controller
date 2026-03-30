@@ -44,9 +44,8 @@ export const ConnectionCard = React.forwardRef<
           <div className="flex flex-row items-center gap-1.5">
             <ConnectionIcon provider={connection.provider} />
             <div className="flex flex-col">
-              <p className="text-sm font-normal">{providerName}</p>
               {displayName && (
-                <p className="text-xs text-foreground-300">{displayName}</p>
+                <p className="text-sm text-foreground-100">@{displayName}</p>
               )}
             </div>
           </div>

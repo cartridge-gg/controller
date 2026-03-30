@@ -11,11 +11,15 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     needsSessionCreation?: boolean;
     username?: string;
     onSessionCreated?: () => void;
+    onStarterpackPlay?: () => void;
     encryptedBlob?: string;
   };
 
+const STARTERPACK_PLAY_CALLBACK_DELAY_MS = 200;
+
 export class KeychainIFrame extends IFrame<Keychain> {
   private walletBridge: WalletBridge;
+  private onStarterpackPlay?: () => void;
 
   constructor({
     url,
@@ -32,11 +36,14 @@ export class KeychainIFrame extends IFrame<Keychain> {
     needsSessionCreation,
     username,
     onSessionCreated,
+    onStarterpackPlay,
     encryptedBlob,
     propagateSessionErrors,
     errorDisplayMode,
+    webauthnPopup,
     ...iframeOptions
   }: KeychainIframeOptions) {
+    let onStarterpackPlayHandler: (() => Promise<void>) | undefined;
     const _url = new URL(url ?? KEYCHAIN_URL);
     const walletBridge = new WalletBridge();
 
@@ -87,17 +94,35 @@ export class KeychainIFrame extends IFrame<Keychain> {
       _url.searchParams.set("username", encodeURIComponent(username));
     }
 
+    if (preset) {
+      _url.searchParams.set("preset", preset);
+    }
+
+    if (shouldOverridePresetPolicies) {
+      _url.searchParams.set("should_override_preset_policies", "true");
+    }
+
+    if (webauthnPopup) {
+      _url.searchParams.set("webauthn_popup", "true");
+    }
+
     // Policy precedence logic:
     // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
-    // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
-    // 3. Otherwise, use provided policies or empty object
+    // 2. Otherwise, if preset is defined, ignore provided policies
+    // 3. Otherwise, use provided policies
     if ((!preset || shouldOverridePresetPolicies) && policies) {
       _url.searchParams.set(
         "policies",
         encodeURIComponent(JSON.stringify(policies)),
       );
     } else if (preset) {
-      _url.searchParams.set("preset", preset);
+      if (policies) {
+        console.warn(
+          "[Controller] Both `preset` and `policies` provided to ControllerProvider. " +
+            "Policies are ignored when preset is set. " +
+            "Use `shouldOverridePresetPolicies: true` to override.",
+        );
+      }
     }
 
     // Add encrypted blob to URL fragment (hash) if present
@@ -113,15 +138,33 @@ export class KeychainIFrame extends IFrame<Keychain> {
       methods: {
         ...walletBridge.getIFrameMethods(),
         // Expose callback for keychain to notify parent that session was created and storage access granted
-        onSessionCreated: (_origin: string) => () => {
-          if (onSessionCreated) {
-            onSessionCreated();
+        onSessionCreated: (_origin: string) => () => onSessionCreated?.(),
+        onStarterpackPlay: (_origin: string) => async () => {
+          if (onStarterpackPlayHandler) {
+            await onStarterpackPlayHandler();
           }
         },
       },
     });
 
     this.walletBridge = walletBridge;
+    this.onStarterpackPlay = onStarterpackPlay;
+    onStarterpackPlayHandler = async () => {
+      this.close();
+      const callback = this.onStarterpackPlay;
+      this.onStarterpackPlay = undefined;
+      if (!callback) {
+        return;
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, STARTERPACK_PLAY_CALLBACK_DELAY_MS),
+      );
+      try {
+        callback();
+      } catch (error) {
+        console.error("Failed to run starterpack play callback:", error);
+      }
+    };
 
     // Expose the wallet bridge instance globally for WASM interop
     if (typeof window !== "undefined") {
@@ -131,5 +174,9 @@ export class KeychainIFrame extends IFrame<Keychain> {
 
   getWalletBridge(): WalletBridge {
     return this.walletBridge;
+  }
+
+  setOnStarterpackPlay(callback?: () => void) {
+    this.onStarterpackPlay = callback;
   }
 }

@@ -22,7 +22,7 @@ import {
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SpendingLimitPage } from "./SpendingLimitPage";
-import { processPolicies } from "./CreateSession";
+import { processPolicies } from "@/utils/session/policies";
 import Controller from "@/utils/controller";
 
 /**
@@ -268,6 +268,7 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
           />
         ) : (
           <UnverifiedSessionSummary
+            game={theme?.name}
             contracts={policies.contracts}
             messages={policies.messages}
           />

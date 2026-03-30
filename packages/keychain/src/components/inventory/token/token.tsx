@@ -16,12 +16,13 @@ import { useData } from "@/hooks/data";
 import { getDate, isPublicChain, useCreditBalance } from "@cartridge/ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import { constants, getChecksumAddress } from "starknet";
-import { useAccount } from "@/hooks/account";
+import { useAccount, useUsernames } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
 import { useCallback, useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
 import { useNavigation } from "@/context/navigation";
+import { EmptyState, LoadingState } from "@/components/activity";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -116,7 +117,7 @@ function ERC20() {
   const accountAddress = account?.address || "";
   const { controller } = useConnection();
   const explorer = useExplorer();
-  const { transfers } = useData();
+  const { transfers, status } = useData();
   const { isControllerGte } = useVersion();
 
   const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
@@ -126,6 +127,22 @@ function ERC20() {
   const compatibility = useMemo(() => {
     return isControllerGte("0.5.6");
   }, [isControllerGte]);
+
+  const addresses = useMemo<string[]>(() => {
+    const accounts =
+      transfers?.transfers?.items.flatMap((item) =>
+        item.transfers.reduce(
+          (acc, item) => [
+            ...acc,
+            `0x${BigInt(item.fromAddress).toString(16)}`,
+            `0x${BigInt(item.toAddress).toString(16)}`,
+          ],
+          [] as string[],
+        ),
+      ) ?? [];
+    return Array.from(new Set(accounts));
+  }, [transfers]);
+  const { getUsername } = useUsernames({ addresses });
 
   const txs = useMemo(() => {
     if (!transfers || !token?.metadata?.image) {
@@ -147,11 +164,14 @@ function ERC20() {
             transactionHash: transfer.transactionHash,
             amount: value,
             to: transfer.toAddress,
+            toUsername: getUsername(transfer.toAddress),
             from: transfer.fromAddress,
+            fromUsername: getUsername(transfer.fromAddress),
             contractAddress: transfer.contractAddress,
             symbol: transfer.symbol,
             eventId: transfer.eventId,
             date: date,
+            timestamp,
             image,
             action:
               getChecksumAddress(transfer.fromAddress) ===
@@ -161,7 +181,7 @@ function ERC20() {
           };
         });
     });
-  }, [transfers, accountAddress, token?.metadata?.image]);
+  }, [transfers, accountAddress, getUsername, token?.metadata?.image]);
 
   const to = useCallback(
     (transactionHash: string) => {
@@ -185,44 +205,56 @@ function ERC20() {
           chainId={chainId as constants.StarknetChainId}
         />
 
-        <div className="flex flex-col gap-3">
-          {Object.entries(
-            txs
-              .filter((tx) => tx?.symbol === token.metadata.symbol)
-              .reduce(
-                (acc, tx) => {
-                  if (!acc[tx.date]) {
-                    acc[tx.date] = [];
-                  }
-                  acc[tx.date].push(tx);
-                  return acc;
-                },
-                {} as Record<string, typeof txs>,
-              ),
-          ).map(([date, transactions]) => (
-            <div key={date} className="flex flex-col gap-3">
-              <p className="text-foreground-400 font-semibold text-xs py-3 tracking-wider">
-                {date}
-              </p>
-              {transactions.map((item) => (
-                <Link
-                  key={item.key}
-                  to={to(item.transactionHash)}
-                  target="_blank"
-                >
-                  <ActivityTokenCard
-                    amount={item.amount}
-                    // no price available from the oracle for $PAPER
-                    value=""
-                    address={item.action === "send" ? item.to : item.from}
-                    image={token.metadata.image!}
-                    action={item.action}
-                  />
-                </Link>
-              ))}
-            </div>
-          ))}
-        </div>
+        {status === "loading" ? (
+          <LoadingState rowCount={2} />
+        ) : status === "error" || !txs.length ? (
+          <EmptyState />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {Object.entries(
+              txs
+                .filter((tx) => tx?.symbol === token.metadata.symbol)
+                .reduce(
+                  (acc, tx) => {
+                    if (!acc[tx.date]) {
+                      acc[tx.date] = [];
+                    }
+                    acc[tx.date].push(tx);
+                    return acc;
+                  },
+                  {} as Record<string, typeof txs>,
+                ),
+            ).map(([date, transactions]) => (
+              <div key={date} className="flex flex-col gap-2">
+                <p className="text-foreground-400 text-xs font-bold uppercase py-2">
+                  {date}
+                </p>
+                {transactions.map((item) => (
+                  <Link
+                    key={item.key}
+                    to={to(item.transactionHash)}
+                    target="_blank"
+                  >
+                    <ActivityTokenCard
+                      amount={item.amount}
+                      // no price available from the oracle for $PAPER
+                      value=""
+                      address={item.action === "send" ? item.to : item.from}
+                      username={
+                        item.action === "send"
+                          ? item.toUsername
+                          : item.fromUsername
+                      }
+                      image={token.metadata.image!}
+                      action={item.action}
+                      timestamp={item.timestamp}
+                    />
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </LayoutContent>
 
       {compatibility && controller && (

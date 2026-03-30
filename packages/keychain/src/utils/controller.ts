@@ -15,6 +15,8 @@ import {
   CartridgeAccount,
   CartridgeAccountMeta,
   ControllerFactory,
+  ImportedControllerMetadata,
+  ImportedSessionMetadata,
   JsAddSignerInput,
   JsCall,
   JsFeeSource,
@@ -29,10 +31,16 @@ import {
 } from "@cartridge/controller-wasm/controller";
 
 import { credentialToAuth } from "@/components/connect/types";
-import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
+import { ParsedSessionPolicies } from "@/hooks/session";
+import { toWasmPolicies } from "@cartridge/controller";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { toJsFeeEstimate } from "./fee";
+
+export interface ImportedControllerState {
+  controller: ImportedControllerMetadata;
+  session?: ImportedSessionMetadata;
+}
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -81,6 +89,39 @@ export default class Controller {
       throw new Error("Account not found");
     }
     return await this.cartridge.register(registerInput);
+  }
+
+  async exportMetadata(): Promise<ImportedControllerMetadata> {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    return await this.cartridge.exportMetadata();
+  }
+
+  async exportAuthorizedSession(
+    appId?: string,
+  ): Promise<ImportedSessionMetadata | undefined> {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    return await this.cartridge.exportAuthorizedSession(appId);
+  }
+
+  async importSession(importedSession: ImportedSessionMetadata) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    await this.cartridge.importSession(importedSession);
+  }
+
+  async exportState(appId?: string): Promise<ImportedControllerState> {
+    return {
+      controller: await this.exportMetadata(),
+      session: await this.exportAuthorizedSession(appId),
+    };
   }
 
   async createSession(
@@ -304,6 +345,21 @@ export default class Controller {
     return await this.cartridge.revokeSessions(sessions);
   }
 
+  private static fromCartridgeAccountWithMeta(
+    accountWithMeta: Awaited<ReturnType<typeof CartridgeAccount.new>>,
+    rpcUrl?: string,
+  ): Controller {
+    const meta = accountWithMeta.meta();
+    const controller = Object.create(Controller.prototype) as Controller;
+    controller.provider = new RpcProvider({
+      nodeUrl: rpcUrl ?? meta.rpcUrl(),
+    });
+    controller.cartridgeMeta = meta;
+    controller.cartridge = accountWithMeta.intoAccount();
+
+    return controller;
+  }
+
   static async apiLogin({
     classHash,
     rpcUrl,
@@ -326,12 +382,7 @@ export default class Controller {
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
 
-    const controller = Object.create(Controller.prototype) as Controller;
-    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
-    controller.cartridgeMeta = accountWithMeta.meta();
-    controller.cartridge = accountWithMeta.intoAccount();
-
-    return controller;
+    return Controller.fromCartridgeAccountWithMeta(accountWithMeta, rpcUrl);
   }
 
   static async create({
@@ -356,12 +407,7 @@ export default class Controller {
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
 
-    const controller = Object.create(Controller.prototype) as Controller;
-    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
-    controller.cartridgeMeta = accountWithMeta.meta();
-    controller.cartridge = accountWithMeta.intoAccount();
-
-    return controller;
+    return Controller.fromCartridgeAccountWithMeta(accountWithMeta, rpcUrl);
   }
 
   static async login({
@@ -403,15 +449,41 @@ export default class Controller {
 
     const [accountWithMeta, session] = loginResult.intoValues();
 
-    const controller = Object.create(Controller.prototype) as Controller;
-    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
-    controller.cartridgeMeta = accountWithMeta.meta();
-    controller.cartridge = accountWithMeta.intoAccount();
+    const controller = Controller.fromCartridgeAccountWithMeta(
+      accountWithMeta,
+      rpcUrl,
+    );
 
     return {
       controller,
       session,
     };
+  }
+
+  static async fromMetadata(
+    metadata: ImportedControllerMetadata,
+  ): Promise<Controller> {
+    const accountWithMeta = await ControllerFactory.fromMetadata(
+      metadata,
+      import.meta.env.VITE_CARTRIDGE_API_URL,
+    );
+
+    return Controller.fromCartridgeAccountWithMeta(
+      accountWithMeta,
+      metadata.rpcUrl,
+    );
+  }
+
+  static async importState(
+    importedState: ImportedControllerState,
+  ): Promise<Controller> {
+    const controller = await Controller.fromMetadata(importedState.controller);
+
+    if (importedState.session) {
+      await controller.importSession(importedState.session);
+    }
+
+    return controller;
   }
 
   static async fromStore(): Promise<Controller | undefined> {
@@ -422,12 +494,7 @@ export default class Controller {
       return undefined;
     }
 
-    const meta = cartridgeWithMeta.meta();
-    const controller = Object.create(Controller.prototype) as Controller;
-    controller.provider = new RpcProvider({ nodeUrl: meta.rpcUrl() });
-    controller.cartridge = cartridgeWithMeta.intoAccount();
-    controller.cartridgeMeta = meta;
-    return controller;
+    return Controller.fromCartridgeAccountWithMeta(cartridgeWithMeta);
   }
 }
 

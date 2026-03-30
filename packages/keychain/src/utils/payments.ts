@@ -3,8 +3,7 @@ import {
   CreateLayerswapDepositInput,
   CreateLayerswapPaymentInput,
   LayerswapDestinationNetwork,
-  PurchaseType,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@/utils/api";
 import { mapPlatformToLayerswapSourceNetwork } from "@/hooks/starterpack/layerswap";
 
 /**
@@ -37,7 +36,6 @@ export function depositToLayerswapInput(
 /**
  * Converts a credits purchase to a CreateLayerswapPaymentInput object.
  *
- * @param starterpackId An optional starterpack ID.
  * @param platform The source platform for the payment.
  * @param isMainnet Whether the transaction is for mainnet or testnet.
  * @param wholeCredits The amount of credits to purchase.
@@ -45,7 +43,6 @@ export function depositToLayerswapInput(
  * @returns A CreateLayerswapPaymentInput object.
  */
 export function creditsPurchaseToLayerswapInput(
-  starterpackId: string | undefined,
   platform: ExternalPlatform,
   isMainnet: boolean,
   wholeCredits: number,
@@ -62,12 +59,10 @@ export function creditsPurchaseToLayerswapInput(
   return {
     sourceNetwork,
     destinationNetwork,
-    purchaseType: PurchaseType.Credits,
     credits: {
       amount: wholeCredits,
       decimals: 0,
     },
-    starterpackId,
     teamId,
   };
 }

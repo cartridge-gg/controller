@@ -33,6 +33,15 @@ vi.mock("@/components/provider/upgrade", () => ({
   })),
 }));
 
+vi.mock("@/context/toast", () => ({
+  useToast: vi.fn(() => ({
+    toast: {
+      transaction: vi.fn(),
+      error: vi.fn(),
+    },
+  })),
+}));
+
 describe("ConfirmTransaction", () => {
   const mockTransactions = [
     {
@@ -71,6 +80,8 @@ describe("ConfirmTransaction", () => {
     const estimateInvokeFee = vi.fn().mockResolvedValue({
       suggestedMaxFee: BigInt(1000),
     });
+    const address = vi.fn().mockResolvedValue("0x123456789abcdef");
+    const username = vi.fn().mockResolvedValue("testuser");
 
     await act(async () => {
       renderWithProviders(
@@ -84,6 +95,8 @@ describe("ConfirmTransaction", () => {
               execute: mockExecute,
               estimateInvokeFee,
               isRequestedSession: vi.fn().mockResolvedValue(true),
+              address,
+              username,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
@@ -149,6 +162,11 @@ describe("ConfirmTransaction", () => {
     // Check that error is displayed (should have 2 instances of the error message)
     await waitFor(() => {
       expect(screen.getAllByText("Account validation failed")).toHaveLength(2);
+    });
+
+    // Submit errors must be propagated so caller promises can resolve/reject
+    await waitFor(() => {
+      expect(defaultProps.onError).toHaveBeenCalledWith(validationError);
     });
   });
 

@@ -8,6 +8,7 @@ import {
 import {
   useBalanceQuery,
   useBalancesQuery,
+  usePriceByAddressesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import makeBlockie from "ethereum-blockies-base64";
 import { useAccount } from "./account";
@@ -389,4 +390,83 @@ export function useToken({
     ),
     status,
   };
+}
+
+export type TokenSwap = {
+  address: string;
+  amount: bigint;
+};
+
+export type TokenSwapData = Metadata & {
+  amount: number;
+  value: number | null | undefined;
+  rounded: boolean;
+};
+
+export type UseTokenSwapDataResponse = {
+  tokenSwapData: TokenSwapData[];
+  status: "success" | "error" | "idle" | "loading";
+};
+
+export function useTokenSwapData(
+  tokens: TokenSwap[],
+): UseTokenSwapDataResponse {
+  const { data: priceData, ...restPriceData } = usePriceByAddressesQuery({
+    addresses: tokens.map((token) => token.address),
+  });
+
+  const tokenSwapData = useMemo<TokenSwapData[]>(() => {
+    return tokens.map((token) => {
+      if (
+        token.address ==
+        getChecksumAddress(
+          "0x036017e69d21d6d8c13e266eabb73ef1f1d02722d86bdcabe5f168f8e549d3cd",
+        )
+      ) {
+        // special treatment for LS2 games
+        // to be replaced for balance simulation
+        return {
+          amount: 1,
+          name: "Adventurer",
+          symbol: "Adventurer",
+          decimals: 0,
+          address: token.address,
+          image:
+            "https://api.cartridge.gg/x/arcade-main/torii/static/0x036017e69d21d6d8c13e266eabb73ef1f1d02722d86bdcabe5f168f8e549d3cd/0x0000000000000000000000000000000000000000000000000000000000000001/image",
+          value: undefined,
+          rounded: false,
+        };
+      }
+      const metadata = erc20Metadata.find(
+        (m) => BigInt(m.l2_token_address) === BigInt(token.address),
+      );
+      const price = priceData?.priceByAddresses.find(
+        (p) => BigInt(p.base) === BigInt(token.address),
+      );
+      const amount = Number(token.amount) / 10 ** (metadata?.decimals || 18);
+      const tokenData: TokenSwapData = {
+        amount,
+        name: metadata?.name || "Unknown",
+        symbol: metadata?.symbol || "UNKNOWN",
+        decimals: metadata?.decimals || 18,
+        address: getChecksumAddress(token.address),
+        image:
+          metadata?.logo_url || makeBlockie(getChecksumAddress(token.address)),
+        value: price
+          ? (Number(price.amount) / 10 ** (price.decimals || 18)) * amount
+          : undefined,
+        rounded: true,
+      };
+      return tokenData;
+    });
+  }, [tokens, priceData]);
+
+  const status = useMemo(() => {
+    if (restPriceData.isLoading) return "loading";
+    if (restPriceData.isError) return "error";
+    if (restPriceData.isSuccess) return "success";
+    return "idle";
+  }, [restPriceData]);
+
+  return { tokenSwapData, status };
 }

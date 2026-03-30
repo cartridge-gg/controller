@@ -10,6 +10,7 @@ import {
   IconProps,
   LockIcon,
   MetaMaskIcon,
+  MobileIcon,
   PasskeyIcon,
   PhantomIcon,
   RabbyIcon,
@@ -26,6 +27,10 @@ interface AuthButtonProps extends React.ComponentProps<typeof Button> {
   validation: ReturnType<typeof useUsernameValidation>;
   username: string | undefined;
   signupOptions?: AuthOption[];
+  webauthnPopup?: {
+    create: boolean;
+    get: boolean;
+  };
 }
 
 export type LoginAuthConfig = {
@@ -87,14 +92,24 @@ const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
   },
   password: {
     Icon: LockIcon,
-    bgColor: "bg-background-300",
     label: AUTH_METHODS_LABELS.password,
+  },
+  sms: {
+    Icon: (props: IconProps) => <MobileIcon {...props} variant="solid" />,
+    label: AUTH_METHODS_LABELS.sms,
   },
 };
 
 export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
   (
-    { waitingForConfirmation, validation, username, signupOptions, ...props },
+    {
+      waitingForConfirmation,
+      validation,
+      username,
+      signupOptions,
+      webauthnPopup,
+      ...props
+    },
     ref,
   ) => {
     const { wallets, isExtensionMissing } = useWallets();
@@ -166,7 +181,32 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       );
     }, [validation.signers]);
 
+    const usesWebauthnPopup = useMemo(() => {
+      if (option?.label !== AUTH_METHODS_LABELS.webauthn) {
+        return false;
+      }
+
+      if (validation.exists) {
+        return !!webauthnPopup?.get && isSingleSignerLogin;
+      }
+
+      return (
+        !!webauthnPopup?.create &&
+        signupOptions?.length === 1 &&
+        signupOptions[0] === "webauthn"
+      );
+    }, [
+      webauthnPopup,
+      option?.label,
+      validation.exists,
+      isSingleSignerLogin,
+      signupOptions,
+    ]);
+
     const text = useMemo(() => {
+      if (usesWebauthnPopup && isLoading) {
+        return "complete in popup";
+      }
       if (waitingForConfirmation) {
         return `Waiting for ${option?.label} confirmation`;
       }
@@ -202,6 +242,7 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       username,
       signupOptions,
       isSingleSignerLogin,
+      usesWebauthnPopup,
     ]);
 
     return (

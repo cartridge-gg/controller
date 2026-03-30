@@ -25,7 +25,7 @@ import { ReviewHeader, SendHeader } from "./header";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useConnection } from "@/hooks/connection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
@@ -34,6 +34,7 @@ export function SendCollectible() {
   const { address: contractAddress, tokenId } = useParams();
   const { controller } = useConnection();
   const { goBack } = useNavigation();
+  const { toast } = useToast();
 
   const [searchParams] = useSearchParams();
   const paramsTokenIds = useMemo(() => {
@@ -151,30 +152,6 @@ export function SendCollectible() {
     amountError,
   ]);
 
-  const onSubmitSend = useCallback(
-    async (maxFee?: FeeEstimate) => {
-      if (!maxFee || !transactions || !controller) {
-        return;
-      }
-
-      try {
-        await controller.execute(transactions, maxFee);
-
-        toast.success("Collectibles sent successfully!", {
-          duration: 10000,
-        });
-
-        // Navigate back to inventory
-        goBack();
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to send collectible(s)");
-        throw error;
-      }
-    },
-    [transactions, controller, goBack],
-  );
-
   const title = useMemo(() => {
     if (!collectible || !assets || assets.length === 0) return "";
     if (assets.length > 1) return `${assets.length} ${collectible.name}(s)`;
@@ -191,6 +168,35 @@ export function SendCollectible() {
     if (!collectible || !assets || assets.length !== 1) return 0;
     return assets[0].amount;
   }, [collectible, assets]);
+
+  const submitToast = useCallback(() => {
+    toast.marketplace("Collectibles sent successfully!", {
+      action: "sent",
+      itemNames: [title],
+      itemImages: [image],
+      collectionName: title,
+    });
+  }, [toast, title, image]);
+
+  const onSubmitSend = useCallback(
+    async (maxFee?: FeeEstimate) => {
+      if (!maxFee || !transactions || !controller) {
+        return;
+      }
+
+      try {
+        await controller.execute(transactions, maxFee);
+        submitToast();
+        // Navigate back to inventory
+        goBack();
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to send collectible(s)");
+        throw error;
+      }
+    },
+    [transactions, controller, goBack, toast, submitToast],
+  );
 
   return (
     <>

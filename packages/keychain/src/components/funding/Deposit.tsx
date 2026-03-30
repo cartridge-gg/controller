@@ -33,8 +33,8 @@ import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "../purchase/Balance";
-import { toast } from "sonner";
 import { convertUSDToTokenAmount, useFeeToken } from "@/hooks/tokens";
+import { useToast } from "@/context/toast";
 
 type DepositProps = {
   onComplete?: (deployHash?: string) => void;
@@ -53,6 +53,7 @@ function DepositInner({ onComplete }: DepositProps) {
   const { controller } = useConnection();
   const { account: extAccount } = useAccount();
   const { token: feeToken } = useFeeToken();
+  const { toast } = useToast();
 
   const [state, setState] = useState<"connect" | "fund">("connect");
   const [tokenAmount, setTokenAmount] = useState<bigint>();
@@ -146,7 +147,7 @@ function DepositInner({ onComplete }: DepositProps) {
 
     navigator.clipboard.writeText(addAddressPadding(controller.address()));
     toast.success("Address copied");
-  }, [controller]);
+  }, [controller, toast]);
 
   return (
     <>

@@ -11,12 +11,13 @@ import {
   useAddressByUsernameQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import base64url from "base64url";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMatch, useSearchParams } from "react-router-dom";
 import { constants, getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
+
 import { useAccountSearchQuery } from "@/utils/api";
 
 type RawAssertion = PublicKeyCredential & {
@@ -38,12 +39,24 @@ const createCredentials = async (
 ) => {
   if (!beginRegistration.publicKey) return;
   if (beginRegistration.publicKey?.authenticatorSelection) {
-    if (!hasPlatformAuthenticator || navigator.userAgent.indexOf("Win") != -1)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      // iOS check must come first: Chrome iOS reports hasPlatformAuthenticator
+      // as false even though the device supports passkeys via iCloud Keychain.
+      // Explicitly set "platform" so Chrome iOS shows "Create Passkey"
+      // instead of "Sign in".
+      beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
+        "platform";
+    } else if (
+      !hasPlatformAuthenticator ||
+      navigator.userAgent.indexOf("Win") != -1
+    ) {
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         "cross-platform";
-    else
+    } else {
       beginRegistration.publicKey.authenticatorSelection.authenticatorAttachment =
         undefined;
+    }
   }
 
   beginRegistration.publicKey.user.id = Buffer.from(name);
@@ -57,6 +70,7 @@ const createCredentials = async (
     { alg: -7, type: "public-key" },
   ];
   beginRegistration.publicKey.rp.id = import.meta.env.VITE_RP_ID;
+
   const credentials = (await navigator.credentials.create(
     beginRegistration,
   )) as RawAttestation & {
@@ -257,12 +271,29 @@ export function useUsernames({ addresses }: { addresses: string[] }) {
     { enabled: addresses.length > 0 },
   );
 
-  return {
-    usernames:
+  const usernames = useMemo(() => {
+    return (
       data?.accounts?.edges?.map((edge) => ({
         username: edge?.node?.username,
         address: edge?.node?.controllers?.edges?.[0]?.node?.address,
-      })) ?? [],
+      })) ?? []
+    );
+  }, [data]);
+
+  const getUsername = useCallback(
+    (adress: string | null | undefined) => {
+      return !adress
+        ? undefined
+        : usernames.find(
+            (user) => BigInt(user.address ?? "0x0") === BigInt(adress),
+          )?.username;
+    },
+    [usernames],
+  );
+
+  return {
+    usernames,
+    getUsername,
   };
 }
 

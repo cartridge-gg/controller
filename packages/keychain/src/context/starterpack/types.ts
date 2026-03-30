@@ -56,6 +56,7 @@ export interface OnchainStarterpackDetails {
   quote: Quote | null;
   isQuoteLoading: boolean;
   additionalPaymentTokens?: string[]; // Additional payment token addresses beyond ETH/STRK/USDC
+  isConditional: boolean;
 }
 
 /**

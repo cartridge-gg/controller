@@ -51,6 +51,7 @@ export function Collections() {
               totalCount={collection.totalCount}
               listingCount={listingCount}
               selectable={false}
+              clickable
             />
           </Link>
         );

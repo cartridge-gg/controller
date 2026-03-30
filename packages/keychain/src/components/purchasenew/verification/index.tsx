@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { useToast } from "@/context/toast";
 import {
   useMeQuery,
   useSendEmailVerificationMutation,
@@ -7,6 +7,7 @@ import {
   useSendPhoneVerificationMutation,
   useVerifyPhoneMutation,
 } from "@cartridge/ui/utils/api/cartridge";
+import { useAccountPrivateQuery } from "@/utils/api";
 import {
   Button,
   Input,
@@ -20,6 +21,11 @@ import {
   Card,
   CardContent,
   HeaderInner,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@cartridge/ui";
 import { useNavigation } from "@/context";
 import { useLocation } from "react-router-dom";
@@ -45,6 +51,7 @@ interface VerificationStepViewProps {
   error: string | null;
   autoComplete?: string;
   name?: string;
+  countryCode?: string;
 }
 
 const VerificationStepView = ({
@@ -60,6 +67,7 @@ const VerificationStepView = ({
   error,
   autoComplete,
   name,
+  countryCode,
 }: VerificationStepViewProps) => (
   <>
     <HeaderInner title={title} icon={icon} variant="compressed" />
@@ -68,19 +76,62 @@ const VerificationStepView = ({
         <label className="text-xs text-foreground-300 font-medium">
           {label}
         </label>
-        <Input
-          name={name}
-          autoComplete={autoComplete}
-          placeholder={placeholder}
-          value={value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            onChange(e.target.value)
-          }
-          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
-            e.key === "Enter" && value && onContinue()
-          }
-          type={type}
-        />
+        {countryCode ? (
+          <div className="flex w-full gap-2">
+            <Select value={countryCode} disabled>
+              <SelectTrigger className="w-16 shrink-0 h-10 justify-between">
+                <SelectValue placeholder={countryCode} />
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 10 6"
+                  className="h-1.5 w-2.5 shrink-0 text-foreground-300"
+                  fill="none"
+                >
+                  <path
+                    d="M1 1L5 5L9 1"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={countryCode}>{countryCode}</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="min-w-0 flex-1">
+              <Input
+                className="w-full"
+                name={name}
+                autoComplete={autoComplete}
+                placeholder={placeholder}
+                value={value}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange(e.target.value)
+                }
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  e.key === "Enter" && value && onContinue()
+                }
+                type={type}
+              />
+            </div>
+          </div>
+        ) : (
+          <Input
+            name={name}
+            autoComplete={autoComplete}
+            placeholder={placeholder}
+            value={value}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange(e.target.value)
+            }
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+              e.key === "Enter" && value && onContinue()
+            }
+            type={type}
+          />
+        )}
       </div>
     </LayoutContent>
     <LayoutFooter>
@@ -166,19 +217,22 @@ const CodeStepView = ({
 );
 
 export function Verification() {
-  const { navigate, setShowClose } = useNavigation();
+  const { navigate } = useNavigation();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const method = searchParams.get("method");
+  const { toast } = useToast();
 
-  useEffect(() => {
-    setShowClose(true);
-  }, [setShowClose]);
   const {
     data: meData,
     isLoading: isMeLoading,
     refetch: refetchMe,
   } = useMeQuery();
+  const {
+    data: accountPrivateData,
+    isLoading: isAccountPrivateLoading,
+    refetch: refetchAccountPrivate,
+  } = useAccountPrivateQuery();
 
   const [step, setStep] = useState<Step | null>(null);
   const [email, setEmail] = useState("");
@@ -195,17 +249,22 @@ export function Verification() {
   const verifyPhoneMutation = useVerifyPhoneMutation();
 
   useEffect(() => {
-    if (meData?.me && step === null) {
+    if (meData?.me && accountPrivateData && step === null) {
+      const accountPrivate = accountPrivateData.accountPrivate;
+
       if (!meData.me.email) {
         setStep("EMAIL_INPUT");
-      } else if (!meData.me.phoneNumber || !meData.me.phoneNumberVerifiedAt) {
+      } else if (
+        !accountPrivate?.phoneNumber ||
+        !accountPrivate?.phoneNumberVerifiedAt
+      ) {
         setStep("PHONE_INPUT");
-        setPhone(meData.me.phoneNumber || "");
+        setPhone(accountPrivate?.phoneNumber || "");
       } else {
         setStep("SUCCESS");
       }
     }
-  }, [meData, step]);
+  }, [meData, accountPrivateData, step]);
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -220,8 +279,8 @@ export function Verification() {
   useEffect(() => {
     const isVerified =
       meData?.me?.email &&
-      meData?.me?.phoneNumber &&
-      meData?.me?.phoneNumberVerifiedAt;
+      accountPrivateData?.accountPrivate?.phoneNumber &&
+      accountPrivateData?.accountPrivate?.phoneNumberVerifiedAt;
 
     if (step === "SUCCESS" && method && isVerified && !isTransientSuccess) {
       const timer = setTimeout(() => {
@@ -235,7 +294,7 @@ export function Verification() {
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [step, method, navigate, meData, isTransientSuccess]);
+  }, [step, method, navigate, meData, accountPrivateData, isTransientSuccess]);
 
   const handleSendEmail = async () => {
     setError(null);
@@ -270,14 +329,19 @@ export function Verification() {
         setIsTransientSuccess(true);
         setStep("SUCCESS");
         setTimeout(async () => {
-          const { data: updatedMe } = await refetchMe();
+          const [, { data: updatedAccountPrivate }] = await Promise.all([
+            refetchMe(),
+            refetchAccountPrivate(),
+          ]);
+
           if (
-            !updatedMe?.me?.phoneNumber ||
-            !updatedMe?.me?.phoneNumberVerifiedAt
+            !updatedAccountPrivate?.accountPrivate?.phoneNumber ||
+            !updatedAccountPrivate?.accountPrivate?.phoneNumberVerifiedAt
           ) {
             setStep("PHONE_INPUT");
-            setPhone(updatedMe?.me?.phoneNumber || "");
+            setPhone(updatedAccountPrivate?.accountPrivate?.phoneNumber || "");
           }
+
           setIsTransientSuccess(false);
         }, 1500);
       } else {
@@ -334,7 +398,7 @@ export function Verification() {
         input: { phoneNumber: formattedPhone, code },
       });
       if (res.verifyPhone.success) {
-        await refetchMe();
+        await Promise.all([refetchMe(), refetchAccountPrivate()]);
         setStep("SUCCESS");
       } else {
         setError(res.verifyPhone.message);
@@ -356,7 +420,7 @@ export function Verification() {
     }
   };
 
-  if (isMeLoading && step === null) {
+  if ((isMeLoading || isAccountPrivateLoading) && step === null) {
     return (
       <div className="flex items-center justify-center h-full">
         <SpinnerIcon className="animate-spin" />
@@ -407,7 +471,7 @@ export function Verification() {
           icon={<MobileIcon variant="solid" />}
           label="Phone Number"
           value={phone}
-          placeholder="111-222-333"
+          placeholder="111-222-3333"
           onChange={(val) => {
             setPhone(val);
             setError(null);
@@ -415,9 +479,10 @@ export function Verification() {
           onContinue={handleSendPhone}
           isLoading={sendPhoneMutation.isLoading}
           type="tel"
-          autoComplete="tel"
+          autoComplete="tel-national"
           name="phone"
           error={error}
+          countryCode="+1"
         />
       );
     case "PHONE_CODE":
@@ -461,7 +526,8 @@ export function Verification() {
                 <div className="flex flex-col gap-1">
                   <h2 className="text-xl font-bold">Success!</h2>
                   <p className="text-sm text-foreground-300">
-                    {email || meData?.me?.phoneNumber} Connected
+                    {email || accountPrivateData?.accountPrivate?.phoneNumber}{" "}
+                    Connected
                   </p>
                 </div>
               </CardContent>

@@ -41,30 +41,30 @@ describe("ControllerProvider defaults", () => {
     );
   });
 
-  test("should throw error when using non-Cartridge RPC for mainnet", async () => {
-    const invalidChains = [
+  test("should allow non-Cartridge RPC for mainnet", async () => {
+    const customChains = [
       { rpcUrl: "https://some-other-provider.com/starknet/mainnet/rpc/v0_9" },
     ];
 
     expect(() => {
       new ControllerProvider({
-        chains: invalidChains,
+        chains: customChains,
         defaultChainId: constants.StarknetChainId.SN_MAIN,
       });
-    }).toThrow("Only Cartridge RPC providers are allowed for mainnet");
+    }).not.toThrow();
   });
 
-  test("should throw error when using non-Cartridge RPC for sepolia", async () => {
-    const invalidChains = [
+  test("should allow non-Cartridge RPC for sepolia", async () => {
+    const customChains = [
       { rpcUrl: "https://some-other-provider.com/starknet/sepolia/rpc/v0_9" },
     ];
 
     expect(() => {
       new ControllerProvider({
-        chains: invalidChains,
+        chains: customChains,
         defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
       });
-    }).toThrow("Only Cartridge RPC providers are allowed for sepolia");
+    }).not.toThrow();
   });
 
   test("should allow non-Cartridge RPC for custom chains", () => {

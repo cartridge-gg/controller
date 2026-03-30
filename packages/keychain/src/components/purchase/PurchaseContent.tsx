@@ -1,7 +1,6 @@
-import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { AmountSelection } from "../funding/AmountSelection";
 import { Balance, BalanceType } from "./Balance";
-import { PurchaseState } from "./types";
+import { PurchaseState, PurchaseType } from "./types";
 
 export type PurchaseContentProps = {
   state: PurchaseState;
