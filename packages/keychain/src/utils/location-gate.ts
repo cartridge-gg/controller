@@ -9,94 +9,6 @@ type GeocodeResult = {
   regionName?: string | null;
 };
 
-const US_STATE_NAME_TO_CODE: Record<string, string> = {
-  alabama: "AL",
-  alaska: "AK",
-  arizona: "AZ",
-  arkansas: "AR",
-  california: "CA",
-  colorado: "CO",
-  connecticut: "CT",
-  delaware: "DE",
-  florida: "FL",
-  georgia: "GA",
-  hawaii: "HI",
-  idaho: "ID",
-  illinois: "IL",
-  indiana: "IN",
-  iowa: "IA",
-  kansas: "KS",
-  kentucky: "KY",
-  louisiana: "LA",
-  maine: "ME",
-  maryland: "MD",
-  massachusetts: "MA",
-  michigan: "MI",
-  minnesota: "MN",
-  mississippi: "MS",
-  missouri: "MO",
-  montana: "MT",
-  nebraska: "NE",
-  nevada: "NV",
-  "new hampshire": "NH",
-  "new jersey": "NJ",
-  "new mexico": "NM",
-  "new york": "NY",
-  "north carolina": "NC",
-  "north dakota": "ND",
-  ohio: "OH",
-  oklahoma: "OK",
-  oregon: "OR",
-  pennsylvania: "PA",
-  "rhode island": "RI",
-  "south carolina": "SC",
-  "south dakota": "SD",
-  tennessee: "TN",
-  texas: "TX",
-  utah: "UT",
-  vermont: "VT",
-  virginia: "VA",
-  washington: "WA",
-  "west virginia": "WV",
-  wisconsin: "WI",
-  wyoming: "WY",
-  "district of columbia": "DC",
-};
-
-const normalizeCode = (value?: string | null) =>
-  value ? value.trim().toUpperCase() : undefined;
-
-const normalizeState = (value: string) => {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-  if (trimmed.length === 2) {
-    return trimmed.toUpperCase();
-  }
-  return US_STATE_NAME_TO_CODE[trimmed.toLowerCase()];
-};
-
-const normalizeGateOptions = (options: LocationGateOptions) => {
-  const allowedCountries = new Set(
-    (options.allowedCountries ?? [])
-      .map((code) => normalizeCode(code))
-      .filter((code): code is string => !!code),
-  );
-  const allowedRegions = new Set(
-    (options.allowedRegions ?? [])
-      .map((code) => normalizeCode(code))
-      .filter((code): code is string => !!code),
-  );
-  const allowedStates = new Set(
-    (options.allowedStates ?? [])
-      .map((code) => normalizeState(code))
-      .filter((code): code is string => !!code),
-  );
-
-  return { allowedCountries, allowedRegions, allowedStates };
-};
-
 export async function reverseGeocodeLocation(
   coords: LocationCoordinates,
 ): Promise<GeocodeResult> {
@@ -125,6 +37,39 @@ export async function reverseGeocodeLocation(
   };
 }
 
+/**
+ * Splits a list of location codes into country codes and region codes.
+ * Country codes are 2-letter (e.g. "US"), region codes contain a dash (e.g. "US-HI").
+ */
+function splitCodes(codes: string[]): {
+  countries: Set<string>;
+  regions: Set<string>;
+} {
+  const countries = new Set<string>();
+  const regions = new Set<string>();
+  for (const raw of codes) {
+    const code = raw.trim().toUpperCase();
+    if (!code) continue;
+    if (code.includes("-")) {
+      regions.add(code);
+    } else {
+      countries.add(code);
+    }
+  }
+  return { countries, regions };
+}
+
+function matchesLocation(
+  countries: Set<string>,
+  regions: Set<string>,
+  countryCode: string | undefined,
+  regionCode: string | undefined,
+): boolean {
+  if (countryCode && countries.has(countryCode)) return true;
+  if (regionCode && regions.has(regionCode)) return true;
+  return false;
+}
+
 export function evaluateLocationGate({
   gate,
   geo,
@@ -132,57 +77,38 @@ export function evaluateLocationGate({
   gate: LocationGateOptions;
   geo: GeocodeResult;
 }) {
-  const { allowedCountries, allowedRegions, allowedStates } =
-    normalizeGateOptions(gate);
+  const allowed = splitCodes(gate.allowed ?? []);
+  const blocked = splitCodes(gate.blocked ?? []);
 
+  const hasAllowlist = allowed.countries.size > 0 || allowed.regions.size > 0;
+  const hasBlocklist = blocked.countries.size > 0 || blocked.regions.size > 0;
+
+  if (!hasAllowlist && !hasBlocklist) {
+    return { allowed: true };
+  }
+
+  const countryCode = geo.countryCode?.trim().toUpperCase();
+  const regionCode = geo.regionCode?.trim().toUpperCase();
+
+  // Blocked always wins
   if (
-    allowedCountries.size === 0 &&
-    allowedRegions.size === 0 &&
-    allowedStates.size === 0
+    hasBlocklist &&
+    matchesLocation(blocked.countries, blocked.regions, countryCode, regionCode)
+  ) {
+    return { allowed: false, reason: "Location not eligible" };
+  }
+
+  // If only a blocklist is set, allow everything not blocked
+  if (!hasAllowlist) {
+    return { allowed: true };
+  }
+
+  // Check allowlist — allow country match even if specific regions are listed
+  if (
+    matchesLocation(allowed.countries, allowed.regions, countryCode, regionCode)
   ) {
     return { allowed: true };
   }
 
-  const countryCode = normalizeCode(geo.countryCode);
-  const regionCode = normalizeCode(geo.regionCode);
-  const regionName = geo.regionName;
-
-  if (allowedRegions.size > 0 || allowedStates.size > 0) {
-    let allowed = false;
-    let stateCode: string | undefined;
-
-    if (regionCode) {
-      if (allowedRegions.has(regionCode)) {
-        allowed = true;
-      } else {
-        const parts = regionCode.split("-");
-        if (parts.length > 1) {
-          stateCode = parts[parts.length - 1];
-        }
-      }
-    }
-
-    if (!allowed && regionName) {
-      stateCode = stateCode ?? normalizeState(regionName);
-    }
-
-    if (!allowed && stateCode && allowedStates.has(stateCode)) {
-      allowed = true;
-    }
-
-    return {
-      allowed,
-      reason: allowed ? undefined : "Location not eligible",
-    };
-  }
-
-  if (allowedCountries.size > 0) {
-    const allowed = !!countryCode && allowedCountries.has(countryCode);
-    return {
-      allowed,
-      reason: allowed ? undefined : "Location not eligible",
-    };
-  }
-
-  return { allowed: true };
+  return { allowed: false, reason: "Location not eligible" };
 }

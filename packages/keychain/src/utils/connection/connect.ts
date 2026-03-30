@@ -213,9 +213,8 @@ export function connect({
         const locationGate = getLocationGate?.();
         const hasLocationGate =
           !!locationGate &&
-          ((locationGate.allowedCountries?.length ?? 0) > 0 ||
-            (locationGate.allowedRegions?.length ?? 0) > 0 ||
-            (locationGate.allowedStates?.length ?? 0) > 0);
+          ((locationGate.allowed?.length ?? 0) > 0 ||
+            (locationGate.blocked?.length ?? 0) > 0);
 
         const destination = hasLocationGate
           ? createLocationGateUrl({

@@ -119,12 +119,10 @@ export type LocationPromptReply = {
 };
 
 export type LocationGateOptions = {
-  /** ISO 3166-1 alpha-2 country codes, e.g. "US", "CA". */
-  allowedCountries?: string[];
-  /** ISO 3166-2 region codes, e.g. "US-CA". */
-  allowedRegions?: string[];
-  /** US state abbreviations or full names, e.g. "CA" or "California". */
-  allowedStates?: string[];
+  /** Locations to allow. Country codes ("US") or region codes ("US-CA", "DE-BY"). */
+  allowed?: string[];
+  /** Locations to block. Country codes ("SG") or region codes ("US-HI"). Blocked wins over allowed. */
+  blocked?: string[];
 };
 
 export type IFrames = {
