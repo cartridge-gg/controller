@@ -65,4 +65,4 @@ export {
 } from "./eth-signing";
 
 // IP utilities
-export { getClientIp } from "./ip";
+export { getIpLocation } from "./ip";

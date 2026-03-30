@@ -1,7 +1,4 @@
-import type {
-  LocationCoordinates,
-  LocationGateOptions,
-} from "@cartridge/controller";
+import type { LocationGateOptions } from "@cartridge/controller";
 
 /**
  * Returns true if the location gate has any configured rules (allowed or blocked).
@@ -13,39 +10,10 @@ export function hasConfiguredLocationGate(gate?: LocationGateOptions): boolean {
   );
 }
 
-type GeocodeResult = {
+type GeoLocation = {
   countryCode?: string | null;
   regionCode?: string | null;
-  regionName?: string | null;
 };
-
-export async function reverseGeocodeLocation(
-  coords: LocationCoordinates,
-): Promise<GeocodeResult> {
-  const url = new URL(
-    "https://api.bigdatacloud.net/data/reverse-geocode-client",
-  );
-  url.searchParams.set("latitude", coords.latitude.toString());
-  url.searchParams.set("longitude", coords.longitude.toString());
-  url.searchParams.set("localityLanguage", "en");
-
-  const response = await fetch(url.toString());
-  if (!response.ok) {
-    throw new Error("Failed to resolve location");
-  }
-
-  const data = (await response.json()) as {
-    countryCode?: string;
-    principalSubdivision?: string;
-    principalSubdivisionCode?: string;
-  };
-
-  return {
-    countryCode: data.countryCode ?? null,
-    regionCode: data.principalSubdivisionCode ?? null,
-    regionName: data.principalSubdivision ?? null,
-  };
-}
 
 /**
  * Splits a list of location codes into country codes and region codes.
@@ -85,7 +53,7 @@ export function evaluateLocationGate({
   geo,
 }: {
   gate: LocationGateOptions;
-  geo: GeocodeResult;
+  geo: GeoLocation;
 }) {
   const allowed = splitCodes(gate.allowed ?? []);
   const blocked = splitCodes(gate.blocked ?? []);

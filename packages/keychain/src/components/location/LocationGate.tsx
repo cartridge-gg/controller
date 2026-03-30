@@ -8,46 +8,29 @@ import {
   LayoutFooter,
 } from "@cartridge/ui";
 import { LocationGateOptions, ResponseCodes } from "@cartridge/controller";
-import { loadConfig } from "@cartridge/presets";
+import { defaultTheme, loadConfig } from "@cartridge/presets";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
-import {
-  evaluateLocationGate,
-  reverseGeocodeLocation,
-} from "@/utils/location-gate";
-import { getIpCountry, getIpGeo } from "@/utils/ip";
+import { evaluateLocationGate } from "@/utils/location-gate";
+import { getIpLocation } from "@/utils/ip";
 import { USMap } from "./USMap";
 
-type GateState = "idle" | "requesting" | "blocked";
+type GateState = "checking" | "blocked" | "error";
 
-const CANCEL_RESPONSE = {
-  code: ResponseCodes.CANCELED,
-  message: "Canceled",
-};
-
-const ERROR_RESPONSE = {
-  code: ResponseCodes.ERROR,
-  message: "This game is not available in your region.",
-};
+function errorResponse(gameName: string) {
+  return {
+    code: ResponseCodes.ERROR,
+    message: `${gameName} is not available in your region.`,
+  };
+}
 
 export function LocationGate() {
-  const { setShowClose } = useNavigation();
-  const { closeModal, setLocationGateVerified } = useConnection();
+  const { closeModal, setLocationGateVerified, theme } = useConnection();
   const { search } = useLocation();
   const navigate = useNavigate();
-  const [state, setState] = useState<GateState>("idle");
+  const [state, setState] = useState<GateState>("checking");
   const [error, setError] = useState<string | null>(null);
-  const [isUS, setIsUS] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    setShowClose(true);
-  }, [setShowClose]);
-
-  useEffect(() => {
-    getIpCountry().then((country) => setIsUS(country === "US"));
-  }, []);
 
   const [presetGate, setPresetGate] = useState<LocationGateOptions | null>(
     null,
@@ -114,135 +97,68 @@ export function LocationGate() {
     [connectId, closeModal],
   );
 
-  const handleCancel = useCallback(() => {
-    resolveConnect(CANCEL_RESPONSE);
-  }, [resolveConnect]);
+  // Auto-check IP location on mount once gate is available
+  useEffect(() => {
+    if (!gate || !returnTo) return;
 
-  const handleContinue = useCallback(() => {
-    if (!gate || !returnTo) {
-      setError("Location requirements are missing.");
-      return;
-    }
+    let cancelled = false;
 
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setError("Location services are not available in this browser.");
-      return;
-    }
+    (async () => {
+      try {
+        const geo = await getIpLocation();
+        if (cancelled) return;
 
-    setError(null);
-    setState("requesting");
+        const result = evaluateLocationGate({ gate, geo });
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { coords, timestamp } = position;
-          const geo = await reverseGeocodeLocation({
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-            accuracy: coords.accuracy,
-            altitude: coords.altitude,
-            altitudeAccuracy: coords.altitudeAccuracy,
-            heading: coords.heading,
-            speed: coords.speed,
-            timestamp,
-          });
-
-          const gateResult = evaluateLocationGate({ gate, geo });
-
-          if (!gateResult.allowed) {
-            setState("blocked");
-            return;
-          }
-
+        if (result.allowed) {
           setLocationGateVerified(true);
           navigate(returnTo, { replace: true });
-        } catch (geoError) {
-          console.error("Location gate failed:", geoError);
-          setState("idle");
-          setError("Unable to verify location.");
+        } else {
+          setState("blocked");
         }
-      },
-      async (geoError) => {
-        // Browser denied geolocation (common in cross-origin iframes on
-        // Brave, mobile WebViews, etc.) — fall back to IP-based location.
-        if (geoError?.code === 1) {
-          try {
-            const ipGeo = await getIpGeo();
-            if (!ipGeo.countryCode) {
-              setState("idle");
-              setError("Unable to verify location.");
-              return;
-            }
+      } catch (err) {
+        if (cancelled) return;
+        console.error("Location gate check failed:", err);
+        setError("Unable to verify location.");
+        setState("error");
+      }
+    })();
 
-            const gateResult = evaluateLocationGate({
-              gate: gate!,
-              geo: {
-                countryCode: ipGeo.countryCode,
-                regionCode: ipGeo.regionCode,
-              },
-            });
+    return () => {
+      cancelled = true;
+    };
+  }, [gate, returnTo, navigate, setLocationGateVerified]);
 
-            if (!gateResult.allowed) {
-              setState("blocked");
-              return;
-            }
-
-            setLocationGateVerified(true);
-            navigate(returnTo!, { replace: true });
-            return;
-          } catch {
-            setState("idle");
-            setError("Unable to verify location.");
-            return;
-          }
-        }
-
-        setState("idle");
-        setError(geoError?.message || "Unable to verify location.");
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60000,
-      },
-    );
-  }, [gate, navigate, returnTo, setLocationGateVerified]);
+  const gameName =
+    theme.name && theme.name !== defaultTheme.name ? theme.name : "This game";
 
   const blockedUSStates = useMemo(() => {
     if (!gate?.blocked) return [];
     return gate.blocked.filter((code) => code.toUpperCase().startsWith("US-"));
   }, [gate]);
 
-  // Show map if there are blocked US states and we haven't confirmed the user is outside the US.
-  // isUS: null = still loading/failed, true = confirmed US, false = confirmed non-US
-  const showMap = blockedUSStates.length > 0 && isUS !== false;
-
-  if (!gate) {
+  // Show nothing while checking
+  if (state === "checking") {
     return null;
   }
 
-  if (state === "blocked") {
+  if (state === "error") {
     return (
       <>
         <HeaderInner
-          title="Region Restricted"
+          title="Location Check"
           icon={<GlobeIcon variant="solid" size="lg" />}
         />
         <LayoutContent className="p-4">
-          {showMap && (
-            <div className="mb-3">
-              <USMap blockedStates={blockedUSStates} />
-            </div>
+          {error && (
+            <ErrorAlert title="Error" description={error} isExpanded={true} />
           )}
-          <p className="text-sm text-foreground-300 leading-relaxed">
-            This game is not available in your region.
-          </p>
         </LayoutContent>
         <LayoutFooter>
           <Button
             variant="secondary"
             className="w-full"
-            onClick={() => resolveConnect(ERROR_RESPONSE)}
+            onClick={() => resolveConnect(errorResponse(gameName))}
           >
             CLOSE
           </Button>
@@ -254,34 +170,26 @@ export function LocationGate() {
   return (
     <>
       <HeaderInner
-        title="Location Verification"
+        title="Region Restricted"
         icon={<GlobeIcon variant="solid" size="lg" />}
       />
-      <LayoutContent className="p-4 gap-3">
-        {showMap && <USMap blockedStates={blockedUSStates} />}
+      <LayoutContent className="p-4">
+        {blockedUSStates.length > 0 && (
+          <div className="mb-3">
+            <USMap blockedStates={blockedUSStates} />
+          </div>
+        )}
         <p className="text-sm text-foreground-300 leading-relaxed">
-          This game needs your location to confirm availability in your region.
+          {gameName} is not available in your region.
         </p>
       </LayoutContent>
       <LayoutFooter>
-        {error && (
-          <ErrorAlert title="Error" description={error} isExpanded={true} />
-        )}
-        <Button
-          variant="primary"
-          className="w-full"
-          onClick={handleContinue}
-          isLoading={state === "requesting"}
-        >
-          CONTINUE
-        </Button>
         <Button
           variant="secondary"
           className="w-full"
-          onClick={handleCancel}
-          disabled={state === "requesting"}
+          onClick={() => resolveConnect(errorResponse(gameName))}
         >
-          CANCEL
+          CLOSE
         </Button>
       </LayoutFooter>
     </>
