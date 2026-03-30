@@ -17,7 +17,7 @@ import {
   evaluateLocationGate,
   reverseGeocodeLocation,
 } from "@/utils/location-gate";
-import { getIpCountry } from "@/utils/ip";
+import { getIpCountry, getIpGeo } from "@/utils/ip";
 import { USMap } from "./USMap";
 
 type GateState = "idle" | "requesting" | "blocked";
@@ -34,7 +34,7 @@ const ERROR_RESPONSE = {
 
 export function LocationGate() {
   const { setShowClose } = useNavigation();
-  const { closeModal } = useConnection();
+  const { closeModal, setLocationGateVerified } = useConnection();
   const { search } = useLocation();
   const navigate = useNavigate();
   const [state, setState] = useState<GateState>("idle");
@@ -154,6 +154,7 @@ export function LocationGate() {
             return;
           }
 
+          setLocationGateVerified(true);
           navigate(returnTo, { replace: true });
         } catch (geoError) {
           console.error("Location gate failed:", geoError);
@@ -161,12 +162,42 @@ export function LocationGate() {
           setError("Unable to verify location.");
         }
       },
-      (geoError) => {
-        setState("idle");
+      async (geoError) => {
+        // Browser denied geolocation (common in cross-origin iframes on
+        // Brave, mobile WebViews, etc.) — fall back to IP-based location.
         if (geoError?.code === 1) {
-          setError("Location permission was denied.");
-          return;
+          try {
+            const ipGeo = await getIpGeo();
+            if (!ipGeo.countryCode) {
+              setState("idle");
+              setError("Unable to verify location.");
+              return;
+            }
+
+            const gateResult = evaluateLocationGate({
+              gate: gate!,
+              geo: {
+                countryCode: ipGeo.countryCode,
+                regionCode: ipGeo.regionCode,
+              },
+            });
+
+            if (!gateResult.allowed) {
+              setState("blocked");
+              return;
+            }
+
+            setLocationGateVerified(true);
+            navigate(returnTo!, { replace: true });
+            return;
+          } catch {
+            setState("idle");
+            setError("Unable to verify location.");
+            return;
+          }
         }
+
+        setState("idle");
         setError(geoError?.message || "Unable to verify location.");
       },
       {
@@ -175,7 +206,7 @@ export function LocationGate() {
         maximumAge: 60000,
       },
     );
-  }, [gate, navigate, returnTo]);
+  }, [gate, navigate, returnTo, setLocationGateVerified]);
 
   const blockedUSStates = useMemo(() => {
     if (!gate?.blocked) return [];

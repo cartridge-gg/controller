@@ -3,6 +3,16 @@ import type {
   LocationGateOptions,
 } from "@cartridge/controller";
 
+/**
+ * Returns true if the location gate has any configured rules (allowed or blocked).
+ */
+export function hasConfiguredLocationGate(gate?: LocationGateOptions): boolean {
+  return (
+    !!gate &&
+    ((gate.allowed?.length ?? 0) > 0 || (gate.blocked?.length ?? 0) > 0)
+  );
+}
+
 type GeocodeResult = {
   countryCode?: string | null;
   regionCode?: string | null;

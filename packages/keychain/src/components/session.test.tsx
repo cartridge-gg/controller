@@ -101,6 +101,9 @@ describe("Session", () => {
       externalSendTransaction: vi.fn().mockResolvedValue({} as never),
       externalGetBalance: vi.fn().mockResolvedValue({} as never),
       externalWaitForTransaction: vi.fn().mockResolvedValue({} as never),
+      locationGate: undefined,
+      locationGateVerified: false,
+      setLocationGateVerified: vi.fn(),
     };
 
     render(

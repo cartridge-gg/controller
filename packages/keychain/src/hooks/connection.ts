@@ -312,6 +312,8 @@ export function useConnectionValue() {
     null,
   );
   const locationGateRef = useRef<LocationGateOptions | undefined>();
+  const [locationGateVerified, setLocationGateVerified] =
+    useState<boolean>(false);
   const [theme, setTheme] = useState<VerifiableControllerTheme>({
     verified: true,
     ...defaultTheme,
@@ -797,6 +799,7 @@ export function useConnectionValue() {
         getParent: () => parentRef.current,
         getConnectionState: () => connectionStateRef.current,
         getLocationGate: () => locationGateRef.current,
+        resetLocationGateVerified: () => setLocationGateVerified(false),
       });
 
       connection.promise
@@ -1010,6 +1013,9 @@ export function useConnectionValue() {
     externalSendTransaction,
     externalGetBalance,
     externalWaitForTransaction,
+    locationGate: locationGateRef.current,
+    locationGateVerified,
+    setLocationGateVerified,
   };
 }
 

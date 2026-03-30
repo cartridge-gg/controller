@@ -148,6 +148,9 @@ const baseConnection = {
   externalSendTransaction: vi.fn(),
   externalGetBalance: vi.fn(),
   externalWaitForTransaction: vi.fn(),
+  locationGate: undefined,
+  locationGateVerified: false,
+  setLocationGateVerified: vi.fn(),
 };
 
 describe("Provider", () => {

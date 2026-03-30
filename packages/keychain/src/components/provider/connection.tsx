@@ -5,6 +5,7 @@ import {
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
+  LocationGateOptions,
 } from "@cartridge/controller";
 import { ControllerTheme } from "@cartridge/ui";
 import { createContext } from "react";
@@ -73,6 +74,9 @@ export type ConnectionContextValue = {
     txHash: string,
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
+  locationGate?: LocationGateOptions;
+  locationGateVerified: boolean;
+  setLocationGateVerified: (verified: boolean) => void;
 };
 
 export type VerifiableControllerTheme = ControllerTheme & {

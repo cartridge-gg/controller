@@ -159,6 +159,16 @@ function Authentication() {
     );
   }
 
+  // Location gate must render even without a controller so that new users
+  // verify their location before the connect flow proceeds.
+  if (!controller && pathname === "/location-gate") {
+    return (
+      <Layout>
+        <Outlet />
+      </Layout>
+    );
+  }
+
   // No controller, show CreateController
   if (!controller) {
     // Extract signers from URL if present (for connect flow)
