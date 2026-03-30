@@ -226,12 +226,8 @@ export function LocationGate() {
         title="Location Verification"
         icon={<GlobeIcon variant="solid" size="lg" />}
       />
-      <LayoutContent className="p-4">
-        {showMap && (
-          <div className="mb-3">
-            <USMap blockedStates={blockedUSStates} />
-          </div>
-        )}
+      <LayoutContent className="p-4 gap-3">
+        {showMap && <USMap blockedStates={blockedUSStates} />}
         <p className="text-sm text-foreground-300 leading-relaxed">
           This game needs your location to confirm availability in your region.
         </p>
