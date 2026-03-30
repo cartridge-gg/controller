@@ -59,6 +59,9 @@ export const defaultMockConnection: ConnectionContextValue = {
   externalGetBalance: vi.fn(),
   externalWaitForTransaction: vi.fn(),
   controllerVersion: new SemVer("1.0.0"),
+  locationGate: undefined,
+  locationGateVerified: false,
+  setLocationGateVerified: vi.fn(),
 };
 
 export function createMockConnection(

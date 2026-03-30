@@ -31,7 +31,7 @@ const ERROR_RESPONSE = {
 
 export function LocationGate() {
   const { setShowClose } = useNavigation();
-  const { closeModal } = useConnection();
+  const { closeModal, setLocationGateVerified } = useConnection();
   const { search } = useLocation();
   const navigate = useNavigate();
   const [state, setState] = useState<GateState>("idle");
@@ -123,6 +123,7 @@ export function LocationGate() {
             return;
           }
 
+          setLocationGateVerified(true);
           navigate(returnTo, { replace: true });
         } catch (geoError) {
           console.error("Location gate failed:", geoError);
@@ -144,7 +145,7 @@ export function LocationGate() {
         maximumAge: 60000,
       },
     );
-  }, [gate, navigate, returnTo, resolveConnect]);
+  }, [gate, navigate, returnTo, resolveConnect, setLocationGateVerified]);
 
   if (!gate) {
     return null;

@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
+import { hasConfiguredLocationGate } from "@/utils/location-gate";
+import { createLocationGateUrl } from "@/utils/connection/location-gate";
 import { CreateSession } from "./connect/CreateSession";
 import {
   createVerifiedSession,
@@ -49,7 +52,10 @@ export function ConnectRoute() {
     preset,
     policiesStr,
     rpcUrl,
+    locationGate,
+    locationGateVerified,
   } = useConnection();
+  const navigate = useNavigate();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
   const [isSessionCreating, setIsSessionCreating] = useState(false);
   const [sessionError, setSessionError] = useState<Error>();
@@ -272,6 +278,18 @@ export function ConnectRoute() {
       return;
     }
 
+    // If location gate is configured but not yet verified, redirect to it
+    // before allowing any auto-connect. This catches the race condition where
+    // connect() was called before the preset config loaded.
+    if (hasConfiguredLocationGate(locationGate) && !locationGateVerified) {
+      const currentUrl = window.location.pathname + window.location.search;
+      navigate(
+        createLocationGateUrl({ returnTo: currentUrl, gate: locationGate! }),
+        { replace: true },
+      );
+      return;
+    }
+
     if (requiresWebauthnPopup && policies) {
       if (hasRequestedSession === undefined) {
         return;
@@ -390,6 +408,9 @@ export function ConnectRoute() {
     setController,
     popupParams,
     clearConnectParams,
+    locationGate,
+    locationGateVerified,
+    navigate,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading

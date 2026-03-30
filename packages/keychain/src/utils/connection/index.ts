@@ -41,6 +41,7 @@ export function connectToController<
   getParent,
   getConnectionState,
   getLocationGate,
+  resetLocationGateVerified,
 }: {
   setRpcUrl: (url: string) => void;
   setController: (controller?: Controller) => void;
@@ -53,17 +54,20 @@ export function connectToController<
   getParent: () => ParentMethods | undefined;
   getConnectionState: () => HeadlessConnectionState;
   getLocationGate?: () => LocationGateOptions | undefined;
+  resetLocationGateVerified?: () => void;
 }) {
   const uiConnect = connect({
     navigate,
     setRpcUrl,
     getLocationGate,
+    resetLocationGateVerified,
   });
 
   const headlessConnectImpl = headlessConnect({
     setController,
     getParent,
     getConnectionState,
+    getLocationGate,
   });
 
   return connectToParent<ParentMethods>({

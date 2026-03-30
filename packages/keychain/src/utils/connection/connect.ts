@@ -139,6 +139,7 @@ export function connect({
   navigate,
   setRpcUrl,
   getLocationGate,
+  resetLocationGateVerified,
 }: {
   navigate: (
     to: string | number,
@@ -146,6 +147,7 @@ export function connect({
   ) => void;
   setRpcUrl: (url: string) => void;
   getLocationGate?: () => LocationGateOptions | undefined;
+  resetLocationGateVerified?: () => void;
 }) {
   return () => {
     // Support both old and new signatures for backwards compatibility
@@ -197,6 +199,9 @@ export function connect({
       if (options.signupOptions && options.signupOptions.length === 0) {
         throw new Error("If defined, signup options cannot be empty");
       }
+
+      // Reset location gate verification for each new connect call
+      resetLocationGateVerified?.();
 
       return new Promise<ConnectReply>((resolve, reject) => {
         const { url } = createConnectUrl(options.signupOptions, {

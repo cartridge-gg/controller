@@ -39,6 +39,7 @@ import {
   createVerifiedSession,
   requiresSessionApproval,
 } from "./session-creation";
+import { hasConfiguredLocationGate } from "@/utils/location-gate";
 
 export type HeadlessConnectionState = {
   origin?: string;
@@ -66,6 +67,9 @@ type HeadlessConnectDependencies<Parent extends HeadlessConnectParent> = {
   setController: (controller?: Controller) => void;
   getParent: () => Parent | undefined;
   getConnectionState: () => HeadlessConnectionState;
+  getLocationGate?: () =>
+    | import("@cartridge/controller").LocationGateOptions
+    | undefined;
 };
 
 type ExistingController = NonNullable<ControllerQuery["controller"]>;
@@ -644,6 +648,7 @@ export const headlessConnect =
     setController,
     getParent,
     getConnectionState,
+    getLocationGate,
   }: HeadlessConnectDependencies<Parent>) =>
   (origin: string) =>
   async (options: HeadlessConnectOptions): Promise<HeadlessConnectReply> => {
@@ -658,6 +663,16 @@ export const headlessConnect =
       return {
         code: ResponseCodes.ERROR,
         message: "A headless approval is already pending",
+      };
+    }
+
+    // Headless connect cannot show the location gate UI, so reject when
+    // a location gate is configured.
+    if (hasConfiguredLocationGate(getLocationGate?.())) {
+      return {
+        code: ResponseCodes.ERROR,
+        message:
+          "Location verification is required. Use the UI connect flow instead.",
       };
     }
 

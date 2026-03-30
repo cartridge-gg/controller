@@ -41,6 +41,8 @@ const defaultConnection = {
     name: "TestApp",
     verified: true,
   },
+  locationGate: undefined,
+  locationGateVerified: false,
 };
 
 const mockUseConnection = vi.fn();

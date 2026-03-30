@@ -45,6 +45,7 @@ import {
   canAutoCreateSession,
   createVerifiedSession,
 } from "@/utils/connection/session-creation";
+import { hasConfiguredLocationGate } from "@/utils/location-gate";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -232,7 +233,16 @@ export function useCreateController({
     closeModal,
     isConfigLoading,
     isPoliciesResolved,
+    locationGate,
+    locationGateVerified,
   } = useConnection();
+
+  // When location gate is configured and not yet verified, skip auto-session
+  // creation and connect resolution. The natural re-render will show LocationGate
+  // (since the URL is still /location-gate), and after verification LocationGate
+  // navigates to /connect where ConnectRoute handles session + resolution.
+  const locationGatePending =
+    hasConfiguredLocationGate(locationGate) && !locationGateVerified;
 
   // Import route params and completion for connection resolution
   const params = useMemo(() => {
@@ -344,6 +354,14 @@ export function useCreateController({
         //   return; // Don't continue with session creation
         // }
 
+        // If location gate is pending, skip session creation and connect
+        // resolution. The re-render will show LocationGate at the current URL;
+        // after verification it navigates to /connect where ConnectRoute handles
+        // session creation and resolution.
+        if (locationGatePending) {
+          return;
+        }
+
         // Normal embedded flow: handle session creation for auto-close cases
         if (shouldAutoCreateSession) {
           await createSession({
@@ -366,6 +384,7 @@ export function useCreateController({
       setController,
       origin,
       policies,
+      locationGatePending,
       handleCompletion,
       params,
       closeModal,
@@ -391,13 +410,15 @@ export function useCreateController({
           const webauthnResult = await signupWithWebauthn(username);
 
           if (webauthnResult?.completedInPopup) {
-            await completePopupConnect({
-              controller: webauthnResult.controller,
-              params,
-              handleCompletion,
-              closeModal,
-              searchParams,
-            });
+            if (!locationGatePending) {
+              await completePopupConnect({
+                controller: webauthnResult.controller,
+                params,
+                handleCompletion,
+                closeModal,
+                searchParams,
+              });
+            }
             return;
           }
 
@@ -561,6 +582,7 @@ export function useCreateController({
       smsAuth,
       setOverlay,
       finishSignup,
+      locationGatePending,
       params,
       handleCompletion,
       closeModal,
@@ -659,6 +681,14 @@ export function useCreateController({
       //   return; // Don't continue with session creation
       // }
 
+      // If location gate is pending, skip session creation and connect
+      // resolution. The re-render will show LocationGate at the current URL;
+      // after verification it navigates to /connect where ConnectRoute handles
+      // session creation and resolution.
+      if (locationGatePending) {
+        return;
+      }
+
       // Normal embedded flow: handle session creation for auto-close cases
       if (shouldAutoCreateSession) {
         await createSession({
@@ -680,6 +710,7 @@ export function useCreateController({
       origin,
       setController,
       policies,
+      locationGatePending,
       handleCompletion,
       params,
       closeModal,
@@ -733,17 +764,19 @@ export function useCreateController({
           }
 
           if (loginController.completedInPopup) {
-            await completePopupConnect({
-              controller: loginController.controller,
-              params,
-              handleCompletion,
-              closeModal,
-              searchParams,
-            });
+            if (!locationGatePending) {
+              await completePopupConnect({
+                controller: loginController.controller,
+                params,
+                handleCompletion,
+                closeModal,
+                searchParams,
+              });
+            }
             return;
           }
 
-          if (shouldAutoCreateSession) {
+          if (shouldAutoCreateSession && !locationGatePending) {
             await createSession({
               controller: loginController.controller,
               origin,
@@ -906,6 +939,7 @@ export function useCreateController({
       origin,
       rpcUrl,
       policies,
+      locationGatePending,
       params,
       handleCompletion,
       closeModal,
