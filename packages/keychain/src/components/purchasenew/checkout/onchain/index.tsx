@@ -331,7 +331,7 @@ export function OnchainCheckout() {
 
       <LayoutContent>
         <Receiving
-          title={`Receiving ${quantity > 1 ? `(${quantity})` : ""}`}
+          title={`You receive ${quantity > 1 ? `(${quantity})` : ""}`}
           items={purchaseItems}
         />
       </LayoutContent>

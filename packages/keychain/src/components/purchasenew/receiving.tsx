@@ -4,6 +4,7 @@ import {
   CardHeader,
   CardListContent,
   CardTitle,
+  cn,
   Spinner,
   Thumbnail,
 } from "@cartridge/ui";
@@ -23,9 +24,15 @@ export function Receiving({
   isLoading,
   showPrice = true,
 }: ReceivingProps) {
+  const rounded = items.length === 1;
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between h-10">
+      <CardHeader
+        className={cn(
+          "flex flex-row items-center justify-between h-10",
+          "bg-transparent px-0",
+        )}
+      >
         <CardTitle className="normal-case font-semibold text-xs">
           {title ?? "Balance"}
         </CardTitle>
@@ -56,7 +63,7 @@ export function Receiving({
                 subTitle={item.value ? `${item.value} CREDITS` : "CREDITS"}
                 topic={formatPrice(item.value, showPrice)}
                 variant="default"
-                className="rounded-none"
+                className={rounded ? "rounded-lg" : "rounded-none"}
               />
             );
           })}
@@ -75,7 +82,7 @@ export function Receiving({
                 }
                 topic={formatPrice(item.value, showPrice)}
                 variant="default"
-                className="rounded-none"
+                className={rounded ? "rounded-lg" : "rounded-none"}
               />
             );
           })}
@@ -94,7 +101,7 @@ export function Receiving({
                 subTitle={item.subtitle || "NFT"}
                 topic=""
                 variant="default"
-                className="rounded-none"
+                className={rounded ? "rounded-lg" : "rounded-none"}
               />
             );
           })}
