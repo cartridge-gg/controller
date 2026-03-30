@@ -50,6 +50,7 @@ export function OnchainCheckout() {
     isFetchingConversion,
     isSendingDeposit,
     purchaseItems,
+    purchaseDescription,
     quantity,
     selectedWallet,
     walletAddress,
@@ -125,7 +126,7 @@ export function OnchainCheckout() {
   const wallet = getWallet(selectedWallet?.type || "controller");
 
   const isFree = useMemo(() => {
-    return quote?.totalCost === BigInt(0);
+    return quote ? quote.totalCost === BigInt(0) : undefined;
   }, [quote]);
 
   const isStripeStarterpackSupported = useMemo(() => {
@@ -331,8 +332,10 @@ export function OnchainCheckout() {
 
       <LayoutContent>
         <Receiving
-          title={`Receiving ${quantity > 1 ? `(${quantity})` : ""}`}
+          title={`You Receive ${quantity > 1 ? `(${quantity})` : ""}`}
           items={purchaseItems}
+          isFree={isFree}
+          description={purchaseDescription}
         />
       </LayoutContent>
 

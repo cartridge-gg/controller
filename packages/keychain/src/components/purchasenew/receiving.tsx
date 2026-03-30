@@ -4,6 +4,7 @@ import {
   CardHeader,
   CardListContent,
   CardTitle,
+  cn,
   Spinner,
   Thumbnail,
 } from "@cartridge/ui";
@@ -22,11 +23,19 @@ export function Receiving({
   showTotal,
   isLoading,
   showPrice = true,
+  isFree,
+  description,
 }: ReceivingProps) {
+  const rounded = items.length === 1;
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between h-10">
-        <CardTitle className="normal-case font-semibold text-xs">
+      <CardHeader
+        className={cn(
+          "flex flex-row items-center justify-between h-10",
+          "bg-transparent px-0",
+        )}
+      >
+        <CardTitle className="normal-case font-normal text-xs">
           {title ?? "Balance"}
         </CardTitle>
         {isLoading && <Spinner size="sm" />}
@@ -56,7 +65,11 @@ export function Receiving({
                 subTitle={item.value ? `${item.value} CREDITS` : "CREDITS"}
                 topic={formatPrice(item.value, showPrice)}
                 variant="default"
-                className="rounded-none"
+                className={cn(
+                  "pointer-events-none",
+                  rounded ? "rounded-lg" : "rounded-none",
+                )}
+                badge={isFree === true ? "FREE" : undefined}
               />
             );
           })}
@@ -75,7 +88,11 @@ export function Receiving({
                 }
                 topic={formatPrice(item.value, showPrice)}
                 variant="default"
-                className="rounded-none"
+                className={cn(
+                  "pointer-events-none",
+                  rounded ? "rounded-lg" : "rounded-none",
+                )}
+                badge={isFree === true ? "FREE" : undefined}
               />
             );
           })}
@@ -94,10 +111,19 @@ export function Receiving({
                 subTitle={item.subtitle || "NFT"}
                 topic=""
                 variant="default"
-                className="rounded-none"
+                className={cn(
+                  "pointer-events-none",
+                  rounded ? "rounded-lg" : "rounded-none",
+                )}
+                badge={isFree === true ? "FREE" : undefined}
               />
             );
           })}
+        {description && (
+          <div className="text-xs text-foreground-300 font-normal h-9 w-full border border-background-200 rounded-sm mt-4 p-2.5">
+            {description}
+          </div>
+        )}
       </CardListContent>
     </Card>
   );

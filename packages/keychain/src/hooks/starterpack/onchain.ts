@@ -319,7 +319,7 @@ export const useOnchainStarterpack = ({
     isQuoteLoading,
     error,
     metadata,
-    quote,
+    quote: isQuoteLoading ? null : quote,
     supply,
     refetchSupply,
   };

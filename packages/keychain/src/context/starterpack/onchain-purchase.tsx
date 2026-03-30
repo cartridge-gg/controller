@@ -41,6 +41,7 @@ export type { TokenOption } from "@/hooks/starterpack";
 export interface OnchainPurchaseContextType {
   // Purchase items
   purchaseItems: Item[];
+  purchaseDescription: string | undefined;
 
   // Quantity management
   quantity: number;
@@ -141,6 +142,11 @@ export const OnchainPurchaseProvider = ({
   // Purchase items and USD amount
   const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
   const [usdAmount, setUsdAmount] = useState(0);
+
+  // Bundle/Starterpack description
+  const [purchaseDescription, setPurchaseDescription] = useState<
+    string | undefined
+  >(undefined);
 
   // Conditional bundles / social claim
   const [issueSignature, setIssueSignature] = useState<string[] | undefined>(
@@ -257,6 +263,7 @@ export const OnchainPurchaseProvider = ({
     resetTokenSelection();
     resetQuantity();
     setPurchaseItems([]);
+    setPurchaseDescription(undefined);
     setIssueSignature(undefined);
   }, [bundleId, starterpackId, resetTokenSelection, resetQuantity]);
 
@@ -268,6 +275,7 @@ export const OnchainPurchaseProvider = ({
         ? usdcToUsd(starterpackDetails.quote.totalCost)
         : 0;
       setUsdAmount(totalUsd);
+      setPurchaseDescription(starterpackDetails.description);
     }
   }, [starterpackDetails]);
 
@@ -590,6 +598,7 @@ export const OnchainPurchaseProvider = ({
 
   const contextValue: OnchainPurchaseContextType = {
     purchaseItems,
+    purchaseDescription,
     quantity,
     incrementQuantity,
     decrementQuantity,

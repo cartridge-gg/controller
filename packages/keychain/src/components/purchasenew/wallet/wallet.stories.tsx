@@ -32,6 +32,7 @@ const mockStarterpackValue = {
 // Mock onchain purchase context
 const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   purchaseItems: [],
+  purchaseDescription: undefined,
   quantity: 1,
   incrementQuantity: () => {},
   decrementQuantity: () => {},
