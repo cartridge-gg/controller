@@ -37,6 +37,7 @@ export function buildIframeAllowList(url: URL): string {
     "publickey-credentials-create *",
     "publickey-credentials-get *",
     "clipboard-write",
+    "geolocation *",
     "payment *",
   ];
 

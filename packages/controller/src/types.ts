@@ -102,6 +102,29 @@ export type DeployReply = {
   transaction_hash: string;
 };
 
+export type LocationCoordinates = {
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+  altitude?: number | null;
+  altitudeAccuracy?: number | null;
+  heading?: number | null;
+  speed?: number | null;
+  timestamp: number;
+};
+
+export type LocationPromptReply = {
+  code: ResponseCodes.SUCCESS;
+  location: LocationCoordinates;
+};
+
+export type LocationGateOptions = {
+  /** Locations to allow. Country codes ("US") or region codes ("US-CA", "DE-BY"). */
+  allowed?: string[];
+  /** Locations to block. Country codes ("SG") or region codes ("US-HI"). Blocked wins over allowed. */
+  blocked?: string[];
+};
+
 export type IFrames = {
   keychain?: KeychainIFrame;
   version?: number;
@@ -171,6 +194,9 @@ export interface Keychain {
   username(): string;
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
+  openLocationPrompt(
+    options?: LocationPromptOptions,
+  ): Promise<LocationPromptReply | ConnectError>;
   switchChain(rpcUrl: string): Promise<void>;
   openBundle(
     id: number,
@@ -286,6 +312,11 @@ export type Tokens = {
 export type OpenOptions = {
   /** The URL to redirect to after authentication (defaults to current page) */
   redirectUrl?: string;
+};
+
+export type LocationPromptOptions = {
+  /** Optional path to navigate to after completion (standalone mode). */
+  returnTo?: string;
 };
 
 export type SocialClaimOptions = {

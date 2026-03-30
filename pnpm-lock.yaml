@@ -162,8 +162,8 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#476cc4f
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/476cc4f
+        specifier: github:cartridge-gg/presets#07cb073
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/07cb073
       '@cartridge/ui':
         specifier: 'catalog:'
         version: https://codeload.github.com/cartridge-gg/ui/tar.gz/bc44cd5(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@2.0.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
@@ -1261,8 +1261,8 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/476cc4f':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/476cc4f}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/07cb073':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/07cb073}
     version: 0.0.1
 
   '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0':
@@ -11477,7 +11477,7 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/476cc4f':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/07cb073':
     dependencies:
       '@starknet-io/types-js': 0.8.4
 

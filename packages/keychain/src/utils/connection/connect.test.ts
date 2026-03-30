@@ -23,7 +23,7 @@ describe("connect utils", () => {
 
   describe("createConnectUrl", () => {
     it("creates a URL with just an id when no signup options are provided", () => {
-      const url = createConnectUrl(undefined);
+      const { url } = createConnectUrl(undefined);
       expect(url).toBe("/connect?id=test-id");
       expect(storeCallbacks).not.toHaveBeenCalled();
     });
@@ -31,7 +31,7 @@ describe("connect utils", () => {
     it("stores callbacks and encodes signup options", () => {
       const resolve = vi.fn();
       const signers: AuthOptions = ["webauthn"];
-      const url = createConnectUrl(signers, { resolve });
+      const { url } = createConnectUrl(signers, { resolve });
 
       expect(storeCallbacks).toHaveBeenCalledTimes(1);
       expect(url).toMatch(/^\/connect\?/);

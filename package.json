@@ -38,7 +38,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#476cc4f",
+    "@cartridge/presets": "github:cartridge-gg/presets#07cb073",
     "@cartridge/ui": "catalog:",
     "tailwindcss": "catalog:",
     "@graphql-codegen/cli": "^2.6.2",

@@ -29,6 +29,7 @@ import {
   ProfileContextTypeVariant,
   ResponseCodes,
   OpenOptions,
+  LocationPromptOptions,
   HeadlessUsernameLookupResult,
   StarterpackOptions,
   UpdateSessionOptions,
@@ -323,7 +324,6 @@ export default class ControllerProvider extends BaseProvider {
       let response = await this.keychain.connect({
         signupOptions: effectiveOptions,
       });
-
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -585,6 +585,26 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return this.keychain.username();
+  }
+
+  async openLocationPrompt(options?: LocationPromptOptions) {
+    if (!this.iframes) {
+      return;
+    }
+
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    const responsePromise = this.keychain.openLocationPrompt(options);
+    this.iframes.keychain.open();
+
+    try {
+      return await responsePromise;
+    } finally {
+      this.iframes.keychain.close();
+    }
   }
 
   async lookupUsername(

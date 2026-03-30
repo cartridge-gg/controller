@@ -20,11 +20,13 @@ import type {
   AuthOptions,
   BundleOptions,
   ConnectOptions,
+  LocationGateOptions,
   SessionPolicies,
   StarterpackOptions,
 } from "@cartridge/controller";
 import { waitForHeadlessApprovalRequest } from "./headless-requests";
 import { createConnectHandler } from "./connect-routing";
+import { locationPromptFactory } from "./location";
 
 export type { ControllerError } from "./execute";
 
@@ -38,6 +40,7 @@ export function connectToController<
   errorDisplayMode,
   getParent,
   getConnectionState,
+  getLocationGate,
 }: {
   setRpcUrl: (url: string) => void;
   setController: (controller?: Controller) => void;
@@ -49,10 +52,12 @@ export function connectToController<
   errorDisplayMode?: "modal" | "notification" | "silent";
   getParent: () => ParentMethods | undefined;
   getConnectionState: () => HeadlessConnectionState;
+  getLocationGate?: () => LocationGateOptions | undefined;
 }) {
   const uiConnect = connect({
     navigate,
     setRpcUrl,
+    getLocationGate,
   });
 
   const headlessConnectImpl = headlessConnect({
@@ -141,6 +146,7 @@ export function connectToController<
             { replace: true },
           );
         },
+      openLocationPrompt: () => locationPromptFactory({ navigate }),
       switchChain: () => switchChain({ setController, setRpcUrl }),
       updateSession: updateSession({ navigate }),
     },
