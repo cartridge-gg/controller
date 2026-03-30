@@ -14,7 +14,7 @@ interface SocialClaimCheckoutProps {
   bundleId: number;
   options: SocialClaimOptions | undefined;
   conditions: SocialClaimConditions;
-  isFree: boolean;
+  isFree: boolean | undefined;
   isLoading: boolean;
   handlePurchase: () => void;
 }
@@ -86,9 +86,9 @@ export function SocialClaimCheckout({
         onClick={
           onSocialConnect ?? onSocialFollow ?? onSocialShare ?? handlePurchase
         }
-        disabled={!isFree}
+        disabled={isFree === false}
       >
-        {!isFree
+        {isFree === false
           ? "Paid Not Implemented"
           : socialClaimStep === "connect"
             ? `Connect ${providerName}`

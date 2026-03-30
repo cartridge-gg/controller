@@ -23,6 +23,7 @@ export function Receiving({
   showTotal,
   isLoading,
   showPrice = true,
+  isFree,
 }: ReceivingProps) {
   const rounded = items.length === 1;
   return (
@@ -33,7 +34,7 @@ export function Receiving({
           "bg-transparent px-0",
         )}
       >
-        <CardTitle className="normal-case font-semibold text-xs">
+        <CardTitle className="normal-case font-normal text-xs">
           {title ?? "Balance"}
         </CardTitle>
         {isLoading && <Spinner size="sm" />}
@@ -64,6 +65,7 @@ export function Receiving({
                 topic={formatPrice(item.value, showPrice)}
                 variant="default"
                 className={rounded ? "rounded-lg" : "rounded-none"}
+                badge={isFree === true ? "FREE" : undefined}
               />
             );
           })}
@@ -83,6 +85,7 @@ export function Receiving({
                 topic={formatPrice(item.value, showPrice)}
                 variant="default"
                 className={rounded ? "rounded-lg" : "rounded-none"}
+                badge={isFree === true ? "FREE" : undefined}
               />
             );
           })}
@@ -102,6 +105,7 @@ export function Receiving({
                 topic=""
                 variant="default"
                 className={rounded ? "rounded-lg" : "rounded-none"}
+                badge={isFree === true ? "FREE" : undefined}
               />
             );
           })}
