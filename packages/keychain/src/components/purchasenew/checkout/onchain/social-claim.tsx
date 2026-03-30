@@ -59,6 +59,7 @@ export function SocialClaimCheckout({
           isDisabled={socialClaimStep !== "connect"}
           isCompleted={socialClaimStep !== "connect"}
           isExpired={isExpired}
+          onClick={onSocialConnect}
         />
         <SocialCard
           text={`Follow`}
@@ -68,6 +69,7 @@ export function SocialClaimCheckout({
           isCompleted={
             socialClaimStep !== "connect" && socialClaimStep !== "follow"
           }
+          onClick={onSocialFollow}
         />
         <SocialCard
           text="Spread The Word"
@@ -78,6 +80,7 @@ export function SocialClaimCheckout({
             socialClaimStep !== "follow" &&
             socialClaimStep !== "share"
           }
+          onClick={onSocialShare}
         />
       </div>
       <Button
