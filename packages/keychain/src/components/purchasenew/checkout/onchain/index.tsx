@@ -50,6 +50,7 @@ export function OnchainCheckout() {
     isFetchingConversion,
     isSendingDeposit,
     purchaseItems,
+    purchaseDescription,
     quantity,
     selectedWallet,
     walletAddress,
@@ -334,6 +335,7 @@ export function OnchainCheckout() {
           title={`You Receive ${quantity > 1 ? `(${quantity})` : ""}`}
           items={purchaseItems}
           isFree={isFree}
+          description={purchaseDescription}
         />
       </LayoutContent>
 

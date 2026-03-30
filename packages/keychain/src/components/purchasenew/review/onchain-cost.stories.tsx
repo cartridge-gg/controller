@@ -25,6 +25,7 @@ const mockUsdcToken = {
 const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
   const mockValue: OnchainPurchaseContextType = {
     purchaseItems: [],
+    purchaseDescription: undefined,
     quantity: 1,
     incrementQuantity: () => {},
     decrementQuantity: () => {},

@@ -38,4 +38,5 @@ export type ReceivingProps = {
   showTotal?: boolean;
   showPrice?: boolean;
   isFree?: boolean;
+  description?: string;
 };

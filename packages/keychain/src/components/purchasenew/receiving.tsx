@@ -24,6 +24,7 @@ export function Receiving({
   isLoading,
   showPrice = true,
   isFree,
+  description,
 }: ReceivingProps) {
   const rounded = items.length === 1;
   return (
@@ -64,7 +65,10 @@ export function Receiving({
                 subTitle={item.value ? `${item.value} CREDITS` : "CREDITS"}
                 topic={formatPrice(item.value, showPrice)}
                 variant="default"
-                className={rounded ? "rounded-lg" : "rounded-none"}
+                className={cn(
+                  "pointer-events-none",
+                  rounded ? "rounded-lg" : "rounded-none",
+                )}
                 badge={isFree === true ? "FREE" : undefined}
               />
             );
@@ -84,7 +88,10 @@ export function Receiving({
                 }
                 topic={formatPrice(item.value, showPrice)}
                 variant="default"
-                className={rounded ? "rounded-lg" : "rounded-none"}
+                className={cn(
+                  "pointer-events-none",
+                  rounded ? "rounded-lg" : "rounded-none",
+                )}
                 badge={isFree === true ? "FREE" : undefined}
               />
             );
@@ -104,11 +111,19 @@ export function Receiving({
                 subTitle={item.subtitle || "NFT"}
                 topic=""
                 variant="default"
-                className={rounded ? "rounded-lg" : "rounded-none"}
+                className={cn(
+                  "pointer-events-none",
+                  rounded ? "rounded-lg" : "rounded-none",
+                )}
                 badge={isFree === true ? "FREE" : undefined}
               />
             );
           })}
+        {description && (
+          <div className="text-xs text-foreground-300 font-normal h-9 w-full border border-background-200 rounded-sm mt-4 p-2.5">
+            {description}
+          </div>
+        )}
       </CardListContent>
     </Card>
   );
