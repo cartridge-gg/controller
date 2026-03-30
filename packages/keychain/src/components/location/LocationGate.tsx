@@ -8,6 +8,7 @@ import {
   LayoutFooter,
 } from "@cartridge/ui";
 import { LocationGateOptions, ResponseCodes } from "@cartridge/controller";
+import { loadConfig } from "@cartridge/presets";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
@@ -48,10 +49,15 @@ export function LocationGate() {
     getIpCountry().then((country) => setIsUS(country === "US"));
   }, []);
 
-  const { returnTo, gate } = useMemo(() => {
+  const [presetGate, setPresetGate] = useState<LocationGateOptions | null>(
+    null,
+  );
+
+  const { returnTo, gateFromUrl, preset } = useMemo(() => {
     const searchParams = new URLSearchParams(search);
     const returnToParam = searchParams.get("returnTo");
     const gateParam = searchParams.get("gate");
+    const presetParam = searchParams.get("preset");
 
     let parsedGate: LocationGateOptions | null = null;
     if (gateParam) {
@@ -62,8 +68,26 @@ export function LocationGate() {
       }
     }
 
-    return { returnTo: returnToParam, gate: parsedGate };
+    return {
+      returnTo: returnToParam,
+      gateFromUrl: parsedGate,
+      preset: presetParam,
+    };
   }, [search]);
+
+  useEffect(() => {
+    if (!preset || gateFromUrl) return;
+    loadConfig(preset)
+      .then((config) => {
+        const configObj = config as Record<string, unknown> | null;
+        if (configObj?.locationGate) {
+          setPresetGate(configObj.locationGate as LocationGateOptions);
+        }
+      })
+      .catch((err) => console.error("Failed to load preset config:", err));
+  }, [preset, gateFromUrl]);
+
+  const gate = gateFromUrl ?? presetGate;
 
   const connectId = useMemo(() => {
     if (!returnTo) {
