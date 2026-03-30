@@ -96,9 +96,24 @@ export function useTokenSelection({
     Record<string, FullTokenMetadata>
   >({});
 
-  const setSelectedToken = useCallback((token: TokenOption | undefined) => {
-    setSelectedTokenState(token);
-  }, []);
+  const setSelectedToken = useCallback(
+    (token: TokenOption | undefined) => {
+      setSelectedTokenState(token);
+
+      // Persist to localStorage
+      if (token && controller) {
+        try {
+          localStorage.setItem(
+            `@cartridge/lastPaymentToken:${controller.chainId()}`,
+            token.address,
+          );
+        } catch {
+          // localStorage may be unavailable
+        }
+      }
+    },
+    [controller],
+  );
 
   const resetTokenSelection = useCallback(() => {
     setSelectedToken(undefined);
@@ -315,7 +330,7 @@ export function useTokenSelection({
     setSelectedToken,
   ]);
 
-  // Set selected token to payment token and initialize convertedPrice from quote
+  // Set selected token from localStorage or fall back to payment token from quote
   useEffect(() => {
     if (
       starterpackDetails &&
@@ -324,20 +339,45 @@ export function useTokenSelection({
     ) {
       const quote = starterpackDetails.quote;
       if (quote) {
-        // Set selected token to payment token if not set
         if (!selectedToken) {
-          const paymentToken =
+          // Try last used token from localStorage
+          let lastToken: TokenOption | undefined;
+          if (controller) {
+            try {
+              const lastAddress = localStorage.getItem(
+                `@cartridge/lastPaymentToken:${controller.chainId()}`,
+              );
+              if (lastAddress) {
+                lastToken = availableTokens.find(
+                  (token) =>
+                    num.toHex(token.address) === num.toHex(lastAddress),
+                );
+              }
+            } catch {
+              // localStorage may be unavailable
+            }
+          }
+
+          const defaultToken =
+            lastToken ||
             availableTokens.find(
               (token: TokenOption) =>
                 num.toHex(token.address) === num.toHex(quote.paymentToken),
-            ) || availableTokens[0];
-          if (paymentToken) {
-            setSelectedToken(paymentToken);
+            ) ||
+            availableTokens[0];
+          if (defaultToken) {
+            setSelectedToken(defaultToken);
           }
         }
       }
     }
-  }, [starterpackDetails, selectedToken, availableTokens, setSelectedToken]);
+  }, [
+    starterpackDetails,
+    selectedToken,
+    availableTokens,
+    setSelectedToken,
+    controller,
+  ]);
 
   // Fetch conversion price when selected token or quote changes
   useEffect(() => {
