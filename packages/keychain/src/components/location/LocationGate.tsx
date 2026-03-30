@@ -8,7 +8,7 @@ import {
   LayoutFooter,
 } from "@cartridge/ui";
 import { LocationGateOptions, ResponseCodes } from "@cartridge/controller";
-import { loadConfig } from "@cartridge/presets";
+import { defaultTheme, loadConfig } from "@cartridge/presets";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
@@ -18,13 +18,15 @@ import { USMap } from "./USMap";
 
 type GateState = "checking" | "blocked" | "error";
 
-const ERROR_RESPONSE = {
-  code: ResponseCodes.ERROR,
-  message: "This game is not available in your region.",
-};
+function errorResponse(gameName: string) {
+  return {
+    code: ResponseCodes.ERROR,
+    message: `${gameName} is not available in your region.`,
+  };
+}
 
 export function LocationGate() {
-  const { closeModal, setLocationGateVerified } = useConnection();
+  const { closeModal, setLocationGateVerified, theme } = useConnection();
   const { search } = useLocation();
   const navigate = useNavigate();
   const [state, setState] = useState<GateState>("checking");
@@ -127,6 +129,9 @@ export function LocationGate() {
     };
   }, [gate, returnTo, navigate, setLocationGateVerified]);
 
+  const gameName =
+    theme.name && theme.name !== defaultTheme.name ? theme.name : "This game";
+
   const blockedUSStates = useMemo(() => {
     if (!gate?.blocked) return [];
     return gate.blocked.filter((code) => code.toUpperCase().startsWith("US-"));
@@ -153,7 +158,7 @@ export function LocationGate() {
           <Button
             variant="secondary"
             className="w-full"
-            onClick={() => resolveConnect(ERROR_RESPONSE)}
+            onClick={() => resolveConnect(errorResponse(gameName))}
           >
             CLOSE
           </Button>
@@ -175,14 +180,14 @@ export function LocationGate() {
           </div>
         )}
         <p className="text-sm text-foreground-300 leading-relaxed">
-          This game is not available in your region.
+          {gameName} is not available in your region.
         </p>
       </LayoutContent>
       <LayoutFooter>
         <Button
           variant="secondary"
           className="w-full"
-          onClick={() => resolveConnect(ERROR_RESPONSE)}
+          onClick={() => resolveConnect(errorResponse(gameName))}
         >
           CLOSE
         </Button>
