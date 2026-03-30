@@ -33,11 +33,12 @@ export function validateKeychainIframeUrl(url: URL): void {
  * Local network access is only needed for localhost development.
  */
 export function buildIframeAllowList(url: URL): string {
+  const origin = url.origin;
   const allowFeatures = [
     "publickey-credentials-create *",
     "publickey-credentials-get *",
     "clipboard-write",
-    "geolocation *",
+    `geolocation 'self' ${origin}`,
     "payment *",
   ];
 
