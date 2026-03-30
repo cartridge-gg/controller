@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.13.11-alpha.2] - 2026-03-30
+
+### ✨ New Features
+- **@cartridge/keychain**: Added keychain location prompt functionality with geolocation API via iframe, enabling location-based features and services (#2349)
+- **@cartridge/keychain**: Added starter pack social claim functionality with X (Twitter) account integration, allowing users to follow and share game accounts to claim bundles (#2498)
+- **@cartridge/keychain**: Added date of birth (DOB) verification to Stripe payment flow for enhanced compliance and verification (#2510)
+- **@cartridge/keychain**: Added SMS authentication to signup/login flows, providing phone-based OTP authentication as an alternative to passkeys and social logins (#2500)
+- **@cartridge/keychain**: Added swap detection for AVNU and LayerSwap (LS2) protocols, enabling better transaction recognition and displaying swap review screens (#2493)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Improved Safari popup blocked error messaging with user-friendly guidance for enabling popups in browser settings (#2506)
+- **@cartridge/keychain**: Enhanced Coinbase payment flow by renaming "Stripe Checkout" to "Credit Card" for clearer user understanding (#2509)
+- **@cartridge/keychain**: Removed feature gate for Stripe checkout in starterpacks, making credit card payments generally available (#2508)
+- **@cartridge/keychain**: Improved Coinbase phone input format to match Stripe verification with disabled country code dropdown for consistency (#2517)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed keychain disconnection issues by ensuring proper disconnect sequence before state changes, preventing users from remaining logged in after disconnect (#2505)
+- **@cartridge/keychain**: Enhanced WASM error handling with structural error message reading for both native Error objects and WASM error-like objects (#2502)
+- **@cartridge/keychain**: Fixed Apple Pay not supported errors in Coinbase checkout by ignoring expected "not supported" messages while preserving real error handling (#2514)
+- **@cartridge/keychain**: Fixed starterpack closure issues for improved stability (#2516)
+- **@cartridge/keychain**: Fixed spending limit loading states and sign-up password form getting stuck, plus miscellaneous controller layout improvements (#2515)
+- **@cartridge/keychain**: Removed Storage Access API console logs to reduce console noise in production environments (#2507)
+- **@cartridge/keychain**: Removed quests functionality to streamline the user interface (#2501)
+
+### 📦 Dependencies
+- **@cartridge/controller-wasm**: Updated to version 0.10.0 for improved WASM functionality and error handling (#2502)
+- **Turnkey SDKs**: Upgraded browser SDKs to version 5 (`@turnkey/sdk-browser` to v5.15.2, `@turnkey/sdk-react` to v5.5.6) for enhanced OTP flow support (#2499)
+
 ## [0.13.11-alpha.1] - 2026-03-26
 
 ### ✨ New Features
