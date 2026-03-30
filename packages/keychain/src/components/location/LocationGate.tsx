@@ -8,6 +8,7 @@ import {
   LayoutFooter,
 } from "@cartridge/ui";
 import { LocationGateOptions, ResponseCodes } from "@cartridge/controller";
+import { loadConfig } from "@cartridge/presets";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
@@ -16,8 +17,10 @@ import {
   evaluateLocationGate,
   reverseGeocodeLocation,
 } from "@/utils/location-gate";
+import { getIpCountry } from "@/utils/ip";
+import { USMap } from "./USMap";
 
-type GateState = "idle" | "requesting";
+type GateState = "idle" | "requesting" | "blocked";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -36,15 +39,25 @@ export function LocationGate() {
   const navigate = useNavigate();
   const [state, setState] = useState<GateState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [isUS, setIsUS] = useState<boolean | null>(null);
 
   useEffect(() => {
     setShowClose(true);
   }, [setShowClose]);
 
-  const { returnTo, gate } = useMemo(() => {
+  useEffect(() => {
+    getIpCountry().then((country) => setIsUS(country === "US"));
+  }, []);
+
+  const [presetGate, setPresetGate] = useState<LocationGateOptions | null>(
+    null,
+  );
+
+  const { returnTo, gateFromUrl, preset } = useMemo(() => {
     const searchParams = new URLSearchParams(search);
     const returnToParam = searchParams.get("returnTo");
     const gateParam = searchParams.get("gate");
+    const presetParam = searchParams.get("preset");
 
     let parsedGate: LocationGateOptions | null = null;
     if (gateParam) {
@@ -55,8 +68,26 @@ export function LocationGate() {
       }
     }
 
-    return { returnTo: returnToParam, gate: parsedGate };
+    return {
+      returnTo: returnToParam,
+      gateFromUrl: parsedGate,
+      preset: presetParam,
+    };
   }, [search]);
+
+  useEffect(() => {
+    if (!preset || gateFromUrl) return;
+    loadConfig(preset)
+      .then((config) => {
+        const configObj = config as Record<string, unknown> | null;
+        if (configObj?.locationGate) {
+          setPresetGate(configObj.locationGate as LocationGateOptions);
+        }
+      })
+      .catch((err) => console.error("Failed to load preset config:", err));
+  }, [preset, gateFromUrl]);
+
+  const gate = gateFromUrl ?? presetGate;
 
   const connectId = useMemo(() => {
     if (!returnTo) {
@@ -119,7 +150,7 @@ export function LocationGate() {
           const gateResult = evaluateLocationGate({ gate, geo });
 
           if (!gateResult.allowed) {
-            resolveConnect(ERROR_RESPONSE);
+            setState("blocked");
             return;
           }
 
@@ -144,10 +175,49 @@ export function LocationGate() {
         maximumAge: 60000,
       },
     );
-  }, [gate, navigate, returnTo, resolveConnect]);
+  }, [gate, navigate, returnTo]);
+
+  const blockedUSStates = useMemo(() => {
+    if (!gate?.blocked) return [];
+    return gate.blocked.filter((code) => code.toUpperCase().startsWith("US-"));
+  }, [gate]);
+
+  // Show map if there are blocked US states and we haven't confirmed the user is outside the US.
+  // isUS: null = still loading/failed, true = confirmed US, false = confirmed non-US
+  const showMap = blockedUSStates.length > 0 && isUS !== false;
 
   if (!gate) {
     return null;
+  }
+
+  if (state === "blocked") {
+    return (
+      <>
+        <HeaderInner
+          title="Region Restricted"
+          icon={<GlobeIcon variant="solid" size="lg" />}
+        />
+        <LayoutContent className="p-4">
+          {showMap && (
+            <div className="mb-3">
+              <USMap blockedStates={blockedUSStates} />
+            </div>
+          )}
+          <p className="text-sm text-foreground-300 leading-relaxed">
+            This game is not available in your region.
+          </p>
+        </LayoutContent>
+        <LayoutFooter>
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={() => resolveConnect(ERROR_RESPONSE)}
+          >
+            CLOSE
+          </Button>
+        </LayoutFooter>
+      </>
+    );
   }
 
   return (
@@ -156,7 +226,8 @@ export function LocationGate() {
         title="Location Verification"
         icon={<GlobeIcon variant="solid" size="lg" />}
       />
-      <LayoutContent className="p-4">
+      <LayoutContent className="p-4 gap-3">
+        {showMap && <USMap blockedStates={blockedUSStates} />}
         <p className="text-sm text-foreground-300 leading-relaxed">
           This game needs your location to confirm availability in your region.
         </p>

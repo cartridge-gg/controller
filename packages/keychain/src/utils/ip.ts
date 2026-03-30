@@ -45,3 +45,30 @@ export const getClientIp = async (): Promise<string> => {
   }
   throw new Error("Failed to fetch client IP from all providers");
 };
+
+/**
+ * Get the country code for the client's IP address (e.g. "US").
+ * In production, reads from Vercel's x-vercel-ip-country header via /api/geo.
+ * Falls back to ipinfo.io for local development.
+ * Returns null if detection fails — callers should treat this as "unknown".
+ */
+export async function getIpCountry(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/geo");
+    if (res.ok) {
+      const data = (await res.json()) as { country?: string | null };
+      if (data.country) return data.country.toUpperCase();
+    }
+  } catch {
+    // Not on Vercel (local dev) — fall through to ipinfo
+  }
+
+  try {
+    const res = await fetch("https://ipinfo.io/json");
+    if (!res.ok) return null;
+    const data = (await res.json()) as { country?: string };
+    return data.country?.toUpperCase() ?? null;
+  } catch {
+    return null;
+  }
+}
