@@ -20,7 +20,7 @@ import {
 import { getIpCountry } from "@/utils/ip";
 import { USMap } from "./USMap";
 
-type GateState = "idle" | "requesting";
+type GateState = "idle" | "requesting" | "blocked";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -150,7 +150,7 @@ export function LocationGate() {
           const gateResult = evaluateLocationGate({ gate, geo });
 
           if (!gateResult.allowed) {
-            resolveConnect(ERROR_RESPONSE);
+            setState("blocked");
             return;
           }
 
@@ -188,6 +188,36 @@ export function LocationGate() {
 
   if (!gate) {
     return null;
+  }
+
+  if (state === "blocked") {
+    return (
+      <>
+        <HeaderInner
+          title="Region Restricted"
+          icon={<GlobeIcon variant="solid" size="lg" />}
+        />
+        <LayoutContent className="p-4">
+          {showMap && (
+            <div className="mb-3">
+              <USMap blockedStates={blockedUSStates} />
+            </div>
+          )}
+          <p className="text-sm text-foreground-300 leading-relaxed">
+            This game is not available in your region.
+          </p>
+        </LayoutContent>
+        <LayoutFooter>
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={() => resolveConnect(ERROR_RESPONSE)}
+          >
+            CLOSE
+          </Button>
+        </LayoutFooter>
+      </>
+    );
   }
 
   return (
