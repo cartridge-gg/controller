@@ -175,7 +175,7 @@ export function LocationGate() {
         maximumAge: 60000,
       },
     );
-  }, [gate, navigate, returnTo, resolveConnect]);
+  }, [gate, navigate, returnTo]);
 
   const blockedUSStates = useMemo(() => {
     if (!gate?.blocked) return [];
