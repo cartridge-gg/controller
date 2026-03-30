@@ -31,7 +31,7 @@ export function USMap({ blockedStates }: USMapProps) {
                 ? "fill-background-200 stroke-background"
                 : "fill-primary-100 stroke-background"
             }
-            strokeWidth={0.5}
+            strokeWidth={1}
             strokeLinejoin="round"
           />
         );
