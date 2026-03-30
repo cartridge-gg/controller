@@ -57,6 +57,7 @@ export const CreditPurchaseProvider = ({
   const { controller, origin } = useConnection();
   const {
     registryAddress,
+    bundleId,
     starterpackId,
     starterpackDetails,
     setDisplayError,
@@ -114,6 +115,7 @@ export const CreditPurchaseProvider = ({
           referral: referralData?.refAddress || referralData?.ref,
           referralGroup: referralData?.refGroup,
           registryAddress,
+          ...(bundleId !== undefined && { clientPercentage: 0 }),
         });
       } else {
         paymentIntent = await createPaymentIntent(
@@ -139,6 +141,7 @@ export const CreditPurchaseProvider = ({
     controller,
     origin,
     registryAddress,
+    bundleId,
     starterpackId,
     starterpackDetails,
     quantity,

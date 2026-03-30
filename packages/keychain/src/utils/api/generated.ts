@@ -1491,6 +1491,7 @@ export type CreateStripePaymentIntentInput = {
 };
 
 export type CreateStripeStarterpackIntentInput = {
+  clientPercentage?: InputMaybe<Scalars["Int"]>;
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   quantity: Scalars["Int"];
   referral?: InputMaybe<Scalars["String"]>;
