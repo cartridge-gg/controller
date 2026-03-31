@@ -11,9 +11,9 @@ import {
 } from "./providers/StarknetProvider";
 
 export const BUNDLE_REGISTRY_MAINNET =
-  "0x1c53584fdbebd996c163fa2d5d5ad37f4b2f06643ea2bb897c5bee578a2e715";
+  "0x1a8516498b484f209aefbbf5af67765a2b1e3889fd00902811f18576a4616b0";
 export const BUNDLE_REGISTRY_SEPOLIA =
-  "0x6361108a877e3bf74e3d92242907d40315824555d50bd7cad08a021021ed8a4";
+  "0x3110295929fc665972ae2ea4b99d5fa57547aa56d140dc73a7e85ddcaf5eaf1";
 
 export function Profile() {
   const { account, connector } = useAccount();
@@ -134,7 +134,11 @@ export function Profile() {
       <h2>Open Starterpack</h2>
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap gap-1">
-          <Button onClick={() => ctrlConnector.controller.openStarterPack(0)}>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openBundle(1, BUNDLE_REGISTRY_MAINNET)
+            }
+          >
             Nums
           </Button>
         </div>
