@@ -26,13 +26,13 @@ type DrawerStep = "network" | "wallet";
 interface WalletSelectionDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  showCreditCard?: boolean;
+  showFiatOptions?: boolean;
 }
 
 export function WalletSelectionDrawer({
   isOpen,
   onClose,
-  showCreditCard = true,
+  showFiatOptions = true,
 }: WalletSelectionDrawerProps) {
   const isApplePayEnabled = useFeature("apple-pay-support");
 
@@ -287,7 +287,7 @@ export function WalletSelectionDrawer({
           {step === "network" ? (
             // Network selection step
             <>
-              {showCreditCard && (
+              {showFiatOptions && (
                 <PurchaseCard
                   key="stripe-checkout"
                   text="Credit Card"
@@ -300,7 +300,7 @@ export function WalletSelectionDrawer({
                   )}
                 />
               )}
-              {isApplePayEnabled && (
+              {showFiatOptions && isApplePayEnabled && (
                 <div
                   key="apple-pay"
                   onClick={handleApplePaySelect}

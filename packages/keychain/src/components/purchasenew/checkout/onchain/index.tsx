@@ -276,21 +276,18 @@ export function OnchainCheckout() {
           navigate("/purchase/checkout/stripe");
         }
       } else if (isApplePaySelected) {
-        const isUS = countryCode === "US";
-        if (isUS) {
-          const [{ data: meData }, { data: accountPrivateData }] =
-            await Promise.all([refetchMe(), refetchAccountPrivate()]);
-          const me = meData?.me;
-          const accountPrivate = accountPrivateData?.accountPrivate;
-          const needsVerification =
-            !me?.email ||
-            !accountPrivate?.phoneNumber ||
-            !accountPrivate?.phoneNumberVerifiedAt;
+        const [{ data: meData }, { data: accountPrivateData }] =
+          await Promise.all([refetchMe(), refetchAccountPrivate()]);
+        const me = meData?.me;
+        const accountPrivate = accountPrivateData?.accountPrivate;
+        const needsVerification =
+          !me?.email ||
+          !accountPrivate?.phoneNumber ||
+          !accountPrivate?.phoneNumberVerifiedAt;
 
-          if (needsVerification) {
-            navigate("/purchase/verification?method=apple-pay");
-            return;
-          }
+        if (needsVerification) {
+          navigate("/purchase/verification?method=apple-pay");
+          return;
         }
 
         await onCreateCoinbaseOrder();
@@ -318,7 +315,6 @@ export function OnchainCheckout() {
     navigate,
     clearError,
     isApplePayAmountTooLow,
-    countryCode,
   ]);
 
   const handleBridge = useCallback(async () => {
@@ -522,7 +518,7 @@ export function OnchainCheckout() {
       <WalletSelectionDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        showCreditCard={countryCode === "US"}
+        showFiatOptions={countryCode === "US"}
       />
     </>
   );
