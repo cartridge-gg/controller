@@ -351,7 +351,13 @@ export function OnchainCheckout() {
     } catch {
       // localStorage may be unavailable
     }
-  }, [controller, quote, isStripeStarterpackSupported, onStripeSelect, countryCode]);
+  }, [
+    controller,
+    quote,
+    isStripeStarterpackSupported,
+    onStripeSelect,
+    countryCode,
+  ]);
 
   useEffect(() => {
     clearError();
