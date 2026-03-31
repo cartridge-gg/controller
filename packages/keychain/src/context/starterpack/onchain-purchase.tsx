@@ -168,11 +168,38 @@ export const OnchainPurchaseProvider = ({
     onError: setDisplayError,
   });
 
+  const savePaymentMethod = useCallback(
+    (method: string) => {
+      if (!controller) return;
+      try {
+        localStorage.setItem(
+          `@cartridge/lastPaymentMethod:${controller.chainId()}`,
+          method,
+        );
+      } catch {
+        // localStorage may be unavailable
+      }
+    },
+    [controller],
+  );
+
+  const clearPaymentMethod = useCallback(() => {
+    if (!controller) return;
+    try {
+      localStorage.removeItem(
+        `@cartridge/lastPaymentMethod:${controller.chainId()}`,
+      );
+    } catch {
+      // localStorage may be unavailable
+    }
+  }, [controller]);
+
   const clearSelectedWallet = useCallback(() => {
     clearSelectedWalletInternal();
     setIsApplePaySelected(false);
     setIsStripeSelected(false);
-  }, [clearSelectedWalletInternal]);
+    clearPaymentMethod();
+  }, [clearSelectedWalletInternal, clearPaymentMethod]);
 
   const onExternalConnect = useCallback(
     async (
@@ -182,9 +209,10 @@ export const OnchainPurchaseProvider = ({
     ) => {
       setIsApplePaySelected(false);
       setIsStripeSelected(false);
+      clearPaymentMethod();
       return onExternalConnectInternal(wallet, platform, chainId);
     },
-    [onExternalConnectInternal],
+    [onExternalConnectInternal, clearPaymentMethod],
   );
 
   // Get onchain starterpack details if available
@@ -570,7 +598,8 @@ export const OnchainPurchaseProvider = ({
     setIsStripeSelected(true);
     setIsApplePaySelected(false);
     clearSelectedWalletInternal();
-  }, [clearSelectedWalletInternal]);
+    savePaymentMethod("stripe");
+  }, [clearSelectedWalletInternal, savePaymentMethod]);
 
   const onCreateCoinbaseOrder = useCallback(
     async (opts?: { force?: boolean }) => {

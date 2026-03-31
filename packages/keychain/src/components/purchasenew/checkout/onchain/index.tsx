@@ -20,7 +20,7 @@ import {
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { useFeatures } from "@/hooks/features";
-import { useTokenBalance } from "@/hooks/starterpack";
+import { useTokenBalance, useTokenFallback } from "@/hooks/starterpack";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "../../receiving";
 import { OnchainCostBreakdown } from "../../review/cost";
@@ -55,6 +55,8 @@ export function OnchainCheckout() {
     selectedWallet,
     walletAddress,
     selectedToken,
+    setSelectedToken,
+    availableTokens,
     convertedPrice,
     conversionError,
     selectedPlatform,
@@ -68,6 +70,7 @@ export function OnchainCheckout() {
     isApplePaySelected,
     isStripeSelected,
     onApplePaySelect,
+    onStripeSelect,
     onCreateCoinbaseOrder,
     isCreatingOrder,
     usdAmount,
@@ -160,6 +163,24 @@ export function OnchainCheckout() {
     quantity,
   });
 
+  const { isCheckingFallback } = useTokenFallback({
+    controller,
+    starterpackDetails: starterpackDetails as
+      | Parameters<typeof useTokenFallback>[0]["starterpackDetails"]
+      | undefined,
+    availableTokens,
+    selectedToken,
+    hasSufficientBalance,
+    isLoadingBalance,
+    balanceError,
+    quantity,
+    isStripeSelected,
+    isApplePaySelected,
+    selectedPlatform,
+    setSelectedToken,
+    onStripeSelect,
+  });
+
   const globalDisabled = useMemo(() => {
     if (isStripeSelected) {
       return !isStripeStarterpackSupported || isStripeLoading;
@@ -206,7 +227,8 @@ export function OnchainCheckout() {
     !balanceError &&
     !bridgeFrom &&
     !isApplePaySelected &&
-    !isStripeSelected;
+    !isStripeSelected &&
+    !isCheckingFallback;
 
   const showConversionError =
     conversionError &&
@@ -299,6 +321,23 @@ export function OnchainCheckout() {
       setDisplayError(error as Error);
     }
   }, [onSendDeposit, navigate, clearError, setDisplayError]);
+
+  // Restore last payment method from localStorage
+  const hasRestoredMethod = useRef(false);
+  useEffect(() => {
+    if (hasRestoredMethod.current || !controller || !quote) return;
+    hasRestoredMethod.current = true;
+    try {
+      const lastMethod = localStorage.getItem(
+        `@cartridge/lastPaymentMethod:${controller.chainId()}`,
+      );
+      if (lastMethod === "stripe" && isStripeStarterpackSupported) {
+        onStripeSelect();
+      }
+    } catch {
+      // localStorage may be unavailable
+    }
+  }, [controller, quote, isStripeStarterpackSupported, onStripeSelect]);
 
   useEffect(() => {
     clearError();
@@ -438,6 +477,7 @@ export function OnchainCheckout() {
               quantity={quantity}
               isLoading={
                 isLoading ||
+                isCheckingFallback ||
                 (bridgeFrom !== null && isFetchingFees) ||
                 isCreatingOrder ||
                 isStripeLoading

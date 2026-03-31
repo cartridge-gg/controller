@@ -33,6 +33,12 @@ export type {
   UseTokenBalanceReturn,
 } from "./token-balance";
 
+export { useTokenFallback } from "./token-fallback";
+export type {
+  UseTokenFallbackOptions,
+  UseTokenFallbackReturn,
+} from "./token-fallback";
+
 export { useCoinbase } from "./coinbase";
 export type {
   CreateOrderInput,
