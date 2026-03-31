@@ -171,6 +171,12 @@ export function OnchainCheckout() {
 
   const isUS = countryCode === "US";
 
+  const onStripeSelectForFallback = useCallback(() => {
+    if (isUS) {
+      onStripeSelect();
+    }
+  }, [isUS, onStripeSelect]);
+
   const { isCheckingFallback } = useTokenFallback({
     controller,
     starterpackDetails: starterpackDetails as
@@ -186,7 +192,7 @@ export function OnchainCheckout() {
     isApplePaySelected,
     selectedPlatform,
     setSelectedToken,
-    onStripeSelect: isUS ? onStripeSelect : () => {},
+    onStripeSelect: onStripeSelectForFallback,
   });
 
   const globalDisabled = useMemo(() => {
@@ -365,7 +371,6 @@ export function OnchainCheckout() {
   if (isStarterpackLoading || !quote) {
     return <LoadingState />;
   }
-
   return (
     <>
       <HeaderInner
