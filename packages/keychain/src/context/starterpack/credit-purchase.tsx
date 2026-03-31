@@ -33,6 +33,7 @@ export interface CreditPurchaseContextType {
   // Stripe state
   stripePaymentId: string | undefined;
   clientSecret: string | undefined;
+  customerSessionClientSecret: string | undefined;
   costDetails: CostDetails | undefined;
   stripePromise: Promise<Stripe | null>;
   isStripeLoading: boolean;
@@ -67,6 +68,8 @@ export const CreditPurchaseProvider = ({
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
   const [stripePaymentId, setStripePaymentId] = useState<string | undefined>();
   const [clientSecret, setClientSecret] = useState<string | undefined>();
+  const [customerSessionClientSecret, setCustomerSessionClientSecret] =
+    useState<string | undefined>();
   const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
 
   const {
@@ -127,6 +130,9 @@ export const CreditPurchaseProvider = ({
 
       setStripePaymentId(paymentIntent.id);
       setClientSecret(paymentIntent.clientSecret);
+      setCustomerSessionClientSecret(
+        paymentIntent.customerSessionClientSecret ?? undefined,
+      );
       setCostDetails(
         starterpackDetails && isOnchainStarterpack(starterpackDetails)
           ? getStarterpackStripeCostDetails(starterpackDetails.quote!, quantity)
@@ -153,6 +159,7 @@ export const CreditPurchaseProvider = ({
   useEffect(() => {
     setStripePaymentId(undefined);
     setClientSecret(undefined);
+    setCustomerSessionClientSecret(undefined);
     setCostDetails(undefined);
   }, [starterpackId]);
 
@@ -161,6 +168,7 @@ export const CreditPurchaseProvider = ({
     setUsdAmount,
     stripePaymentId,
     clientSecret,
+    customerSessionClientSecret,
     costDetails,
     stripePromise,
     isStripeLoading,

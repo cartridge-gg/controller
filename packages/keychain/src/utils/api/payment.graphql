@@ -45,6 +45,7 @@ mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
   createStripePaymentIntent(input: $input) {
     id
     clientSecret
+    customerSessionClientSecret
     pricing {
       baseCostInCents
       processingFeeInCents
@@ -59,6 +60,7 @@ mutation CreateStripeStarterpackIntent(
   createStripeStarterpackIntent(input: $input) {
     id
     clientSecret
+    customerSessionClientSecret
     pricing {
       baseCostInCents
       processingFeeInCents
