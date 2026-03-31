@@ -32,6 +32,7 @@ import { QuantityControls } from "./quantity";
 import { WalletSelectionDrawer } from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
+import { getIpLocation } from "@/utils/ip";
 import { num } from "starknet";
 
 export function OnchainCheckout() {
@@ -85,6 +86,11 @@ export function OnchainCheckout() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [countryCode, setCountryCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    getIpLocation().then((geo) => setCountryCode(geo.countryCode));
+  }, []);
 
   // Triple-click on the header icon to enable hidden payment methods.
   const clickCountRef = useRef(0);
@@ -331,13 +337,23 @@ export function OnchainCheckout() {
       const lastMethod = localStorage.getItem(
         `@cartridge/lastPaymentMethod:${controller.chainId()}`,
       );
-      if (lastMethod === "stripe" && isStripeStarterpackSupported) {
+      if (
+        lastMethod === "stripe" &&
+        isStripeStarterpackSupported &&
+        countryCode === "US"
+      ) {
         onStripeSelect();
       }
     } catch {
       // localStorage may be unavailable
     }
-  }, [controller, quote, isStripeStarterpackSupported, onStripeSelect]);
+  }, [
+    controller,
+    quote,
+    isStripeStarterpackSupported,
+    onStripeSelect,
+    countryCode,
+  ]);
 
   useEffect(() => {
     clearError();
@@ -502,6 +518,7 @@ export function OnchainCheckout() {
       <WalletSelectionDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
+        showFiatOptions={countryCode === "US"}
       />
     </>
   );
