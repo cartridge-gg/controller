@@ -252,7 +252,7 @@ export function CoinbasePopup() {
           setCompleted(true);
           setCommitted(false);
           setFailed(false);
-          //setTimeout(() => window.close(), 1500);
+          setTimeout(() => window.close(), 1500);
           break;
 
         case "onramp_api.polling_error":
