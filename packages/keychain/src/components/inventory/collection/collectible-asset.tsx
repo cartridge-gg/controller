@@ -35,10 +35,10 @@ import {
   getChecksumAddress,
 } from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
+import { ExplorerTransactionLink } from "@/components/ExplorerLink";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { OrderModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
@@ -56,7 +56,6 @@ export function CollectibleAsset() {
   const account = useAccount();
   const address = account?.address || "";
   const { chainId } = useConnection();
-  const explorer = useExplorer();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [cap, setCap] = useState(OFFSET);
@@ -146,13 +145,6 @@ export function CollectibleAsset() {
     const amount = Math.floor(Number(mainOrder.price) / 10 ** token.decimals);
     return { orderAmount: amount, orderImage: token.logo_url };
   }, [mainOrder]);
-
-  const to = useCallback(
-    (transactionHash: string) => {
-      return explorer.transaction(transactionHash);
-    },
-    [explorer],
-  );
 
   const handleUnlist = useCallback(
     async (orderId?: number) => {
@@ -288,10 +280,9 @@ export function CollectibleAsset() {
                   value="activity"
                 >
                   {events.map((props: CardProps, index: number) => (
-                    <Link
+                    <ExplorerTransactionLink
                       key={`${index}-${props.key}`}
-                      to={to(props.transactionHash)}
-                      target="_blank"
+                      transactionHash={props.transactionHash}
                     >
                       <TraceabilityCollectibleCard
                         username={props.username || ""}
@@ -306,7 +297,7 @@ export function CollectibleAsset() {
                         currencyImage={props.currencyImage}
                         quantity={props.amount}
                       />
-                    </Link>
+                    </ExplorerTransactionLink>
                   ))}
                   <Button
                     variant="secondary"

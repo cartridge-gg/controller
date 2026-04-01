@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useNavigation } from "@/context/navigation";
+import { useAdvanced } from "@/context/advanced";
 import { useConnection } from "@/hooks/connection";
 import { processControllerQuery } from "@/utils/signers";
 import {
@@ -17,6 +18,7 @@ import {
   SheetFooter,
   SheetTrigger,
   SignOutIcon,
+  Switch,
 } from "@cartridge/ui";
 import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { constants } from "starknet";
@@ -39,6 +41,7 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
+  const { advanced, setAdvanced } = useAdvanced();
   const { navigate } = useNavigation();
 
   const controllerQuery = useControllerQuery(
@@ -78,7 +81,11 @@ export function Settings() {
         <section className="space-y-4">
           <SectionHeader
             title="Recovery Accounts"
-            description="Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
+            description={
+              advanced
+                ? "Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
+                : "Recovery accounts are wallets that can be used to recover your Controller if you lose access to your signers."
+            }
           />
           <Button
             type="button"
@@ -145,6 +152,19 @@ export function Settings() {
             description="Set your default currency for denomination"
           />
           <CurrencySelect />
+        </section>
+
+        <section className="space-y-4">
+          <SectionHeader
+            title="Advanced Mode"
+            description="Show network details like explorer links and chain information"
+          />
+          <div className="flex items-center justify-between py-2.5 px-3 bg-background-200 rounded">
+            <span className="text-sm font-normal text-foreground-200">
+              Show advanced details
+            </span>
+            <Switch checked={advanced} onCheckedChange={setAdvanced} />
+          </div>
         </section>
 
         <SessionsSection />

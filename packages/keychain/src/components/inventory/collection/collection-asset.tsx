@@ -26,7 +26,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "@/hooks/collection";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useUsername } from "@/hooks/username";
 import { useMarketplace } from "@/hooks/marketplace";
@@ -34,6 +33,7 @@ import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
 import { useAccount } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
+import { ExplorerTransactionLink } from "@/components/ExplorerLink";
 import { useNavigation } from "@/context/navigation";
 import { createExecuteUrl } from "@/utils/connection/execute";
 
@@ -42,7 +42,6 @@ const OFFSET = 10;
 export function CollectionAsset() {
   const { chainId } = useConnection();
   const account = useAccount();
-  const explorer = useExplorer();
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
   const { navigate } = useNavigation();
@@ -163,13 +162,6 @@ export function CollectionAsset() {
     return data.slice(0, cap);
   }, [data, cap]);
 
-  const to = useCallback(
-    (transactionHash: string) => {
-      return explorer.transaction(transactionHash);
-    },
-    [explorer],
-  );
-
   const status = useMemo(() => {
     if (collectionStatus === "error" || traceabilitiesStatus === "error")
       return "error";
@@ -255,10 +247,9 @@ export function CollectionAsset() {
                   value="activity"
                 >
                   {events.map((props: CardProps, index: number) => (
-                    <Link
+                    <ExplorerTransactionLink
                       key={`${index}-${props.key}`}
-                      to={to(props.transactionHash)}
-                      target="_blank"
+                      transactionHash={props.transactionHash}
                     >
                       <TraceabilityCollectibleCard
                         username={props.username || ""}
@@ -273,7 +264,7 @@ export function CollectionAsset() {
                         collectibleName={title || collection.name}
                         currencyImage={props.currencyImage}
                       />
-                    </Link>
+                    </ExplorerTransactionLink>
                   ))}
                   <Button
                     variant="secondary"

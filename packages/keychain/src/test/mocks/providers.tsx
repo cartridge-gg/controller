@@ -9,6 +9,7 @@ import { withConnection } from "./connection";
 import { withPostHog } from "./posthog";
 import { withStarknet } from "./starknet";
 import { FeatureProvider } from "@/hooks/features";
+import { AdvancedProvider } from "@/context/advanced";
 import { NavigationProvider } from "@/context/navigation";
 import { QueryClient, QueryClientProvider } from "react-query";
 
@@ -35,13 +36,15 @@ export function renderWithProviders(
 
   const RouterComponent = (
     <BrowserRouter>
-      <NavigationProvider>
-        <FeatureProvider>
-          <QueryClientProvider client={queryClient}>
-            {withStarknet(withPostHog(ui), config.starknet)}
-          </QueryClientProvider>
-        </FeatureProvider>
-      </NavigationProvider>
+      <AdvancedProvider>
+        <NavigationProvider>
+          <FeatureProvider>
+            <QueryClientProvider client={queryClient}>
+              {withStarknet(withPostHog(ui), config.starknet)}
+            </QueryClientProvider>
+          </FeatureProvider>
+        </NavigationProvider>
+      </AdvancedProvider>
     </BrowserRouter>
   );
 

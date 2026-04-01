@@ -7,6 +7,7 @@ import {
   HeaderInner,
 } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
+import { useAdvanced } from "@/context/advanced";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { createExecuteUrl } from "@/utils/connection/execute";
@@ -14,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 export function Delegate() {
   const { controller } = useConnection();
+  const { advanced } = useAdvanced();
   const navigate = useNavigate();
   const [delegateAddress, setDelegateAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
@@ -48,8 +50,9 @@ export function Delegate() {
       <LayoutContent>
         <div className="flex flex-col gap-4">
           <div className="text-sm text-foreground-400 text-center">
-            Your controller can be owned by an existing Starknet wallet which
-            can receive the rewards you earn while playing. <br />
+            Your controller can be owned by an existing{" "}
+            {advanced ? "Starknet " : ""}wallet which can receive the rewards
+            you earn while playing. <br />
             (This can be updated later)
           </div>
           <div className="flex flex-col gap-2">

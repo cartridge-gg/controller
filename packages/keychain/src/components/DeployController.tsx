@@ -1,5 +1,6 @@
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { useConnection } from "@/hooks/connection";
+import { useAdvanced } from "@/context/advanced";
 import { useDeploy } from "@/hooks/deploy";
 import { useFeeToken } from "@/hooks/tokens";
 import { ControllerError } from "@/utils/connection";
@@ -76,6 +77,7 @@ export function DeployControllerView({
   ctrlError?: ControllerError;
 }) {
   const { controller } = useConnection();
+  const { advanced } = useAdvanced();
   const { deploySelf, isDeploying } = useDeploy();
   const { token: feeToken, isLoading } = useFeeToken();
   const [deployHash, setDeployHash] = useState<string>();
@@ -203,11 +205,15 @@ export function DeployControllerView({
             variant="expanded"
             icon={<Spinner size="xl" />}
             title="Deploying Controller"
-            description={`Your controller is being deployed on ${chainName}`}
+            description={
+              advanced
+                ? `Your controller is being deployed on ${chainName}`
+                : "Your controller is being deployed"
+            }
             hideIcon
           />
           <LayoutContent>
-            {deployHash && controller && (
+            {advanced && deployHash && controller && (
               <ExplorerLink
                 chainId={controller.chainId()}
                 txHash={deployHash}
@@ -236,11 +242,15 @@ export function DeployControllerView({
             variant="expanded"
             Icon={CheckIcon}
             title="Success!"
-            description={`Your controller has been deployed on ${chainName}`}
+            description={
+              advanced
+                ? `Your controller has been deployed on ${chainName}`
+                : "Your controller has been deployed"
+            }
             hideIcon
           />
           <LayoutContent className="items-center">
-            {deployHash && controller && (
+            {advanced && deployHash && controller && (
               <ExplorerLink
                 chainId={controller.chainId()}
                 txHash={deployHash}

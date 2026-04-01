@@ -23,6 +23,7 @@ import {
 } from "@cartridge/ui";
 import { cn, formatAddress } from "@cartridge/ui/utils";
 import { useExplorer } from "@starknet-react/core";
+import { useAdvanced } from "@/context/advanced";
 import React, {
   ReactElement,
   useCallback,
@@ -423,6 +424,7 @@ function StackTraceDisplay({
   stackTrace: ReturnType<typeof parseExecutionError>["stack"];
 }) {
   const explorer = useExplorer();
+  const { advanced } = useAdvanced();
   const getExplorerUrl = useCallback(
     (key: "address" | "class", value: string) => {
       switch (key) {
@@ -448,15 +450,23 @@ function StackTraceDisplay({
                       {key}
                     </div>
                     {key === "address" || key === "class" ? (
-                      <Link
-                        to={getExplorerUrl(key, value as string)}
-                        target="_blank"
-                        className="break-all text-left hover:underline"
-                      >
-                        {formatAddress(value as string, {
-                          size: "sm",
-                        })}
-                      </Link>
+                      advanced ? (
+                        <Link
+                          to={getExplorerUrl(key, value as string)}
+                          target="_blank"
+                          className="break-all text-left hover:underline"
+                        >
+                          {formatAddress(value as string, {
+                            size: "sm",
+                          })}
+                        </Link>
+                      ) : (
+                        <span className="break-all text-left">
+                          {formatAddress(value as string, {
+                            size: "sm",
+                          })}
+                        </span>
+                      )
                     ) : key === "selector" ? (
                       <div className="break-all text-left">
                         {formatAddress(value as string, {

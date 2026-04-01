@@ -5,6 +5,7 @@ import {
 } from "@/hooks/session";
 
 import { useConnection } from "@/hooks/connection";
+import { useAdvanced } from "@/context/advanced";
 import {
   Accordion,
   AccordionContent,
@@ -46,6 +47,7 @@ export function AggregateCard({
 }: AggregateCardProps) {
   const [isOpened, setisOpened] = useState(isExpanded);
   const { controller } = useConnection();
+  const { advanced } = useAdvanced();
   const explorer = useExplorer();
   const { onToggleMethod, isEditable } = useCreateSession();
 
@@ -85,20 +87,26 @@ export function AggregateCard({
               <div key={address} className="flex flex-col gap-2">
                 <div className="py-2 px-1 flex items-center justify-between bg-background-200 text-xs font-medium">
                   <h1 className="text-foregroung-100">{name}</h1>
-                  <Link
-                    to={
-                      controller?.chainId() ===
-                        constants.StarknetChainId.SN_MAIN ||
-                      controller?.chainId() ===
-                        constants.StarknetChainId.SN_SEPOLIA
-                        ? explorer.contract(address)
-                        : `#` // TODO: Add explorer for worlds.dev
-                    }
-                    target="_blank"
-                    className="text-foreground-400 hover:underline"
-                  >
-                    {formatAddress(address, { first: 5, last: 5 })}
-                  </Link>
+                  {advanced ? (
+                    <Link
+                      to={
+                        controller?.chainId() ===
+                          constants.StarknetChainId.SN_MAIN ||
+                        controller?.chainId() ===
+                          constants.StarknetChainId.SN_SEPOLIA
+                          ? explorer.contract(address)
+                          : `#` // TODO: Add explorer for worlds.dev
+                      }
+                      target="_blank"
+                      className="text-foreground-400 hover:underline"
+                    >
+                      {formatAddress(address, { first: 5, last: 5 })}
+                    </Link>
+                  ) : (
+                    <span className="text-foreground-400">
+                      {formatAddress(address, { first: 5, last: 5 })}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-px rounded overflow-auto border border-background divide-y divide-solid divide-background">

@@ -1,5 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import {
   ActivityAchievementCard,
   ActivityCollectibleCard,
@@ -12,24 +11,16 @@ import {
   Skeleton,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { useExplorer } from "@starknet-react/core";
 import { useData } from "@/hooks/data";
+import { ExplorerTransactionLink } from "@/components/ExplorerLink";
 import { CardProps } from "@/components/provider/data";
 
 const OFFSET = 100;
 
 export function Activity() {
   const [cap, setCap] = useState(OFFSET);
-  const explorer = useExplorer();
 
   const { events: data, status } = useData();
-
-  const to = useCallback(
-    (transactionHash: string) => {
-      return explorer.transaction(transactionHash);
-    },
-    [explorer],
-  );
 
   const { events, dates } = useMemo(() => {
     const filteredData = data.slice(0, cap);
@@ -55,13 +46,17 @@ export function Activity() {
               {events
                 .filter((event) => event.date === current)
                 .map((props: CardProps, index: number) => {
+                  const key =
+                    props.variant === "token"
+                      ? `${index}-${props.key}-${props.username}`
+                      : `${index}-${props.key}`;
+
                   switch (props.variant) {
                     case "token":
                       return (
-                        <Link
-                          key={`${index}-${props.key}-${props.username}`}
-                          to={to(props.transactionHash)}
-                          target="_blank"
+                        <ExplorerTransactionLink
+                          key={key}
+                          transactionHash={props.transactionHash}
                         >
                           <ActivityTokenCard
                             amount={props.amount}
@@ -72,14 +67,13 @@ export function Activity() {
                             action={props.action}
                             timestamp={props.timestamp * 1000}
                           />
-                        </Link>
+                        </ExplorerTransactionLink>
                       );
                     case "collectible":
                       return (
-                        <Link
-                          key={`${index}-${props.key}`}
-                          to={to(props.transactionHash)}
-                          target="_blank"
+                        <ExplorerTransactionLink
+                          key={key}
+                          transactionHash={props.transactionHash}
                         >
                           <ActivityCollectibleCard
                             name={props.name}
@@ -90,14 +84,13 @@ export function Activity() {
                             action={props.action}
                             timestamp={props.timestamp * 1000}
                           />
-                        </Link>
+                        </ExplorerTransactionLink>
                       );
                     case "game":
                       return (
-                        <Link
-                          key={`${index}-${props.key}`}
-                          to={to(props.transactionHash)}
-                          target="_blank"
+                        <ExplorerTransactionLink
+                          key={key}
+                          transactionHash={props.transactionHash}
                         >
                           <ActivityGameCard
                             action={props.title}
@@ -107,12 +100,12 @@ export function Activity() {
                             certified={props.certified}
                             timestamp={props.timestamp * 1000}
                           />
-                        </Link>
+                        </ExplorerTransactionLink>
                       );
                     case "achievement":
                       return (
                         <ActivityAchievementCard
-                          key={`${index}-${props.key}`}
+                          key={key}
                           title={"Achievement"}
                           topic={props.title}
                           image={props.image}
