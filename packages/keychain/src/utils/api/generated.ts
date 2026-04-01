@@ -6360,6 +6360,7 @@ export type StripePayment = {
 export type StripePaymentIntent = {
   __typename?: "StripePaymentIntent";
   clientSecret: Scalars["String"];
+  customerSessionClientSecret?: Maybe<Scalars["String"]>;
   id: Scalars["ID"];
   pricing: StripePricingDetails;
 };
@@ -7236,6 +7237,7 @@ export type CreateStripePaymentIntentMutation = {
     __typename?: "StripePaymentIntent";
     id: string;
     clientSecret: string;
+    customerSessionClientSecret?: string | null;
     pricing: {
       __typename?: "StripePricingDetails";
       baseCostInCents: number;
@@ -7255,6 +7257,7 @@ export type CreateStripeStarterpackIntentMutation = {
     __typename?: "StripePaymentIntent";
     id: string;
     clientSecret: string;
+    customerSessionClientSecret?: string | null;
     pricing: {
       __typename?: "StripePricingDetails";
       baseCostInCents: number;
@@ -7964,6 +7967,7 @@ export const CreateStripePaymentIntentDocument = `
   createStripePaymentIntent(input: $input) {
     id
     clientSecret
+    customerSessionClientSecret
     pricing {
       baseCostInCents
       processingFeeInCents
@@ -8001,6 +8005,7 @@ export const CreateStripeStarterpackIntentDocument = `
   createStripeStarterpackIntent(input: $input) {
     id
     clientSecret
+    customerSessionClientSecret
     pricing {
       baseCostInCents
       processingFeeInCents
