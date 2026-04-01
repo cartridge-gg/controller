@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 import { processControllerQuery } from "@/utils/signers";
@@ -18,9 +18,14 @@ import {
   SheetTrigger,
   SignOutIcon,
 } from "@cartridge/ui";
-import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
+import {
+  useControllerQuery,
+  useDeleteMeMutation,
+} from "@cartridge/ui/utils/api/cartridge";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";
+import { DeleteAccountSection } from "./delete-account-section";
+import { DeleteAccountSheet } from "./delete-account-sheet";
 import {
   RegisteredAccount,
   RegisteredAccountCard,
@@ -40,6 +45,13 @@ const registeredAccounts: RegisteredAccount[] = [
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
   const { navigate } = useNavigation();
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const deleteMe = useDeleteMeMutation();
+
+  const handleDeleteAccount = useCallback(async () => {
+    await deleteMe.mutateAsync({});
+    logout();
+  }, [deleteMe, logout]);
 
   const controllerQuery = useControllerQuery(
     {
@@ -148,6 +160,8 @@ export function Settings() {
         </section>
 
         <SessionsSection />
+
+        <DeleteAccountSection onDeleteClick={() => setIsDeleteOpen(true)} />
       </LayoutContent>
 
       <LayoutFooter className="pt-2">
@@ -198,6 +212,13 @@ export function Settings() {
           </Button>
         </SheetFooter>
       </SheetContent>
+
+      <DeleteAccountSheet
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        username={controller?.username() ?? ""}
+        onConfirm={handleDeleteAccount}
+      />
     </Sheet>
   );
 }

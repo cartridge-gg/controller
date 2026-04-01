@@ -3005,6 +3005,7 @@ export type Mutation = {
   createTeam: Team;
   decreaseBudget: Paymaster;
   deleteDeployment: Scalars["Boolean"];
+  deleteMe: Scalars["Boolean"];
   deleteRpcApiKey: Scalars["Boolean"];
   deleteRpcCorsDomain: Scalars["Boolean"];
   deleteTeam: Scalars["Boolean"];
@@ -7145,6 +7146,13 @@ export type AccountVerifyMutation = {
   accountVerify: boolean;
 };
 
+export type DeleteMeMutationVariables = Exact<{ [key: string]: never }>;
+
+export type DeleteMeMutation = {
+  __typename?: "Mutation";
+  deleteMe: boolean;
+};
+
 export type CryptoPaymentQueryVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -7847,6 +7855,24 @@ export const useAccountVerifyMutation = <TError = unknown, TContext = unknown>(
     useFetchData<AccountVerifyMutation, AccountVerifyMutationVariables>(
       AccountVerifyDocument,
     ),
+    options,
+  );
+export const DeleteMeDocument = `
+    mutation DeleteMe {
+  deleteMe
+}
+    `;
+export const useDeleteMeMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    DeleteMeMutation,
+    TError,
+    DeleteMeMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<DeleteMeMutation, TError, DeleteMeMutationVariables, TContext>(
+    ["DeleteMe"],
+    useFetchData<DeleteMeMutation, DeleteMeMutationVariables>(DeleteMeDocument),
     options,
   );
 export const CryptoPaymentDocument = `
