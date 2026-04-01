@@ -380,10 +380,24 @@ export function useCoinbase({
           }
           if (!terminalReachedRef.current) {
             console.log(
-              "[coinbase-hook] No terminal status — stopping poll and setting popupClosed",
+              "[coinbase-hook] No terminal status — polling once before giving up",
             );
-            stopPoll();
-            setPopupClosed(true);
+            // The popup auto-closes on success, so the BroadcastChannel message
+            // may not have arrived yet. Poll once to check actual order status
+            // before showing the "Payment Window Closed" error.
+            pollOnce(targetOrderId).finally(() => {
+              if (!terminalReachedRef.current) {
+                console.log(
+                  "[coinbase-hook] Final poll did not resolve — setting popupClosed",
+                );
+                stopPoll();
+                setPopupClosed(true);
+              } else {
+                console.log(
+                  "[coinbase-hook] Final poll resolved terminal status — not showing popupClosed",
+                );
+              }
+            });
           } else {
             console.log(
               "[coinbase-hook] Terminal already reached — ignoring popup close",
@@ -399,6 +413,7 @@ export function useCoinbase({
       startFallbackPoll,
       startConfirmationPoll,
       stopPoll,
+      pollOnce,
       onError,
     ],
   );
