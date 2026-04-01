@@ -10,7 +10,7 @@ import {
   SpinnerIcon,
   TrashIcon,
 } from "@cartridge/ui";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export interface DeleteAccountSheetProps {
   open: boolean;
@@ -28,10 +28,13 @@ export function DeleteAccountSheet({
   const [confirmText, setConfirmText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const deletingRef = useRef(false);
 
   const isConfirmed = confirmText === username;
 
   const handleDelete = async () => {
+    if (deletingRef.current) return;
+    deletingRef.current = true;
     setIsLoading(true);
     setError(null);
     try {
@@ -40,6 +43,7 @@ export function DeleteAccountSheet({
       setError(err instanceof Error ? err.message : "Failed to delete account");
     } finally {
       setIsLoading(false);
+      deletingRef.current = false;
     }
   };
 

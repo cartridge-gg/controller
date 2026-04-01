@@ -49,7 +49,10 @@ export function Settings() {
   const deleteMe = useDeleteMeMutation();
 
   const handleDeleteAccount = useCallback(async () => {
-    await deleteMe.mutateAsync({});
+    const result = await deleteMe.mutateAsync({});
+    if (!result.deleteMe) {
+      throw new Error("Account deletion failed");
+    }
     logout();
   }, [deleteMe, logout]);
 
