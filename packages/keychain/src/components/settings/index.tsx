@@ -18,10 +18,8 @@ import {
   SheetTrigger,
   SignOutIcon,
 } from "@cartridge/ui";
-import {
-  useControllerQuery,
-  useDeleteMeMutation,
-} from "@cartridge/ui/utils/api/cartridge";
+import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
+import { useDeleteMeMutation } from "@/utils/api";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";
 import { DeleteAccountSection } from "./delete-account-section";
