@@ -326,6 +326,9 @@ export function useCoinbase({
           case "onramp_api.polling_success":
             // Mark terminal immediately so popup-close watcher doesn't interfere
             terminalReachedRef.current = true;
+            // Tell the popup to close now that keychain has acknowledged success
+            console.log("[coinbase-hook] Sending close command to popup");
+            channel.postMessage({ type: "close" });
             // Switch from 15s fallback to fast 1s poll + 15s timeout
             startConfirmationPoll(targetOrderId);
             break;
@@ -380,24 +383,10 @@ export function useCoinbase({
           }
           if (!terminalReachedRef.current) {
             console.log(
-              "[coinbase-hook] No terminal status — polling once before giving up",
+              "[coinbase-hook] No terminal status — stopping poll and setting popupClosed",
             );
-            // The popup auto-closes on success, so the BroadcastChannel message
-            // may not have arrived yet. Poll once to check actual order status
-            // before showing the "Payment Window Closed" error.
-            pollOnce(targetOrderId).finally(() => {
-              if (!terminalReachedRef.current) {
-                console.log(
-                  "[coinbase-hook] Final poll did not resolve — setting popupClosed",
-                );
-                stopPoll();
-                setPopupClosed(true);
-              } else {
-                console.log(
-                  "[coinbase-hook] Final poll resolved terminal status — not showing popupClosed",
-                );
-              }
-            });
+            stopPoll();
+            setPopupClosed(true);
           } else {
             console.log(
               "[coinbase-hook] Terminal already reached — ignoring popup close",
@@ -413,7 +402,6 @@ export function useCoinbase({
       startFallbackPoll,
       startConfirmationPoll,
       stopPoll,
-      pollOnce,
       onError,
     ],
   );
