@@ -7335,7 +7335,11 @@ export type LayerswapStatusQueryVariables = Exact<{
 
 export type LayerswapStatusQuery = {
   __typename?: "Query";
-  layerswapStatus: LayerswapStatus;
+  layerswapStatus: {
+    __typename?: "LayerswapStatusResponse";
+    status: LayerswapStatus;
+    txHash?: string | null;
+  };
 };
 
 export type CoinbaseOnrampTransactionsQueryVariables = Exact<{
@@ -8152,7 +8156,10 @@ export const useLayerswapQuoteQuery = <
   );
 export const LayerswapStatusDocument = `
     query LayerswapStatus($swapId: ID!, $isMainnet: Boolean) {
-  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet)
+  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet) {
+    status
+    txHash
+  }
 }
     `;
 export const useLayerswapStatusQuery = <

@@ -142,7 +142,7 @@ const waitForDeposit = async (
       LayerswapStatusQueryVariables
     >(LayerswapStatusDocument, { swapId, isMainnet });
 
-    const status = result.layerswapStatus;
+    const { status } = result.layerswapStatus;
     if (!status) {
       throw new Error("Swap not found");
     }
