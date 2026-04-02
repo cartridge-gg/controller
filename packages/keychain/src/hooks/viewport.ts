@@ -21,6 +21,18 @@ const isKeyboardInput = (elem: HTMLElement) =>
     )) ||
   elem.hasAttribute("contenteditable");
 
+export function getIOSVersion(userAgentString: string) {
+  const match = userAgentString.match(/Version\/(\d+)\.\d+/);
+  if (match && match[1]) {
+    return parseInt(match[1], 10); // Parse the captured string to an integer
+  }
+  return null; // Return null if not found, or a default like 0
+}
+
+export function isSafari(userAgentString: string) {
+  return /^((?!chrome|android).)*safari/i.test(userAgentString);
+}
+
 /**
  * Hook to detect keyboard state and provide viewport dimensions
  * @param minKeyboardHeight - Minimum height difference to consider keyboard as open (default: 300)
@@ -87,32 +99,23 @@ export function useDetectKeyboardOpen(
   // Support for focus events to detect keyboard on iOS Safari
   useEffect(() => {
     const handleFocusIn = (e: FocusEvent) => {
-      if (!isMobile) {
-        return;
-      }
-
-      if (!e.target) {
-        return;
-      }
-      const target = e.target as HTMLElement;
-      if (isKeyboardInput(target)) {
-        setKeyboardState((st) => ({ ...st, isOpen: true }));
+      if (isMobile && e.target) {
+        const target = e.target as HTMLElement;
+        if (isKeyboardInput(target)) {
+          setKeyboardState((st) => ({ ...st, isOpen: true }));
+        }
       }
     };
-    document.addEventListener("focusin", handleFocusIn);
     const handleFocusOut = (e: FocusEvent) => {
-      if (!isMobile) {
-        return;
-      }
-
-      if (!e.target) {
-        return;
-      }
-      const target = e.target as HTMLElement;
-      if (isKeyboardInput(target)) {
-        setKeyboardState((st) => ({ ...st, isOpen: false }));
+      if (isMobile && e.target) {
+        const target = e.target as HTMLElement;
+        if (isKeyboardInput(target)) {
+          setKeyboardState((st) => ({ ...st, isOpen: false }));
+        }
       }
     };
+
+    document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("focusout", handleFocusOut);
 
     return () => {
