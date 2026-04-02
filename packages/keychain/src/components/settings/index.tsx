@@ -199,13 +199,15 @@ export function Settings() {
               <h3 className="text-lg font-semibold text-foreground-100">
                 {controller.username()}
               </h3>
-              <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
-                <CopyAddress
-                  size="xs"
-                  className="text-sm"
-                  address={controller.address()}
-                />
-              </div>
+              {advanced && (
+                <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
+                  <CopyAddress
+                    size="xs"
+                    className="text-sm"
+                    address={controller.address()}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

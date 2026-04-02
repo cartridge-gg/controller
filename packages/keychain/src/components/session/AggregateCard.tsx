@@ -87,7 +87,7 @@ export function AggregateCard({
               <div key={address} className="flex flex-col gap-2">
                 <div className="py-2 px-1 flex items-center justify-between bg-background-200 text-xs font-medium">
                   <h1 className="text-foregroung-100">{name}</h1>
-                  {advanced ? (
+                  {advanced && (
                     <Link
                       to={
                         controller?.chainId() ===
@@ -102,10 +102,6 @@ export function AggregateCard({
                     >
                       {formatAddress(address, { first: 5, last: 5 })}
                     </Link>
-                  ) : (
-                    <span className="text-foreground-400">
-                      {formatAddress(address, { first: 5, last: 5 })}
-                    </span>
                   )}
                 </div>
 

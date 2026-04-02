@@ -437,6 +437,10 @@ function StackTraceDisplay({
     [explorer],
   );
 
+  if (!advanced) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {stackTrace.map((trace, i, arr) => (

@@ -30,6 +30,7 @@ import {
   HeaderInner,
 } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
+import { useAdvanced } from "@/context/advanced";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "../purchase/Balance";
@@ -51,6 +52,7 @@ export function Deposit(innerProps: DepositProps) {
 function DepositInner({ onComplete }: DepositProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller } = useConnection();
+  const { advanced } = useAdvanced();
   const { account: extAccount } = useAccount();
   const { token: feeToken } = useFeeToken();
   const { toast } = useToast();
@@ -154,7 +156,7 @@ function DepositInner({ onComplete }: DepositProps) {
       <HeaderInner
         title="Deposit"
         description={
-          controller ? (
+          advanced && controller ? (
             <CopyAddress address={controller.address()} />
           ) : undefined
         }
