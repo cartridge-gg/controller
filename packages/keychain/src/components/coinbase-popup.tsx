@@ -93,19 +93,6 @@ export function CoinbasePopup() {
     console.log("[coinbase-popup] Opening BroadcastChannel:", channelName);
     const channel = new BroadcastChannel(channelName);
     channelRef.current = channel;
-
-    // Listen for close command from keychain
-    channel.onmessage = (event: MessageEvent) => {
-      console.log(
-        "[coinbase-popup] BroadcastChannel message received:",
-        event.data,
-      );
-      if (event.data?.type === "close") {
-        console.log("[coinbase-popup] Close command received from keychain");
-        window.close();
-      }
-    };
-
     return () => {
       console.log("[coinbase-popup] Closing BroadcastChannel:", channelName);
       channel.close();

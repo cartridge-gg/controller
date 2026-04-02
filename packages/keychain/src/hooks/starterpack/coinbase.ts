@@ -209,12 +209,11 @@ export function useCoinbase({
           setOrderStatus(CoinbaseOnrampStatus.Completed);
           terminalReachedRef.current = true;
           stopPoll();
-          // Tell the popup to close
+          // Close the popup directly via window reference
           console.log(
-            "[coinbase-hook] Poll detected completed — sending close command to popup, channel:",
-            !!channelRef.current,
+            "[coinbase-hook] Poll detected completed — closing popup directly",
           );
-          channelRef.current?.postMessage({ type: "close" });
+          popupRef.current?.close();
         } else if (result.status === CoinbaseOnrampStatus.Failed) {
           setOrderStatus(CoinbaseOnrampStatus.Failed);
           terminalReachedRef.current = true;
@@ -340,9 +339,9 @@ export function useCoinbase({
           case "onramp_api.polling_success":
             // Mark terminal immediately so popup-close watcher doesn't interfere
             terminalReachedRef.current = true;
-            // Tell the popup to close now that keychain has acknowledged success
-            console.log("[coinbase-hook] Sending close command to popup");
-            channel.postMessage({ type: "close" });
+            // Close the popup directly via window reference
+            console.log("[coinbase-hook] Closing popup directly");
+            popupRef.current?.close();
             // Switch from 15s fallback to fast 1s poll + 15s timeout
             startConfirmationPoll(targetOrderId);
             break;
