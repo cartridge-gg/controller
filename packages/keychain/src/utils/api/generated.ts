@@ -378,6 +378,8 @@ export type Activity = Node & {
   actualFee?: Maybe<Scalars["BigInt"]>;
   controller?: Maybe<Controller>;
   controllerID?: Maybe<Scalars["ID"]>;
+  /** Recalculated credit fee using native USDC oracle price */
+  correctedCreditFee?: Maybe<Scalars["Int"]>;
   createdAt: Scalars["Time"];
   /** Credits fee for the activity */
   creditsFee?: Maybe<Scalars["Int"]>;
@@ -556,6 +558,17 @@ export type ActivityWhereInput = {
   controllerIDNEQ?: InputMaybe<Scalars["ID"]>;
   controllerIDNotIn?: InputMaybe<Array<Scalars["ID"]>>;
   controllerIDNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** corrected_credit_fee field predicates */
+  correctedCreditFee?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeGT?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeGTE?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeIn?: InputMaybe<Array<Scalars["Int"]>>;
+  correctedCreditFeeIsNil?: InputMaybe<Scalars["Boolean"]>;
+  correctedCreditFeeLT?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeLTE?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeNEQ?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeNotIn?: InputMaybe<Array<Scalars["Int"]>>;
+  correctedCreditFeeNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** created_at field predicates */
   createdAt?: InputMaybe<Scalars["Time"]>;
   createdAtGT?: InputMaybe<Scalars["Time"]>;
@@ -5052,6 +5065,8 @@ export type RpcLog = Node & {
   method?: Maybe<Scalars["String"]>;
   /** Starknet network used */
   network: RpcLogNetwork;
+  /** Origin header from the request */
+  origin?: Maybe<Scalars["String"]>;
   /** When billing was processed. NULL indicates not yet processed. */
   processedAt?: Maybe<Scalars["Time"]>;
   /** Referer header from the request */
@@ -5201,6 +5216,22 @@ export type RpcLogWhereInput = {
   networkNotIn?: InputMaybe<Array<RpcLogNetwork>>;
   not?: InputMaybe<RpcLogWhereInput>;
   or?: InputMaybe<Array<RpcLogWhereInput>>;
+  /** origin field predicates */
+  origin?: InputMaybe<Scalars["String"]>;
+  originContains?: InputMaybe<Scalars["String"]>;
+  originContainsFold?: InputMaybe<Scalars["String"]>;
+  originEqualFold?: InputMaybe<Scalars["String"]>;
+  originGT?: InputMaybe<Scalars["String"]>;
+  originGTE?: InputMaybe<Scalars["String"]>;
+  originHasPrefix?: InputMaybe<Scalars["String"]>;
+  originHasSuffix?: InputMaybe<Scalars["String"]>;
+  originIn?: InputMaybe<Array<Scalars["String"]>>;
+  originIsNil?: InputMaybe<Scalars["Boolean"]>;
+  originLT?: InputMaybe<Scalars["String"]>;
+  originLTE?: InputMaybe<Scalars["String"]>;
+  originNEQ?: InputMaybe<Scalars["String"]>;
+  originNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  originNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** processed_at field predicates */
   processedAt?: InputMaybe<Scalars["Time"]>;
   processedAtGT?: InputMaybe<Scalars["Time"]>;

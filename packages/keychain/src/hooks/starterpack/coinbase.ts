@@ -192,6 +192,14 @@ export function useCoinbase({
     async (targetOrderId: string) => {
       try {
         const result = await getCoinbaseOrderStatus(targetOrderId);
+        console.log(
+          "[coinbase-hook] pollOnce result:",
+          result.status,
+          "txHash:",
+          result.txHash,
+          "channel:",
+          !!channelRef.current,
+        );
 
         if (result.txHash) {
           setOrderTxHash(result.txHash);
@@ -202,7 +210,10 @@ export function useCoinbase({
           terminalReachedRef.current = true;
           stopPoll();
           // Tell the popup to close
-          console.log("[coinbase-hook] Poll detected completed — sending close command to popup");
+          console.log(
+            "[coinbase-hook] Poll detected completed — sending close command to popup, channel:",
+            !!channelRef.current,
+          );
           channelRef.current?.postMessage({ type: "close" });
         } else if (result.status === CoinbaseOnrampStatus.Failed) {
           setOrderStatus(CoinbaseOnrampStatus.Failed);
