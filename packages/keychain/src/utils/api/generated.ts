@@ -2527,6 +2527,12 @@ export enum LayerswapStatus {
   PendingUserTransfer = "PENDING_USER_TRANSFER",
 }
 
+export type LayerswapStatusResponse = {
+  __typename?: "LayerswapStatusResponse";
+  status: LayerswapStatus;
+  txHash?: Maybe<Scalars["String"]>;
+};
+
 export type Lock = Node & {
   __typename?: "Lock";
   createdAt: Scalars["Time"];
@@ -4437,7 +4443,7 @@ export type Query = {
   layerswapPayment?: Maybe<LayerswapPayment>;
   layerswapQuote: LayerswapQuote;
   layerswapSources: Array<LayerswapSource>;
-  layerswapStatus: LayerswapStatus;
+  layerswapStatus: LayerswapStatusResponse;
   lookupPaymaster: PaymasterLookupResult;
   me?: Maybe<Account>;
   merkleClaims: MerkleClaimConnection;

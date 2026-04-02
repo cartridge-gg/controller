@@ -70,7 +70,7 @@ export interface UseLayerswapReturn {
 
   // Actions
   onSendDeposit: () => Promise<void>;
-  waitForDeposit: (swapId: string) => Promise<boolean>;
+  waitForDeposit: (swapId: string) => Promise<string>;
 
   // Errors
   depositError: Error | null;
@@ -133,7 +133,7 @@ const estimateLayerswapFees = async (input: CreateLayerswapDepositInput) => {
 const waitForDeposit = async (
   swapId: string,
   isMainnet?: boolean,
-): Promise<boolean> => {
+): Promise<string> => {
   const startTime = Date.now();
 
   while (Date.now() - startTime < DEPOSIT_MAX_WAIT_TIME) {
@@ -142,14 +142,21 @@ const waitForDeposit = async (
       LayerswapStatusQueryVariables
     >(LayerswapStatusDocument, { swapId, isMainnet });
 
-    const { status } = result.layerswapStatus;
+    const { status, txHash } = result.layerswapStatus;
     if (!status) {
       throw new Error("Swap not found");
     }
 
     switch (status as string) {
       case "CONFIRMED":
-        return true;
+        // Keep polling until we have the destination tx hash
+        if (txHash) {
+          return txHash;
+        }
+        await new Promise((resolve) =>
+          setTimeout(resolve, DEPOSIT_POLL_INTERVAL),
+        );
+        break;
       case "FAILED":
         throw new Error(`Deposit failed, swap id: ${swapId}`);
       case "EXPIRED":
