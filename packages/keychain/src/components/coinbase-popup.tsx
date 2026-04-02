@@ -93,6 +93,20 @@ export function CoinbasePopup() {
     console.log("[coinbase-popup] Opening BroadcastChannel:", channelName);
     const channel = new BroadcastChannel(channelName);
     channelRef.current = channel;
+
+    // BroadcastChannel ping-pong test
+    channel.onmessage = (event: MessageEvent) => {
+      console.log("[coinbase-popup] BroadcastChannel received:", event.data);
+      if (event.data?.type === "ping") {
+        console.log("[coinbase-popup] Got ping, sending pong");
+        channel.postMessage({ type: "pong" });
+      }
+    };
+
+    // Send initial ping to keychain
+    console.log("[coinbase-popup] Sending initial ping to keychain");
+    channel.postMessage({ type: "ping" });
+
     return () => {
       console.log("[coinbase-popup] Closing BroadcastChannel:", channelName);
       channel.close();

@@ -323,6 +323,10 @@ export function useCoinbase({
       const channel = new BroadcastChannel(channelName);
       channelRef.current = channel;
 
+      // Send a ping to test BroadcastChannel connectivity
+      console.log("[coinbase-hook] Sending initial ping to popup");
+      channel.postMessage({ type: "ping" });
+
       channel.onmessage = (event: MessageEvent) => {
         console.log(
           "[coinbase-hook] BroadcastChannel onmessage fired:",
@@ -332,6 +336,19 @@ export function useCoinbase({
           type: string;
           data?: { errorCode?: string; errorMessage?: string };
         };
+
+        // Handle ping-pong test
+        if (type === "ping") {
+          console.log("[coinbase-hook] Got ping from popup, sending pong");
+          channel.postMessage({ type: "pong" });
+          return;
+        }
+        if (type === "pong") {
+          console.log(
+            "[coinbase-hook] Got pong from popup — BroadcastChannel works!",
+          );
+          return;
+        }
 
         console.log("[coinbase-hook] BroadcastChannel event:", type, data);
 
