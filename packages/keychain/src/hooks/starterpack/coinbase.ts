@@ -201,6 +201,9 @@ export function useCoinbase({
           setOrderStatus(CoinbaseOnrampStatus.Completed);
           terminalReachedRef.current = true;
           stopPoll();
+          // Tell the popup to close
+          console.log("[coinbase-hook] Poll detected completed — sending close command to popup");
+          channelRef.current?.postMessage({ type: "close" });
         } else if (result.status === CoinbaseOnrampStatus.Failed) {
           setOrderStatus(CoinbaseOnrampStatus.Failed);
           terminalReachedRef.current = true;
