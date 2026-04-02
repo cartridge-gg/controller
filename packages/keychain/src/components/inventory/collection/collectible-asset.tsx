@@ -35,6 +35,7 @@ import {
   getChecksumAddress,
 } from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
+import { useAdvanced } from "@/context/advanced";
 import { ExplorerTransactionLink } from "@/components/ExplorerLink";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CollectionHeader } from "./header";
@@ -56,6 +57,7 @@ export function CollectibleAsset() {
   const account = useAccount();
   const address = account?.address || "";
   const { chainId } = useConnection();
+  const { advanced } = useAdvanced();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [cap, setCap] = useState(OFFSET);
@@ -239,13 +241,15 @@ export function CollectibleAsset() {
                   {properties.length > 0 && (
                     <CollectibleProperties properties={properties} />
                   )}
-                  <CollectibleDetails
-                    chainId={chainId as constants.StarknetChainId}
-                    address={collectible.address}
-                    tokenId={asset.tokenId}
-                    standard={collectible.type}
-                    // owner={username}  // Owner hidden for 1155 since there are several
-                  />
+                  {advanced && (
+                    <CollectibleDetails
+                      chainId={chainId as constants.StarknetChainId}
+                      address={collectible.address}
+                      tokenId={asset.tokenId}
+                      standard={collectible.type}
+                      // owner={username}  // Owner hidden for 1155 since there are several
+                    />
+                  )}
                 </TabsContent>
                 <TabsContent
                   className="m-0 p-0 flex flex-col gap-y-4"

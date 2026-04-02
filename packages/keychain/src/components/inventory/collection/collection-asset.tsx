@@ -33,6 +33,7 @@ import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
 import { useAccount } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
+import { useAdvanced } from "@/context/advanced";
 import { ExplorerTransactionLink } from "@/components/ExplorerLink";
 import { useNavigation } from "@/context/navigation";
 import { createExecuteUrl } from "@/utils/connection/execute";
@@ -41,6 +42,7 @@ const OFFSET = 10;
 
 export function CollectionAsset() {
   const { chainId } = useConnection();
+  const { advanced } = useAdvanced();
   const account = useAccount();
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
@@ -231,16 +233,18 @@ export function CollectionAsset() {
                   {properties.length > 0 && (
                     <CollectibleProperties properties={properties} />
                   )}
-                  <CollectibleDetails
-                    chainId={chainId as constants.StarknetChainId}
-                    address={collection.address}
-                    tokenId={asset.tokenId}
-                    standard={collection.type}
-                    owner={
-                      username ||
-                      asset.owner.slice(0, 6) + "..." + asset.owner.slice(-4)
-                    }
-                  />
+                  {advanced && (
+                    <CollectibleDetails
+                      chainId={chainId as constants.StarknetChainId}
+                      address={collection.address}
+                      tokenId={asset.tokenId}
+                      standard={collection.type}
+                      owner={
+                        username ||
+                        asset.owner.slice(0, 6) + "..." + asset.owner.slice(-4)
+                      }
+                    />
+                  )}
                 </TabsContent>
                 <TabsContent
                   className="m-0 p-0 flex flex-col gap-2"

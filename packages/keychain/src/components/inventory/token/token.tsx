@@ -19,6 +19,7 @@ import { useAccount, useUsernames } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
 import { useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
+import { useAdvanced } from "@/context/advanced";
 import { ExplorerTransactionLink } from "@/components/ExplorerLink";
 import { useVersion } from "@/hooks/version";
 import { useNavigation } from "@/context/navigation";
@@ -116,6 +117,7 @@ function ERC20() {
   const account = useAccount();
   const accountAddress = account?.address || "";
   const { controller } = useConnection();
+  const { advanced } = useAdvanced();
   const { transfers, status } = useData();
   const { isControllerGte } = useVersion();
 
@@ -191,11 +193,13 @@ function ERC20() {
       <LayoutContent>
         <ERC20Header token={token} />
 
-        <ERC20Detail
-          token={token}
-          isPublicChain={isPublicChain(chainId || "")}
-          chainId={chainId as constants.StarknetChainId}
-        />
+        {advanced && (
+          <ERC20Detail
+            token={token}
+            isPublicChain={isPublicChain(chainId || "")}
+            chainId={chainId as constants.StarknetChainId}
+          />
+        )}
 
         {status === "loading" ? (
           <LoadingState rowCount={2} />

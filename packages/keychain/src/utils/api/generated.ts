@@ -5064,6 +5064,8 @@ export type RpcLog = Node & {
   method?: Maybe<Scalars["String"]>;
   /** Starknet network used */
   network: RpcLogNetwork;
+  /** Origin header from the request */
+  origin?: Maybe<Scalars["String"]>;
   /** When billing was processed. NULL indicates not yet processed. */
   processedAt?: Maybe<Scalars["Time"]>;
   /** Referer header from the request */
@@ -5213,6 +5215,22 @@ export type RpcLogWhereInput = {
   networkNotIn?: InputMaybe<Array<RpcLogNetwork>>;
   not?: InputMaybe<RpcLogWhereInput>;
   or?: InputMaybe<Array<RpcLogWhereInput>>;
+  /** origin field predicates */
+  origin?: InputMaybe<Scalars["String"]>;
+  originContains?: InputMaybe<Scalars["String"]>;
+  originContainsFold?: InputMaybe<Scalars["String"]>;
+  originEqualFold?: InputMaybe<Scalars["String"]>;
+  originGT?: InputMaybe<Scalars["String"]>;
+  originGTE?: InputMaybe<Scalars["String"]>;
+  originHasPrefix?: InputMaybe<Scalars["String"]>;
+  originHasSuffix?: InputMaybe<Scalars["String"]>;
+  originIn?: InputMaybe<Array<Scalars["String"]>>;
+  originIsNil?: InputMaybe<Scalars["Boolean"]>;
+  originLT?: InputMaybe<Scalars["String"]>;
+  originLTE?: InputMaybe<Scalars["String"]>;
+  originNEQ?: InputMaybe<Scalars["String"]>;
+  originNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  originNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** processed_at field predicates */
   processedAt?: InputMaybe<Scalars["Time"]>;
   processedAtGT?: InputMaybe<Scalars["Time"]>;
