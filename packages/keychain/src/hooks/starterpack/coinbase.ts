@@ -143,20 +143,22 @@ export function useCoinbase({
   const [orderTxHash, setOrderTxHash] = useState<string | undefined>();
   const [popupClosed, setPopupClosed] = useState(false);
 
-  // Refs for managing the popup and channel lifecycle
+  // Refs for managing the popup and message lifecycle
   const popupRef = useRef<Window | null>(null);
-  const channelRef = useRef<BroadcastChannel | null>(null);
+  const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(
+    null,
+  );
   const popupCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const confirmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Whether a terminal status has been reached (prevents popup-closed from overriding) */
   const terminalReachedRef = useRef(false);
 
-  /** Clean up BroadcastChannel, popup watcher, and poll */
+  /** Clean up message listener, popup watcher, and poll */
   const cleanup = useCallback(() => {
-    if (channelRef.current) {
-      channelRef.current.close();
-      channelRef.current = null;
+    if (messageHandlerRef.current) {
+      window.removeEventListener("message", messageHandlerRef.current);
+      messageHandlerRef.current = null;
     }
     if (popupCheckRef.current) {
       clearInterval(popupCheckRef.current);
@@ -197,8 +199,6 @@ export function useCoinbase({
           result.status,
           "txHash:",
           result.txHash,
-          "channel:",
-          !!channelRef.current,
         );
 
         if (result.txHash) {
@@ -314,43 +314,22 @@ export function useCoinbase({
       );
       popupRef.current = popup;
 
-      // Start slow 15s fallback poll (catches completions even if BroadcastChannel signal is lost)
+      // Start slow 15s fallback poll (catches completions even if postMessage signal is lost)
       startFallbackPoll(targetOrderId);
 
-      // Listen for events from the popup via BroadcastChannel
-      const channelName = `coinbase-payment-${targetOrderId}`;
-      console.log("[coinbase-hook] Opening BroadcastChannel:", channelName);
-      const channel = new BroadcastChannel(channelName);
-      channelRef.current = channel;
+      // Listen for events from the popup via postMessage
+      const handlePopupMessage = (event: MessageEvent) => {
+        // Only handle messages from our origin with the relay flag
+        if (event.origin !== keychainOrigin) return;
+        if (!event.data?.__coinbase_relay) return;
 
-      // Send a ping to test BroadcastChannel connectivity
-      console.log("[coinbase-hook] Sending initial ping to popup");
-      channel.postMessage({ type: "ping" });
-
-      channel.onmessage = (event: MessageEvent) => {
-        console.log(
-          "[coinbase-hook] BroadcastChannel onmessage fired:",
-          event.data,
-        );
         const { type, data } = event.data as {
+          __coinbase_relay: boolean;
           type: string;
           data?: { errorCode?: string; errorMessage?: string };
         };
 
-        // Handle ping-pong test
-        if (type === "ping") {
-          console.log("[coinbase-hook] Got ping from popup, sending pong");
-          channel.postMessage({ type: "pong" });
-          return;
-        }
-        if (type === "pong") {
-          console.log(
-            "[coinbase-hook] Got pong from popup — BroadcastChannel works!",
-          );
-          return;
-        }
-
-        console.log("[coinbase-hook] BroadcastChannel event:", type, data);
+        console.log("[coinbase-hook] postMessage event:", type, data);
 
         switch (type) {
           case "onramp_api.polling_success":
@@ -399,6 +378,9 @@ export function useCoinbase({
             break;
         }
       };
+
+      window.addEventListener("message", handlePopupMessage);
+      messageHandlerRef.current = handlePopupMessage;
 
       // Watch for the popup being closed by the user
       popupCheckRef.current = setInterval(() => {

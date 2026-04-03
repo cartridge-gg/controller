@@ -84,35 +84,23 @@ export function CoinbasePopup() {
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const channelRef = useRef<BroadcastChannel | null>(null);
+  const keychainOrigin = window.location.origin;
 
-  // Open BroadcastChannel scoped to this orderId
+  // Listen for postMessage commands from keychain (e.g. close)
   useEffect(() => {
-    if (!orderId) return;
-    const channelName = `coinbase-payment-${orderId}`;
-    console.log("[coinbase-popup] Opening BroadcastChannel:", channelName);
-    const channel = new BroadcastChannel(channelName);
-    channelRef.current = channel;
-
-    // BroadcastChannel ping-pong test
-    channel.onmessage = (event: MessageEvent) => {
-      console.log("[coinbase-popup] BroadcastChannel received:", event.data);
-      if (event.data?.type === "ping") {
-        console.log("[coinbase-popup] Got ping, sending pong");
-        channel.postMessage({ type: "pong" });
+    const handleKeychainMessage = (event: MessageEvent) => {
+      if (event.origin !== keychainOrigin) return;
+      if (event.data?.__coinbase_relay) return; // Ignore our own relayed events
+      console.log("[coinbase-popup] Message from keychain:", event.data);
+      if (event.data?.type === "close") {
+        console.log("[coinbase-popup] Close command received from keychain");
+        window.close();
       }
     };
 
-    // Send initial ping to keychain
-    console.log("[coinbase-popup] Sending initial ping to keychain");
-    channel.postMessage({ type: "ping" });
-
-    return () => {
-      console.log("[coinbase-popup] Closing BroadcastChannel:", channelName);
-      channel.close();
-      channelRef.current = null;
-    };
-  }, [orderId]);
+    window.addEventListener("message", handleKeychainMessage);
+    return () => window.removeEventListener("message", handleKeychainMessage);
+  }, [keychainOrigin]);
 
   // Listen for Coinbase postMessage events from the iframe
   useEffect(() => {
@@ -167,23 +155,27 @@ export function CoinbasePopup() {
         loadTimeoutRef.current = null;
       }
 
-      // Relay every Coinbase event to the keychain via BroadcastChannel
-      const channel = channelRef.current;
+      // Relay every Coinbase event to the keychain via postMessage
+      const opener = window.opener;
       console.log(
-        "[coinbase-popup] BroadcastChannel relay:",
+        "[coinbase-popup] postMessage relay:",
         data.eventName,
-        "channel open:",
-        !!channel,
+        "opener:",
+        !!opener,
       );
-      if (channel) {
-        channel.postMessage({
-          type: data.eventName,
-          data: data.data,
-        });
-        console.log("[coinbase-popup] Message posted to BroadcastChannel");
+      if (opener) {
+        opener.postMessage(
+          {
+            __coinbase_relay: true,
+            type: data.eventName,
+            data: data.data,
+          },
+          keychainOrigin,
+        );
+        console.log("[coinbase-popup] Message posted via postMessage");
       } else {
         console.error(
-          "[coinbase-popup] BroadcastChannel is null — message NOT relayed!",
+          "[coinbase-popup] window.opener is null — message NOT relayed!",
         );
       }
 
@@ -282,7 +274,7 @@ export function CoinbasePopup() {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [paymentLink]);
+  }, [paymentLink, keychainOrigin]);
 
   // Timeout safety net
   useEffect(() => {
@@ -369,10 +361,14 @@ export function CoinbasePopup() {
                 setFailed(true);
 
                 // Alert the keychain so it can display an appropriate message
-                channelRef.current?.postMessage({
-                  type: "onramp_api.load_error",
-                  data: { errorMessage },
-                });
+                window.opener?.postMessage(
+                  {
+                    __coinbase_relay: true,
+                    type: "onramp_api.load_error",
+                    data: { errorMessage },
+                  },
+                  keychainOrigin,
+                );
               }
             }, LOAD_EVENT_TIMEOUT_MS);
           }}
