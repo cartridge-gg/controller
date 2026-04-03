@@ -86,30 +86,17 @@ export function CoinbasePopup() {
   const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const keychainOrigin = window.location.origin;
 
-  // Listen for postMessage commands from keychain (e.g. close, ping)
+  // Listen for postMessage commands from keychain (e.g. close)
   useEffect(() => {
     const handleKeychainMessage = (event: MessageEvent) => {
       if (event.origin !== keychainOrigin) return;
       if (event.data?.__coinbase_relay) return; // Ignore our own relayed events
       console.log("[coinbase-popup] Message from keychain:", event.data);
-      if (event.data?.type === "ping") {
-        console.log("[coinbase-popup] Got ping from keychain, sending pong");
-        window.opener?.postMessage({ type: "pong" }, keychainOrigin);
-      }
-      if (event.data?.type === "pong") {
-        console.log(
-          "[coinbase-popup] Got pong from keychain — postMessage works!",
-        );
-      }
       if (event.data?.type === "close") {
         console.log("[coinbase-popup] Close command received from keychain");
         window.close();
       }
     };
-
-    // Send initial ping to keychain
-    console.log("[coinbase-popup] Sending ping to keychain via postMessage");
-    window.opener?.postMessage({ type: "ping" }, keychainOrigin);
 
     window.addEventListener("message", handleKeychainMessage);
     return () => window.removeEventListener("message", handleKeychainMessage);
