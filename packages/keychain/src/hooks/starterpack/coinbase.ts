@@ -320,10 +320,30 @@ export function useCoinbase({
       // Start slow 15s fallback poll (catches completions even if postMessage signal is lost)
       startFallbackPoll(targetOrderId);
 
+      // Send initial ping to popup after a short delay (let popup load)
+      setTimeout(() => {
+        console.log("[coinbase-hook] Sending ping to popup via postMessage");
+        popup?.postMessage({ type: "ping" }, keychainOrigin);
+      }, 2000);
+
       // Listen for events from the popup via postMessage
       const handlePopupMessage = (event: MessageEvent) => {
-        // Only handle messages from our origin with the relay flag
         if (event.origin !== keychainOrigin) return;
+
+        // Handle ping-pong test (no __coinbase_relay flag)
+        if (event.data?.type === "ping") {
+          console.log("[coinbase-hook] Got ping from popup, sending pong");
+          popup?.postMessage({ type: "pong" }, keychainOrigin);
+          return;
+        }
+        if (event.data?.type === "pong") {
+          console.log(
+            "[coinbase-hook] Got pong from popup — postMessage works!",
+          );
+          return;
+        }
+
+        // Only handle relay messages beyond this point
         if (!event.data?.__coinbase_relay) return;
 
         const { type, data } = event.data as {
