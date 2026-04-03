@@ -3005,6 +3005,7 @@ export type Mutation = {
   createTeam: Team;
   decreaseBudget: Paymaster;
   deleteDeployment: Scalars["Boolean"];
+  deleteMe: Scalars["Boolean"];
   deleteRpcApiKey: Scalars["Boolean"];
   deleteRpcCorsDomain: Scalars["Boolean"];
   deleteTeam: Scalars["Boolean"];
@@ -7145,6 +7146,13 @@ export type AccountVerifyMutation = {
   accountVerify: boolean;
 };
 
+export type DeleteMeMutationVariables = Exact<{ [key: string]: never }>;
+
+export type DeleteMeMutation = {
+  __typename?: "Mutation";
+  deleteMe: boolean;
+};
+
 export type CryptoPaymentQueryVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -7327,7 +7335,11 @@ export type LayerswapStatusQueryVariables = Exact<{
 
 export type LayerswapStatusQuery = {
   __typename?: "Query";
-  layerswapStatus: LayerswapStatus;
+  layerswapStatus: {
+    __typename?: "LayerswapStatusResponse";
+    status: LayerswapStatus;
+    txHash?: string | null;
+  };
 };
 
 export type CoinbaseOnrampTransactionsQueryVariables = Exact<{
@@ -7849,6 +7861,24 @@ export const useAccountVerifyMutation = <TError = unknown, TContext = unknown>(
     ),
     options,
   );
+export const DeleteMeDocument = `
+    mutation DeleteMe {
+  deleteMe
+}
+    `;
+export const useDeleteMeMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    DeleteMeMutation,
+    TError,
+    DeleteMeMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<DeleteMeMutation, TError, DeleteMeMutationVariables, TContext>(
+    ["DeleteMe"],
+    useFetchData<DeleteMeMutation, DeleteMeMutationVariables>(DeleteMeDocument),
+    options,
+  );
 export const CryptoPaymentDocument = `
     query CryptoPayment($id: ID!) {
   cryptoPayment(id: $id) {
@@ -8126,7 +8156,10 @@ export const useLayerswapQuoteQuery = <
   );
 export const LayerswapStatusDocument = `
     query LayerswapStatus($swapId: ID!, $isMainnet: Boolean) {
-  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet)
+  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet) {
+    status
+    txHash
+  }
 }
     `;
 export const useLayerswapStatusQuery = <
