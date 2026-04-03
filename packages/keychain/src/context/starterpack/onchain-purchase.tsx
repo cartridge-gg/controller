@@ -95,6 +95,8 @@ export interface OnchainPurchaseContextType {
   orderStatus: CoinbaseOnrampStatus | undefined;
   orderTxHash: string | undefined;
   popupClosed: boolean;
+  paymentSuccess: boolean;
+  coinbaseLsSwapId: string | undefined;
 
   // Actions
   onOnchainPurchase: () => Promise<void>;
@@ -104,7 +106,7 @@ export interface OnchainPurchaseContextType {
     chainId?: string,
   ) => Promise<string | undefined>;
   onSendDeposit: () => Promise<void>;
-  waitForDeposit: (swapId: string) => Promise<boolean>;
+  waitForDeposit: (swapId: string) => Promise<string>;
   onApplePaySelect: () => void;
   onStripeSelect: () => void;
   onCreateCoinbaseOrder: (opts?: {
@@ -260,6 +262,9 @@ export const OnchainPurchaseProvider = ({
 
   const [isApplePaySelected, setIsApplePaySelected] = useState(false);
   const [isStripeSelected, setIsStripeSelected] = useState(false);
+  const [coinbaseLsSwapId, setCoinbaseLsSwapId] = useState<
+    string | undefined
+  >();
   const {
     orderId,
     paymentLink,
@@ -272,6 +277,7 @@ export const OnchainPurchaseProvider = ({
     orderStatus,
     orderTxHash,
     popupClosed,
+    paymentSuccess,
     openPaymentPopup,
   } = useCoinbase({
     onError: setDisplayError,
@@ -612,9 +618,15 @@ export const OnchainPurchaseProvider = ({
 
       const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
 
-      return createCoinbaseOrder({
+      const order = await createCoinbaseOrder({
         purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
       });
+
+      if (order?.layerswapPayment?.swapId) {
+        setCoinbaseLsSwapId(order.layerswapPayment.swapId);
+      }
+
+      return order;
     },
     [
       onchainDetails,
@@ -665,6 +677,8 @@ export const OnchainPurchaseProvider = ({
     orderStatus,
     orderTxHash,
     popupClosed,
+    paymentSuccess,
+    coinbaseLsSwapId,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,
