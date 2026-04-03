@@ -123,7 +123,7 @@ const getCoinbaseOrderStatus = async (
  *
  * After creating an order, call `openPaymentPopup()` to open the Coinbase
  * payment link in a new browser popup. The popup relays Coinbase postMessage
- * events back to the keychain via BroadcastChannel. When the popup reports
+ * events back to the keychain via postMessage. When the popup reports
  * success, the hook polls the backend for a confirmed status and txHash.
  */
 export function useCoinbase({
@@ -230,7 +230,7 @@ export function useCoinbase({
     [onError, stopPoll],
   );
 
-  /** Start slow 15s fallback poll (catches completions if BroadcastChannel signal is lost) */
+  /** Start slow 15s fallback poll (catches completions if postMessage signal is lost) */
   const startFallbackPoll = useCallback(
     (targetOrderId: string) => {
       if (pollRef.current) return;
@@ -281,7 +281,7 @@ export function useCoinbase({
     [pollOnce, onError, stopPoll],
   );
 
-  /** Open the payment link in a popup and listen via BroadcastChannel */
+  /** Open the payment link in a popup and listen via postMessage */
   const openPaymentPopup = useCallback(
     (opts?: { paymentLink?: string; orderId?: string }) => {
       const targetPaymentLink = opts?.paymentLink ?? paymentLink;
