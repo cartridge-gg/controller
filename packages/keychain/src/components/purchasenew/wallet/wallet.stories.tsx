@@ -77,6 +77,7 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   orderStatus: undefined,
   orderTxHash: undefined,
   popupClosed: false,
+  paymentSuccess: false,
   coinbaseLsSwapId: undefined,
   getTransactions: async () => [],
 };

@@ -70,6 +70,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     orderStatus: undefined,
     orderTxHash: undefined,
     popupClosed: false,
+    paymentSuccess: false,
     coinbaseLsSwapId: undefined,
     getTransactions: async () => [],
   };

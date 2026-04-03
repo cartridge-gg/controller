@@ -20,6 +20,7 @@ export function CoinbaseCheckout() {
     isCreatingOrder,
     orderStatus,
     popupClosed,
+    paymentSuccess,
     onCreateCoinbaseOrder,
     openPaymentPopup,
   } = useOnchainPurchaseContext();
@@ -34,12 +35,12 @@ export function CoinbaseCheckout() {
     }
   }, [paymentLink, onCreateCoinbaseOrder]);
 
-  // Navigate to pending when order is completed
+  // Navigate to pending when payment success is signaled or order is completed
   useEffect(() => {
-    if (orderStatus === CoinbaseOnrampStatus.Completed) {
+    if (paymentSuccess || orderStatus === CoinbaseOnrampStatus.Completed) {
       navigate("/purchase/pending", { reset: true });
     }
-  }, [orderStatus, navigate]);
+  }, [paymentSuccess, orderStatus, navigate]);
 
   const handleContinue = useCallback(async () => {
     if (isOpeningPopup) return;

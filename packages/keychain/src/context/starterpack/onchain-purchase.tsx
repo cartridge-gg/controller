@@ -95,6 +95,7 @@ export interface OnchainPurchaseContextType {
   orderStatus: CoinbaseOnrampStatus | undefined;
   orderTxHash: string | undefined;
   popupClosed: boolean;
+  paymentSuccess: boolean;
   coinbaseLsSwapId: string | undefined;
 
   // Actions
@@ -276,6 +277,7 @@ export const OnchainPurchaseProvider = ({
     orderStatus,
     orderTxHash,
     popupClosed,
+    paymentSuccess,
     openPaymentPopup,
   } = useCoinbase({
     onError: setDisplayError,
@@ -675,6 +677,7 @@ export const OnchainPurchaseProvider = ({
     orderStatus,
     orderTxHash,
     popupClosed,
+    paymentSuccess,
     coinbaseLsSwapId,
     onOnchainPurchase,
     onExternalConnect,

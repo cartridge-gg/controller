@@ -54,6 +54,7 @@ export interface UseCoinbaseReturn {
   orderStatus: CoinbaseOnrampStatus | undefined;
   orderTxHash: string | undefined;
   popupClosed: boolean;
+  paymentSuccess: boolean;
 
   // Actions
   createOrder: (input: CreateOrderInput) => Promise<CoinbaseOrderResult>;
@@ -142,6 +143,7 @@ export function useCoinbase({
   >();
   const [orderTxHash, setOrderTxHash] = useState<string | undefined>();
   const [popupClosed, setPopupClosed] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   // Refs for managing the popup and message lifecycle
   const popupRef = useRef<Window | null>(null);
@@ -288,6 +290,7 @@ export function useCoinbase({
 
       // Reset state for a new popup session
       setPopupClosed(false);
+      setPaymentSuccess(false);
       setOrderStatus(undefined);
       setOrderTxHash(undefined);
       terminalReachedRef.current = false;
@@ -335,6 +338,8 @@ export function useCoinbase({
           case "onramp_api.polling_success":
             // Mark terminal immediately so popup-close watcher doesn't interfere
             terminalReachedRef.current = true;
+            // Signal success so UI can navigate to bridge screen immediately
+            setPaymentSuccess(true);
             // Close the popup directly via window reference
             console.log("[coinbase-hook] Closing popup directly");
             popupRef.current?.close();
@@ -430,6 +435,7 @@ export function useCoinbase({
         setOrderStatus(undefined);
         setOrderTxHash(undefined);
         setPopupClosed(false);
+        setPaymentSuccess(false);
         terminalReachedRef.current = false;
 
         // Clean up any previous session
@@ -492,6 +498,7 @@ export function useCoinbase({
     orderStatus,
     orderTxHash,
     popupClosed,
+    paymentSuccess,
     createOrder,
     getTransactions,
     getQuote,
