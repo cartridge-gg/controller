@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.13.11] - 2026-04-03
+
+### ✨ New Features
+- **@cartridge/keychain**: Added auto-fallback payment token functionality with persistent selection, enabling seamless payment method switching when primary token fails (#2527)
+- **@cartridge/keychain**: Added IP-based location detection to replace geolocation API for improved accuracy and user privacy (#2526)
+- **@cartridge/keychain**: Added US map display showing blocked states in location gate for clear geographical compliance information (#2522)
+- **@cartridge/keychain**: Added date of birth verification to Stripe payment flow for enhanced compliance and age verification (#2510)
+- **@cartridge/keychain**: Added SMS authentication to signup/login flows, providing phone-based OTP authentication as an alternative to passkeys and social logins (#2500)
+- **@cartridge/keychain**: Added swap detection for AVNU and LayerSwap (LS2) protocols, enabling better transaction recognition and displaying swap review screens (#2493)
+- **@cartridge/keychain**: Added starter pack social claim functionality with X (Twitter) account integration, allowing users to follow and share game accounts to claim bundles (#2498)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced payment processing by hardcoding client percentage to 0 for bundle payments, optimizing fee structure (#2523)
+- **@cartridge/keychain**: Improved mobile UI by fixing hidden password fields on mobile devices for better accessibility (#2535)
+- **@cartridge/keychain**: Enhanced payment flow by passing CustomerSession client secret to Stripe Elements for improved payment processing (#2531)
+- **@cartridge/keychain**: Improved user experience by matching Coinbase phone input format to Stripe verification requirements (#2517)
+- **@cartridge/keychain**: Enhanced miscellaneous controller layout for better visual consistency (#2515)
+- **@cartridge/keychain**: Improved payment UI by renaming "Stripe Checkout" to "Credit Card" for clearer user understanding (#2509)
+- **@cartridge/keychain**: Removed feature gate for Stripe checkout in starterpacks, making credit card payments generally available (#2508)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed disconnect session_controller issue preventing proper session cleanup and user logout (#2537)
+- **@cartridge/keychain**: Fixed Coinbase popup autoclose on payment success to ensure proper payment flow completion (#2532)
+- **@cartridge/keychain**: Fixed token fallback failure by improving fallback mechanism reliability (#2530)
+- **@cartridge/keychain**: Fixed Stripe auto-fallback blocking for non-US users to ensure compliance with regional restrictions (#2529)
+- **@cartridge/keychain**: Fixed KYC verification gating to US users only for proper compliance requirements (#2528)
+- **@cartridge/keychain**: Fixed location gate verification enforcement to ensure verification completes before connect resolves (#2525)
+- **@cartridge/keychain**: Fixed starterpack closure issues for improved stability and user experience (#2516)
+- **@cartridge/keychain**: Fixed Apple Pay not supported error handling in Coinbase checkout by properly ignoring expected errors (#2514)
+- **@cartridge/keychain**: Enhanced WASM error handling and updated controller-wasm to v0.10.0 for improved stability (#2502)
+- **@cartridge/keychain**: Fixed popup blocked error message for Safari users with clearer guidance for enabling popups (#2506)
+- **@cartridge/keychain**: Fixed keychain disconnection by ensuring proper disconnect sequence before state changes (#2505)
+
+### 📦 Dependencies
+- **@cartridge/controller-wasm**: Updated to version 0.10.0 for improved WASM functionality and error handling (#2502)
+- **Turnkey browser SDKs**: Upgraded to version 5 (`@turnkey/sdk-browser` to v5.15.2, `@turnkey/sdk-react` to v5.5.6) for enhanced OTP flow support (#2499)
+
 ## [0.13.11-alpha.2] - 2026-03-30
 
 ### ✨ New Features
