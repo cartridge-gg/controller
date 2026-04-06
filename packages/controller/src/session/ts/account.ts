@@ -6,7 +6,7 @@ import {
   createPolicyProofIndex,
   type SessionRegistration,
 } from "./execution";
-import { signerToGuid } from "./guid";
+import { signerToGuid } from "./shared";
 
 /**
  * Pure TypeScript replacement for the WASM CartridgeSessionAccount class.

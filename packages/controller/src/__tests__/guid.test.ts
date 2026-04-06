@@ -1,5 +1,5 @@
 import { ec, hash, num, shortString, encode } from "starknet";
-import { signerToGuid } from "../session/ts/guid";
+import { signerToGuid } from "../session/ts/shared";
 
 describe("signerToGuid", () => {
   test("produces a valid hex felt", () => {
