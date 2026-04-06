@@ -7234,6 +7234,25 @@ export type StripePaymentQuery = {
   };
 };
 
+export type StripeStarterpackQuoteQueryVariables = Exact<{
+  input: StripeStarterpackQuoteInput;
+}>;
+
+export type StripeStarterpackQuoteQuery = {
+  __typename?: "Query";
+  stripeStarterpackQuote: {
+    __typename?: "StripeStarterpackQuote";
+    paymentToken: string;
+    needsSwap: boolean;
+    pricing: {
+      __typename?: "StripePricingDetails";
+      baseCostInCents: number;
+      processingFeeInCents: number;
+      totalInCents: number;
+    };
+  };
+};
+
 export type LayerswapSourcesQueryVariables = Exact<{
   token: Scalars["String"];
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
@@ -7969,6 +7988,34 @@ export const useStripePaymentQuery = <
     useFetchData<StripePaymentQuery, StripePaymentQueryVariables>(
       StripePaymentDocument,
     ).bind(null, variables),
+    options,
+  );
+export const StripeStarterpackQuoteDocument = `
+    query StripeStarterpackQuote($input: StripeStarterpackQuoteInput!) {
+  stripeStarterpackQuote(input: $input) {
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+    paymentToken
+    needsSwap
+  }
+}
+    `;
+export const useStripeStarterpackQuoteQuery = <
+  TData = StripeStarterpackQuoteQuery,
+  TError = unknown,
+>(
+  variables: StripeStarterpackQuoteQueryVariables,
+  options?: UseQueryOptions<StripeStarterpackQuoteQuery, TError, TData>,
+) =>
+  useQuery<StripeStarterpackQuoteQuery, TError, TData>(
+    ["StripeStarterpackQuote", variables],
+    useFetchData<
+      StripeStarterpackQuoteQuery,
+      StripeStarterpackQuoteQueryVariables
+    >(StripeStarterpackQuoteDocument).bind(null, variables),
     options,
   );
 export const LayerswapSourcesDocument = `

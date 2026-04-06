@@ -17,6 +17,18 @@ query StripePayment($id: ID!) {
   }
 }
 
+query StripeStarterpackQuote($input: StripeStarterpackQuoteInput!) {
+  stripeStarterpackQuote(input: $input) {
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+    paymentToken
+    needsSwap
+  }
+}
+
 query LayerswapSources($token: String!, $isMainnet: Boolean) {
   layerswapSources(token: $token, isMainnet: $isMainnet) {
     name

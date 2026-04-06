@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { num, uint256 } from "starknet";
-import { fetchSwapQuote, USDC_ADDRESSES } from "@/utils/ekubo";
+import { fetchSwapQuote } from "@/utils/ekubo";
 import { isOnchainStarterpack } from "@/context/starterpack/types";
 import type { OnchainStarterpackDetails } from "@/context/starterpack/types";
 import type { TokenOption } from "./token-selection";
@@ -162,14 +162,8 @@ export function useTokenFallback({
 
       if (abortController.signal.aborted) return;
 
-      // No fallback token found - default to Stripe if priced in USDC
-      const usdcAddress = USDC_ADDRESSES[controller.chainId()];
-      if (
-        usdcAddress &&
-        num.toHex(quote.paymentToken) === num.toHex(usdcAddress)
-      ) {
-        onStripeSelect();
-      }
+      // No fallback token found - default to Stripe
+      onStripeSelect();
 
       setIsCheckingFallback(false);
     };

@@ -31,9 +31,7 @@ import { WalletSelector } from "./selector";
 import { QuantityControls } from "./quantity";
 import { WalletSelectionDrawer } from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
-import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { getIpLocation } from "@/utils/ip";
-import { num } from "starknet";
 
 export function OnchainCheckout() {
   const { navigate } = useNavigation();
@@ -138,17 +136,6 @@ export function OnchainCheckout() {
     return quote ? quote.totalCost === BigInt(0) : undefined;
   }, [quote]);
 
-  const isStripeStarterpackSupported = useMemo(() => {
-    if (!controller || !quote) {
-      return true;
-    }
-
-    const usdcAddress = USDC_ADDRESSES[controller.chainId()];
-    return (
-      !!usdcAddress && num.toHex(quote.paymentToken) === num.toHex(usdcAddress)
-    );
-  }, [controller, quote]);
-
   const {
     balanceError,
     bridgeFrom,
@@ -197,7 +184,7 @@ export function OnchainCheckout() {
 
   const globalDisabled = useMemo(() => {
     if (isStripeSelected) {
-      return !isStripeStarterpackSupported || isStripeLoading;
+      return isStripeLoading;
     }
 
     // Disable if there's a fee estimation error (e.g., bridge amount too low)
@@ -231,7 +218,6 @@ export function OnchainCheckout() {
     isApplePaySelected,
     isApplePayAmountTooLow,
     isStripeSelected,
-    isStripeStarterpackSupported,
     isStripeLoading,
   ]);
 
@@ -260,9 +246,12 @@ export function OnchainCheckout() {
 
   const handlePurchase = useCallback(async () => {
     if (isApplePayAmountTooLow) return;
-    if (isStripeSelected) {
-      if (!isStripeStarterpackSupported) return;
-    } else if (!hasSufficientBalance && !isFree && !isApplePaySelected) {
+    if (
+      !isStripeSelected &&
+      !hasSufficientBalance &&
+      !isFree &&
+      !isApplePaySelected
+    ) {
       console.warn("no means to pay");
       return;
     }
@@ -313,7 +302,6 @@ export function OnchainCheckout() {
     hasSufficientBalance,
     isFree,
     isStripeSelected,
-    isStripeStarterpackSupported,
     isApplePaySelected,
     onCreditCardPurchase,
     refetchMe,
@@ -345,23 +333,13 @@ export function OnchainCheckout() {
       const lastMethod = localStorage.getItem(
         `@cartridge/lastPaymentMethod:${controller.chainId()}`,
       );
-      if (
-        lastMethod === "stripe" &&
-        isStripeStarterpackSupported &&
-        countryCode === "US"
-      ) {
+      if (lastMethod === "stripe" && countryCode === "US") {
         onStripeSelect();
       }
     } catch {
       // localStorage may be unavailable
     }
-  }, [
-    controller,
-    quote,
-    isStripeStarterpackSupported,
-    onStripeSelect,
-    countryCode,
-  ]);
+  }, [controller, quote, onStripeSelect, countryCode]);
 
   useEffect(() => {
     clearError();
@@ -454,14 +432,6 @@ export function OnchainCheckout() {
                 variant="warning"
                 title="Amount Too Low"
                 message="Bridge amount is too low for this network. Try increasing quantity or selecting a different network."
-              />
-            )}
-
-            {isStripeSelected && !isStripeStarterpackSupported && (
-              <ErrorCard
-                variant="error"
-                title="Stripe Checkout Unavailable"
-                message="Stripe checkout is only available for starterpacks priced in USDC."
               />
             )}
 

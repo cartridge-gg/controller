@@ -28,6 +28,7 @@ export const OnchainFeesTooltip = ({
   layerswapFees,
   coinbaseQuote,
   stripeFeeInCents,
+  stripeTotalInCents,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
@@ -36,10 +37,9 @@ export const OnchainFeesTooltip = ({
   layerswapFees?: string;
   coinbaseQuote?: CoinbaseQuoteResult;
   stripeFeeInCents?: number;
+  stripeTotalInCents?: number;
 }) => {
   const { decimals, symbol } = quote.paymentTokenMetadata;
-  const baseTotal =
-    Number(quote.totalCost * BigInt(quantity)) / Math.pow(10, decimals);
 
   // Format layerswap fees in USDC (6 decimals)
   const formattedBridgeFee = layerswapFees
@@ -54,12 +54,12 @@ export const OnchainFeesTooltip = ({
 
   const formattedStripeFee =
     stripeFeeInCents !== undefined
-      ? `${(stripeFeeInCents / 100).toFixed(2)} ${symbol}`
+      ? `$${(stripeFeeInCents / 100).toFixed(2)}`
       : null;
 
   const totalWithStripeFee =
-    stripeFeeInCents !== undefined
-      ? `${(baseTotal + stripeFeeInCents / 100).toFixed(2)} ${symbol}`
+    stripeTotalInCents !== undefined
+      ? `$${(stripeTotalInCents / 100).toFixed(2)}`
       : null;
 
   return (

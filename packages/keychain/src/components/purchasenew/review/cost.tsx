@@ -28,7 +28,7 @@ import type { Quote } from "@/context";
 import { useCallback, useMemo, useEffect } from "react";
 import { useOnchainPurchaseContext } from "@/context";
 import { num } from "starknet";
-import { getStarterpackStripeCostDetails } from "./stripe-pricing";
+import { useStripeStarterpackQuote } from "@/hooks/payments/stripe-quote";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -131,13 +131,8 @@ export function OnchainCostBreakdown({
     isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
   const { decimals } = quote.paymentTokenMetadata;
-  const stripeCostDetails = useMemo(() => {
-    if (!isStripeSelected) {
-      return undefined;
-    }
-
-    return getStarterpackStripeCostDetails(quote, quantity);
-  }, [isStripeSelected, quantity, quote]);
+  const { costDetails: stripeCostDetails, isLoading: isStripePriceLoading } =
+    useStripeStarterpackQuote({ enabled: isStripeSelected });
 
   // Get default token (matching quote if available) or fallback to the first available token
   const defaultToken =
@@ -234,16 +229,19 @@ export function OnchainCostBreakdown({
                 layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
                 coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
                 stripeFeeInCents={stripeCostDetails?.processingFeeInCents}
+                stripeTotalInCents={stripeCostDetails?.totalInCents}
               />
             </div>
-            {isFetchingConversion || isFetchingCoinbaseQuote ? (
+            {isFetchingConversion ||
+            isFetchingCoinbaseQuote ||
+            isStripePriceLoading ? (
               <Spinner />
             ) : (
               <div className="flex items-center gap-1.5">
                 {isStripeSelected ? (
                   stripeCostDetails ? (
                     <span className="text-foreground-100">
-                      {formatAmount(stripeCostDetails.totalInCents / 100)}
+                      {`$${formatAmount(stripeCostDetails.totalInCents / 100)}`}
                     </span>
                   ) : (
                     <span className="text-foreground-400">—</span>
