@@ -14,6 +14,7 @@ import {
   Button,
   CreditCardIcon,
   HeaderInner,
+  Input,
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/ui";
@@ -38,11 +39,12 @@ export default function CheckoutForm({
 
   const verifiedFirstName = accountPrivate?.accountPrivate?.firstName ?? "";
   const verifiedLastName = accountPrivate?.accountPrivate?.lastName ?? "";
-  const defaultName =
+  const verifiedName =
     verifiedFirstName && verifiedLastName
       ? `${verifiedFirstName} ${verifiedLastName}`
-      : undefined;
+      : "";
 
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
@@ -51,6 +53,12 @@ export default function CheckoutForm({
     e.preventDefault();
 
     if (!stripe || !elements) {
+      return;
+    }
+
+    const billingName = verifiedName || name.trim();
+    if (!billingName) {
+      setError(new Error("Please enter your name."));
       return;
     }
 
@@ -65,6 +73,11 @@ export default function CheckoutForm({
         elements,
         confirmParams: {
           return_url: "http://cartridge.gg",
+          payment_method_data: {
+            billing_details: {
+              name: billingName,
+            },
+          },
         },
         redirect: "if_required",
       });
@@ -94,11 +107,6 @@ export default function CheckoutForm({
 
   const paymentElementOptions: StripePaymentElementOptions = {
     layout: "tabs",
-    defaultValues: {
-      billingDetails: {
-        name: defaultName ?? "",
-      },
-    },
   };
 
   return (
@@ -112,7 +120,27 @@ export default function CheckoutForm({
       isSubmitting={isSubmitting}
       handleSubmit={handleSubmit}
     >
-      <form id="payment-form">
+      <form id="payment-form" className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <label style={{ color: "#505050", fontSize: "13px" }}>Name</label>
+          <Input
+            name="name"
+            autoComplete="name"
+            placeholder="Full name"
+            value={verifiedName || name}
+            readOnly={!!verifiedName}
+            onChange={
+              verifiedName
+                ? undefined
+                : (e: React.ChangeEvent<HTMLInputElement>) => {
+                    setName(e.target.value);
+                    setError(undefined);
+                  }
+            }
+            type="text"
+            className={`focus-visible:border-background-300 focus-visible:bg-background-200 ${verifiedName ? "opacity-70" : ""}`}
+          />
+        </div>
         <PaymentElement
           id="payment-element"
           options={paymentElementOptions}
