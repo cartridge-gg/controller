@@ -4,13 +4,13 @@ import {
   hashPolicyLeaf,
   computePolicyMerkle,
   computePolicyMerkleProofs,
-} from "../session/ts/merkle";
+} from "../session/internal/merkle";
 import type {
   CallPolicy,
   TypedDataPolicy,
   ApprovalPolicy,
   Policy,
-} from "../session/ts/types";
+} from "../session/internal/types";
 
 const SELECTOR_TRANSFER = hash.getSelectorFromName("transfer");
 const SELECTOR_APPROVE = hash.getSelectorFromName("approve");

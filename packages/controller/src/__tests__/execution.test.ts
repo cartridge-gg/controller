@@ -2,13 +2,13 @@ import { ec, encode, hash, shortString } from "starknet";
 import {
   buildSignedOutsideExecutionV3,
   createPolicyProofIndex,
-} from "../session/ts/execution";
+} from "../session/internal/execution";
 import {
   computePolicyMerkle,
   computePolicyMerkleProofs,
-} from "../session/ts/merkle";
-import type { CallPolicy } from "../session/ts/types";
-import { normalizeFelt } from "../session/ts/shared";
+} from "../session/internal/merkle";
+import type { CallPolicy } from "../session/internal/types";
+import { normalizeFelt } from "../session/internal/shared";
 
 const TEST_PRIVATE_KEY = "0x1";
 const TEST_ADDRESS =
