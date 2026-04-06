@@ -2,7 +2,7 @@ import { ec, encode, hash, shortString } from "starknet";
 import {
   buildSignedOutsideExecutionV3,
   createPolicyProofIndex,
-} from "../session/ts/outside-execution";
+} from "../session/ts/execution";
 import {
   computePolicyMerkle,
   computePolicyMerkleProofs,
