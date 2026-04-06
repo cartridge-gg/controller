@@ -37,8 +37,12 @@ export default function CheckoutForm({
   const elements = useElements();
   const { data: accountPrivate } = useAccountPrivateQuery();
 
-  const firstName = accountPrivate?.accountPrivate?.firstName ?? "";
-  const lastName = accountPrivate?.accountPrivate?.lastName ?? "";
+  const verifiedFirstName = accountPrivate?.accountPrivate?.firstName ?? "";
+  const verifiedLastName = accountPrivate?.accountPrivate?.lastName ?? "";
+  const isVerified = !!verifiedFirstName && !!verifiedLastName;
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
@@ -50,7 +54,10 @@ export default function CheckoutForm({
       return;
     }
 
-    if (!firstName.trim() || !lastName.trim()) {
+    const finalFirstName = isVerified ? verifiedFirstName : firstName.trim();
+    const finalLastName = isVerified ? verifiedLastName : lastName.trim();
+
+    if (!finalFirstName || !finalLastName) {
       setError(new Error("Please enter your first and last name."));
       return;
     }
@@ -68,7 +75,7 @@ export default function CheckoutForm({
           return_url: "http://cartridge.gg",
           payment_method_data: {
             billing_details: {
-              name: `${firstName.trim()} ${lastName.trim()}`,
+              name: `${finalFirstName} ${finalLastName}`,
             },
           },
         },
@@ -126,11 +133,20 @@ export default function CheckoutForm({
             </label>
             <Input
               name="firstName"
+              autoComplete="given-name"
               placeholder="First name"
-              value={firstName}
-              readOnly
+              value={isVerified ? verifiedFirstName : firstName}
+              readOnly={isVerified}
+              onChange={
+                isVerified
+                  ? undefined
+                  : (e: React.ChangeEvent<HTMLInputElement>) => {
+                      setFirstName(e.target.value);
+                      setError(undefined);
+                    }
+              }
               type="text"
-              className="opacity-70"
+              className={isVerified ? "opacity-70" : ""}
             />
           </div>
           <div className="flex flex-col gap-2 flex-1">
@@ -139,11 +155,20 @@ export default function CheckoutForm({
             </label>
             <Input
               name="lastName"
+              autoComplete="family-name"
               placeholder="Last name"
-              value={lastName}
-              readOnly
+              value={isVerified ? verifiedLastName : lastName}
+              readOnly={isVerified}
+              onChange={
+                isVerified
+                  ? undefined
+                  : (e: React.ChangeEvent<HTMLInputElement>) => {
+                      setLastName(e.target.value);
+                      setError(undefined);
+                    }
+              }
               type="text"
-              className="opacity-70"
+              className={isVerified ? "opacity-70" : ""}
             />
           </div>
         </div>
