@@ -1,7 +1,7 @@
 import { ec, stark, WalletAccount } from "starknet";
 
-import { signerToGuid } from "./ts/shared";
-import { subscribeCreateSession } from "./ts/subscribe";
+import { signerToGuid } from "./internal/shared";
+import { subscribeCreateSession } from "./internal/subscribe";
 import { loadConfig, SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
 import { encode } from "starknet";

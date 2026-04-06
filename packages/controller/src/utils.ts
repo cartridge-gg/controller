@@ -1,4 +1,4 @@
-import type { Policy, ApprovalPolicy } from "./session/ts/types";
+import type { Policy, ApprovalPolicy } from "./session/internal/types";
 import { Policies, SessionPolicies } from "@cartridge/presets";
 import { ChainId } from "@starknet-io/types-js";
 import {

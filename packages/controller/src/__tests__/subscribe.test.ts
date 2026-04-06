@@ -1,5 +1,5 @@
-import { subscribeCreateSession } from "../session/ts/subscribe";
-import { SessionTimeoutError } from "../session/ts/errors";
+import { subscribeCreateSession } from "../session/internal/subscribe";
+import { SessionTimeoutError } from "../session/internal/errors";
 
 // Mock global fetch
 const mockFetch = jest.fn();
