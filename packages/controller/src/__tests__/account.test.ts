@@ -1,5 +1,5 @@
 import { hash } from "starknet";
-import { CartridgeSessionAccount } from "../session/ts/session-account";
+import { CartridgeSessionAccount } from "../session/ts/account";
 import type { CallPolicy, Session } from "../session/ts/types";
 import { normalizeFelt } from "../session/ts/shared";
 

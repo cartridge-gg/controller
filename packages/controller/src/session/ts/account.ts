@@ -5,7 +5,7 @@ import {
   buildSignedOutsideExecutionV3,
   createPolicyProofIndex,
   type SessionRegistration,
-} from "./outside-execution";
+} from "./execution";
 import { signerToGuid } from "./guid";
 
 /**
