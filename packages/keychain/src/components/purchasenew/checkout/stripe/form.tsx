@@ -14,11 +14,13 @@ import {
   Button,
   CreditCardIcon,
   HeaderInner,
+  Input,
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { CostBreakdown } from "../../review/cost";
+import { useAccountPrivateQuery } from "@/utils/api";
 
 type CheckoutFormProps = {
   cost: CostDetails;
@@ -33,7 +35,10 @@ export default function CheckoutForm({
 }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
+  const { data: accountPrivate } = useAccountPrivateQuery();
 
+  const firstName = accountPrivate?.accountPrivate?.firstName ?? "";
+  const lastName = accountPrivate?.accountPrivate?.lastName ?? "";
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
@@ -42,6 +47,11 @@ export default function CheckoutForm({
     e.preventDefault();
 
     if (!stripe || !elements) {
+      return;
+    }
+
+    if (!firstName.trim() || !lastName.trim()) {
+      setError(new Error("Please enter your first and last name."));
       return;
     }
 
@@ -56,6 +66,11 @@ export default function CheckoutForm({
         elements,
         confirmParams: {
           return_url: "http://cartridge.gg",
+          payment_method_data: {
+            billing_details: {
+              name: `${firstName.trim()} ${lastName.trim()}`,
+            },
+          },
         },
         redirect: "if_required",
       });
@@ -85,6 +100,11 @@ export default function CheckoutForm({
 
   const paymentElementOptions: StripePaymentElementOptions = {
     layout: "tabs",
+    fields: {
+      billingDetails: {
+        name: "never",
+      },
+    },
   };
 
   return (
@@ -98,7 +118,35 @@ export default function CheckoutForm({
       isSubmitting={isSubmitting}
       handleSubmit={handleSubmit}
     >
-      <form id="payment-form">
+      <form id="payment-form" className="flex flex-col gap-4">
+        <div className="flex gap-2">
+          <div className="flex flex-col gap-2 flex-1">
+            <label className="text-xs text-foreground-300 font-medium">
+              First Name
+            </label>
+            <Input
+              name="firstName"
+              placeholder="First name"
+              value={firstName}
+              readOnly
+              type="text"
+              className="opacity-70"
+            />
+          </div>
+          <div className="flex flex-col gap-2 flex-1">
+            <label className="text-xs text-foreground-300 font-medium">
+              Last Name
+            </label>
+            <Input
+              name="lastName"
+              placeholder="Last name"
+              value={lastName}
+              readOnly
+              type="text"
+              className="opacity-70"
+            />
+          </div>
+        </div>
         <PaymentElement
           id="payment-element"
           options={paymentElementOptions}
