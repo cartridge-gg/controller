@@ -2,21 +2,23 @@
  * Pure TypeScript equivalents of the WASM session types.
  */
 
+export type Felt252 = string;
+
 export interface CallPolicy {
-  target: string;
-  method: string;
+  target: Felt252;
+  method: Felt252;
   authorized?: boolean;
 }
 
 export interface TypedDataPolicy {
-  scope_hash: string;
+  scope_hash: Felt252;
   authorized?: boolean;
 }
 
 export interface ApprovalPolicy {
-  target: string;
-  spender: string;
-  amount: string;
+  target: Felt252;
+  spender: Felt252;
+  amount: Felt252;
 }
 
 export type Policy = CallPolicy | TypedDataPolicy | ApprovalPolicy;
@@ -24,15 +26,15 @@ export type Policy = CallPolicy | TypedDataPolicy | ApprovalPolicy;
 export interface Session {
   policies: Policy[];
   expiresAt: number;
-  metadataHash: string;
-  sessionKeyGuid: string;
-  guardianKeyGuid: string;
+  metadataHash: Felt252;
+  sessionKeyGuid: Felt252;
+  guardianKeyGuid: Felt252;
 }
 
 export interface SessionCall {
-  contractAddress: string;
+  contractAddress: Felt252;
   entrypoint: string;
-  calldata: string[];
+  calldata: Felt252[];
 }
 
 export interface Signer {
@@ -40,5 +42,5 @@ export interface Signer {
 }
 
 export interface StarknetSigner {
-  privateKey: string;
+  privateKey: Felt252;
 }
