@@ -14,7 +14,6 @@ import {
   Button,
   CreditCardIcon,
   HeaderInner,
-  Input,
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/ui";
@@ -39,10 +38,11 @@ export default function CheckoutForm({
 
   const verifiedFirstName = accountPrivate?.accountPrivate?.firstName ?? "";
   const verifiedLastName = accountPrivate?.accountPrivate?.lastName ?? "";
-  const isVerified = !!verifiedFirstName && !!verifiedLastName;
+  const defaultName =
+    verifiedFirstName && verifiedLastName
+      ? `${verifiedFirstName} ${verifiedLastName}`
+      : undefined;
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
@@ -51,14 +51,6 @@ export default function CheckoutForm({
     e.preventDefault();
 
     if (!stripe || !elements) {
-      return;
-    }
-
-    const finalFirstName = isVerified ? verifiedFirstName : firstName.trim();
-    const finalLastName = isVerified ? verifiedLastName : lastName.trim();
-
-    if (!finalFirstName || !finalLastName) {
-      setError(new Error("Please enter your first and last name."));
       return;
     }
 
@@ -73,11 +65,6 @@ export default function CheckoutForm({
         elements,
         confirmParams: {
           return_url: "http://cartridge.gg",
-          payment_method_data: {
-            billing_details: {
-              name: `${finalFirstName} ${finalLastName}`,
-            },
-          },
         },
         redirect: "if_required",
       });
@@ -107,9 +94,9 @@ export default function CheckoutForm({
 
   const paymentElementOptions: StripePaymentElementOptions = {
     layout: "tabs",
-    fields: {
+    defaultValues: {
       billingDetails: {
-        name: "never",
+        name: defaultName ?? "",
       },
     },
   };
@@ -125,53 +112,7 @@ export default function CheckoutForm({
       isSubmitting={isSubmitting}
       handleSubmit={handleSubmit}
     >
-      <form id="payment-form" className="flex flex-col gap-4">
-        <div className="flex gap-2">
-          <div className="flex flex-col gap-2 flex-1">
-            <label className="text-xs text-foreground-300 font-medium">
-              First Name
-            </label>
-            <Input
-              name="firstName"
-              autoComplete="given-name"
-              placeholder="First name"
-              value={isVerified ? verifiedFirstName : firstName}
-              readOnly={isVerified}
-              onChange={
-                isVerified
-                  ? undefined
-                  : (e: React.ChangeEvent<HTMLInputElement>) => {
-                      setFirstName(e.target.value);
-                      setError(undefined);
-                    }
-              }
-              type="text"
-              className={isVerified ? "opacity-70" : ""}
-            />
-          </div>
-          <div className="flex flex-col gap-2 flex-1">
-            <label className="text-xs text-foreground-300 font-medium">
-              Last Name
-            </label>
-            <Input
-              name="lastName"
-              autoComplete="family-name"
-              placeholder="Last name"
-              value={isVerified ? verifiedLastName : lastName}
-              readOnly={isVerified}
-              onChange={
-                isVerified
-                  ? undefined
-                  : (e: React.ChangeEvent<HTMLInputElement>) => {
-                      setLastName(e.target.value);
-                      setError(undefined);
-                    }
-              }
-              type="text"
-              className={isVerified ? "opacity-70" : ""}
-            />
-          </div>
-        </div>
+      <form id="payment-form">
         <PaymentElement
           id="payment-element"
           options={paymentElementOptions}
