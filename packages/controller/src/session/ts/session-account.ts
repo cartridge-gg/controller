@@ -12,7 +12,7 @@ import { signerToGuid } from "./guid";
  * Pure TypeScript replacement for the WASM CartridgeSessionAccount class.
  * Provides the same `newAsRegistered`, `executeFromOutside`, and `execute` interface.
  */
-export class TsSessionAccount {
+export class CartridgeSessionAccount {
   private _rpcUrl: string;
   private _privateKey: string;
   private _address: string;
@@ -56,8 +56,8 @@ export class TsSessionAccount {
     ownerGuid: string,
     chainId: string,
     session: Session,
-  ): TsSessionAccount {
-    return new TsSessionAccount(
+  ): CartridgeSessionAccount {
+    return new CartridgeSessionAccount(
       rpcUrl,
       signer,
       address,
