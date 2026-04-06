@@ -57,7 +57,9 @@ export function StripeCheckout() {
       ".Input": {
         border: "1px solid #242824",
         color: "#FFFFFF",
-        padding: "14px",
+        padding: "0 16px",
+        height: "40px",
+        lineHeight: "40px",
       },
     },
   } as Appearance;

@@ -378,8 +378,6 @@ export type Activity = Node & {
   actualFee?: Maybe<Scalars["BigInt"]>;
   controller?: Maybe<Controller>;
   controllerID?: Maybe<Scalars["ID"]>;
-  /** Recalculated credit fee using native USDC oracle price */
-  correctedCreditFee?: Maybe<Scalars["Int"]>;
   createdAt: Scalars["Time"];
   /** Credits fee for the activity */
   creditsFee?: Maybe<Scalars["Int"]>;
@@ -558,17 +556,6 @@ export type ActivityWhereInput = {
   controllerIDNEQ?: InputMaybe<Scalars["ID"]>;
   controllerIDNotIn?: InputMaybe<Array<Scalars["ID"]>>;
   controllerIDNotNil?: InputMaybe<Scalars["Boolean"]>;
-  /** corrected_credit_fee field predicates */
-  correctedCreditFee?: InputMaybe<Scalars["Int"]>;
-  correctedCreditFeeGT?: InputMaybe<Scalars["Int"]>;
-  correctedCreditFeeGTE?: InputMaybe<Scalars["Int"]>;
-  correctedCreditFeeIn?: InputMaybe<Array<Scalars["Int"]>>;
-  correctedCreditFeeIsNil?: InputMaybe<Scalars["Boolean"]>;
-  correctedCreditFeeLT?: InputMaybe<Scalars["Int"]>;
-  correctedCreditFeeLTE?: InputMaybe<Scalars["Int"]>;
-  correctedCreditFeeNEQ?: InputMaybe<Scalars["Int"]>;
-  correctedCreditFeeNotIn?: InputMaybe<Array<Scalars["Int"]>>;
-  correctedCreditFeeNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** created_at field predicates */
   createdAt?: InputMaybe<Scalars["Time"]>;
   createdAtGT?: InputMaybe<Scalars["Time"]>;
@@ -4474,6 +4461,7 @@ export type Query = {
   starterpack?: Maybe<StarterpackDetails>;
   streaks: StreakResult;
   stripePayment: StripePayment;
+  stripeStarterpackQuote: StripeStarterpackQuote;
   subscribeCreateSession?: Maybe<Session>;
   team?: Maybe<Team>;
   teams?: Maybe<TeamConnection>;
@@ -4765,6 +4753,10 @@ export type QueryStreaksArgs = {
 
 export type QueryStripePaymentArgs = {
   id: Scalars["ID"];
+};
+
+export type QueryStripeStarterpackQuoteArgs = {
+  input: StripeStarterpackQuoteInput;
 };
 
 export type QuerySubscribeCreateSessionArgs = {
@@ -6416,6 +6408,23 @@ export type StripePricingDetails = {
   totalInCents: Scalars["Int"];
 };
 
+export type StripeStarterpackQuote = {
+  __typename?: "StripeStarterpackQuote";
+  needsSwap: Scalars["Boolean"];
+  paymentToken: Scalars["String"];
+  pricing: StripePricingDetails;
+};
+
+export type StripeStarterpackQuoteInput = {
+  clientPercentage?: InputMaybe<Scalars["Int"]>;
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  quantity: Scalars["Int"];
+  referral?: InputMaybe<Scalars["String"]>;
+  referralGroup?: InputMaybe<Scalars["String"]>;
+  registryAddress: Scalars["String"];
+  starterpackId: Scalars["String"];
+};
+
 export type Team = Node & {
   __typename?: "Team";
   address?: Maybe<Scalars["String"]>;
@@ -7185,10 +7194,7 @@ export type AccountVerifyMutation = {
 
 export type DeleteMeMutationVariables = Exact<{ [key: string]: never }>;
 
-export type DeleteMeMutation = {
-  __typename?: "Mutation";
-  deleteMe: boolean;
-};
+export type DeleteMeMutation = { __typename?: "Mutation"; deleteMe: boolean };
 
 export type CryptoPaymentQueryVariables = Exact<{
   id: Scalars["ID"];
