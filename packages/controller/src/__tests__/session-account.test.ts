@@ -1,0 +1,155 @@
+import { hash } from "starknet";
+import { TsSessionAccount } from "../session/ts/session-account";
+import type { CallPolicy, Session } from "../session/ts/types";
+import { normalizeFelt } from "../session/ts/shared";
+
+// Mock global fetch
+const mockFetch = jest.fn();
+(global as any).fetch = mockFetch;
+
+beforeEach(() => {
+  mockFetch.mockReset();
+});
+
+const TRANSFER_SELECTOR = normalizeFelt(hash.getSelectorFromName("transfer"));
+const TEST_RPC = "https://rpc.test";
+const TEST_PRIVATE_KEY = "0x1";
+const TEST_ADDRESS = "0x1234";
+const TEST_OWNER_GUID = "0x5678";
+const TEST_CHAIN_ID = "SN_SEPOLIA";
+
+const TEST_POLICIES: CallPolicy[] = [
+  {
+    target:
+      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+    method: TRANSFER_SELECTOR,
+    authorized: true,
+  },
+];
+
+const TEST_SESSION: Session = {
+  policies: TEST_POLICIES,
+  expiresAt: 9999999999,
+  metadataHash: "0x0",
+  sessionKeyGuid: "0x0",
+  guardianKeyGuid: "0x0",
+};
+
+describe("TsSessionAccount", () => {
+  test("newAsRegistered creates an instance", () => {
+    const account = TsSessionAccount.newAsRegistered(
+      TEST_RPC,
+      TEST_PRIVATE_KEY,
+      TEST_ADDRESS,
+      TEST_OWNER_GUID,
+      TEST_CHAIN_ID,
+      TEST_SESSION,
+    );
+    expect(account).toBeInstanceOf(TsSessionAccount);
+  });
+
+  test("executeFromOutside sends correct RPC request", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        jsonrpc: "2.0",
+        id: 1,
+        result: { transaction_hash: "0xtxhash" },
+      }),
+    });
+
+    const account = TsSessionAccount.newAsRegistered(
+      TEST_RPC,
+      TEST_PRIVATE_KEY,
+      TEST_ADDRESS,
+      TEST_OWNER_GUID,
+      TEST_CHAIN_ID,
+      TEST_SESSION,
+    );
+
+    const result = await account.executeFromOutside([
+      {
+        contractAddress:
+          "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        entrypoint: "transfer",
+        calldata: ["0x1", "0x2", "0x0"],
+      },
+    ]);
+
+    expect(result.transaction_hash).toBe("0xtxhash");
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toBe(TEST_RPC);
+    const body = JSON.parse(options.body);
+    expect(body.method).toBe("cartridge_addExecuteOutsideTransaction");
+    expect(body.params.address).toBe(TEST_ADDRESS);
+    expect(body.params.outside_execution).toBeDefined();
+    expect(body.params.signature).toBeDefined();
+    expect(Array.isArray(body.params.signature)).toBe(true);
+  });
+
+  test("executeFromOutside throws on RPC error", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        jsonrpc: "2.0",
+        id: 1,
+        error: { code: -32000, message: "execution failed" },
+      }),
+    });
+
+    const account = TsSessionAccount.newAsRegistered(
+      TEST_RPC,
+      TEST_PRIVATE_KEY,
+      TEST_ADDRESS,
+      TEST_OWNER_GUID,
+      TEST_CHAIN_ID,
+      TEST_SESSION,
+    );
+
+    await expect(
+      account.executeFromOutside([
+        {
+          contractAddress:
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          entrypoint: "transfer",
+          calldata: [],
+        },
+      ]),
+    ).rejects.toThrow("execution failed");
+  });
+
+  test("execute sends correct RPC request", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        jsonrpc: "2.0",
+        id: 1,
+        result: { transaction_hash: "0xtxhash2" },
+      }),
+    });
+
+    const account = TsSessionAccount.newAsRegistered(
+      TEST_RPC,
+      TEST_PRIVATE_KEY,
+      TEST_ADDRESS,
+      TEST_OWNER_GUID,
+      TEST_CHAIN_ID,
+      TEST_SESSION,
+    );
+
+    const result = await account.execute([
+      {
+        contractAddress:
+          "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        entrypoint: "transfer",
+        calldata: ["0x1"],
+      },
+    ]);
+
+    expect(result.transaction_hash).toBe("0xtxhash2");
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.method).toBe("starknet_addInvokeTransaction");
+  });
+});

@@ -1,9 +1,7 @@
 import { ec, stark, WalletAccount } from "starknet";
 
-import {
-  signerToGuid,
-  subscribeCreateSession,
-} from "@cartridge/controller-wasm";
+import { signerToGuid } from "./ts/guid";
+import { subscribeCreateSession } from "./ts/subscribe";
 import { loadConfig, SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
 import { encode } from "starknet";
