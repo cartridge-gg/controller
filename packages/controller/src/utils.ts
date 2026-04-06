@@ -1,4 +1,4 @@
-import { Policy, ApprovalPolicy } from "@cartridge/controller-wasm/controller";
+import type { Policy, ApprovalPolicy } from "./session/ts/types";
 import { Policies, SessionPolicies } from "@cartridge/presets";
 import { ChainId } from "@starknet-io/types-js";
 import {
