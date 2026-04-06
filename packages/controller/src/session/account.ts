@@ -1,5 +1,5 @@
 import type { Policy } from "./ts/types";
-import { TsSessionAccount as CartridgeSessionAccount } from "./ts/session-account";
+import { CartridgeSessionAccount } from "./ts/session-account";
 import { Call, InvokeFunctionResponse, WalletAccount } from "starknet";
 
 import { normalizeCalls } from "../utils";

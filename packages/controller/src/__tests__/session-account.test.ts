@@ -1,5 +1,5 @@
 import { hash } from "starknet";
-import { TsSessionAccount } from "../session/ts/session-account";
+import { CartridgeSessionAccount } from "../session/ts/session-account";
 import type { CallPolicy, Session } from "../session/ts/types";
 import { normalizeFelt } from "../session/ts/shared";
 
@@ -35,9 +35,9 @@ const TEST_SESSION: Session = {
   guardianKeyGuid: "0x0",
 };
 
-describe("TsSessionAccount", () => {
+describe("CartridgeSessionAccount", () => {
   test("newAsRegistered creates an instance", () => {
-    const account = TsSessionAccount.newAsRegistered(
+    const account = CartridgeSessionAccount.newAsRegistered(
       TEST_RPC,
       TEST_PRIVATE_KEY,
       TEST_ADDRESS,
@@ -45,7 +45,7 @@ describe("TsSessionAccount", () => {
       TEST_CHAIN_ID,
       TEST_SESSION,
     );
-    expect(account).toBeInstanceOf(TsSessionAccount);
+    expect(account).toBeInstanceOf(CartridgeSessionAccount);
   });
 
   test("executeFromOutside sends correct RPC request", async () => {
@@ -58,7 +58,7 @@ describe("TsSessionAccount", () => {
       }),
     });
 
-    const account = TsSessionAccount.newAsRegistered(
+    const account = CartridgeSessionAccount.newAsRegistered(
       TEST_RPC,
       TEST_PRIVATE_KEY,
       TEST_ADDRESS,
@@ -99,7 +99,7 @@ describe("TsSessionAccount", () => {
       }),
     });
 
-    const account = TsSessionAccount.newAsRegistered(
+    const account = CartridgeSessionAccount.newAsRegistered(
       TEST_RPC,
       TEST_PRIVATE_KEY,
       TEST_ADDRESS,
@@ -130,7 +130,7 @@ describe("TsSessionAccount", () => {
       }),
     });
 
-    const account = TsSessionAccount.newAsRegistered(
+    const account = CartridgeSessionAccount.newAsRegistered(
       TEST_RPC,
       TEST_PRIVATE_KEY,
       TEST_ADDRESS,
