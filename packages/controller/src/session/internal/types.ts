@@ -1,25 +1,22 @@
 /**
  * Pure TypeScript equivalents of the WASM session types.
- * Structurally identical to @cartridge/controller-wasm session_wasm.d.ts.
  */
 
-export type JsFelt = string;
-
 export interface CallPolicy {
-  target: JsFelt;
-  method: JsFelt;
+  target: string;
+  method: string;
   authorized?: boolean;
 }
 
 export interface TypedDataPolicy {
-  scope_hash: JsFelt;
+  scope_hash: string;
   authorized?: boolean;
 }
 
 export interface ApprovalPolicy {
-  target: JsFelt;
-  spender: JsFelt;
-  amount: JsFelt;
+  target: string;
+  spender: string;
+  amount: string;
 }
 
 export type Policy = CallPolicy | TypedDataPolicy | ApprovalPolicy;
@@ -27,15 +24,15 @@ export type Policy = CallPolicy | TypedDataPolicy | ApprovalPolicy;
 export interface Session {
   policies: Policy[];
   expiresAt: number;
-  metadataHash: JsFelt;
-  sessionKeyGuid: JsFelt;
-  guardianKeyGuid: JsFelt;
+  metadataHash: string;
+  sessionKeyGuid: string;
+  guardianKeyGuid: string;
 }
 
-export interface JsCall {
-  contractAddress: JsFelt;
+export interface SessionCall {
+  contractAddress: string;
   entrypoint: string;
-  calldata: JsFelt[];
+  calldata: string[];
 }
 
 export interface Signer {
@@ -43,18 +40,5 @@ export interface Signer {
 }
 
 export interface StarknetSigner {
-  privateKey: JsFelt;
-}
-
-export interface JsOutsideExecutionV3 {
-  caller: JsFelt;
-  execute_after: string;
-  execute_before: string;
-  calls: { to: JsFelt; selector: JsFelt; calldata: JsFelt[] }[];
-  nonce: [JsFelt, JsFelt];
-}
-
-export interface JsSignedOutsideExecution {
-  outside_execution: JsOutsideExecutionV3;
-  signature: JsFelt[];
+  privateKey: string;
 }

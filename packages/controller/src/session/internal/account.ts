@@ -1,5 +1,5 @@
 import type { InvokeFunctionResponse } from "starknet";
-import type { JsCall, Session } from "./types";
+import type { SessionCall, Session } from "./types";
 import { computePolicyMerkle, computePolicyMerkleProofs } from "./merkle";
 import {
   buildSignedOutsideExecutionV3,
@@ -67,7 +67,9 @@ export class CartridgeSessionAccount {
     );
   }
 
-  async executeFromOutside(calls: JsCall[]): Promise<InvokeFunctionResponse> {
+  async executeFromOutside(
+    calls: SessionCall[],
+  ): Promise<InvokeFunctionResponse> {
     const sessionRegistration: SessionRegistration = {
       username: "",
       address: this._address,
@@ -118,7 +120,7 @@ export class CartridgeSessionAccount {
     return extractTransactionHash(result.result);
   }
 
-  async execute(calls: JsCall[]): Promise<InvokeFunctionResponse> {
+  async execute(calls: SessionCall[]): Promise<InvokeFunctionResponse> {
     const sessionRegistration: SessionRegistration = {
       username: "",
       address: this._address,
