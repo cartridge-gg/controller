@@ -1,5 +1,6 @@
 import { hash } from "starknet";
 import { CartridgeSessionAccount } from "../session/internal/account";
+import { isSnip9CompatibilityError } from "../session/internal/errors";
 import type { CallPolicy, Session } from "../session/internal/types";
 import { normalizeFelt } from "../session/internal/utils";
 
@@ -120,13 +121,100 @@ describe("CartridgeSessionAccount", () => {
     ).rejects.toThrow("execution failed");
   });
 
-  test("execute sends correct RPC request", async () => {
+  test("execute() is not available on CartridgeSessionAccount", () => {
+    const account = CartridgeSessionAccount.newAsRegistered(
+      TEST_RPC,
+      TEST_PRIVATE_KEY,
+      TEST_ADDRESS,
+      TEST_OWNER_GUID,
+      TEST_CHAIN_ID,
+      TEST_SESSION,
+    );
+    expect((account as any).execute).toBeUndefined();
+  });
+
+  test("executeFromOutside propagates non-SNIP-9 errors without swallowing", async () => {
+    const networkError = new Error("network timeout");
+    mockFetch.mockRejectedValueOnce(networkError);
+
+    const account = CartridgeSessionAccount.newAsRegistered(
+      TEST_RPC,
+      TEST_PRIVATE_KEY,
+      TEST_ADDRESS,
+      TEST_OWNER_GUID,
+      TEST_CHAIN_ID,
+      TEST_SESSION,
+    );
+
+    await expect(
+      account.executeFromOutside([
+        {
+          contractAddress:
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          entrypoint: "transfer",
+          calldata: [],
+        },
+      ]),
+    ).rejects.toThrow("network timeout");
+  });
+
+  describe("isSnip9CompatibilityError", () => {
+    test("returns true for OUTSIDE_EXECUTION_NOT_SUPPORTED code", () => {
+      const err = Object.assign(new Error("failed"), {
+        code: "OUTSIDE_EXECUTION_NOT_SUPPORTED",
+      });
+      expect(isSnip9CompatibilityError(err)).toBe(true);
+    });
+
+    test("returns true for snip-9 message patterns", () => {
+      expect(
+        isSnip9CompatibilityError(
+          new Error("account is not compatible with snip-9"),
+        ),
+      ).toBe(true);
+      expect(
+        isSnip9CompatibilityError(new Error("entrypoint does not exist")),
+      ).toBe(true);
+      expect(
+        isSnip9CompatibilityError(
+          new Error("not implemented: outside execution"),
+        ),
+      ).toBe(true);
+    });
+
+    test("returns false for generic errors", () => {
+      expect(isSnip9CompatibilityError(new Error("network timeout"))).toBe(
+        false,
+      );
+      expect(
+        isSnip9CompatibilityError(new Error("policy not authorized")),
+      ).toBe(false);
+      expect(isSnip9CompatibilityError(new Error("execution failed"))).toBe(
+        false,
+      );
+    });
+
+    test("returns false for null/undefined", () => {
+      expect(isSnip9CompatibilityError(null)).toBe(false);
+      expect(isSnip9CompatibilityError(undefined)).toBe(false);
+    });
+
+    test("checks nested cause for error code", () => {
+      const cause = Object.assign(new Error("inner"), {
+        code: "OUTSIDE_EXECUTION_UNSUPPORTED",
+      });
+      const err = Object.assign(new Error("outer"), { cause });
+      expect(isSnip9CompatibilityError(err)).toBe(true);
+    });
+  });
+
+  test("executeFromOutside propagates policy-mismatch errors", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         jsonrpc: "2.0",
         id: 1,
-        result: { transaction_hash: "0xtxhash2" },
+        error: { code: -32000, message: "policy not authorized" },
       }),
     });
 
@@ -139,17 +227,15 @@ describe("CartridgeSessionAccount", () => {
       TEST_SESSION,
     );
 
-    const result = await account.execute([
-      {
-        contractAddress:
-          "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-        entrypoint: "transfer",
-        calldata: ["0x1"],
-      },
-    ]);
-
-    expect(result.transaction_hash).toBe("0xtxhash2");
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.method).toBe("starknet_addInvokeTransaction");
+    await expect(
+      account.executeFromOutside([
+        {
+          contractAddress:
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          entrypoint: "transfer",
+          calldata: [],
+        },
+      ]),
+    ).rejects.toThrow("policy not authorized");
   });
 });

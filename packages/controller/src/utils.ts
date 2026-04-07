@@ -111,14 +111,20 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
  * produce different merkle roots, leading to "session/not-registered" errors.
  * See: https://github.com/cartridge-gg/controller/issues/2357
  */
+function lexCompare(a: string, b: string): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
 export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
   return [
     ...Object.entries(policies.contracts ?? {})
-      .sort(([a], [b]) => a.toLowerCase().localeCompare(b.toLowerCase()))
+      .sort(([a], [b]) => lexCompare(a.toLowerCase(), b.toLowerCase()))
       .flatMap(([target, { methods }]) =>
         toArray(methods)
           .slice()
-          .sort((a, b) => a.entrypoint.localeCompare(b.entrypoint))
+          .sort((a, b) => lexCompare(a.entrypoint, b.entrypoint))
           .map((m): Policy => {
             // Check if this is an approve entrypoint with spender and amount
             if (m.entrypoint === "approve") {
@@ -167,7 +173,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
         };
       })
       .sort((a, b) =>
-        a.scope_hash.toString().localeCompare(b.scope_hash.toString()),
+        lexCompare(a.scope_hash.toString(), b.scope_hash.toString()),
       ),
   ];
 }

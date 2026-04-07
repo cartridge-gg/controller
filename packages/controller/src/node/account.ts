@@ -1,5 +1,9 @@
 import type { Policy } from "../session";
-import { CartridgeSessionAccount } from "../session";
+import {
+  CartridgeSessionAccount,
+  isSnip9CompatibilityError,
+  SessionProtocolError,
+} from "../session";
 import { Call, InvokeFunctionResponse, WalletAccount } from "starknet";
 
 import { normalizeCalls } from "../utils";
@@ -73,13 +77,15 @@ export default class SessionAccount extends WalletAccount {
    */
   async execute(calls: Call | Call[]): Promise<InvokeFunctionResponse> {
     try {
-      const res = await this.controller.executeFromOutside(
-        normalizeCalls(calls),
-      );
-
-      return res;
+      return await this.controller.executeFromOutside(normalizeCalls(calls));
     } catch (e) {
-      return this.controller.execute(normalizeCalls(calls));
+      if (!isSnip9CompatibilityError(e)) {
+        throw e;
+      }
+      throw new SessionProtocolError(
+        "This account does not support outside execution (SNIP-9). Direct session invocation is not supported in this client.",
+        e,
+      );
     }
   }
 }
