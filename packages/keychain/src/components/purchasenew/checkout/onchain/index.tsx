@@ -83,6 +83,7 @@ export function OnchainCheckout() {
     enabled: false,
   });
   const { enableFeature } = useFeatures();
+  const isStripeEnabled = false;
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -172,10 +173,10 @@ export function OnchainCheckout() {
   const isUS = countryCode === "US";
 
   const onStripeSelectForFallback = useCallback(() => {
-    if (isUS) {
+    if (isUS && isStripeEnabled) {
       onStripeSelect();
     }
-  }, [isUS, onStripeSelect]);
+  }, [isUS, isStripeEnabled, onStripeSelect]);
 
   const { isCheckingFallback } = useTokenFallback({
     controller,
@@ -347,6 +348,7 @@ export function OnchainCheckout() {
       );
       if (
         lastMethod === "stripe" &&
+        isStripeEnabled &&
         isStripeStarterpackSupported &&
         countryCode === "US"
       ) {
@@ -358,6 +360,7 @@ export function OnchainCheckout() {
   }, [
     controller,
     quote,
+    isStripeEnabled,
     isStripeStarterpackSupported,
     onStripeSelect,
     countryCode,
