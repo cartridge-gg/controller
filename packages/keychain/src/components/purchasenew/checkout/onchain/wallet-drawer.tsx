@@ -35,6 +35,7 @@ export function WalletSelectionDrawer({
   showFiatOptions = true,
 }: WalletSelectionDrawerProps) {
   const isApplePayEnabled = useFeature("apple-pay-support");
+  const isStripeEnabled = false;
 
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
@@ -287,7 +288,7 @@ export function WalletSelectionDrawer({
           {step === "network" ? (
             // Network selection step
             <>
-              {showFiatOptions && (
+              {showFiatOptions && isStripeEnabled && (
                 <PurchaseCard
                   key="stripe-checkout"
                   text="Credit Card"
