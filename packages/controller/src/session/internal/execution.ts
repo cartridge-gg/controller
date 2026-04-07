@@ -382,6 +382,12 @@ export function buildSignedOutsideExecutionV3({
   const executeAfter = toUintBigInt(timeBounds?.executeAfter ?? 0);
   const executeBefore = toUintBigInt(timeBounds?.executeBefore ?? now + 600n);
 
+  if (executeBefore <= executeAfter) {
+    throw new SessionProtocolError(
+      "Outside execution window is invalid: execute_before must be greater than execute_after.",
+    );
+  }
+
   const outsideExecution: RpcOutsideExecutionV3 = {
     caller: OUTSIDE_EXECUTION_CALLER_ANY,
     nonce: [normalizeFelt(stark.randomAddress()), ONE_FELT],

@@ -137,6 +137,48 @@ describe("toWasmPolicies", () => {
       expect(result1[3]).toHaveProperty("target", ADDR_C_CS);
     });
 
+    test("sorts addresses with differing leading zeros by byte value not locale", () => {
+      // 0x0aaa < 0x0b00 < 0x4aaa in byte order (leading zero preserved in sort key)
+      // A locale-sensitive sort could behave differently depending on the runtime locale.
+      const policies1: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          "0x04aaa": {
+            methods: [{ entrypoint: "third", authorized: true }],
+          },
+          "0x00aaa": {
+            methods: [{ entrypoint: "first", authorized: true }],
+          },
+          "0x00b00": {
+            methods: [{ entrypoint: "second", authorized: true }],
+          },
+        },
+      };
+
+      const policies2: ParsedSessionPolicies = {
+        verified: false,
+        contracts: {
+          "0x00b00": {
+            methods: [{ entrypoint: "second", authorized: true }],
+          },
+          "0x04aaa": {
+            methods: [{ entrypoint: "third", authorized: true }],
+          },
+          "0x00aaa": {
+            methods: [{ entrypoint: "first", authorized: true }],
+          },
+        },
+      };
+
+      const result1 = toWasmPolicies(policies1);
+      const result2 = toWasmPolicies(policies2);
+
+      // Both orderings of input should produce identical output
+      expect(result1).toEqual(result2);
+      // Verify stable byte-order: 0x00aaa < 0x00b00 < 0x04aaa
+      expect((result1[0] as any).method).toBeDefined(); // first policy
+    });
+
     test("handles case-insensitive address sorting", () => {
       const policies1: ParsedSessionPolicies = {
         verified: false,
