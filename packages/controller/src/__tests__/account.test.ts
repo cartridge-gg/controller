@@ -1,7 +1,7 @@
 import { hash } from "starknet";
 import { CartridgeSessionAccount } from "../session/internal/account";
 import type { CallPolicy, Session } from "../session/internal/types";
-import { normalizeFelt } from "../session/internal/shared";
+import { normalizeFelt } from "../session/internal/utils";
 
 // Mock global fetch
 const mockFetch = jest.fn();

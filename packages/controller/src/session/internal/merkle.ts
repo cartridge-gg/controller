@@ -5,7 +5,7 @@ import type {
   TypedDataPolicy,
   ApprovalPolicy,
 } from "./types";
-import { normalizeFelt } from "./shared";
+import { normalizeFelt } from "./utils";
 
 const ZERO_FELT = "0x0";
 

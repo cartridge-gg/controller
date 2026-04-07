@@ -13,7 +13,7 @@ import {
   normalizeFelt,
   normalizeContractAddress,
   selectorFromEntrypoint,
-} from "./shared";
+} from "./utils";
 
 const ZERO_FELT = "0x0";
 const ONE_FELT = "0x1";

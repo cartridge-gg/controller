@@ -8,7 +8,7 @@ import {
   computePolicyMerkleProofs,
 } from "../session/internal/merkle";
 import type { CallPolicy } from "../session/internal/types";
-import { normalizeFelt } from "../session/internal/shared";
+import { normalizeFelt } from "../session/internal/utils";
 
 const TEST_PRIVATE_KEY = "0x1";
 const TEST_ADDRESS =
