@@ -20,7 +20,11 @@ import { UIProvider } from "./ui";
 import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
 import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
-import { ToastProvider, StarterpackProviders } from "@/context";
+import {
+  AdvancedProvider,
+  ToastProvider,
+  StarterpackProviders,
+} from "@/context";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
@@ -86,21 +90,23 @@ export function Provider({ children }: PropsWithChildren) {
                               defaultChainId={defaultChainId}
                               provider={jsonRpcProvider({ rpc })}
                             >
-                              <ToastProvider>
-                                <TokensProvider>
-                                  <ProfileArcadeProvider>
-                                    <MarketplaceClientProvider
-                                      config={marketplaceConfig}
-                                    >
-                                      <ProfileDataProvider>
-                                        <StarterpackProviders>
-                                          {children}
-                                        </StarterpackProviders>
-                                      </ProfileDataProvider>
-                                    </MarketplaceClientProvider>
-                                  </ProfileArcadeProvider>
-                                </TokensProvider>
-                              </ToastProvider>
+                              <AdvancedProvider>
+                                <ToastProvider>
+                                  <TokensProvider>
+                                    <ProfileArcadeProvider>
+                                      <MarketplaceClientProvider
+                                        config={marketplaceConfig}
+                                      >
+                                        <ProfileDataProvider>
+                                          <StarterpackProviders>
+                                            {children}
+                                          </StarterpackProviders>
+                                        </ProfileDataProvider>
+                                      </MarketplaceClientProvider>
+                                    </ProfileArcadeProvider>
+                                  </TokensProvider>
+                                </ToastProvider>
+                              </AdvancedProvider>
                             </StarknetConfig>
                           </UIProvider>
                         </UpgradeProvider>

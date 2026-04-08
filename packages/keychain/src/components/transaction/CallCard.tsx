@@ -12,6 +12,7 @@ import {
   cn,
 } from "@cartridge/ui";
 import { humanizeString } from "@cartridge/controller";
+import { useAdvanced } from "@/context/advanced";
 import { ContractLink } from "@/components/ContractLink";
 
 interface CallCardProps {
@@ -271,6 +272,12 @@ export function CallCardContents({
   call: Call;
   className?: string;
 }) {
+  const { advanced } = useAdvanced();
+
+  if (!advanced) {
+    return null;
+  }
+
   return (
     <div
       className={cn(

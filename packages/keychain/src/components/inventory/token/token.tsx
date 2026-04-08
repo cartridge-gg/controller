@@ -14,12 +14,13 @@ import {
 
 import { useData } from "@/hooks/data";
 import { getDate, isPublicChain, useCreditBalance } from "@cartridge/ui/utils";
-import { useExplorer } from "@starknet-react/core";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
+import { useAdvanced } from "@/context/advanced";
+import { ExplorerTransactionLink } from "@/components/ExplorerLink";
 import { useVersion } from "@/hooks/version";
 import { useNavigation } from "@/context/navigation";
 import { EmptyState, LoadingState } from "@/components/activity";
@@ -116,7 +117,7 @@ function ERC20() {
   const account = useAccount();
   const accountAddress = account?.address || "";
   const { controller } = useConnection();
-  const explorer = useExplorer();
+  const { advanced } = useAdvanced();
   const { transfers, status } = useData();
   const { isControllerGte } = useVersion();
 
@@ -183,13 +184,6 @@ function ERC20() {
     });
   }, [transfers, accountAddress, getUsername, token?.metadata?.image]);
 
-  const to = useCallback(
-    (transactionHash: string) => {
-      return explorer.transaction(transactionHash);
-    },
-    [explorer],
-  );
-
   if (!token) {
     return null;
   }
@@ -199,11 +193,13 @@ function ERC20() {
       <LayoutContent>
         <ERC20Header token={token} />
 
-        <ERC20Detail
-          token={token}
-          isPublicChain={isPublicChain(chainId || "")}
-          chainId={chainId as constants.StarknetChainId}
-        />
+        {advanced && (
+          <ERC20Detail
+            token={token}
+            isPublicChain={isPublicChain(chainId || "")}
+            chainId={chainId as constants.StarknetChainId}
+          />
+        )}
 
         {status === "loading" ? (
           <LoadingState rowCount={2} />
@@ -230,10 +226,9 @@ function ERC20() {
                   {date}
                 </p>
                 {transactions.map((item) => (
-                  <Link
+                  <ExplorerTransactionLink
                     key={item.key}
-                    to={to(item.transactionHash)}
-                    target="_blank"
+                    transactionHash={item.transactionHash}
                   >
                     <ActivityTokenCard
                       amount={item.amount}
@@ -249,7 +244,7 @@ function ERC20() {
                       action={item.action}
                       timestamp={item.timestamp}
                     />
-                  </Link>
+                  </ExplorerTransactionLink>
                 ))}
               </div>
             ))}

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useNavigation } from "@/context/navigation";
+import { useAdvanced } from "@/context/advanced";
 import { useConnection } from "@/hooks/connection";
 import { processControllerQuery } from "@/utils/signers";
 import {
@@ -17,6 +18,7 @@ import {
   SheetFooter,
   SheetTrigger,
   SignOutIcon,
+  Switch,
 } from "@cartridge/ui";
 import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useDeleteMeMutation } from "@/utils/api";
@@ -42,6 +44,7 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
+  const { advanced, setAdvanced } = useAdvanced();
   const { navigate } = useNavigation();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const deleteMe = useDeleteMeMutation();
@@ -91,7 +94,11 @@ export function Settings() {
         <section className="space-y-4">
           <SectionHeader
             title="Recovery Accounts"
-            description="Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
+            description={
+              advanced
+                ? "Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
+                : "Recovery accounts are wallets that can be used to recover your Controller if you lose access to your signers."
+            }
           />
           <Button
             type="button"
@@ -160,6 +167,19 @@ export function Settings() {
           <CurrencySelect />
         </section>
 
+        <section className="space-y-4">
+          <SectionHeader
+            title="Advanced Mode"
+            description="Show network details like explorer links and chain information"
+          />
+          <div className="flex items-center justify-between py-2.5 px-3 bg-background-200 rounded">
+            <span className="text-sm font-normal text-foreground-200">
+              Show advanced details
+            </span>
+            <Switch checked={advanced} onCheckedChange={setAdvanced} />
+          </div>
+        </section>
+
         <SessionsSection />
 
         <DeleteAccountSection onDeleteClick={() => setIsDeleteOpen(true)} />
@@ -194,13 +214,15 @@ export function Settings() {
               <h3 className="text-lg font-semibold text-foreground-100">
                 {controller.username()}
               </h3>
-              <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
-                <CopyAddress
-                  size="xs"
-                  className="text-sm"
-                  address={controller.address()}
-                />
-              </div>
+              {advanced && (
+                <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
+                  <CopyAddress
+                    size="xs"
+                    className="text-sm"
+                    address={controller.address()}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

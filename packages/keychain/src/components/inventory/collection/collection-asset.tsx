@@ -26,7 +26,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "@/hooks/collection";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useUsername } from "@/hooks/username";
 import { useMarketplace } from "@/hooks/marketplace";
@@ -34,6 +33,8 @@ import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
 import { useAccount } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
+import { useAdvanced } from "@/context/advanced";
+import { ExplorerTransactionLink } from "@/components/ExplorerLink";
 import { useNavigation } from "@/context/navigation";
 import { createExecuteUrl } from "@/utils/connection/execute";
 
@@ -41,8 +42,8 @@ const OFFSET = 10;
 
 export function CollectionAsset() {
   const { chainId } = useConnection();
+  const { advanced } = useAdvanced();
   const account = useAccount();
-  const explorer = useExplorer();
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
   const { navigate } = useNavigation();
@@ -163,13 +164,6 @@ export function CollectionAsset() {
     return data.slice(0, cap);
   }, [data, cap]);
 
-  const to = useCallback(
-    (transactionHash: string) => {
-      return explorer.transaction(transactionHash);
-    },
-    [explorer],
-  );
-
   const status = useMemo(() => {
     if (collectionStatus === "error" || traceabilitiesStatus === "error")
       return "error";
@@ -239,26 +233,27 @@ export function CollectionAsset() {
                   {properties.length > 0 && (
                     <CollectibleProperties properties={properties} />
                   )}
-                  <CollectibleDetails
-                    chainId={chainId as constants.StarknetChainId}
-                    address={collection.address}
-                    tokenId={asset.tokenId}
-                    standard={collection.type}
-                    owner={
-                      username ||
-                      asset.owner.slice(0, 6) + "..." + asset.owner.slice(-4)
-                    }
-                  />
+                  {advanced && (
+                    <CollectibleDetails
+                      chainId={chainId as constants.StarknetChainId}
+                      address={collection.address}
+                      tokenId={asset.tokenId}
+                      standard={collection.type}
+                      owner={
+                        username ||
+                        asset.owner.slice(0, 6) + "..." + asset.owner.slice(-4)
+                      }
+                    />
+                  )}
                 </TabsContent>
                 <TabsContent
                   className="m-0 p-0 flex flex-col gap-2"
                   value="activity"
                 >
                   {events.map((props: CardProps, index: number) => (
-                    <Link
+                    <ExplorerTransactionLink
                       key={`${index}-${props.key}`}
-                      to={to(props.transactionHash)}
-                      target="_blank"
+                      transactionHash={props.transactionHash}
                     >
                       <TraceabilityCollectibleCard
                         username={props.username || ""}
@@ -273,7 +268,7 @@ export function CollectionAsset() {
                         collectibleName={title || collection.name}
                         currencyImage={props.currencyImage}
                       />
-                    </Link>
+                    </ExplorerTransactionLink>
                   ))}
                   <Button
                     variant="secondary"

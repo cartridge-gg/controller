@@ -12,8 +12,8 @@ import {
   ArgentIcon,
   CopyAddress,
 } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
-import { formatAddress } from "@cartridge/ui/utils";
+import { cn, formatAddress } from "@cartridge/ui/utils";
+import { useAdvanced } from "@/context/advanced";
 
 export interface RegisteredAccount {
   accountName: string;
@@ -28,6 +28,8 @@ export const RegisteredAccountCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SignerCardProps
 >(({ className, accountName, accountAddress, onDelete, ...props }, ref) => {
+  const { advanced } = useAdvanced();
+
   return (
     <Sheet>
       <div
@@ -41,9 +43,11 @@ export const RegisteredAccountCard = React.forwardRef<
               <ArgentIcon />
               <h1 className="flex-1 text-sm font-normal">{accountName}</h1>
             </div>
-            <h1 className="text-xs text-foreground-300 font-normal">
-              {formatAddress(accountAddress, { first: 4, last: 4 })}
-            </h1>
+            {advanced && (
+              <h1 className="text-xs text-foreground-300 font-normal">
+                {formatAddress(accountAddress, { first: 4, last: 4 })}
+              </h1>
+            )}
           </CardContent>
         </Card>
         <SheetTrigger asChild>
@@ -73,13 +77,15 @@ export const RegisteredAccountCard = React.forwardRef<
               <h3 className="text-lg font-semibold text-foreground-100">
                 {accountName}
               </h3>
-              <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
-                <CopyAddress
-                  size="xs"
-                  className="text-sm"
-                  address={accountAddress}
-                />
-              </div>
+              {advanced && (
+                <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
+                  <CopyAddress
+                    size="xs"
+                    className="text-sm"
+                    address={accountAddress}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

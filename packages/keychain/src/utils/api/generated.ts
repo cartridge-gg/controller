@@ -378,6 +378,8 @@ export type Activity = Node & {
   actualFee?: Maybe<Scalars["BigInt"]>;
   controller?: Maybe<Controller>;
   controllerID?: Maybe<Scalars["ID"]>;
+  /** Recalculated credit fee using native USDC oracle price */
+  correctedCreditFee?: Maybe<Scalars["Int"]>;
   createdAt: Scalars["Time"];
   /** Credits fee for the activity */
   creditsFee?: Maybe<Scalars["Int"]>;
@@ -556,6 +558,17 @@ export type ActivityWhereInput = {
   controllerIDNEQ?: InputMaybe<Scalars["ID"]>;
   controllerIDNotIn?: InputMaybe<Array<Scalars["ID"]>>;
   controllerIDNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** corrected_credit_fee field predicates */
+  correctedCreditFee?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeGT?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeGTE?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeIn?: InputMaybe<Array<Scalars["Int"]>>;
+  correctedCreditFeeIsNil?: InputMaybe<Scalars["Boolean"]>;
+  correctedCreditFeeLT?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeLTE?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeNEQ?: InputMaybe<Scalars["Int"]>;
+  correctedCreditFeeNotIn?: InputMaybe<Array<Scalars["Int"]>>;
+  correctedCreditFeeNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** created_at field predicates */
   createdAt?: InputMaybe<Scalars["Time"]>;
   createdAtGT?: InputMaybe<Scalars["Time"]>;
