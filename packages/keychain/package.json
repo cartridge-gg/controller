@@ -50,6 +50,7 @@
     "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",
+    "@coinflowlabs/react": "^5.12.0",
     "@dojoengine/sdk": "catalog:",
     "@dojoengine/torii-wasm": "catalog:",
     "@icons-pack/react-simple-icons": "^13.8.0",

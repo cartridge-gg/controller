@@ -8,16 +8,15 @@ import {
 } from "react";
 import { useConnection } from "@/hooks/connection";
 import useStripePayment from "@/hooks/payments/stripe";
+import useCoinflowPayment, {
+  CoinflowOrderResponse,
+} from "@/hooks/payments/coinflow";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useStarterpackContext } from "./starterpack";
 import { useOnchainPurchaseContext } from "./onchain-purchase";
-import { getCurrentReferral } from "@/utils/referral";
 import { isOnchainStarterpack } from "./types";
-import { USDC_ADDRESSES } from "@/utils/ekubo";
-import { num } from "starknet";
-import { getStarterpackStripeCostDetails } from "@/components/purchasenew/review/stripe-pricing";
 
 export interface CostDetails {
   baseCostInCents: number;
@@ -38,6 +37,11 @@ export interface CreditPurchaseContextType {
   stripePromise: Promise<Stripe | null>;
   isStripeLoading: boolean;
 
+  // Coinflow state
+  coinflowOrder: CoinflowOrderResponse | undefined;
+  coinflowEnv: "prod" | "sandbox";
+  isCoinflowLoading: boolean;
+
   // Actions
   onCreditCardPurchase: () => Promise<void>;
 }
@@ -55,10 +59,9 @@ export const CreditPurchaseProvider = ({
   children,
   isSlot = false,
 }: CreditPurchaseProviderProps) => {
-  const { controller, origin } = useConnection();
+  const { controller } = useConnection();
   const {
     registryAddress,
-    bundleId,
     starterpackId,
     starterpackDetails,
     setDisplayError,
@@ -71,28 +74,41 @@ export const CreditPurchaseProvider = ({
   const [customerSessionClientSecret, setCustomerSessionClientSecret] =
     useState<string | undefined>();
   const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
+  const [coinflowOrder, setCoinflowOrder] = useState<
+    CoinflowOrderResponse | undefined
+  >();
 
   const {
     stripePromise,
     isLoading: isStripeLoading,
     error: stripeError,
     createPaymentIntent,
-    createStarterpackPaymentIntent,
   } = useStripePayment({ isSlot });
 
-  // Sync stripe error
+  const {
+    isLoading: isCoinflowLoading,
+    error: coinflowError,
+    createOrder: createCoinflowOrder,
+    env: coinflowEnv,
+  } = useCoinflowPayment();
+
+  // Sync payment errors
   useEffect(() => {
     if (stripeError) {
       setDisplayError(stripeError);
     }
   }, [stripeError]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (coinflowError) {
+      setDisplayError(coinflowError);
+    }
+  }, [coinflowError]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const onCreditCardPurchase = useCallback(async () => {
     if (!controller || !registryAddress) return;
 
     try {
-      let paymentIntent;
-
       if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
         const starterpackQuote = starterpackDetails.quote;
 
@@ -100,44 +116,28 @@ export const CreditPurchaseProvider = ({
           throw new Error("Quote not loaded yet");
         }
 
-        const usdcAddress = USDC_ADDRESSES[controller.chainId()];
-        if (
-          !usdcAddress ||
-          num.toHex(starterpackQuote.paymentToken) !== num.toHex(usdcAddress)
-        ) {
-          throw new Error(
-            "Stripe checkout is only available for starterpacks priced in USDC.",
-          );
-        }
+        // Convert quote total cost from base units to USDC amount string
+        // Quote totalCost is in payment token base units (6 decimals for USDC)
+        const totalCostUsdc = (
+          Number(starterpackQuote.totalCost * BigInt(quantity)) / 1e6
+        ).toFixed(6);
 
-        const referralData = getCurrentReferral(origin);
-
-        paymentIntent = await createStarterpackPaymentIntent({
-          starterpackId: starterpackDetails.id.toString(),
-          quantity,
-          referral: referralData?.refAddress || referralData?.ref,
-          referralGroup: referralData?.refGroup,
-          registryAddress,
-          ...(bundleId !== undefined && { clientPercentage: 0 }),
-        });
+        const order = await createCoinflowOrder(totalCostUsdc);
+        setCoinflowOrder(order);
       } else {
-        paymentIntent = await createPaymentIntent(
+        const paymentIntent = await createPaymentIntent(
           usdToCredits(usdAmount),
           undefined,
           typeof starterpackId === "string" ? starterpackId : undefined,
         );
-      }
 
-      setStripePaymentId(paymentIntent.id);
-      setClientSecret(paymentIntent.clientSecret);
-      setCustomerSessionClientSecret(
-        paymentIntent.customerSessionClientSecret ?? undefined,
-      );
-      setCostDetails(
-        starterpackDetails && isOnchainStarterpack(starterpackDetails)
-          ? getStarterpackStripeCostDetails(starterpackDetails.quote!, quantity)
-          : paymentIntent.pricing,
-      );
+        setStripePaymentId(paymentIntent.id);
+        setClientSecret(paymentIntent.clientSecret);
+        setCustomerSessionClientSecret(
+          paymentIntent.customerSessionClientSecret ?? undefined,
+        );
+        setCostDetails(paymentIntent.pricing);
+      }
     } catch (e) {
       setDisplayError(e as Error);
       throw e;
@@ -145,14 +145,12 @@ export const CreditPurchaseProvider = ({
   }, [
     usdAmount,
     controller,
-    origin,
     registryAddress,
-    bundleId,
     starterpackId,
     starterpackDetails,
     quantity,
     createPaymentIntent,
-    createStarterpackPaymentIntent,
+    createCoinflowOrder,
     setDisplayError,
   ]);
 
@@ -161,6 +159,7 @@ export const CreditPurchaseProvider = ({
     setClientSecret(undefined);
     setCustomerSessionClientSecret(undefined);
     setCostDetails(undefined);
+    setCoinflowOrder(undefined);
   }, [starterpackId]);
 
   const contextValue: CreditPurchaseContextType = {
@@ -172,6 +171,9 @@ export const CreditPurchaseProvider = ({
     costDetails,
     stripePromise,
     isStripeLoading,
+    coinflowOrder,
+    coinflowEnv,
+    isCoinflowLoading,
     onCreditCardPurchase,
   };
 

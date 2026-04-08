@@ -76,7 +76,8 @@ export function OnchainCheckout() {
     isCreatingOrder,
     usdAmount,
   } = useOnchainPurchaseContext();
-  const { onCreditCardPurchase, isStripeLoading } = useCreditPurchaseContext();
+  const { onCreditCardPurchase, isStripeLoading, isCoinflowLoading } =
+    useCreditPurchaseContext();
 
   const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
   const { refetch: refetchAccountPrivate } = useAccountPrivateQuery(undefined, {
@@ -198,7 +199,9 @@ export function OnchainCheckout() {
 
   const globalDisabled = useMemo(() => {
     if (isStripeSelected) {
-      return !isStripeStarterpackSupported || isStripeLoading;
+      return (
+        !isStripeStarterpackSupported || isStripeLoading || isCoinflowLoading
+      );
     }
 
     // Disable if there's a fee estimation error (e.g., bridge amount too low)
@@ -234,6 +237,7 @@ export function OnchainCheckout() {
     isStripeSelected,
     isStripeStarterpackSupported,
     isStripeLoading,
+    isCoinflowLoading,
   ]);
 
   const showInsufficientBalance =
@@ -274,16 +278,7 @@ export function OnchainCheckout() {
     try {
       if (isStripeSelected) {
         await onCreditCardPurchase();
-
-        const { data: accountPrivateData } = await refetchAccountPrivate();
-        const needsVerification =
-          !accountPrivateData?.accountPrivate?.proveVerifiedAt;
-
-        if (needsVerification) {
-          navigate("/purchase/verification/stripe");
-        } else {
-          navigate("/purchase/checkout/stripe");
-        }
+        navigate("/purchase/checkout/coinflow");
       } else if (isApplePaySelected) {
         const [{ data: meData }, { data: accountPrivateData }] =
           await Promise.all([refetchMe(), refetchAccountPrivate()]);
@@ -506,7 +501,8 @@ export function OnchainCheckout() {
                 isCheckingFallback ||
                 (bridgeFrom !== null && isFetchingFees) ||
                 isCreatingOrder ||
-                isStripeLoading
+                isStripeLoading ||
+                isCoinflowLoading
               }
               isSendingDeposit={isSendingDeposit}
               globalDisabled={globalDisabled}

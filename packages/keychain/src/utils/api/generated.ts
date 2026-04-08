@@ -5048,6 +5048,10 @@ export type RpcLog = Node & {
   __typename?: "RPCLog";
   /** API key used (if any) */
   apiKeyID?: Maybe<Scalars["String"]>;
+  /** Authentication outcome for this request */
+  authDecision: RpcLogAuthDecision;
+  /** Whether RPC auth enforcement was enabled for this request */
+  authEnforced: Scalars["Boolean"];
   /** IP address of the client */
   clientIP: Scalars["String"];
   /** CORS domain used (if any) */
@@ -5080,6 +5084,13 @@ export type RpcLog = Node & {
   /** User agent of the client */
   userAgent?: Maybe<Scalars["String"]>;
 };
+
+/** RPCLogAuthDecision is enum for the field auth_decision */
+export enum RpcLogAuthDecision {
+  Allowed = "allowed",
+  Blocked = "blocked",
+  WouldBeBlocked = "would_be_blocked",
+}
 
 /** A connection to a list of items. */
 export type RpcLogConnection = {
@@ -5129,6 +5140,14 @@ export type RpcLogWhereInput = {
   apiKeyIDNEQ?: InputMaybe<Scalars["String"]>;
   apiKeyIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
   apiKeyIDNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** auth_decision field predicates */
+  authDecision?: InputMaybe<RpcLogAuthDecision>;
+  authDecisionIn?: InputMaybe<Array<RpcLogAuthDecision>>;
+  authDecisionNEQ?: InputMaybe<RpcLogAuthDecision>;
+  authDecisionNotIn?: InputMaybe<Array<RpcLogAuthDecision>>;
+  /** auth_enforced field predicates */
+  authEnforced?: InputMaybe<Scalars["Boolean"]>;
+  authEnforcedNEQ?: InputMaybe<Scalars["Boolean"]>;
   /** client_ip field predicates */
   clientIP?: InputMaybe<Scalars["String"]>;
   clientIPContains?: InputMaybe<Scalars["String"]>;
