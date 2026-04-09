@@ -2,51 +2,98 @@ import { useCallback, useState } from "react";
 import { useConnection } from "../connection";
 import { client } from "@/utils/graphql";
 
-// Manual types since codegen hasn't run yet with the new backend schema
+// Manual types mirror the backend GraphQL schema. Replace with generated
+// types once the backend PR (cartridge-gg/internal#4291) is merged and
+// `pnpm build:keychain` runs codegen against the live schema.
 
-export interface CoinflowOrderResponse {
+export interface CoinflowPricingDetails {
+  baseCostInCents: number;
+  processingFeeInCents: number;
+  totalInCents: number;
+}
+
+export interface CoinflowStarterpackIntent {
+  id: string;
   sessionKey: string;
   jwtToken: string;
   merchantId: string;
-  subtotalCents: number;
-  layerswapPayment: {
-    cryptoPaymentId: string;
-    swapId: string;
-    status: string;
-    sourceNetwork: string;
-    sourceTokenAmount: string;
-    sourceTokenAddress: string;
-    sourceDepositAddress: string;
-    expiresAt: string;
-  };
+  pricing: CoinflowPricingDetails;
 }
 
-export interface CreateCoinflowLayerswapOrderMutation {
-  createCoinflowLayerswapOrder: CoinflowOrderResponse;
+export interface CreateCoinflowStarterpackIntentInput {
+  starterpackId: string;
+  quantity: number;
+  referral?: string;
+  referralGroup?: string;
+  registryAddress: string;
+  clientPercentage?: number;
+  isMainnet?: boolean;
 }
 
-const CreateCoinflowLayerswapOrderDocument = `
-  mutation CreateCoinflowLayerswapOrder($input: CreateCoinflowLayerswapOrderInput!) {
-    createCoinflowLayerswapOrder(input: $input) {
+interface CreateCoinflowStarterpackIntentMutation {
+  createCoinflowStarterpackIntent: CoinflowStarterpackIntent;
+}
+
+const CreateCoinflowStarterpackIntentDocument = `
+  mutation CreateCoinflowStarterpackIntent($input: CreateCoinflowStarterpackIntentInput!) {
+    createCoinflowStarterpackIntent(input: $input) {
+      id
       sessionKey
       jwtToken
       merchantId
-      subtotalCents
-      layerswapPayment {
-        ...LayerswapPaymentFields
+      pricing {
+        baseCostInCents
+        processingFeeInCents
+        totalInCents
       }
     }
   }
+`;
 
-  fragment LayerswapPaymentFields on LayerswapPayment {
-    cryptoPaymentId
-    swapId
-    status
-    sourceNetwork
-    sourceTokenAmount
-    sourceTokenAddress
-    sourceDepositAddress
-    expiresAt
+export enum CoinflowPaymentStatus {
+  Pending = "PENDING",
+  Succeeded = "SUCCEEDED",
+  Failed = "FAILED",
+}
+
+export enum CoinflowFulfillmentStatus {
+  AwaitingPayment = "AWAITING_PAYMENT",
+  Queued = "QUEUED",
+  Processing = "PROCESSING",
+  Submitted = "SUBMITTED",
+  Confirmed = "CONFIRMED",
+  Failed = "FAILED",
+}
+
+export interface CoinflowPaymentPurchaseFulfillment {
+  id: string;
+  status: CoinflowFulfillmentStatus;
+  transactionHash?: string | null;
+  lastError?: string | null;
+}
+
+export interface CoinflowPayment {
+  id: string;
+  paymentStatus: CoinflowPaymentStatus;
+  purchaseFulfillment?: CoinflowPaymentPurchaseFulfillment | null;
+}
+
+export interface CoinflowPaymentQuery {
+  coinflowPayment: CoinflowPayment;
+}
+
+export const CoinflowPaymentDocument = `
+  query CoinflowPayment($id: ID!) {
+    coinflowPayment(id: $id) {
+      id
+      paymentStatus
+      purchaseFulfillment {
+        id
+        status
+        transactionHash
+        lastError
+      }
+    }
   }
 `;
 
@@ -57,8 +104,10 @@ const useCoinflowPayment = () => {
 
   const isMainnet = controller?.chainId() === "0x534e5f4d41494e"; // SN_MAIN
 
-  const createOrder = useCallback(
-    async (purchaseUSDCAmount: string) => {
+  const createIntent = useCallback(
+    async (
+      input: Omit<CreateCoinflowStarterpackIntentInput, "isMainnet">,
+    ): Promise<CoinflowStarterpackIntent> => {
       if (!controller) {
         throw new Error("Controller not connected");
       }
@@ -68,17 +117,17 @@ const useCoinflowPayment = () => {
         setError(null);
 
         const result =
-          await client.request<CreateCoinflowLayerswapOrderMutation>(
-            CreateCoinflowLayerswapOrderDocument,
+          await client.request<CreateCoinflowStarterpackIntentMutation>(
+            CreateCoinflowStarterpackIntentDocument,
             {
               input: {
-                purchaseUSDCAmount,
-                sandbox: !isMainnet,
+                ...input,
+                isMainnet,
               },
             },
           );
 
-        return result.createCoinflowLayerswapOrder;
+        return result.createCoinflowStarterpackIntent;
       } catch (e) {
         setError(e as Error);
         throw e;
@@ -92,7 +141,7 @@ const useCoinflowPayment = () => {
   return {
     isLoading,
     error,
-    createOrder,
+    createIntent,
     env: isMainnet ? ("prod" as const) : ("sandbox" as const),
   };
 };

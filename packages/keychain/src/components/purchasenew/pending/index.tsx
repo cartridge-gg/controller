@@ -1,8 +1,4 @@
-import {
-  useStarterpackContext,
-  useOnchainPurchaseContext,
-  useCreditPurchaseContext,
-} from "@/context";
+import { useStarterpackContext, useOnchainPurchaseContext } from "@/context";
 import { ClaimPending } from "./claim";
 import { PurchasePending } from "./purchase";
 import { BridgePending } from "./bridge";
@@ -36,7 +32,6 @@ export function Pending() {
     isApplePaySelected,
     coinbaseLsSwapId,
   } = useOnchainPurchaseContext();
-  const { coinflowOrder } = useCreditPurchaseContext();
   const { closeModal } = useConnection();
 
   // Claim flow (merkle drop)
@@ -47,19 +42,6 @@ export function Pending() {
         items={claimItems}
         quantity={quantity}
         transactionHash={transactionHash!}
-      />
-    );
-  }
-
-  // Coinflow credit card flow
-  if (coinflowOrder?.layerswapPayment?.swapId) {
-    return (
-      <BridgePending
-        name={starterpackDetails?.name || "Items"}
-        items={purchaseItems}
-        paymentMethod="stripe"
-        selectedPlatform="base"
-        swapId={coinflowOrder.layerswapPayment.swapId}
       />
     );
   }

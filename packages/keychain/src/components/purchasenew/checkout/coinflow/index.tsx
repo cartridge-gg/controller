@@ -9,7 +9,7 @@ import { HeaderInner, CreditCardIcon, LayoutContent } from "@cartridge/ui";
 
 export function CoinflowCheckout() {
   const { clearError } = useStarterpackContext();
-  const { coinflowOrder, coinflowEnv } = useCreditPurchaseContext();
+  const { coinflowIntent, coinflowEnv } = useCreditPurchaseContext();
   const { navigate } = useNavigation();
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export function CoinflowCheckout() {
     return () => clearError();
   }, [clearError]);
 
-  if (!coinflowOrder) {
+  if (!coinflowIntent) {
     return null;
   }
 
@@ -30,12 +30,12 @@ export function CoinflowCheckout() {
       <LayoutContent className="p-0">
         <div className="h-full min-h-[400px]">
           <CoinflowPurchase
-            merchantId={coinflowOrder.merchantId}
-            sessionKey={coinflowOrder.sessionKey}
-            jwtToken={coinflowOrder.jwtToken}
+            merchantId={coinflowIntent.merchantId}
+            sessionKey={coinflowIntent.sessionKey}
+            jwtToken={coinflowIntent.jwtToken}
             env={coinflowEnv}
             onSuccess={() => {
-              navigate("/purchase/pending", { reset: true });
+              navigate("/purchase/success", { reset: true });
             }}
           />
         </div>
