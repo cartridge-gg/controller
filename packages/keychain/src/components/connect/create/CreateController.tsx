@@ -184,6 +184,7 @@ function CreateControllerForm({
         hideNetwork
         hideUsername
         hideSettings
+        forceShowClose
       />
       <form
         className="flex flex-col overflow-y-scroll"
