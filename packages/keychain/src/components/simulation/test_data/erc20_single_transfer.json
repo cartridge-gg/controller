@@ -1,0 +1,86 @@
+[
+  {
+    "transaction_trace": {
+      "type": "INVOKE",
+      "execute_invocation": {
+        "contract_address": "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
+        "entry_point_selector": "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+        "calldata": [
+          "0x1",
+          "0x28e156a25dfde6fc4a06fead9df08e0f77b31dda5d09f36878e3cdea819a781",
+          "0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e",
+          "0x3",
+          "0x17cc6ca902ed4e8baa8463a7009ff18cc294fa85a94b4ce6ac30a9ebd6057c7",
+          "0xde0b6b3a7640000",
+          "0x0"
+        ],
+        "caller_address": "0x0",
+        "class_hash": "0x7dc7899aa655b0aae51eadff6d801a58e97dd99cf4666ee59e704249e51adf2",
+        "entry_point_type": "EXTERNAL",
+        "call_type": "CALL",
+        "result": ["0x1", "0x1", "0x1"],
+        "calls": [
+          {
+            "contract_address": "0x28e156a25dfde6fc4a06fead9df08e0f77b31dda5d09f36878e3cdea819a781",
+            "entry_point_selector": "0x83afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e",
+            "calldata": [
+              "0x17cc6ca902ed4e8baa8463a7009ff18cc294fa85a94b4ce6ac30a9ebd6057c7",
+              "0xde0b6b3a7640000",
+              "0x0"
+            ],
+            "caller_address": "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
+            "class_hash": "0x4c205f836ea5efdbb5b7244c1ff6685bbf46ce8d07d0148d6a8379e08bd4831",
+            "entry_point_type": "EXTERNAL",
+            "call_type": "CALL",
+            "result": ["0x1"],
+            "calls": [],
+            "events": [
+              {
+                "order": 0,
+                "keys": [
+                  "0x99cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9",
+                  "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
+                  "0x17cc6ca902ed4e8baa8463a7009ff18cc294fa85a94b4ce6ac30a9ebd6057c7"
+                ],
+                "data": ["0xde0b6b3a7640000", "0x0"]
+              }
+            ],
+            "messages": [],
+            "execution_resources": {
+              "l1_gas": 0,
+              "l2_gas": 0
+            },
+            "is_reverted": false
+          }
+        ],
+        "events": [],
+        "messages": [],
+        "execution_resources": {
+          "l1_gas": 0,
+          "l2_gas": 0
+        },
+        "is_reverted": false
+      },
+      "execution_resources": {
+        "l1_gas": 5197,
+        "l1_data_gas": 0,
+        "l2_gas": 756800
+      }
+    },
+    "resourceBounds": {
+      "l2_gas": {
+        "max_amount": "__bigint__:1135200",
+        "max_price_per_unit": "__bigint__:30000000000"
+      },
+      "l1_gas": {
+        "max_amount": "__bigint__:7795",
+        "max_price_per_unit": "__bigint__:30000000000"
+      },
+      "l1_data_gas": {
+        "max_amount": "__bigint__:0",
+        "max_price_per_unit": "__bigint__:1500000"
+      }
+    },
+    "overall_fee": "__bigint__:34289850000000000"
+  }
+]
