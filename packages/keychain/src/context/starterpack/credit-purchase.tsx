@@ -10,6 +10,8 @@ import { useConnection } from "@/hooks/connection";
 import useStripePayment from "@/hooks/payments/stripe";
 import useCoinflowPayment, {
   CoinflowStarterpackIntent,
+  CoinflowStarterpackQuote,
+  useCoinflowStarterpackQuote,
 } from "@/hooks/payments/coinflow";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
@@ -40,6 +42,8 @@ export interface CreditPurchaseContextType {
 
   // Coinflow state
   coinflowIntent: CoinflowStarterpackIntent | undefined;
+  coinflowQuote: CoinflowStarterpackQuote | undefined;
+  isCoinflowQuoteLoading: boolean;
   coinflowEnv: "prod" | "sandbox";
   isCoinflowLoading: boolean;
 
@@ -93,6 +97,25 @@ export const CreditPurchaseProvider = ({
     createIntent: createCoinflowIntent,
     env: coinflowEnv,
   } = useCoinflowPayment();
+
+  // Auto-fetch the Coinflow pricing quote whenever the relevant inputs change.
+  // The hook handles its own enabled/disabled state and Ekubo swap pricing
+  // for non-USDC starterpacks via the backend coinflowStarterpackQuote query.
+  const referralData = getCurrentReferral(origin);
+  const isOnchain =
+    !!starterpackDetails && isOnchainStarterpack(starterpackDetails);
+  const { data: coinflowQuote, isLoading: isCoinflowQuoteLoading } =
+    useCoinflowStarterpackQuote({
+      starterpackId: isOnchain
+        ? (starterpackDetails as { id: number | string }).id.toString()
+        : undefined,
+      quantity,
+      registryAddress,
+      referral: referralData?.refAddress || referralData?.ref,
+      referralGroup: referralData?.refGroup,
+      ...(bundleId !== undefined && { clientPercentage: 0 }),
+      enabled: isOnchain,
+    });
 
   // Sync payment errors
   useEffect(() => {
@@ -179,6 +202,8 @@ export const CreditPurchaseProvider = ({
     stripePromise,
     isStripeLoading,
     coinflowIntent,
+    coinflowQuote,
+    isCoinflowQuoteLoading,
     coinflowEnv,
     isCoinflowLoading,
     onCreditCardPurchase,

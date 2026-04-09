@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useQuery } from "react-query";
 import { useConnection } from "../connection";
 import { client } from "@/utils/graphql";
 
@@ -147,3 +148,103 @@ const useCoinflowPayment = () => {
 };
 
 export default useCoinflowPayment;
+
+// ---------------------------------------------------------------------------
+// Quote query
+// ---------------------------------------------------------------------------
+
+export interface CoinflowStarterpackQuote {
+  pricing: CoinflowPricingDetails;
+  paymentToken: string;
+  needsSwap: boolean;
+}
+
+interface CoinflowStarterpackQuoteQuery {
+  coinflowStarterpackQuote: CoinflowStarterpackQuote;
+}
+
+const CoinflowStarterpackQuoteDocument = `
+  query CoinflowStarterpackQuote($input: CoinflowStarterpackQuoteInput!) {
+    coinflowStarterpackQuote(input: $input) {
+      pricing {
+        baseCostInCents
+        processingFeeInCents
+        totalInCents
+      }
+      paymentToken
+      needsSwap
+    }
+  }
+`;
+
+export interface UseCoinflowStarterpackQuoteParams {
+  starterpackId: string | undefined;
+  quantity: number;
+  registryAddress: string | undefined;
+  referral?: string;
+  referralGroup?: string;
+  clientPercentage?: number;
+  enabled?: boolean;
+}
+
+/**
+ * Polls the backend for the latest Coinflow pricing for a starterpack purchase.
+ * Re-fetches automatically when any of the inputs change. The query is disabled
+ * unless `enabled` is true and required inputs are present.
+ */
+export const useCoinflowStarterpackQuote = ({
+  starterpackId,
+  quantity,
+  registryAddress,
+  referral,
+  referralGroup,
+  clientPercentage,
+  enabled = true,
+}: UseCoinflowStarterpackQuoteParams) => {
+  const { controller } = useConnection();
+  const isMainnet = controller?.chainId() === "0x534e5f4d41494e"; // SN_MAIN
+
+  const isReady =
+    enabled &&
+    !!controller &&
+    !!starterpackId &&
+    !!registryAddress &&
+    quantity > 0;
+
+  return useQuery<
+    CoinflowStarterpackQuoteQuery,
+    Error,
+    CoinflowStarterpackQuote
+  >(
+    [
+      "coinflowStarterpackQuote",
+      starterpackId,
+      quantity,
+      registryAddress,
+      referral,
+      referralGroup,
+      clientPercentage,
+      isMainnet,
+    ],
+    () =>
+      client.request<CoinflowStarterpackQuoteQuery>(
+        CoinflowStarterpackQuoteDocument,
+        {
+          input: {
+            starterpackId,
+            quantity,
+            registryAddress,
+            referral,
+            referralGroup,
+            clientPercentage,
+            isMainnet,
+          },
+        },
+      ),
+    {
+      enabled: isReady,
+      retry: false,
+      select: (data) => data.coinflowStarterpackQuote,
+    },
+  );
+};
