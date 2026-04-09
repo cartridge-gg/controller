@@ -60,7 +60,7 @@ export function ConfirmSwap({
       additionalFees={sellingSwapData.map((token) => ({
         label: "Cost",
         contractAddress: token.address,
-        amount: token?.amount ?? 0,
+        amount: typeof token?.amount === "number" ? token.amount : 0,
         usdValue: formatValue(token),
         decimals: 2,
       }))}

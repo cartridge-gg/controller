@@ -76,7 +76,7 @@ export const useSwapTransactions = (
 
     const addToken = (acc: TokenSwap[], address: string, amount: bigint) => {
       const token = acc.find((t) => t.address === address);
-      if (token) {
+      if (token && typeof token.amount === "bigint") {
         token.amount += amount;
       } else {
         acc.push({ address, amount });
