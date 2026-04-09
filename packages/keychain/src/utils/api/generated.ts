@@ -2514,6 +2514,12 @@ export enum LayerswapStatus {
   PendingUserTransfer = "PENDING_USER_TRANSFER",
 }
 
+export type LayerswapStatusResponse = {
+  __typename?: "LayerswapStatusResponse";
+  status: LayerswapStatus;
+  txHash?: Maybe<Scalars["String"]>;
+};
+
 export type Lock = Node & {
   __typename?: "Lock";
   createdAt: Scalars["Time"];
@@ -3005,6 +3011,7 @@ export type Mutation = {
   createTeam: Team;
   decreaseBudget: Paymaster;
   deleteDeployment: Scalars["Boolean"];
+  deleteMe: Scalars["Boolean"];
   deleteRpcApiKey: Scalars["Boolean"];
   deleteRpcCorsDomain: Scalars["Boolean"];
   deleteTeam: Scalars["Boolean"];
@@ -4423,7 +4430,7 @@ export type Query = {
   layerswapPayment?: Maybe<LayerswapPayment>;
   layerswapQuote: LayerswapQuote;
   layerswapSources: Array<LayerswapSource>;
-  layerswapStatus: LayerswapStatus;
+  layerswapStatus: LayerswapStatusResponse;
   lookupPaymaster: PaymasterLookupResult;
   me?: Maybe<Account>;
   merkleClaims: MerkleClaimConnection;
@@ -4454,6 +4461,7 @@ export type Query = {
   starterpack?: Maybe<StarterpackDetails>;
   streaks: StreakResult;
   stripePayment: StripePayment;
+  stripeStarterpackQuote: StripeStarterpackQuote;
   subscribeCreateSession?: Maybe<Session>;
   team?: Maybe<Team>;
   teams?: Maybe<TeamConnection>;
@@ -4745,6 +4753,10 @@ export type QueryStreaksArgs = {
 
 export type QueryStripePaymentArgs = {
   id: Scalars["ID"];
+};
+
+export type QueryStripeStarterpackQuoteArgs = {
+  input: StripeStarterpackQuoteInput;
 };
 
 export type QuerySubscribeCreateSessionArgs = {
@@ -5051,6 +5063,8 @@ export type RpcLog = Node & {
   method?: Maybe<Scalars["String"]>;
   /** Starknet network used */
   network: RpcLogNetwork;
+  /** Origin header from the request */
+  origin?: Maybe<Scalars["String"]>;
   /** When billing was processed. NULL indicates not yet processed. */
   processedAt?: Maybe<Scalars["Time"]>;
   /** Referer header from the request */
@@ -5200,6 +5214,22 @@ export type RpcLogWhereInput = {
   networkNotIn?: InputMaybe<Array<RpcLogNetwork>>;
   not?: InputMaybe<RpcLogWhereInput>;
   or?: InputMaybe<Array<RpcLogWhereInput>>;
+  /** origin field predicates */
+  origin?: InputMaybe<Scalars["String"]>;
+  originContains?: InputMaybe<Scalars["String"]>;
+  originContainsFold?: InputMaybe<Scalars["String"]>;
+  originEqualFold?: InputMaybe<Scalars["String"]>;
+  originGT?: InputMaybe<Scalars["String"]>;
+  originGTE?: InputMaybe<Scalars["String"]>;
+  originHasPrefix?: InputMaybe<Scalars["String"]>;
+  originHasSuffix?: InputMaybe<Scalars["String"]>;
+  originIn?: InputMaybe<Array<Scalars["String"]>>;
+  originIsNil?: InputMaybe<Scalars["Boolean"]>;
+  originLT?: InputMaybe<Scalars["String"]>;
+  originLTE?: InputMaybe<Scalars["String"]>;
+  originNEQ?: InputMaybe<Scalars["String"]>;
+  originNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  originNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** processed_at field predicates */
   processedAt?: InputMaybe<Scalars["Time"]>;
   processedAtGT?: InputMaybe<Scalars["Time"]>;
@@ -6360,6 +6390,7 @@ export type StripePayment = {
 export type StripePaymentIntent = {
   __typename?: "StripePaymentIntent";
   clientSecret: Scalars["String"];
+  customerSessionClientSecret?: Maybe<Scalars["String"]>;
   id: Scalars["ID"];
   pricing: StripePricingDetails;
 };
@@ -6375,6 +6406,23 @@ export type StripePricingDetails = {
   baseCostInCents: Scalars["Int"];
   processingFeeInCents: Scalars["Int"];
   totalInCents: Scalars["Int"];
+};
+
+export type StripeStarterpackQuote = {
+  __typename?: "StripeStarterpackQuote";
+  needsSwap: Scalars["Boolean"];
+  paymentToken: Scalars["String"];
+  pricing: StripePricingDetails;
+};
+
+export type StripeStarterpackQuoteInput = {
+  clientPercentage?: InputMaybe<Scalars["Int"]>;
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  quantity: Scalars["Int"];
+  referral?: InputMaybe<Scalars["String"]>;
+  referralGroup?: InputMaybe<Scalars["String"]>;
+  registryAddress: Scalars["String"];
+  starterpackId: Scalars["String"];
 };
 
 export type Team = Node & {
@@ -7144,6 +7192,10 @@ export type AccountVerifyMutation = {
   accountVerify: boolean;
 };
 
+export type DeleteMeMutationVariables = Exact<{ [key: string]: never }>;
+
+export type DeleteMeMutation = { __typename?: "Mutation"; deleteMe: boolean };
+
 export type CryptoPaymentQueryVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -7236,6 +7288,7 @@ export type CreateStripePaymentIntentMutation = {
     __typename?: "StripePaymentIntent";
     id: string;
     clientSecret: string;
+    customerSessionClientSecret?: string | null;
     pricing: {
       __typename?: "StripePricingDetails";
       baseCostInCents: number;
@@ -7255,6 +7308,7 @@ export type CreateStripeStarterpackIntentMutation = {
     __typename?: "StripePaymentIntent";
     id: string;
     clientSecret: string;
+    customerSessionClientSecret?: string | null;
     pricing: {
       __typename?: "StripePricingDetails";
       baseCostInCents: number;
@@ -7324,7 +7378,11 @@ export type LayerswapStatusQueryVariables = Exact<{
 
 export type LayerswapStatusQuery = {
   __typename?: "Query";
-  layerswapStatus: LayerswapStatus;
+  layerswapStatus: {
+    __typename?: "LayerswapStatusResponse";
+    status: LayerswapStatus;
+    txHash?: string | null;
+  };
 };
 
 export type CoinbaseOnrampTransactionsQueryVariables = Exact<{
@@ -7846,6 +7904,24 @@ export const useAccountVerifyMutation = <TError = unknown, TContext = unknown>(
     ),
     options,
   );
+export const DeleteMeDocument = `
+    mutation DeleteMe {
+  deleteMe
+}
+    `;
+export const useDeleteMeMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    DeleteMeMutation,
+    TError,
+    DeleteMeMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<DeleteMeMutation, TError, DeleteMeMutationVariables, TContext>(
+    ["DeleteMe"],
+    useFetchData<DeleteMeMutation, DeleteMeMutationVariables>(DeleteMeDocument),
+    options,
+  );
 export const CryptoPaymentDocument = `
     query CryptoPayment($id: ID!) {
   cryptoPayment(id: $id) {
@@ -7964,6 +8040,7 @@ export const CreateStripePaymentIntentDocument = `
   createStripePaymentIntent(input: $input) {
     id
     clientSecret
+    customerSessionClientSecret
     pricing {
       baseCostInCents
       processingFeeInCents
@@ -8001,6 +8078,7 @@ export const CreateStripeStarterpackIntentDocument = `
   createStripeStarterpackIntent(input: $input) {
     id
     clientSecret
+    customerSessionClientSecret
     pricing {
       baseCostInCents
       processingFeeInCents
@@ -8121,7 +8199,10 @@ export const useLayerswapQuoteQuery = <
   );
 export const LayerswapStatusDocument = `
     query LayerswapStatus($swapId: ID!, $isMainnet: Boolean) {
-  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet)
+  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet) {
+    status
+    txHash
+  }
 }
     `;
 export const useLayerswapStatusQuery = <

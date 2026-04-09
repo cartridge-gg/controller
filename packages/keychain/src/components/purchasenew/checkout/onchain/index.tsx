@@ -32,6 +32,7 @@ import { QuantityControls } from "./quantity";
 import { WalletSelectionDrawer } from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
+import { getIpLocation } from "@/utils/ip";
 import { num } from "starknet";
 
 export function OnchainCheckout() {
@@ -82,9 +83,15 @@ export function OnchainCheckout() {
     enabled: false,
   });
   const { enableFeature } = useFeatures();
+  const isStripeEnabled = false;
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [countryCode, setCountryCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    getIpLocation().then((geo) => setCountryCode(geo.countryCode));
+  }, []);
 
   // Triple-click on the header icon to enable hidden payment methods.
   const clickCountRef = useRef(0);
@@ -163,6 +170,14 @@ export function OnchainCheckout() {
     quantity,
   });
 
+  const isUS = countryCode === "US";
+
+  const onStripeSelectForFallback = useCallback(() => {
+    if (isUS && isStripeEnabled) {
+      onStripeSelect();
+    }
+  }, [isUS, isStripeEnabled, onStripeSelect]);
+
   const { isCheckingFallback } = useTokenFallback({
     controller,
     starterpackDetails: starterpackDetails as
@@ -178,7 +193,7 @@ export function OnchainCheckout() {
     isApplePaySelected,
     selectedPlatform,
     setSelectedToken,
-    onStripeSelect,
+    onStripeSelect: onStripeSelectForFallback,
   });
 
   const globalDisabled = useMemo(() => {
@@ -331,13 +346,25 @@ export function OnchainCheckout() {
       const lastMethod = localStorage.getItem(
         `@cartridge/lastPaymentMethod:${controller.chainId()}`,
       );
-      if (lastMethod === "stripe" && isStripeStarterpackSupported) {
+      if (
+        lastMethod === "stripe" &&
+        isStripeEnabled &&
+        isStripeStarterpackSupported &&
+        countryCode === "US"
+      ) {
         onStripeSelect();
       }
     } catch {
       // localStorage may be unavailable
     }
-  }, [controller, quote, isStripeStarterpackSupported, onStripeSelect]);
+  }, [
+    controller,
+    quote,
+    isStripeEnabled,
+    isStripeStarterpackSupported,
+    onStripeSelect,
+    countryCode,
+  ]);
 
   useEffect(() => {
     clearError();
@@ -347,7 +374,6 @@ export function OnchainCheckout() {
   if (isStarterpackLoading || !quote) {
     return <LoadingState />;
   }
-
   return (
     <>
       <HeaderInner
@@ -502,6 +528,7 @@ export function OnchainCheckout() {
       <WalletSelectionDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
+        showFiatOptions={countryCode === "US"}
       />
     </>
   );

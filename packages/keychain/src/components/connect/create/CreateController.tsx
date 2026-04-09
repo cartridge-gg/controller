@@ -1,7 +1,6 @@
 import { NavigationHeader } from "@/components";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/components/provider/connection";
-import { usePostHog } from "@/components/provider/posthog";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
 import { allUseSameAuth } from "@/utils/controller";
@@ -26,6 +25,8 @@ import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
 import {
+  getIOSVersion,
+  isSafari,
   useDetectKeyboardOpen,
   usePreventOverScrolling,
 } from "@/hooks/viewport";
@@ -69,14 +70,6 @@ type CreateControllerFormProps = Omit<
   "setAuthenticationStep"
 >;
 
-function getIOSVersion(userAgentString: string) {
-  const match = userAgentString.match(/Version\/(\d+)\.\d+/);
-  if (match && match[1]) {
-    return parseInt(match[1], 10); // Parse the captured string to an integer
-  }
-  return null; // Return null if not found, or a default like 0
-}
-
 function CreateControllerForm({
   theme,
   usernameField,
@@ -103,9 +96,9 @@ function CreateControllerForm({
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
   const { isOpen: keyboardIsOpen, viewportHeight } = useDetectKeyboardOpen();
+  const { isMobile } = useDevice();
   const [pendingSubmitAfterKeyboardClose, setPendingSubmitAfterKeyboardClose] =
     useState(false);
-  const { isMobile } = useDevice();
   const prevKeyboardIsOpen = useRef(keyboardIsOpen);
 
   // Track when keyboard closes and auto-submit if there was a pending submission
@@ -135,11 +128,8 @@ function CreateControllerForm({
 
   const layoutHeight = useMemo(() => {
     if (isMobile) {
-      const isSafari = /^((?!chrome|android).)*safari/i.test(
-        navigator.userAgent,
-      );
       if (keyboardIsOpen) {
-        if (!isSafari) {
+        if (!isSafari(navigator.userAgent)) {
           return viewportHeight;
         }
 
@@ -154,7 +144,7 @@ function CreateControllerForm({
         }
 
         // old safari
-        return viewportHeight - 200;
+        return viewportHeight - 160;
       } else {
         return "100%";
       }
@@ -327,17 +317,19 @@ export function CreateControllerView({
   };
 
   // Handles scroll to top on mobile when keyboard opens
+  const { isMobile } = useDevice();
   useEffect(() => {
+    if (!isMobile || authenticationStep !== AuthenticationStep.FillForm) {
+      return;
+    }
     const handleScroll = () => {
       window.scrollTo(0, 0);
     };
-
     window.addEventListener("scroll", handleScroll);
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [isMobile, authenticationStep]);
 
   return (
     <LayoutContainer>
@@ -397,9 +389,6 @@ export function CreateController({
   forcedAuthMethod?: AuthOption;
   forcedAction?: "signup" | "login";
 }) {
-  const posthog = usePostHog();
-  const hasLoggedFocus = useRef(false);
-  const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
@@ -550,10 +539,6 @@ export function CreateController({
 
   const handleUsernameChange = (value: string) => {
     if (prefillUsername) return;
-    if (!hasLoggedChange.current) {
-      posthog?.capture("Change Username");
-      hasLoggedChange.current = true;
-    }
     setError(undefined);
     setUsernameField((u) => ({
       ...u,
@@ -562,12 +547,7 @@ export function CreateController({
     }));
   };
 
-  const handleUsernameFocus = () => {
-    if (!hasLoggedFocus.current) {
-      posthog?.capture("Focus Username");
-      hasLoggedFocus.current = true;
-    }
-  };
+  const handleUsernameFocus = () => {};
 
   const handleUsernameClear = () => {
     if (prefillUsername) return;

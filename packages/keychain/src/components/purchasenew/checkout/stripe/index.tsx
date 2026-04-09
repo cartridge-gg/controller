@@ -11,8 +11,12 @@ import { useEffect } from "react";
 
 export function StripeCheckout() {
   const { clearError, starterpackDetails } = useStarterpackContext();
-  const { stripePromise, clientSecret, costDetails } =
-    useCreditPurchaseContext();
+  const {
+    stripePromise,
+    clientSecret,
+    customerSessionClientSecret,
+    costDetails,
+  } = useCreditPurchaseContext();
   const { navigate, setOnBackCallback } = useNavigation();
   const isOnchainStarterpackCheckout =
     !!starterpackDetails && isOnchainStarterpack(starterpackDetails);
@@ -53,14 +57,23 @@ export function StripeCheckout() {
       ".Input": {
         border: "1px solid #242824",
         color: "#FFFFFF",
-        padding: "14px",
+        padding: "0 16px",
+        height: "40px",
+        lineHeight: "40px",
       },
     },
   } as Appearance;
 
   return (
     <Elements
-      options={{ clientSecret, appearance, loader: "auto" }}
+      options={{
+        clientSecret,
+        appearance,
+        loader: "auto",
+        ...(customerSessionClientSecret && {
+          customerSessionClientSecret,
+        }),
+      }}
       stripe={stripePromise}
     >
       <CheckoutForm

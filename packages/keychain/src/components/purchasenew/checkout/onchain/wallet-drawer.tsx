@@ -26,13 +26,16 @@ type DrawerStep = "network" | "wallet";
 interface WalletSelectionDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  showFiatOptions?: boolean;
 }
 
 export function WalletSelectionDrawer({
   isOpen,
   onClose,
+  showFiatOptions = true,
 }: WalletSelectionDrawerProps) {
   const isApplePayEnabled = useFeature("apple-pay-support");
+  const isStripeEnabled = false;
 
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
@@ -285,18 +288,20 @@ export function WalletSelectionDrawer({
           {step === "network" ? (
             // Network selection step
             <>
-              <PurchaseCard
-                key="stripe-checkout"
-                text="Credit Card"
-                icon={<CreditCardIcon variant="solid" />}
-                onClick={handleStripeCheckoutSelect}
-                className={cn(
-                  "group flex flex-row gap-2 bg-background-200 hover:bg-background-300 rounded-lg p-3 justify-between cursor-pointer",
-                  "rounded-lg",
-                  isApplePayLoading && "opacity-50 pointer-events-none",
-                )}
-              />
-              {isApplePayEnabled && (
+              {showFiatOptions && isStripeEnabled && (
+                <PurchaseCard
+                  key="stripe-checkout"
+                  text="Credit Card"
+                  icon={<CreditCardIcon variant="solid" />}
+                  onClick={handleStripeCheckoutSelect}
+                  className={cn(
+                    "group flex flex-row gap-2 bg-background-200 hover:bg-background-300 rounded-lg p-3 justify-between cursor-pointer",
+                    "rounded-lg",
+                    isApplePayLoading && "opacity-50 pointer-events-none",
+                  )}
+                />
+              )}
+              {showFiatOptions && isApplePayEnabled && (
                 <div
                   key="apple-pay"
                   onClick={handleApplePaySelect}

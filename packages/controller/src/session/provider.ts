@@ -351,8 +351,13 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("sessionPolicies");
     localStorage.removeItem("lastUsedConnector");
     this.account = undefined;
-    this.emitAccountsChanged([]);
     this._username = undefined;
+
+    // calling this InjectedConnector callback hangs forever, and we do not disconnect properly
+    // looking at InjectedConnector, it will disconnect is we pass [], so it must be safe to bypass
+    // this seems to be removed in the starknet 9 version
+    // this.emitAccountsChanged([]);
+
     const disconnectUrl = new URL(`${this._keychainUrl}`);
     disconnectUrl.pathname = "disconnect";
 

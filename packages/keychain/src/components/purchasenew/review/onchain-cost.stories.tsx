@@ -55,7 +55,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     onOnchainPurchase: async () => {},
     onExternalConnect: async () => undefined,
     onSendDeposit: async () => {},
-    waitForDeposit: async () => false,
+    waitForDeposit: async () => "0xmocktxhash",
     isApplePaySelected: false,
     isStripeSelected: false,
     paymentLink: undefined,
@@ -70,6 +70,8 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     orderStatus: undefined,
     orderTxHash: undefined,
     popupClosed: false,
+    paymentSuccess: false,
+    coinbaseLsSwapId: undefined,
     getTransactions: async () => [],
   };
 

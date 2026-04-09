@@ -53,7 +53,7 @@ export const CryptoPurchaseWithCredits: Story = {
       swapId="payment_123"
       transactionHash="0x1234567890abcdef"
       selectedPlatform="ethereum"
-      waitForDeposit={async () => true}
+      waitForDeposit={async () => "0xmocktxhash"}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0x1234567890abcdef",
@@ -97,7 +97,7 @@ export const CryptoPurchaseWithNFT: Story = {
       swapId="payment_456"
       transactionHash="0xabcdef1234567890"
       selectedPlatform="solana"
-      waitForDeposit={async () => true}
+      waitForDeposit={async () => "0xmocktxhash"}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0xabcdef1234567890",
@@ -135,7 +135,7 @@ export const CryptoPurchaseWithoutWallet: Story = {
       paymentMethod="crypto"
       swapId="payment_789"
       selectedPlatform="starknet"
-      waitForDeposit={async () => true}
+      waitForDeposit={async () => "0xmocktxhash"}
     />
   ),
 };
@@ -167,7 +167,7 @@ export const StripePurchase: Story = {
       paymentMethod="stripe"
       swapId="pi_stripe123"
       selectedPlatform="starknet"
-      waitForDeposit={async () => true}
+      waitForDeposit={async () => "0xmocktxhash"}
     />
   ),
 };
@@ -304,7 +304,7 @@ export const CryptoPurchaseLoading: Story = {
       swapId="payment_loading"
       transactionHash="0x0000000000000000"
       selectedPlatform="starknet"
-      waitForDeposit={async () => true}
+      waitForDeposit={async () => "0xmocktxhash"}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0x0000000000000000",
@@ -345,7 +345,7 @@ export const TokenPurchaseSmallAmount: Story = {
       swapId="payment_small_tokens"
       transactionHash="0xabc123def456"
       selectedPlatform="ethereum"
-      waitForDeposit={async () => true}
+      waitForDeposit={async () => "0xmocktxhash"}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0xabc123def456",
@@ -392,7 +392,7 @@ export const TokenPurchaseLargeAmount: Story = {
       swapId="payment_large_tokens"
       transactionHash="0xdef789abc012"
       selectedPlatform="ethereum"
-      waitForDeposit={async () => true}
+      waitForDeposit={async () => "0xmocktxhash"}
       explorer={{
         name: "Etherscan",
         url: "https://etherscan.io/tx/0xdef789abc012",

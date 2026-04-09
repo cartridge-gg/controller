@@ -30,6 +30,7 @@ export function Pending() {
     quantity,
     selectedPlatform,
     isApplePaySelected,
+    coinbaseLsSwapId,
   } = useOnchainPurchaseContext();
   const { closeModal } = useConnection();
 
@@ -53,6 +54,7 @@ export function Pending() {
         items={purchaseItems}
         paymentMethod="apple-pay"
         selectedPlatform="base"
+        swapId={coinbaseLsSwapId}
       />
     );
   }

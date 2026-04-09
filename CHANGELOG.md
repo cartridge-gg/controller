@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.13.11] - 2026-04-03
+
+### ✨ New Features
+- **@cartridge/keychain**: Added delete account option to settings, enabling users to permanently remove their accounts from the platform (#2534)
+- **@cartridge/keychain**: Added CustomerSession client secret support for Stripe Elements, enabling enhanced payment security (#2531)
+- **@cartridge/keychain**: Added auto-fallback payment token functionality with persistent selection, improving payment flow reliability when primary tokens fail (#2527)
+- **@cartridge/keychain**: Added IP-based location detection to replace geolocation, providing more reliable location services (#2526)
+- **@cartridge/keychain**: Added US map display with blocked states in location gate for enhanced compliance visualization (#2522)
+- **@cartridge/keychain**: Added keychain location prompt functionality enabling location-based features and services (#2349)
+- **@cartridge/keychain**: Added date of birth (DOB) verification to Stripe payment flow for enhanced compliance (#2510)
+- **@cartridge/keychain**: Added SMS authentication to signup/login flows, providing phone-based OTP authentication (#2500)
+- **@cartridge/keychain**: Added swap detection for AVNU and LayerSwap (LS2) protocols for better transaction recognition (#2493)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced payment flows with hardcoded clientPercentage set to 0 for bundle payments, reducing costs for users (#2523)
+- **@cartridge/keychain**: Improved Safari popup blocked error messaging with clearer guidance for browser settings (#2506)
+- **@cartridge/keychain**: Enhanced Coinbase phone input format to match Stripe verification requirements (#2517)
+- **@cartridge/keychain**: Improved payment UI by renaming "Stripe Checkout" to "Credit Card" for clarity (#2509)
+- **@cartridge/keychain**: Enhanced location gate verification to enforce checks before connect resolves (#2525)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed BroadcastChannel communication issues by replacing with postMessage for Coinbase popup (#2533)
+- **@cartridge/keychain**: Fixed session controller disconnect issues preventing proper session cleanup (#2537)
+- **@cartridge/keychain**: Fixed hidden password fields on mobile devices for better accessibility (#2535)
+- **@cartridge/keychain**: Fixed Coinbase popup autoclose functionality on payment success (#2532)
+- **@cartridge/keychain**: Fixed payment token fallback failures when primary tokens are unavailable (#2530)
+- **@cartridge/keychain**: Fixed Stripe auto-fallback behavior for non-US users to prevent inappropriate fallbacks (#2529)
+- **@cartridge/keychain**: Fixed KYC verification gating to restrict to US users only (#2528)
+- **@cartridge/keychain**: Fixed starterpack closure issues for improved stability (#2516)
+- **@cartridge/keychain**: Fixed controller layout updates and spending limit loading states (#2515)
+- **@cartridge/keychain**: Fixed Apple Pay support errors in Coinbase checkout by properly ignoring expected "not supported" messages (#2514)
+- **@cartridge/keychain**: Fixed WASM error handling and updated controller-wasm to v0.10.0 (#2502)
+
+### 📦 Dependencies
+- **@cartridge/controller-wasm**: Updated to version 0.10.0 for improved WASM functionality and error handling (#2502)
+- **Turnkey SDKs**: Upgraded browser SDKs to version 5 for enhanced security and performance (#2499)
+
 ## [0.13.11-alpha.2] - 2026-03-30
 
 ### ✨ New Features

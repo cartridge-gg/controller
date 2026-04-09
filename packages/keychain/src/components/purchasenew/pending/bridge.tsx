@@ -55,7 +55,7 @@ export interface BridgePendingProps {
   /** For storybook: override selectedPlatform from context */
   selectedPlatform?: string;
   /** For storybook: override waitForDeposit from context */
-  waitForDeposit?: (swapId: string) => Promise<boolean>;
+  waitForDeposit?: (swapId: string) => Promise<string>;
 }
 
 /**
@@ -112,7 +112,6 @@ export function BridgePending({
     if (paymentMethod === "apple-pay" && !paymentCompleted) {
       if (orderStatus === CoinbaseOnrampStatus.Completed) {
         setDepositCompleted(true);
-        setPaymentCompleted(true);
       } else if (orderStatus === CoinbaseOnrampStatus.Failed) {
         setError(new Error("Coinbase payment failed. Please try again."));
       }
@@ -138,13 +137,27 @@ export function BridgePending({
   useEffect(() => {
     if (swapId) {
       waitForDeposit(swapId)
-        .then(() => setPaymentCompleted(true))
+        .then(async (bridgeTxHash) => {
+          // Wait for the bridge transaction to be confirmed on-chain
+          if (controller && bridgeTxHash) {
+            await retryWithBackoff(() =>
+              controller.provider.waitForTransaction(bridgeTxHash, {
+                retryInterval: 1000,
+                successStates: [
+                  TransactionFinalityStatus.PRE_CONFIRMED,
+                  TransactionFinalityStatus.ACCEPTED_ON_L2,
+                ],
+              }),
+            );
+          }
+          setPaymentCompleted(true);
+        })
         .catch((err) => {
           console.error("Failed to wait for deposit:", err);
           setError(err as Error);
         });
     }
-  }, [swapId, waitForDeposit]);
+  }, [swapId, waitForDeposit, controller]);
 
   useEffect(() => {
     if (depositCompleted) {
