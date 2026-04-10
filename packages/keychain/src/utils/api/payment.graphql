@@ -69,6 +69,47 @@ mutation CreateStripeStarterpackIntent(
   }
 }
 
+mutation CreateCoinflowStarterpackIntent(
+  $input: CreateCoinflowStarterpackIntentInput!
+) {
+  createCoinflowStarterpackIntent(input: $input) {
+    id
+    sessionKey
+    jwtToken
+    merchantId
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+  }
+}
+
+query CoinflowPayment($id: ID!) {
+  coinflowPayment(id: $id) {
+    id
+    paymentStatus
+    purchaseFulfillment {
+      id
+      status
+      transactionHash
+      lastError
+    }
+  }
+}
+
+query CoinflowStarterpackQuote($input: CoinflowStarterpackQuoteInput!) {
+  coinflowStarterpackQuote(input: $input) {
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+    paymentToken
+    needsSwap
+  }
+}
+
 mutation CreateLayerswapPayment($input: CreateLayerswapPaymentInput!) {
   createLayerswapPayment(input: $input) {
     ...LayerswapPaymentFields

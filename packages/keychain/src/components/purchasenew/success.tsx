@@ -20,18 +20,12 @@ import { getExplorer } from "@/hooks/starterpack/layerswap";
 import { StarterpackType } from "@/context";
 import { useStarterpackPlayHandler } from "@/hooks/starterpack";
 import {
+  CoinflowPaymentStatus,
   PurchaseFulfillmentStatus,
   StripePaymentStatus,
+  useCoinflowPaymentQuery,
   useStripePaymentQuery,
 } from "@/utils/api";
-import { useQuery } from "react-query";
-import { client } from "@/utils/graphql";
-import {
-  CoinflowFulfillmentStatus,
-  CoinflowPaymentDocument,
-  CoinflowPaymentQuery,
-  CoinflowPaymentStatus,
-} from "@/hooks/payments/coinflow";
 
 export function Success() {
   const { starterpackDetails, transactionHash, claimItems } =
@@ -306,33 +300,6 @@ function getCoinflowPaymentStage(
   }
 }
 
-function getCoinflowFulfillmentStage(
-  fulfillmentStatus: CoinflowFulfillmentStatus | undefined,
-): StripePurchaseStage {
-  switch (fulfillmentStatus) {
-    case CoinflowFulfillmentStatus.Confirmed:
-      return {
-        title: "Confirmed on Starknet",
-        status: "success",
-      };
-    case CoinflowFulfillmentStatus.Failed:
-      return {
-        title: "Failed on Starknet",
-        status: "error",
-      };
-    case CoinflowFulfillmentStatus.Submitted:
-      return {
-        title: "Submitted to Starknet",
-        status: "loading",
-      };
-    default:
-      return {
-        title: "Purchasing on Starknet",
-        status: "loading",
-      };
-  }
-}
-
 export function CoinflowPurchaseSuccess({
   items,
   name,
@@ -348,12 +315,8 @@ export function CoinflowPurchaseSuccess({
   const quantityText = quantity > 1 ? `(${quantity})` : "";
 
   const { data, error, isLoading, isFetching, refetch } =
-    useQuery<CoinflowPaymentQuery>(
-      ["coinflowPayment", coinflowPaymentId],
-      () =>
-        client.request<CoinflowPaymentQuery>(CoinflowPaymentDocument, {
-          id: coinflowPaymentId,
-        }),
+    useCoinflowPaymentQuery(
+      { id: coinflowPaymentId },
       {
         enabled: true,
         retry: false,
@@ -369,9 +332,9 @@ export function CoinflowPurchaseSuccess({
 
   const isPaymentFailed = paymentStatus === CoinflowPaymentStatus.Failed;
   const isPurchaseComplete =
-    fulfillmentStatus === CoinflowFulfillmentStatus.Confirmed;
+    fulfillmentStatus === PurchaseFulfillmentStatus.Confirmed;
   const isFulfillmentFailed =
-    fulfillmentStatus === CoinflowFulfillmentStatus.Failed;
+    fulfillmentStatus === PurchaseFulfillmentStatus.Failed;
 
   useEffect(() => {
     if (paymentStatus !== CoinflowPaymentStatus.Succeeded) {
@@ -430,7 +393,7 @@ export function CoinflowPurchaseSuccess({
   }, [error, isPaymentFailed]);
 
   const paymentStage = getCoinflowPaymentStage(paymentStatus);
-  const fulfillmentStage = getCoinflowFulfillmentStage(fulfillmentStatus);
+  const fulfillmentStage = getFulfillmentStage(fulfillmentStatus);
 
   return (
     <>
