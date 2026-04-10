@@ -78,10 +78,17 @@ mutation CreateCoinflowStarterpackIntent(
     jwtToken
     merchantId
     pricing {
-      baseCostInCents
-      processingFeeInCents
+      subtotalInCents
+      cardFeeInCents
+      gasFeeInCents
       totalInCents
     }
+  }
+}
+
+mutation CoinflowCardCheckout($input: CoinflowCardCheckoutInput!) {
+  coinflowCardCheckout(input: $input) {
+    paymentId
   }
 }
 
@@ -101,8 +108,9 @@ query CoinflowPayment($id: ID!) {
 query CoinflowStarterpackQuote($input: CoinflowStarterpackQuoteInput!) {
   coinflowStarterpackQuote(input: $input) {
     pricing {
-      baseCostInCents
-      processingFeeInCents
+      subtotalInCents
+      cardFeeInCents
+      gasFeeInCents
       totalInCents
     }
     paymentToken
