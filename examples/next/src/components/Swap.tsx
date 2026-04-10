@@ -1,25 +1,34 @@
 "use client";
 
 import { useCallback } from "react";
-import { Call } from "starknet";
+import { BigNumberish, Call } from "starknet";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button } from "@cartridge/ui";
 
 export function Swap() {
-  const { account, connector } = useAccount();
+  const { account, address, connector } = useAccount();
   const ctrlConnector = connector as unknown as ControllerConnector;
 
   const execute = useCallback(
     (transactions: Call[]) => {
+      // mock calldata caller as the connected account address
+      const examplesCaller = BigInt(
+        "0x76a3565794dB7894484718bE7F51Ad5B2E76605e22722887C1260e2451aD945",
+      );
+      const calls = transactions.map((call) => ({
+        ...call,
+        calldata: ((call.calldata as BigNumberish[]) ?? []).map((data) =>
+          BigInt(data) === examplesCaller && address ? address : data,
+        ),
+      }));
       if (account) {
-        account.execute(transactions);
-      } else {
+        account.execute(calls);
         // this is causing the controller to close on validation error
-        ctrlConnector.controller.openExecute(transactions);
+        // ctrlConnector.controller.openExecute(calls);
       }
     },
-    [account, ctrlConnector],
+    [account, address, ctrlConnector],
   );
 
   if (!account) {
