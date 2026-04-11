@@ -234,7 +234,12 @@ export function OnchainCostBreakdown({
                 quantity={quantity}
                 layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
                 coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
-                stripeFeeInCents={coinflowCostDetails ? coinflowCostDetails.cardFeeInCents + coinflowCostDetails.gasFeeInCents : undefined}
+                stripeFeeInCents={
+                  coinflowCostDetails
+                    ? coinflowCostDetails.cardFeeInCents +
+                      coinflowCostDetails.gasFeeInCents
+                    : undefined
+                }
               />
             </div>
             {isFetchingConversion || isFetchingCoinbaseQuote ? (
