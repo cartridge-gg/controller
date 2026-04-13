@@ -160,5 +160,4 @@ describe("subscribeCreateSession", () => {
     expect(body.variables.sessionKeyGuid).toBe("0xmyguid");
     expect(body.query).toContain("subscribeCreateSession");
   });
-
 });
