@@ -27,7 +27,7 @@ export const OnchainFeesTooltip = ({
   quantity = 1,
   layerswapFees,
   coinbaseQuote,
-  stripeFeeInCents,
+  creditCardFeeInCents,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
@@ -35,7 +35,7 @@ export const OnchainFeesTooltip = ({
   quantity?: number;
   layerswapFees?: string;
   coinbaseQuote?: CoinbaseQuoteResult;
-  stripeFeeInCents?: number;
+  creditCardFeeInCents?: number;
 }) => {
   const { decimals, symbol } = quote.paymentTokenMetadata;
   const baseTotal =
@@ -52,14 +52,14 @@ export const OnchainFeesTooltip = ({
     ? `${Number(coinbaseQuote.coinbaseFee.amount).toFixed(2)} ${coinbaseQuote.coinbaseFee.currency}`
     : null;
 
-  const formattedStripeFee =
-    stripeFeeInCents !== undefined
-      ? `${(stripeFeeInCents / 100).toFixed(2)} ${symbol}`
+  const formattedCardFee =
+    creditCardFeeInCents !== undefined
+      ? `${(creditCardFeeInCents / 100).toFixed(2)} ${symbol}`
       : null;
 
-  const totalWithStripeFee =
-    stripeFeeInCents !== undefined
-      ? `${(baseTotal + stripeFeeInCents / 100).toFixed(2)} ${symbol}`
+  const totalWithCardFee =
+    creditCardFeeInCents !== undefined
+      ? `${(baseTotal + creditCardFeeInCents / 100).toFixed(2)} ${symbol}`
       : null;
 
   return (
@@ -115,10 +115,10 @@ export const OnchainFeesTooltip = ({
               <span>{formattedCoinbaseFee}</span>
             </div>
           )}
-          {formattedStripeFee && (
+          {formattedCardFee && (
             <div className="flex flex-row justify-between text-foreground-300">
-              <span>Stripe Fee:</span>
-              <span>{formattedStripeFee}</span>
+              <span>Card Fee:</span>
+              <span>{formattedCardFee}</span>
             </div>
           )}
           <Separator className="bg-background-125" />
@@ -127,8 +127,8 @@ export const OnchainFeesTooltip = ({
             <span>
               {coinbaseQuote?.paymentTotal
                 ? `${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)} ${coinbaseQuote.paymentTotal.currency}`
-                : totalWithStripeFee
-                  ? totalWithStripeFee
+                : totalWithCardFee
+                  ? totalWithCardFee
                   : formatTokenAmount(
                       quote.totalCost * BigInt(quantity) +
                         (layerswapFees ? BigInt(layerswapFees) : 0n),

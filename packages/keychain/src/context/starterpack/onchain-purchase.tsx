@@ -86,7 +86,7 @@ export interface OnchainPurchaseContextType {
 
   // Coinbase / Apple Pay state
   isApplePaySelected: boolean;
-  isStripeSelected: boolean;
+  isCoinflowSelected: boolean;
   paymentLink: string | undefined;
   isCreatingOrder: boolean;
   coinbaseQuote: CoinbaseQuoteResult | undefined;
@@ -108,7 +108,7 @@ export interface OnchainPurchaseContextType {
   onSendDeposit: () => Promise<void>;
   waitForDeposit: (swapId: string) => Promise<string>;
   onApplePaySelect: () => void;
-  onStripeSelect: () => void;
+  onCoinflowSelect: () => void;
   onCreateCoinbaseOrder: (opts?: {
     force?: boolean;
   }) => Promise<CoinbaseOrderResult | undefined>;
@@ -199,7 +199,7 @@ export const OnchainPurchaseProvider = ({
   const clearSelectedWallet = useCallback(() => {
     clearSelectedWalletInternal();
     setIsApplePaySelected(false);
-    setIsStripeSelected(false);
+    setIsCoinflowSelected(false);
     clearPaymentMethod();
   }, [clearSelectedWalletInternal, clearPaymentMethod]);
 
@@ -210,7 +210,7 @@ export const OnchainPurchaseProvider = ({
       chainId?: string,
     ) => {
       setIsApplePaySelected(false);
-      setIsStripeSelected(false);
+      setIsCoinflowSelected(false);
       clearPaymentMethod();
       return onExternalConnectInternal(wallet, platform, chainId);
     },
@@ -261,7 +261,7 @@ export const OnchainPurchaseProvider = ({
   });
 
   const [isApplePaySelected, setIsApplePaySelected] = useState(false);
-  const [isStripeSelected, setIsStripeSelected] = useState(false);
+  const [isCoinflowSelected, setIsCoinflowSelected] = useState(false);
   const [coinbaseLsSwapId, setCoinbaseLsSwapId] = useState<
     string | undefined
   >();
@@ -333,14 +333,14 @@ export const OnchainPurchaseProvider = ({
     selectedToken,
     selectedWallet,
     isApplePaySelected,
-    isStripeSelected,
+    isCoinflowSelected,
     setDisplayError,
   ]);
 
   // Auto-select USDC when a card-based flow is selected
   useEffect(() => {
     if (
-      (isApplePaySelected || isStripeSelected) &&
+      (isApplePaySelected || isCoinflowSelected) &&
       availableTokens.length > 0
     ) {
       const usdcToken = availableTokens.find(
@@ -352,7 +352,7 @@ export const OnchainPurchaseProvider = ({
     }
   }, [
     isApplePaySelected,
-    isStripeSelected,
+    isCoinflowSelected,
     availableTokens,
     selectedToken,
     setSelectedToken,
@@ -596,15 +596,15 @@ export const OnchainPurchaseProvider = ({
 
   const onApplePaySelect = useCallback(() => {
     setIsApplePaySelected(true);
-    setIsStripeSelected(false);
+    setIsCoinflowSelected(false);
     clearSelectedWalletInternal();
   }, [clearSelectedWalletInternal]);
 
-  const onStripeSelect = useCallback(() => {
-    setIsStripeSelected(true);
+  const onCoinflowSelect = useCallback(() => {
+    setIsCoinflowSelected(true);
     setIsApplePaySelected(false);
     clearSelectedWalletInternal();
-    savePaymentMethod("stripe");
+    savePaymentMethod("coinflow");
   }, [clearSelectedWalletInternal, savePaymentMethod]);
 
   const onCreateCoinbaseOrder = useCallback(
@@ -655,7 +655,7 @@ export const OnchainPurchaseProvider = ({
     swapQuote,
     isFetchingConversion,
     isTokenSelectionLocked:
-      isTokenSelectionLocked || isApplePaySelected || isStripeSelected,
+      isTokenSelectionLocked || isApplePaySelected || isCoinflowSelected,
     conversionError,
     usdAmount,
     layerswapFees,
@@ -668,7 +668,7 @@ export const OnchainPurchaseProvider = ({
     depositAmount,
     feeEstimationError,
     isApplePaySelected,
-    isStripeSelected,
+    isCoinflowSelected,
     paymentLink,
     isCreatingOrder,
     coinbaseQuote,
@@ -684,7 +684,7 @@ export const OnchainPurchaseProvider = ({
     onSendDeposit,
     waitForDeposit,
     onApplePaySelect,
-    onStripeSelect,
+    onCoinflowSelect,
     onCreateCoinbaseOrder,
     openPaymentPopup,
     getTransactions,

@@ -16,11 +16,11 @@ export interface UseTokenFallbackOptions {
   isLoadingBalance: boolean;
   balanceError: string | null;
   quantity: number;
-  isStripeSelected: boolean;
+  isCoinflowSelected: boolean;
   isApplePaySelected: boolean;
   selectedPlatform: ExternalPlatform | undefined;
   setSelectedToken: (token: TokenOption) => void;
-  onStripeSelect: () => void;
+  onCoinflowSelect: () => void;
 }
 
 export interface UseTokenFallbackReturn {
@@ -63,7 +63,7 @@ async function fetchBalance(
  * Hook that checks fallback token balances when the selected token has
  * insufficient funds. If a token with sufficient balance is found, it
  * auto-switches to it. If none are found and the starterpack is priced
- * in USDC, it defaults to Stripe checkout.
+ * in USDC, it defaults to Coinflow credit-card checkout.
  */
 export function useTokenFallback({
   controller,
@@ -74,11 +74,11 @@ export function useTokenFallback({
   isLoadingBalance,
   balanceError,
   quantity,
-  isStripeSelected,
+  isCoinflowSelected,
   isApplePaySelected,
   selectedPlatform,
   setSelectedToken,
-  onStripeSelect,
+  onCoinflowSelect,
 }: UseTokenFallbackOptions): UseTokenFallbackReturn {
   const [isCheckingFallback, setIsCheckingFallback] = useState(false);
   const hasAttemptedFallback = useRef(false);
@@ -93,7 +93,7 @@ export function useTokenFallback({
       !starterpackDetails ||
       !isOnchainStarterpack(starterpackDetails) ||
       !selectedToken ||
-      isStripeSelected ||
+      isCoinflowSelected ||
       isApplePaySelected ||
       (selectedPlatform && selectedPlatform !== "starknet")
     ) {
@@ -162,13 +162,13 @@ export function useTokenFallback({
 
       if (abortController.signal.aborted) return;
 
-      // No fallback token found - default to Stripe if priced in USDC
+      // No fallback token found - default to Coinflow credit-card if priced in USDC
       const usdcAddress = USDC_ADDRESSES[controller.chainId()];
       if (
         usdcAddress &&
         num.toHex(quote.paymentToken) === num.toHex(usdcAddress)
       ) {
-        onStripeSelect();
+        onCoinflowSelect();
       }
 
       setIsCheckingFallback(false);
@@ -188,11 +188,11 @@ export function useTokenFallback({
     isLoadingBalance,
     balanceError,
     quantity,
-    isStripeSelected,
+    isCoinflowSelected,
     isApplePaySelected,
     selectedPlatform,
     setSelectedToken,
-    onStripeSelect,
+    onCoinflowSelect,
   ]);
 
   return { isCheckingFallback };

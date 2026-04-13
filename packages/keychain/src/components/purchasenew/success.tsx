@@ -30,8 +30,8 @@ import {
 export function Success() {
   const { starterpackDetails, transactionHash, claimItems } =
     useStarterpackContext();
-  const { purchaseItems, isStripeSelected } = useOnchainPurchaseContext();
-  const { stripePaymentId, coinflowIntent } = useCreditPurchaseContext();
+  const { purchaseItems } = useOnchainPurchaseContext();
+  const { coinflowIntent } = useCreditPurchaseContext();
 
   const items = useMemo(() => {
     if (starterpackDetails?.type === "claimed") {
@@ -47,20 +47,6 @@ export function Success() {
         items={items}
         name={starterpackDetails.name}
         coinflowPaymentId={coinflowIntent.id}
-      />
-    );
-  }
-
-  if (
-    starterpackDetails?.type === "onchain" &&
-    isStripeSelected &&
-    stripePaymentId
-  ) {
-    return (
-      <StripePurchaseSuccess
-        items={items}
-        name={starterpackDetails.name}
-        stripePaymentId={stripePaymentId}
       />
     );
   }

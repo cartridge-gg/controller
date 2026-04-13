@@ -125,7 +125,7 @@ export function OnchainCostBreakdown({
     feeEstimationError,
     quantity,
     isApplePaySelected,
-    isStripeSelected,
+    isCoinflowSelected,
     coinbaseQuote,
     isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
@@ -134,11 +134,11 @@ export function OnchainCostBreakdown({
   // When credit card is selected, use the Coinflow backend quote so that
   // pricing is correct even for non-USDC starterpacks (handles Ekubo swap).
   const coinflowCostDetails = useMemo(() => {
-    if (!isStripeSelected) {
+    if (!isCoinflowSelected) {
       return undefined;
     }
     return coinflowQuote?.pricing;
-  }, [isStripeSelected, coinflowQuote]);
+  }, [isCoinflowSelected, coinflowQuote]);
 
   // Get default token (matching quote if available) or fallback to the first available token
   const defaultToken =
@@ -234,7 +234,7 @@ export function OnchainCostBreakdown({
                 quantity={quantity}
                 layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
                 coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
-                stripeFeeInCents={
+                creditCardFeeInCents={
                   coinflowCostDetails
                     ? coinflowCostDetails.cardFeeInCents +
                       coinflowCostDetails.gasFeeInCents
@@ -246,7 +246,7 @@ export function OnchainCostBreakdown({
               <Spinner />
             ) : (
               <div className="flex items-center gap-1.5">
-                {isStripeSelected ? (
+                {isCoinflowSelected ? (
                   isCoinflowQuoteLoading ? (
                     <Spinner />
                   ) : coinflowCostDetails ? (
