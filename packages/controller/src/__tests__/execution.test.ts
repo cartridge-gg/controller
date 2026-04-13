@@ -18,11 +18,28 @@ const TEST_CHAIN_ID = "SN_SEPOLIA";
 
 const TRANSFER_SELECTOR = normalizeFelt(hash.getSelectorFromName("transfer"));
 
+const APPROVE_SELECTOR = normalizeFelt(hash.getSelectorFromName("approve"));
+
 const policies: CallPolicy[] = [
   {
     target:
       "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     method: TRANSFER_SELECTOR,
+    authorized: true,
+  },
+];
+
+const multiPolicies: CallPolicy[] = [
+  {
+    target:
+      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+    method: TRANSFER_SELECTOR,
+    authorized: true,
+  },
+  {
+    target:
+      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+    method: APPROVE_SELECTOR,
     authorized: true,
   },
 ];
@@ -245,6 +262,67 @@ describe("buildSignedOutsideExecutionV3", () => {
         policyProofIndex,
       }),
     ).toThrow("execute_before must be greater than execute_after");
+  });
+
+  test("handles multiple calls with different calldata lengths", () => {
+    const { root } = computePolicyMerkle(multiPolicies);
+    const proofs = computePolicyMerkleProofs(multiPolicies);
+    const policyProofIndex = createPolicyProofIndex(proofs);
+    const publicKey = ec.starkCurve.getStarkKey(
+      encode.addHexPrefix(TEST_PRIVATE_KEY),
+    );
+    const domain = shortString.encodeShortString("Starknet Signer");
+    const sessionKeyGuid = normalizeFelt(
+      hash.computePoseidonHash(normalizeFelt(domain), publicKey),
+    );
+
+    const result = buildSignedOutsideExecutionV3({
+      calls: [
+        {
+          contractAddress:
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          entrypoint: "transfer",
+          calldata: ["0x1", "0x2", "0x0"],
+        },
+        {
+          contractAddress:
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          entrypoint: "approve",
+          calldata: ["0xaaa"],
+        },
+      ],
+      chainId: TEST_CHAIN_ID,
+      session: {
+        username: "test",
+        address: TEST_ADDRESS,
+        ownerGuid: TEST_OWNER_GUID,
+        expiresAt: "9999999999",
+        guardianKeyGuid: "0x0",
+        metadataHash: "0x0",
+        sessionKeyGuid,
+      },
+      sessionPrivateKey: TEST_PRIVATE_KEY,
+      policyRoot: root,
+      sessionKeyGuid,
+      policyProofIndex,
+      nowSeconds: 1000000,
+    });
+
+    // Both calls serialized
+    expect(result.outsideExecution.calls).toHaveLength(2);
+    expect(result.outsideExecution.calls[0].calldata).toEqual([
+      "0x1",
+      "0x2",
+      "0x0",
+    ]);
+    expect(result.outsideExecution.calls[1].calldata).toEqual(["0xaaa"]);
+
+    // Signature is still valid
+    expect(result.signature.length).toBeGreaterThan(0);
+    const sessionTokenMagic = normalizeFelt(
+      shortString.encodeShortString("session-token"),
+    );
+    expect(result.signature[0]).toBe(sessionTokenMagic);
   });
 
   test("respects custom time bounds", () => {

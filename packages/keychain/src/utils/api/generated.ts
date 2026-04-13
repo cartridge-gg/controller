@@ -1203,21 +1203,14 @@ export type CoinbaseTransactionsResponse = {
 };
 
 export type CoinflowCardCheckoutInput = {
-  /** Street address line 1. Required by Coinflow address validation. */
-  address1: Scalars["String"];
   cardToken: Scalars["String"];
-  city: Scalars["String"];
   /** Our internal CoinflowPayments row ID from createCoinflowStarterpackIntent. */
   coinflowPaymentId: Scalars["ID"];
-  /** ISO 3166-1 alpha-2 country code (e.g. "US"). Required by Coinflow address validation. */
-  country: Scalars["String"];
   email: Scalars["String"];
   expMonth: Scalars["String"];
   expYear: Scalars["String"];
   firstName: Scalars["String"];
   lastName: Scalars["String"];
-  state?: InputMaybe<Scalars["String"]>;
-  zip?: InputMaybe<Scalars["String"]>;
 };
 
 export type CoinflowCardCheckoutResult = {
@@ -7475,80 +7468,6 @@ export type CreateStripeStarterpackIntentMutation = {
   };
 };
 
-export type CreateCoinflowStarterpackIntentMutationVariables = Exact<{
-  input: CreateCoinflowStarterpackIntentInput;
-}>;
-
-export type CreateCoinflowStarterpackIntentMutation = {
-  __typename?: "Mutation";
-  createCoinflowStarterpackIntent: {
-    __typename?: "CoinflowStarterpackIntent";
-    id: string;
-    sessionKey: string;
-    jwtToken: string;
-    merchantId: string;
-    pricing: {
-      __typename?: "CoinflowPricingDetails";
-      subtotalInCents: number;
-      cardFeeInCents: number;
-      gasFeeInCents: number;
-      totalInCents: number;
-    };
-  };
-};
-
-export type CoinflowCardCheckoutMutationVariables = Exact<{
-  input: CoinflowCardCheckoutInput;
-}>;
-
-export type CoinflowCardCheckoutMutation = {
-  __typename?: "Mutation";
-  coinflowCardCheckout: {
-    __typename?: "CoinflowCardCheckoutResult";
-    paymentId: string;
-  };
-};
-
-export type CoinflowPaymentQueryVariables = Exact<{
-  id: Scalars["ID"];
-}>;
-
-export type CoinflowPaymentQuery = {
-  __typename?: "Query";
-  coinflowPayment: {
-    __typename?: "CoinflowPayment";
-    id: string;
-    paymentStatus: CoinflowPaymentStatus;
-    purchaseFulfillment?: {
-      __typename?: "PurchaseFulfillment";
-      id: string;
-      status: PurchaseFulfillmentStatus;
-      transactionHash?: string | null;
-      lastError?: string | null;
-    } | null;
-  };
-};
-
-export type CoinflowStarterpackQuoteQueryVariables = Exact<{
-  input: CoinflowStarterpackQuoteInput;
-}>;
-
-export type CoinflowStarterpackQuoteQuery = {
-  __typename?: "Query";
-  coinflowStarterpackQuote: {
-    __typename?: "CoinflowStarterpackQuote";
-    paymentToken: string;
-    needsSwap: boolean;
-    pricing: {
-      __typename?: "CoinflowPricingDetails";
-      subtotalInCents: number;
-      cardFeeInCents: number;
-      gasFeeInCents: number;
-      totalInCents: number;
-    };
-  };
-};
-
 export type CreateLayerswapPaymentMutationVariables = Exact<{
   input: CreateLayerswapPaymentInput;
 }>;
@@ -8340,134 +8259,6 @@ export const useCreateStripeStarterpackIntentMutation = <
       CreateStripeStarterpackIntentMutation,
       CreateStripeStarterpackIntentMutationVariables
     >(CreateStripeStarterpackIntentDocument),
-    options,
-  );
-export const CreateCoinflowStarterpackIntentDocument = `
-    mutation CreateCoinflowStarterpackIntent($input: CreateCoinflowStarterpackIntentInput!) {
-  createCoinflowStarterpackIntent(input: $input) {
-    id
-    sessionKey
-    jwtToken
-    merchantId
-    pricing {
-      subtotalInCents
-      cardFeeInCents
-      gasFeeInCents
-      totalInCents
-    }
-  }
-}
-    `;
-export const useCreateCoinflowStarterpackIntentMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    CreateCoinflowStarterpackIntentMutation,
-    TError,
-    CreateCoinflowStarterpackIntentMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    CreateCoinflowStarterpackIntentMutation,
-    TError,
-    CreateCoinflowStarterpackIntentMutationVariables,
-    TContext
-  >(
-    ["CreateCoinflowStarterpackIntent"],
-    useFetchData<
-      CreateCoinflowStarterpackIntentMutation,
-      CreateCoinflowStarterpackIntentMutationVariables
-    >(CreateCoinflowStarterpackIntentDocument),
-    options,
-  );
-export const CoinflowCardCheckoutDocument = `
-    mutation CoinflowCardCheckout($input: CoinflowCardCheckoutInput!) {
-  coinflowCardCheckout(input: $input) {
-    paymentId
-  }
-}
-    `;
-export const useCoinflowCardCheckoutMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    CoinflowCardCheckoutMutation,
-    TError,
-    CoinflowCardCheckoutMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    CoinflowCardCheckoutMutation,
-    TError,
-    CoinflowCardCheckoutMutationVariables,
-    TContext
-  >(
-    ["CoinflowCardCheckout"],
-    useFetchData<
-      CoinflowCardCheckoutMutation,
-      CoinflowCardCheckoutMutationVariables
-    >(CoinflowCardCheckoutDocument),
-    options,
-  );
-export const CoinflowPaymentDocument = `
-    query CoinflowPayment($id: ID!) {
-  coinflowPayment(id: $id) {
-    id
-    paymentStatus
-    purchaseFulfillment {
-      id
-      status
-      transactionHash
-      lastError
-    }
-  }
-}
-    `;
-export const useCoinflowPaymentQuery = <
-  TData = CoinflowPaymentQuery,
-  TError = unknown,
->(
-  variables: CoinflowPaymentQueryVariables,
-  options?: UseQueryOptions<CoinflowPaymentQuery, TError, TData>,
-) =>
-  useQuery<CoinflowPaymentQuery, TError, TData>(
-    ["CoinflowPayment", variables],
-    useFetchData<CoinflowPaymentQuery, CoinflowPaymentQueryVariables>(
-      CoinflowPaymentDocument,
-    ).bind(null, variables),
-    options,
-  );
-export const CoinflowStarterpackQuoteDocument = `
-    query CoinflowStarterpackQuote($input: CoinflowStarterpackQuoteInput!) {
-  coinflowStarterpackQuote(input: $input) {
-    pricing {
-      subtotalInCents
-      cardFeeInCents
-      gasFeeInCents
-      totalInCents
-    }
-    paymentToken
-    needsSwap
-  }
-}
-    `;
-export const useCoinflowStarterpackQuoteQuery = <
-  TData = CoinflowStarterpackQuoteQuery,
-  TError = unknown,
->(
-  variables: CoinflowStarterpackQuoteQueryVariables,
-  options?: UseQueryOptions<CoinflowStarterpackQuoteQuery, TError, TData>,
-) =>
-  useQuery<CoinflowStarterpackQuoteQuery, TError, TData>(
-    ["CoinflowStarterpackQuote", variables],
-    useFetchData<
-      CoinflowStarterpackQuoteQuery,
-      CoinflowStarterpackQuoteQueryVariables
-    >(CoinflowStarterpackQuoteDocument).bind(null, variables),
     options,
   );
 export const CreateLayerswapPaymentDocument = `
