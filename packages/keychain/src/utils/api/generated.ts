@@ -1202,6 +1202,22 @@ export type CoinbaseTransactionsResponse = {
   transactions: Array<CoinbaseTransaction>;
 };
 
+export type CoinflowCardCheckoutInput = {
+  cardToken: Scalars["String"];
+  /** Our internal CoinflowPayments row ID from createCoinflowStarterpackIntent. */
+  coinflowPaymentId: Scalars["ID"];
+  email: Scalars["String"];
+  expMonth: Scalars["String"];
+  expYear: Scalars["String"];
+  firstName: Scalars["String"];
+  lastName: Scalars["String"];
+};
+
+export type CoinflowCardCheckoutResult = {
+  __typename?: "CoinflowCardCheckoutResult";
+  paymentId: Scalars["String"];
+};
+
 export type CoinflowPayment = {
   __typename?: "CoinflowPayment";
   id: Scalars["ID"];
@@ -1217,8 +1233,9 @@ export enum CoinflowPaymentStatus {
 
 export type CoinflowPricingDetails = {
   __typename?: "CoinflowPricingDetails";
-  baseCostInCents: Scalars["Int"];
-  processingFeeInCents: Scalars["Int"];
+  cardFeeInCents: Scalars["Int"];
+  gasFeeInCents: Scalars["Int"];
+  subtotalInCents: Scalars["Int"];
   totalInCents: Scalars["Int"];
 };
 
@@ -3052,6 +3069,12 @@ export type Mutation = {
   beginRegistration: Scalars["JSON"];
   claimFreeStarterpack: Scalars["String"];
   /**
+   * Process a card checkout using a tokenized card from the frontend.
+   * The coinflowPaymentId must reference an existing intent created via
+   * createCoinflowStarterpackIntent.
+   */
+  coinflowCardCheckout: CoinflowCardCheckoutResult;
+  /**
    * Create a unified Coinbase onramp order.
    * This mutation orchestrates both Coinbase and Layerswap to bridge USDC from Apple Pay to Starknet.
    */
@@ -3160,6 +3183,10 @@ export type MutationBeginRegistrationArgs = {
 
 export type MutationClaimFreeStarterpackArgs = {
   input: StarterpackInput;
+};
+
+export type MutationCoinflowCardCheckoutArgs = {
+  input: CoinflowCardCheckoutInput;
 };
 
 export type MutationCreateCoinbaseLayerswapOrderArgs = {
@@ -4494,14 +4521,19 @@ export type Query = {
    */
   coinbaseOnrampTransactions: CoinbaseTransactionsResponse;
   /**
+   * Test endpoint: get Coinflow checkout totals for a given amount in cents.
+   * No auth required — for local testing only.
+   */
+  coinflowCheckoutTotals: CoinflowPricingDetails;
+  /**
    * Get a Coinflow payment by its internal ID (the CoinflowPayments row ID),
    * including its linked PurchaseFulfillment for fulfillment status polling.
    */
   coinflowPayment: CoinflowPayment;
   /**
    * Get a Coinflow starterpack pricing quote without creating a payment intent.
-   * Mirrors stripeStarterpackQuote: computes pricing, resolves payment token,
-   * and indicates whether a USDC swap is required at purchase time.
+   * Computes the base cost from the onchain registry, then calls Coinflow's
+   * checkout totals API to get the actual processing fees.
    */
   coinflowStarterpackQuote: CoinflowStarterpackQuote;
   collectible: Collectible;
@@ -4603,6 +4635,11 @@ export type QueryCoinbaseOnrampQuoteArgs = {
 
 export type QueryCoinbaseOnrampTransactionsArgs = {
   input: CoinbaseTransactionsInput;
+};
+
+export type QueryCoinflowCheckoutTotalsArgs = {
+  amountInCents: Scalars["Int"];
+  sandbox?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type QueryCoinflowPaymentArgs = {
@@ -7445,10 +7482,23 @@ export type CreateCoinflowStarterpackIntentMutation = {
     merchantId: string;
     pricing: {
       __typename?: "CoinflowPricingDetails";
-      baseCostInCents: number;
-      processingFeeInCents: number;
+      subtotalInCents: number;
+      cardFeeInCents: number;
+      gasFeeInCents: number;
       totalInCents: number;
     };
+  };
+};
+
+export type CoinflowCardCheckoutMutationVariables = Exact<{
+  input: CoinflowCardCheckoutInput;
+}>;
+
+export type CoinflowCardCheckoutMutation = {
+  __typename?: "Mutation";
+  coinflowCardCheckout: {
+    __typename?: "CoinflowCardCheckoutResult";
+    paymentId: string;
   };
 };
 
@@ -7484,8 +7534,9 @@ export type CoinflowStarterpackQuoteQuery = {
     needsSwap: boolean;
     pricing: {
       __typename?: "CoinflowPricingDetails";
-      baseCostInCents: number;
-      processingFeeInCents: number;
+      subtotalInCents: number;
+      cardFeeInCents: number;
+      gasFeeInCents: number;
       totalInCents: number;
     };
   };
@@ -8292,8 +8343,9 @@ export const CreateCoinflowStarterpackIntentDocument = `
     jwtToken
     merchantId
     pricing {
-      baseCostInCents
-      processingFeeInCents
+      subtotalInCents
+      cardFeeInCents
+      gasFeeInCents
       totalInCents
     }
   }
@@ -8321,6 +8373,37 @@ export const useCreateCoinflowStarterpackIntentMutation = <
       CreateCoinflowStarterpackIntentMutation,
       CreateCoinflowStarterpackIntentMutationVariables
     >(CreateCoinflowStarterpackIntentDocument),
+    options,
+  );
+export const CoinflowCardCheckoutDocument = `
+    mutation CoinflowCardCheckout($input: CoinflowCardCheckoutInput!) {
+  coinflowCardCheckout(input: $input) {
+    paymentId
+  }
+}
+    `;
+export const useCoinflowCardCheckoutMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CoinflowCardCheckoutMutation,
+    TError,
+    CoinflowCardCheckoutMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CoinflowCardCheckoutMutation,
+    TError,
+    CoinflowCardCheckoutMutationVariables,
+    TContext
+  >(
+    ["CoinflowCardCheckout"],
+    useFetchData<
+      CoinflowCardCheckoutMutation,
+      CoinflowCardCheckoutMutationVariables
+    >(CoinflowCardCheckoutDocument),
     options,
   );
 export const CoinflowPaymentDocument = `
@@ -8355,8 +8438,9 @@ export const CoinflowStarterpackQuoteDocument = `
     query CoinflowStarterpackQuote($input: CoinflowStarterpackQuoteInput!) {
   coinflowStarterpackQuote(input: $input) {
     pricing {
-      baseCostInCents
-      processingFeeInCents
+      subtotalInCents
+      cardFeeInCents
+      gasFeeInCents
       totalInCents
     }
     paymentToken
