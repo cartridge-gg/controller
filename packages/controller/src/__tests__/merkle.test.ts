@@ -5,6 +5,7 @@ import {
   computePolicyMerkle,
   computePolicyMerkleProofs,
 } from "../session/internal/merkle";
+import { normalizeFelt } from "../session/internal/utils";
 import type {
   CallPolicy,
   TypedDataPolicy,
@@ -74,6 +75,61 @@ describe("hashPolicyLeaf", () => {
     const p2: CallPolicy = { target: ADDR_A, method: SELECTOR_APPROVE };
     expect(hashPolicyLeaf(p1)).not.toBe(hashPolicyLeaf(p2));
   });
+
+  test("TypedDataPolicy uses a different type hash than CallPolicy", () => {
+    // A TypedDataPolicy leaf must NOT equal a CallPolicy leaf that happens to
+    // share the same numeric value, because they use distinct SNIP-12 type
+    // hashes ("Allowed Type" vs "Allowed Method").
+    const scopeHash = "0xabc";
+    const typedData: TypedDataPolicy = { scope_hash: scopeHash };
+    const call: CallPolicy = { target: scopeHash, method: scopeHash };
+    expect(hashPolicyLeaf(typedData)).not.toBe(hashPolicyLeaf(call));
+  });
+
+  test("TypedDataPolicy leaf matches manual Poseidon(AllowedType hash, scope_hash)", () => {
+    const scopeHash = "0xdeadbeef";
+    const policy: TypedDataPolicy = { scope_hash: scopeHash };
+    const expectedTypeHash = normalizeFelt(
+      hash.getSelectorFromName('"Allowed Type"("Scope Hash":"felt")'),
+    );
+    const expected = normalizeFelt(
+      hash.computePoseidonHashOnElements([
+        expectedTypeHash,
+        normalizeFelt(scopeHash),
+      ]),
+    );
+    expect(hashPolicyLeaf(policy)).toBe(expected);
+  });
+
+  test("ApprovalPolicy hashes identically to CallPolicy(target, approve)", () => {
+    // The WASM converts ApprovalPolicy → CallPolicy(target, approve_selector)
+    // before merkle hashing. Verify the TS implementation matches.
+    const approval: ApprovalPolicy = {
+      target: ADDR_A,
+      spender: ADDR_B,
+      amount: "1000",
+    };
+    const equivalentCall: CallPolicy = {
+      target: ADDR_A,
+      method: SELECTOR_APPROVE,
+    };
+    expect(hashPolicyLeaf(approval)).toBe(hashPolicyLeaf(equivalentCall));
+  });
+
+  test("ApprovalPolicy leaf is independent of spender and amount", () => {
+    const a1: ApprovalPolicy = {
+      target: ADDR_A,
+      spender: ADDR_B,
+      amount: "1000",
+    };
+    const a2: ApprovalPolicy = {
+      target: ADDR_A,
+      spender: "0xdead",
+      amount: "9999",
+    };
+    // Same target → same leaf, because both reduce to CallPolicy(target, approve)
+    expect(hashPolicyLeaf(a1)).toBe(hashPolicyLeaf(a2));
+  });
 });
 
 describe("computePolicyMerkle", () => {
@@ -87,8 +143,8 @@ describe("computePolicyMerkle", () => {
     const policy: CallPolicy = { target: ADDR_A, method: SELECTOR_TRANSFER };
     const result = computePolicyMerkle([policy]);
     expect(result.leaves).toHaveLength(1);
-    // Single leaf gets paired with ZERO_FELT
-    expect(result.root).toMatch(/^0x[0-9a-f]+$/);
+    // Single leaf IS the root (no pairing needed)
+    expect(result.root).toBe(result.leaves[0]);
   });
 
   test("two policies: root is hash of the two leaves", () => {
@@ -198,6 +254,44 @@ describe("computePolicyMerkleProofs", () => {
       target: `0x${(i + 1).toString(16)}`,
       method: SELECTOR_TRANSFER,
     }));
+
+    const { root } = computePolicyMerkle(policies);
+    const proofs = computePolicyMerkleProofs(policies);
+
+    for (const proof of proofs) {
+      let current = proof.leaf;
+      for (const sibling of proof.proof) {
+        current = hashPair(current, sibling);
+      }
+      expect(current).toBe(root);
+    }
+  });
+
+  test("ApprovalPolicy proof uses the approve selector, not zero", () => {
+    const approval: ApprovalPolicy = {
+      target: ADDR_A,
+      spender: ADDR_B,
+      amount: "1000",
+    };
+    const proofs = computePolicyMerkleProofs([approval]);
+    expect(proofs[0].selector).toBe(
+      normalizeFelt(hash.getSelectorFromName("approve")),
+    );
+  });
+
+  test("TypedDataPolicy proof uses zero selector", () => {
+    const td: TypedDataPolicy = { scope_hash: "0xabc", authorized: true };
+    const proofs = computePolicyMerkleProofs([td]);
+    expect(proofs[0].selector).toBe("0x0");
+    expect(proofs[0].contractAddress).toBe("0x0");
+  });
+
+  test("mixed-type tree proofs all verify against the same root", () => {
+    const policies: Policy[] = [
+      { target: ADDR_A, method: SELECTOR_TRANSFER, authorized: true },
+      { scope_hash: "0xabc", authorized: true },
+      { target: ADDR_B, spender: ADDR_A, amount: "1000" },
+    ];
 
     const { root } = computePolicyMerkle(policies);
     const proofs = computePolicyMerkleProofs(policies);
