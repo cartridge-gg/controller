@@ -18,6 +18,20 @@ const POLICY_CALL_TYPE_HASH = normalizeFelt(
   ),
 );
 
+/**
+ * SNIP-12 type hash for "Allowed Type"("Scope Hash":"felt")
+ * Used for TypedDataPolicy leaves — distinct from the CallPolicy type hash.
+ */
+const POLICY_TYPED_DATA_TYPE_HASH = normalizeFelt(
+  hash.getSelectorFromName('"Allowed Type"("Scope Hash":"felt")'),
+);
+
+/**
+ * Selector for the "approve" entrypoint, used when converting ApprovalPolicy
+ * to the equivalent CallPolicy leaf (matching the WASM boundary conversion).
+ */
+const APPROVE_SELECTOR = normalizeFelt(hash.getSelectorFromName("approve"));
+
 export interface PolicyMerkleResult {
   leaves: string[];
   root: string;
@@ -67,13 +81,14 @@ export function hashPolicyLeaf(policy: Policy): string {
   }
 
   if (isApprovalPolicy(policy)) {
-    // Approval policies use: Poseidon(typeHash, target, spender, amount)
+    // WASM converts ApprovalPolicy → CallPolicy(target, approve_selector)
+    // before merkle hashing. Match that: hash as a CallPolicy with the
+    // "approve" selector, discarding spender/amount.
     return normalizeFelt(
       hash.computePoseidonHashOnElements([
         POLICY_CALL_TYPE_HASH,
         normalizeFelt(policy.target),
-        normalizeFelt(policy.spender),
-        normalizeFelt(policy.amount),
+        APPROVE_SELECTOR,
       ]),
     );
   }
@@ -81,7 +96,7 @@ export function hashPolicyLeaf(policy: Policy): string {
   if (isTypedDataPolicy(policy)) {
     return normalizeFelt(
       hash.computePoseidonHashOnElements([
-        POLICY_CALL_TYPE_HASH,
+        POLICY_TYPED_DATA_TYPE_HASH,
         normalizeFelt(policy.scope_hash),
       ]),
     );
@@ -172,7 +187,9 @@ export function computePolicyMerkleProofs(
         : ZERO_FELT;
     const selector = isCallPolicy(policy)
       ? normalizeFelt(policy.method)
-      : ZERO_FELT;
+      : isApprovalPolicy(policy)
+        ? APPROVE_SELECTOR
+        : ZERO_FELT;
 
     return {
       contractAddress: target,
