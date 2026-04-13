@@ -1203,14 +1203,21 @@ export type CoinbaseTransactionsResponse = {
 };
 
 export type CoinflowCardCheckoutInput = {
+  /** Street address line 1. Required by Coinflow address validation. */
+  address1: Scalars["String"];
   cardToken: Scalars["String"];
+  city: Scalars["String"];
   /** Our internal CoinflowPayments row ID from createCoinflowStarterpackIntent. */
   coinflowPaymentId: Scalars["ID"];
+  /** ISO 3166-1 alpha-2 country code (e.g. "US"). Required by Coinflow address validation. */
+  country: Scalars["String"];
   email: Scalars["String"];
   expMonth: Scalars["String"];
   expYear: Scalars["String"];
   firstName: Scalars["String"];
   lastName: Scalars["String"];
+  state?: InputMaybe<Scalars["String"]>;
+  zip?: InputMaybe<Scalars["String"]>;
 };
 
 export type CoinflowCardCheckoutResult = {
