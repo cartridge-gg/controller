@@ -1,4 +1,4 @@
-import { SessionTimeoutError } from "./errors";
+import { SessionProtocolError, SessionTimeoutError } from "./errors";
 
 export interface SubscribeSessionResult {
   authorization: string[];
@@ -30,6 +30,7 @@ export async function subscribeCreateSession(
   sessionKeyGuid: string,
   cartridgeApiUrl: string,
   timeoutMs: number = 180_000,
+  requestTimeoutMs: number = 15_000,
 ): Promise<SubscribeSessionResult> {
   const endpoint = `${cartridgeApiUrl.replace(/\/+$/, "")}/query`;
   const deadline = Date.now() + timeoutMs;
@@ -38,47 +39,73 @@ export async function subscribeCreateSession(
   const MAX_DELAY = 5_000;
 
   while (Date.now() < deadline) {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: SUBSCRIBE_QUERY,
-        variables: { sessionKeyGuid },
-      }),
-    });
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) break;
 
-    if (!response.ok) {
-      // Retry on server errors
-      await sleep(delay);
+    const effectiveTimeout = Math.min(requestTimeoutMs, remainingMs);
+    const controller =
+      typeof AbortController !== "undefined"
+        ? new AbortController()
+        : undefined;
+    const timeoutId = controller
+      ? setTimeout(() => controller.abort(), effectiveTimeout)
+      : undefined;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: SUBSCRIBE_QUERY,
+          variables: { sessionKeyGuid },
+        }),
+        ...(controller ? { signal: controller.signal } : {}),
+      });
+
+      if (!response.ok) {
+        // Retry on server errors (5xx, etc.)
+        await sleep(Math.min(delay, deadline - Date.now()));
+        delay = Math.min(delay * 2, MAX_DELAY);
+        continue;
+      }
+
+      const json = (await response.json()) as {
+        data?: { subscribeCreateSession?: SubscribeSessionResult | null };
+        errors?: { message: string }[];
+      };
+
+      if (json.errors?.length) {
+        // GraphQL errors are permanent (malformed query, validation failure).
+        // Don't waste time retrying.
+        const messages = json.errors.map((e) => e.message).join("; ");
+        throw new SessionProtocolError(
+          `Session subscription failed: ${messages}`,
+        );
+      }
+
+      const session = json.data?.subscribeCreateSession;
+      if (session) {
+        return session;
+      }
+
+      // Session not ready yet — back off and retry
+      await sleep(Math.min(delay, deadline - Date.now()));
       delay = Math.min(delay * 2, MAX_DELAY);
-      continue;
-    }
-
-    const json = (await response.json()) as {
-      data?: { subscribeCreateSession?: SubscribeSessionResult | null };
-      errors?: { message: string }[];
-    };
-
-    if (json.errors?.length) {
-      // Retry on GraphQL errors
-      await sleep(delay);
+    } catch (e) {
+      if (e instanceof SessionProtocolError || e instanceof SessionTimeoutError)
+        throw e;
+      // Network errors, aborts — retry
+      await sleep(Math.min(delay, deadline - Date.now()));
       delay = Math.min(delay * 2, MAX_DELAY);
-      continue;
+    } finally {
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
     }
-
-    const session = json.data?.subscribeCreateSession;
-    if (session) {
-      return session;
-    }
-
-    // Session not ready yet — back off and retry
-    await sleep(delay);
-    delay = Math.min(delay * 2, MAX_DELAY);
   }
 
   throw new SessionTimeoutError("Timed out waiting for session creation");
 }
 
 function sleep(ms: number): Promise<void> {
+  if (ms <= 0) return Promise.resolve();
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

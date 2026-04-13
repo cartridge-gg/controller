@@ -130,6 +130,37 @@ describe("hashPolicyLeaf", () => {
     // Same target → same leaf, because both reduce to CallPolicy(target, approve)
     expect(hashPolicyLeaf(a1)).toBe(hashPolicyLeaf(a2));
   });
+
+  test("unauthorized CallPolicy returns zero felt", () => {
+    const policy: CallPolicy = {
+      target: ADDR_A,
+      method: SELECTOR_TRANSFER,
+      authorized: false,
+    };
+    expect(hashPolicyLeaf(policy)).toBe("0x0");
+  });
+
+  test("unauthorized TypedDataPolicy returns zero felt", () => {
+    const policy: TypedDataPolicy = {
+      scope_hash: "0xabc",
+      authorized: false,
+    };
+    expect(hashPolicyLeaf(policy)).toBe("0x0");
+  });
+
+  test("authorized: undefined is treated as authorized (hashes normally)", () => {
+    const withUndefined: CallPolicy = {
+      target: ADDR_A,
+      method: SELECTOR_TRANSFER,
+    };
+    const withTrue: CallPolicy = {
+      target: ADDR_A,
+      method: SELECTOR_TRANSFER,
+      authorized: true,
+    };
+    expect(hashPolicyLeaf(withUndefined)).toBe(hashPolicyLeaf(withTrue));
+    expect(hashPolicyLeaf(withUndefined)).not.toBe("0x0");
+  });
 });
 
 describe("computePolicyMerkle", () => {

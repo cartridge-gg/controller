@@ -68,8 +68,13 @@ export function hashPair(a: string, b: string): string {
 
 /**
  * Hash a single policy into a merkle leaf.
+ * Returns ZERO_FELT for unauthorized policies, matching the WASM MerkleLeaf impl.
  */
 export function hashPolicyLeaf(policy: Policy): string {
+  if ("authorized" in policy && policy.authorized === false) {
+    return ZERO_FELT;
+  }
+
   if (isCallPolicy(policy)) {
     return normalizeFelt(
       hash.computePoseidonHashOnElements([
