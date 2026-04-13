@@ -1,5 +1,8 @@
 import { subscribeCreateSession } from "../session/internal/subscribe";
-import { SessionTimeoutError } from "../session/internal/errors";
+import {
+  SessionProtocolError,
+  SessionTimeoutError,
+} from "../session/internal/errors";
 
 // Mock global fetch
 const mockFetch = jest.fn();
@@ -78,14 +81,36 @@ describe("subscribeCreateSession", () => {
     expect(result).toEqual(MOCK_SESSION);
   });
 
-  test("retries on GraphQL errors", async () => {
+  test("throws immediately on GraphQL errors (permanent failure)", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        errors: [{ message: "validation failed: unknown field" }],
+      }),
+    });
+
+    await expect(
+      subscribeCreateSession("0xguid", "https://api.test"),
+    ).rejects.toThrow(SessionProtocolError);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  test("GraphQL error message is included in thrown error", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        errors: [{ message: "field X not found" }],
+      }),
+    });
+
+    await expect(
+      subscribeCreateSession("0xguid", "https://api.test"),
+    ).rejects.toThrow("field X not found");
+  });
+
+  test("retries on network errors", async () => {
     mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          errors: [{ message: "temporary error" }],
-        }),
-      })
+      .mockRejectedValueOnce(new Error("network failure"))
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -98,6 +123,7 @@ describe("subscribeCreateSession", () => {
 
     const result = await promise;
     expect(result).toEqual(MOCK_SESSION);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
   test("times out after configured duration", async () => {
@@ -113,6 +139,20 @@ describe("subscribeCreateSession", () => {
       subscribeCreateSession("0xguid", "https://api.test", 500),
     ).rejects.toThrow(SessionTimeoutError);
   }, 15000);
+
+  test("passes AbortController signal to fetch", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: { subscribeCreateSession: MOCK_SESSION },
+      }),
+    });
+
+    await subscribeCreateSession("0xguid", "https://api.test");
+
+    const [, options] = mockFetch.mock.calls[0];
+    expect(options.signal).toBeDefined();
+  });
 
   test("sends correct GraphQL query", async () => {
     mockFetch.mockResolvedValueOnce({

@@ -121,7 +121,7 @@ describe("CartridgeSessionAccount", () => {
     ).rejects.toThrow("execution failed");
   });
 
-  test("execute() is not available on CartridgeSessionAccount", () => {
+  test("internal CartridgeSessionAccount only exposes executeFromOutside, not execute", () => {
     const account = CartridgeSessionAccount.newAsRegistered(
       TEST_RPC,
       TEST_PRIVATE_KEY,
@@ -131,6 +131,7 @@ describe("CartridgeSessionAccount", () => {
       TEST_SESSION,
     );
     expect((account as any).execute).toBeUndefined();
+    expect(account.executeFromOutside).toBeDefined();
   });
 
   test("executeFromOutside propagates non-SNIP-9 errors without swallowing", async () => {
