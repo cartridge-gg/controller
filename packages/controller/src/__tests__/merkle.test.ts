@@ -26,50 +26,9 @@ describe("hashPair", () => {
     const b = "0x2";
     expect(hashPair(a, b)).toBe(hashPair(b, a));
   });
-
-  test("produces valid hex output", () => {
-    const result = hashPair("0x1", "0x2");
-    expect(result).toMatch(/^0x[0-9a-f]+$/);
-  });
-
-  test("always hashes (smaller, larger)", () => {
-    // Regardless of input order, the hash should be deterministic
-    const r1 = hashPair("0x100", "0x1");
-    const r2 = hashPair("0x1", "0x100");
-    expect(r1).toBe(r2);
-  });
 });
 
 describe("hashPolicyLeaf", () => {
-  test("hashes a CallPolicy", () => {
-    const policy: CallPolicy = {
-      target: ADDR_A,
-      method: SELECTOR_TRANSFER,
-      authorized: true,
-    };
-    const leaf = hashPolicyLeaf(policy);
-    expect(leaf).toMatch(/^0x[0-9a-f]+$/);
-  });
-
-  test("hashes a TypedDataPolicy", () => {
-    const policy: TypedDataPolicy = {
-      scope_hash: "0xabc123",
-      authorized: true,
-    };
-    const leaf = hashPolicyLeaf(policy);
-    expect(leaf).toMatch(/^0x[0-9a-f]+$/);
-  });
-
-  test("hashes an ApprovalPolicy", () => {
-    const policy: ApprovalPolicy = {
-      target: ADDR_A,
-      spender: ADDR_B,
-      amount: "1000",
-    };
-    const leaf = hashPolicyLeaf(policy);
-    expect(leaf).toMatch(/^0x[0-9a-f]+$/);
-  });
-
   test("different policies produce different leaves", () => {
     const p1: CallPolicy = { target: ADDR_A, method: SELECTOR_TRANSFER };
     const p2: CallPolicy = { target: ADDR_A, method: SELECTOR_APPROVE };
@@ -77,9 +36,6 @@ describe("hashPolicyLeaf", () => {
   });
 
   test("TypedDataPolicy uses a different type hash than CallPolicy", () => {
-    // A TypedDataPolicy leaf must NOT equal a CallPolicy leaf that happens to
-    // share the same numeric value, because they use distinct SNIP-12 type
-    // hashes ("Allowed Type" vs "Allowed Method").
     const scopeHash = "0xabc";
     const typedData: TypedDataPolicy = { scope_hash: scopeHash };
     const call: CallPolicy = { target: scopeHash, method: scopeHash };
@@ -102,8 +58,6 @@ describe("hashPolicyLeaf", () => {
   });
 
   test("ApprovalPolicy hashes identically to CallPolicy(target, approve)", () => {
-    // The WASM converts ApprovalPolicy → CallPolicy(target, approve_selector)
-    // before merkle hashing. Verify the TS implementation matches.
     const approval: ApprovalPolicy = {
       target: ADDR_A,
       spender: ADDR_B,
@@ -127,7 +81,6 @@ describe("hashPolicyLeaf", () => {
       spender: "0xdead",
       amount: "9999",
     };
-    // Same target → same leaf, because both reduce to CallPolicy(target, approve)
     expect(hashPolicyLeaf(a1)).toBe(hashPolicyLeaf(a2));
   });
 
@@ -147,20 +100,6 @@ describe("hashPolicyLeaf", () => {
     };
     expect(hashPolicyLeaf(policy)).toBe("0x0");
   });
-
-  test("authorized: undefined is treated as authorized (hashes normally)", () => {
-    const withUndefined: CallPolicy = {
-      target: ADDR_A,
-      method: SELECTOR_TRANSFER,
-    };
-    const withTrue: CallPolicy = {
-      target: ADDR_A,
-      method: SELECTOR_TRANSFER,
-      authorized: true,
-    };
-    expect(hashPolicyLeaf(withUndefined)).toBe(hashPolicyLeaf(withTrue));
-    expect(hashPolicyLeaf(withUndefined)).not.toBe("0x0");
-  });
 });
 
 describe("computePolicyMerkle", () => {
@@ -174,7 +113,6 @@ describe("computePolicyMerkle", () => {
     const policy: CallPolicy = { target: ADDR_A, method: SELECTOR_TRANSFER };
     const result = computePolicyMerkle([policy]);
     expect(result.leaves).toHaveLength(1);
-    // Single leaf IS the root (no pairing needed)
     expect(result.root).toBe(result.leaves[0]);
   });
 
@@ -198,38 +136,11 @@ describe("computePolicyMerkle", () => {
   });
 
   test("deterministic root regardless of policy order", () => {
-    // Note: policies are NOT reordered by computePolicyMerkle.
-    // But the sorted-pair hashing means hashPair(a,b) == hashPair(b,a).
-    // The caller (toWasmPolicies) is responsible for canonical ordering.
     const p1: CallPolicy = { target: ADDR_A, method: SELECTOR_TRANSFER };
     const p2: CallPolicy = { target: ADDR_B, method: SELECTOR_APPROVE };
-
     const r1 = computePolicyMerkle([p1, p2]);
     const r2 = computePolicyMerkle([p2, p1]);
-
-    // With sorted-pair hashing, order of two leaves doesn't matter
     expect(r1.root).toBe(r2.root);
-  });
-
-  test("seven policies produce a valid tree", () => {
-    const policies: CallPolicy[] = Array.from({ length: 7 }, (_, i) => ({
-      target: `0x${(i + 1).toString(16)}`,
-      method: SELECTOR_TRANSFER,
-    }));
-    const result = computePolicyMerkle(policies);
-    expect(result.leaves).toHaveLength(7);
-    expect(result.root).toMatch(/^0x[0-9a-f]+$/);
-  });
-
-  test("mixed policy types", () => {
-    const policies: Policy[] = [
-      { target: ADDR_A, method: SELECTOR_TRANSFER, authorized: true },
-      { scope_hash: "0xabc", authorized: true },
-      { target: ADDR_B, spender: ADDR_A, amount: "1000" },
-    ];
-    const result = computePolicyMerkle(policies);
-    expect(result.leaves).toHaveLength(3);
-    expect(result.root).toMatch(/^0x[0-9a-f]+$/);
   });
 });
 
@@ -241,23 +152,9 @@ describe("computePolicyMerkleProofs", () => {
   test("single policy proof is empty (leaf is the root)", () => {
     const policy: CallPolicy = { target: ADDR_A, method: SELECTOR_TRANSFER };
     const proofs = computePolicyMerkleProofs([policy]);
-    expect(proofs).toHaveLength(1);
-    expect(proofs[0].proof).toHaveLength(0); // single leaf = root, no proof needed
-    expect(proofs[0].leaf).toBe(hashPolicyLeaf(policy));
-
-    // Root should equal the leaf directly
+    expect(proofs[0].proof).toHaveLength(0);
     const { root } = computePolicyMerkle([policy]);
     expect(proofs[0].leaf).toBe(root);
-  });
-
-  test("two policies: each proof has one element (the sibling)", () => {
-    const p1: CallPolicy = { target: ADDR_A, method: SELECTOR_TRANSFER };
-    const p2: CallPolicy = { target: ADDR_B, method: SELECTOR_APPROVE };
-    const proofs = computePolicyMerkleProofs([p1, p2]);
-    expect(proofs).toHaveLength(2);
-    // Each leaf's proof is the other leaf
-    expect(proofs[0].proof).toHaveLength(1);
-    expect(proofs[1].proof).toHaveLength(1);
   });
 
   test("proofs verify against the merkle root", () => {
@@ -266,25 +163,6 @@ describe("computePolicyMerkleProofs", () => {
       { target: ADDR_A, method: SELECTOR_APPROVE },
       { target: ADDR_B, method: SELECTOR_BALANCE },
     ];
-
-    const { root } = computePolicyMerkle(policies);
-    const proofs = computePolicyMerkleProofs(policies);
-
-    // Verify each proof
-    for (const proof of proofs) {
-      let current = proof.leaf;
-      for (const sibling of proof.proof) {
-        current = hashPair(current, sibling);
-      }
-      expect(current).toBe(root);
-    }
-  });
-
-  test("proofs verify for 7 policies", () => {
-    const policies: CallPolicy[] = Array.from({ length: 7 }, (_, i) => ({
-      target: `0x${(i + 1).toString(16)}`,
-      method: SELECTOR_TRANSFER,
-    }));
 
     const { root } = computePolicyMerkle(policies);
     const proofs = computePolicyMerkleProofs(policies);

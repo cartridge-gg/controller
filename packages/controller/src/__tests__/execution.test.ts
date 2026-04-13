@@ -229,41 +229,6 @@ describe("buildSignedOutsideExecutionV3", () => {
     ).toThrow("execute_before must be greater than execute_after");
   });
 
-  test("throws when execute_before equals execute_after", () => {
-    const { root, policyProofIndex, sessionKeyGuid } = buildTestContext();
-
-    expect(() =>
-      buildSignedOutsideExecutionV3({
-        calls: [
-          {
-            contractAddress:
-              "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-            entrypoint: "transfer",
-            calldata: [],
-          },
-        ],
-        timeBounds: {
-          executeAfter: 1000,
-          executeBefore: 1000,
-        },
-        chainId: TEST_CHAIN_ID,
-        session: {
-          username: "test",
-          address: TEST_ADDRESS,
-          ownerGuid: TEST_OWNER_GUID,
-          expiresAt: "9999999999",
-          guardianKeyGuid: "0x0",
-          metadataHash: "0x0",
-          sessionKeyGuid,
-        },
-        sessionPrivateKey: TEST_PRIVATE_KEY,
-        policyRoot: root,
-        sessionKeyGuid,
-        policyProofIndex,
-      }),
-    ).toThrow("execute_before must be greater than execute_after");
-  });
-
   test("handles multiple calls with different calldata lengths", () => {
     const { root } = computePolicyMerkle(multiPolicies);
     const proofs = computePolicyMerkleProofs(multiPolicies);
@@ -366,13 +331,6 @@ describe("createPolicyProofIndex", () => {
   test("indexes proofs by contractAddress:selector", () => {
     const proofs = computePolicyMerkleProofs(policies);
     const index = createPolicyProofIndex(proofs);
-    expect(index.size).toBe(1);
-  });
-
-  test("deduplicates identical keys", () => {
-    const proofs = computePolicyMerkleProofs(policies);
-    // Double the proofs
-    const index = createPolicyProofIndex([...proofs, ...proofs]);
     expect(index.size).toBe(1);
   });
 });

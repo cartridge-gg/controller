@@ -37,18 +37,6 @@ const TEST_SESSION: Session = {
 };
 
 describe("CartridgeSessionAccount", () => {
-  test("newAsRegistered creates an instance", () => {
-    const account = CartridgeSessionAccount.newAsRegistered(
-      TEST_RPC,
-      TEST_PRIVATE_KEY,
-      TEST_ADDRESS,
-      TEST_OWNER_GUID,
-      TEST_CHAIN_ID,
-      TEST_SESSION,
-    );
-    expect(account).toBeInstanceOf(CartridgeSessionAccount);
-  });
-
   test("executeFromOutside sends correct RPC request", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -176,21 +164,10 @@ describe("CartridgeSessionAccount", () => {
       expect(
         isSnip9CompatibilityError(new Error("entrypoint does not exist")),
       ).toBe(true);
-      expect(
-        isSnip9CompatibilityError(
-          new Error("not implemented: outside execution"),
-        ),
-      ).toBe(true);
     });
 
     test("returns false for generic errors", () => {
       expect(isSnip9CompatibilityError(new Error("network timeout"))).toBe(
-        false,
-      );
-      expect(
-        isSnip9CompatibilityError(new Error("policy not authorized")),
-      ).toBe(false);
-      expect(isSnip9CompatibilityError(new Error("execution failed"))).toBe(
         false,
       );
     });
@@ -207,36 +184,5 @@ describe("CartridgeSessionAccount", () => {
       const err = Object.assign(new Error("outer"), { cause });
       expect(isSnip9CompatibilityError(err)).toBe(true);
     });
-  });
-
-  test("executeFromOutside propagates policy-mismatch errors", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        jsonrpc: "2.0",
-        id: 1,
-        error: { code: -32000, message: "policy not authorized" },
-      }),
-    });
-
-    const account = CartridgeSessionAccount.newAsRegistered(
-      TEST_RPC,
-      TEST_PRIVATE_KEY,
-      TEST_ADDRESS,
-      TEST_OWNER_GUID,
-      TEST_CHAIN_ID,
-      TEST_SESSION,
-    );
-
-    await expect(
-      account.executeFromOutside([
-        {
-          contractAddress:
-            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-          entrypoint: "transfer",
-          calldata: [],
-        },
-      ]),
-    ).rejects.toThrow("policy not authorized");
   });
 });

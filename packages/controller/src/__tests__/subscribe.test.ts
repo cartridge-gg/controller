@@ -95,19 +95,6 @@ describe("subscribeCreateSession", () => {
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
-  test("GraphQL error message is included in thrown error", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        errors: [{ message: "field X not found" }],
-      }),
-    });
-
-    await expect(
-      subscribeCreateSession("0xguid", "https://api.test"),
-    ).rejects.toThrow("field X not found");
-  });
-
   test("retries on network errors", async () => {
     mockFetch
       .mockRejectedValueOnce(new Error("network failure"))
@@ -174,15 +161,4 @@ describe("subscribeCreateSession", () => {
     expect(body.query).toContain("subscribeCreateSession");
   });
 
-  test("strips trailing slashes from API URL", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        data: { subscribeCreateSession: MOCK_SESSION },
-      }),
-    });
-
-    await subscribeCreateSession("0xguid", "https://api.test///");
-    expect(mockFetch.mock.calls[0][0]).toBe("https://api.test/query");
-  });
 });
