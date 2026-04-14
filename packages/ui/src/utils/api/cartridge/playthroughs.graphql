@@ -1,0 +1,19 @@
+query Playthroughs($projects: [PlaythroughProject!]!) {
+  playthroughs(projects: $projects) {
+    items {
+      playthroughs {
+        entrypoints
+        sessionStart
+        sessionEnd
+        actionCount
+        callerAddress
+      }
+      meta {
+        project
+        limit
+        error
+        count
+      }
+    }
+  }
+}
