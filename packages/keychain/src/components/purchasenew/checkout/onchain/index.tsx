@@ -167,6 +167,14 @@ export function OnchainCheckout() {
     quantity,
   });
 
+  const isUS = countryCode === "US";
+
+  const onCoinflowSelectForFallback = useCallback(() => {
+    if (isUS && isCoinflowEnabled) {
+      onCoinflowSelect();
+    }
+  }, [isUS, isCoinflowEnabled, onCoinflowSelect]);
+
   const { isCheckingFallback } = useTokenFallback({
     controller,
     starterpackDetails: starterpackDetails as
@@ -182,6 +190,7 @@ export function OnchainCheckout() {
     isApplePaySelected,
     selectedPlatform,
     setSelectedToken,
+    onCoinflowSelect: onCoinflowSelectForFallback,
   });
 
   const globalDisabled = useMemo(() => {
