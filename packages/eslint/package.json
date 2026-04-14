@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.9",
+    "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-react-refresh": "catalog:",
     "eslint-plugin-storybook": "^0.11.2",
     "globals": "catalog:",
     "typescript": "catalog:",
