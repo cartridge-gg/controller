@@ -1,0 +1,25 @@
+@layer base {
+  /* Style scrollbar */
+  * {
+    ::-webkit-scrollbar {
+      @apply border-l-transparent size-2;
+    }
+
+    ::-webkit-scrollbar-corner {
+      @apply bg-background;
+    }
+
+    ::-webkit-scrollbar-track {
+      @apply bg-background;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      @apply bg-background-300 rounded-full;
+    }
+  }
+
+  /* Hide scrollbar from a page */
+  html {
+    scrollbar-width: none;
+  }
+}

@@ -1,0 +1,7 @@
+mutation BeginLogin($username: String!) {
+  beginLogin(username: $username)
+}
+
+mutation FinalizeLogin($credentials: String!) {
+  finalizeLogin(credentials: $credentials)
+}
