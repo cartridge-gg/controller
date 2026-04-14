@@ -19,7 +19,6 @@ import {
   OnchainStarterpackDetails,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { useFeatures } from "@/hooks/features";
 import { useTokenBalance, useTokenFallback } from "@/hooks/starterpack";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "../../receiving";
@@ -70,7 +69,6 @@ export function OnchainCheckout() {
     layerswapFees,
     isApplePaySelected,
     isCoinflowSelected,
-    onApplePaySelect,
     onCoinflowSelect,
     onCreateCoinbaseOrder,
     isCreatingOrder,
@@ -83,7 +81,6 @@ export function OnchainCheckout() {
   const { refetch: refetchAccountPrivate } = useAccountPrivateQuery(undefined, {
     enabled: false,
   });
-  const { enableFeature } = useFeatures();
   const isCoinflowEnabled = true;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -94,7 +91,7 @@ export function OnchainCheckout() {
     getIpLocation().then((geo) => setCountryCode(geo.countryCode));
   }, []);
 
-  // Triple-click on the header icon to enable hidden payment methods.
+  // Triple-click on the header icon selects the Coinflow credit-card flow.
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const handleIconTripleClick = useCallback(() => {
@@ -102,14 +99,13 @@ export function OnchainCheckout() {
     clearTimeout(clickTimerRef.current);
     if (clickCountRef.current === 3) {
       clickCountRef.current = 0;
-      enableFeature("apple-pay-support");
-      onApplePaySelect();
+      onCoinflowSelect();
     } else {
       clickTimerRef.current = setTimeout(() => {
         clickCountRef.current = 0;
       }, 500);
     }
-  }, [enableFeature, onApplePaySelect]);
+  }, [onCoinflowSelect]);
 
   const totalUsdAmount = useMemo(() => {
     return usdAmount * quantity;
