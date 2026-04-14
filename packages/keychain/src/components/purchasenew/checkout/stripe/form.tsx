@@ -17,7 +17,7 @@ import {
   Input,
   LayoutContent,
   LayoutFooter,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { CostBreakdown } from "../../review/cost";
 import { useAccountPrivateQuery } from "@/utils/api";

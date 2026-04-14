@@ -13,7 +13,7 @@ import {
   Thumbnail,
   TimesIcon,
   WalletIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ExternalWallet } from "@cartridge/controller";
 import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
 import { useConnection } from "@/hooks/connection";

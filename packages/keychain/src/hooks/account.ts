@@ -9,7 +9,7 @@ import {
   useAccountNameQuery,
   useAccountNamesQuery,
   useAddressByUsernameQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import base64url from "base64url";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMatch, useSearchParams } from "react-router-dom";

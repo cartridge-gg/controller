@@ -25,7 +25,7 @@ import {
   BraavosIcon,
   ControllerIcon,
   PhantomIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { NetworkWalletData, Wallet } from "../types";
 import { constants } from "starknet";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";

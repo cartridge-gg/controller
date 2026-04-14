@@ -3,7 +3,7 @@ import {
   type SessionContracts,
   type SessionMessages,
 } from "@/hooks/session";
-import { cn, CodeIcon } from "@cartridge/ui";
+import { cn, CodeIcon } from "@cartridge/controller-ui";
 import { useMemo } from "react";
 import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";

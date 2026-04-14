@@ -7,8 +7,8 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-} from "@cartridge/ui";
-import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui";
+import { useMeQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useAccountPrivateQuery } from "@/utils/api";
 import {
   useNavigation,

@@ -5,7 +5,7 @@ import {
   PopoverAnchor,
   Skeleton,
   cn,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import {
   useAccountSearch,
   AccountSearchResult,

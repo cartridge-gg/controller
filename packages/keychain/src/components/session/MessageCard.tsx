@@ -8,10 +8,10 @@ import {
   PencilIcon,
   Switch,
   Thumbnail,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { useCreateSession } from "@/hooks/session";
-import { ArrowTurnDownIcon, Badge } from "@cartridge/ui";
+import { ArrowTurnDownIcon, Badge } from "@cartridge/controller-ui";
 import type { SignMessagePolicy } from "@cartridge/presets";
 import type {
   StarknetEnumType,

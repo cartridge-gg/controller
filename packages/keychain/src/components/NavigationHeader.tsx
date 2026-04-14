@@ -1,4 +1,4 @@
-import { LayoutHeader, HeaderProps } from "@cartridge/ui";
+import { LayoutHeader, HeaderProps } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
 import { useCallback } from "react";

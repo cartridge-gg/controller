@@ -9,7 +9,7 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 

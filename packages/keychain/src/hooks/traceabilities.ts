@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { formatAddress } from "@cartridge/ui/utils";
+import { formatAddress } from "@cartridge/controller-ui/utils";
 import { useUsernames } from "./account";
 import { getChecksumAddress } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { CostBreakdown } from "./cost";
 import { StarterpackProviders } from "@/context";
-import { WalletType } from "@cartridge/ui";
+import { WalletType } from "@cartridge/controller-ui";
 
 const meta: Meta<typeof CostBreakdown> = {
   component: CostBreakdown,

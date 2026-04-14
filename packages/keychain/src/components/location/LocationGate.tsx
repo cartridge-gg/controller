@@ -6,7 +6,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { LocationGateOptions, ResponseCodes } from "@cartridge/controller";
 import { defaultTheme, loadConfig } from "@cartridge/presets";
 import { ErrorAlert } from "@/components/ErrorAlert";

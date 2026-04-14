@@ -1,7 +1,7 @@
 import { now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
-import { Skeleton } from "@cartridge/ui";
-import { useSessionsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { Skeleton } from "@cartridge/controller-ui";
+import { useSessionsQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { constants, shortString } from "starknet";
 import { SectionHeader } from "../section-header";
 import { RevokeAllSessionsButton } from "./revoke-all-sessions";

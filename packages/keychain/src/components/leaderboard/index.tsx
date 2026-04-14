@@ -4,7 +4,7 @@ import {
   LeaderboardRow,
   Empty,
   Skeleton,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";

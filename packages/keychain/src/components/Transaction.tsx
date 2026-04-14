@@ -1,6 +1,11 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { constants } from "starknet";
-import { CheckIcon, ExternalIcon, Spinner, StarknetIcon } from "@cartridge/ui";
+import {
+  CheckIcon,
+  ExternalIcon,
+  Spinner,
+  StarknetIcon,
+} from "@cartridge/controller-ui";
 import { useController } from "@/hooks/controller";
 import { useChainName } from "@/hooks/chain";
 import { useExplorer } from "@starknet-react/core";

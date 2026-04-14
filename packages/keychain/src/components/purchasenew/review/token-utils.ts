@@ -1,4 +1,4 @@
-import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
+import { USDC_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { USDC_ADDRESSES, USDCE_ADDRESSES } from "@/utils/ekubo";
 
 /**

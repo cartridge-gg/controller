@@ -10,10 +10,14 @@ import {
   InfoIcon,
   Skeleton,
   Thumbnail,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
 import { useData } from "@/hooks/data";
-import { getDate, isPublicChain, useCreditBalance } from "@cartridge/ui/utils";
+import {
+  getDate,
+  isPublicChain,
+  useCreditBalance,
+} from "@cartridge/controller-ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount, useUsernames } from "@/hooks/account";

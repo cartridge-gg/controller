@@ -3,7 +3,7 @@ import {
   HeaderInner,
   LayoutContent,
   PurchaseCard,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { networkWalletData } from "./config";
 import { useNavigation } from "@/context";
 import { useParams } from "react-router-dom";

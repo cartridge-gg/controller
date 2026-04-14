@@ -1,5 +1,5 @@
 import { useConnection } from "@/hooks/connection";
-import { Address, cn } from "@cartridge/ui";
+import { Address, cn } from "@cartridge/controller-ui";
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
 

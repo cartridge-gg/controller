@@ -6,7 +6,7 @@ import {
   useVerifyEmailMutation,
   useSendPhoneVerificationMutation,
   useVerifyPhoneMutation,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import { useAccountPrivateQuery } from "@/utils/api";
 import {
   Button,
@@ -26,7 +26,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useNavigation } from "@/context";
 import { useLocation } from "react-router-dom";
 import { ErrorAlert } from "@/components/ErrorAlert";

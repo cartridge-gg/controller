@@ -4,7 +4,7 @@ import { num, getChecksumAddress, constants } from "starknet";
 import {
   ERC20 as ERC20Contract,
   USDC_CONTRACT_ADDRESS,
-} from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui/utils";
 import {
   DEFAULT_TOKENS,
   type ERC20Metadata,

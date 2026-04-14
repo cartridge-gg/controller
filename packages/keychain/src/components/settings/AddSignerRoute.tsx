@@ -1,6 +1,6 @@
 import { useConnection } from "@/hooks/connection";
 import { processControllerQuery } from "@/utils/signers";
-import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
+import { useControllerQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { constants } from "starknet";
 import { AddSigner } from "./signers/add-signer/add-signer";
 

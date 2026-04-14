@@ -1,4 +1,4 @@
-import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
+import { MerkleDropNetwork } from "@cartridge/controller-ui/utils/api/cartridge";
 
 /**
  * Item types for starterpack items

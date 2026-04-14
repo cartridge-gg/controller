@@ -5,7 +5,7 @@ import {
   ExternalWalletResponse,
   ExternalWalletType,
 } from "@cartridge/controller";
-import { isIframe } from "@cartridge/ui/utils";
+import { isIframe } from "@cartridge/controller-ui/utils";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
 import { Turnkey, TurnkeyIframeClient } from "@turnkey/sdk-browser";

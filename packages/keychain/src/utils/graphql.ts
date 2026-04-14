@@ -3,7 +3,7 @@ import {
   type RequestDocument,
   type Variables,
 } from "graphql-request";
-import { fetchDataCreator } from "@cartridge/ui/utils";
+import { fetchDataCreator } from "@cartridge/controller-ui/utils";
 import { parseClientError, type ErrorWithGraphQL } from "./errors";
 
 export const ENDPOINT = `${import.meta.env.VITE_CARTRIDGE_API_URL}/query`;

@@ -28,7 +28,7 @@ import {
   CopyAddress,
   Separator,
   HeaderInner,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";

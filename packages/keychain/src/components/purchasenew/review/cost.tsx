@@ -15,7 +15,7 @@ import {
   StarknetIcon,
   Thumbnail,
   TokenSelectHeader,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { CostDetails } from "../types";
 import {
   ExternalPlatform,

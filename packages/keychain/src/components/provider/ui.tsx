@@ -6,7 +6,7 @@ import {
   Dialog,
   DialogContent,
   UIProvider as Provider,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { QRCodeSVG } from "qrcode.react";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { QRCodeOverlay } from "../connect/create/wallet-connect/qr-code-overlay";

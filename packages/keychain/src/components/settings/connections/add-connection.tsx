@@ -15,7 +15,7 @@ import {
   LayoutContent,
   LayoutFooter,
   SpinnerIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { SiInstagram, SiTiktok, SiX } from "@icons-pack/react-simple-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "react-query";

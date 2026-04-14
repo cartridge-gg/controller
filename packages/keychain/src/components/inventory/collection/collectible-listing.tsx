@@ -18,14 +18,14 @@ import {
   Checkbox,
   PlusIcon,
   MinusIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import {
   cn,
   ETH_CONTRACT_ADDRESS,
   LORDS_CONTRACT_ADDRESS,
   STRK_CONTRACT_ADDRESS,
   USDC_CONTRACT_ADDRESS,
-} from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui/utils";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import placeholder from "/placeholder.svg?url";

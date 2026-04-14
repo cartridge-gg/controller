@@ -90,11 +90,11 @@ vi.mock("@/context/quest", () => ({
   QuestProvider: ({ children }: PropsWithChildren) => <>{children}</>,
 }));
 
-vi.mock("@cartridge/ui/utils/api/indexer", () => ({
+vi.mock("@cartridge/controller-ui/utils/api/indexer", () => ({
   IndexerAPIProvider: ({ children }: PropsWithChildren) => <>{children}</>,
 }));
 
-vi.mock("@cartridge/ui/utils/api/cartridge", () => ({
+vi.mock("@cartridge/controller-ui/utils/api/cartridge", () => ({
   CartridgeAPIProvider: ({ children }: PropsWithChildren) => <>{children}</>,
 }));
 
@@ -108,7 +108,7 @@ vi.mock("@cartridge/arcade/marketplace/react", () => ({
   ),
 }));
 
-vi.mock("@cartridge/ui", () => ({
+vi.mock("@cartridge/controller-ui", () => ({
   SpinnerIcon: () => <div data-testid="loading-spinner" />,
 }));
 

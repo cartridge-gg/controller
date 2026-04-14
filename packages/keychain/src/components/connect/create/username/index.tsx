@@ -7,7 +7,7 @@ import {
   SparklesIcon,
   TimesIcon,
   cn,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { AccountSearchResult } from "@/hooks/account";
 import * as React from "react";
 import { AccountSearchDropdown } from "./account-search-dropdown";

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ResponseCodes, toast } from "@cartridge/controller";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button } from "@cartridge/ui";
+import { Button } from "@cartridge/controller-ui";
 import {
   STRK_CONTRACT_ADDRESS,
   ETH_CONTRACT_ADDRESS,

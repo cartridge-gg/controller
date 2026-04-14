@@ -1,4 +1,4 @@
-import { useCartridgeAPI } from "@cartridge/ui/utils";
+import { useCartridgeAPI } from "@cartridge/controller-ui/utils";
 
 export function fetchDataCreator(
   url: string,

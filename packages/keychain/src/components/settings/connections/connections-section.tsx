@@ -1,4 +1,4 @@
-import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
+import { Button, PlusIcon, Skeleton } from "@cartridge/controller-ui";
 import { useQueryClient, useMutation } from "react-query";
 import { SectionHeader } from "../section-header";
 import { ConnectionCard } from "./connection-card";

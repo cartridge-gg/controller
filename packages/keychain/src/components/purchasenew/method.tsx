@@ -10,7 +10,7 @@ import {
   LayoutContent,
   LayoutFooter,
   PurchaseCard,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useState } from "react";
 import { ControllerErrorAlert } from "../ErrorAlert";
 import { networkWalletData } from "./wallet/config";

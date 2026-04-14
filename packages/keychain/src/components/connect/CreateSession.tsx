@@ -20,7 +20,7 @@ import {
   LayoutContent,
   LayoutFooter,
   SliderIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { SpendingLimitPage } from "./SpendingLimitPage";
 import { useNavigation } from "@/context/navigation";

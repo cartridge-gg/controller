@@ -9,8 +9,8 @@ import {
   Empty,
   PaperPlaneIcon,
   WalletType,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";

@@ -12,7 +12,7 @@ import {
   LayoutContent,
   LayoutFooter,
   Sheet,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { CreateAccount } from "./username";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

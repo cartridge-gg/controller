@@ -14,7 +14,7 @@ import {
   InfoIcon,
   Separator,
   Thumbnail,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { PricingDetails } from ".";
 import { ExternalWalletType } from "@cartridge/controller";
 import { FeesTooltip } from "./FeesTooltip";

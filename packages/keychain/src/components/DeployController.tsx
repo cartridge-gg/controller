@@ -12,8 +12,8 @@ import {
   LayoutContent,
   LayoutFooter,
   Spinner,
-} from "@cartridge/ui";
-import { getChainName } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { getChainName } from "@cartridge/controller-ui/utils";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useExplorer } from "@starknet-react/core";

@@ -1,5 +1,5 @@
-import { TagIcon } from "@cartridge/ui";
-import { cn } from "@cartridge/ui";
+import { TagIcon } from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui";
 import React, { HTMLAttributes } from "react";
 
 export interface SupplyProps {

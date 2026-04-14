@@ -15,7 +15,7 @@ import {
   PhantomColorIcon,
   RabbyColorIcon,
   WalletConnectColorIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ComponentType, createElement } from "react";
 
 /**

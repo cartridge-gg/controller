@@ -4,7 +4,7 @@ import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
 import { openPopupAuth } from "@/utils/connection/popup";
 import { Owner } from "@cartridge/controller-wasm";
-import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
+import { ControllerQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useCallback } from "react";
 import { shortString } from "starknet";
 

@@ -7,7 +7,7 @@ import {
 } from "@/components/connect";
 
 import { useConnection } from "@/hooks/connection";
-import { CheckIcon, HeaderInner } from "@cartridge/ui";
+import { CheckIcon, HeaderInner } from "@cartridge/controller-ui";
 import type { JsFelt } from "@cartridge/controller-wasm/controller";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";

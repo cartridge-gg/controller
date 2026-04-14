@@ -4,7 +4,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
 export const FeesTooltip = ({
   trigger,

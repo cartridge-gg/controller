@@ -1,6 +1,6 @@
-import { Token, Separator } from "@cartridge/ui";
+import { Token, Separator } from "@cartridge/controller-ui";
 import { useMemo } from "react";
-import { useCountervalue } from "@cartridge/ui/utils";
+import { useCountervalue } from "@cartridge/controller-ui/utils";
 import { FeesData } from "@/components/Fees";
 
 export function usePurchaseFeesData({

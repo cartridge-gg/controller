@@ -1,4 +1,4 @@
-# @cartridge/ui
+# @cartridge/controller-ui
 
 ## Usage
 

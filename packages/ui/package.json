@@ -1,5 +1,5 @@
 {
-  "name": "@cartridge/ui",
+  "name": "@cartridge/controller-ui",
   "version": "0.7.14-alpha.2",
   "description": "Catridge UI component library, backend utils for apps spread accross org",
   "packageManager": "pnpm@10.10.0",

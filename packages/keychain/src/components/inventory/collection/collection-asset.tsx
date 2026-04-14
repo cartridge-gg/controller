@@ -18,9 +18,9 @@ import {
   Token,
   Spinner,
   Thumbnail,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
-import { cn } from "@cartridge/ui/utils";
+import { cn } from "@cartridge/controller-ui/utils";
 import { AllowArray, cairo, Call, CallData, constants } from "starknet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "@/hooks/collection";

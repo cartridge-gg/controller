@@ -1,13 +1,13 @@
 import { useUsername } from "@/hooks/account";
 import { useWallet } from "@/hooks/wallet";
-import { formatAddress } from "@cartridge/ui/utils";
+import { formatAddress } from "@cartridge/controller-ui/utils";
 import {
   UserIcon,
   WalletType,
   ArgentIcon,
   BraavosIcon,
   CartridgeIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
 interface RecipientCardProps {
   address: string;

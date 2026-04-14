@@ -10,8 +10,8 @@ import {
   Spinner,
   PaperPlaneIcon,
   WalletType,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";

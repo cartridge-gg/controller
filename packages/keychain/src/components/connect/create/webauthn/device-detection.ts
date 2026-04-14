@@ -1,4 +1,4 @@
-import { WebauthnCredential } from "@cartridge/ui/utils/api/cartridge";
+import { WebauthnCredential } from "@cartridge/controller-ui/utils/api/cartridge";
 import base64url from "base64url";
 
 export async function findAvailableCredential(

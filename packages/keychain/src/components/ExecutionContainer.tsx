@@ -11,7 +11,7 @@ import {
   type HeaderProps,
   LayoutFooter,
   VerifiedIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { isEqual } from "@/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createDeployUrl } from "@/utils/connection/deploy";

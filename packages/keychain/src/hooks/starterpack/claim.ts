@@ -3,7 +3,7 @@ import {
   MerkleDropNetwork,
   StarterPackDocument,
   StarterPackQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useController } from "@/hooks/controller";
 import { Item, ItemType } from "@/context";

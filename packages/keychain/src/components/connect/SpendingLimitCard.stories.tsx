@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { SpendingLimitCard } from "./SpendingLimitCard";
-import { CoinsIcon } from "@cartridge/ui";
+import { CoinsIcon } from "@cartridge/controller-ui";
 import type { ParsedSessionPolicies } from "@/hooks/session";
 
 const meta = {

@@ -17,7 +17,7 @@ import {
   useRouteCompletion,
   useRouteCallbacks,
 } from "@/hooks/route";
-import { isIframe } from "@cartridge/ui/utils";
+import { isIframe } from "@cartridge/controller-ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
 import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { openPopupAuth } from "@/utils/connection/popup";
@@ -27,7 +27,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 
 const CANCEL_RESPONSE = {

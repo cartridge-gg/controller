@@ -5,7 +5,7 @@ import {
   TagIcon,
   Thumbnail,
   VerifiedIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useEffect, useMemo, useState } from "react";
 
 export function CollectionHeader({

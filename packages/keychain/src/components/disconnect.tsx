@@ -1,5 +1,5 @@
 import { useConnection } from "@/hooks/connection";
-import { HeaderInner, LayoutContent } from "@cartridge/ui";
+import { HeaderInner, LayoutContent } from "@cartridge/controller-ui";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Layout } from "./layout";
