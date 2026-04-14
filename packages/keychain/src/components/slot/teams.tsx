@@ -11,7 +11,7 @@ import {
   TokenCard,
   Empty,
   HeaderInner,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { formatBalance } from "@/hooks/tokens";
 import { useState } from "react";
 

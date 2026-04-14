@@ -1,5 +1,5 @@
-import { Button, DollarIcon, Input } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+import { Button, DollarIcon, Input } from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { useCallback, useRef, useState } from "react";
 
 export const USD_AMOUNTS = [10, 25, 50];

@@ -8,7 +8,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 
 export function SpendingLimitPage({

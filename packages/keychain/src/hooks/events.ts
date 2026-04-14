@@ -3,10 +3,10 @@ import {
   Event,
   EventNode,
   useEventsQuery,
-} from "@cartridge/ui/utils/api/indexer";
+} from "@cartridge/controller-ui/utils/api/indexer";
 import { Trophy, Progress } from "@/models";
 import { hash, byteArray, ByteArray } from "starknet";
-import { useIndexerAPI } from "@cartridge/ui/utils";
+import { useIndexerAPI } from "@cartridge/controller-ui/utils";
 
 const EVENT_WRAPPER = "EventEmitted";
 

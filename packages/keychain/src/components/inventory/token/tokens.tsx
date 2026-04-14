@@ -1,10 +1,16 @@
-import { Empty, MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
+import {
+  Empty,
+  MinusIcon,
+  PlusIcon,
+  Skeleton,
+  TokenCard,
+} from "@cartridge/controller-ui";
 import { Link, useSearchParams } from "react-router-dom";
 import { Token, useTokens } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
 import { useMemo, useState } from "react";
 
-import { cn } from "@cartridge/ui/utils";
+import { cn } from "@cartridge/controller-ui/utils";
 import { getChecksumAddress } from "starknet";
 
 const DEFAULT_TOKENS_COUNT = 2;

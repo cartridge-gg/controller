@@ -10,8 +10,8 @@ import { useConnection } from "@/hooks/connection";
 import {
   ERC20 as ERC20Contract,
   USDC_CONTRACT_ADDRESS,
-} from "@cartridge/ui/utils";
-import { Price } from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils";
+import { Price } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
 import {

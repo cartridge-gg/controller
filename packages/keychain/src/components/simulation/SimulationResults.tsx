@@ -1,5 +1,5 @@
 import { Call } from "starknet";
-import { TokenCard, TokenSummary } from "@cartridge/ui";
+import { TokenCard, TokenSummary } from "@cartridge/controller-ui";
 import { TokenSwap, TokenSwapData, useTokenSwapData } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
 import { useSimulateBalanceChanges } from "./use-simulate";

@@ -1,4 +1,4 @@
-import { cn } from "@cartridge/ui";
+import { cn } from "@cartridge/controller-ui";
 
 export const Badge = ({ price }: { price: number }) => {
   return (

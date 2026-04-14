@@ -1,4 +1,4 @@
-import { Spinner } from "@cartridge/ui";
+import { Spinner } from "@cartridge/controller-ui";
 import { useState } from "react";
 
 export const RevokeAllSessionsButton = ({

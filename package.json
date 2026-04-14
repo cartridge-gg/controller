@@ -25,7 +25,7 @@
     "keychain": "pnpm --filter @cartridge/keychain",
     "controller": "pnpm --filter @cartridge/controller",
     "connector": "pnpm --filter @cartridge/connector",
-    "ui": "pnpm --filter @cartridge/ui",
+    "ui": "pnpm --filter @cartridge/controller-ui",
     "book": "pnpm --filter @cartridge/documentation",
     "example:next": "pnpm --filter @cartridge/controller-example-next",
     "example:svelte": "pnpm --filter @cartridge/controller-example-svelte",
@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@cartridge/presets": "github:cartridge-gg/presets#e94909f",
-    "@cartridge/ui": "workspace:*",
+    "@cartridge/controller-ui": "workspace:*",
     "tailwindcss": "catalog:",
     "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/typescript": "^2.4.8",

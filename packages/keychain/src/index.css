@@ -1,7 +1,7 @@
-@import "@cartridge/ui/themes/default.css";
-@import "@cartridge/ui/themes/dark.css";
-@import "@cartridge/ui/themes/fonts.css";
-@import "@cartridge/ui/themes/scrollbar.css";
+@import "@cartridge/controller-ui/themes/default.css";
+@import "@cartridge/controller-ui/themes/dark.css";
+@import "@cartridge/controller-ui/themes/fonts.css";
+@import "@cartridge/controller-ui/themes/scrollbar.css";
 @import "./fonts.css";
 
 @tailwind base;

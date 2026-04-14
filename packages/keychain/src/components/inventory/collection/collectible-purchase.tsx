@@ -7,8 +7,8 @@ import {
   Token,
   Thumbnail,
   ThumbnailCollectible,
-} from "@cartridge/ui";
-import { cn, useCountervalue } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn, useCountervalue } from "@cartridge/controller-ui/utils";
 import {
   addAddressPadding,
   AllowArray,

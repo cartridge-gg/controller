@@ -5,7 +5,7 @@ import {
   STRK_CONTRACT_ADDRESS,
   ETH_CONTRACT_ADDRESS,
   USDC_CONTRACT_ADDRESS,
-} from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui/utils";
 
 export interface TokenMetadata {
   name: string;

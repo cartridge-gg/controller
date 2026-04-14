@@ -5,7 +5,7 @@ import {
   Spinner,
   CheckIcon,
   TimesIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
 export type ConfirmingTransactionStatus = "loading" | "success" | "error";
 

@@ -1,4 +1,4 @@
-import { ExternalIcon, cn } from "@cartridge/ui";
+import { ExternalIcon, cn } from "@cartridge/controller-ui";
 import { HTMLAttributes, useMemo } from "react";
 
 export type ValidationState = {

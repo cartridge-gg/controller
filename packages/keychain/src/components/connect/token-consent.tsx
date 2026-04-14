@@ -1,4 +1,4 @@
-import { cn } from "@cartridge/ui";
+import { cn } from "@cartridge/controller-ui";
 import React, { HTMLAttributes } from "react";
 
 export const TokenConsent = React.forwardRef<

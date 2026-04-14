@@ -49,7 +49,7 @@
     "@cartridge/controller": "workspace:*",
     "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
-    "@cartridge/ui": "workspace:*",
+    "@cartridge/controller-ui": "workspace:*",
     "@coinflowlabs/react": "^5.12.0",
     "@dojoengine/sdk": "catalog:",
     "@dojoengine/torii-wasm": "catalog:",

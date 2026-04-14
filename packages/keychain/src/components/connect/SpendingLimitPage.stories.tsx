@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { SpendingLimitPage } from "./SpendingLimitPage";
-import { CoinsIcon } from "@cartridge/ui";
+import { CoinsIcon } from "@cartridge/controller-ui";
 import type { ParsedSessionPolicies } from "@/hooks/session";
 import type { ControllerError } from "@/utils/connection";
 import { ErrorCode } from "@cartridge/controller-wasm/controller";

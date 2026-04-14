@@ -3,7 +3,7 @@ import {
   LayoutContent,
   LayoutHeader,
   Spinner,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { AuthOption } from "@cartridge/controller";
 import { getAuthMethodDisplayName, getAuthMethodIcon } from "@/utils/auth";
 import { Link } from "react-router-dom";

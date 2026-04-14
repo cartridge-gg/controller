@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { BridgePending, PurchasePending, ClaimPending } from "./index";
-import { CreditIcon } from "@cartridge/ui";
+import { CreditIcon } from "@cartridge/controller-ui";
 import { ItemType, StarterpackProviders } from "@/context";
 import { ExternalWalletType } from "@cartridge/controller";
 

@@ -7,7 +7,7 @@ import {
   cn,
   Spinner,
   Thumbnail,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ReceivingProps } from "./types";
 import { ItemType } from "@/context";
 

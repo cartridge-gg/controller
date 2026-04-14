@@ -1,5 +1,5 @@
 import { Token } from "@/hooks/token";
-import { Amount } from "@cartridge/ui";
+import { Amount } from "@cartridge/controller-ui";
 import { useCallback, useMemo } from "react";
 
 export function SendAmount({

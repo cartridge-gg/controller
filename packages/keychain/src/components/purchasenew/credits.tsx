@@ -1,4 +1,4 @@
-import { DepositIcon, HeaderInner } from "@cartridge/ui";
+import { DepositIcon, HeaderInner } from "@cartridge/controller-ui";
 
 export function PurchaseCredits() {
   return (

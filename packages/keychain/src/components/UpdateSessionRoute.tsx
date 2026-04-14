@@ -25,7 +25,7 @@ import {
   LayoutContent,
   LayoutFooter,
   SpinnerIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,

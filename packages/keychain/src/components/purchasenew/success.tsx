@@ -4,7 +4,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "./receiving";
 import { useConnection } from "@/hooks/connection";

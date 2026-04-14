@@ -7,7 +7,7 @@ import {
   type TypedDataPolicy,
   erc20Metadata,
 } from "@cartridge/presets";
-import { CartridgeIcon } from "@cartridge/ui";
+import { CartridgeIcon } from "@cartridge/controller-ui";
 import React, { createContext, useContext } from "react";
 import { getChecksumAddress } from "starknet";
 

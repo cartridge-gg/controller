@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Textarea } from "@cartridge/ui";
+import { Button, Textarea } from "@cartridge/controller-ui";
 import { useAccount, useSignTypedData } from "@starknet-react/core";
 import { useCallback, useState } from "react";
 import {

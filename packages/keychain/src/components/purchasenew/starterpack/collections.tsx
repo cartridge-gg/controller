@@ -20,8 +20,8 @@ import {
   Spinner,
   StarknetIcon,
   Thumbnail,
-} from "@cartridge/ui";
-import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui";
+import { MerkleDropNetwork } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useCallback } from "react";
 
 export const Collections = () => {

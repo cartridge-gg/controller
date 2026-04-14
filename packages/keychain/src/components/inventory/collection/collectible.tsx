@@ -4,8 +4,13 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import { LayoutContent, CollectibleCard, Skeleton, Empty } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+import {
+  LayoutContent,
+  CollectibleCard,
+  Skeleton,
+  Empty,
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { useMemo } from "react";
 import placeholder from "/placeholder.svg?url";
 import { CollectionHeader } from "./header";

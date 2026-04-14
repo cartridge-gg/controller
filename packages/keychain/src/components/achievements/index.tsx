@@ -1,4 +1,4 @@
-import { LayoutContent, Empty, Skeleton } from "@cartridge/ui";
+import { LayoutContent, Empty, Skeleton } from "@cartridge/controller-ui";
 import { useAccount } from "@/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";

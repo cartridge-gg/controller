@@ -3,7 +3,7 @@ import {
   TokenCard,
   TokenSummary,
   TransferIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ControllerError } from "@/utils/connection";
 import { Call, FeeEstimate } from "starknet";

@@ -14,7 +14,7 @@ import {
   CoinbaseWalletColorIcon,
   CheckIcon,
   TimesIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import type { SubmitCoinbaseLimitsUpgradeInput } from "@/utils/api";
 import {
   LIMIT_TYPE_LIFETIME_TRANSACTIONS,

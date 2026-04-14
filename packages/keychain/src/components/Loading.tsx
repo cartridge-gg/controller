@@ -3,7 +3,7 @@ import {
   LayoutContent,
   LayoutFooter,
   Skeleton,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
 interface PageLoadingProps {
   headerVariant?: "expanded" | "hidden";

@@ -514,7 +514,7 @@ export const UsageExample: Story = {
             {'<ControllerToaster toasterId="controller" />'}
           </h3>
           <pre className="bg-gray-800 p-2 rounded mt-1 text-xs">
-            {`import { ControllerToaster } from "@cartridge/ui";
+            {`import { ControllerToaster } from "@cartridge/controller-ui";
 
 function App() {
   return (

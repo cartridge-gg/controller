@@ -1,4 +1,4 @@
-import { Button, Input, MobileIcon } from "@cartridge/ui";
+import { Button, Input, MobileIcon } from "@cartridge/controller-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface SmsOtpFormProps {

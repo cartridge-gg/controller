@@ -6,7 +6,7 @@ import {
   LayoutFooter,
   PurchaseCard,
   WalletIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { networkWalletData, evmNetworks } from "./config";
 import {
   useNavigation,

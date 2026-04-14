@@ -5,7 +5,7 @@ import {
   LayoutContent,
   LayoutFooter,
   PurchaseCard,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ControllerErrorAlert } from "../ErrorAlert";
 import { networkWalletData } from "./wallet/config";
 import { useParams } from "react-router-dom";

@@ -33,7 +33,7 @@ import {
 import { credentialToAuth } from "@/components/connect/types";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import { toWasmPolicies } from "@cartridge/controller";
-import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
+import { CredentialMetadata } from "@cartridge/controller-ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { toJsFeeEstimate } from "./fee";
 

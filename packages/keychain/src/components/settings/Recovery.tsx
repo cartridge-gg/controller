@@ -5,7 +5,7 @@ import {
   Button,
   Input,
   HeaderInner,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";

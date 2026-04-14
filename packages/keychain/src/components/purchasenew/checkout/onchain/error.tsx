@@ -1,4 +1,4 @@
-import { ErrorAlertIcon, Card, CardContent } from "@cartridge/ui";
+import { ErrorAlertIcon, Card, CardContent } from "@cartridge/controller-ui";
 
 interface ErrorCardProps {
   variant: "error" | "warning";

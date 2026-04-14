@@ -1,6 +1,11 @@
 import React from "react";
-import { Card, CardContent, InfoIcon, Separator } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+import {
+  Card,
+  CardContent,
+  InfoIcon,
+  Separator,
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 
 export interface TotalCostProps extends React.HTMLAttributes<HTMLDivElement> {
   price: number;
