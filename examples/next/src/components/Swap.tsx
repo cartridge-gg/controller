@@ -1,25 +1,34 @@
 "use client";
 
 import { useCallback } from "react";
-import { Call } from "starknet";
+import { BigNumberish, Call } from "starknet";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button } from "@cartridge/ui";
 
 export function Swap() {
-  const { account, connector } = useAccount();
+  const { account, address, connector } = useAccount();
   const ctrlConnector = connector as unknown as ControllerConnector;
 
   const execute = useCallback(
     (transactions: Call[]) => {
+      // mock calldata caller as the connected account address
+      const examplesCaller = BigInt(
+        "0x76a3565794dB7894484718bE7F51Ad5B2E76605e22722887C1260e2451aD945",
+      );
+      const calls = transactions.map((call) => ({
+        ...call,
+        calldata: ((call.calldata as BigNumberish[]) ?? []).map((data) =>
+          BigInt(data) === examplesCaller && address ? address : data,
+        ),
+      }));
       if (account) {
-        account.execute(transactions);
-      } else {
+        account.execute(calls);
         // this is causing the controller to close on validation error
-        ctrlConnector.controller.openExecute(transactions);
+        // ctrlConnector.controller.openExecute(calls);
       }
     },
-    [account, ctrlConnector],
+    [account, address, ctrlConnector],
   );
 
   if (!account) {
@@ -267,7 +276,7 @@ const LS2_PURCHASE_GAME = [
     entrypoint: "transfer",
     calldata: [
       "0x0199741822c2dc722f6f605204f35e56dbc23bceed54818168c4c49e4fb8737e",
-      "0x155ee7c39a3d69a76",
+      "0x130cf58b0f0e7ba76",
       "0x0",
     ],
   },
@@ -325,8 +334,8 @@ const LS2_PURCHASE_GAME = [
     calldata: [
       "0",
       "0",
-      "2017717448871504735845",
-      "2403140985568399978641699320335980224292375691718886561247325844102368719999",
+      "482905977721",
+      "3353844257235124925573382629261102992028433843221166170064905711558609000773",
       "0",
     ],
   },

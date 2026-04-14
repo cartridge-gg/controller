@@ -1202,6 +1202,60 @@ export type CoinbaseTransactionsResponse = {
   transactions: Array<CoinbaseTransaction>;
 };
 
+export type CoinflowPayment = {
+  __typename?: "CoinflowPayment";
+  id: Scalars["ID"];
+  paymentStatus: CoinflowPaymentStatus;
+  purchaseFulfillment?: Maybe<PurchaseFulfillment>;
+};
+
+export enum CoinflowPaymentStatus {
+  Failed = "FAILED",
+  Pending = "PENDING",
+  Succeeded = "SUCCEEDED",
+}
+
+export type CoinflowPricingDetails = {
+  __typename?: "CoinflowPricingDetails";
+  baseCostInCents: Scalars["Int"];
+  processingFeeInCents: Scalars["Int"];
+  totalInCents: Scalars["Int"];
+};
+
+export type CoinflowStarterpackIntent = {
+  __typename?: "CoinflowStarterpackIntent";
+  /**
+   * Internal CoinflowPayments row ID. Use this with the coinflowPayment query
+   * to poll fulfillment status after checkout completes.
+   */
+  id: Scalars["ID"];
+  /** Checkout JWT encoding subtotal, blockchain, settlement type, and destination. */
+  jwtToken: Scalars["String"];
+  /** Coinflow merchant ID for the checkout component. */
+  merchantId: Scalars["String"];
+  /** Pricing breakdown in cents. */
+  pricing: CoinflowPricingDetails;
+  /** Session key (JWT) for authenticating the checkout component with Coinflow. */
+  sessionKey: Scalars["String"];
+};
+
+export type CoinflowStarterpackQuote = {
+  __typename?: "CoinflowStarterpackQuote";
+  needsSwap: Scalars["Boolean"];
+  paymentToken: Scalars["String"];
+  pricing: CoinflowPricingDetails;
+};
+
+export type CoinflowStarterpackQuoteInput = {
+  clientPercentage?: InputMaybe<Scalars["Int"]>;
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  quantity: Scalars["Int"];
+  referral?: InputMaybe<Scalars["String"]>;
+  referralGroup?: InputMaybe<Scalars["String"]>;
+  registryAddress: Scalars["String"];
+  starterpackId: Scalars["String"];
+};
+
 export type Collectible = {
   __typename?: "Collectible";
   assets: Array<AssetEdge>;
@@ -1407,6 +1461,16 @@ export type CreateCoinbaseOnrampOrderInput = {
   sandbox?: InputMaybe<Scalars["Boolean"]>;
   /** The EIP-3009 authorization for the USDC transfer. */
   usdcTransferAuthorization: UsdcTransferAuthorizationInput;
+};
+
+export type CreateCoinflowStarterpackIntentInput = {
+  clientPercentage?: InputMaybe<Scalars["Int"]>;
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  quantity: Scalars["Int"];
+  referral?: InputMaybe<Scalars["String"]>;
+  referralGroup?: InputMaybe<Scalars["String"]>;
+  registryAddress: Scalars["String"];
+  starterpackId: Scalars["String"];
 };
 
 export type CreateCryptoPaymentInput = {
@@ -2997,6 +3061,13 @@ export type Mutation = {
    * This mutation sends USDC to a burner address, which then transfers to the presigned destination.
    */
   createCoinbaseOnrampOrder: CoinbaseOnrampOrderResponse;
+  /**
+   * Create a Coinflow checkout intent for a starterpack purchase.
+   * Mirrors createStripeStarterpackIntent: computes pricing, creates a
+   * PurchaseFulfillment (AWAITING_PAYMENT), and returns the session key
+   * and JWT the frontend needs to render the Coinflow checkout component.
+   */
+  createCoinflowStarterpackIntent: CoinflowStarterpackIntent;
   createCryptoPayment: CryptoPayment;
   createDeployment: Deployment;
   createLayerswapDeposit: LayerswapPayment;
@@ -3097,6 +3168,10 @@ export type MutationCreateCoinbaseLayerswapOrderArgs = {
 
 export type MutationCreateCoinbaseOnrampOrderArgs = {
   input: CreateCoinbaseOnrampOrderInput;
+};
+
+export type MutationCreateCoinflowStarterpackIntentArgs = {
+  input: CreateCoinflowStarterpackIntentInput;
 };
 
 export type MutationCreateCryptoPaymentArgs = {
@@ -4418,6 +4493,17 @@ export type Query = {
    * Returns a paginated list of transactions in reverse chronological order.
    */
   coinbaseOnrampTransactions: CoinbaseTransactionsResponse;
+  /**
+   * Get a Coinflow payment by its internal ID (the CoinflowPayments row ID),
+   * including its linked PurchaseFulfillment for fulfillment status polling.
+   */
+  coinflowPayment: CoinflowPayment;
+  /**
+   * Get a Coinflow starterpack pricing quote without creating a payment intent.
+   * Mirrors stripeStarterpackQuote: computes pricing, resolves payment token,
+   * and indicates whether a USDC swap is required at purchase time.
+   */
+  coinflowStarterpackQuote: CoinflowStarterpackQuote;
   collectible: Collectible;
   collectibles: CollectibleConnection;
   collection: Collection;
@@ -4517,6 +4603,14 @@ export type QueryCoinbaseOnrampQuoteArgs = {
 
 export type QueryCoinbaseOnrampTransactionsArgs = {
   input: CoinbaseTransactionsInput;
+};
+
+export type QueryCoinflowPaymentArgs = {
+  id: Scalars["ID"];
+};
+
+export type QueryCoinflowStarterpackQuoteArgs = {
+  input: CoinflowStarterpackQuoteInput;
 };
 
 export type QueryCollectibleArgs = {
@@ -5048,6 +5142,10 @@ export type RpcLog = Node & {
   __typename?: "RPCLog";
   /** API key used (if any) */
   apiKeyID?: Maybe<Scalars["String"]>;
+  /** Authentication outcome for this request */
+  authDecision: RpcLogAuthDecision;
+  /** Whether RPC auth enforcement was enabled for this request */
+  authEnforced: Scalars["Boolean"];
   /** IP address of the client */
   clientIP: Scalars["String"];
   /** CORS domain used (if any) */
@@ -5080,6 +5178,13 @@ export type RpcLog = Node & {
   /** User agent of the client */
   userAgent?: Maybe<Scalars["String"]>;
 };
+
+/** RPCLogAuthDecision is enum for the field auth_decision */
+export enum RpcLogAuthDecision {
+  Allowed = "allowed",
+  Blocked = "blocked",
+  WouldBeBlocked = "would_be_blocked",
+}
 
 /** A connection to a list of items. */
 export type RpcLogConnection = {
@@ -5129,6 +5234,14 @@ export type RpcLogWhereInput = {
   apiKeyIDNEQ?: InputMaybe<Scalars["String"]>;
   apiKeyIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
   apiKeyIDNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** auth_decision field predicates */
+  authDecision?: InputMaybe<RpcLogAuthDecision>;
+  authDecisionIn?: InputMaybe<Array<RpcLogAuthDecision>>;
+  authDecisionNEQ?: InputMaybe<RpcLogAuthDecision>;
+  authDecisionNotIn?: InputMaybe<Array<RpcLogAuthDecision>>;
+  /** auth_enforced field predicates */
+  authEnforced?: InputMaybe<Scalars["Boolean"]>;
+  authEnforcedNEQ?: InputMaybe<Scalars["Boolean"]>;
   /** client_ip field predicates */
   clientIP?: InputMaybe<Scalars["String"]>;
   clientIPContains?: InputMaybe<Scalars["String"]>;

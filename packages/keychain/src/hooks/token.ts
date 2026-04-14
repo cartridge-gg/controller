@@ -394,11 +394,12 @@ export function useToken({
 
 export type TokenSwap = {
   address: string;
-  amount: bigint;
+  amount: bigint | "ALL";
+  tokenType?: string;
 };
 
 export type TokenSwapData = Metadata & {
-  amount: number;
+  amount: number | "ALL";
   value: number | null | undefined;
   rounded: boolean;
 };
@@ -426,7 +427,7 @@ export function useTokenSwapData(
         // special treatment for LS2 games
         // to be replaced for balance simulation
         return {
-          amount: 1,
+          amount: token.amount === "ALL" ? "ALL" : Number(token.amount),
           name: "Adventurer",
           symbol: "Adventurer",
           decimals: 0,
@@ -443,19 +444,29 @@ export function useTokenSwapData(
       const price = priceData?.priceByAddresses.find(
         (p) => BigInt(p.base) === BigInt(token.address),
       );
-      const amount = Number(token.amount) / 10 ** (metadata?.decimals || 18);
+      const isErc20 =
+        token.tokenType !== "ERC721" && token.tokenType !== "ERC1155";
+      const amount =
+        token.amount == "ALL"
+          ? "ALL"
+          : isErc20
+            ? Number(token.amount) / 10 ** (metadata?.decimals || 18)
+            : Number(token.amount);
+      const value =
+        price && typeof amount === "number"
+          ? (Number(price.amount) / 10 ** (price.decimals || 18)) * amount
+          : undefined;
+      const image =
+        metadata?.logo_url || makeBlockie(getChecksumAddress(token.address));
       const tokenData: TokenSwapData = {
         amount,
-        name: metadata?.name || "Unknown",
-        symbol: metadata?.symbol || "UNKNOWN",
+        name: metadata?.name || token.tokenType || "Unknown",
+        symbol: metadata?.symbol || token.tokenType || "UNKNOWN",
         decimals: metadata?.decimals || 18,
         address: getChecksumAddress(token.address),
-        image:
-          metadata?.logo_url || makeBlockie(getChecksumAddress(token.address)),
-        value: price
-          ? (Number(price.amount) / 10 ** (price.decimals || 18)) * amount
-          : undefined,
-        rounded: true,
+        image,
+        value,
+        rounded: isErc20,
       };
       return tokenData;
     });

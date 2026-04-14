@@ -11,73 +11,81 @@ import { Call } from "starknet";
 import { humanizeString } from "@cartridge/controller";
 import { useState, PropsWithChildren } from "react";
 import { ContractLink } from "@/components/ContractLink";
-import { CallCardContents } from "../transaction/CallCard";
+import { CallCardContents } from "@/components/transaction/CallCard";
+import { SimulationResults } from "@/components/simulation/SimulationResults";
 
 interface TransactionSummaryProps {
   calls: Call[];
   isExpanded?: boolean;
+  simulate?: boolean;
   className?: string;
 }
 
 export function TransactionSummary({
   calls,
   isExpanded = false,
+  simulate = false,
   className,
 }: TransactionSummaryProps) {
   const [isOpened, setisOpened] = useState(isExpanded);
 
   return (
-    <Accordion
-      type="single"
-      collapsible
-      className={cn(
-        "rounded border",
-        isExpanded ? "text-foreground-100" : "text-foreground-300",
-        isOpened
-          ? "bg-background-200 border-transparent"
-          : "bg-transparent border-background-200",
-        className,
-      )}
-      value={isOpened ? "item" : ""}
-      onValueChange={(value) => setisOpened(value === "item")}
-    >
-      <AccordionItem value="item">
-        <AccordionTrigger
-          parentClassName="h-11 p-3 transition-none"
-          className={cn(
-            "flex items-center text-sm font-medium gap-1.5",
-            isExpanded ? "text-foreground-100" : "text-foreground-300",
-          )}
-          color={cn(isExpanded ? "text-foreground-100" : "text-foreground-300")}
-        >
-          <Thumbnail
-            variant="light"
-            size="sm"
-            icon={calls.length}
-            centered={true}
+    <>
+      {simulate && <SimulationResults calls={calls} />}
+      <Accordion
+        type="single"
+        collapsible
+        className={cn(
+          "rounded border",
+          isExpanded ? "text-foreground-100" : "text-foreground-300",
+          isOpened
+            ? "bg-background-200 border-transparent"
+            : "bg-transparent border-background-200",
+          className,
+        )}
+        value={isOpened ? "item" : ""}
+        onValueChange={(value) => setisOpened(value === "item")}
+      >
+        <AccordionItem value="item">
+          <AccordionTrigger
+            parentClassName="h-11 p-3 transition-none"
             className={cn(
-              "text-xs",
+              "flex items-center text-sm font-medium gap-1.5",
               isExpanded ? "text-foreground-100" : "text-foreground-300",
-              isOpened ? "bg-background-300" : "bg-background-200",
             )}
-          />
-          <p>Operations</p>
-        </AccordionTrigger>
+            color={cn(
+              isExpanded ? "text-foreground-100" : "text-foreground-300",
+            )}
+          >
+            <Thumbnail
+              variant="light"
+              size="sm"
+              icon={calls.length}
+              centered={true}
+              className={cn(
+                "text-xs",
+                isExpanded ? "text-foreground-100" : "text-foreground-300",
+                isOpened ? "bg-background-300" : "bg-background-200",
+              )}
+            />
+            <p>Operations</p>
+          </AccordionTrigger>
 
-        <AccordionContent className="flex flex-col gap-3 px-3 pb-3 border-t border-background-100 pt-2">
-          {calls.map((call, index) => (
-            <CollapsibleTransactionRow
-              key={`${index}-${call.entrypoint}`}
-              transaction={call}
-              enabled={true}
-              highlighted={isExpanded}
-            >
-              <CallCardContents call={call} className="mt-2" />
-            </CollapsibleTransactionRow>
-          ))}
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+          <AccordionContent className="flex flex-col gap-3 px-3 pb-3 border-t border-background-100 pt-2">
+            {calls.map((call, index) => (
+              <CollapsibleTransactionRow
+                key={`${index}-${call.entrypoint}`}
+                transaction={call}
+                enabled={true}
+                highlighted={isExpanded}
+              >
+                <CallCardContents call={call} className="mt-2" />
+              </CollapsibleTransactionRow>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </>
   );
 }
 
