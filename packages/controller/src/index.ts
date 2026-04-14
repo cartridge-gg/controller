@@ -6,4 +6,5 @@ export * from "./utils";
 export * from "./policies";
 export * from "./wallets";
 export * from "./toast";
+// @ts-expect-error
 export * from "@cartridge/presets";

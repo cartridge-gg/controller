@@ -12,7 +12,6 @@ import { ErrorCode } from "@cartridge/controller-wasm";
 import { useToast } from "@/context/toast";
 import { humanizeString } from "@cartridge/controller";
 import { useIsSwapTransaction } from "@/components/swap/swap";
-import { ConfirmSwap } from "@/components/swap/ConfirmSwap";
 
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
@@ -97,18 +96,6 @@ export function ConfirmTransaction({
     return <PageLoading />;
   }
 
-  if (isSwap) {
-    return (
-      <ConfirmSwap
-        onSubmit={onSubmit}
-        onError={onError}
-        transactions={transactions}
-        executionError={error || executionError}
-        origin={origin}
-      />
-    );
-  }
-
   // Show session refresh UI if SessionRefreshRequired error occurred
   if (needsSessionRefresh && policies && !skipSession) {
     return (
@@ -167,9 +154,10 @@ export function ConfirmTransaction({
       transactions={transactions}
       onSubmit={onSubmit}
       onError={onError}
+      buttonText={isSwap ? "Swap" : undefined}
     >
       <LayoutContent>
-        <TransactionSummary calls={transactions} isExpanded />
+        <TransactionSummary calls={transactions} isExpanded simulate />
       </LayoutContent>
     </ExecutionContainer>
   );

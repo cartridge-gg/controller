@@ -1,7 +1,6 @@
 import { NavigationHeader } from "@/components";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/components/provider/connection";
-import { usePostHog } from "@/components/provider/posthog";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
 import { allUseSameAuth } from "@/utils/controller";
@@ -185,6 +184,7 @@ function CreateControllerForm({
         hideNetwork
         hideUsername
         hideSettings
+        forceShowClose
       />
       <form
         className="flex flex-col overflow-y-scroll"
@@ -389,9 +389,6 @@ export function CreateController({
   forcedAuthMethod?: AuthOption;
   forcedAction?: "signup" | "login";
 }) {
-  const posthog = usePostHog();
-  const hasLoggedFocus = useRef(false);
-  const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
@@ -542,10 +539,6 @@ export function CreateController({
 
   const handleUsernameChange = (value: string) => {
     if (prefillUsername) return;
-    if (!hasLoggedChange.current) {
-      posthog?.capture("Change Username");
-      hasLoggedChange.current = true;
-    }
     setError(undefined);
     setUsernameField((u) => ({
       ...u,
@@ -554,12 +547,7 @@ export function CreateController({
     }));
   };
 
-  const handleUsernameFocus = () => {
-    if (!hasLoggedFocus.current) {
-      posthog?.capture("Focus Username");
-      hasLoggedFocus.current = true;
-    }
-  };
+  const handleUsernameFocus = () => {};
 
   const handleUsernameClear = () => {
     if (prefillUsername) return;

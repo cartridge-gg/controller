@@ -1,0 +1,116 @@
+[
+  {
+    "transaction_trace": {
+      "type": "INVOKE",
+      "execute_invocation": {
+        "contract_address": "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
+        "entry_point_selector": "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+        "calldata": [
+          "0x1",
+          "0x7f6f20d1993a0caeb38e753032fe6443aee2ff692abf3cb4552fdde1d66fa8a",
+          "0x1655e9417d4dde9cefb5e88c40d679475f1dc56cf2bc5b1e71889ab95b360ca",
+          "0xc",
+          "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
+          "0x17cc6ca902ed4e8baa8463a7009ff18cc294fa85a94b4ce6ac30a9ebd6057c7",
+          "0x2",
+          "0x1",
+          "0x0",
+          "0x2",
+          "0x0",
+          "0x2",
+          "0x2",
+          "0x0",
+          "0x1",
+          "0x0"
+        ],
+        "caller_address": "0x0",
+        "class_hash": "0x7dc7899aa655b0aae51eadff6d801a58e97dd99cf4666ee59e704249e51adf2",
+        "entry_point_type": "EXTERNAL",
+        "call_type": "CALL",
+        "result": ["0x1", "0x0"],
+        "calls": [
+          {
+            "contract_address": "0x7f6f20d1993a0caeb38e753032fe6443aee2ff692abf3cb4552fdde1d66fa8a",
+            "entry_point_selector": "0x1655e9417d4dde9cefb5e88c40d679475f1dc56cf2bc5b1e71889ab95b360ca",
+            "calldata": [
+              "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
+              "0x17cc6ca902ed4e8baa8463a7009ff18cc294fa85a94b4ce6ac30a9ebd6057c7",
+              "0x2",
+              "0x1",
+              "0x0",
+              "0x2",
+              "0x0",
+              "0x2",
+              "0x2",
+              "0x0",
+              "0x1",
+              "0x0"
+            ],
+            "caller_address": "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
+            "class_hash": "0x5c5e7e8a9bf0959fa701a7b9620c5ad45446f6239c56a850fbe91998e0ce372",
+            "entry_point_type": "EXTERNAL",
+            "call_type": "CALL",
+            "result": [],
+            "calls": [],
+            "events": [
+              {
+                "order": 0,
+                "keys": [
+                  "0x2563683c757f3abe19c4b7237e2285d8993417ddffe0b54a19eb212ea574b08",
+                  "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
+                  "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
+                  "0x17cc6ca902ed4e8baa8463a7009ff18cc294fa85a94b4ce6ac30a9ebd6057c7"
+                ],
+                "data": [
+                  "0x2",
+                  "0x1",
+                  "0x0",
+                  "0x2",
+                  "0x0",
+                  "0x2",
+                  "0x2",
+                  "0x0",
+                  "0x1",
+                  "0x0"
+                ]
+              }
+            ],
+            "messages": [],
+            "execution_resources": {
+              "l1_gas": 0,
+              "l2_gas": 0
+            },
+            "is_reverted": false
+          }
+        ],
+        "events": [],
+        "messages": [],
+        "execution_resources": {
+          "l1_gas": 0,
+          "l2_gas": 0
+        },
+        "is_reverted": false
+      },
+      "execution_resources": {
+        "l1_gas": 7952,
+        "l1_data_gas": 0,
+        "l2_gas": 1014080
+      }
+    },
+    "resourceBounds": {
+      "l2_gas": {
+        "max_amount": "__bigint__:1521120",
+        "max_price_per_unit": "__bigint__:30000000000"
+      },
+      "l1_gas": {
+        "max_amount": "__bigint__:11928",
+        "max_price_per_unit": "__bigint__:30000000000"
+      },
+      "l1_data_gas": {
+        "max_amount": "__bigint__:0",
+        "max_price_per_unit": "__bigint__:1500000"
+      }
+    },
+    "overall_fee": "__bigint__:45991440000000000"
+  }
+]

@@ -367,7 +367,7 @@ export default class SessionProvider extends BaseProvider {
         this._disconnectRedirectUrl,
       );
 
-    const openedWindow = window.open(disconnectUrl);
+    const openedWindow = window.open(disconnectUrl, "_blank");
     if (openedWindow === null) return Promise.resolve();
 
     const { resolve, promise } = Promise.withResolvers<void>();

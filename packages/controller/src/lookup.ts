@@ -124,7 +124,7 @@ const HEADLESS_AUTH_OPTIONS: AuthOption[] = [
   "rabby",
   "phantom-evm",
 ].filter((option) =>
-  IMPLEMENTED_AUTH_OPTIONS.includes(option as AuthOption),
+  (IMPLEMENTED_AUTH_OPTIONS as string[]).includes(option as AuthOption),
 ) as AuthOption[];
 
 function normalizeSignerOptions(

@@ -32,6 +32,7 @@ import { SectionHeader } from "./section-header";
 import { SessionsSection } from "./sessions/sessions-section";
 import { SignersSection } from "./signers/signers-section";
 import { ConnectionsSection } from "./connections/connections-section";
+import { useFeature } from "@/hooks/features";
 
 const registeredAccounts: RegisteredAccount[] = [
   {
@@ -45,6 +46,7 @@ export function Settings() {
   const { navigate } = useNavigation();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const deleteMe = useDeleteMeMutation();
+  const isRegisteredAccountsEnabled = useFeature("registered-accounts");
 
   const handleDeleteAccount = useCallback(async () => {
     const result = await deleteMe.mutateAsync({});
@@ -126,31 +128,33 @@ export function Settings() {
           </section>
         )} */}
 
-        <section className="space-y-4">
-          <SectionHeader
-            title="Registered Account"
-            description="Information associated with registered accounts can be made available to games and applications."
-          />
-          <div className="space-y-3">
-            {registeredAccounts.map((i, index) => (
-              <RegisteredAccountCard
-                key={index}
-                accountName={i.accountName}
-                accountAddress={i.accountAddress}
-              />
-            ))}
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="py-2.5 px-3 text-foreground-300 gap-1"
-          >
-            <PlusIcon size="sm" variant="line" />
-            <span className="normal-case font-normal font-sans text-sm">
-              Add Account
-            </span>
-          </Button>
-        </section>
+        {isRegisteredAccountsEnabled && (
+          <section className="space-y-4">
+            <SectionHeader
+              title="Registered Account"
+              description="Information associated with registered accounts can be made available to games and applications."
+            />
+            <div className="space-y-3">
+              {registeredAccounts.map((i, index) => (
+                <RegisteredAccountCard
+                  key={index}
+                  accountName={i.accountName}
+                  accountAddress={i.accountAddress}
+                />
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="py-2.5 px-3 text-foreground-300 gap-1"
+            >
+              <PlusIcon size="sm" variant="line" />
+              <span className="normal-case font-normal font-sans text-sm">
+                Add Account
+              </span>
+            </Button>
+          </section>
+        )}
 
         <section className="space-y-4">
           <SectionHeader
