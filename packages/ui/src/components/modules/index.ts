@@ -8,7 +8,6 @@ export * from "./create-account";
 export * from "./erc20";
 export * from "./followers";
 export * from "./leaderboard";
-export * from "./marketplace";
 export * from "./progress-bar";
 export * from "./recipient";
 export * from "./signer-method";
