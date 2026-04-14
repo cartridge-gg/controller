@@ -19,7 +19,7 @@ import {
   OnchainStarterpackDetails,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { useFeatures } from "@/hooks/features";
+import { useFeature, useFeatures } from "@/hooks/features";
 import { useTokenBalance, useTokenFallback } from "@/hooks/starterpack";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "../../receiving";
@@ -69,21 +69,21 @@ export function OnchainCheckout() {
     isFetchingFees,
     layerswapFees,
     isApplePaySelected,
-    isStripeSelected,
-    onApplePaySelect,
-    onStripeSelect,
+    isCoinflowSelected,
+    onCoinflowSelect,
     onCreateCoinbaseOrder,
     isCreatingOrder,
     usdAmount,
   } = useOnchainPurchaseContext();
-  const { onCreditCardPurchase, isStripeLoading } = useCreditPurchaseContext();
+  const { onCreditCardPurchase, isStripeLoading, isCoinflowLoading } =
+    useCreditPurchaseContext();
 
   const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
   const { refetch: refetchAccountPrivate } = useAccountPrivateQuery(undefined, {
     enabled: false,
   });
+  const isCoinflowEnabled = useFeature("coinflow-support");
   const { enableFeature } = useFeatures();
-  const isStripeEnabled = false;
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -93,7 +93,7 @@ export function OnchainCheckout() {
     getIpLocation().then((geo) => setCountryCode(geo.countryCode));
   }, []);
 
-  // Triple-click on the header icon to enable hidden payment methods.
+  // Triple-click on the header icon selects the Coinflow credit-card flow.
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const handleIconTripleClick = useCallback(() => {
@@ -101,14 +101,14 @@ export function OnchainCheckout() {
     clearTimeout(clickTimerRef.current);
     if (clickCountRef.current === 3) {
       clickCountRef.current = 0;
-      enableFeature("apple-pay-support");
-      onApplePaySelect();
+      enableFeature("coinflow-support");
+      onCoinflowSelect();
     } else {
       clickTimerRef.current = setTimeout(() => {
         clickCountRef.current = 0;
       }, 500);
     }
-  }, [enableFeature, onApplePaySelect]);
+  }, [enableFeature, onCoinflowSelect]);
 
   const totalUsdAmount = useMemo(() => {
     return usdAmount * quantity;
@@ -139,7 +139,7 @@ export function OnchainCheckout() {
     return quote ? quote.totalCost === BigInt(0) : undefined;
   }, [quote]);
 
-  const isStripeStarterpackSupported = useMemo(() => {
+  const isCoinflowStarterpackSupported = useMemo(() => {
     if (!controller || !quote) {
       return true;
     }
@@ -170,14 +170,6 @@ export function OnchainCheckout() {
     quantity,
   });
 
-  const isUS = countryCode === "US";
-
-  const onStripeSelectForFallback = useCallback(() => {
-    if (isUS && isStripeEnabled) {
-      onStripeSelect();
-    }
-  }, [isUS, isStripeEnabled, onStripeSelect]);
-
   const { isCheckingFallback } = useTokenFallback({
     controller,
     starterpackDetails: starterpackDetails as
@@ -189,16 +181,17 @@ export function OnchainCheckout() {
     isLoadingBalance,
     balanceError,
     quantity,
-    isStripeSelected,
+    isCoinflowSelected,
     isApplePaySelected,
     selectedPlatform,
     setSelectedToken,
-    onStripeSelect: onStripeSelectForFallback,
   });
 
   const globalDisabled = useMemo(() => {
-    if (isStripeSelected) {
-      return !isStripeStarterpackSupported || isStripeLoading;
+    if (isCoinflowSelected) {
+      return (
+        !isCoinflowStarterpackSupported || isStripeLoading || isCoinflowLoading
+      );
     }
 
     // Disable if there's a fee estimation error (e.g., bridge amount too low)
@@ -231,9 +224,10 @@ export function OnchainCheckout() {
     isCreatingOrder,
     isApplePaySelected,
     isApplePayAmountTooLow,
-    isStripeSelected,
-    isStripeStarterpackSupported,
+    isCoinflowSelected,
+    isCoinflowStarterpackSupported,
     isStripeLoading,
+    isCoinflowLoading,
   ]);
 
   const showInsufficientBalance =
@@ -242,17 +236,17 @@ export function OnchainCheckout() {
     !balanceError &&
     !bridgeFrom &&
     !isApplePaySelected &&
-    !isStripeSelected &&
+    !isCoinflowSelected &&
     !isCheckingFallback;
 
   const showConversionError =
     conversionError &&
     needsConversion &&
     !isApplePaySelected &&
-    !isStripeSelected;
+    !isCoinflowSelected;
 
   const showBridgeAmountTooLow =
-    !isStripeSelected &&
+    !isCoinflowSelected &&
     (feeEstimationError?.message?.includes("too low") ?? false);
 
   const handleWalletSelect = useCallback(() => {
@@ -261,8 +255,8 @@ export function OnchainCheckout() {
 
   const handlePurchase = useCallback(async () => {
     if (isApplePayAmountTooLow) return;
-    if (isStripeSelected) {
-      if (!isStripeStarterpackSupported) return;
+    if (isCoinflowSelected) {
+      if (!isCoinflowStarterpackSupported) return;
     } else if (!hasSufficientBalance && !isFree && !isApplePaySelected) {
       console.warn("no means to pay");
       return;
@@ -272,18 +266,9 @@ export function OnchainCheckout() {
     clearError();
 
     try {
-      if (isStripeSelected) {
+      if (isCoinflowSelected) {
         await onCreditCardPurchase();
-
-        const { data: accountPrivateData } = await refetchAccountPrivate();
-        const needsVerification =
-          !accountPrivateData?.accountPrivate?.proveVerifiedAt;
-
-        if (needsVerification) {
-          navigate("/purchase/verification/stripe");
-        } else {
-          navigate("/purchase/checkout/stripe");
-        }
+        navigate("/purchase/checkout/coinflow");
       } else if (isApplePaySelected) {
         const [{ data: meData }, { data: accountPrivateData }] =
           await Promise.all([refetchMe(), refetchAccountPrivate()]);
@@ -313,8 +298,8 @@ export function OnchainCheckout() {
   }, [
     hasSufficientBalance,
     isFree,
-    isStripeSelected,
-    isStripeStarterpackSupported,
+    isCoinflowSelected,
+    isCoinflowStarterpackSupported,
     isApplePaySelected,
     onCreditCardPurchase,
     refetchMe,
@@ -347,12 +332,12 @@ export function OnchainCheckout() {
         `@cartridge/lastPaymentMethod:${controller.chainId()}`,
       );
       if (
-        lastMethod === "stripe" &&
-        isStripeEnabled &&
-        isStripeStarterpackSupported &&
+        lastMethod === "coinflow" &&
+        isCoinflowEnabled &&
+        isCoinflowStarterpackSupported &&
         countryCode === "US"
       ) {
-        onStripeSelect();
+        onCoinflowSelect();
       }
     } catch {
       // localStorage may be unavailable
@@ -360,9 +345,9 @@ export function OnchainCheckout() {
   }, [
     controller,
     quote,
-    isStripeEnabled,
-    isStripeStarterpackSupported,
-    onStripeSelect,
+    isCoinflowEnabled,
+    isCoinflowStarterpackSupported,
+    onCoinflowSelect,
     countryCode,
   ]);
 
@@ -460,11 +445,11 @@ export function OnchainCheckout() {
               />
             )}
 
-            {isStripeSelected && !isStripeStarterpackSupported && (
+            {isCoinflowSelected && !isCoinflowStarterpackSupported && (
               <ErrorCard
                 variant="error"
-                title="Stripe Checkout Unavailable"
-                message="Stripe checkout is only available for starterpacks priced in USDC."
+                title="Credit Card Checkout Unavailable"
+                message="Credit card checkout is only available for starterpacks priced in USDC."
               />
             )}
 
@@ -478,14 +463,14 @@ export function OnchainCheckout() {
 
             <WalletSelector
               walletName={
-                isStripeSelected
+                isCoinflowSelected
                   ? "Credit Card"
                   : isApplePaySelected
                     ? "Apple Pay"
                     : wallet.name
               }
               walletIcon={
-                isStripeSelected ? (
+                isCoinflowSelected ? (
                   <CreditCardIcon size="xs" variant="solid" />
                 ) : isApplePaySelected ? (
                   <AppleIcon size="xs" />
@@ -506,12 +491,13 @@ export function OnchainCheckout() {
                 isCheckingFallback ||
                 (bridgeFrom !== null && isFetchingFees) ||
                 isCreatingOrder ||
-                isStripeLoading
+                isStripeLoading ||
+                isCoinflowLoading
               }
               isSendingDeposit={isSendingDeposit}
               globalDisabled={globalDisabled}
               hasSufficientBalance={
-                hasSufficientBalance || isApplePaySelected || isStripeSelected
+                hasSufficientBalance || isApplePaySelected || isCoinflowSelected
               }
               bridgeFrom={bridgeFrom}
               onIncrement={incrementQuantity}
@@ -519,7 +505,7 @@ export function OnchainCheckout() {
               onPurchase={handlePurchase}
               onBridge={handleBridge}
               isApplePayAmountTooLow={isApplePayAmountTooLow}
-              purchaseLabel={isStripeSelected ? "Continue" : undefined}
+              purchaseLabel={isCoinflowSelected ? "Continue" : undefined}
             />
           </>
         )}

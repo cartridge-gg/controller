@@ -8,6 +8,11 @@ import {
 } from "react";
 import { useConnection } from "@/hooks/connection";
 import useStripePayment from "@/hooks/payments/stripe";
+import useCoinflowPayment, {
+  CoinflowStarterpackIntent,
+  CoinflowStarterpackQuote,
+  useCoinflowStarterpackQuote,
+} from "@/hooks/payments/coinflow";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
@@ -15,9 +20,6 @@ import { useStarterpackContext } from "./starterpack";
 import { useOnchainPurchaseContext } from "./onchain-purchase";
 import { getCurrentReferral } from "@/utils/referral";
 import { isOnchainStarterpack } from "./types";
-import { USDC_ADDRESSES } from "@/utils/ekubo";
-import { num } from "starknet";
-import { getStarterpackStripeCostDetails } from "@/components/purchasenew/review/stripe-pricing";
 
 export interface CostDetails {
   baseCostInCents: number;
@@ -37,6 +39,13 @@ export interface CreditPurchaseContextType {
   costDetails: CostDetails | undefined;
   stripePromise: Promise<Stripe | null>;
   isStripeLoading: boolean;
+
+  // Coinflow state
+  coinflowIntent: CoinflowStarterpackIntent | undefined;
+  coinflowQuote: CoinflowStarterpackQuote | undefined;
+  isCoinflowQuoteLoading: boolean;
+  coinflowEnv: "prod" | "sandbox";
+  isCoinflowLoading: boolean;
 
   // Actions
   onCreditCardPurchase: () => Promise<void>;
@@ -71,28 +80,60 @@ export const CreditPurchaseProvider = ({
   const [customerSessionClientSecret, setCustomerSessionClientSecret] =
     useState<string | undefined>();
   const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
+  const [coinflowIntent, setCoinflowIntent] = useState<
+    CoinflowStarterpackIntent | undefined
+  >();
 
   const {
     stripePromise,
     isLoading: isStripeLoading,
     error: stripeError,
     createPaymentIntent,
-    createStarterpackPaymentIntent,
   } = useStripePayment({ isSlot });
 
-  // Sync stripe error
+  const {
+    isLoading: isCoinflowLoading,
+    error: coinflowError,
+    createIntent: createCoinflowIntent,
+    env: coinflowEnv,
+  } = useCoinflowPayment();
+
+  // Auto-fetch the Coinflow pricing quote whenever the relevant inputs change.
+  // The hook handles its own enabled/disabled state and Ekubo swap pricing
+  // for non-USDC starterpacks via the backend coinflowStarterpackQuote query.
+  const referralData = getCurrentReferral(origin);
+  const isOnchain =
+    !!starterpackDetails && isOnchainStarterpack(starterpackDetails);
+  const { data: coinflowQuote, isLoading: isCoinflowQuoteLoading } =
+    useCoinflowStarterpackQuote({
+      starterpackId: isOnchain
+        ? (starterpackDetails as { id: number | string }).id.toString()
+        : undefined,
+      quantity,
+      registryAddress,
+      referral: referralData?.refAddress || referralData?.ref,
+      referralGroup: referralData?.refGroup,
+      ...(bundleId !== undefined && { clientPercentage: 0 }),
+      enabled: isOnchain,
+    });
+
+  // Sync payment errors
   useEffect(() => {
     if (stripeError) {
       setDisplayError(stripeError);
     }
   }, [stripeError]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (coinflowError) {
+      setDisplayError(coinflowError);
+    }
+  }, [coinflowError]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const onCreditCardPurchase = useCallback(async () => {
     if (!controller || !registryAddress) return;
 
     try {
-      let paymentIntent;
-
       if (starterpackDetails && isOnchainStarterpack(starterpackDetails)) {
         const starterpackQuote = starterpackDetails.quote;
 
@@ -100,19 +141,9 @@ export const CreditPurchaseProvider = ({
           throw new Error("Quote not loaded yet");
         }
 
-        const usdcAddress = USDC_ADDRESSES[controller.chainId()];
-        if (
-          !usdcAddress ||
-          num.toHex(starterpackQuote.paymentToken) !== num.toHex(usdcAddress)
-        ) {
-          throw new Error(
-            "Stripe checkout is only available for starterpacks priced in USDC.",
-          );
-        }
-
         const referralData = getCurrentReferral(origin);
 
-        paymentIntent = await createStarterpackPaymentIntent({
+        const intent = await createCoinflowIntent({
           starterpackId: starterpackDetails.id.toString(),
           quantity,
           referral: referralData?.refAddress || referralData?.ref,
@@ -120,24 +151,21 @@ export const CreditPurchaseProvider = ({
           registryAddress,
           ...(bundleId !== undefined && { clientPercentage: 0 }),
         });
+        setCoinflowIntent(intent);
       } else {
-        paymentIntent = await createPaymentIntent(
+        const paymentIntent = await createPaymentIntent(
           usdToCredits(usdAmount),
           undefined,
           typeof starterpackId === "string" ? starterpackId : undefined,
         );
-      }
 
-      setStripePaymentId(paymentIntent.id);
-      setClientSecret(paymentIntent.clientSecret);
-      setCustomerSessionClientSecret(
-        paymentIntent.customerSessionClientSecret ?? undefined,
-      );
-      setCostDetails(
-        starterpackDetails && isOnchainStarterpack(starterpackDetails)
-          ? getStarterpackStripeCostDetails(starterpackDetails.quote!, quantity)
-          : paymentIntent.pricing,
-      );
+        setStripePaymentId(paymentIntent.id);
+        setClientSecret(paymentIntent.clientSecret);
+        setCustomerSessionClientSecret(
+          paymentIntent.customerSessionClientSecret ?? undefined,
+        );
+        setCostDetails(paymentIntent.pricing);
+      }
     } catch (e) {
       setDisplayError(e as Error);
       throw e;
@@ -152,7 +180,7 @@ export const CreditPurchaseProvider = ({
     starterpackDetails,
     quantity,
     createPaymentIntent,
-    createStarterpackPaymentIntent,
+    createCoinflowIntent,
     setDisplayError,
   ]);
 
@@ -161,6 +189,7 @@ export const CreditPurchaseProvider = ({
     setClientSecret(undefined);
     setCustomerSessionClientSecret(undefined);
     setCostDetails(undefined);
+    setCoinflowIntent(undefined);
   }, [starterpackId]);
 
   const contextValue: CreditPurchaseContextType = {
@@ -172,6 +201,11 @@ export const CreditPurchaseProvider = ({
     costDetails,
     stripePromise,
     isStripeLoading,
+    coinflowIntent,
+    coinflowQuote,
+    isCoinflowQuoteLoading,
+    coinflowEnv,
+    isCoinflowLoading,
     onCreditCardPurchase,
   };
 

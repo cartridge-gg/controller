@@ -35,7 +35,7 @@ export function WalletSelectionDrawer({
   showFiatOptions = true,
 }: WalletSelectionDrawerProps) {
   const isApplePayEnabled = useFeature("apple-pay-support");
-  const isStripeEnabled = false;
+  const isCoinflowEnabled = useFeature("coinflow-support");
 
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
@@ -43,7 +43,7 @@ export function WalletSelectionDrawer({
     onExternalConnect,
     clearSelectedWallet,
     onApplePaySelect,
-    onStripeSelect,
+    onCoinflowSelect,
   } = useOnchainPurchaseContext();
 
   const [step, setStep] = useState<DrawerStep>("network");
@@ -154,10 +154,10 @@ export function WalletSelectionDrawer({
     onClose();
   }, [onApplePaySelect, onClose]);
 
-  const handleStripeCheckoutSelect = useCallback(async () => {
-    onStripeSelect();
+  const handleCoinflowSelect = useCallback(async () => {
+    onCoinflowSelect();
     onClose();
-  }, [onStripeSelect, onClose]);
+  }, [onCoinflowSelect, onClose]);
 
   const onControllerWalletSelect = useCallback(() => {
     clearSelectedWallet();
@@ -288,12 +288,12 @@ export function WalletSelectionDrawer({
           {step === "network" ? (
             // Network selection step
             <>
-              {showFiatOptions && isStripeEnabled && (
+              {showFiatOptions && isCoinflowEnabled && (
                 <PurchaseCard
-                  key="stripe-checkout"
+                  key="coinflow-checkout"
                   text="Credit Card"
                   icon={<CreditCardIcon variant="solid" />}
-                  onClick={handleStripeCheckoutSelect}
+                  onClick={handleCoinflowSelect}
                   className={cn(
                     "group flex flex-row gap-2 bg-background-200 hover:bg-background-300 rounded-lg p-3 justify-between cursor-pointer",
                     "rounded-lg",

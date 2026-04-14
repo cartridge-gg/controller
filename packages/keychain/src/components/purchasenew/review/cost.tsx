@@ -26,9 +26,8 @@ import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
 import type { Quote } from "@/context";
 import { useCallback, useMemo, useEffect } from "react";
-import { useOnchainPurchaseContext } from "@/context";
+import { useOnchainPurchaseContext, useCreditPurchaseContext } from "@/context";
 import { num } from "starknet";
-import { getStarterpackStripeCostDetails } from "./stripe-pricing";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -126,18 +125,20 @@ export function OnchainCostBreakdown({
     feeEstimationError,
     quantity,
     isApplePaySelected,
-    isStripeSelected,
+    isCoinflowSelected,
     coinbaseQuote,
     isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
+  const { coinflowQuote, isCoinflowQuoteLoading } = useCreditPurchaseContext();
   const { decimals } = quote.paymentTokenMetadata;
-  const stripeCostDetails = useMemo(() => {
-    if (!isStripeSelected) {
+  // When credit card is selected, use the Coinflow backend quote so that
+  // pricing is correct even for non-USDC starterpacks (handles Ekubo swap).
+  const coinflowCostDetails = useMemo(() => {
+    if (!isCoinflowSelected) {
       return undefined;
     }
-
-    return getStarterpackStripeCostDetails(quote, quantity);
-  }, [isStripeSelected, quantity, quote]);
+    return coinflowQuote?.pricing;
+  }, [isCoinflowSelected, coinflowQuote]);
 
   // Get default token (matching quote if available) or fallback to the first available token
   const defaultToken =
@@ -233,17 +234,24 @@ export function OnchainCostBreakdown({
                 quantity={quantity}
                 layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
                 coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
-                stripeFeeInCents={stripeCostDetails?.processingFeeInCents}
+                creditCardFeeInCents={
+                  coinflowCostDetails
+                    ? coinflowCostDetails.cardFeeInCents +
+                      coinflowCostDetails.gasFeeInCents
+                    : undefined
+                }
               />
             </div>
             {isFetchingConversion || isFetchingCoinbaseQuote ? (
               <Spinner />
             ) : (
               <div className="flex items-center gap-1.5">
-                {isStripeSelected ? (
-                  stripeCostDetails ? (
+                {isCoinflowSelected ? (
+                  isCoinflowQuoteLoading ? (
+                    <Spinner />
+                  ) : coinflowCostDetails ? (
                     <span className="text-foreground-100">
-                      {formatAmount(stripeCostDetails.totalInCents / 100)}
+                      {formatAmount(coinflowCostDetails.totalInCents / 100)}
                     </span>
                   ) : (
                     <span className="text-foreground-400">—</span>

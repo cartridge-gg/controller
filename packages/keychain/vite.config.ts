@@ -1,9 +1,13 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react-swc";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => ({
   plugins: [
@@ -31,6 +35,7 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom"],
     alias: {
       "@": "/src",
+      "@solana/web3.js": path.resolve(__dirname, "src/shims/solana-web3.ts"),
       ...(mode === "production"
         ? {
             "fetch-cookie": "/src/shims/fetch-cookie.ts",
