@@ -19,6 +19,7 @@ import {
   OnchainStarterpackDetails,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
+import { useFeature, useFeatures } from "@/hooks/features";
 import { useTokenBalance, useTokenFallback } from "@/hooks/starterpack";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "../../receiving";
@@ -81,7 +82,8 @@ export function OnchainCheckout() {
   const { refetch: refetchAccountPrivate } = useAccountPrivateQuery(undefined, {
     enabled: false,
   });
-  const isCoinflowEnabled = true;
+  const isCoinflowEnabled = useFeature("coinflow-support");
+  const { enableFeature } = useFeatures();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -99,13 +101,14 @@ export function OnchainCheckout() {
     clearTimeout(clickTimerRef.current);
     if (clickCountRef.current === 3) {
       clickCountRef.current = 0;
+      enableFeature("coinflow-support");
       onCoinflowSelect();
     } else {
       clickTimerRef.current = setTimeout(() => {
         clickCountRef.current = 0;
       }, 500);
     }
-  }, [onCoinflowSelect]);
+  }, [enableFeature, onCoinflowSelect]);
 
   const totalUsdAmount = useMemo(() => {
     return usdAmount * quantity;

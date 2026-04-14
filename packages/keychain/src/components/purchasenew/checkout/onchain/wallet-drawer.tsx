@@ -35,7 +35,7 @@ export function WalletSelectionDrawer({
   showFiatOptions = true,
 }: WalletSelectionDrawerProps) {
   const isApplePayEnabled = useFeature("apple-pay-support");
-  const isCoinflowEnabled = true;
+  const isCoinflowEnabled = useFeature("coinflow-support");
 
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();

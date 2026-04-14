@@ -15,6 +15,7 @@ export type Feature =
   | "connection-instagram"
   | "connection-tiktok"
   | "apple-pay-support"
+  | "coinflow-support"
   | "sms"
   | "registered-accounts";
 
