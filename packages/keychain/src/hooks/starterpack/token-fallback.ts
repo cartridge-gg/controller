@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { num, uint256 } from "starknet";
-import { fetchSwapQuote, USDC_ADDRESSES } from "@/utils/ekubo";
+import { fetchSwapQuote } from "@/utils/ekubo";
 import { isOnchainStarterpack } from "@/context/starterpack/types";
 import type { OnchainStarterpackDetails } from "@/context/starterpack/types";
 import type { TokenOption } from "./token-selection";
@@ -20,7 +20,6 @@ export interface UseTokenFallbackOptions {
   isApplePaySelected: boolean;
   selectedPlatform: ExternalPlatform | undefined;
   setSelectedToken: (token: TokenOption) => void;
-  onCoinflowSelect: () => void;
 }
 
 export interface UseTokenFallbackReturn {
@@ -62,8 +61,8 @@ async function fetchBalance(
 /**
  * Hook that checks fallback token balances when the selected token has
  * insufficient funds. If a token with sufficient balance is found, it
- * auto-switches to it. If none are found and the starterpack is priced
- * in USDC, it defaults to Coinflow credit-card checkout.
+ * auto-switches to it; otherwise the caller's "insufficient balance" UI
+ * takes over.
  */
 export function useTokenFallback({
   controller,
@@ -78,7 +77,6 @@ export function useTokenFallback({
   isApplePaySelected,
   selectedPlatform,
   setSelectedToken,
-  onCoinflowSelect,
 }: UseTokenFallbackOptions): UseTokenFallbackReturn {
   const [isCheckingFallback, setIsCheckingFallback] = useState(false);
   const hasAttemptedFallback = useRef(false);
@@ -162,15 +160,6 @@ export function useTokenFallback({
 
       if (abortController.signal.aborted) return;
 
-      // No fallback token found - default to Coinflow credit-card if priced in USDC
-      const usdcAddress = USDC_ADDRESSES[controller.chainId()];
-      if (
-        usdcAddress &&
-        num.toHex(quote.paymentToken) === num.toHex(usdcAddress)
-      ) {
-        onCoinflowSelect();
-      }
-
       setIsCheckingFallback(false);
     };
 
@@ -192,7 +181,6 @@ export function useTokenFallback({
     isApplePaySelected,
     selectedPlatform,
     setSelectedToken,
-    onCoinflowSelect,
   ]);
 
   return { isCheckingFallback };
