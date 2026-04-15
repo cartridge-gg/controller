@@ -15,6 +15,8 @@ const TEST_ADDRESS =
   "0x0000000000000000000000000000000000000000000000000000000000001234";
 const TEST_OWNER_GUID = "0x5678";
 const TEST_CHAIN_ID = "SN_SEPOLIA";
+const STRK_CONTRACT_ADDRESS =
+  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 const TRANSFER_SELECTOR = normalizeFelt(hash.getSelectorFromName("transfer"));
 
@@ -22,8 +24,7 @@ const APPROVE_SELECTOR = normalizeFelt(hash.getSelectorFromName("approve"));
 
 const policies: CallPolicy[] = [
   {
-    target:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+    target: STRK_CONTRACT_ADDRESS,
     method: TRANSFER_SELECTOR,
     authorized: true,
   },
@@ -31,14 +32,12 @@ const policies: CallPolicy[] = [
 
 const multiPolicies: CallPolicy[] = [
   {
-    target:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+    target: STRK_CONTRACT_ADDRESS,
     method: TRANSFER_SELECTOR,
     authorized: true,
   },
   {
-    target:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+    target: STRK_CONTRACT_ADDRESS,
     method: APPROVE_SELECTOR,
     authorized: true,
   },
@@ -66,8 +65,7 @@ describe("buildSignedOutsideExecutionV3", () => {
     const result = buildSignedOutsideExecutionV3({
       calls: [
         {
-          contractAddress:
-            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          contractAddress: STRK_CONTRACT_ADDRESS,
           entrypoint: "transfer",
           calldata: ["0x1", "0x2", "0x0"],
         },
@@ -106,8 +104,7 @@ describe("buildSignedOutsideExecutionV3", () => {
     const result = buildSignedOutsideExecutionV3({
       calls: [
         {
-          contractAddress:
-            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          contractAddress: STRK_CONTRACT_ADDRESS,
           entrypoint: "transfer",
           calldata: ["0x1"],
         },
@@ -201,8 +198,7 @@ describe("buildSignedOutsideExecutionV3", () => {
       buildSignedOutsideExecutionV3({
         calls: [
           {
-            contractAddress:
-              "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            contractAddress: STRK_CONTRACT_ADDRESS,
             entrypoint: "transfer",
             calldata: [],
           },
@@ -244,14 +240,12 @@ describe("buildSignedOutsideExecutionV3", () => {
     const result = buildSignedOutsideExecutionV3({
       calls: [
         {
-          contractAddress:
-            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          contractAddress: STRK_CONTRACT_ADDRESS,
           entrypoint: "transfer",
           calldata: ["0x1", "0x2", "0x0"],
         },
         {
-          contractAddress:
-            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          contractAddress: STRK_CONTRACT_ADDRESS,
           entrypoint: "approve",
           calldata: ["0xaaa"],
         },
@@ -296,8 +290,7 @@ describe("buildSignedOutsideExecutionV3", () => {
     const result = buildSignedOutsideExecutionV3({
       calls: [
         {
-          contractAddress:
-            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          contractAddress: STRK_CONTRACT_ADDRESS,
           entrypoint: "transfer",
           calldata: [],
         },
