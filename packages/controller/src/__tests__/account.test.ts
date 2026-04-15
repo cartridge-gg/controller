@@ -18,11 +18,12 @@ const TEST_PRIVATE_KEY = "0x1";
 const TEST_ADDRESS = "0x1234";
 const TEST_OWNER_GUID = "0x5678";
 const TEST_CHAIN_ID = "SN_SEPOLIA";
+const STRK_CONTRACT_ADDRESS =
+  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 
 const TEST_POLICIES: CallPolicy[] = [
   {
-    target:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+    target: STRK_CONTRACT_ADDRESS,
     method: TRANSFER_SELECTOR,
     authorized: true,
   },
@@ -58,8 +59,7 @@ describe("CartridgeSessionAccount", () => {
 
     const result = await account.executeFromOutside([
       {
-        contractAddress:
-          "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        contractAddress: STRK_CONTRACT_ADDRESS,
         entrypoint: "transfer",
         calldata: ["0x1", "0x2", "0x0"],
       },
@@ -100,8 +100,7 @@ describe("CartridgeSessionAccount", () => {
     await expect(
       account.executeFromOutside([
         {
-          contractAddress:
-            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          contractAddress: STRK_CONTRACT_ADDRESS,
           entrypoint: "transfer",
           calldata: [],
         },
@@ -138,8 +137,7 @@ describe("CartridgeSessionAccount", () => {
     await expect(
       account.executeFromOutside([
         {
-          contractAddress:
-            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          contractAddress: STRK_CONTRACT_ADDRESS,
           entrypoint: "transfer",
           calldata: [],
         },
