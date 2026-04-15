@@ -288,13 +288,20 @@ export function useCreateController({
       rpcUrl,
       signupResponse,
       signer,
+      overrideOrigin,
+      skipSessionCreation,
     }: {
       username: string;
       chainId: string;
       rpcUrl: string;
       signupResponse: SignupResponse;
       signer: SignerInput;
+      /** Explicit origin for OAuth redirect paths where closure value may be stale. */
+      overrideOrigin?: string;
+      /** Skip session creation (e.g. during OAuth redirect when policies aren't loaded yet). */
+      skipSessionCreation?: boolean;
     }) => {
+      const effectiveOrigin = overrideOrigin ?? origin;
       const classHash = STABLE_CONTROLLER.hash;
       const owner = {
         signer: signupResponse.signer,
@@ -303,7 +310,7 @@ export function useCreateController({
       const address = computeAccountAddress(classHash, owner, salt);
 
       const { controller, session } = await Controller.login({
-        appId: origin,
+        appId: effectiveOrigin,
         classHash,
         rpcUrl,
         address,
@@ -325,13 +332,21 @@ export function useCreateController({
           sessionKeyGuid: session.sessionKeyGuid,
           allowedPoliciesRoot: session.allowedPoliciesRoot,
           authorization: session.authorization ?? [],
-          appId: origin,
+          appId: effectiveOrigin,
         },
       });
 
       if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
+
+        // When called from the OAuth redirect path, skip session creation and
+        // post-login navigation. The restored URL params will trigger preset
+        // config loading, which remounts the tree and lets the normal connect
+        // flow handle session creation with fully-loaded policies.
+        if (skipSessionCreation) {
+          return;
+        }
 
         // Check if this is a standalone redirect flow
         const urlSearchParams = new URLSearchParams(window.location.search);
@@ -366,7 +381,7 @@ export function useCreateController({
         if (shouldAutoCreateSession) {
           await createSession({
             controller,
-            origin,
+            origin: effectiveOrigin,
             policies,
             params,
             handleCompletion,
@@ -596,12 +611,20 @@ export function useCreateController({
       rpcUrl,
       loginResponse,
       authenticationMethod,
+      overrideOrigin,
+      skipSessionCreation,
     }: {
       controller: NonNullable<ControllerQuery["controller"]>;
       rpcUrl: string;
       loginResponse: LoginResponse;
       authenticationMethod: AuthOption;
+      /** Explicit origin for OAuth redirect paths where closure value may be stale. */
+      overrideOrigin?: string;
+      /** Skip session creation (e.g. during OAuth redirect when policies aren't loaded yet). */
+      skipSessionCreation?: boolean;
     }) => {
+      const effectiveOrigin = overrideOrigin ?? origin;
+
       // Verify correct EVM wallet account is selected
       if (authenticationMethod !== "password") {
         const normalizeAddress = (address?: string) => {
@@ -644,7 +667,7 @@ export function useCreateController({
       }
 
       const loginRet = await Controller.login({
-        appId: origin,
+        appId: effectiveOrigin,
         rpcUrl,
         username: controller.accountID,
         classHash: controller.constructorCalldata[0],
@@ -659,6 +682,14 @@ export function useCreateController({
 
       window.controller = loginRet.controller;
       setController(loginRet.controller);
+
+      // When called from the OAuth redirect path, skip session creation and
+      // post-login navigation. The restored URL params will trigger preset
+      // config loading, which remounts the tree and lets the normal connect
+      // flow handle session creation with fully-loaded policies.
+      if (skipSessionCreation) {
+        return;
+      }
 
       // Check if this is a standalone redirect flow
       const urlSearchParams = new URLSearchParams(window.location.search);
@@ -693,7 +724,7 @@ export function useCreateController({
       if (shouldAutoCreateSession) {
         await createSession({
           controller: loginRet.controller,
-          origin,
+          origin: effectiveOrigin,
           policies,
           params,
           handleCompletion,
@@ -1002,6 +1033,12 @@ export function useCreateController({
             turnkeyWallet as unknown as WalletAdapter,
           );
 
+          // Extract origin from the saved searchParams so registration uses
+          // the correct appId, rather than relying on the (possibly stale)
+          // closure value which may not have loaded yet due to preset config.
+          const savedOrigin =
+            searchParams?.get("origin") || window.location.origin;
+
           if (isSignup) {
             await finishSignup({
               username,
@@ -1023,6 +1060,8 @@ export function useCreateController({
                   eth_address: account,
                 }),
               },
+              overrideOrigin: savedOrigin,
+              skipSessionCreation: true,
             });
           } else {
             const controller = await fetchController(chainId, username);
@@ -1041,6 +1080,8 @@ export function useCreateController({
               },
               authenticationMethod: socialProvider as AuthOption,
               rpcUrl,
+              overrideOrigin: savedOrigin,
+              skipSessionCreation: true,
             });
           }
 
