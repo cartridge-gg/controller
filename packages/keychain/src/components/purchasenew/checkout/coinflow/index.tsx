@@ -25,7 +25,6 @@ export function CoinflowCheckout() {
   const cardFormRef = useRef<{ tokenize: () => Promise<{ token: string }> }>(
     null,
   );
-  const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [expMonth, setExpMonth] = useState("");
@@ -60,7 +59,6 @@ export function CoinflowCheckout() {
           cardToken: token,
           expMonth,
           expYear,
-          email,
           firstName,
           lastName,
           country,
@@ -82,7 +80,6 @@ export function CoinflowCheckout() {
     cardCheckout,
     expMonth,
     expYear,
-    email,
     firstName,
     lastName,
     country,
@@ -98,7 +95,6 @@ export function CoinflowCheckout() {
   }
 
   const isFormValid =
-    email &&
     firstName &&
     lastName &&
     expMonth &&
@@ -128,13 +124,6 @@ export function CoinflowCheckout() {
               onChange={(e) => setLastName(e.target.value)}
             />
           </div>
-
-          <Input
-            placeholder="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
 
           <CoinflowCardForm
             ref={cardFormRef}

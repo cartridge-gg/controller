@@ -248,6 +248,8 @@ export function Verification() {
   const sendPhoneMutation = useSendPhoneVerificationMutation();
   const verifyPhoneMutation = useVerifyPhoneMutation();
 
+  const emailOnly = method === "coinflow";
+
   useEffect(() => {
     if (meData?.me && accountPrivateData && step === null) {
       const accountPrivate = accountPrivateData.accountPrivate;
@@ -255,8 +257,8 @@ export function Verification() {
       if (!meData.me.email) {
         setStep("EMAIL_INPUT");
       } else if (
-        !accountPrivate?.phoneNumber ||
-        !accountPrivate?.phoneNumberVerifiedAt
+        !emailOnly &&
+        (!accountPrivate?.phoneNumber || !accountPrivate?.phoneNumberVerifiedAt)
       ) {
         setStep("PHONE_INPUT");
         setPhone(accountPrivate?.phoneNumber || "");
@@ -264,7 +266,7 @@ export function Verification() {
         setStep("SUCCESS");
       }
     }
-  }, [meData, accountPrivateData, step]);
+  }, [meData, accountPrivateData, step, emailOnly]);
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -277,15 +279,18 @@ export function Verification() {
   }, [resendCooldown]);
 
   useEffect(() => {
-    const isVerified =
-      meData?.me?.email &&
-      accountPrivateData?.accountPrivate?.phoneNumber &&
-      accountPrivateData?.accountPrivate?.phoneNumberVerifiedAt;
+    const hasEmail = !!meData?.me?.email;
+    const hasVerifiedPhone =
+      !!accountPrivateData?.accountPrivate?.phoneNumber &&
+      !!accountPrivateData?.accountPrivate?.phoneNumberVerifiedAt;
+    const isVerified = emailOnly ? hasEmail : hasEmail && hasVerifiedPhone;
 
     if (step === "SUCCESS" && method && isVerified && !isTransientSuccess) {
       const timer = setTimeout(() => {
         if (method === "apple-pay") {
           navigate("/purchase/checkout/coinbase");
+        } else if (method === "coinflow") {
+          navigate("/purchase/checkout/coinflow");
         } else {
           navigate(
             `/purchase/checkout/onchain${method ? `?method=${method}` : ""}`,
@@ -294,7 +299,15 @@ export function Verification() {
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [step, method, navigate, meData, accountPrivateData, isTransientSuccess]);
+  }, [
+    step,
+    method,
+    navigate,
+    meData,
+    accountPrivateData,
+    isTransientSuccess,
+    emailOnly,
+  ]);
 
   const handleSendEmail = async () => {
     setError(null);
@@ -335,8 +348,9 @@ export function Verification() {
           ]);
 
           if (
-            !updatedAccountPrivate?.accountPrivate?.phoneNumber ||
-            !updatedAccountPrivate?.accountPrivate?.phoneNumberVerifiedAt
+            !emailOnly &&
+            (!updatedAccountPrivate?.accountPrivate?.phoneNumber ||
+              !updatedAccountPrivate?.accountPrivate?.phoneNumberVerifiedAt)
           ) {
             setStep("PHONE_INPUT");
             setPhone(updatedAccountPrivate?.accountPrivate?.phoneNumber || "");

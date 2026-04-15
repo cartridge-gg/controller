@@ -267,6 +267,12 @@ export function OnchainCheckout() {
 
     try {
       if (isCoinflowSelected) {
+        const { data: meData } = await refetchMe();
+        if (!meData?.me?.email) {
+          navigate("/purchase/verification?method=coinflow");
+          return;
+        }
+
         await onCreditCardPurchase();
         navigate("/purchase/checkout/coinflow");
       } else if (isApplePaySelected) {
