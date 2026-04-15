@@ -8,7 +8,9 @@ import {
 } from "react";
 import { useConnection } from "@/hooks/connection";
 import {
-  ERC20 as ERC20Contract,
+  ERC20Contract,
+  ETH_CONTRACT_ADDRESS,
+  STRK_CONTRACT_ADDRESS,
   USDC_CONTRACT_ADDRESS,
 } from "@cartridge/controller-ui/utils";
 import { Price } from "@cartridge/controller-ui/utils/api/cartridge";
@@ -23,16 +25,14 @@ import {
 
 export const DEFAULT_TOKENS = [
   {
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+    address: ETH_CONTRACT_ADDRESS,
     name: "Ether",
     symbol: "ETH",
     decimals: 18,
     icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
   },
   {
-    address:
-      "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
+    address: STRK_CONTRACT_ADDRESS,
     name: "Starknet Token",
     symbol: "STRK",
     decimals: 18,
@@ -40,8 +40,7 @@ export const DEFAULT_TOKENS = [
   },
 ];
 
-export const DEFAULT_FEE_TOKEN =
-  "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
+export const DEFAULT_FEE_TOKEN = STRK_CONTRACT_ADDRESS;
 
 export type ERC20Metadata = {
   address: string;
