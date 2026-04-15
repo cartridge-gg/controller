@@ -993,9 +993,6 @@ export function useCreateController({
           ) {
             return;
           }
-          if (searchParams) {
-            setSearchParams(searchParams);
-          }
 
           if (!window.keychain_wallets) {
             throw new Error("Keychain wallets isn't present");
@@ -1045,6 +1042,15 @@ export function useCreateController({
               authenticationMethod: socialProvider as AuthOption,
               rpcUrl,
             });
+          }
+
+          // Restore the original URL params (including preset) AFTER
+          // signup/login completes. Restoring earlier triggers preset config
+          // loading (isConfigLoading=true), which unmounts the entire
+          // component tree via the provider's loading guard, orphaning
+          // the in-flight signup/login async operation.
+          if (searchParams) {
+            setSearchParams(searchParams);
           }
         } catch (e) {
           setError(e as Error);
