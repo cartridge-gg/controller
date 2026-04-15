@@ -36,7 +36,6 @@
     }
   },
   "dependencies": {
-    "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
     "micro-sol-signer": "^0.5.0",
     "bs58": "^6.0.0",
