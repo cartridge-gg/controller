@@ -12,6 +12,7 @@ import {
   Input,
   LayoutContent,
   LayoutFooter,
+  Skeleton,
   Spinner,
 } from "@cartridge/ui";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
@@ -36,6 +37,7 @@ export function CoinflowCheckout() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormReady, setIsFormReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const { mutateAsync: cardCheckout } = useCoinflowCardCheckoutMutation();
@@ -98,6 +100,7 @@ export function CoinflowCheckout() {
   }
 
   const isFormValid =
+    isFormReady &&
     email &&
     firstName &&
     lastName &&
@@ -115,7 +118,38 @@ export function CoinflowCheckout() {
         icon={<CreditCardIcon variant="solid" size="lg" />}
       />
       <LayoutContent>
-        <div className="flex flex-col gap-3">
+        {/* Keep skeletons in the tree while Coinflow's iframe boots so the
+            layout is stable and the user has immediate feedback. The
+            CoinflowCardForm is always mounted (just visually hidden) so its
+            onLoad can fire. */}
+        {!isFormReady && (
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-3">
+              <Skeleton className="h-10 flex-1 rounded" />
+              <Skeleton className="h-10 flex-1 rounded" />
+            </div>
+            <Skeleton className="h-10 w-full rounded" />
+            <Skeleton className="h-10 w-full rounded" />
+            <div className="flex gap-3">
+              <Skeleton className="h-10 flex-1 rounded" />
+              <Skeleton className="h-10 flex-1 rounded" />
+            </div>
+            <Skeleton className="h-10 w-full rounded" />
+            <div className="flex gap-3">
+              <Skeleton className="h-10 flex-1 rounded" />
+              <Skeleton className="h-10 flex-1 rounded" />
+            </div>
+            <div className="flex gap-3">
+              <Skeleton className="h-10 flex-1 rounded" />
+              <Skeleton className="h-10 flex-1 rounded" />
+            </div>
+          </div>
+        )}
+
+        <div
+          className={`flex flex-col gap-3 ${isFormReady ? "" : "hidden"}`}
+          aria-hidden={!isFormReady}
+        >
           <div className="flex gap-3">
             <Input
               placeholder="First name"
@@ -140,6 +174,7 @@ export function CoinflowCheckout() {
             ref={cardFormRef}
             merchantId={coinflowIntent.merchantId}
             env={coinflowEnv}
+            onLoad={() => setIsFormReady(true)}
           />
 
           <div className="flex gap-3">
