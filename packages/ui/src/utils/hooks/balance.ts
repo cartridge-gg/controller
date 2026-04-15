@@ -1,6 +1,6 @@
 import { getChecksumAddress, Provider } from "starknet";
 import useSWR from "swr";
-import { ERC20, ERC20Metadata } from "../erc20";
+import { ERC20Contract, ERC20Metadata } from "../erc20";
 import { CreditQuery, useCreditQuery } from "../api/cartridge";
 import { erc20Metadata } from "@cartridge/presets";
 
@@ -95,7 +95,7 @@ export function useERC20Balance({
         : [contractAddress];
       const erc20List = await Promise.allSettled(
         contractList.map((address) =>
-          new ERC20({
+          new ERC20Contract({
             address,
             provider,
             logoUrl: erc20Metadata.find(

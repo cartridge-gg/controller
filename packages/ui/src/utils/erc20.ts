@@ -14,7 +14,7 @@ export type ERC20Metadata = {
   symbol: string;
   decimals: number;
   address: string;
-  instance: ERC20;
+  instance: ERC20Contract;
 };
 
 export const ETH_CONTRACT_ADDRESS = getChecksumAddress(
@@ -39,7 +39,7 @@ export const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
 );
 
-export class ERC20 {
+export class ERC20Contract {
   private address: string;
   private logoUrl?: string;
   private provider: Provider;
