@@ -93,7 +93,8 @@ export function OnchainCheckout() {
     getIpLocation().then((geo) => setCountryCode(geo.countryCode));
   }, []);
 
-  // Triple-click on the header icon selects the Coinflow credit-card flow.
+  // Triple-click on the header icon unlocks the hidden fiat payment options
+  // (Coinflow credit card + Apple Pay) and selects Coinflow.
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const handleIconTripleClick = useCallback(() => {
@@ -102,6 +103,7 @@ export function OnchainCheckout() {
     if (clickCountRef.current === 3) {
       clickCountRef.current = 0;
       enableFeature("coinflow-support");
+      enableFeature("apple-pay-support");
       onCoinflowSelect();
     } else {
       clickTimerRef.current = setTimeout(() => {
