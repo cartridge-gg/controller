@@ -16,7 +16,11 @@ import {
   TimesIcon,
 } from "@cartridge/ui";
 import type { SubmitCoinbaseLimitsUpgradeInput } from "@/utils/api";
-import { LIMIT_TYPE_WEEKLY_SPENDING } from "@/hooks/starterpack/coinbase";
+import {
+  LIMIT_TYPE_LIFETIME_TRANSACTIONS,
+  LIMIT_TYPE_WEEKLY_SPENDING,
+  UNLIMITED_SENTINEL,
+} from "@/hooks/starterpack/coinbase";
 import type { CoinbaseLimitsResult } from "@/hooks/starterpack";
 
 const MONTH_OPTIONS = [
@@ -86,7 +90,6 @@ export interface VerifyFormPanelProps {
   isResubmit: boolean;
   isSubmitting: boolean;
   onSubmit: (input: SubmitCoinbaseLimitsUpgradeInput) => void;
-  onBack: () => void;
 }
 
 export function VerifyFormPanel({
@@ -94,7 +97,6 @@ export function VerifyFormPanel({
   isResubmit,
   isSubmitting,
   onSubmit,
-  onBack,
 }: VerifyFormPanelProps) {
   const [ssn, setSsn] = useState("");
   const [month, setMonth] = useState("");
@@ -108,6 +110,28 @@ export function VerifyFormPanel({
       )?.maxUpgrade,
     [limits.maxUpgrades],
   );
+
+  /** Human-readable reason the user landed on this form. */
+  const reason = useMemo(() => {
+    const weekly = limits.limits.find(
+      (l) => l.limitType === LIMIT_TYPE_WEEKLY_SPENDING,
+    );
+    const lifetime = limits.limits.find(
+      (l) => l.limitType === LIMIT_TYPE_LIFETIME_TRANSACTIONS,
+    );
+    const lifetimeDepleted =
+      lifetime &&
+      lifetime.remaining !== UNLIMITED_SENTINEL &&
+      Number(lifetime.remaining) <= 0;
+    if (lifetimeDepleted) {
+      const cap = lifetime?.limit ?? "15";
+      return `You've reached Coinbase's ${cap}-transaction lifetime cap.`;
+    }
+    const weeklyCap = weekly?.limit;
+    return weeklyCap
+      ? `This purchase exceeds your $${weeklyCap} weekly Coinbase limit.`
+      : "You've reached your Coinbase purchase limit.";
+  }, [limits.limits]);
 
   const ssnValid = /^\d{4}$/.test(ssn);
   const dobValid = isValidCalendarDate(year, month, day);
@@ -129,17 +153,20 @@ export function VerifyFormPanel({
         icon={<CoinbaseWalletColorIcon size="lg" />}
       />
       <LayoutContent className="p-4 flex flex-col gap-4">
-        <div className="bg-[#181C19] border border-background-200 p-4 rounded-[4px] text-xs text-foreground-300">
+        <div className="bg-[#181C19] border border-background-200 p-4 rounded-[4px] text-xs text-foreground-300 flex flex-col gap-2">
           {isResubmit ? (
-            <span className="text-destructive-100">
+            <p className="text-destructive-100">
               We couldn&apos;t verify your details. Please double-check and try
               again.
-            </span>
+            </p>
           ) : (
             <>
-              Verify your identity to raise your weekly limit
-              {weeklyUpgrade ? ` to $${weeklyUpgrade}` : ""} and unlock
-              unlimited transactions. Takes about 2 minutes.
+              <p>{reason}</p>
+              <p>
+                Verify your identity to raise your weekly limit
+                {weeklyUpgrade ? ` to $${weeklyUpgrade}` : ""} and unlock
+                unlimited transactions.
+              </p>
             </>
           )}
         </div>
@@ -208,24 +235,14 @@ export function VerifyFormPanel({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        <div className="flex gap-2 w-full">
-          <Button
-            variant="secondary"
-            className="flex-1"
-            onClick={onBack}
-            disabled={isSubmitting}
-          >
-            BACK
-          </Button>
-          <Button
-            className="flex-1"
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            isLoading={isSubmitting}
-          >
-            SUBMIT
-          </Button>
-        </div>
+        <Button
+          className="w-full"
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          isLoading={isSubmitting}
+        >
+          SUBMIT
+        </Button>
       </LayoutFooter>
     </>
   );
