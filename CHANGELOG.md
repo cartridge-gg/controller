@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.13.12] - 2026-04-16
+
+### ✨ New Features
+- **@cartridge/keychain**: Added transaction simulation with balance change calculations for ERC-20, ERC-721, and ERC-1155 tokens, displaying balance differences, allowances, and approval statuses in transaction summaries (#2547)
+- **@cartridge/keychain**: Added Coinflow payment integration for starterpack credit card payments, replacing Stripe with email verification flow and direct USDC settlement (#2544)
+- **@cartridge/controller**: Added preset support to node SessionProvider with automatic policy resolution from `@cartridge/presets`, enabling `preset: "my-game"` configuration (#2459)
+- **@cartridge/keychain**: Added delete account option to settings, enabling users to permanently remove their accounts with username confirmation (#2534)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Enhanced Coinflow checkout flow to use verified account email instead of manual input, requiring email verification before card payment (#2550)
+- **@cartridge/keychain**: Enhanced Stripe payment form with verified name fields pre-populated from identity verification, ensuring billing details match verification data (#2541)
+- **@cartridge/keychain**: Disabled Stripe payments for starterpacks in preparation for Coinflow migration (#2543)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed OAuth signup/login failures in preset environments by deferring URL parameter restoration until after authentication completes, preventing component unmounting during signup (#2551)
+- **@cartridge/keychain**: Fixed login screen header to always show close button instead of non-functional back button when navigation history exists (#2546)
+- **@cartridge/keychain**: Fixed BroadcastChannel communication with Coinbase popup by replacing with postMessage for Safari iframe compatibility (#2533)
+- **@cartridge/keychain**: Removed noisy Focus/Change Username PostHog events that generated excessive analytics noise during account creation (#2545)
+
+### 📦 Dependencies
+- **@coinflowlabs/react**: Added Coinflow SDK for credit card payment processing integration (#2544)
+
 ## [0.13.11] - 2026-04-03
 
 ### ✨ New Features
