@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   HeaderInner,
   LayoutContent,
@@ -12,7 +12,33 @@ import {
 } from "@cartridge/ui";
 import { useOnchainPurchaseContext } from "@/context";
 import { useNavigation } from "@/context";
-import { CoinbaseOnrampStatus } from "@/utils/api";
+import {
+  CoinbaseLimitUpgradeStatus,
+  CoinbaseOnrampStatus,
+  type SubmitCoinbaseLimitsUpgradeInput,
+} from "@/utils/api";
+import { exceedsLimit } from "@/hooks/starterpack/coinbase";
+import {
+  VerifyActivePanel,
+  VerifyFormPanel,
+  VerifyInactivePanel,
+  VerifyPendingPanel,
+  VerifyTimeoutPanel,
+} from "./limits-verify-panels";
+
+/** How often to refresh limits while waiting for a terminal status. */
+const VERIFY_POLL_INTERVAL_MS = 5_000;
+/** Max time to sit in the pending state before falling back to a timeout message. */
+const VERIFY_TIMEOUT_MS = 3 * 60 * 1_000;
+
+type PanelMode =
+  | "policies"
+  | "status"
+  | "verify-form"
+  | "verify-pending"
+  | "verify-timeout"
+  | "verify-active"
+  | "verify-inactive";
 
 export function CoinbaseCheckout() {
   const {
@@ -23,29 +49,130 @@ export function CoinbaseCheckout() {
     paymentSuccess,
     onCreateCoinbaseOrder,
     openPaymentPopup,
+    coinbaseQuote,
+    coinbaseLimits,
+    isFetchingCoinbaseLimits,
+    isSubmittingLimitsUpgrade,
+    fetchCoinbaseLimits,
+    submitCoinbaseLimitsUpgrade,
   } = useOnchainPurchaseContext();
   const { navigate } = useNavigation();
-  const [showPolicies, setShowPolicies] = useState(true);
-  const [isOpeningPopup, setIsOpeningPopup] = useState(false);
 
-  // Create the order if we don't have a payment link yet
+  const [mode, setMode] = useState<PanelMode>("policies");
+  const [isOpeningPopup, setIsOpeningPopup] = useState(false);
+  /** True once the user has explicitly submitted the verify form in this
+   * session. Kept separate from server `upgradeStatus === PENDING` so that we
+   * only surface the timeout copy after the user actually did something. */
+  const [submittedThisSession, setSubmittedThisSession] = useState(false);
+
+  // Fetch limits once on mount.
   useEffect(() => {
-    if (!paymentLink) {
+    fetchCoinbaseLimits();
+  }, [fetchCoinbaseLimits]);
+
+  const paymentTotalUsd = useMemo(() => {
+    const raw = coinbaseQuote?.paymentTotal?.amount;
+    if (!raw) return 0;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : 0;
+  }, [coinbaseQuote]);
+
+  const limitExceeded = useMemo(
+    () => exceedsLimit(paymentTotalUsd, coinbaseLimits),
+    [paymentTotalUsd, coinbaseLimits],
+  );
+
+  const upgradeStatus = coinbaseLimits?.upgradeStatus;
+  const hasLimitsLoaded = coinbaseLimits !== undefined;
+
+  // Decide which panel to show based on server-provided status. Local user
+  // actions (submit, close, continue) may override this via setMode below.
+  useEffect(() => {
+    if (!hasLimitsLoaded) return;
+
+    // If the user doesn't exceed the limit, stay on the purchase flow.
+    if (!limitExceeded) {
+      setMode((prev) =>
+        prev === "policies" || prev === "status" ? prev : "policies",
+      );
+      return;
+    }
+
+    switch (upgradeStatus) {
+      case CoinbaseLimitUpgradeStatus.Unrequested:
+      case CoinbaseLimitUpgradeStatus.Resubmit:
+        setMode((prev) =>
+          prev === "verify-pending" || prev === "verify-timeout"
+            ? prev
+            : "verify-form",
+        );
+        break;
+      case CoinbaseLimitUpgradeStatus.Pending:
+        setMode((prev) =>
+          prev === "verify-timeout" ? prev : "verify-pending",
+        );
+        break;
+      case CoinbaseLimitUpgradeStatus.Active:
+        setMode("verify-active");
+        break;
+      case CoinbaseLimitUpgradeStatus.Inactive:
+      case CoinbaseLimitUpgradeStatus.Ineligible:
+        setMode("verify-inactive");
+        break;
+    }
+  }, [hasLimitsLoaded, limitExceeded, upgradeStatus]);
+
+  // Eagerly create an order once we know the user isn't blocked by limits.
+  useEffect(() => {
+    if (!paymentLink && hasLimitsLoaded && !limitExceeded) {
       onCreateCoinbaseOrder();
     }
-  }, [paymentLink, onCreateCoinbaseOrder]);
+  }, [paymentLink, hasLimitsLoaded, limitExceeded, onCreateCoinbaseOrder]);
 
-  // Navigate to pending when payment success is signaled or order is completed
+  // Navigate to pending when payment success is signaled or order is completed.
   useEffect(() => {
     if (paymentSuccess || orderStatus === CoinbaseOnrampStatus.Completed) {
       navigate("/purchase/pending", { reset: true });
     }
   }, [paymentSuccess, orderStatus, navigate]);
 
+  // Poll limits while waiting for a terminal verify status.
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (mode !== "verify-pending") {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      return;
+    }
+
+    const interval = setInterval(() => {
+      fetchCoinbaseLimits();
+    }, VERIFY_POLL_INTERVAL_MS);
+
+    if (!timeoutRef.current) {
+      timeoutRef.current = setTimeout(() => {
+        setMode("verify-timeout");
+      }, VERIFY_TIMEOUT_MS);
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [mode, fetchCoinbaseLimits]);
+
+  // Reset the per-session "submitted" flag once we've fully resolved.
+  useEffect(() => {
+    if (mode === "policies" || mode === "status") {
+      setSubmittedThisSession(false);
+    }
+  }, [mode]);
+
   const handleContinue = useCallback(async () => {
     if (isOpeningPopup) return;
 
-    setShowPolicies(false);
+    setMode("status");
     setIsOpeningPopup(true);
     try {
       const order = await onCreateCoinbaseOrder({ force: true });
@@ -59,18 +186,56 @@ export function CoinbaseCheckout() {
         });
       }
     } catch {
-      setShowPolicies(true);
+      setMode("policies");
     } finally {
       setIsOpeningPopup(false);
     }
   }, [isOpeningPopup, onCreateCoinbaseOrder, paymentLink, openPaymentPopup]);
 
+  const handleVerifySubmit = useCallback(
+    async (input: SubmitCoinbaseLimitsUpgradeInput) => {
+      const next = await submitCoinbaseLimitsUpgrade(input);
+      if (!next) return;
+      setSubmittedThisSession(true);
+      // Don't rely solely on the next server status — if Coinbase returns
+      // pending/unrequested/resubmit, flip to the waiting panel so the poller
+      // takes over. ACTIVE/INACTIVE are handled by the status-driven effect.
+      setMode("verify-pending");
+    },
+    [submitCoinbaseLimitsUpgrade],
+  );
+
+  const handleBackToMethod = useCallback(() => {
+    navigate("/purchase/checkout/method");
+  }, [navigate]);
+
+  const handleContinueAfterActive = useCallback(() => {
+    // Refresh limits so exceedsLimit recomputes with upgraded remaining, then
+    // the mode effect will flip us back to policies.
+    fetchCoinbaseLimits();
+    setMode("policies");
+  }, [fetchCoinbaseLimits]);
+
   const isFailed = orderStatus === CoinbaseOnrampStatus.Failed;
+
+  const waitingForLimits = !hasLimitsLoaded && isFetchingCoinbaseLimits;
 
   return (
     <>
+      {/* Limits check in flight: brief spinner before we know what to show. */}
+      <div
+        className={cn(
+          "flex flex-col h-full items-center justify-center gap-4",
+          !waitingForLimits && "hidden",
+        )}
+      >
+        <SpinnerIcon className="animate-spin" size="lg" />
+      </div>
+
       {/* Policies Screen */}
-      <div className={cn("flex flex-col h-full", !showPolicies && "hidden")}>
+      <div
+        className={cn("flex flex-col h-full", mode !== "policies" && "hidden")}
+      >
         <HeaderInner
           title="Coinbase"
           description="Policies"
@@ -112,7 +277,7 @@ export function CoinbaseCheckout() {
       <div
         className={cn(
           "flex flex-col h-full",
-          showPolicies && "invisible absolute inset-0 -z-10",
+          mode !== "status" && "invisible absolute inset-0 -z-10",
         )}
       >
         <HeaderInner
@@ -171,6 +336,53 @@ export function CoinbaseCheckout() {
           </LayoutFooter>
         )}
       </div>
+
+      {/* Verify Form */}
+      {mode === "verify-form" && coinbaseLimits && (
+        <div className="flex flex-col h-full">
+          <VerifyFormPanel
+            limits={coinbaseLimits}
+            isResubmit={
+              upgradeStatus === CoinbaseLimitUpgradeStatus.Resubmit ||
+              submittedThisSession
+            }
+            isSubmitting={isSubmittingLimitsUpgrade}
+            onSubmit={handleVerifySubmit}
+            onBack={handleBackToMethod}
+          />
+        </div>
+      )}
+
+      {/* Verify Pending */}
+      {mode === "verify-pending" && (
+        <div className="flex flex-col h-full">
+          <VerifyPendingPanel />
+        </div>
+      )}
+
+      {/* Verify Timeout */}
+      {mode === "verify-timeout" && (
+        <div className="flex flex-col h-full">
+          <VerifyTimeoutPanel onClose={handleBackToMethod} />
+        </div>
+      )}
+
+      {/* Verify Active */}
+      {mode === "verify-active" && coinbaseLimits && (
+        <div className="flex flex-col h-full">
+          <VerifyActivePanel
+            limits={coinbaseLimits}
+            onContinue={handleContinueAfterActive}
+          />
+        </div>
+      )}
+
+      {/* Verify Inactive */}
+      {mode === "verify-inactive" && (
+        <div className="flex flex-col h-full">
+          <VerifyInactivePanel onClose={handleBackToMethod} />
+        </div>
+      )}
     </>
   );
 }

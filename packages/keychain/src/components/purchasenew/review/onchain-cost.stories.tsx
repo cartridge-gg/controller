@@ -73,6 +73,11 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     paymentSuccess: false,
     coinbaseLsSwapId: undefined,
     getTransactions: async () => [],
+    coinbaseLimits: undefined,
+    isFetchingCoinbaseLimits: false,
+    isSubmittingLimitsUpgrade: false,
+    fetchCoinbaseLimits: async () => undefined,
+    submitCoinbaseLimitsUpgrade: async () => undefined,
   };
 
   return (

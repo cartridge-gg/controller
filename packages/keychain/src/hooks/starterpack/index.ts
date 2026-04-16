@@ -39,7 +39,7 @@ export type {
   UseTokenFallbackReturn,
 } from "./token-fallback";
 
-export { useCoinbase } from "./coinbase";
+export { useCoinbase, exceedsLimit } from "./coinbase";
 export type {
   CreateOrderInput,
   UseCoinbaseOptions,
@@ -48,6 +48,7 @@ export type {
   CoinbaseTransactionResult,
   CoinbaseQuoteResult,
   CoinbaseOrderStatusResult,
+  CoinbaseLimitsResult,
 } from "./coinbase";
 
 export { useStarterpackPlayHandler } from "./play";

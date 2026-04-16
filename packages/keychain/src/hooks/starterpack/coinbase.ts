@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import {
+  CoinbaseOnrampLimitsDocument,
+  CoinbaseOnrampLimitsQuery,
   CoinbaseOnrampTransactionsDocument,
   CoinbaseOnrampTransactionsQuery,
   CreateCoinbaseLayerswapOrderDocument,
@@ -9,6 +11,9 @@ import {
   CoinbaseOnRampOrderDocument,
   CoinbaseOnRampOrderQuery,
   CoinbaseOnrampStatus,
+  SubmitCoinbaseLimitsUpgradeDocument,
+  SubmitCoinbaseLimitsUpgradeInput,
+  SubmitCoinbaseLimitsUpgradeMutation,
 } from "@/utils/api";
 import { request } from "@/utils/graphql";
 import { useConnection } from "../connection";
@@ -22,6 +27,15 @@ export type CoinbaseQuoteResult =
   CoinbaseOnRampQuoteQuery["coinbaseOnrampQuote"];
 export type CoinbaseOrderStatusResult =
   CoinbaseOnRampOrderQuery["coinbaseOnrampOrder"];
+export type CoinbaseLimitsResult =
+  CoinbaseOnrampLimitsQuery["coinbaseOnrampLimits"];
+
+/** Known limit types returned by Coinbase. */
+export const LIMIT_TYPE_WEEKLY_SPENDING = "weekly_spending";
+export const LIMIT_TYPE_LIFETIME_TRANSACTIONS = "lifetime_transactions";
+
+/** Sentinel for unlimited limit / remaining values. */
+export const UNLIMITED_SENTINEL = "-1";
 
 export interface CreateOrderInput {
   purchaseUSDCAmount: string;
@@ -56,11 +70,21 @@ export interface UseCoinbaseReturn {
   popupClosed: boolean;
   paymentSuccess: boolean;
 
+  // Limits-upgrade state
+  limits: CoinbaseLimitsResult | undefined;
+  isFetchingLimits: boolean;
+  limitsError: Error | null;
+  isSubmittingLimitsUpgrade: boolean;
+
   // Actions
   createOrder: (input: CreateOrderInput) => Promise<CoinbaseOrderResult>;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
   getQuote: (input: CoinbaseQuoteInput) => Promise<CoinbaseQuoteResult>;
   openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
+  fetchLimits: () => Promise<CoinbaseLimitsResult | undefined>;
+  submitLimitsUpgrade: (
+    input: SubmitCoinbaseLimitsUpgradeInput,
+  ) => Promise<CoinbaseLimitsResult | undefined>;
 }
 
 const createCoinbaseOrder = async (
@@ -118,6 +142,57 @@ const getCoinbaseOrderStatus = async (
   return result.coinbaseOnrampOrder;
 };
 
+const getCoinbaseLimits = async (): Promise<CoinbaseLimitsResult> => {
+  const result = await request<CoinbaseOnrampLimitsQuery>(
+    CoinbaseOnrampLimitsDocument,
+    {},
+  );
+  return result.coinbaseOnrampLimits;
+};
+
+const submitCoinbaseLimitsUpgradeRequest = async (
+  input: SubmitCoinbaseLimitsUpgradeInput,
+): Promise<CoinbaseLimitsResult> => {
+  const result = await request<SubmitCoinbaseLimitsUpgradeMutation>(
+    SubmitCoinbaseLimitsUpgradeDocument,
+    { input },
+  );
+  return result.submitCoinbaseLimitsUpgrade;
+};
+
+/**
+ * Pure helper: does the requested Coinbase payment total (USD) exceed the
+ * user's weekly or lifetime remaining? Undefined limits are treated as
+ * non-exceeding — callers should gate on `limits !== undefined` before relying
+ * on a `false` result.
+ */
+export function exceedsLimit(
+  paymentTotalUsd: number,
+  limits: CoinbaseLimitsResult | undefined,
+): boolean {
+  if (!limits) return false;
+  const weekly = limits.limits.find(
+    (l) => l.limitType === LIMIT_TYPE_WEEKLY_SPENDING,
+  );
+  const lifetime = limits.limits.find(
+    (l) => l.limitType === LIMIT_TYPE_LIFETIME_TRANSACTIONS,
+  );
+
+  if (weekly && weekly.remaining !== UNLIMITED_SENTINEL) {
+    const remaining = Number(weekly.remaining);
+    if (Number.isFinite(remaining) && paymentTotalUsd > remaining) {
+      return true;
+    }
+  }
+  if (lifetime && lifetime.remaining !== UNLIMITED_SENTINEL) {
+    const remaining = Number(lifetime.remaining);
+    if (Number.isFinite(remaining) && remaining <= 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Hook for managing Coinbase onramp functionality.
  *
@@ -144,6 +219,11 @@ export function useCoinbase({
   const [orderTxHash, setOrderTxHash] = useState<string | undefined>();
   const [popupClosed, setPopupClosed] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [limits, setLimits] = useState<CoinbaseLimitsResult | undefined>();
+  const [isFetchingLimits, setIsFetchingLimits] = useState(false);
+  const [limitsError, setLimitsError] = useState<Error | null>(null);
+  const [isSubmittingLimitsUpgrade, setIsSubmittingLimitsUpgrade] =
+    useState(false);
 
   // Refs for managing the popup and message lifecycle
   const popupRef = useRef<Window | null>(null);
@@ -488,6 +568,43 @@ export function useCoinbase({
     [onError],
   );
 
+  const fetchLimits = useCallback(async () => {
+    try {
+      setIsFetchingLimits(true);
+      setLimitsError(null);
+      const next = await getCoinbaseLimits();
+      setLimits(next);
+      return next;
+    } catch (err) {
+      const error = err as Error;
+      setLimitsError(error);
+      onError?.(error);
+      return undefined;
+    } finally {
+      setIsFetchingLimits(false);
+    }
+  }, [onError]);
+
+  const submitLimitsUpgrade = useCallback(
+    async (input: SubmitCoinbaseLimitsUpgradeInput) => {
+      try {
+        setIsSubmittingLimitsUpgrade(true);
+        setLimitsError(null);
+        const next = await submitCoinbaseLimitsUpgradeRequest(input);
+        setLimits(next);
+        return next;
+      } catch (err) {
+        const error = err as Error;
+        setLimitsError(error);
+        onError?.(error);
+        return undefined;
+      } finally {
+        setIsSubmittingLimitsUpgrade(false);
+      }
+    },
+    [onError],
+  );
+
   return {
     orderId,
     paymentLink,
@@ -499,9 +616,15 @@ export function useCoinbase({
     orderTxHash,
     popupClosed,
     paymentSuccess,
+    limits,
+    isFetchingLimits,
+    limitsError,
+    isSubmittingLimitsUpgrade,
     createOrder,
     getTransactions,
     getQuote,
     openPaymentPopup,
+    fetchLimits,
+    submitLimitsUpgrade,
   };
 }

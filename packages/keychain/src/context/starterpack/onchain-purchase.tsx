@@ -21,7 +21,10 @@ import {
 import { Item } from "./types";
 import { useStarterpackContext } from "./starterpack";
 import { ExternalWalletError } from "@/utils/errors";
-import { CoinbaseOnrampStatus } from "@/utils/api";
+import {
+  CoinbaseOnrampStatus,
+  type SubmitCoinbaseLimitsUpgradeInput,
+} from "@/utils/api";
 import {
   useQuantity,
   useExternalWallet,
@@ -32,6 +35,7 @@ import {
   type CoinbaseOrderResult,
   type CoinbaseTransactionResult,
   type CoinbaseQuoteResult,
+  type CoinbaseLimitsResult,
 } from "@/hooks/starterpack";
 import { useSocialClaimConnection } from "@/hooks/starterpack/social";
 import { Explorer } from "@/hooks/starterpack/layerswap";
@@ -98,6 +102,11 @@ export interface OnchainPurchaseContextType {
   paymentSuccess: boolean;
   coinbaseLsSwapId: string | undefined;
 
+  // Coinbase limits-upgrade state
+  coinbaseLimits: CoinbaseLimitsResult | undefined;
+  isFetchingCoinbaseLimits: boolean;
+  isSubmittingLimitsUpgrade: boolean;
+
   // Actions
   onOnchainPurchase: () => Promise<void>;
   onExternalConnect: (
@@ -114,6 +123,10 @@ export interface OnchainPurchaseContextType {
   }) => Promise<CoinbaseOrderResult | undefined>;
   openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
+  fetchCoinbaseLimits: () => Promise<CoinbaseLimitsResult | undefined>;
+  submitCoinbaseLimitsUpgrade: (
+    input: SubmitCoinbaseLimitsUpgradeInput,
+  ) => Promise<CoinbaseLimitsResult | undefined>;
 }
 
 export const OnchainPurchaseContext = createContext<
@@ -279,6 +292,11 @@ export const OnchainPurchaseProvider = ({
     popupClosed,
     paymentSuccess,
     openPaymentPopup,
+    limits: coinbaseLimits,
+    isFetchingLimits: isFetchingCoinbaseLimits,
+    isSubmittingLimitsUpgrade,
+    fetchLimits: fetchCoinbaseLimits,
+    submitLimitsUpgrade: submitCoinbaseLimitsUpgrade,
   } = useCoinbase({
     onError: setDisplayError,
   });
@@ -688,6 +706,11 @@ export const OnchainPurchaseProvider = ({
     onCreateCoinbaseOrder,
     openPaymentPopup,
     getTransactions,
+    coinbaseLimits,
+    isFetchingCoinbaseLimits,
+    isSubmittingLimitsUpgrade,
+    fetchCoinbaseLimits,
+    submitCoinbaseLimitsUpgrade,
   };
 
   return (
