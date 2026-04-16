@@ -225,6 +225,35 @@ query CoinbaseOnRampQuote($input: CoinbaseOnrampQuoteInput!) {
   }
 }
 
+query CoinbaseOnrampLimits {
+  coinbaseOnrampLimits {
+    ...CoinbaseOnrampLimitsFields
+  }
+}
+
+mutation SubmitCoinbaseLimitsUpgrade(
+  $input: SubmitCoinbaseLimitsUpgradeInput!
+) {
+  submitCoinbaseLimitsUpgrade(input: $input) {
+    ...CoinbaseOnrampLimitsFields
+  }
+}
+
+fragment CoinbaseOnrampLimitsFields on CoinbaseOnrampLimits {
+  upgradeStatus
+  requiredFields
+  limits {
+    limitType
+    limit
+    remaining
+    currency
+  }
+  maxUpgrades {
+    limitType
+    maxUpgrade
+  }
+}
+
 fragment CryptoPaymentFields on CryptoPayment {
   id
   tokenAmount

@@ -302,30 +302,16 @@ export function WalletSelectionDrawer({
                 />
               )}
               {showFiatOptions && isApplePayEnabled && (
-                <div
+                <PurchaseCard
                   key="apple-pay"
+                  text="Apple Pay"
+                  icon={<AppleIcon />}
                   onClick={handleApplePaySelect}
                   className={cn(
-                    "group flex flex-row gap-2 bg-background-200 hover:bg-background-300 rounded-lg p-3 justify-between cursor-pointer",
                     "rounded-lg",
                     isApplePayLoading && "opacity-50 pointer-events-none",
                   )}
-                >
-                  <div className="flex items-center gap-2">
-                    <Thumbnail
-                      icon={<AppleIcon />}
-                      size="md"
-                      className="bg-background-300 group-hover:bg-background-400"
-                      rounded
-                    />
-                    <span>Apple Pay</span>
-                  </div>
-                  {isApplePayLoading && (
-                    <div className="flex items-center">
-                      <SpinnerIcon className="animate-spin" size="sm" />
-                    </div>
-                  )}
-                </div>
+                />
               )}
               {selectedNetworks.length > 0 ? (
                 selectedNetworks.map((network) => (
