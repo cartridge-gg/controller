@@ -44,7 +44,16 @@ export function ControllerToaster({
   const { toast } = useToast();
 
   useEffect(() => {
-    const eventHandler = (event: any) => {
+    const eventHandler = (event: MessageEvent) => {
+      if (
+        !event.data ||
+        typeof event.data !== "object" ||
+        !("type" in event.data) ||
+        !("options" in event.data)
+      ) {
+        return;
+      }
+
       const variant =
         event.data.type === CONTROLLER_TOAST_MESSAGE_TYPE
           ? event.data.options.variant
