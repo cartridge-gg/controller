@@ -171,6 +171,9 @@ export function CoinbaseCheckout() {
 
   const handleContinue = useCallback(async () => {
     if (isOpeningPopup) return;
+    // Refuse to submit until we've resolved limits — the mode-setting effect
+    // will flip us into verify-* if the user is actually blocked.
+    if (!hasLimitsLoaded || limitExceeded) return;
 
     setMode("status");
     setIsOpeningPopup(true);
@@ -185,12 +188,30 @@ export function CoinbaseCheckout() {
           orderId: nextOrderId,
         });
       }
-    } catch {
+    } catch (err) {
+      // Coinbase can still reject after we pass our local check — for example,
+      // if /limits came back stale. Re-fetch limits so the mode-setting effect
+      // can transition to the verify flow on the next render.
+      const message = err instanceof Error ? err.message : String(err);
+      if (
+        message.includes("guest_transaction_count") ||
+        message.includes("guest_transaction_limit")
+      ) {
+        await fetchCoinbaseLimits();
+      }
       setMode("policies");
     } finally {
       setIsOpeningPopup(false);
     }
-  }, [isOpeningPopup, onCreateCoinbaseOrder, paymentLink, openPaymentPopup]);
+  }, [
+    isOpeningPopup,
+    hasLimitsLoaded,
+    limitExceeded,
+    onCreateCoinbaseOrder,
+    paymentLink,
+    openPaymentPopup,
+    fetchCoinbaseLimits,
+  ]);
 
   const handleVerifySubmit = useCallback(
     async (input: SubmitCoinbaseLimitsUpgradeInput) => {
@@ -266,9 +287,18 @@ export function CoinbaseCheckout() {
           <Button
             className="w-full"
             onClick={handleContinue}
-            disabled={isCreatingOrder || isOpeningPopup}
+            disabled={
+              !hasLimitsLoaded ||
+              isFetchingCoinbaseLimits ||
+              isCreatingOrder ||
+              isOpeningPopup
+            }
           >
-            {isCreatingOrder || isOpeningPopup ? "LOADING..." : "CONTINUE"}
+            {!hasLimitsLoaded || isFetchingCoinbaseLimits
+              ? "CHECKING LIMITS…"
+              : isCreatingOrder || isOpeningPopup
+                ? "LOADING..."
+                : "CONTINUE"}
           </Button>
         </LayoutFooter>
       </div>
