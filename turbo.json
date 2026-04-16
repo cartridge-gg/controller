@@ -2,8 +2,15 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
+    "@cartridge/controller-ui#build:deps": {
+      "dependsOn": [],
+      "outputs": [
+        "dist/**"
+      ]
+    },
     "build:deps": {
       "dependsOn": [
+        "@cartridge/controller-ui#build:deps",
         "^build:deps"
       ],
       "outputs": [
