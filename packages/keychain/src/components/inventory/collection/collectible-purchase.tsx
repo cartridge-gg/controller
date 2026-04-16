@@ -39,6 +39,7 @@ import {
 import { StatusType } from "@cartridge/arcade";
 import { ArcadeContext } from "@/context/arcade";
 import { usePurchaseFeesData } from "./footer";
+import { formatUsdValue } from "@/utils/format-value";
 
 export function CollectiblePurchase() {
   const { address: contractAddress, tokenId } = useParams();
@@ -449,8 +450,7 @@ const Order = ({
   }, [royaltyInfo, orderId, addRoyalties]);
 
   const usdPrice = useMemo(
-    () =>
-      `$${counterValue?.toLocaleString(undefined, { maximumFractionDigits: 2 }) ?? "?"}`,
+    () => (counterValue ? formatUsdValue(counterValue) : ""),
     [counterValue],
   );
 
