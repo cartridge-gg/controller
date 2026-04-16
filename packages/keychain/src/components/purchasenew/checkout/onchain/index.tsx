@@ -20,7 +20,11 @@ import {
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { useFeature, useFeatures } from "@/hooks/features";
-import { useTokenBalance, useTokenFallback } from "@/hooks/starterpack";
+import {
+  exceedsLimit,
+  useTokenBalance,
+  useTokenFallback,
+} from "@/hooks/starterpack";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "../../receiving";
 import { OnchainCostBreakdown } from "../../review/cost";
@@ -74,6 +78,9 @@ export function OnchainCheckout() {
     onCreateCoinbaseOrder,
     isCreatingOrder,
     usdAmount,
+    coinbaseLimits,
+    isFetchingCoinbaseLimits,
+    fetchCoinbaseLimits,
   } = useOnchainPurchaseContext();
   const { onCreditCardPurchase, isStripeLoading, isCoinflowLoading } =
     useCreditPurchaseContext();
@@ -119,6 +126,26 @@ export function OnchainCheckout() {
   const isApplePayAmountTooLow = useMemo(() => {
     return isApplePaySelected && totalUsdAmount < 2;
   }, [isApplePaySelected, totalUsdAmount]);
+
+  // Pre-fetch Coinbase limits as soon as Apple Pay is selected so we can gate
+  // the Buy button and skip a doomed order-create for users over the cap.
+  useEffect(() => {
+    if (isApplePaySelected) {
+      fetchCoinbaseLimits();
+    }
+  }, [isApplePaySelected, fetchCoinbaseLimits]);
+
+  const applePayLimitsLoading = useMemo(
+    () => isApplePaySelected && !coinbaseLimits && isFetchingCoinbaseLimits,
+    [isApplePaySelected, coinbaseLimits, isFetchingCoinbaseLimits],
+  );
+  const applePayLimitExceeded = useMemo(
+    () =>
+      isApplePaySelected &&
+      !!coinbaseLimits &&
+      exceedsLimit(totalUsdAmount, coinbaseLimits),
+    [isApplePaySelected, coinbaseLimits, totalUsdAmount],
+  );
 
   const quote = useMemo(() => {
     if (!starterpackDetails || !isOnchainStarterpack(starterpackDetails)) {
@@ -292,7 +319,29 @@ export function OnchainCheckout() {
           return;
         }
 
-        await onCreateCoinbaseOrder();
+        // User is over the Coinbase cap — skip the order create entirely;
+        // CoinbaseCheckout will surface the verify flow.
+        if (applePayLimitExceeded) {
+          navigate("/purchase/checkout/coinbase");
+          return;
+        }
+
+        try {
+          await onCreateCoinbaseOrder();
+        } catch (err) {
+          // Safety net: Coinbase can still reject if /limits was stale.
+          // Navigate anyway so the verify flow takes over.
+          const message = err instanceof Error ? err.message : String(err);
+          if (
+            message.includes("guest_transaction_count") ||
+            message.includes("guest_transaction_limit")
+          ) {
+            await fetchCoinbaseLimits();
+            navigate("/purchase/checkout/coinbase");
+            return;
+          }
+          throw err;
+        }
         navigate("/purchase/checkout/coinbase");
       } else {
         await onOnchainPurchase();
@@ -309,6 +358,8 @@ export function OnchainCheckout() {
     isCoinflowSelected,
     isCoinflowStarterpackSupported,
     isApplePaySelected,
+    applePayLimitExceeded,
+    fetchCoinbaseLimits,
     onCreditCardPurchase,
     refetchMe,
     refetchAccountPrivate,
@@ -500,7 +551,8 @@ export function OnchainCheckout() {
                 (bridgeFrom !== null && isFetchingFees) ||
                 isCreatingOrder ||
                 isStripeLoading ||
-                isCoinflowLoading
+                isCoinflowLoading ||
+                applePayLimitsLoading
               }
               isSendingDeposit={isSendingDeposit}
               globalDisabled={globalDisabled}
@@ -513,7 +565,13 @@ export function OnchainCheckout() {
               onPurchase={handlePurchase}
               onBridge={handleBridge}
               isApplePayAmountTooLow={isApplePayAmountTooLow}
-              purchaseLabel={isCoinflowSelected ? "Continue" : undefined}
+              purchaseLabel={
+                isCoinflowSelected
+                  ? "Continue"
+                  : applePayLimitExceeded
+                    ? "Verify to continue"
+                    : undefined
+              }
             />
           </>
         )}

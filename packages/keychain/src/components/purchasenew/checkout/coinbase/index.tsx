@@ -255,7 +255,10 @@ export function CoinbaseCheckout() {
 
       {/* Policies Screen */}
       <div
-        className={cn("flex flex-col h-full", mode !== "policies" && "hidden")}
+        className={cn(
+          "flex flex-col h-full",
+          (mode !== "policies" || waitingForLimits) && "hidden",
+        )}
       >
         <HeaderInner
           title="Coinbase"
@@ -378,7 +381,6 @@ export function CoinbaseCheckout() {
             }
             isSubmitting={isSubmittingLimitsUpgrade}
             onSubmit={handleVerifySubmit}
-            onBack={handleBackToMethod}
           />
         </div>
       )}
