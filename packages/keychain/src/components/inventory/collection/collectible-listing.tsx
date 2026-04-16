@@ -39,6 +39,7 @@ import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
 import { useCollection } from "@/hooks/collection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { formatUsdValue } from "@/utils/format-value";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
@@ -151,7 +152,7 @@ export function CollectibleListing() {
     const value = selected.balance.value;
     const max = selected.balance.amount;
     const total = (value * (split ? quantity * price : price)) / max;
-    return `$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    return formatUsdValue(total);
   }, [selected, price, split, quantity]);
 
   const listingData = useMemo(() => {
@@ -181,7 +182,7 @@ export function CollectibleListing() {
     const value = selected.balance.value;
     const max = selected.balance.amount;
     const total = (listingData.assets.length * (value * price)) / max;
-    return `$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    return formatUsdValue(total);
   }, [selected, price, listingData]);
 
   const handleSelection = useCallback(

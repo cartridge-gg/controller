@@ -12,6 +12,11 @@ import { useMemo, useState } from "react";
 
 import { cn } from "@cartridge/controller-ui/utils";
 import { getChecksumAddress } from "starknet";
+import {
+  formatTokenValue,
+  formatUsdValue,
+  formatUsdValueDifference,
+} from "@/utils/format-value";
 
 const DEFAULT_TOKENS_COUNT = 2;
 
@@ -82,18 +87,12 @@ function TokenCardContent({ token }: { token: Token }) {
       <TokenCard
         image={token.metadata.image || placeholder}
         title={token.metadata.name}
-        amount={`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
-        value={
-          token.balance.value
-            ? `$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-            : ""
-        }
+        amount={`${formatTokenValue(token.balance.amount, 5, token.metadata.symbol)}`}
+        value={token.balance.value ? formatUsdValue(token.balance.value) : ""}
         change={
           token.balance.change === 0
             ? undefined
-            : token.balance.change > 0
-              ? `+$${token.balance.change.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-              : `-$${(-token.balance.change).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+            : formatUsdValueDifference(token.balance.change)
         }
       />
     </Link>

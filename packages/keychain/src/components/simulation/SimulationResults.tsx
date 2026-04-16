@@ -1,9 +1,10 @@
 import { Call } from "starknet";
-import { TokenCard, TokenSummary } from "@cartridge/controller-ui";
+import { Spinner, TokenCard, TokenSummary } from "@cartridge/controller-ui";
 import { TokenSwap, TokenSwapData, useTokenSwapData } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
 import { useSimulateBalanceChanges } from "./use-simulate";
 import { SimulationBalance } from "./event-parser";
+import { formatTokenValue, formatUsdValue } from "@/utils/format-value";
 
 interface SimulationResultsProps {
   calls: Call[];
@@ -32,22 +33,16 @@ export function SimulationResults({ calls }: SimulationResultsProps) {
 
   const formatAmount = (token: TokenSwapData, result: SimulationBalance) => {
     const isApproved = result.allowance > 0n || result.approvedAll;
-    return `${token.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.symbol}${isApproved ? " (Approved)" : ""}`;
-  };
-
-  const formatValue = (token: TokenSwapData) => {
-    return !token.value
-      ? "$0.00"
-      : token.value < 0.01
-        ? "<$0.01"
-        : `~$${token.value.toFixed(2)}`;
+    return `${token.amount === "ALL" ? "ALL" : formatTokenValue(token.amount, 5, token.symbol)}${isApproved ? " (Approved)" : ""}`;
   };
 
   return (
     <TokenSummary
       title={
         isSimulating ? (
-          "Simulating transactions..."
+          <div className="flex items-center gap-1">
+            <Spinner size="xs" /> Simulating transactions...
+          </div>
         ) : isSimulationError ? (
           <span className="text-destructive">Simulation Error</span>
         ) : simulationBalances.length == 0 ? (
@@ -66,7 +61,9 @@ export function SimulationResults({ calls }: SimulationResultsProps) {
           roundedImage={token.rounded}
           amount={formatAmount(token, simulationBalances[index])}
           value={
-            typeof token.value === "number" ? formatValue(token) : undefined
+            typeof token.value === "number"
+              ? formatUsdValue(token.value)
+              : undefined
           }
           clickable={false}
           increasing={simulationBalances[index].balance > 0n}
