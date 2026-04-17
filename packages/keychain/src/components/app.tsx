@@ -273,7 +273,13 @@ export function App() {
           <Route path="method/:platforms" element={<PaymentMethod />} />
           <Route path="network/:platforms" element={<ChooseNetwork />} />
           <Route path="wallet/:platforms" element={<SelectWallet />} />
+          {/* Kept as a standalone route for reuse (deep-link, non-drawer
+              hosts). The starterpack flow opens this as a bottom-sheet drawer
+              from <OnchainCheckout />. */}
           <Route path="verification" element={<Verification />} />
+          {/* Kept as standalone routes for potential reuse (deep-link,
+              full-screen fallback). The primary starterpack flow opens these
+              as bottom-sheet drawers mounted inside <OnchainCheckout />. */}
           <Route path="checkout/coinflow" element={<CoinflowCheckout />} />
           <Route path="checkout/onchain" element={<OnchainCheckout />} />
           <Route path="checkout/coinbase" element={<CoinbaseCheckout />} />
