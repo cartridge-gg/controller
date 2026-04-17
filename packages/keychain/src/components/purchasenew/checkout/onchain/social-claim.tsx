@@ -4,7 +4,7 @@ import {
   XIcon,
   ChatIcon,
   SocialCard,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useSocialClaim } from "@/hooks/starterpack/social";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { SocialClaimOptions } from "@cartridge/controller";

@@ -1,0 +1,9385 @@
+import { useQuery, useMutation, UseQueryOptions, UseMutationOptions } from 'react-query';
+import { useFetchData } from './fetcher';
+export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+/** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: string;
+  String: string;
+  Boolean: boolean;
+  Int: number;
+  Float: number;
+  BigInt: string;
+  ChainID: string;
+  Cursor: string;
+  Felt: string;
+  JSON: any;
+  Long: string;
+  Time: string;
+};
+
+export type Account = Node & {
+  __typename?: 'Account';
+  activities: ActivityConnection;
+  attestations: AttestationConnection;
+  controllers: ControllerConnection;
+  createdAt: Scalars['Time'];
+  credentials: Credentials;
+  credits: Credits;
+  creditsPlain: Scalars['Int'];
+  email?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  membership: AccountTeamConnection;
+  name?: Maybe<Scalars['String']>;
+  oauthConnections?: Maybe<Array<OAuthConnection>>;
+  /** If true, the account is billed for paid slot deployments */
+  slotBilling: Scalars['Boolean'];
+  starterpackMint: StarterpackMintConnection;
+  teams: TeamConnection;
+  updatedAt: Scalars['Time'];
+  username: Scalars['String'];
+};
+
+
+export type AccountActivitiesArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<ActivityOrder>;
+  where?: InputMaybe<ActivityWhereInput>;
+};
+
+
+export type AccountAttestationsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<AttestationOrder>;
+  where?: InputMaybe<AttestationWhereInput>;
+};
+
+
+export type AccountControllersArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<ControllerOrder>;
+  where?: InputMaybe<ControllerWhereInput>;
+};
+
+
+export type AccountMembershipArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  where?: InputMaybe<AccountTeamWhereInput>;
+};
+
+
+export type AccountStarterpackMintArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StarterpackMintOrder>;
+  where?: InputMaybe<StarterpackMintWhereInput>;
+};
+
+
+export type AccountTeamsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  where?: InputMaybe<TeamWhereInput>;
+};
+
+/** A connection to a list of items. */
+export type AccountConnection = {
+  __typename?: 'AccountConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<AccountEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type AccountEdge = {
+  __typename?: 'AccountEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Account>;
+};
+
+/** Ordering options for Account connections */
+export type AccountOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Accounts. */
+  field: AccountOrderField;
+};
+
+/** Properties by which Account connections can be ordered. */
+export enum AccountOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+export type AccountPrivate = {
+  __typename?: 'AccountPrivate';
+  /** Date of birth in YYYY-MM-DD format. */
+  dob?: Maybe<Scalars['String']>;
+  firstName?: Maybe<Scalars['String']>;
+  lastName?: Maybe<Scalars['String']>;
+  phoneNumber?: Maybe<Scalars['String']>;
+  phoneNumberVerifiedAt?: Maybe<Scalars['Time']>;
+  proveVerifiedAt?: Maybe<Scalars['Time']>;
+  verificationStatus?: Maybe<Scalars['String']>;
+};
+
+export type AccountTeam = Node & {
+  __typename?: 'AccountTeam';
+  account: Account;
+  accountID: Scalars['ID'];
+  id: Scalars['ID'];
+  role: AccountTeamRole;
+  team: Team;
+  teamID: Scalars['ID'];
+};
+
+/** A connection to a list of items. */
+export type AccountTeamConnection = {
+  __typename?: 'AccountTeamConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<AccountTeamEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type AccountTeamEdge = {
+  __typename?: 'AccountTeamEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<AccountTeam>;
+};
+
+/** AccountTeamRole is enum for the field role */
+export enum AccountTeamRole {
+  Owner = 'owner'
+}
+
+/**
+ * AccountTeamWhereInput is used for filtering AccountTeam objects.
+ * Input was generated by ent.
+ */
+export type AccountTeamWhereInput = {
+  and?: InputMaybe<Array<AccountTeamWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<AccountTeamWhereInput>;
+  or?: InputMaybe<Array<AccountTeamWhereInput>>;
+  /** role field predicates */
+  role?: InputMaybe<AccountTeamRole>;
+  roleIn?: InputMaybe<Array<AccountTeamRole>>;
+  roleNEQ?: InputMaybe<AccountTeamRole>;
+  roleNotIn?: InputMaybe<Array<AccountTeamRole>>;
+};
+
+export type AccountUpdateInput = {
+  /** Set the email for the account. */
+  email?: InputMaybe<Scalars['String']>;
+};
+
+export type AccountVerifyInput = {
+  /** Date of birth in YYYY-MM-DD format. */
+  dob?: InputMaybe<Scalars['String']>;
+  emailAddress?: InputMaybe<Scalars['String']>;
+  firstName?: InputMaybe<Scalars['String']>;
+  lastName?: InputMaybe<Scalars['String']>;
+  phoneNumber?: InputMaybe<Scalars['String']>;
+  /** Use the UAT sandbox environment instead of production. */
+  sandbox?: InputMaybe<Scalars['Boolean']>;
+};
+
+/**
+ * AccountWhereInput is used for filtering Account objects.
+ * Input was generated by ent.
+ */
+export type AccountWhereInput = {
+  and?: InputMaybe<Array<AccountWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** activities edge predicates */
+  hasActivities?: InputMaybe<Scalars['Boolean']>;
+  hasActivitiesWith?: InputMaybe<Array<ActivityWhereInput>>;
+  /** controllers edge predicates */
+  hasControllers?: InputMaybe<Scalars['Boolean']>;
+  hasControllersWith?: InputMaybe<Array<ControllerWhereInput>>;
+  /** membership edge predicates */
+  hasMembership?: InputMaybe<Scalars['Boolean']>;
+  hasMembershipWith?: InputMaybe<Array<AccountTeamWhereInput>>;
+  /** oauth_connections edge predicates */
+  hasOauthConnections?: InputMaybe<Scalars['Boolean']>;
+  hasOauthConnectionsWith?: InputMaybe<Array<OAuthConnectionWhereInput>>;
+  /** starterpack_mint edge predicates */
+  hasStarterpackMint?: InputMaybe<Scalars['Boolean']>;
+  hasStarterpackMintWith?: InputMaybe<Array<StarterpackMintWhereInput>>;
+  /** teams edge predicates */
+  hasTeams?: InputMaybe<Scalars['Boolean']>;
+  hasTeamsWith?: InputMaybe<Array<TeamWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** name field predicates */
+  name?: InputMaybe<Scalars['String']>;
+  nameContains?: InputMaybe<Scalars['String']>;
+  nameContainsFold?: InputMaybe<Scalars['String']>;
+  nameEqualFold?: InputMaybe<Scalars['String']>;
+  nameGT?: InputMaybe<Scalars['String']>;
+  nameGTE?: InputMaybe<Scalars['String']>;
+  nameHasPrefix?: InputMaybe<Scalars['String']>;
+  nameHasSuffix?: InputMaybe<Scalars['String']>;
+  nameIn?: InputMaybe<Array<Scalars['String']>>;
+  nameIsNil?: InputMaybe<Scalars['Boolean']>;
+  nameLT?: InputMaybe<Scalars['String']>;
+  nameLTE?: InputMaybe<Scalars['String']>;
+  nameNEQ?: InputMaybe<Scalars['String']>;
+  nameNotIn?: InputMaybe<Array<Scalars['String']>>;
+  nameNotNil?: InputMaybe<Scalars['Boolean']>;
+  not?: InputMaybe<AccountWhereInput>;
+  or?: InputMaybe<Array<AccountWhereInput>>;
+  /** slot_billing field predicates */
+  slotBilling?: InputMaybe<Scalars['Boolean']>;
+  slotBillingNEQ?: InputMaybe<Scalars['Boolean']>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** username field predicates */
+  username?: InputMaybe<Scalars['String']>;
+  usernameContains?: InputMaybe<Scalars['String']>;
+  usernameContainsFold?: InputMaybe<Scalars['String']>;
+  usernameEqualFold?: InputMaybe<Scalars['String']>;
+  usernameGT?: InputMaybe<Scalars['String']>;
+  usernameGTE?: InputMaybe<Scalars['String']>;
+  usernameHasPrefix?: InputMaybe<Scalars['String']>;
+  usernameHasSuffix?: InputMaybe<Scalars['String']>;
+  usernameIn?: InputMaybe<Array<Scalars['String']>>;
+  usernameLT?: InputMaybe<Scalars['String']>;
+  usernameLTE?: InputMaybe<Scalars['String']>;
+  usernameNEQ?: InputMaybe<Scalars['String']>;
+  usernameNotIn?: InputMaybe<Array<Scalars['String']>>;
+};
+
+export type Achievement = {
+  __typename?: 'Achievement';
+  /** Hexadecimal string, e.g., "0x427261776c6572" */
+  achievementGroup: Scalars['String'];
+  /** Can be an empty string */
+  data?: Maybe<Scalars['String']>;
+  /** A description of the achievement */
+  description: Scalars['String'];
+  /** Hexadecimal string, can be "0x" */
+  end: Scalars['String'];
+  /** Integer, e.g., 0 (possibly a boolean indicator) */
+  hidden: Scalars['Int'];
+  /** Hexadecimal string, e.g., "0x66612d706572736f6e2d7269666c65" */
+  icon: Scalars['String'];
+  /** Hexadecimal string, unique identifier */
+  id: Scalars['String'];
+  /** Integer, e.g., 0 (could represent a section or chapter) */
+  page: Scalars['Int'];
+  /** Integer, e.g., 80 */
+  points: Scalars['Int'];
+  /** Hexadecimal string, can be "0x" */
+  start: Scalars['String'];
+  /** Description of the task, e.g., "Defeat a Big Boss" */
+  taskDescription: Scalars['String'];
+  /** Hexadecimal string, e.g., "0x425241574c455247" */
+  taskId: Scalars['String'];
+  /** Integer, e.g., 1 (total tasks to complete) */
+  taskTotal: Scalars['Int'];
+  /** Hexadecimal string, e.g., "0x427261776c6572" */
+  title: Scalars['String'];
+};
+
+export type AchievementItem = {
+  __typename?: 'AchievementItem';
+  achievements: Array<Achievement>;
+  meta: AchievementMeta;
+};
+
+export type AchievementMeta = {
+  __typename?: 'AchievementMeta';
+  count: Scalars['Int'];
+  error?: Maybe<Scalars['String']>;
+  model: Scalars['String'];
+  namespace: Scalars['String'];
+  project: Scalars['String'];
+};
+
+export type AchievementResult = {
+  __typename?: 'AchievementResult';
+  items: Array<AchievementItem>;
+};
+
+export type Activity = Node & {
+  __typename?: 'Activity';
+  account: Account;
+  accountID: Scalars['ID'];
+  /** Actual fee for the activity */
+  actualFee?: Maybe<Scalars['BigInt']>;
+  controller?: Maybe<Controller>;
+  controllerID?: Maybe<Scalars['ID']>;
+  createdAt: Scalars['Time'];
+  /** Credits fee for the activity */
+  creditsFee?: Maybe<Scalars['Int']>;
+  /** Transaction fee payment source */
+  feeSource: ActivityFeeSource;
+  /** Fee unit for the activity */
+  feeUnit: ActivityFeeUnit;
+  id: Scalars['ID'];
+  /** Blockchain network if applicable */
+  network?: Maybe<Scalars['String']>;
+  paymaster?: Maybe<Paymaster>;
+  paymasterID?: Maybe<Scalars['ID']>;
+  session?: Maybe<Session>;
+  sessionID?: Maybe<Scalars['ID']>;
+  starterpackMint: StarterpackMintConnection;
+  /** Status of the activity */
+  status: ActivityStatus;
+  /** Transaction hash if this is a blockchain transaction */
+  transactionHash?: Maybe<Scalars['String']>;
+  /** External transaction tracking ID for sponsored transactions */
+  transactionID?: Maybe<Scalars['String']>;
+  /** Type of activity */
+  type: ActivityType;
+  updatedAt: Scalars['Time'];
+};
+
+
+export type ActivityStarterpackMintArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StarterpackMintOrder>;
+  where?: InputMaybe<StarterpackMintWhereInput>;
+};
+
+/** A connection to a list of items. */
+export type ActivityConnection = {
+  __typename?: 'ActivityConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<ActivityEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type ActivityEdge = {
+  __typename?: 'ActivityEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Activity>;
+};
+
+export type ActivityEntry = {
+  __typename?: 'ActivityEntry';
+  callerAddress: Scalars['String'];
+  contractAddress: Scalars['String'];
+  entrypoint: Scalars['String'];
+  executedAt: Scalars['String'];
+  transactionHash: Scalars['String'];
+};
+
+/** ActivityFeeSource is enum for the field fee_source */
+export enum ActivityFeeSource {
+  Account = 'ACCOUNT',
+  Credits = 'CREDITS',
+  Paymaster = 'PAYMASTER'
+}
+
+/** ActivityFeeUnit is enum for the field fee_unit */
+export enum ActivityFeeUnit {
+  Fri = 'FRI',
+  Wei = 'WEI'
+}
+
+export type ActivityItem = {
+  __typename?: 'ActivityItem';
+  activities: Array<ActivityEntry>;
+  meta: ActivityMeta;
+};
+
+export type ActivityMeta = {
+  __typename?: 'ActivityMeta';
+  address: Scalars['String'];
+  count: Scalars['Int'];
+  error?: Maybe<Scalars['String']>;
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+};
+
+/** Ordering options for Activity connections */
+export type ActivityOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Activities. */
+  field: ActivityOrderField;
+};
+
+/** Properties by which Activity connections can be ordered. */
+export enum ActivityOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+export type ActivityProject = {
+  address: Scalars['String'];
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+};
+
+export type ActivityResult = {
+  __typename?: 'ActivityResult';
+  items: Array<ActivityItem>;
+};
+
+/** ActivityStatus is enum for the field status */
+export enum ActivityStatus {
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  PendingBacklog = 'PENDING_BACKLOG',
+  TimedOut = 'TIMED_OUT'
+}
+
+/** ActivityType is enum for the field type */
+export enum ActivityType {
+  SessionCreated = 'SESSION_CREATED',
+  Transaction = 'TRANSACTION'
+}
+
+/**
+ * ActivityWhereInput is used for filtering Activity objects.
+ * Input was generated by ent.
+ */
+export type ActivityWhereInput = {
+  /** account_id field predicates */
+  accountID?: InputMaybe<Scalars['ID']>;
+  accountIDContains?: InputMaybe<Scalars['ID']>;
+  accountIDContainsFold?: InputMaybe<Scalars['ID']>;
+  accountIDEqualFold?: InputMaybe<Scalars['ID']>;
+  accountIDGT?: InputMaybe<Scalars['ID']>;
+  accountIDGTE?: InputMaybe<Scalars['ID']>;
+  accountIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  accountIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  accountIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  accountIDLT?: InputMaybe<Scalars['ID']>;
+  accountIDLTE?: InputMaybe<Scalars['ID']>;
+  accountIDNEQ?: InputMaybe<Scalars['ID']>;
+  accountIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** actual_fee field predicates */
+  actualFee?: InputMaybe<Scalars['BigInt']>;
+  actualFeeGT?: InputMaybe<Scalars['BigInt']>;
+  actualFeeGTE?: InputMaybe<Scalars['BigInt']>;
+  actualFeeIn?: InputMaybe<Array<Scalars['BigInt']>>;
+  actualFeeIsNil?: InputMaybe<Scalars['Boolean']>;
+  actualFeeLT?: InputMaybe<Scalars['BigInt']>;
+  actualFeeLTE?: InputMaybe<Scalars['BigInt']>;
+  actualFeeNEQ?: InputMaybe<Scalars['BigInt']>;
+  actualFeeNotIn?: InputMaybe<Array<Scalars['BigInt']>>;
+  actualFeeNotNil?: InputMaybe<Scalars['Boolean']>;
+  and?: InputMaybe<Array<ActivityWhereInput>>;
+  /** controller_id field predicates */
+  controllerID?: InputMaybe<Scalars['ID']>;
+  controllerIDContains?: InputMaybe<Scalars['ID']>;
+  controllerIDContainsFold?: InputMaybe<Scalars['ID']>;
+  controllerIDEqualFold?: InputMaybe<Scalars['ID']>;
+  controllerIDGT?: InputMaybe<Scalars['ID']>;
+  controllerIDGTE?: InputMaybe<Scalars['ID']>;
+  controllerIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  controllerIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  controllerIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  controllerIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  controllerIDLT?: InputMaybe<Scalars['ID']>;
+  controllerIDLTE?: InputMaybe<Scalars['ID']>;
+  controllerIDNEQ?: InputMaybe<Scalars['ID']>;
+  controllerIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  controllerIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** credits_fee field predicates */
+  creditsFee?: InputMaybe<Scalars['Int']>;
+  creditsFeeGT?: InputMaybe<Scalars['Int']>;
+  creditsFeeGTE?: InputMaybe<Scalars['Int']>;
+  creditsFeeIn?: InputMaybe<Array<Scalars['Int']>>;
+  creditsFeeIsNil?: InputMaybe<Scalars['Boolean']>;
+  creditsFeeLT?: InputMaybe<Scalars['Int']>;
+  creditsFeeLTE?: InputMaybe<Scalars['Int']>;
+  creditsFeeNEQ?: InputMaybe<Scalars['Int']>;
+  creditsFeeNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  creditsFeeNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** fee_source field predicates */
+  feeSource?: InputMaybe<ActivityFeeSource>;
+  feeSourceIn?: InputMaybe<Array<ActivityFeeSource>>;
+  feeSourceNEQ?: InputMaybe<ActivityFeeSource>;
+  feeSourceNotIn?: InputMaybe<Array<ActivityFeeSource>>;
+  /** fee_unit field predicates */
+  feeUnit?: InputMaybe<ActivityFeeUnit>;
+  feeUnitIn?: InputMaybe<Array<ActivityFeeUnit>>;
+  feeUnitNEQ?: InputMaybe<ActivityFeeUnit>;
+  feeUnitNotIn?: InputMaybe<Array<ActivityFeeUnit>>;
+  /** account edge predicates */
+  hasAccount?: InputMaybe<Scalars['Boolean']>;
+  hasAccountWith?: InputMaybe<Array<AccountWhereInput>>;
+  /** controller edge predicates */
+  hasController?: InputMaybe<Scalars['Boolean']>;
+  hasControllerWith?: InputMaybe<Array<ControllerWhereInput>>;
+  /** paymaster edge predicates */
+  hasPaymaster?: InputMaybe<Scalars['Boolean']>;
+  hasPaymasterWith?: InputMaybe<Array<PaymasterWhereInput>>;
+  /** session edge predicates */
+  hasSession?: InputMaybe<Scalars['Boolean']>;
+  hasSessionWith?: InputMaybe<Array<SessionWhereInput>>;
+  /** starterpack_mint edge predicates */
+  hasStarterpackMint?: InputMaybe<Scalars['Boolean']>;
+  hasStarterpackMintWith?: InputMaybe<Array<StarterpackMintWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** network field predicates */
+  network?: InputMaybe<Scalars['String']>;
+  networkContains?: InputMaybe<Scalars['String']>;
+  networkContainsFold?: InputMaybe<Scalars['String']>;
+  networkEqualFold?: InputMaybe<Scalars['String']>;
+  networkGT?: InputMaybe<Scalars['String']>;
+  networkGTE?: InputMaybe<Scalars['String']>;
+  networkHasPrefix?: InputMaybe<Scalars['String']>;
+  networkHasSuffix?: InputMaybe<Scalars['String']>;
+  networkIn?: InputMaybe<Array<Scalars['String']>>;
+  networkIsNil?: InputMaybe<Scalars['Boolean']>;
+  networkLT?: InputMaybe<Scalars['String']>;
+  networkLTE?: InputMaybe<Scalars['String']>;
+  networkNEQ?: InputMaybe<Scalars['String']>;
+  networkNotIn?: InputMaybe<Array<Scalars['String']>>;
+  networkNotNil?: InputMaybe<Scalars['Boolean']>;
+  not?: InputMaybe<ActivityWhereInput>;
+  or?: InputMaybe<Array<ActivityWhereInput>>;
+  /** paymaster_id field predicates */
+  paymasterID?: InputMaybe<Scalars['ID']>;
+  paymasterIDContains?: InputMaybe<Scalars['ID']>;
+  paymasterIDContainsFold?: InputMaybe<Scalars['ID']>;
+  paymasterIDEqualFold?: InputMaybe<Scalars['ID']>;
+  paymasterIDGT?: InputMaybe<Scalars['ID']>;
+  paymasterIDGTE?: InputMaybe<Scalars['ID']>;
+  paymasterIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  paymasterIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  paymasterIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  paymasterIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  paymasterIDLT?: InputMaybe<Scalars['ID']>;
+  paymasterIDLTE?: InputMaybe<Scalars['ID']>;
+  paymasterIDNEQ?: InputMaybe<Scalars['ID']>;
+  paymasterIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  paymasterIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** session_id field predicates */
+  sessionID?: InputMaybe<Scalars['ID']>;
+  sessionIDContains?: InputMaybe<Scalars['ID']>;
+  sessionIDContainsFold?: InputMaybe<Scalars['ID']>;
+  sessionIDEqualFold?: InputMaybe<Scalars['ID']>;
+  sessionIDGT?: InputMaybe<Scalars['ID']>;
+  sessionIDGTE?: InputMaybe<Scalars['ID']>;
+  sessionIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  sessionIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  sessionIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  sessionIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  sessionIDLT?: InputMaybe<Scalars['ID']>;
+  sessionIDLTE?: InputMaybe<Scalars['ID']>;
+  sessionIDNEQ?: InputMaybe<Scalars['ID']>;
+  sessionIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  sessionIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** status field predicates */
+  status?: InputMaybe<ActivityStatus>;
+  statusIn?: InputMaybe<Array<ActivityStatus>>;
+  statusNEQ?: InputMaybe<ActivityStatus>;
+  statusNotIn?: InputMaybe<Array<ActivityStatus>>;
+  /** transaction_hash field predicates */
+  transactionHash?: InputMaybe<Scalars['String']>;
+  transactionHashContains?: InputMaybe<Scalars['String']>;
+  transactionHashContainsFold?: InputMaybe<Scalars['String']>;
+  transactionHashEqualFold?: InputMaybe<Scalars['String']>;
+  transactionHashGT?: InputMaybe<Scalars['String']>;
+  transactionHashGTE?: InputMaybe<Scalars['String']>;
+  transactionHashHasPrefix?: InputMaybe<Scalars['String']>;
+  transactionHashHasSuffix?: InputMaybe<Scalars['String']>;
+  transactionHashIn?: InputMaybe<Array<Scalars['String']>>;
+  transactionHashIsNil?: InputMaybe<Scalars['Boolean']>;
+  transactionHashLT?: InputMaybe<Scalars['String']>;
+  transactionHashLTE?: InputMaybe<Scalars['String']>;
+  transactionHashNEQ?: InputMaybe<Scalars['String']>;
+  transactionHashNotIn?: InputMaybe<Array<Scalars['String']>>;
+  transactionHashNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** transaction_id field predicates */
+  transactionID?: InputMaybe<Scalars['String']>;
+  transactionIDContains?: InputMaybe<Scalars['String']>;
+  transactionIDContainsFold?: InputMaybe<Scalars['String']>;
+  transactionIDEqualFold?: InputMaybe<Scalars['String']>;
+  transactionIDGT?: InputMaybe<Scalars['String']>;
+  transactionIDGTE?: InputMaybe<Scalars['String']>;
+  transactionIDHasPrefix?: InputMaybe<Scalars['String']>;
+  transactionIDHasSuffix?: InputMaybe<Scalars['String']>;
+  transactionIDIn?: InputMaybe<Array<Scalars['String']>>;
+  transactionIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  transactionIDLT?: InputMaybe<Scalars['String']>;
+  transactionIDLTE?: InputMaybe<Scalars['String']>;
+  transactionIDNEQ?: InputMaybe<Scalars['String']>;
+  transactionIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  transactionIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** type field predicates */
+  type?: InputMaybe<ActivityType>;
+  typeIn?: InputMaybe<Array<ActivityType>>;
+  typeNEQ?: InputMaybe<ActivityType>;
+  typeNotIn?: InputMaybe<Array<ActivityType>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export enum AdminBudgetReason {
+  Advance = 'ADVANCE',
+  Correction = 'CORRECTION',
+  Promotion = 'PROMOTION',
+  Refund = 'REFUND',
+  Settlement = 'SETTLEMENT'
+}
+
+export type AssetEdge = {
+  __typename?: 'AssetEdge';
+  amount: Scalars['Float'];
+  attributes?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
+  imageUrl: Scalars['String'];
+  metadata?: Maybe<Scalars['String']>;
+  name: Scalars['String'];
+  raw: Scalars['String'];
+  tokenId: Scalars['String'];
+};
+
+export type Attestation = Node & {
+  __typename?: 'Attestation';
+  account: Account;
+  chainID?: Maybe<Scalars['String']>;
+  controller?: Maybe<Controller>;
+  createdAt: Scalars['Time'];
+  /** Document SHA-256 hash (0x-prefixed, 32 bytes) */
+  docHashHex?: Maybe<Scalars['String']>;
+  documentVersion?: Maybe<DocumentVersion>;
+  expiresAt?: Maybe<Scalars['Time']>;
+  id: Scalars['ID'];
+  issuerRef?: Maybe<Scalars['String']>;
+  issuerType: AttestationIssuerType;
+  /** Typed-data message hash (felt hex string) */
+  messageHash?: Maybe<Scalars['String']>;
+  publicClaims?: Maybe<Scalars['JSON']>;
+  revokedAt?: Maybe<Scalars['Time']>;
+  /** Array of field elements represented as hex strings */
+  signature?: Maybe<Array<Scalars['String']>>;
+  signedAt?: Maybe<Scalars['Long']>;
+  subjectKey: Scalars['String'];
+  type: AttestationType;
+  updatedAt: Scalars['Time'];
+  verifiedAt: Scalars['Time'];
+  visibility: AttestationVisibility;
+};
+
+/** A connection to a list of items. */
+export type AttestationConnection = {
+  __typename?: 'AttestationConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<AttestationEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type AttestationEdge = {
+  __typename?: 'AttestationEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Attestation>;
+};
+
+export type AttestationInput = {
+  docHashHex: Scalars['String'];
+  docType: Scalars['String'];
+  signature: Array<Scalars['Felt']>;
+  signedAt: Scalars['Long'];
+  version: Scalars['String'];
+};
+
+/** AttestationIssuerType is enum for the field issuer_type */
+export enum AttestationIssuerType {
+  Oauth = 'OAUTH',
+  Provider = 'PROVIDER',
+  SelfSignature = 'SELF_SIGNATURE'
+}
+
+/** Ordering options for Attestation connections */
+export type AttestationOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Attestations. */
+  field: AttestationOrderField;
+};
+
+/** Properties by which Attestation connections can be ordered. */
+export enum AttestationOrderField {
+  CreatedAt = 'CREATED_AT',
+  VerifiedAt = 'VERIFIED_AT'
+}
+
+/** AttestationType is enum for the field type */
+export enum AttestationType {
+  AgeOver_18 = 'AGE_OVER_18',
+  Document = 'DOCUMENT',
+  Location = 'LOCATION',
+  OauthIdentity = 'OAUTH_IDENTITY'
+}
+
+/** AttestationVisibility is enum for the field visibility */
+export enum AttestationVisibility {
+  Private = 'PRIVATE',
+  Public = 'PUBLIC'
+}
+
+/**
+ * AttestationWhereInput is used for filtering Attestation objects.
+ * Input was generated by ent.
+ */
+export type AttestationWhereInput = {
+  and?: InputMaybe<Array<AttestationWhereInput>>;
+  /** chain_id field predicates */
+  chainID?: InputMaybe<Scalars['String']>;
+  chainIDContains?: InputMaybe<Scalars['String']>;
+  chainIDContainsFold?: InputMaybe<Scalars['String']>;
+  chainIDEqualFold?: InputMaybe<Scalars['String']>;
+  chainIDGT?: InputMaybe<Scalars['String']>;
+  chainIDGTE?: InputMaybe<Scalars['String']>;
+  chainIDHasPrefix?: InputMaybe<Scalars['String']>;
+  chainIDHasSuffix?: InputMaybe<Scalars['String']>;
+  chainIDIn?: InputMaybe<Array<Scalars['String']>>;
+  chainIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  chainIDLT?: InputMaybe<Scalars['String']>;
+  chainIDLTE?: InputMaybe<Scalars['String']>;
+  chainIDNEQ?: InputMaybe<Scalars['String']>;
+  chainIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  chainIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** doc_hash_hex field predicates */
+  docHashHex?: InputMaybe<Scalars['String']>;
+  docHashHexContains?: InputMaybe<Scalars['String']>;
+  docHashHexContainsFold?: InputMaybe<Scalars['String']>;
+  docHashHexEqualFold?: InputMaybe<Scalars['String']>;
+  docHashHexGT?: InputMaybe<Scalars['String']>;
+  docHashHexGTE?: InputMaybe<Scalars['String']>;
+  docHashHexHasPrefix?: InputMaybe<Scalars['String']>;
+  docHashHexHasSuffix?: InputMaybe<Scalars['String']>;
+  docHashHexIn?: InputMaybe<Array<Scalars['String']>>;
+  docHashHexIsNil?: InputMaybe<Scalars['Boolean']>;
+  docHashHexLT?: InputMaybe<Scalars['String']>;
+  docHashHexLTE?: InputMaybe<Scalars['String']>;
+  docHashHexNEQ?: InputMaybe<Scalars['String']>;
+  docHashHexNotIn?: InputMaybe<Array<Scalars['String']>>;
+  docHashHexNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** expires_at field predicates */
+  expiresAt?: InputMaybe<Scalars['Time']>;
+  expiresAtGT?: InputMaybe<Scalars['Time']>;
+  expiresAtGTE?: InputMaybe<Scalars['Time']>;
+  expiresAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  expiresAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  expiresAtLT?: InputMaybe<Scalars['Time']>;
+  expiresAtLTE?: InputMaybe<Scalars['Time']>;
+  expiresAtNEQ?: InputMaybe<Scalars['Time']>;
+  expiresAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  expiresAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** account edge predicates */
+  hasAccount?: InputMaybe<Scalars['Boolean']>;
+  hasAccountWith?: InputMaybe<Array<AccountWhereInput>>;
+  /** controller edge predicates */
+  hasController?: InputMaybe<Scalars['Boolean']>;
+  hasControllerWith?: InputMaybe<Array<ControllerWhereInput>>;
+  /** document_version edge predicates */
+  hasDocumentVersion?: InputMaybe<Scalars['Boolean']>;
+  hasDocumentVersionWith?: InputMaybe<Array<DocumentVersionWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** issuer_ref field predicates */
+  issuerRef?: InputMaybe<Scalars['String']>;
+  issuerRefContains?: InputMaybe<Scalars['String']>;
+  issuerRefContainsFold?: InputMaybe<Scalars['String']>;
+  issuerRefEqualFold?: InputMaybe<Scalars['String']>;
+  issuerRefGT?: InputMaybe<Scalars['String']>;
+  issuerRefGTE?: InputMaybe<Scalars['String']>;
+  issuerRefHasPrefix?: InputMaybe<Scalars['String']>;
+  issuerRefHasSuffix?: InputMaybe<Scalars['String']>;
+  issuerRefIn?: InputMaybe<Array<Scalars['String']>>;
+  issuerRefIsNil?: InputMaybe<Scalars['Boolean']>;
+  issuerRefLT?: InputMaybe<Scalars['String']>;
+  issuerRefLTE?: InputMaybe<Scalars['String']>;
+  issuerRefNEQ?: InputMaybe<Scalars['String']>;
+  issuerRefNotIn?: InputMaybe<Array<Scalars['String']>>;
+  issuerRefNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** issuer_type field predicates */
+  issuerType?: InputMaybe<AttestationIssuerType>;
+  issuerTypeIn?: InputMaybe<Array<AttestationIssuerType>>;
+  issuerTypeNEQ?: InputMaybe<AttestationIssuerType>;
+  issuerTypeNotIn?: InputMaybe<Array<AttestationIssuerType>>;
+  /** message_hash field predicates */
+  messageHash?: InputMaybe<Scalars['String']>;
+  messageHashContains?: InputMaybe<Scalars['String']>;
+  messageHashContainsFold?: InputMaybe<Scalars['String']>;
+  messageHashEqualFold?: InputMaybe<Scalars['String']>;
+  messageHashGT?: InputMaybe<Scalars['String']>;
+  messageHashGTE?: InputMaybe<Scalars['String']>;
+  messageHashHasPrefix?: InputMaybe<Scalars['String']>;
+  messageHashHasSuffix?: InputMaybe<Scalars['String']>;
+  messageHashIn?: InputMaybe<Array<Scalars['String']>>;
+  messageHashIsNil?: InputMaybe<Scalars['Boolean']>;
+  messageHashLT?: InputMaybe<Scalars['String']>;
+  messageHashLTE?: InputMaybe<Scalars['String']>;
+  messageHashNEQ?: InputMaybe<Scalars['String']>;
+  messageHashNotIn?: InputMaybe<Array<Scalars['String']>>;
+  messageHashNotNil?: InputMaybe<Scalars['Boolean']>;
+  not?: InputMaybe<AttestationWhereInput>;
+  or?: InputMaybe<Array<AttestationWhereInput>>;
+  /** revoked_at field predicates */
+  revokedAt?: InputMaybe<Scalars['Time']>;
+  revokedAtGT?: InputMaybe<Scalars['Time']>;
+  revokedAtGTE?: InputMaybe<Scalars['Time']>;
+  revokedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  revokedAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  revokedAtLT?: InputMaybe<Scalars['Time']>;
+  revokedAtLTE?: InputMaybe<Scalars['Time']>;
+  revokedAtNEQ?: InputMaybe<Scalars['Time']>;
+  revokedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  revokedAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** signed_at field predicates */
+  signedAt?: InputMaybe<Scalars['Long']>;
+  signedAtGT?: InputMaybe<Scalars['Long']>;
+  signedAtGTE?: InputMaybe<Scalars['Long']>;
+  signedAtIn?: InputMaybe<Array<Scalars['Long']>>;
+  signedAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  signedAtLT?: InputMaybe<Scalars['Long']>;
+  signedAtLTE?: InputMaybe<Scalars['Long']>;
+  signedAtNEQ?: InputMaybe<Scalars['Long']>;
+  signedAtNotIn?: InputMaybe<Array<Scalars['Long']>>;
+  signedAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** subject_key field predicates */
+  subjectKey?: InputMaybe<Scalars['String']>;
+  subjectKeyContains?: InputMaybe<Scalars['String']>;
+  subjectKeyContainsFold?: InputMaybe<Scalars['String']>;
+  subjectKeyEqualFold?: InputMaybe<Scalars['String']>;
+  subjectKeyGT?: InputMaybe<Scalars['String']>;
+  subjectKeyGTE?: InputMaybe<Scalars['String']>;
+  subjectKeyHasPrefix?: InputMaybe<Scalars['String']>;
+  subjectKeyHasSuffix?: InputMaybe<Scalars['String']>;
+  subjectKeyIn?: InputMaybe<Array<Scalars['String']>>;
+  subjectKeyLT?: InputMaybe<Scalars['String']>;
+  subjectKeyLTE?: InputMaybe<Scalars['String']>;
+  subjectKeyNEQ?: InputMaybe<Scalars['String']>;
+  subjectKeyNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** type field predicates */
+  type?: InputMaybe<AttestationType>;
+  typeIn?: InputMaybe<Array<AttestationType>>;
+  typeNEQ?: InputMaybe<AttestationType>;
+  typeNotIn?: InputMaybe<Array<AttestationType>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** verified_at field predicates */
+  verifiedAt?: InputMaybe<Scalars['Time']>;
+  verifiedAtGT?: InputMaybe<Scalars['Time']>;
+  verifiedAtGTE?: InputMaybe<Scalars['Time']>;
+  verifiedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  verifiedAtLT?: InputMaybe<Scalars['Time']>;
+  verifiedAtLTE?: InputMaybe<Scalars['Time']>;
+  verifiedAtNEQ?: InputMaybe<Scalars['Time']>;
+  verifiedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** visibility field predicates */
+  visibility?: InputMaybe<AttestationVisibility>;
+  visibilityIn?: InputMaybe<Array<AttestationVisibility>>;
+  visibilityNEQ?: InputMaybe<AttestationVisibility>;
+  visibilityNotIn?: InputMaybe<Array<AttestationVisibility>>;
+};
+
+export type Balance = {
+  __typename?: 'Balance';
+  amount: Scalars['Float'];
+  meta: Erc20Metadata;
+  raw: Scalars['String'];
+  value: Scalars['Float'];
+};
+
+export type BalanceConnection = {
+  __typename?: 'BalanceConnection';
+  edges: Array<BalanceEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+export type BalanceEdge = {
+  __typename?: 'BalanceEdge';
+  cursor: Scalars['Cursor'];
+  node: Balance;
+};
+
+export type CoinbaseAmount = {
+  __typename?: 'CoinbaseAmount';
+  /** The amount value as a string. */
+  amount: Scalars['String'];
+  /** The currency code (e.g., "USD", "USDC"). */
+  currency: Scalars['String'];
+};
+
+export enum CoinbaseNetwork {
+  Arbitrum = 'ARBITRUM',
+  Base = 'BASE',
+  Ethereum = 'ETHEREUM',
+  Optimism = 'OPTIMISM',
+  Polygon = 'POLYGON',
+  Solana = 'SOLANA'
+}
+
+export type CoinbaseOnrampFee = {
+  __typename?: 'CoinbaseOnrampFee';
+  /** The fee amount. */
+  amount: Scalars['String'];
+  /** The currency of the fee. */
+  currency: Scalars['String'];
+  /** The type of fee (FEE_TYPE_NETWORK or FEE_TYPE_EXCHANGE). */
+  type: Scalars['String'];
+};
+
+export type CoinbaseOnrampOrder = {
+  __typename?: 'CoinbaseOnrampOrder';
+  /** When the order was created. */
+  createdAt: Scalars['Time'];
+  /** The destination address for the crypto. */
+  destinationAddress: Scalars['String'];
+  /** The destination network. */
+  destinationNetwork: Scalars['String'];
+  /** The exchange rate used for the conversion. */
+  exchangeRate: Scalars['String'];
+  /** Fees associated with the order. */
+  fees: Array<CoinbaseOnrampFee>;
+  /** The unique order ID. */
+  orderId: Scalars['String'];
+  /** The fiat currency used for payment. */
+  paymentCurrency: Scalars['String'];
+  /**
+   * The payment link URL for Apple Pay checkout.
+   * Append &useApplePaySandbox=true for testing on localhost.
+   */
+  paymentLink: Scalars['String'];
+  /** The type of payment link. */
+  paymentLinkType: Scalars['String'];
+  /** Payment amount before fees. */
+  paymentSubtotal: Scalars['String'];
+  /** Total payment amount including fees. */
+  paymentTotal: Scalars['String'];
+  /** The amount of crypto to be purchased. */
+  purchaseAmount: Scalars['String'];
+  /** The crypto currency being purchased (always USDC). */
+  purchaseCurrency: Scalars['String'];
+  /** Current status of the order. */
+  status: CoinbaseOnrampStatus;
+  /** Transaction hash (only available after crypto is sent). */
+  txHash?: Maybe<Scalars['String']>;
+  /** When the order was last updated. */
+  updatedAt: Scalars['Time'];
+};
+
+export type CoinbaseOnrampOrderResponse = {
+  __typename?: 'CoinbaseOnrampOrderResponse';
+  /** The Coinbase onramp order details. */
+  coinbaseOrder: CoinbaseOnrampOrder;
+  /**
+   * The Layerswap payment details for tracking the bridge.
+   * Only available for createCoinbaseLayerswapOrder.
+   */
+  layerswapPayment?: Maybe<LayerswapPayment>;
+};
+
+export type CoinbaseOnrampQuote = {
+  __typename?: 'CoinbaseOnrampQuote';
+  /** Fee charged by Coinbase. */
+  coinbaseFee: CoinbaseAmount;
+  /** Fees charged by Layerswap for bridging. */
+  layerswapFees: CoinbaseAmount;
+  /** Network fee for sending the crypto. */
+  networkFee: CoinbaseAmount;
+  /** Ready-to-use one-click-buy URL. Only returned when destinationAddress is provided. */
+  onrampUrl?: Maybe<Scalars['String']>;
+  /** Payment amount before fees (cost of crypto). */
+  paymentSubtotal: CoinbaseAmount;
+  /** Total payment amount including fees. */
+  paymentTotal: CoinbaseAmount;
+  /** The amount of crypto to be purchased. */
+  purchaseAmount: CoinbaseAmount;
+  /** Quote ID that can be used when launching the Coinbase Onramp widget. */
+  quoteId: Scalars['String'];
+};
+
+export type CoinbaseOnrampQuoteInput = {
+  /** The amount of USDC to purchase (e.g., "100.00" for 100 USDC). */
+  purchaseUSDCAmount: Scalars['String'];
+  /** If true, use sandbox mode to get a quote for testnet bridging. */
+  sandbox?: InputMaybe<Scalars['Boolean']>;
+};
+
+export enum CoinbaseOnrampStatus {
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  PendingAuth = 'PENDING_AUTH',
+  PendingPayment = 'PENDING_PAYMENT',
+  Processing = 'PROCESSING'
+}
+
+export type CoinbaseTransaction = {
+  __typename?: 'CoinbaseTransaction';
+  /** Coinbase fee amount. */
+  coinbaseFee: CoinbaseAmount;
+  /** Country of the user. */
+  country: Scalars['String'];
+  /** When the transaction was created. */
+  createdAt: Scalars['String'];
+  /** Exchange rate for the transaction. */
+  exchangeRate: CoinbaseAmount;
+  /** Network fee amount. */
+  networkFee: CoinbaseAmount;
+  /** Payment method used. */
+  paymentMethod: Scalars['String'];
+  /** Fiat payment amount before fees. */
+  paymentSubtotal: CoinbaseAmount;
+  /** Total fiat payment amount. */
+  paymentTotal: CoinbaseAmount;
+  /** Amount of crypto being purchased. */
+  purchaseAmount: CoinbaseAmount;
+  /** Crypto currency being purchased. */
+  purchaseCurrency: Scalars['String'];
+  /** Network used to deliver crypto. */
+  purchaseNetwork: Scalars['String'];
+  /** Status of the transaction. */
+  status: CoinbaseTransactionStatus;
+  /** Unique identifier for the transaction. */
+  transactionId: Scalars['String'];
+  /** Transaction hash on the blockchain. */
+  txHash?: Maybe<Scalars['String']>;
+  /** Type of transaction. */
+  type?: Maybe<Scalars['String']>;
+  /** Wallet address the transaction was sent to. */
+  walletAddress?: Maybe<Scalars['String']>;
+};
+
+export enum CoinbaseTransactionStatus {
+  Failed = 'FAILED',
+  InProgress = 'IN_PROGRESS',
+  Success = 'SUCCESS'
+}
+
+export type CoinbaseTransactionsInput = {
+  /** Reference to the next page of transactions (from previous response). */
+  pageKey?: InputMaybe<Scalars['String']>;
+  /** Number of transactions to return per page. Default is 1. */
+  pageSize?: InputMaybe<Scalars['Int']>;
+  /** If true, use sandbox mode to query sandbox transactions. */
+  sandbox?: InputMaybe<Scalars['Boolean']>;
+};
+
+export type CoinbaseTransactionsResponse = {
+  __typename?: 'CoinbaseTransactionsResponse';
+  /** Reference to the next page of transactions. */
+  nextPageKey?: Maybe<Scalars['String']>;
+  /** Total number of transactions for this user. */
+  totalCount?: Maybe<Scalars['String']>;
+  /** List of transactions in reverse chronological order. */
+  transactions: Array<CoinbaseTransaction>;
+};
+
+export type CoinflowCardCheckoutInput = {
+  /** Street address line 1. Required by Coinflow address validation. */
+  address1: Scalars['String'];
+  cardToken: Scalars['String'];
+  city: Scalars['String'];
+  /** Our internal CoinflowPayments row ID from createCoinflowStarterpackIntent. */
+  coinflowPaymentId: Scalars['ID'];
+  /** ISO 3166-1 alpha-2 country code (e.g. "US"). Required by Coinflow address validation. */
+  country: Scalars['String'];
+  expMonth: Scalars['String'];
+  expYear: Scalars['String'];
+  firstName: Scalars['String'];
+  lastName: Scalars['String'];
+  state?: InputMaybe<Scalars['String']>;
+  zip?: InputMaybe<Scalars['String']>;
+};
+
+export type CoinflowCardCheckoutResult = {
+  __typename?: 'CoinflowCardCheckoutResult';
+  paymentId: Scalars['String'];
+};
+
+export type CoinflowPayment = {
+  __typename?: 'CoinflowPayment';
+  id: Scalars['ID'];
+  paymentStatus: CoinflowPaymentStatus;
+  purchaseFulfillment?: Maybe<PurchaseFulfillment>;
+};
+
+export enum CoinflowPaymentStatus {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Succeeded = 'SUCCEEDED'
+}
+
+export type CoinflowPricingDetails = {
+  __typename?: 'CoinflowPricingDetails';
+  cardFeeInCents: Scalars['Int'];
+  gasFeeInCents: Scalars['Int'];
+  subtotalInCents: Scalars['Int'];
+  totalInCents: Scalars['Int'];
+};
+
+export type CoinflowStarterpackIntent = {
+  __typename?: 'CoinflowStarterpackIntent';
+  /**
+   * Internal CoinflowPayments row ID. Use this with the coinflowPayment query
+   * to poll fulfillment status after checkout completes.
+   */
+  id: Scalars['ID'];
+  /** Checkout JWT encoding subtotal, blockchain, settlement type, and destination. */
+  jwtToken: Scalars['String'];
+  /** Coinflow merchant ID for the checkout component. */
+  merchantId: Scalars['String'];
+  /** Pricing breakdown in cents. */
+  pricing: CoinflowPricingDetails;
+  /** Session key (JWT) for authenticating the checkout component with Coinflow. */
+  sessionKey: Scalars['String'];
+};
+
+export type CoinflowStarterpackQuote = {
+  __typename?: 'CoinflowStarterpackQuote';
+  needsSwap: Scalars['Boolean'];
+  paymentToken: Scalars['String'];
+  pricing: CoinflowPricingDetails;
+};
+
+export type CoinflowStarterpackQuoteInput = {
+  clientPercentage?: InputMaybe<Scalars['Int']>;
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+  quantity: Scalars['Int'];
+  referral?: InputMaybe<Scalars['String']>;
+  referralGroup?: InputMaybe<Scalars['String']>;
+  registryAddress: Scalars['String'];
+  starterpackId: Scalars['String'];
+};
+
+export type Collectible = {
+  __typename?: 'Collectible';
+  assets: Array<AssetEdge>;
+  meta: Erc1155Metadata;
+};
+
+export type CollectibleConnection = {
+  __typename?: 'CollectibleConnection';
+  edges: Array<CollectibleEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+export type CollectibleEdge = {
+  __typename?: 'CollectibleEdge';
+  cursor: Scalars['Cursor'];
+  node: Collectible;
+};
+
+export type Collection = {
+  __typename?: 'Collection';
+  assets: Array<AssetEdge>;
+  meta: Erc721Metadata;
+};
+
+export type CollectionConnection = {
+  __typename?: 'CollectionConnection';
+  edges: Array<CollectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+export type CollectionEdge = {
+  __typename?: 'CollectionEdge';
+  cursor: Scalars['Cursor'];
+  node: Collection;
+};
+
+export type Controller = Node & {
+  __typename?: 'Controller';
+  account: Account;
+  accountID: Scalars['ID'];
+  activities: ActivityConnection;
+  address: Scalars['String'];
+  constructorCalldata: Array<Scalars['String']>;
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  network: Scalars['String'];
+  sessions?: Maybe<Array<Session>>;
+  signers?: Maybe<Array<Signer>>;
+  updatedAt: Scalars['Time'];
+};
+
+
+export type ControllerActivitiesArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<ActivityOrder>;
+  where?: InputMaybe<ActivityWhereInput>;
+};
+
+/** A connection to a list of items. */
+export type ControllerConnection = {
+  __typename?: 'ControllerConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<ControllerEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type ControllerEdge = {
+  __typename?: 'ControllerEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Controller>;
+};
+
+/** Ordering options for Controller connections */
+export type ControllerOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Controllers. */
+  field: ControllerOrderField;
+};
+
+/** Properties by which Controller connections can be ordered. */
+export enum ControllerOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * ControllerWhereInput is used for filtering Controller objects.
+ * Input was generated by ent.
+ */
+export type ControllerWhereInput = {
+  /** account_id field predicates */
+  accountID?: InputMaybe<Scalars['ID']>;
+  accountIDContains?: InputMaybe<Scalars['ID']>;
+  accountIDContainsFold?: InputMaybe<Scalars['ID']>;
+  accountIDEqualFold?: InputMaybe<Scalars['ID']>;
+  accountIDGT?: InputMaybe<Scalars['ID']>;
+  accountIDGTE?: InputMaybe<Scalars['ID']>;
+  accountIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  accountIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  accountIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  accountIDLT?: InputMaybe<Scalars['ID']>;
+  accountIDLTE?: InputMaybe<Scalars['ID']>;
+  accountIDNEQ?: InputMaybe<Scalars['ID']>;
+  accountIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** address field predicates */
+  address?: InputMaybe<Scalars['String']>;
+  addressContains?: InputMaybe<Scalars['String']>;
+  addressContainsFold?: InputMaybe<Scalars['String']>;
+  addressEqualFold?: InputMaybe<Scalars['String']>;
+  addressGT?: InputMaybe<Scalars['String']>;
+  addressGTE?: InputMaybe<Scalars['String']>;
+  addressHasPrefix?: InputMaybe<Scalars['String']>;
+  addressHasSuffix?: InputMaybe<Scalars['String']>;
+  addressIn?: InputMaybe<Array<Scalars['String']>>;
+  addressLT?: InputMaybe<Scalars['String']>;
+  addressLTE?: InputMaybe<Scalars['String']>;
+  addressNEQ?: InputMaybe<Scalars['String']>;
+  addressNotIn?: InputMaybe<Array<Scalars['String']>>;
+  and?: InputMaybe<Array<ControllerWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** account edge predicates */
+  hasAccount?: InputMaybe<Scalars['Boolean']>;
+  hasAccountWith?: InputMaybe<Array<AccountWhereInput>>;
+  /** activities edge predicates */
+  hasActivities?: InputMaybe<Scalars['Boolean']>;
+  hasActivitiesWith?: InputMaybe<Array<ActivityWhereInput>>;
+  /** sessions edge predicates */
+  hasSessions?: InputMaybe<Scalars['Boolean']>;
+  hasSessionsWith?: InputMaybe<Array<SessionWhereInput>>;
+  /** signers edge predicates */
+  hasSigners?: InputMaybe<Scalars['Boolean']>;
+  hasSignersWith?: InputMaybe<Array<SignerWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** network field predicates */
+  network?: InputMaybe<Scalars['String']>;
+  networkContains?: InputMaybe<Scalars['String']>;
+  networkContainsFold?: InputMaybe<Scalars['String']>;
+  networkEqualFold?: InputMaybe<Scalars['String']>;
+  networkGT?: InputMaybe<Scalars['String']>;
+  networkGTE?: InputMaybe<Scalars['String']>;
+  networkHasPrefix?: InputMaybe<Scalars['String']>;
+  networkHasSuffix?: InputMaybe<Scalars['String']>;
+  networkIn?: InputMaybe<Array<Scalars['String']>>;
+  networkLT?: InputMaybe<Scalars['String']>;
+  networkLTE?: InputMaybe<Scalars['String']>;
+  networkNEQ?: InputMaybe<Scalars['String']>;
+  networkNotIn?: InputMaybe<Array<Scalars['String']>>;
+  not?: InputMaybe<ControllerWhereInput>;
+  or?: InputMaybe<Array<ControllerWhereInput>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type CreateCoinbaseLayerswapOrderInput = {
+  /**
+   * The amount of USDC to purchase (e.g., "100.000000" for 100 USDC).
+   * This is the amount that will be delivered to the bridge.
+   */
+  purchaseUSDCAmount: Scalars['String'];
+  /** If true, use sandbox mode (Base Sepolia -> Starknet Sepolia). */
+  sandbox?: InputMaybe<Scalars['Boolean']>;
+};
+
+export type CreateCoinbaseOnrampOrderInput = {
+  /** The amount of USDC to purchase (e.g., "100.000000" for 100 USDC). */
+  purchaseUSDCAmount: Scalars['String'];
+  /** If true, use sandbox mode (Base Sepolia). */
+  sandbox?: InputMaybe<Scalars['Boolean']>;
+  /** The EIP-3009 authorization for the USDC transfer. */
+  usdcTransferAuthorization: UsdcTransferAuthorizationInput;
+};
+
+export type CreateCoinflowStarterpackIntentInput = {
+  clientPercentage?: InputMaybe<Scalars['Int']>;
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+  quantity: Scalars['Int'];
+  referral?: InputMaybe<Scalars['String']>;
+  referralGroup?: InputMaybe<Scalars['String']>;
+  registryAddress: Scalars['String'];
+  starterpackId: Scalars['String'];
+};
+
+export type CreateCryptoPaymentInput = {
+  credits: CreditsInput;
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+  network: Network;
+  teamId?: InputMaybe<Scalars['ID']>;
+  username: Scalars['String'];
+};
+
+export type CreateLayerswapDepositInput = {
+  amount: Scalars['BigInt'];
+  layerswapFees?: InputMaybe<Scalars['BigInt']>;
+  marginPercent?: InputMaybe<Scalars['Int']>;
+  sourceNetwork: LayerswapSourceNetwork;
+};
+
+export type CreateLayerswapPaymentInput = {
+  credits: CreditsInput;
+  destinationNetwork: LayerswapDestinationNetwork;
+  layerswapFees?: InputMaybe<Scalars['BigInt']>;
+  sourceNetwork: LayerswapSourceNetwork;
+  teamId?: InputMaybe<Scalars['ID']>;
+};
+
+/**
+ * CreateMerkleClaimInput is used for create MerkleClaim object.
+ * Input was generated by ent.
+ */
+export type CreateMerkleClaimInput = {
+  address: Scalars['String'];
+  claimed?: InputMaybe<Scalars['Boolean']>;
+  claimedAt?: InputMaybe<Scalars['Time']>;
+  createdAt?: InputMaybe<Scalars['Time']>;
+  data: Array<Scalars['String']>;
+  /** Index of the claim in the merkle tree */
+  index?: InputMaybe<Scalars['Int']>;
+  merkleDropID: Scalars['ID'];
+  merkleProof?: InputMaybe<Array<Scalars['String']>>;
+  updatedAt?: InputMaybe<Scalars['Time']>;
+};
+
+/**
+ * CreateMerkleDropInput is used for create MerkleDrop object.
+ * Input was generated by ent.
+ */
+export type CreateMerkleDropInput = {
+  claimIDs?: InputMaybe<Array<Scalars['ID']>>;
+  contract: Scalars['String'];
+  createdAt?: InputMaybe<Scalars['Time']>;
+  description?: InputMaybe<Scalars['String']>;
+  entrypoint: Scalars['String'];
+  key: Scalars['String'];
+  matchStarterpackItem?: InputMaybe<Scalars['Boolean']>;
+  merkleRoot: Scalars['String'];
+  /** Additional metadata for the merkle drop */
+  metadata?: InputMaybe<Scalars['JSON']>;
+  network: MerkleDropNetwork;
+  salt: Scalars['String'];
+  starterpackID?: InputMaybe<Scalars['ID']>;
+  updatedAt?: InputMaybe<Scalars['Time']>;
+};
+
+export type CreateRpcApiKeyPayload = {
+  __typename?: 'CreateRpcApiKeyPayload';
+  apiKey: RpcApiKey;
+  secretKey: Scalars['String'];
+};
+
+export type CreateServiceInput = {
+  config: Scalars['String'];
+  katana?: InputMaybe<KatanaCreateInput>;
+  torii?: InputMaybe<ToriiCreateInput>;
+  type: DeploymentService;
+  version?: InputMaybe<Scalars['String']>;
+};
+
+export type CreateStripePaymentIntentInput = {
+  credits: CreditsInput;
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+  teamId?: InputMaybe<Scalars['ID']>;
+};
+
+export type CreateStripeStarterpackIntentInput = {
+  clientPercentage?: InputMaybe<Scalars['Int']>;
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+  quantity: Scalars['Int'];
+  referral?: InputMaybe<Scalars['String']>;
+  referralGroup?: InputMaybe<Scalars['String']>;
+  registryAddress: Scalars['String'];
+  starterpackId: Scalars['String'];
+};
+
+export type CredentialMetadata = Eip191Credentials | PasswordCredentials | SiwsCredentials | StarknetCredentials | WebauthnCredentials;
+
+export type Credentials = {
+  __typename?: 'Credentials';
+  webauthn?: Maybe<Array<WebauthnCredential>>;
+};
+
+export type Credits = {
+  __typename?: 'Credits';
+  amount: Scalars['BigInt'];
+  decimals: Scalars['Int'];
+};
+
+export type CreditsHistory = Node & {
+  __typename?: 'CreditsHistory';
+  accountID: Scalars['String'];
+  amount: Scalars['Int'];
+  /** Optional comment for transaction reason */
+  comment?: Maybe<Scalars['String']>;
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  /** Transaction hash for debit transactions */
+  transactionHash?: Maybe<Scalars['String']>;
+  /** Type of transaction: credit or debit */
+  transactionType: CreditsHistoryTransactionType;
+  updatedAt: Scalars['Time'];
+};
+
+/** Ordering options for CreditsHistory connections */
+export type CreditsHistoryOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order CreditsHistories. */
+  field: CreditsHistoryOrderField;
+};
+
+/** Properties by which CreditsHistory connections can be ordered. */
+export enum CreditsHistoryOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/** CreditsHistoryTransactionType is enum for the field transaction_type */
+export enum CreditsHistoryTransactionType {
+  Credit = 'credit',
+  Debit = 'debit'
+}
+
+/**
+ * CreditsHistoryWhereInput is used for filtering CreditsHistory objects.
+ * Input was generated by ent.
+ */
+export type CreditsHistoryWhereInput = {
+  /** account_id field predicates */
+  accountID?: InputMaybe<Scalars['String']>;
+  accountIDContains?: InputMaybe<Scalars['String']>;
+  accountIDContainsFold?: InputMaybe<Scalars['String']>;
+  accountIDEqualFold?: InputMaybe<Scalars['String']>;
+  accountIDGT?: InputMaybe<Scalars['String']>;
+  accountIDGTE?: InputMaybe<Scalars['String']>;
+  accountIDHasPrefix?: InputMaybe<Scalars['String']>;
+  accountIDHasSuffix?: InputMaybe<Scalars['String']>;
+  accountIDIn?: InputMaybe<Array<Scalars['String']>>;
+  accountIDLT?: InputMaybe<Scalars['String']>;
+  accountIDLTE?: InputMaybe<Scalars['String']>;
+  accountIDNEQ?: InputMaybe<Scalars['String']>;
+  accountIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** amount field predicates */
+  amount?: InputMaybe<Scalars['Int']>;
+  amountGT?: InputMaybe<Scalars['Int']>;
+  amountGTE?: InputMaybe<Scalars['Int']>;
+  amountIn?: InputMaybe<Array<Scalars['Int']>>;
+  amountLT?: InputMaybe<Scalars['Int']>;
+  amountLTE?: InputMaybe<Scalars['Int']>;
+  amountNEQ?: InputMaybe<Scalars['Int']>;
+  amountNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  and?: InputMaybe<Array<CreditsHistoryWhereInput>>;
+  /** comment field predicates */
+  comment?: InputMaybe<Scalars['String']>;
+  commentContains?: InputMaybe<Scalars['String']>;
+  commentContainsFold?: InputMaybe<Scalars['String']>;
+  commentEqualFold?: InputMaybe<Scalars['String']>;
+  commentGT?: InputMaybe<Scalars['String']>;
+  commentGTE?: InputMaybe<Scalars['String']>;
+  commentHasPrefix?: InputMaybe<Scalars['String']>;
+  commentHasSuffix?: InputMaybe<Scalars['String']>;
+  commentIn?: InputMaybe<Array<Scalars['String']>>;
+  commentIsNil?: InputMaybe<Scalars['Boolean']>;
+  commentLT?: InputMaybe<Scalars['String']>;
+  commentLTE?: InputMaybe<Scalars['String']>;
+  commentNEQ?: InputMaybe<Scalars['String']>;
+  commentNotIn?: InputMaybe<Array<Scalars['String']>>;
+  commentNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<CreditsHistoryWhereInput>;
+  or?: InputMaybe<Array<CreditsHistoryWhereInput>>;
+  /** transaction_hash field predicates */
+  transactionHash?: InputMaybe<Scalars['String']>;
+  transactionHashContains?: InputMaybe<Scalars['String']>;
+  transactionHashContainsFold?: InputMaybe<Scalars['String']>;
+  transactionHashEqualFold?: InputMaybe<Scalars['String']>;
+  transactionHashGT?: InputMaybe<Scalars['String']>;
+  transactionHashGTE?: InputMaybe<Scalars['String']>;
+  transactionHashHasPrefix?: InputMaybe<Scalars['String']>;
+  transactionHashHasSuffix?: InputMaybe<Scalars['String']>;
+  transactionHashIn?: InputMaybe<Array<Scalars['String']>>;
+  transactionHashIsNil?: InputMaybe<Scalars['Boolean']>;
+  transactionHashLT?: InputMaybe<Scalars['String']>;
+  transactionHashLTE?: InputMaybe<Scalars['String']>;
+  transactionHashNEQ?: InputMaybe<Scalars['String']>;
+  transactionHashNotIn?: InputMaybe<Array<Scalars['String']>>;
+  transactionHashNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** transaction_type field predicates */
+  transactionType?: InputMaybe<CreditsHistoryTransactionType>;
+  transactionTypeIn?: InputMaybe<Array<CreditsHistoryTransactionType>>;
+  transactionTypeNEQ?: InputMaybe<CreditsHistoryTransactionType>;
+  transactionTypeNotIn?: InputMaybe<Array<CreditsHistoryTransactionType>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type CreditsInput = {
+  amount: Scalars['Int'];
+  decimals: Scalars['Int'];
+};
+
+export type CryptoPayment = {
+  __typename?: 'CryptoPayment';
+  depositAddress: Scalars['String'];
+  expiresAt: Scalars['Time'];
+  id: Scalars['ID'];
+  network: Network;
+  status: CryptoPaymentStatus;
+  tokenAddress: Scalars['String'];
+  tokenAmount: Scalars['BigInt'];
+  tokenFees: Scalars['BigInt'];
+};
+
+export enum CryptoPaymentStatus {
+  Confirmed = 'CONFIRMED',
+  Expired = 'EXPIRED',
+  Failed = 'FAILED',
+  Pending = 'PENDING'
+}
+
+export type Deployment = Node & {
+  __typename?: 'Deployment';
+  autoUpgrade: Scalars['Boolean'];
+  branch?: Maybe<Scalars['String']>;
+  config: DeploymentConfig;
+  createdAt: Scalars['Time'];
+  deprecated?: Maybe<Scalars['Boolean']>;
+  error?: Maybe<Scalars['String']>;
+  events?: Maybe<Array<DeploymentLog>>;
+  id: Scalars['ID'];
+  logs: Logs;
+  observability: Scalars['Boolean'];
+  observabilitySecret?: Maybe<Scalars['String']>;
+  project: Scalars['String'];
+  regions: Array<Scalars['String']>;
+  replicas: Scalars['Int'];
+  service: Service;
+  serviceID: Scalars['ID'];
+  spinDownAt?: Maybe<Scalars['Time']>;
+  spinUpAt?: Maybe<Scalars['Time']>;
+  status: DeploymentStatus;
+  storage: Scalars['Int'];
+  teams: TeamConnection;
+  tier: DeploymentTier;
+  updatedAt: Scalars['Time'];
+  version: Scalars['String'];
+};
+
+
+export type DeploymentLogsArgs = {
+  container?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Int']>;
+  order?: InputMaybe<Order>;
+  region?: InputMaybe<Scalars['String']>;
+  since?: InputMaybe<Scalars['Time']>;
+};
+
+
+export type DeploymentTeamsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  where?: InputMaybe<TeamWhereInput>;
+};
+
+export type DeploymentConfig = {
+  __typename?: 'DeploymentConfig';
+  configFile: Scalars['String'];
+};
+
+/** A connection to a list of items. */
+export type DeploymentConnection = {
+  __typename?: 'DeploymentConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<DeploymentEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type DeploymentEdge = {
+  __typename?: 'DeploymentEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Deployment>;
+};
+
+export type DeploymentLog = Node & {
+  __typename?: 'DeploymentLog';
+  deployment: Deployment;
+  deploymentID: Scalars['ID'];
+  id: Scalars['ID'];
+  logType: DeploymentLogLogType;
+  timestamp: Scalars['Time'];
+};
+
+/** A connection to a list of items. */
+export type DeploymentLogConnection = {
+  __typename?: 'DeploymentLogConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<DeploymentLogEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type DeploymentLogEdge = {
+  __typename?: 'DeploymentLogEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<DeploymentLog>;
+};
+
+/** DeploymentLogLogType is enum for the field log_type */
+export enum DeploymentLogLogType {
+  Created = 'created',
+  Deleted = 'deleted',
+  ScaledDown = 'scaled_down',
+  ScaledUp = 'scaled_up'
+}
+
+/**
+ * DeploymentLogWhereInput is used for filtering DeploymentLog objects.
+ * Input was generated by ent.
+ */
+export type DeploymentLogWhereInput = {
+  and?: InputMaybe<Array<DeploymentLogWhereInput>>;
+  /** deployment_id field predicates */
+  deploymentID?: InputMaybe<Scalars['ID']>;
+  deploymentIDContains?: InputMaybe<Scalars['ID']>;
+  deploymentIDContainsFold?: InputMaybe<Scalars['ID']>;
+  deploymentIDEqualFold?: InputMaybe<Scalars['ID']>;
+  deploymentIDGT?: InputMaybe<Scalars['ID']>;
+  deploymentIDGTE?: InputMaybe<Scalars['ID']>;
+  deploymentIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  deploymentIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  deploymentIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  deploymentIDLT?: InputMaybe<Scalars['ID']>;
+  deploymentIDLTE?: InputMaybe<Scalars['ID']>;
+  deploymentIDNEQ?: InputMaybe<Scalars['ID']>;
+  deploymentIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** deployment edge predicates */
+  hasDeployment?: InputMaybe<Scalars['Boolean']>;
+  hasDeploymentWith?: InputMaybe<Array<DeploymentWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** log_type field predicates */
+  logType?: InputMaybe<DeploymentLogLogType>;
+  logTypeIn?: InputMaybe<Array<DeploymentLogLogType>>;
+  logTypeNEQ?: InputMaybe<DeploymentLogLogType>;
+  logTypeNotIn?: InputMaybe<Array<DeploymentLogLogType>>;
+  not?: InputMaybe<DeploymentLogWhereInput>;
+  or?: InputMaybe<Array<DeploymentLogWhereInput>>;
+  /** timestamp field predicates */
+  timestamp?: InputMaybe<Scalars['Time']>;
+  timestampGT?: InputMaybe<Scalars['Time']>;
+  timestampGTE?: InputMaybe<Scalars['Time']>;
+  timestampIn?: InputMaybe<Array<Scalars['Time']>>;
+  timestampLT?: InputMaybe<Scalars['Time']>;
+  timestampLTE?: InputMaybe<Scalars['Time']>;
+  timestampNEQ?: InputMaybe<Scalars['Time']>;
+  timestampNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+/** Ordering options for Deployment connections */
+export type DeploymentOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Deployments. */
+  field: DeploymentOrderField;
+};
+
+/** Properties by which Deployment connections can be ordered. */
+export enum DeploymentOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+export enum DeploymentService {
+  Katana = 'katana',
+  Torii = 'torii'
+}
+
+/** DeploymentStatus is enum for the field status */
+export enum DeploymentStatus {
+  Active = 'active',
+  Deleted = 'deleted',
+  Disabled = 'disabled',
+  Error = 'error'
+}
+
+/** DeploymentTier is enum for the field tier */
+export enum DeploymentTier {
+  Basic = 'basic',
+  Common = 'common',
+  Epic = 'epic',
+  Insane = 'insane',
+  Legendary = 'legendary',
+  Pro = 'pro'
+}
+
+/**
+ * DeploymentWhereInput is used for filtering Deployment objects.
+ * Input was generated by ent.
+ */
+export type DeploymentWhereInput = {
+  and?: InputMaybe<Array<DeploymentWhereInput>>;
+  /** auto_upgrade field predicates */
+  autoUpgrade?: InputMaybe<Scalars['Boolean']>;
+  autoUpgradeNEQ?: InputMaybe<Scalars['Boolean']>;
+  /** branch field predicates */
+  branch?: InputMaybe<Scalars['String']>;
+  branchContains?: InputMaybe<Scalars['String']>;
+  branchContainsFold?: InputMaybe<Scalars['String']>;
+  branchEqualFold?: InputMaybe<Scalars['String']>;
+  branchGT?: InputMaybe<Scalars['String']>;
+  branchGTE?: InputMaybe<Scalars['String']>;
+  branchHasPrefix?: InputMaybe<Scalars['String']>;
+  branchHasSuffix?: InputMaybe<Scalars['String']>;
+  branchIn?: InputMaybe<Array<Scalars['String']>>;
+  branchIsNil?: InputMaybe<Scalars['Boolean']>;
+  branchLT?: InputMaybe<Scalars['String']>;
+  branchLTE?: InputMaybe<Scalars['String']>;
+  branchNEQ?: InputMaybe<Scalars['String']>;
+  branchNotIn?: InputMaybe<Array<Scalars['String']>>;
+  branchNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** deprecated field predicates */
+  deprecated?: InputMaybe<Scalars['Boolean']>;
+  deprecatedIsNil?: InputMaybe<Scalars['Boolean']>;
+  deprecatedNEQ?: InputMaybe<Scalars['Boolean']>;
+  deprecatedNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** error field predicates */
+  error?: InputMaybe<Scalars['String']>;
+  errorContains?: InputMaybe<Scalars['String']>;
+  errorContainsFold?: InputMaybe<Scalars['String']>;
+  errorEqualFold?: InputMaybe<Scalars['String']>;
+  errorGT?: InputMaybe<Scalars['String']>;
+  errorGTE?: InputMaybe<Scalars['String']>;
+  errorHasPrefix?: InputMaybe<Scalars['String']>;
+  errorHasSuffix?: InputMaybe<Scalars['String']>;
+  errorIn?: InputMaybe<Array<Scalars['String']>>;
+  errorIsNil?: InputMaybe<Scalars['Boolean']>;
+  errorLT?: InputMaybe<Scalars['String']>;
+  errorLTE?: InputMaybe<Scalars['String']>;
+  errorNEQ?: InputMaybe<Scalars['String']>;
+  errorNotIn?: InputMaybe<Array<Scalars['String']>>;
+  errorNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** events edge predicates */
+  hasEvents?: InputMaybe<Scalars['Boolean']>;
+  hasEventsWith?: InputMaybe<Array<DeploymentLogWhereInput>>;
+  /** service edge predicates */
+  hasService?: InputMaybe<Scalars['Boolean']>;
+  hasServiceWith?: InputMaybe<Array<ServiceWhereInput>>;
+  /** teams edge predicates */
+  hasTeams?: InputMaybe<Scalars['Boolean']>;
+  hasTeamsWith?: InputMaybe<Array<TeamWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<DeploymentWhereInput>;
+  /** observability field predicates */
+  observability?: InputMaybe<Scalars['Boolean']>;
+  observabilityNEQ?: InputMaybe<Scalars['Boolean']>;
+  or?: InputMaybe<Array<DeploymentWhereInput>>;
+  /** project field predicates */
+  project?: InputMaybe<Scalars['String']>;
+  projectContains?: InputMaybe<Scalars['String']>;
+  projectContainsFold?: InputMaybe<Scalars['String']>;
+  projectEqualFold?: InputMaybe<Scalars['String']>;
+  projectGT?: InputMaybe<Scalars['String']>;
+  projectGTE?: InputMaybe<Scalars['String']>;
+  projectHasPrefix?: InputMaybe<Scalars['String']>;
+  projectHasSuffix?: InputMaybe<Scalars['String']>;
+  projectIn?: InputMaybe<Array<Scalars['String']>>;
+  projectLT?: InputMaybe<Scalars['String']>;
+  projectLTE?: InputMaybe<Scalars['String']>;
+  projectNEQ?: InputMaybe<Scalars['String']>;
+  projectNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** replicas field predicates */
+  replicas?: InputMaybe<Scalars['Int']>;
+  replicasGT?: InputMaybe<Scalars['Int']>;
+  replicasGTE?: InputMaybe<Scalars['Int']>;
+  replicasIn?: InputMaybe<Array<Scalars['Int']>>;
+  replicasLT?: InputMaybe<Scalars['Int']>;
+  replicasLTE?: InputMaybe<Scalars['Int']>;
+  replicasNEQ?: InputMaybe<Scalars['Int']>;
+  replicasNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** service_id field predicates */
+  serviceID?: InputMaybe<Scalars['ID']>;
+  serviceIDContains?: InputMaybe<Scalars['ID']>;
+  serviceIDContainsFold?: InputMaybe<Scalars['ID']>;
+  serviceIDEqualFold?: InputMaybe<Scalars['ID']>;
+  serviceIDGT?: InputMaybe<Scalars['ID']>;
+  serviceIDGTE?: InputMaybe<Scalars['ID']>;
+  serviceIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  serviceIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  serviceIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  serviceIDLT?: InputMaybe<Scalars['ID']>;
+  serviceIDLTE?: InputMaybe<Scalars['ID']>;
+  serviceIDNEQ?: InputMaybe<Scalars['ID']>;
+  serviceIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** spin_down_at field predicates */
+  spinDownAt?: InputMaybe<Scalars['Time']>;
+  spinDownAtGT?: InputMaybe<Scalars['Time']>;
+  spinDownAtGTE?: InputMaybe<Scalars['Time']>;
+  spinDownAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  spinDownAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  spinDownAtLT?: InputMaybe<Scalars['Time']>;
+  spinDownAtLTE?: InputMaybe<Scalars['Time']>;
+  spinDownAtNEQ?: InputMaybe<Scalars['Time']>;
+  spinDownAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  spinDownAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** spin_up_at field predicates */
+  spinUpAt?: InputMaybe<Scalars['Time']>;
+  spinUpAtGT?: InputMaybe<Scalars['Time']>;
+  spinUpAtGTE?: InputMaybe<Scalars['Time']>;
+  spinUpAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  spinUpAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  spinUpAtLT?: InputMaybe<Scalars['Time']>;
+  spinUpAtLTE?: InputMaybe<Scalars['Time']>;
+  spinUpAtNEQ?: InputMaybe<Scalars['Time']>;
+  spinUpAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  spinUpAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** status field predicates */
+  status?: InputMaybe<DeploymentStatus>;
+  statusIn?: InputMaybe<Array<DeploymentStatus>>;
+  statusNEQ?: InputMaybe<DeploymentStatus>;
+  statusNotIn?: InputMaybe<Array<DeploymentStatus>>;
+  /** storage field predicates */
+  storage?: InputMaybe<Scalars['Int']>;
+  storageGT?: InputMaybe<Scalars['Int']>;
+  storageGTE?: InputMaybe<Scalars['Int']>;
+  storageIn?: InputMaybe<Array<Scalars['Int']>>;
+  storageLT?: InputMaybe<Scalars['Int']>;
+  storageLTE?: InputMaybe<Scalars['Int']>;
+  storageNEQ?: InputMaybe<Scalars['Int']>;
+  storageNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** tier field predicates */
+  tier?: InputMaybe<DeploymentTier>;
+  tierIn?: InputMaybe<Array<DeploymentTier>>;
+  tierNEQ?: InputMaybe<DeploymentTier>;
+  tierNotIn?: InputMaybe<Array<DeploymentTier>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** version field predicates */
+  version?: InputMaybe<Scalars['String']>;
+  versionContains?: InputMaybe<Scalars['String']>;
+  versionContainsFold?: InputMaybe<Scalars['String']>;
+  versionEqualFold?: InputMaybe<Scalars['String']>;
+  versionGT?: InputMaybe<Scalars['String']>;
+  versionGTE?: InputMaybe<Scalars['String']>;
+  versionHasPrefix?: InputMaybe<Scalars['String']>;
+  versionHasSuffix?: InputMaybe<Scalars['String']>;
+  versionIn?: InputMaybe<Array<Scalars['String']>>;
+  versionLT?: InputMaybe<Scalars['String']>;
+  versionLTE?: InputMaybe<Scalars['String']>;
+  versionNEQ?: InputMaybe<Scalars['String']>;
+  versionNotIn?: InputMaybe<Array<Scalars['String']>>;
+};
+
+export type DocumentVersion = Node & {
+  __typename?: 'DocumentVersion';
+  createdAt: Scalars['Time'];
+  docType: Scalars['String'];
+  id: Scalars['ID'];
+  /** SHA-256 hash of content (0x-prefixed, 32 bytes) */
+  sha256Hex: Scalars['String'];
+  updatedAt: Scalars['Time'];
+  version: Scalars['String'];
+};
+
+/** A connection to a list of items. */
+export type DocumentVersionConnection = {
+  __typename?: 'DocumentVersionConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<DocumentVersionEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type DocumentVersionEdge = {
+  __typename?: 'DocumentVersionEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<DocumentVersion>;
+};
+
+/** Ordering options for DocumentVersion connections */
+export type DocumentVersionOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order DocumentVersions. */
+  field: DocumentVersionOrderField;
+};
+
+/** Properties by which DocumentVersion connections can be ordered. */
+export enum DocumentVersionOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * DocumentVersionWhereInput is used for filtering DocumentVersion objects.
+ * Input was generated by ent.
+ */
+export type DocumentVersionWhereInput = {
+  and?: InputMaybe<Array<DocumentVersionWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** doc_type field predicates */
+  docType?: InputMaybe<Scalars['String']>;
+  docTypeContains?: InputMaybe<Scalars['String']>;
+  docTypeContainsFold?: InputMaybe<Scalars['String']>;
+  docTypeEqualFold?: InputMaybe<Scalars['String']>;
+  docTypeGT?: InputMaybe<Scalars['String']>;
+  docTypeGTE?: InputMaybe<Scalars['String']>;
+  docTypeHasPrefix?: InputMaybe<Scalars['String']>;
+  docTypeHasSuffix?: InputMaybe<Scalars['String']>;
+  docTypeIn?: InputMaybe<Array<Scalars['String']>>;
+  docTypeLT?: InputMaybe<Scalars['String']>;
+  docTypeLTE?: InputMaybe<Scalars['String']>;
+  docTypeNEQ?: InputMaybe<Scalars['String']>;
+  docTypeNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<DocumentVersionWhereInput>;
+  or?: InputMaybe<Array<DocumentVersionWhereInput>>;
+  /** sha256_hex field predicates */
+  sha256Hex?: InputMaybe<Scalars['String']>;
+  sha256HexContains?: InputMaybe<Scalars['String']>;
+  sha256HexContainsFold?: InputMaybe<Scalars['String']>;
+  sha256HexEqualFold?: InputMaybe<Scalars['String']>;
+  sha256HexGT?: InputMaybe<Scalars['String']>;
+  sha256HexGTE?: InputMaybe<Scalars['String']>;
+  sha256HexHasPrefix?: InputMaybe<Scalars['String']>;
+  sha256HexHasSuffix?: InputMaybe<Scalars['String']>;
+  sha256HexIn?: InputMaybe<Array<Scalars['String']>>;
+  sha256HexLT?: InputMaybe<Scalars['String']>;
+  sha256HexLTE?: InputMaybe<Scalars['String']>;
+  sha256HexNEQ?: InputMaybe<Scalars['String']>;
+  sha256HexNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** version field predicates */
+  version?: InputMaybe<Scalars['String']>;
+  versionContains?: InputMaybe<Scalars['String']>;
+  versionContainsFold?: InputMaybe<Scalars['String']>;
+  versionEqualFold?: InputMaybe<Scalars['String']>;
+  versionGT?: InputMaybe<Scalars['String']>;
+  versionGTE?: InputMaybe<Scalars['String']>;
+  versionHasPrefix?: InputMaybe<Scalars['String']>;
+  versionHasSuffix?: InputMaybe<Scalars['String']>;
+  versionIn?: InputMaybe<Array<Scalars['String']>>;
+  versionLT?: InputMaybe<Scalars['String']>;
+  versionLTE?: InputMaybe<Scalars['String']>;
+  versionNEQ?: InputMaybe<Scalars['String']>;
+  versionNotIn?: InputMaybe<Array<Scalars['String']>>;
+};
+
+export type Erc20Metadata = {
+  __typename?: 'ERC20Metadata';
+  contractAddress: Scalars['String'];
+  decimals: Scalars['Int'];
+  name: Scalars['String'];
+  periodPrice: Scalars['Float'];
+  price: Scalars['Float'];
+  project: Scalars['String'];
+  symbol: Scalars['String'];
+};
+
+export type Erc721Metadata = {
+  __typename?: 'ERC721Metadata';
+  assetCount: Scalars['Int'];
+  contractAddress: Scalars['String'];
+  imagePath: Scalars['String'];
+  name: Scalars['String'];
+  project: Scalars['String'];
+};
+
+export type Erc1155Metadata = {
+  __typename?: 'ERC1155Metadata';
+  assetCount: Scalars['Int'];
+  contractAddress: Scalars['String'];
+  imagePath: Scalars['String'];
+  name: Scalars['String'];
+  project: Scalars['String'];
+};
+
+export type Eip191Credential = {
+  __typename?: 'Eip191Credential';
+  ethAddress: Scalars['String'];
+  provider: Scalars['String'];
+};
+
+export type Eip191Credentials = {
+  __typename?: 'Eip191Credentials';
+  eip191?: Maybe<Array<Eip191Credential>>;
+};
+
+export enum FeeUnit {
+  Credit = 'CREDIT',
+  Strk = 'STRK'
+}
+
+export type HasValueInput = {
+  index: Scalars['Int'];
+  value: Scalars['String'];
+};
+
+export type Invoice = Node & {
+  __typename?: 'Invoice';
+  createdAt: Scalars['Time'];
+  /** Whether the invoice is finalized and ready for billing */
+  finalized: Scalars['Boolean'];
+  id: Scalars['ID'];
+  /** Auto-credits from incubator program. 1 credit = 0.01 USD. */
+  incubatorCredits: Scalars['Int'];
+  /** Incubator stage at time of invoice: kohai, senpai, or sensei */
+  incubatorStage?: Maybe<Scalars['String']>;
+  /** Month in YYYY-MM format */
+  month: Scalars['String'];
+  /** Net amount (total_debits - total_credits). 1 credit = 0.01 USD. */
+  netAmount: Scalars['Int'];
+  /** Debits for paymaster usage. 1 credit = 0.01 USD. */
+  paymasterDebits: Scalars['Int'];
+  /** Debits for slot deployments. 1 credit = 0.01 USD. */
+  slotDebits: Scalars['Int'];
+  team: Team;
+  /** Foreign key to team table */
+  teamID: Scalars['ID'];
+  /** Total credits added during the month. 1 credit = 0.01 USD. */
+  totalCredits: Scalars['Int'];
+  /** Total debits during the month. 1 credit = 0.01 USD. */
+  totalDebits: Scalars['Int'];
+  updatedAt: Scalars['Time'];
+};
+
+/** A connection to a list of items. */
+export type InvoiceConnection = {
+  __typename?: 'InvoiceConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<InvoiceEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type InvoiceEdge = {
+  __typename?: 'InvoiceEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Invoice>;
+};
+
+/** Ordering options for Invoice connections */
+export type InvoiceOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Invoices. */
+  field: InvoiceOrderField;
+};
+
+/** Properties by which Invoice connections can be ordered. */
+export enum InvoiceOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * InvoiceWhereInput is used for filtering Invoice objects.
+ * Input was generated by ent.
+ */
+export type InvoiceWhereInput = {
+  and?: InputMaybe<Array<InvoiceWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** finalized field predicates */
+  finalized?: InputMaybe<Scalars['Boolean']>;
+  finalizedNEQ?: InputMaybe<Scalars['Boolean']>;
+  /** team edge predicates */
+  hasTeam?: InputMaybe<Scalars['Boolean']>;
+  hasTeamWith?: InputMaybe<Array<TeamWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** incubator_credits field predicates */
+  incubatorCredits?: InputMaybe<Scalars['Int']>;
+  incubatorCreditsGT?: InputMaybe<Scalars['Int']>;
+  incubatorCreditsGTE?: InputMaybe<Scalars['Int']>;
+  incubatorCreditsIn?: InputMaybe<Array<Scalars['Int']>>;
+  incubatorCreditsLT?: InputMaybe<Scalars['Int']>;
+  incubatorCreditsLTE?: InputMaybe<Scalars['Int']>;
+  incubatorCreditsNEQ?: InputMaybe<Scalars['Int']>;
+  incubatorCreditsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** incubator_stage field predicates */
+  incubatorStage?: InputMaybe<Scalars['String']>;
+  incubatorStageContains?: InputMaybe<Scalars['String']>;
+  incubatorStageContainsFold?: InputMaybe<Scalars['String']>;
+  incubatorStageEqualFold?: InputMaybe<Scalars['String']>;
+  incubatorStageGT?: InputMaybe<Scalars['String']>;
+  incubatorStageGTE?: InputMaybe<Scalars['String']>;
+  incubatorStageHasPrefix?: InputMaybe<Scalars['String']>;
+  incubatorStageHasSuffix?: InputMaybe<Scalars['String']>;
+  incubatorStageIn?: InputMaybe<Array<Scalars['String']>>;
+  incubatorStageIsNil?: InputMaybe<Scalars['Boolean']>;
+  incubatorStageLT?: InputMaybe<Scalars['String']>;
+  incubatorStageLTE?: InputMaybe<Scalars['String']>;
+  incubatorStageNEQ?: InputMaybe<Scalars['String']>;
+  incubatorStageNotIn?: InputMaybe<Array<Scalars['String']>>;
+  incubatorStageNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** month field predicates */
+  month?: InputMaybe<Scalars['String']>;
+  monthContains?: InputMaybe<Scalars['String']>;
+  monthContainsFold?: InputMaybe<Scalars['String']>;
+  monthEqualFold?: InputMaybe<Scalars['String']>;
+  monthGT?: InputMaybe<Scalars['String']>;
+  monthGTE?: InputMaybe<Scalars['String']>;
+  monthHasPrefix?: InputMaybe<Scalars['String']>;
+  monthHasSuffix?: InputMaybe<Scalars['String']>;
+  monthIn?: InputMaybe<Array<Scalars['String']>>;
+  monthLT?: InputMaybe<Scalars['String']>;
+  monthLTE?: InputMaybe<Scalars['String']>;
+  monthNEQ?: InputMaybe<Scalars['String']>;
+  monthNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** net_amount field predicates */
+  netAmount?: InputMaybe<Scalars['Int']>;
+  netAmountGT?: InputMaybe<Scalars['Int']>;
+  netAmountGTE?: InputMaybe<Scalars['Int']>;
+  netAmountIn?: InputMaybe<Array<Scalars['Int']>>;
+  netAmountLT?: InputMaybe<Scalars['Int']>;
+  netAmountLTE?: InputMaybe<Scalars['Int']>;
+  netAmountNEQ?: InputMaybe<Scalars['Int']>;
+  netAmountNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  not?: InputMaybe<InvoiceWhereInput>;
+  or?: InputMaybe<Array<InvoiceWhereInput>>;
+  /** paymaster_debits field predicates */
+  paymasterDebits?: InputMaybe<Scalars['Int']>;
+  paymasterDebitsGT?: InputMaybe<Scalars['Int']>;
+  paymasterDebitsGTE?: InputMaybe<Scalars['Int']>;
+  paymasterDebitsIn?: InputMaybe<Array<Scalars['Int']>>;
+  paymasterDebitsLT?: InputMaybe<Scalars['Int']>;
+  paymasterDebitsLTE?: InputMaybe<Scalars['Int']>;
+  paymasterDebitsNEQ?: InputMaybe<Scalars['Int']>;
+  paymasterDebitsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** slot_debits field predicates */
+  slotDebits?: InputMaybe<Scalars['Int']>;
+  slotDebitsGT?: InputMaybe<Scalars['Int']>;
+  slotDebitsGTE?: InputMaybe<Scalars['Int']>;
+  slotDebitsIn?: InputMaybe<Array<Scalars['Int']>>;
+  slotDebitsLT?: InputMaybe<Scalars['Int']>;
+  slotDebitsLTE?: InputMaybe<Scalars['Int']>;
+  slotDebitsNEQ?: InputMaybe<Scalars['Int']>;
+  slotDebitsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** team_id field predicates */
+  teamID?: InputMaybe<Scalars['ID']>;
+  teamIDContains?: InputMaybe<Scalars['ID']>;
+  teamIDContainsFold?: InputMaybe<Scalars['ID']>;
+  teamIDEqualFold?: InputMaybe<Scalars['ID']>;
+  teamIDGT?: InputMaybe<Scalars['ID']>;
+  teamIDGTE?: InputMaybe<Scalars['ID']>;
+  teamIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  teamIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  teamIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  teamIDLT?: InputMaybe<Scalars['ID']>;
+  teamIDLTE?: InputMaybe<Scalars['ID']>;
+  teamIDNEQ?: InputMaybe<Scalars['ID']>;
+  teamIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** total_credits field predicates */
+  totalCredits?: InputMaybe<Scalars['Int']>;
+  totalCreditsGT?: InputMaybe<Scalars['Int']>;
+  totalCreditsGTE?: InputMaybe<Scalars['Int']>;
+  totalCreditsIn?: InputMaybe<Array<Scalars['Int']>>;
+  totalCreditsLT?: InputMaybe<Scalars['Int']>;
+  totalCreditsLTE?: InputMaybe<Scalars['Int']>;
+  totalCreditsNEQ?: InputMaybe<Scalars['Int']>;
+  totalCreditsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** total_debits field predicates */
+  totalDebits?: InputMaybe<Scalars['Int']>;
+  totalDebitsGT?: InputMaybe<Scalars['Int']>;
+  totalDebitsGTE?: InputMaybe<Scalars['Int']>;
+  totalDebitsIn?: InputMaybe<Array<Scalars['Int']>>;
+  totalDebitsLT?: InputMaybe<Scalars['Int']>;
+  totalDebitsLTE?: InputMaybe<Scalars['Int']>;
+  totalDebitsNEQ?: InputMaybe<Scalars['Int']>;
+  totalDebitsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type KatanaCreateInput = {
+  forkProviderUrl?: InputMaybe<Scalars['String']>;
+  network?: InputMaybe<Scalars['String']>;
+  optimistic?: InputMaybe<Scalars['Boolean']>;
+  provable?: InputMaybe<Scalars['Boolean']>;
+  saya?: InputMaybe<Scalars['Boolean']>;
+};
+
+export enum LayerswapDestinationNetwork {
+  StarknetMainnet = 'STARKNET_MAINNET',
+  StarknetSepolia = 'STARKNET_SEPOLIA'
+}
+
+export type LayerswapPayment = {
+  __typename?: 'LayerswapPayment';
+  cryptoPaymentId: Scalars['ID'];
+  expiresAt: Scalars['Time'];
+  sourceDepositAddress: Scalars['String'];
+  sourceNetwork: LayerswapSourceNetwork;
+  sourceTokenAddress: Scalars['String'];
+  sourceTokenAmount: Scalars['BigInt'];
+  status: LayerswapStatus;
+  swapId: Scalars['String'];
+};
+
+export type LayerswapQuote = {
+  __typename?: 'LayerswapQuote';
+  averageCompletionTime: Scalars['String'];
+  receivedAmount: Scalars['BigInt'];
+  requestedAmount: Scalars['BigInt'];
+  totalFees: Scalars['BigInt'];
+};
+
+export type LayerswapSource = {
+  __typename?: 'LayerswapSource';
+  accountExplorerTemplate: Scalars['String'];
+  chainId: Scalars['String'];
+  depositMethods: Array<Scalars['String']>;
+  destinationRank: Scalars['Int'];
+  displayName: Scalars['String'];
+  logo: Scalars['String'];
+  name: Scalars['String'];
+  nodeUrl: Scalars['String'];
+  sourceRank: Scalars['Int'];
+  tokens: Array<LayerswapSourceToken>;
+  transactionExplorerTemplate: Scalars['String'];
+  type: Scalars['String'];
+};
+
+export enum LayerswapSourceNetwork {
+  ArbitrumMainnet = 'ARBITRUM_MAINNET',
+  ArbitrumSepolia = 'ARBITRUM_SEPOLIA',
+  BaseMainnet = 'BASE_MAINNET',
+  BaseSepolia = 'BASE_SEPOLIA',
+  EthereumMainnet = 'ETHEREUM_MAINNET',
+  EthereumSepolia = 'ETHEREUM_SEPOLIA',
+  OptimismMainnet = 'OPTIMISM_MAINNET',
+  OptimismSepolia = 'OPTIMISM_SEPOLIA',
+  SolanaDevnet = 'SOLANA_DEVNET',
+  SolanaMainnet = 'SOLANA_MAINNET'
+}
+
+export type LayerswapSourceToken = {
+  __typename?: 'LayerswapSourceToken';
+  contract?: Maybe<Scalars['String']>;
+  decimals: Scalars['Int'];
+  displayAsset: Scalars['String'];
+  logo: Scalars['String'];
+  precision: Scalars['Int'];
+  priceInUsd: Scalars['Float'];
+  status: Scalars['String'];
+  symbol: Scalars['String'];
+};
+
+export enum LayerswapStatus {
+  Confirmed = 'CONFIRMED',
+  Expired = 'EXPIRED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  PendingLsTransfer = 'PENDING_LS_TRANSFER',
+  PendingUserTransfer = 'PENDING_USER_TRANSFER'
+}
+
+export type LayerswapStatusResponse = {
+  __typename?: 'LayerswapStatusResponse';
+  status: LayerswapStatus;
+  txHash?: Maybe<Scalars['String']>;
+};
+
+export type Lock = Node & {
+  __typename?: 'Lock';
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  updatedAt: Scalars['Time'];
+};
+
+/** Ordering options for Lock connections */
+export type LockOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Locks. */
+  field: LockOrderField;
+};
+
+/** Properties by which Lock connections can be ordered. */
+export enum LockOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * LockWhereInput is used for filtering Lock objects.
+ * Input was generated by ent.
+ */
+export type LockWhereInput = {
+  and?: InputMaybe<Array<LockWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<LockWhereInput>;
+  or?: InputMaybe<Array<LockWhereInput>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type Logs = {
+  __typename?: 'Logs';
+  content: Scalars['String'];
+  until: Scalars['Time'];
+};
+
+export type MerkleClaim = Node & {
+  __typename?: 'MerkleClaim';
+  address: Scalars['String'];
+  claimed: Scalars['Boolean'];
+  claimedAt?: Maybe<Scalars['Time']>;
+  createdAt: Scalars['Time'];
+  data: Array<Scalars['String']>;
+  id: Scalars['ID'];
+  /** Index of the claim in the merkle tree */
+  index: Scalars['Int'];
+  merkleDrop: MerkleDrop;
+  merkleDropID: Scalars['ID'];
+  merkleProof?: Maybe<Array<Scalars['String']>>;
+  updatedAt: Scalars['Time'];
+};
+
+/** A connection to a list of items. */
+export type MerkleClaimConnection = {
+  __typename?: 'MerkleClaimConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<MerkleClaimEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type MerkleClaimEdge = {
+  __typename?: 'MerkleClaimEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<MerkleClaim>;
+};
+
+export type MerkleClaimInput = {
+  address: Scalars['Felt'];
+  data: Array<Scalars['Felt']>;
+  index: Scalars['Int'];
+};
+
+/** Ordering options for MerkleClaim connections */
+export type MerkleClaimOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order MerkleClaims. */
+  field: MerkleClaimOrderField;
+};
+
+/** Properties by which MerkleClaim connections can be ordered. */
+export enum MerkleClaimOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * MerkleClaimWhereInput is used for filtering MerkleClaim objects.
+ * Input was generated by ent.
+ */
+export type MerkleClaimWhereInput = {
+  /** address field predicates */
+  address?: InputMaybe<Scalars['String']>;
+  addressContains?: InputMaybe<Scalars['String']>;
+  addressContainsFold?: InputMaybe<Scalars['String']>;
+  addressEqualFold?: InputMaybe<Scalars['String']>;
+  addressGT?: InputMaybe<Scalars['String']>;
+  addressGTE?: InputMaybe<Scalars['String']>;
+  addressHasPrefix?: InputMaybe<Scalars['String']>;
+  addressHasSuffix?: InputMaybe<Scalars['String']>;
+  addressIn?: InputMaybe<Array<Scalars['String']>>;
+  addressLT?: InputMaybe<Scalars['String']>;
+  addressLTE?: InputMaybe<Scalars['String']>;
+  addressNEQ?: InputMaybe<Scalars['String']>;
+  addressNotIn?: InputMaybe<Array<Scalars['String']>>;
+  and?: InputMaybe<Array<MerkleClaimWhereInput>>;
+  /** claimed field predicates */
+  claimed?: InputMaybe<Scalars['Boolean']>;
+  /** claimed_at field predicates */
+  claimedAt?: InputMaybe<Scalars['Time']>;
+  claimedAtGT?: InputMaybe<Scalars['Time']>;
+  claimedAtGTE?: InputMaybe<Scalars['Time']>;
+  claimedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  claimedAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  claimedAtLT?: InputMaybe<Scalars['Time']>;
+  claimedAtLTE?: InputMaybe<Scalars['Time']>;
+  claimedAtNEQ?: InputMaybe<Scalars['Time']>;
+  claimedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  claimedAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  claimedNEQ?: InputMaybe<Scalars['Boolean']>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** merkle_drop edge predicates */
+  hasMerkleDrop?: InputMaybe<Scalars['Boolean']>;
+  hasMerkleDropWith?: InputMaybe<Array<MerkleDropWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** index field predicates */
+  index?: InputMaybe<Scalars['Int']>;
+  indexGT?: InputMaybe<Scalars['Int']>;
+  indexGTE?: InputMaybe<Scalars['Int']>;
+  indexIn?: InputMaybe<Array<Scalars['Int']>>;
+  indexLT?: InputMaybe<Scalars['Int']>;
+  indexLTE?: InputMaybe<Scalars['Int']>;
+  indexNEQ?: InputMaybe<Scalars['Int']>;
+  indexNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** merkle_drop_id field predicates */
+  merkleDropID?: InputMaybe<Scalars['ID']>;
+  merkleDropIDContains?: InputMaybe<Scalars['ID']>;
+  merkleDropIDContainsFold?: InputMaybe<Scalars['ID']>;
+  merkleDropIDEqualFold?: InputMaybe<Scalars['ID']>;
+  merkleDropIDGT?: InputMaybe<Scalars['ID']>;
+  merkleDropIDGTE?: InputMaybe<Scalars['ID']>;
+  merkleDropIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  merkleDropIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  merkleDropIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  merkleDropIDLT?: InputMaybe<Scalars['ID']>;
+  merkleDropIDLTE?: InputMaybe<Scalars['ID']>;
+  merkleDropIDNEQ?: InputMaybe<Scalars['ID']>;
+  merkleDropIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<MerkleClaimWhereInput>;
+  or?: InputMaybe<Array<MerkleClaimWhereInput>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type MerkleDrop = Node & {
+  __typename?: 'MerkleDrop';
+  claims: MerkleClaimConnection;
+  contract: Scalars['String'];
+  createdAt: Scalars['Time'];
+  description?: Maybe<Scalars['String']>;
+  entrypoint: Scalars['String'];
+  id: Scalars['ID'];
+  key: Scalars['String'];
+  matchStarterpackItem: Scalars['Boolean'];
+  merkleRoot: Scalars['String'];
+  /** Additional metadata for the merkle drop */
+  metadata?: Maybe<Scalars['JSON']>;
+  network: MerkleDropNetwork;
+  salt: Scalars['String'];
+  starterpack?: Maybe<Starterpack>;
+  updatedAt: Scalars['Time'];
+};
+
+
+export type MerkleDropClaimsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<MerkleClaimOrder>;
+  where?: InputMaybe<MerkleClaimWhereInput>;
+};
+
+/** A connection to a list of items. */
+export type MerkleDropConnection = {
+  __typename?: 'MerkleDropConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<MerkleDropEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type MerkleDropEdge = {
+  __typename?: 'MerkleDropEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<MerkleDrop>;
+};
+
+/** MerkleDropNetwork is enum for the field network */
+export enum MerkleDropNetwork {
+  Arbitrum = 'ARBITRUM',
+  Base = 'BASE',
+  Ethereum = 'ETHEREUM',
+  Optimism = 'OPTIMISM',
+  Polygon = 'POLYGON',
+  Starknet = 'STARKNET'
+}
+
+/** Ordering options for MerkleDrop connections */
+export type MerkleDropOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order MerkleDrops. */
+  field: MerkleDropOrderField;
+};
+
+/** Properties by which MerkleDrop connections can be ordered. */
+export enum MerkleDropOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * MerkleDropWhereInput is used for filtering MerkleDrop objects.
+ * Input was generated by ent.
+ */
+export type MerkleDropWhereInput = {
+  and?: InputMaybe<Array<MerkleDropWhereInput>>;
+  /** contract field predicates */
+  contract?: InputMaybe<Scalars['String']>;
+  contractContains?: InputMaybe<Scalars['String']>;
+  contractContainsFold?: InputMaybe<Scalars['String']>;
+  contractEqualFold?: InputMaybe<Scalars['String']>;
+  contractGT?: InputMaybe<Scalars['String']>;
+  contractGTE?: InputMaybe<Scalars['String']>;
+  contractHasPrefix?: InputMaybe<Scalars['String']>;
+  contractHasSuffix?: InputMaybe<Scalars['String']>;
+  contractIn?: InputMaybe<Array<Scalars['String']>>;
+  contractLT?: InputMaybe<Scalars['String']>;
+  contractLTE?: InputMaybe<Scalars['String']>;
+  contractNEQ?: InputMaybe<Scalars['String']>;
+  contractNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** description field predicates */
+  description?: InputMaybe<Scalars['String']>;
+  descriptionContains?: InputMaybe<Scalars['String']>;
+  descriptionContainsFold?: InputMaybe<Scalars['String']>;
+  descriptionEqualFold?: InputMaybe<Scalars['String']>;
+  descriptionGT?: InputMaybe<Scalars['String']>;
+  descriptionGTE?: InputMaybe<Scalars['String']>;
+  descriptionHasPrefix?: InputMaybe<Scalars['String']>;
+  descriptionHasSuffix?: InputMaybe<Scalars['String']>;
+  descriptionIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionIsNil?: InputMaybe<Scalars['Boolean']>;
+  descriptionLT?: InputMaybe<Scalars['String']>;
+  descriptionLTE?: InputMaybe<Scalars['String']>;
+  descriptionNEQ?: InputMaybe<Scalars['String']>;
+  descriptionNotIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** entrypoint field predicates */
+  entrypoint?: InputMaybe<Scalars['String']>;
+  entrypointContains?: InputMaybe<Scalars['String']>;
+  entrypointContainsFold?: InputMaybe<Scalars['String']>;
+  entrypointEqualFold?: InputMaybe<Scalars['String']>;
+  entrypointGT?: InputMaybe<Scalars['String']>;
+  entrypointGTE?: InputMaybe<Scalars['String']>;
+  entrypointHasPrefix?: InputMaybe<Scalars['String']>;
+  entrypointHasSuffix?: InputMaybe<Scalars['String']>;
+  entrypointIn?: InputMaybe<Array<Scalars['String']>>;
+  entrypointLT?: InputMaybe<Scalars['String']>;
+  entrypointLTE?: InputMaybe<Scalars['String']>;
+  entrypointNEQ?: InputMaybe<Scalars['String']>;
+  entrypointNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** claims edge predicates */
+  hasClaims?: InputMaybe<Scalars['Boolean']>;
+  hasClaimsWith?: InputMaybe<Array<MerkleClaimWhereInput>>;
+  /** starterpack edge predicates */
+  hasStarterpack?: InputMaybe<Scalars['Boolean']>;
+  hasStarterpackWith?: InputMaybe<Array<StarterpackWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** key field predicates */
+  key?: InputMaybe<Scalars['String']>;
+  keyContains?: InputMaybe<Scalars['String']>;
+  keyContainsFold?: InputMaybe<Scalars['String']>;
+  keyEqualFold?: InputMaybe<Scalars['String']>;
+  keyGT?: InputMaybe<Scalars['String']>;
+  keyGTE?: InputMaybe<Scalars['String']>;
+  keyHasPrefix?: InputMaybe<Scalars['String']>;
+  keyHasSuffix?: InputMaybe<Scalars['String']>;
+  keyIn?: InputMaybe<Array<Scalars['String']>>;
+  keyLT?: InputMaybe<Scalars['String']>;
+  keyLTE?: InputMaybe<Scalars['String']>;
+  keyNEQ?: InputMaybe<Scalars['String']>;
+  keyNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** match_starterpack_item field predicates */
+  matchStarterpackItem?: InputMaybe<Scalars['Boolean']>;
+  matchStarterpackItemNEQ?: InputMaybe<Scalars['Boolean']>;
+  /** merkle_root field predicates */
+  merkleRoot?: InputMaybe<Scalars['String']>;
+  merkleRootContains?: InputMaybe<Scalars['String']>;
+  merkleRootContainsFold?: InputMaybe<Scalars['String']>;
+  merkleRootEqualFold?: InputMaybe<Scalars['String']>;
+  merkleRootGT?: InputMaybe<Scalars['String']>;
+  merkleRootGTE?: InputMaybe<Scalars['String']>;
+  merkleRootHasPrefix?: InputMaybe<Scalars['String']>;
+  merkleRootHasSuffix?: InputMaybe<Scalars['String']>;
+  merkleRootIn?: InputMaybe<Array<Scalars['String']>>;
+  merkleRootLT?: InputMaybe<Scalars['String']>;
+  merkleRootLTE?: InputMaybe<Scalars['String']>;
+  merkleRootNEQ?: InputMaybe<Scalars['String']>;
+  merkleRootNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** network field predicates */
+  network?: InputMaybe<MerkleDropNetwork>;
+  networkIn?: InputMaybe<Array<MerkleDropNetwork>>;
+  networkNEQ?: InputMaybe<MerkleDropNetwork>;
+  networkNotIn?: InputMaybe<Array<MerkleDropNetwork>>;
+  not?: InputMaybe<MerkleDropWhereInput>;
+  or?: InputMaybe<Array<MerkleDropWhereInput>>;
+  /** salt field predicates */
+  salt?: InputMaybe<Scalars['String']>;
+  saltContains?: InputMaybe<Scalars['String']>;
+  saltContainsFold?: InputMaybe<Scalars['String']>;
+  saltEqualFold?: InputMaybe<Scalars['String']>;
+  saltGT?: InputMaybe<Scalars['String']>;
+  saltGTE?: InputMaybe<Scalars['String']>;
+  saltHasPrefix?: InputMaybe<Scalars['String']>;
+  saltHasSuffix?: InputMaybe<Scalars['String']>;
+  saltIn?: InputMaybe<Array<Scalars['String']>>;
+  saltLT?: InputMaybe<Scalars['String']>;
+  saltLTE?: InputMaybe<Scalars['String']>;
+  saltNEQ?: InputMaybe<Scalars['String']>;
+  saltNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type MetricsEntry = {
+  __typename?: 'MetricsEntry';
+  callerCount: Scalars['Int'];
+  transactionCount: Scalars['Int'];
+  transactionDate: Scalars['String'];
+};
+
+export type MetricsItem = {
+  __typename?: 'MetricsItem';
+  meta: MetricsMeta;
+  metrics: Array<MetricsEntry>;
+};
+
+export type MetricsMeta = {
+  __typename?: 'MetricsMeta';
+  count: Scalars['Int'];
+  error?: Maybe<Scalars['String']>;
+  project: Scalars['String'];
+};
+
+export type MetricsProject = {
+  project: Scalars['String'];
+};
+
+export type MetricsResult = {
+  __typename?: 'MetricsResult';
+  items: Array<MetricsItem>;
+};
+
+export type MintAllowance = {
+  __typename?: 'MintAllowance';
+  count: Scalars['Int'];
+  limit: Scalars['Int'];
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  accountVerify: Scalars['Boolean'];
+  addOwner: Scalars['Boolean'];
+  addPolicies?: Maybe<Array<PaymasterPolicy>>;
+  addToTeam: Scalars['Boolean'];
+  beginLogin: Scalars['JSON'];
+  beginRegistration: Scalars['JSON'];
+  claimFreeStarterpack: Scalars['String'];
+  /**
+   * Process a card checkout using a tokenized card from the frontend.
+   * The coinflowPaymentId must reference an existing intent created via
+   * createCoinflowStarterpackIntent.
+   */
+  coinflowCardCheckout: CoinflowCardCheckoutResult;
+  /**
+   * Create a unified Coinbase onramp order.
+   * This mutation orchestrates both Coinbase and Layerswap to bridge USDC from Apple Pay to Starknet.
+   */
+  createCoinbaseLayerswapOrder: CoinbaseOnrampOrderResponse;
+  /**
+   * Create a Coinbase onramp order with a presigned transaction.
+   * This mutation sends USDC to a burner address, which then transfers to the presigned destination.
+   */
+  createCoinbaseOnrampOrder: CoinbaseOnrampOrderResponse;
+  /**
+   * Create a Coinflow checkout intent for a starterpack purchase.
+   * Mirrors createStripeStarterpackIntent: computes pricing, creates a
+   * PurchaseFulfillment (AWAITING_PAYMENT), and returns the session key
+   * and JWT the frontend needs to render the Coinflow checkout component.
+   */
+  createCoinflowStarterpackIntent: CoinflowStarterpackIntent;
+  createCryptoPayment: CryptoPayment;
+  createDeployment: Deployment;
+  createLayerswapDeposit: LayerswapPayment;
+  createLayerswapPayment: LayerswapPayment;
+  createMerkleDrop: MerkleDrop;
+  createPaymaster: Paymaster;
+  createRpcApiKey: CreateRpcApiKeyPayload;
+  createRpcCorsDomain: RpcCorsDomain;
+  createSession: Scalars['String'];
+  createStripePaymentIntent: StripePaymentIntent;
+  createStripeStarterpackIntent: StripePaymentIntent;
+  createTeam: Team;
+  decreaseBudget: Paymaster;
+  deleteDeployment: Scalars['Boolean'];
+  deleteMe: Scalars['Boolean'];
+  deleteRpcApiKey: Scalars['Boolean'];
+  deleteRpcCorsDomain: Scalars['Boolean'];
+  deleteTeam: Scalars['Boolean'];
+  deploy: Account;
+  disconnectOAuth: Scalars['Boolean'];
+  finalizeLogin: Scalars['String'];
+  finalizeRegistration: Account;
+  increaseBudget: Paymaster;
+  register: Account;
+  removeAllPolicies: Scalars['Boolean'];
+  removeFromTeam: Scalars['Boolean'];
+  removeOwner: Scalars['Boolean'];
+  removePaymaster: Scalars['Boolean'];
+  removePolicy: Scalars['Boolean'];
+  revokeSessions: Scalars['Boolean'];
+  /**
+   * Send a verification code via email to the specified email address.
+   * The code expires after 10 minutes.
+   */
+  sendEmailVerification: SendVerificationResponse;
+  /**
+   * Send a verification code via SMS to the specified phone number.
+   * The code expires after 10 minutes.
+   */
+  sendPhoneVerification: SendVerificationResponse;
+  signDocument: Attestation;
+  transfer: TransferResponse;
+  transferDeployment: Scalars['Boolean'];
+  updateDeployment: Deployment;
+  updateMe: Account;
+  updatePaymaster: Scalars['Boolean'];
+  updateRpcApiKey: RpcApiKey;
+  updateRpcCorsDomain: RpcCorsDomain;
+  updateTeam: Team;
+  /**
+   * Verify an email address using the code sent via email.
+   * Updates the user's email and verification timestamp on success.
+   */
+  verifyEmail: VerifyResponse;
+  /**
+   * Verify a phone number using the code sent via SMS.
+   * Updates the user's phone number and verification timestamp on success.
+   */
+  verifyPhone: VerifyResponse;
+};
+
+
+export type MutationAccountVerifyArgs = {
+  input: AccountVerifyInput;
+};
+
+
+export type MutationAddOwnerArgs = {
+  chainID: Scalars['String'];
+  owner: SignerInput;
+  signerGuid: Scalars['Felt'];
+  username: Scalars['String'];
+};
+
+
+export type MutationAddPoliciesArgs = {
+  paymasterName: Scalars['ID'];
+  policies?: InputMaybe<Array<PolicyInput>>;
+};
+
+
+export type MutationAddToTeamArgs = {
+  name: Scalars['ID'];
+  usernames: Array<Scalars['String']>;
+};
+
+
+export type MutationBeginLoginArgs = {
+  username: Scalars['String'];
+};
+
+
+export type MutationBeginRegistrationArgs = {
+  username: Scalars['String'];
+};
+
+
+export type MutationClaimFreeStarterpackArgs = {
+  input: StarterpackInput;
+};
+
+
+export type MutationCoinflowCardCheckoutArgs = {
+  input: CoinflowCardCheckoutInput;
+};
+
+
+export type MutationCreateCoinbaseLayerswapOrderArgs = {
+  input: CreateCoinbaseLayerswapOrderInput;
+};
+
+
+export type MutationCreateCoinbaseOnrampOrderArgs = {
+  input: CreateCoinbaseOnrampOrderInput;
+};
+
+
+export type MutationCreateCoinflowStarterpackIntentArgs = {
+  input: CreateCoinflowStarterpackIntentInput;
+};
+
+
+export type MutationCreateCryptoPaymentArgs = {
+  input: CreateCryptoPaymentInput;
+};
+
+
+export type MutationCreateDeploymentArgs = {
+  name: Scalars['String'];
+  observability?: InputMaybe<Scalars['Boolean']>;
+  regions?: InputMaybe<Array<Scalars['String']>>;
+  service: CreateServiceInput;
+  team?: InputMaybe<Scalars['String']>;
+  tier?: InputMaybe<DeploymentTier>;
+  wait?: InputMaybe<Scalars['Boolean']>;
+};
+
+
+export type MutationCreateLayerswapDepositArgs = {
+  input: CreateLayerswapDepositInput;
+};
+
+
+export type MutationCreateLayerswapPaymentArgs = {
+  input: CreateLayerswapPaymentInput;
+};
+
+
+export type MutationCreateMerkleDropArgs = {
+  claims: Array<MerkleClaimInput>;
+  contract: Scalars['Felt'];
+  description?: InputMaybe<Scalars['String']>;
+  entrypoint: Scalars['String'];
+  key: Scalars['String'];
+  network: MerkleDropNetwork;
+  salt: Scalars['String'];
+};
+
+
+export type MutationCreatePaymasterArgs = {
+  budget: Scalars['Int'];
+  name: Scalars['String'];
+  sponsorCapBps?: InputMaybe<Scalars['Int']>;
+  teamName: Scalars['String'];
+  unit: FeeUnit;
+};
+
+
+export type MutationCreateRpcApiKeyArgs = {
+  name: Scalars['String'];
+  teamName: Scalars['String'];
+};
+
+
+export type MutationCreateRpcCorsDomainArgs = {
+  domain: Scalars['String'];
+  rateLimitPerMinute?: InputMaybe<Scalars['Int']>;
+  teamName: Scalars['String'];
+};
+
+
+export type MutationCreateSessionArgs = {
+  appId: Scalars['String'];
+  chainId: Scalars['String'];
+  session: SessionInput;
+  username: Scalars['String'];
+};
+
+
+export type MutationCreateStripePaymentIntentArgs = {
+  input: CreateStripePaymentIntentInput;
+};
+
+
+export type MutationCreateStripeStarterpackIntentArgs = {
+  input: CreateStripeStarterpackIntentInput;
+};
+
+
+export type MutationCreateTeamArgs = {
+  data?: InputMaybe<TeamInput>;
+  name: Scalars['String'];
+};
+
+
+export type MutationDecreaseBudgetArgs = {
+  admin?: InputMaybe<Scalars['Boolean']>;
+  amount: Scalars['Int'];
+  paymasterName: Scalars['ID'];
+  reason?: InputMaybe<AdminBudgetReason>;
+  unit: FeeUnit;
+};
+
+
+export type MutationDeleteDeploymentArgs = {
+  name: Scalars['String'];
+  service: DeploymentService;
+};
+
+
+export type MutationDeleteRpcApiKeyArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteRpcCorsDomainArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationDeleteTeamArgs = {
+  name: Scalars['String'];
+};
+
+
+export type MutationDeployArgs = {
+  chainId: Scalars['String'];
+  username: Scalars['String'];
+};
+
+
+export type MutationDisconnectOAuthArgs = {
+  provider: OAuthProvider;
+};
+
+
+export type MutationFinalizeLoginArgs = {
+  credentials: Scalars['String'];
+};
+
+
+export type MutationFinalizeRegistrationArgs = {
+  credentials: Scalars['String'];
+  network: Scalars['String'];
+};
+
+
+export type MutationIncreaseBudgetArgs = {
+  admin?: InputMaybe<Scalars['Boolean']>;
+  amount: Scalars['Int'];
+  paymasterName: Scalars['ID'];
+  reason?: InputMaybe<AdminBudgetReason>;
+  unit: FeeUnit;
+};
+
+
+export type MutationRegisterArgs = {
+  chainId: Scalars['String'];
+  owner: SignerInput;
+  session: SessionInput;
+  username: Scalars['String'];
+};
+
+
+export type MutationRemoveAllPoliciesArgs = {
+  paymasterName: Scalars['ID'];
+};
+
+
+export type MutationRemoveFromTeamArgs = {
+  name: Scalars['ID'];
+  usernames: Array<Scalars['String']>;
+};
+
+
+export type MutationRemoveOwnerArgs = {
+  chainID: Scalars['String'];
+  owner: SignerInput;
+  signerGuid: Scalars['Felt'];
+  username: Scalars['String'];
+};
+
+
+export type MutationRemovePaymasterArgs = {
+  paymasterName: Scalars['ID'];
+};
+
+
+export type MutationRemovePolicyArgs = {
+  paymasterName: Scalars['ID'];
+  policy: PolicyInput;
+};
+
+
+export type MutationRevokeSessionsArgs = {
+  sessions: Array<RevokeSessionInput>;
+};
+
+
+export type MutationSendEmailVerificationArgs = {
+  input: SendEmailVerificationInput;
+};
+
+
+export type MutationSendPhoneVerificationArgs = {
+  input: SendPhoneVerificationInput;
+};
+
+
+export type MutationSignDocumentArgs = {
+  input: AttestationInput;
+};
+
+
+export type MutationTransferArgs = {
+  data: TransferInput;
+};
+
+
+export type MutationTransferDeploymentArgs = {
+  name: Scalars['String'];
+  service: DeploymentService;
+  team: Scalars['String'];
+};
+
+
+export type MutationUpdateDeploymentArgs = {
+  name: Scalars['String'];
+  observability?: InputMaybe<Scalars['Boolean']>;
+  service: UpdateServiceInput;
+  tier?: InputMaybe<DeploymentTier>;
+  wait?: InputMaybe<Scalars['Boolean']>;
+};
+
+
+export type MutationUpdateMeArgs = {
+  data: AccountUpdateInput;
+};
+
+
+export type MutationUpdatePaymasterArgs = {
+  active?: InputMaybe<Scalars['Boolean']>;
+  newName?: InputMaybe<Scalars['String']>;
+  paymasterName: Scalars['ID'];
+  sponsorCapBps?: InputMaybe<Scalars['Int']>;
+  teamName?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationUpdateRpcApiKeyArgs = {
+  id: Scalars['ID'];
+  update: RpcApiKeyInput;
+};
+
+
+export type MutationUpdateRpcCorsDomainArgs = {
+  id: Scalars['ID'];
+  update: RpcCorsDomainInput;
+};
+
+
+export type MutationUpdateTeamArgs = {
+  name: Scalars['String'];
+  update: TeamInput;
+};
+
+
+export type MutationVerifyEmailArgs = {
+  input: VerifyEmailInput;
+};
+
+
+export type MutationVerifyPhoneArgs = {
+  input: VerifyPhoneInput;
+};
+
+export enum Network {
+  Solana = 'SOLANA',
+  Starknet = 'STARKNET'
+}
+
+/**
+ * An object with an ID.
+ * Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
+ */
+export type Node = {
+  /** The id of the object. */
+  id: Scalars['ID'];
+};
+
+export type OAuthConnection = Node & {
+  __typename?: 'OAuthConnection';
+  /** When the access token expires */
+  accessTokenExpiresAt: Scalars['Time'];
+  account: Account;
+  accountID: Scalars['ID'];
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  isExpired: Scalars['Boolean'];
+  profile: OAuthConnectionProfile;
+  /** OAuth provider identifier */
+  provider: OAuthConnectionProvider;
+  /** User's avatar URL on the provider */
+  providerAvatarURL?: Maybe<Scalars['String']>;
+  /** User's ID on the provider platform */
+  providerUserID: Scalars['String'];
+  /** User's display name/username on the provider */
+  providerUsername?: Maybe<Scalars['String']>;
+  /** When the refresh token expires */
+  refreshTokenExpiresAt?: Maybe<Scalars['Time']>;
+  /** Granted OAuth scopes */
+  scopes: Array<Scalars['String']>;
+  updatedAt: Scalars['Time'];
+};
+
+/** Ordering options for OAuthConnection connections */
+export type OAuthConnectionOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order OAuthConnections. */
+  field: OAuthConnectionOrderField;
+};
+
+/** Properties by which OAuthConnection connections can be ordered. */
+export enum OAuthConnectionOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+export type OAuthConnectionProfile = {
+  __typename?: 'OAuthConnectionProfile';
+  avatarUrl?: Maybe<Scalars['String']>;
+  providerUserId: Scalars['String'];
+  username?: Maybe<Scalars['String']>;
+};
+
+/** OAuthConnectionProvider is enum for the field provider */
+export enum OAuthConnectionProvider {
+  Instagram = 'INSTAGRAM',
+  Tiktok = 'TIKTOK',
+  Twitter = 'TWITTER'
+}
+
+/**
+ * OAuthConnectionWhereInput is used for filtering OAuthConnection objects.
+ * Input was generated by ent.
+ */
+export type OAuthConnectionWhereInput = {
+  /** access_token_expires_at field predicates */
+  accessTokenExpiresAt?: InputMaybe<Scalars['Time']>;
+  accessTokenExpiresAtGT?: InputMaybe<Scalars['Time']>;
+  accessTokenExpiresAtGTE?: InputMaybe<Scalars['Time']>;
+  accessTokenExpiresAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  accessTokenExpiresAtLT?: InputMaybe<Scalars['Time']>;
+  accessTokenExpiresAtLTE?: InputMaybe<Scalars['Time']>;
+  accessTokenExpiresAtNEQ?: InputMaybe<Scalars['Time']>;
+  accessTokenExpiresAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** account_id field predicates */
+  accountID?: InputMaybe<Scalars['ID']>;
+  accountIDContains?: InputMaybe<Scalars['ID']>;
+  accountIDContainsFold?: InputMaybe<Scalars['ID']>;
+  accountIDEqualFold?: InputMaybe<Scalars['ID']>;
+  accountIDGT?: InputMaybe<Scalars['ID']>;
+  accountIDGTE?: InputMaybe<Scalars['ID']>;
+  accountIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  accountIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  accountIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  accountIDLT?: InputMaybe<Scalars['ID']>;
+  accountIDLTE?: InputMaybe<Scalars['ID']>;
+  accountIDNEQ?: InputMaybe<Scalars['ID']>;
+  accountIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  and?: InputMaybe<Array<OAuthConnectionWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** account edge predicates */
+  hasAccount?: InputMaybe<Scalars['Boolean']>;
+  hasAccountWith?: InputMaybe<Array<AccountWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<OAuthConnectionWhereInput>;
+  or?: InputMaybe<Array<OAuthConnectionWhereInput>>;
+  /** provider field predicates */
+  provider?: InputMaybe<OAuthConnectionProvider>;
+  /** provider_avatar_url field predicates */
+  providerAvatarURL?: InputMaybe<Scalars['String']>;
+  providerAvatarURLContains?: InputMaybe<Scalars['String']>;
+  providerAvatarURLContainsFold?: InputMaybe<Scalars['String']>;
+  providerAvatarURLEqualFold?: InputMaybe<Scalars['String']>;
+  providerAvatarURLGT?: InputMaybe<Scalars['String']>;
+  providerAvatarURLGTE?: InputMaybe<Scalars['String']>;
+  providerAvatarURLHasPrefix?: InputMaybe<Scalars['String']>;
+  providerAvatarURLHasSuffix?: InputMaybe<Scalars['String']>;
+  providerAvatarURLIn?: InputMaybe<Array<Scalars['String']>>;
+  providerAvatarURLIsNil?: InputMaybe<Scalars['Boolean']>;
+  providerAvatarURLLT?: InputMaybe<Scalars['String']>;
+  providerAvatarURLLTE?: InputMaybe<Scalars['String']>;
+  providerAvatarURLNEQ?: InputMaybe<Scalars['String']>;
+  providerAvatarURLNotIn?: InputMaybe<Array<Scalars['String']>>;
+  providerAvatarURLNotNil?: InputMaybe<Scalars['Boolean']>;
+  providerIn?: InputMaybe<Array<OAuthConnectionProvider>>;
+  providerNEQ?: InputMaybe<OAuthConnectionProvider>;
+  providerNotIn?: InputMaybe<Array<OAuthConnectionProvider>>;
+  /** provider_user_id field predicates */
+  providerUserID?: InputMaybe<Scalars['String']>;
+  providerUserIDContains?: InputMaybe<Scalars['String']>;
+  providerUserIDContainsFold?: InputMaybe<Scalars['String']>;
+  providerUserIDEqualFold?: InputMaybe<Scalars['String']>;
+  providerUserIDGT?: InputMaybe<Scalars['String']>;
+  providerUserIDGTE?: InputMaybe<Scalars['String']>;
+  providerUserIDHasPrefix?: InputMaybe<Scalars['String']>;
+  providerUserIDHasSuffix?: InputMaybe<Scalars['String']>;
+  providerUserIDIn?: InputMaybe<Array<Scalars['String']>>;
+  providerUserIDLT?: InputMaybe<Scalars['String']>;
+  providerUserIDLTE?: InputMaybe<Scalars['String']>;
+  providerUserIDNEQ?: InputMaybe<Scalars['String']>;
+  providerUserIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** provider_username field predicates */
+  providerUsername?: InputMaybe<Scalars['String']>;
+  providerUsernameContains?: InputMaybe<Scalars['String']>;
+  providerUsernameContainsFold?: InputMaybe<Scalars['String']>;
+  providerUsernameEqualFold?: InputMaybe<Scalars['String']>;
+  providerUsernameGT?: InputMaybe<Scalars['String']>;
+  providerUsernameGTE?: InputMaybe<Scalars['String']>;
+  providerUsernameHasPrefix?: InputMaybe<Scalars['String']>;
+  providerUsernameHasSuffix?: InputMaybe<Scalars['String']>;
+  providerUsernameIn?: InputMaybe<Array<Scalars['String']>>;
+  providerUsernameIsNil?: InputMaybe<Scalars['Boolean']>;
+  providerUsernameLT?: InputMaybe<Scalars['String']>;
+  providerUsernameLTE?: InputMaybe<Scalars['String']>;
+  providerUsernameNEQ?: InputMaybe<Scalars['String']>;
+  providerUsernameNotIn?: InputMaybe<Array<Scalars['String']>>;
+  providerUsernameNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** refresh_token_expires_at field predicates */
+  refreshTokenExpiresAt?: InputMaybe<Scalars['Time']>;
+  refreshTokenExpiresAtGT?: InputMaybe<Scalars['Time']>;
+  refreshTokenExpiresAtGTE?: InputMaybe<Scalars['Time']>;
+  refreshTokenExpiresAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  refreshTokenExpiresAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  refreshTokenExpiresAtLT?: InputMaybe<Scalars['Time']>;
+  refreshTokenExpiresAtLTE?: InputMaybe<Scalars['Time']>;
+  refreshTokenExpiresAtNEQ?: InputMaybe<Scalars['Time']>;
+  refreshTokenExpiresAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  refreshTokenExpiresAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export enum OAuthProvider {
+  Instagram = 'INSTAGRAM',
+  Tiktok = 'TIKTOK',
+  Twitter = 'TWITTER'
+}
+
+export enum Order {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
+/** Possible directions in which to order a list of items when provided an `orderBy` argument. */
+export enum OrderDirection {
+  /** Specifies an ascending order for a given `orderBy` argument. */
+  Asc = 'ASC',
+  /** Specifies a descending order for a given `orderBy` argument. */
+  Desc = 'DESC'
+}
+
+export type Ownership = {
+  __typename?: 'Ownership';
+  accountAddress: Scalars['String'];
+  balance: Scalars['String'];
+  contractAddress: Scalars['String'];
+  tokenId: Scalars['String'];
+};
+
+export type OwnershipItem = {
+  __typename?: 'OwnershipItem';
+  meta: OwnershipMeta;
+  ownerships: Array<Ownership>;
+};
+
+export type OwnershipMeta = {
+  __typename?: 'OwnershipMeta';
+  contractAddresses: Array<Scalars['String']>;
+  count: Scalars['Int'];
+  error?: Maybe<Scalars['String']>;
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+  tokenIds: Array<Scalars['String']>;
+};
+
+export type OwnershipProject = {
+  contractAddresses: Array<Scalars['String']>;
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+  tokenIds: Array<Scalars['String']>;
+};
+
+export type OwnershipResult = {
+  __typename?: 'OwnershipResult';
+  items: Array<OwnershipItem>;
+};
+
+/**
+ * Information about pagination in a connection.
+ * https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo
+ */
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  /** When paginating forwards, the cursor to continue. */
+  endCursor?: Maybe<Scalars['Cursor']>;
+  /** When paginating forwards, are there more items? */
+  hasNextPage: Scalars['Boolean'];
+  /** When paginating backwards, are there more items? */
+  hasPreviousPage: Scalars['Boolean'];
+  /** When paginating backwards, the cursor to continue. */
+  startCursor?: Maybe<Scalars['Cursor']>;
+};
+
+export type PasswordCredential = {
+  __typename?: 'PasswordCredential';
+  encryptedPrivateKey: Scalars['String'];
+  publicKey: Scalars['String'];
+};
+
+export type PasswordCredentials = {
+  __typename?: 'PasswordCredentials';
+  password?: Maybe<Array<PasswordCredential>>;
+};
+
+export type Paymaster = Node & {
+  __typename?: 'Paymaster';
+  active: Scalars['Boolean'];
+  activities: ActivityConnection;
+  /** Budget in 6 decimal precision */
+  budget: Scalars['Int'];
+  budgetFeeUnit: PaymasterBudgetFeeUnit;
+  createdAt: Scalars['Time'];
+  /** Accumulated CREDITS fees in 6 decimal precision */
+  creditFees: Scalars['Int'];
+  id: Scalars['ID'];
+  legacyEthFees: Scalars['Int'];
+  legacyRevertedTransactions: Scalars['Int'];
+  legacyStrkFees: Scalars['Int'];
+  legacySuccessfulTransactions: Scalars['Int'];
+  name: Scalars['String'];
+  outbox: PaymasterOutboxConnection;
+  policies: PaymasterPolicyConnection;
+  /** Number of reverted transactions */
+  revertedTransactions: Scalars['Int'];
+  /** Per-transaction sponsor cap in basis points (0-10000) */
+  sponsorCapBps?: Maybe<Scalars['Int']>;
+  starterpacks: StarterpackConnection;
+  /** Accumulated STRK fees in 6 decimal precision */
+  strkFees: Scalars['Int'];
+  /** Number of successful transactions */
+  successfulTransactions: Scalars['Int'];
+  team?: Maybe<Team>;
+  updatedAt: Scalars['Time'];
+};
+
+
+export type PaymasterActivitiesArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<ActivityOrder>;
+  where?: InputMaybe<ActivityWhereInput>;
+};
+
+
+export type PaymasterOutboxArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaymasterOutboxOrder>;
+  where?: InputMaybe<PaymasterOutboxWhereInput>;
+};
+
+
+export type PaymasterPoliciesArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaymasterPolicyOrder>;
+  where?: InputMaybe<PaymasterPolicyWhereInput>;
+};
+
+
+export type PaymasterStarterpacksArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StarterpackOrder>;
+  where?: InputMaybe<StarterpackWhereInput>;
+};
+
+/** PaymasterBudgetFeeUnit is enum for the field budget_fee_unit */
+export enum PaymasterBudgetFeeUnit {
+  Credit = 'CREDIT',
+  Strk = 'STRK'
+}
+
+/** A connection to a list of items. */
+export type PaymasterConnection = {
+  __typename?: 'PaymasterConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<PaymasterEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type PaymasterEdge = {
+  __typename?: 'PaymasterEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Paymaster>;
+};
+
+export type PaymasterLookupResult = {
+  __typename?: 'PaymasterLookupResult';
+  paymaster?: Maybe<Paymaster>;
+};
+
+/** Ordering options for Paymaster connections */
+export type PaymasterOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Paymasters. */
+  field: PaymasterOrderField;
+};
+
+/** Properties by which Paymaster connections can be ordered. */
+export enum PaymasterOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+export type PaymasterOutbox = Node & {
+  __typename?: 'PaymasterOutbox';
+  claimToken?: Maybe<Scalars['String']>;
+  claimedAt?: Maybe<Scalars['Time']>;
+  createdAt: Scalars['Time'];
+  creditFee: Scalars['Int'];
+  id: Scalars['ID'];
+  paymaster: Paymaster;
+  /** Paymaster ID */
+  paymasterID: Scalars['ID'];
+  status: PaymasterOutboxStatus;
+  strkFee: Scalars['Int'];
+  transactionHash: Scalars['String'];
+  transactionStatus: PaymasterOutboxTransactionStatus;
+  updatedAt: Scalars['Time'];
+};
+
+/** A connection to a list of items. */
+export type PaymasterOutboxConnection = {
+  __typename?: 'PaymasterOutboxConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<PaymasterOutboxEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type PaymasterOutboxEdge = {
+  __typename?: 'PaymasterOutboxEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<PaymasterOutbox>;
+};
+
+/** Ordering options for PaymasterOutbox connections */
+export type PaymasterOutboxOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order PaymasterOutboxes. */
+  field: PaymasterOutboxOrderField;
+};
+
+/** Properties by which PaymasterOutbox connections can be ordered. */
+export enum PaymasterOutboxOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/** PaymasterOutboxStatus is enum for the field status */
+export enum PaymasterOutboxStatus {
+  New = 'NEW',
+  Processing = 'PROCESSING'
+}
+
+/** PaymasterOutboxTransactionStatus is enum for the field transaction_status */
+export enum PaymasterOutboxTransactionStatus {
+  Reverted = 'REVERTED',
+  Success = 'SUCCESS'
+}
+
+/**
+ * PaymasterOutboxWhereInput is used for filtering PaymasterOutbox objects.
+ * Input was generated by ent.
+ */
+export type PaymasterOutboxWhereInput = {
+  and?: InputMaybe<Array<PaymasterOutboxWhereInput>>;
+  /** claim_token field predicates */
+  claimToken?: InputMaybe<Scalars['String']>;
+  claimTokenContains?: InputMaybe<Scalars['String']>;
+  claimTokenContainsFold?: InputMaybe<Scalars['String']>;
+  claimTokenEqualFold?: InputMaybe<Scalars['String']>;
+  claimTokenGT?: InputMaybe<Scalars['String']>;
+  claimTokenGTE?: InputMaybe<Scalars['String']>;
+  claimTokenHasPrefix?: InputMaybe<Scalars['String']>;
+  claimTokenHasSuffix?: InputMaybe<Scalars['String']>;
+  claimTokenIn?: InputMaybe<Array<Scalars['String']>>;
+  claimTokenIsNil?: InputMaybe<Scalars['Boolean']>;
+  claimTokenLT?: InputMaybe<Scalars['String']>;
+  claimTokenLTE?: InputMaybe<Scalars['String']>;
+  claimTokenNEQ?: InputMaybe<Scalars['String']>;
+  claimTokenNotIn?: InputMaybe<Array<Scalars['String']>>;
+  claimTokenNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** claimed_at field predicates */
+  claimedAt?: InputMaybe<Scalars['Time']>;
+  claimedAtGT?: InputMaybe<Scalars['Time']>;
+  claimedAtGTE?: InputMaybe<Scalars['Time']>;
+  claimedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  claimedAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  claimedAtLT?: InputMaybe<Scalars['Time']>;
+  claimedAtLTE?: InputMaybe<Scalars['Time']>;
+  claimedAtNEQ?: InputMaybe<Scalars['Time']>;
+  claimedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  claimedAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** credit_fee field predicates */
+  creditFee?: InputMaybe<Scalars['Int']>;
+  creditFeeGT?: InputMaybe<Scalars['Int']>;
+  creditFeeGTE?: InputMaybe<Scalars['Int']>;
+  creditFeeIn?: InputMaybe<Array<Scalars['Int']>>;
+  creditFeeLT?: InputMaybe<Scalars['Int']>;
+  creditFeeLTE?: InputMaybe<Scalars['Int']>;
+  creditFeeNEQ?: InputMaybe<Scalars['Int']>;
+  creditFeeNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** paymaster edge predicates */
+  hasPaymaster?: InputMaybe<Scalars['Boolean']>;
+  hasPaymasterWith?: InputMaybe<Array<PaymasterWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<PaymasterOutboxWhereInput>;
+  or?: InputMaybe<Array<PaymasterOutboxWhereInput>>;
+  /** paymaster_id field predicates */
+  paymasterID?: InputMaybe<Scalars['ID']>;
+  paymasterIDContains?: InputMaybe<Scalars['ID']>;
+  paymasterIDContainsFold?: InputMaybe<Scalars['ID']>;
+  paymasterIDEqualFold?: InputMaybe<Scalars['ID']>;
+  paymasterIDGT?: InputMaybe<Scalars['ID']>;
+  paymasterIDGTE?: InputMaybe<Scalars['ID']>;
+  paymasterIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  paymasterIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  paymasterIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  paymasterIDLT?: InputMaybe<Scalars['ID']>;
+  paymasterIDLTE?: InputMaybe<Scalars['ID']>;
+  paymasterIDNEQ?: InputMaybe<Scalars['ID']>;
+  paymasterIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** status field predicates */
+  status?: InputMaybe<PaymasterOutboxStatus>;
+  statusIn?: InputMaybe<Array<PaymasterOutboxStatus>>;
+  statusNEQ?: InputMaybe<PaymasterOutboxStatus>;
+  statusNotIn?: InputMaybe<Array<PaymasterOutboxStatus>>;
+  /** strk_fee field predicates */
+  strkFee?: InputMaybe<Scalars['Int']>;
+  strkFeeGT?: InputMaybe<Scalars['Int']>;
+  strkFeeGTE?: InputMaybe<Scalars['Int']>;
+  strkFeeIn?: InputMaybe<Array<Scalars['Int']>>;
+  strkFeeLT?: InputMaybe<Scalars['Int']>;
+  strkFeeLTE?: InputMaybe<Scalars['Int']>;
+  strkFeeNEQ?: InputMaybe<Scalars['Int']>;
+  strkFeeNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** transaction_hash field predicates */
+  transactionHash?: InputMaybe<Scalars['String']>;
+  transactionHashContains?: InputMaybe<Scalars['String']>;
+  transactionHashContainsFold?: InputMaybe<Scalars['String']>;
+  transactionHashEqualFold?: InputMaybe<Scalars['String']>;
+  transactionHashGT?: InputMaybe<Scalars['String']>;
+  transactionHashGTE?: InputMaybe<Scalars['String']>;
+  transactionHashHasPrefix?: InputMaybe<Scalars['String']>;
+  transactionHashHasSuffix?: InputMaybe<Scalars['String']>;
+  transactionHashIn?: InputMaybe<Array<Scalars['String']>>;
+  transactionHashLT?: InputMaybe<Scalars['String']>;
+  transactionHashLTE?: InputMaybe<Scalars['String']>;
+  transactionHashNEQ?: InputMaybe<Scalars['String']>;
+  transactionHashNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** transaction_status field predicates */
+  transactionStatus?: InputMaybe<PaymasterOutboxTransactionStatus>;
+  transactionStatusIn?: InputMaybe<Array<PaymasterOutboxTransactionStatus>>;
+  transactionStatusNEQ?: InputMaybe<PaymasterOutboxTransactionStatus>;
+  transactionStatusNotIn?: InputMaybe<Array<PaymasterOutboxTransactionStatus>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type PaymasterPolicy = Node & {
+  __typename?: 'PaymasterPolicy';
+  active: Scalars['Boolean'];
+  contractAddress: Scalars['String'];
+  createdAt: Scalars['Time'];
+  entryPoint: Scalars['String'];
+  id: Scalars['ID'];
+  paymasterID?: Maybe<Scalars['ID']>;
+  paymasters?: Maybe<Paymaster>;
+  /** Predicate configuration for the policy */
+  predicate?: Maybe<PolicyPredicate>;
+  /** If set, this policy only applies to requests from the specified katana project (e.g., 'myproject' for /x/myproject/katana) */
+  requiredKatanaProject?: Maybe<Scalars['String']>;
+  selector: Scalars['String'];
+  /** Trigger configuration - policy only applies if this call exists in the multicall */
+  trigger?: Maybe<PolicyTrigger>;
+  updatedAt: Scalars['Time'];
+};
+
+/** A connection to a list of items. */
+export type PaymasterPolicyConnection = {
+  __typename?: 'PaymasterPolicyConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<PaymasterPolicyEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type PaymasterPolicyEdge = {
+  __typename?: 'PaymasterPolicyEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<PaymasterPolicy>;
+};
+
+/** Ordering options for PaymasterPolicy connections */
+export type PaymasterPolicyOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order PaymasterPolicies. */
+  field: PaymasterPolicyOrderField;
+};
+
+/** Properties by which PaymasterPolicy connections can be ordered. */
+export enum PaymasterPolicyOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * PaymasterPolicyWhereInput is used for filtering PaymasterPolicy objects.
+ * Input was generated by ent.
+ */
+export type PaymasterPolicyWhereInput = {
+  /** active field predicates */
+  active?: InputMaybe<Scalars['Boolean']>;
+  activeNEQ?: InputMaybe<Scalars['Boolean']>;
+  and?: InputMaybe<Array<PaymasterPolicyWhereInput>>;
+  /** contract_address field predicates */
+  contractAddress?: InputMaybe<Scalars['String']>;
+  contractAddressContains?: InputMaybe<Scalars['String']>;
+  contractAddressContainsFold?: InputMaybe<Scalars['String']>;
+  contractAddressEqualFold?: InputMaybe<Scalars['String']>;
+  contractAddressGT?: InputMaybe<Scalars['String']>;
+  contractAddressGTE?: InputMaybe<Scalars['String']>;
+  contractAddressHasPrefix?: InputMaybe<Scalars['String']>;
+  contractAddressHasSuffix?: InputMaybe<Scalars['String']>;
+  contractAddressIn?: InputMaybe<Array<Scalars['String']>>;
+  contractAddressLT?: InputMaybe<Scalars['String']>;
+  contractAddressLTE?: InputMaybe<Scalars['String']>;
+  contractAddressNEQ?: InputMaybe<Scalars['String']>;
+  contractAddressNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** entry_point field predicates */
+  entryPoint?: InputMaybe<Scalars['String']>;
+  entryPointContains?: InputMaybe<Scalars['String']>;
+  entryPointContainsFold?: InputMaybe<Scalars['String']>;
+  entryPointEqualFold?: InputMaybe<Scalars['String']>;
+  entryPointGT?: InputMaybe<Scalars['String']>;
+  entryPointGTE?: InputMaybe<Scalars['String']>;
+  entryPointHasPrefix?: InputMaybe<Scalars['String']>;
+  entryPointHasSuffix?: InputMaybe<Scalars['String']>;
+  entryPointIn?: InputMaybe<Array<Scalars['String']>>;
+  entryPointLT?: InputMaybe<Scalars['String']>;
+  entryPointLTE?: InputMaybe<Scalars['String']>;
+  entryPointNEQ?: InputMaybe<Scalars['String']>;
+  entryPointNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** paymasters edge predicates */
+  hasPaymasters?: InputMaybe<Scalars['Boolean']>;
+  hasPaymastersWith?: InputMaybe<Array<PaymasterWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<PaymasterPolicyWhereInput>;
+  or?: InputMaybe<Array<PaymasterPolicyWhereInput>>;
+  /** paymaster_id field predicates */
+  paymasterID?: InputMaybe<Scalars['ID']>;
+  paymasterIDContains?: InputMaybe<Scalars['ID']>;
+  paymasterIDContainsFold?: InputMaybe<Scalars['ID']>;
+  paymasterIDEqualFold?: InputMaybe<Scalars['ID']>;
+  paymasterIDGT?: InputMaybe<Scalars['ID']>;
+  paymasterIDGTE?: InputMaybe<Scalars['ID']>;
+  paymasterIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  paymasterIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  paymasterIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  paymasterIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  paymasterIDLT?: InputMaybe<Scalars['ID']>;
+  paymasterIDLTE?: InputMaybe<Scalars['ID']>;
+  paymasterIDNEQ?: InputMaybe<Scalars['ID']>;
+  paymasterIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  paymasterIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** required_katana_project field predicates */
+  requiredKatanaProject?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectContains?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectContainsFold?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectEqualFold?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectGT?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectGTE?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectHasPrefix?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectHasSuffix?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectIn?: InputMaybe<Array<Scalars['String']>>;
+  requiredKatanaProjectIsNil?: InputMaybe<Scalars['Boolean']>;
+  requiredKatanaProjectLT?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectLTE?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectNEQ?: InputMaybe<Scalars['String']>;
+  requiredKatanaProjectNotIn?: InputMaybe<Array<Scalars['String']>>;
+  requiredKatanaProjectNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** selector field predicates */
+  selector?: InputMaybe<Scalars['String']>;
+  selectorContains?: InputMaybe<Scalars['String']>;
+  selectorContainsFold?: InputMaybe<Scalars['String']>;
+  selectorEqualFold?: InputMaybe<Scalars['String']>;
+  selectorGT?: InputMaybe<Scalars['String']>;
+  selectorGTE?: InputMaybe<Scalars['String']>;
+  selectorHasPrefix?: InputMaybe<Scalars['String']>;
+  selectorHasSuffix?: InputMaybe<Scalars['String']>;
+  selectorIn?: InputMaybe<Array<Scalars['String']>>;
+  selectorLT?: InputMaybe<Scalars['String']>;
+  selectorLTE?: InputMaybe<Scalars['String']>;
+  selectorNEQ?: InputMaybe<Scalars['String']>;
+  selectorNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type PaymasterStats = {
+  __typename?: 'PaymasterStats';
+  avgUsdFee?: Maybe<Scalars['Float']>;
+  maxUsdFee?: Maybe<Scalars['Float']>;
+  minUsdFee?: Maybe<Scalars['Float']>;
+  revertedTransactions: Scalars['Int'];
+  successfulTransactions: Scalars['Int'];
+  totalTransactions: Scalars['Int'];
+  totalUsdFees?: Maybe<Scalars['Float']>;
+  uniqueUsers: Scalars['Int'];
+};
+
+export type PaymasterTransaction = {
+  __typename?: 'PaymasterTransaction';
+  executedAt: Scalars['Time'];
+  status: ActivityStatus;
+  transactionHash: Scalars['String'];
+  usdFee: Scalars['Float'];
+};
+
+export enum PaymasterTransactionFilter {
+  All = 'ALL',
+  Reverted = 'REVERTED',
+  Success = 'SUCCESS'
+}
+
+export enum PaymasterTransactionOrder {
+  ExecutedAtAsc = 'EXECUTED_AT_ASC',
+  ExecutedAtDesc = 'EXECUTED_AT_DESC',
+  FeesAsc = 'FEES_ASC',
+  FeesDesc = 'FEES_DESC'
+}
+
+/**
+ * PaymasterWhereInput is used for filtering Paymaster objects.
+ * Input was generated by ent.
+ */
+export type PaymasterWhereInput = {
+  /** active field predicates */
+  active?: InputMaybe<Scalars['Boolean']>;
+  activeNEQ?: InputMaybe<Scalars['Boolean']>;
+  and?: InputMaybe<Array<PaymasterWhereInput>>;
+  /** budget field predicates */
+  budget?: InputMaybe<Scalars['Int']>;
+  /** budget_fee_unit field predicates */
+  budgetFeeUnit?: InputMaybe<PaymasterBudgetFeeUnit>;
+  budgetFeeUnitIn?: InputMaybe<Array<PaymasterBudgetFeeUnit>>;
+  budgetFeeUnitNEQ?: InputMaybe<PaymasterBudgetFeeUnit>;
+  budgetFeeUnitNotIn?: InputMaybe<Array<PaymasterBudgetFeeUnit>>;
+  budgetGT?: InputMaybe<Scalars['Int']>;
+  budgetGTE?: InputMaybe<Scalars['Int']>;
+  budgetIn?: InputMaybe<Array<Scalars['Int']>>;
+  budgetLT?: InputMaybe<Scalars['Int']>;
+  budgetLTE?: InputMaybe<Scalars['Int']>;
+  budgetNEQ?: InputMaybe<Scalars['Int']>;
+  budgetNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** credit_fees field predicates */
+  creditFees?: InputMaybe<Scalars['Int']>;
+  creditFeesGT?: InputMaybe<Scalars['Int']>;
+  creditFeesGTE?: InputMaybe<Scalars['Int']>;
+  creditFeesIn?: InputMaybe<Array<Scalars['Int']>>;
+  creditFeesLT?: InputMaybe<Scalars['Int']>;
+  creditFeesLTE?: InputMaybe<Scalars['Int']>;
+  creditFeesNEQ?: InputMaybe<Scalars['Int']>;
+  creditFeesNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** activities edge predicates */
+  hasActivities?: InputMaybe<Scalars['Boolean']>;
+  hasActivitiesWith?: InputMaybe<Array<ActivityWhereInput>>;
+  /** outbox edge predicates */
+  hasOutbox?: InputMaybe<Scalars['Boolean']>;
+  hasOutboxWith?: InputMaybe<Array<PaymasterOutboxWhereInput>>;
+  /** policies edge predicates */
+  hasPolicies?: InputMaybe<Scalars['Boolean']>;
+  hasPoliciesWith?: InputMaybe<Array<PaymasterPolicyWhereInput>>;
+  /** starterpacks edge predicates */
+  hasStarterpacks?: InputMaybe<Scalars['Boolean']>;
+  hasStarterpacksWith?: InputMaybe<Array<StarterpackWhereInput>>;
+  /** team edge predicates */
+  hasTeam?: InputMaybe<Scalars['Boolean']>;
+  hasTeamWith?: InputMaybe<Array<TeamWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** legacy_eth_fees field predicates */
+  legacyEthFees?: InputMaybe<Scalars['Int']>;
+  legacyEthFeesGT?: InputMaybe<Scalars['Int']>;
+  legacyEthFeesGTE?: InputMaybe<Scalars['Int']>;
+  legacyEthFeesIn?: InputMaybe<Array<Scalars['Int']>>;
+  legacyEthFeesLT?: InputMaybe<Scalars['Int']>;
+  legacyEthFeesLTE?: InputMaybe<Scalars['Int']>;
+  legacyEthFeesNEQ?: InputMaybe<Scalars['Int']>;
+  legacyEthFeesNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** legacy_reverted_transactions field predicates */
+  legacyRevertedTransactions?: InputMaybe<Scalars['Int']>;
+  legacyRevertedTransactionsGT?: InputMaybe<Scalars['Int']>;
+  legacyRevertedTransactionsGTE?: InputMaybe<Scalars['Int']>;
+  legacyRevertedTransactionsIn?: InputMaybe<Array<Scalars['Int']>>;
+  legacyRevertedTransactionsLT?: InputMaybe<Scalars['Int']>;
+  legacyRevertedTransactionsLTE?: InputMaybe<Scalars['Int']>;
+  legacyRevertedTransactionsNEQ?: InputMaybe<Scalars['Int']>;
+  legacyRevertedTransactionsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** legacy_strk_fees field predicates */
+  legacyStrkFees?: InputMaybe<Scalars['Int']>;
+  legacyStrkFeesGT?: InputMaybe<Scalars['Int']>;
+  legacyStrkFeesGTE?: InputMaybe<Scalars['Int']>;
+  legacyStrkFeesIn?: InputMaybe<Array<Scalars['Int']>>;
+  legacyStrkFeesLT?: InputMaybe<Scalars['Int']>;
+  legacyStrkFeesLTE?: InputMaybe<Scalars['Int']>;
+  legacyStrkFeesNEQ?: InputMaybe<Scalars['Int']>;
+  legacyStrkFeesNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** legacy_successful_transactions field predicates */
+  legacySuccessfulTransactions?: InputMaybe<Scalars['Int']>;
+  legacySuccessfulTransactionsGT?: InputMaybe<Scalars['Int']>;
+  legacySuccessfulTransactionsGTE?: InputMaybe<Scalars['Int']>;
+  legacySuccessfulTransactionsIn?: InputMaybe<Array<Scalars['Int']>>;
+  legacySuccessfulTransactionsLT?: InputMaybe<Scalars['Int']>;
+  legacySuccessfulTransactionsLTE?: InputMaybe<Scalars['Int']>;
+  legacySuccessfulTransactionsNEQ?: InputMaybe<Scalars['Int']>;
+  legacySuccessfulTransactionsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** name field predicates */
+  name?: InputMaybe<Scalars['String']>;
+  nameContains?: InputMaybe<Scalars['String']>;
+  nameContainsFold?: InputMaybe<Scalars['String']>;
+  nameEqualFold?: InputMaybe<Scalars['String']>;
+  nameGT?: InputMaybe<Scalars['String']>;
+  nameGTE?: InputMaybe<Scalars['String']>;
+  nameHasPrefix?: InputMaybe<Scalars['String']>;
+  nameHasSuffix?: InputMaybe<Scalars['String']>;
+  nameIn?: InputMaybe<Array<Scalars['String']>>;
+  nameLT?: InputMaybe<Scalars['String']>;
+  nameLTE?: InputMaybe<Scalars['String']>;
+  nameNEQ?: InputMaybe<Scalars['String']>;
+  nameNotIn?: InputMaybe<Array<Scalars['String']>>;
+  not?: InputMaybe<PaymasterWhereInput>;
+  or?: InputMaybe<Array<PaymasterWhereInput>>;
+  /** reverted_transactions field predicates */
+  revertedTransactions?: InputMaybe<Scalars['Int']>;
+  revertedTransactionsGT?: InputMaybe<Scalars['Int']>;
+  revertedTransactionsGTE?: InputMaybe<Scalars['Int']>;
+  revertedTransactionsIn?: InputMaybe<Array<Scalars['Int']>>;
+  revertedTransactionsLT?: InputMaybe<Scalars['Int']>;
+  revertedTransactionsLTE?: InputMaybe<Scalars['Int']>;
+  revertedTransactionsNEQ?: InputMaybe<Scalars['Int']>;
+  revertedTransactionsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** sponsor_cap_bps field predicates */
+  sponsorCapBps?: InputMaybe<Scalars['Int']>;
+  sponsorCapBpsGT?: InputMaybe<Scalars['Int']>;
+  sponsorCapBpsGTE?: InputMaybe<Scalars['Int']>;
+  sponsorCapBpsIn?: InputMaybe<Array<Scalars['Int']>>;
+  sponsorCapBpsIsNil?: InputMaybe<Scalars['Boolean']>;
+  sponsorCapBpsLT?: InputMaybe<Scalars['Int']>;
+  sponsorCapBpsLTE?: InputMaybe<Scalars['Int']>;
+  sponsorCapBpsNEQ?: InputMaybe<Scalars['Int']>;
+  sponsorCapBpsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  sponsorCapBpsNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** strk_fees field predicates */
+  strkFees?: InputMaybe<Scalars['Int']>;
+  strkFeesGT?: InputMaybe<Scalars['Int']>;
+  strkFeesGTE?: InputMaybe<Scalars['Int']>;
+  strkFeesIn?: InputMaybe<Array<Scalars['Int']>>;
+  strkFeesLT?: InputMaybe<Scalars['Int']>;
+  strkFeesLTE?: InputMaybe<Scalars['Int']>;
+  strkFeesNEQ?: InputMaybe<Scalars['Int']>;
+  strkFeesNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** successful_transactions field predicates */
+  successfulTransactions?: InputMaybe<Scalars['Int']>;
+  successfulTransactionsGT?: InputMaybe<Scalars['Int']>;
+  successfulTransactionsGTE?: InputMaybe<Scalars['Int']>;
+  successfulTransactionsIn?: InputMaybe<Array<Scalars['Int']>>;
+  successfulTransactionsLT?: InputMaybe<Scalars['Int']>;
+  successfulTransactionsLTE?: InputMaybe<Scalars['Int']>;
+  successfulTransactionsNEQ?: InputMaybe<Scalars['Int']>;
+  successfulTransactionsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type PlayerAchievement = {
+  __typename?: 'PlayerAchievement';
+  /** The unique identifier for the achievement. */
+  achievementId: Scalars['ID'];
+  /** The timestamp when the achievement was completed in ISO 8601 format. */
+  completionTime: Scalars['String'];
+  /** The unique identifier of the player who earned the achievement. */
+  playerId: Scalars['ID'];
+  /** The number of points awarded for completing the achievement. */
+  points: Scalars['Int'];
+  /** The unique identifier for the task associated with this achievement. */
+  taskId: Scalars['ID'];
+  /** The total number of tasks required for this specific achievement. */
+  taskTotal: Scalars['Int'];
+  /** The total number of achievements completed by the player. */
+  total: Scalars['Int'];
+};
+
+export type PlayerAchievementItem = {
+  __typename?: 'PlayerAchievementItem';
+  achievements: Array<PlayerAchievement>;
+  meta: AchievementMeta;
+};
+
+export type PlayerAchievementResult = {
+  __typename?: 'PlayerAchievementResult';
+  items: Array<PlayerAchievementItem>;
+};
+
+export type PlaythroughEntry = {
+  __typename?: 'PlaythroughEntry';
+  actionCount: Scalars['Int'];
+  callerAddress: Scalars['String'];
+  entrypoints: Scalars['String'];
+  sessionEnd: Scalars['String'];
+  sessionStart: Scalars['String'];
+};
+
+export type PlaythroughItem = {
+  __typename?: 'PlaythroughItem';
+  meta: PlaythroughMeta;
+  playthroughs: Array<PlaythroughEntry>;
+};
+
+export type PlaythroughMeta = {
+  __typename?: 'PlaythroughMeta';
+  count: Scalars['Int'];
+  error?: Maybe<Scalars['String']>;
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+};
+
+export type PlaythroughProject = {
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+};
+
+export type PlaythroughResult = {
+  __typename?: 'PlaythroughResult';
+  items: Array<PlaythroughItem>;
+};
+
+export type PolicyCallInput = {
+  contractAddress: Scalars['String'];
+  entryPoint: Scalars['String'];
+};
+
+export type PolicyInput = {
+  contractAddress: Scalars['String'];
+  entryPoint: Scalars['String'];
+  predicate?: InputMaybe<PolicyPredicateInput>;
+  trigger?: InputMaybe<PolicyTriggerInput>;
+};
+
+export type PolicyPredicate = {
+  __typename?: 'PolicyPredicate';
+  contractAddress: Scalars['String'];
+  entryPoint: Scalars['String'];
+};
+
+export type PolicyPredicateInput = {
+  address: Scalars['String'];
+  entrypoint: Scalars['String'];
+};
+
+export type PolicyTrigger = {
+  __typename?: 'PolicyTrigger';
+  contractAddress: Scalars['String'];
+  entryPoint: Scalars['String'];
+};
+
+export type PolicyTriggerInput = {
+  address: Scalars['String'];
+  entrypoint: Scalars['String'];
+};
+
+export type Price = {
+  __typename?: 'Price';
+  amount: Scalars['BigInt'];
+  base: Scalars['String'];
+  decimals: Scalars['Int'];
+  quote: Scalars['String'];
+};
+
+export type Project = {
+  model: Scalars['String'];
+  namespace: Scalars['String'];
+  project: Scalars['String'];
+};
+
+export type PurchaseFulfillment = {
+  __typename?: 'PurchaseFulfillment';
+  id: Scalars['ID'];
+  lastError?: Maybe<Scalars['String']>;
+  status: PurchaseFulfillmentStatus;
+  transactionHash?: Maybe<Scalars['String']>;
+};
+
+export enum PurchaseFulfillmentStatus {
+  AwaitingPayment = 'AWAITING_PAYMENT',
+  Confirmed = 'CONFIRMED',
+  Failed = 'FAILED',
+  Processing = 'PROCESSING',
+  Queued = 'QUEUED',
+  Submitted = 'SUBMITTED'
+}
+
+export type Query = {
+  __typename?: 'Query';
+  account?: Maybe<Account>;
+  accountPrivate?: Maybe<AccountPrivate>;
+  accounts?: Maybe<AccountConnection>;
+  achievements: AchievementResult;
+  activities: ActivityResult;
+  balance: Balance;
+  balances: BalanceConnection;
+  /**
+   * Get a specific Coinbase onramp order by its ID.
+   * Queries the internal database for the current status.
+   */
+  coinbaseOnrampOrder: CoinbaseOnrampOrder;
+  /**
+   * Get a quote for a Coinbase onramp purchase without creating a transaction.
+   * This is an estimate only and does not guarantee the final price.
+   */
+  coinbaseOnrampQuote: CoinbaseOnrampQuote;
+  /**
+   * Get the status and history of Coinbase onramp transactions for a user.
+   * Returns a paginated list of transactions in reverse chronological order.
+   */
+  coinbaseOnrampTransactions: CoinbaseTransactionsResponse;
+  /**
+   * Test endpoint: get Coinflow checkout totals for a given amount in cents.
+   * No auth required — for local testing only.
+   */
+  coinflowCheckoutTotals: CoinflowPricingDetails;
+  /**
+   * Get a Coinflow payment by its internal ID (the CoinflowPayments row ID),
+   * including its linked PurchaseFulfillment for fulfillment status polling.
+   */
+  coinflowPayment: CoinflowPayment;
+  /**
+   * Get a Coinflow starterpack pricing quote without creating a payment intent.
+   * Computes the base cost from the onchain registry, then calls Coinflow's
+   * checkout totals API to get the actual processing fees.
+   */
+  coinflowStarterpackQuote: CoinflowStarterpackQuote;
+  collectible: Collectible;
+  collectibles: CollectibleConnection;
+  collection: Collection;
+  collections: CollectionConnection;
+  controller?: Maybe<Controller>;
+  controllers?: Maybe<ControllerConnection>;
+  cryptoPayment?: Maybe<CryptoPayment>;
+  deployment?: Maybe<Deployment>;
+  deployments?: Maybe<DeploymentConnection>;
+  layerswapPayment?: Maybe<LayerswapPayment>;
+  layerswapQuote: LayerswapQuote;
+  layerswapSources: Array<LayerswapSource>;
+  layerswapStatus: LayerswapStatusResponse;
+  lookupPaymaster: PaymasterLookupResult;
+  me?: Maybe<Account>;
+  merkleClaims: MerkleClaimConnection;
+  merkleClaimsForAddress: Array<MerkleClaim>;
+  merkleDropByKey?: Maybe<MerkleDrop>;
+  merkleDrops: MerkleDropConnection;
+  metrics: MetricsResult;
+  /** Fetches an object given its ID. */
+  node?: Maybe<Node>;
+  /** Lookup nodes by a list of IDs. */
+  nodes: Array<Maybe<Node>>;
+  ownerships: OwnershipResult;
+  paymaster?: Maybe<Paymaster>;
+  paymasterStats: PaymasterStats;
+  paymasterTransactions: Array<PaymasterTransaction>;
+  paymasters?: Maybe<PaymasterConnection>;
+  playerAchievements: PlayerAchievementResult;
+  playthroughs: PlaythroughResult;
+  price: Array<Price>;
+  priceByAddresses: Array<Price>;
+  pricePeriodByAddresses: Array<Price>;
+  rpcApiKeys?: Maybe<RpcApiKeyConnection>;
+  rpcCorsDomains?: Maybe<RpcCorsDomainConnection>;
+  rpcLogs?: Maybe<RpcLogConnection>;
+  searchAccounts: Array<Account>;
+  session?: Maybe<Session>;
+  sessions?: Maybe<SessionConnection>;
+  starterpack?: Maybe<StarterpackDetails>;
+  streaks: StreakResult;
+  stripePayment: StripePayment;
+  stripeStarterpackQuote: StripeStarterpackQuote;
+  subscribeCreateSession?: Maybe<Session>;
+  team?: Maybe<Team>;
+  teams?: Maybe<TeamConnection>;
+  traceabilities: TraceabilityResult;
+  transfers: TransferResult;
+};
+
+
+export type QueryAccountArgs = {
+  username?: InputMaybe<Scalars['String']>;
+};
+
+
+export type QueryAccountsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<AccountOrder>;
+  where?: InputMaybe<AccountWhereInput>;
+};
+
+
+export type QueryAchievementsArgs = {
+  projects?: InputMaybe<Array<Project>>;
+};
+
+
+export type QueryActivitiesArgs = {
+  projects?: InputMaybe<Array<ActivityProject>>;
+};
+
+
+export type QueryBalanceArgs = {
+  accountAddress: Scalars['String'];
+  projects: Array<Scalars['String']>;
+  tokenAddress: Scalars['String'];
+};
+
+
+export type QueryBalancesArgs = {
+  accountAddress: Scalars['String'];
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  projects?: InputMaybe<Array<Scalars['String']>>;
+};
+
+
+export type QueryCoinbaseOnrampOrderArgs = {
+  orderId: Scalars['String'];
+};
+
+
+export type QueryCoinbaseOnrampQuoteArgs = {
+  input: CoinbaseOnrampQuoteInput;
+};
+
+
+export type QueryCoinbaseOnrampTransactionsArgs = {
+  input: CoinbaseTransactionsInput;
+};
+
+
+export type QueryCoinflowCheckoutTotalsArgs = {
+  amountInCents: Scalars['Int'];
+  sandbox?: InputMaybe<Scalars['Boolean']>;
+};
+
+
+export type QueryCoinflowPaymentArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryCoinflowStarterpackQuoteArgs = {
+  input: CoinflowStarterpackQuoteInput;
+};
+
+
+export type QueryCollectibleArgs = {
+  accountAddress: Scalars['String'];
+  contractAddress: Scalars['String'];
+  projects?: InputMaybe<Array<Scalars['String']>>;
+};
+
+
+export type QueryCollectiblesArgs = {
+  accountAddress: Scalars['String'];
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  projects?: InputMaybe<Array<Scalars['String']>>;
+};
+
+
+export type QueryCollectionArgs = {
+  accountAddress: Scalars['String'];
+  contractAddress: Scalars['String'];
+  projects?: InputMaybe<Array<Scalars['String']>>;
+};
+
+
+export type QueryCollectionsArgs = {
+  accountAddress: Scalars['String'];
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  projects?: InputMaybe<Array<Scalars['String']>>;
+};
+
+
+export type QueryControllerArgs = {
+  chainId: Scalars['String'];
+  username: Scalars['String'];
+};
+
+
+export type QueryControllersArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<ControllerOrder>;
+  where?: InputMaybe<ControllerWhereInput>;
+};
+
+
+export type QueryCryptoPaymentArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryDeploymentArgs = {
+  name: Scalars['String'];
+  service: DeploymentService;
+};
+
+
+export type QueryDeploymentsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<DeploymentOrder>;
+  where?: InputMaybe<DeploymentWhereInput>;
+};
+
+
+export type QueryLayerswapPaymentArgs = {
+  swapId: Scalars['ID'];
+};
+
+
+export type QueryLayerswapQuoteArgs = {
+  input: CreateLayerswapDepositInput;
+};
+
+
+export type QueryLayerswapSourcesArgs = {
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+  token: Scalars['String'];
+};
+
+
+export type QueryLayerswapStatusArgs = {
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+  swapId: Scalars['ID'];
+};
+
+
+export type QueryLookupPaymasterArgs = {
+  calls: Array<PolicyCallInput>;
+};
+
+
+export type QueryMerkleClaimsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<MerkleClaimOrder>;
+  where?: InputMaybe<MerkleClaimWhereInput>;
+};
+
+
+export type QueryMerkleClaimsForAddressArgs = {
+  address: Scalars['String'];
+  keys: Array<Scalars['String']>;
+};
+
+
+export type QueryMerkleDropByKeyArgs = {
+  key: Scalars['String'];
+};
+
+
+export type QueryMerkleDropsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<MerkleDropOrder>;
+  where?: InputMaybe<MerkleDropWhereInput>;
+};
+
+
+export type QueryMetricsArgs = {
+  projects?: InputMaybe<Array<MetricsProject>>;
+};
+
+
+export type QueryNodeArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryNodesArgs = {
+  ids: Array<Scalars['ID']>;
+};
+
+
+export type QueryOwnershipsArgs = {
+  projects?: InputMaybe<Array<OwnershipProject>>;
+};
+
+
+export type QueryPaymasterArgs = {
+  name: Scalars['ID'];
+};
+
+
+export type QueryPaymasterStatsArgs = {
+  paymasterName: Scalars['ID'];
+  since: Scalars['Time'];
+};
+
+
+export type QueryPaymasterTransactionsArgs = {
+  filter?: InputMaybe<PaymasterTransactionFilter>;
+  limit?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaymasterTransactionOrder>;
+  paymasterName: Scalars['ID'];
+  since: Scalars['Time'];
+};
+
+
+export type QueryPaymastersArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaymasterOrder>;
+  where?: InputMaybe<PaymasterWhereInput>;
+};
+
+
+export type QueryPlayerAchievementsArgs = {
+  projects?: InputMaybe<Array<Project>>;
+};
+
+
+export type QueryPlaythroughsArgs = {
+  projects?: InputMaybe<Array<PlaythroughProject>>;
+};
+
+
+export type QueryPriceArgs = {
+  pairs: Array<TokenPair>;
+};
+
+
+export type QueryPriceByAddressesArgs = {
+  addresses: Array<Scalars['String']>;
+};
+
+
+export type QueryPricePeriodByAddressesArgs = {
+  addresses: Array<Scalars['String']>;
+  end: Scalars['Int'];
+  start: Scalars['Int'];
+};
+
+
+export type QueryRpcApiKeysArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  teamName: Scalars['String'];
+  where?: InputMaybe<RpcApiKeyWhereInput>;
+};
+
+
+export type QueryRpcCorsDomainsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  teamName: Scalars['String'];
+  where?: InputMaybe<RpcCorsDomainWhereInput>;
+};
+
+
+export type QueryRpcLogsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  teamName: Scalars['String'];
+  where?: InputMaybe<RpcLogWhereInput>;
+};
+
+
+export type QuerySearchAccountsArgs = {
+  limit?: InputMaybe<Scalars['Int']>;
+  query: Scalars['String'];
+};
+
+
+export type QuerySessionArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QuerySessionsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<SessionOrder>;
+  where?: InputMaybe<SessionWhereInput>;
+};
+
+
+export type QueryStarterpackArgs = {
+  input: StarterpackInput;
+};
+
+
+export type QueryStreaksArgs = {
+  projects?: InputMaybe<Array<StreakProject>>;
+};
+
+
+export type QueryStripePaymentArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryStripeStarterpackQuoteArgs = {
+  input: StripeStarterpackQuoteInput;
+};
+
+
+export type QuerySubscribeCreateSessionArgs = {
+  sessionKeyGuid: Scalars['Felt'];
+};
+
+
+export type QueryTeamArgs = {
+  name: Scalars['String'];
+};
+
+
+export type QueryTeamsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  where?: InputMaybe<TeamWhereInput>;
+};
+
+
+export type QueryTraceabilitiesArgs = {
+  projects?: InputMaybe<Array<TraceabilityProject>>;
+};
+
+
+export type QueryTransfersArgs = {
+  projects?: InputMaybe<Array<TransferProject>>;
+};
+
+export type RpcApiKey = Node & {
+  __typename?: 'RPCApiKey';
+  /** Whether this API key is active */
+  active: Scalars['Boolean'];
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  /** SHA256 hash of the API key for secure storage */
+  keyHash: Scalars['String'];
+  /** First 8 characters of the key for display purposes */
+  keyPrefix: Scalars['String'];
+  /** Last time this API key was used */
+  lastUsedAt?: Maybe<Scalars['Time']>;
+  /** Human readable name for the API key */
+  name: Scalars['String'];
+  team: Team;
+  /** Team that owns this API key */
+  teamID: Scalars['ID'];
+};
+
+/** A connection to a list of items. */
+export type RpcApiKeyConnection = {
+  __typename?: 'RPCApiKeyConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<RpcApiKeyEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type RpcApiKeyEdge = {
+  __typename?: 'RPCApiKeyEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<RpcApiKey>;
+};
+
+export type RpcApiKeyInput = {
+  active?: InputMaybe<Scalars['Boolean']>;
+  name?: InputMaybe<Scalars['String']>;
+};
+
+/**
+ * RPCApiKeyWhereInput is used for filtering RPCApiKey objects.
+ * Input was generated by ent.
+ */
+export type RpcApiKeyWhereInput = {
+  /** active field predicates */
+  active?: InputMaybe<Scalars['Boolean']>;
+  activeNEQ?: InputMaybe<Scalars['Boolean']>;
+  and?: InputMaybe<Array<RpcApiKeyWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** team edge predicates */
+  hasTeam?: InputMaybe<Scalars['Boolean']>;
+  hasTeamWith?: InputMaybe<Array<TeamWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** key_hash field predicates */
+  keyHash?: InputMaybe<Scalars['String']>;
+  keyHashContains?: InputMaybe<Scalars['String']>;
+  keyHashContainsFold?: InputMaybe<Scalars['String']>;
+  keyHashEqualFold?: InputMaybe<Scalars['String']>;
+  keyHashGT?: InputMaybe<Scalars['String']>;
+  keyHashGTE?: InputMaybe<Scalars['String']>;
+  keyHashHasPrefix?: InputMaybe<Scalars['String']>;
+  keyHashHasSuffix?: InputMaybe<Scalars['String']>;
+  keyHashIn?: InputMaybe<Array<Scalars['String']>>;
+  keyHashLT?: InputMaybe<Scalars['String']>;
+  keyHashLTE?: InputMaybe<Scalars['String']>;
+  keyHashNEQ?: InputMaybe<Scalars['String']>;
+  keyHashNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** key_prefix field predicates */
+  keyPrefix?: InputMaybe<Scalars['String']>;
+  keyPrefixContains?: InputMaybe<Scalars['String']>;
+  keyPrefixContainsFold?: InputMaybe<Scalars['String']>;
+  keyPrefixEqualFold?: InputMaybe<Scalars['String']>;
+  keyPrefixGT?: InputMaybe<Scalars['String']>;
+  keyPrefixGTE?: InputMaybe<Scalars['String']>;
+  keyPrefixHasPrefix?: InputMaybe<Scalars['String']>;
+  keyPrefixHasSuffix?: InputMaybe<Scalars['String']>;
+  keyPrefixIn?: InputMaybe<Array<Scalars['String']>>;
+  keyPrefixLT?: InputMaybe<Scalars['String']>;
+  keyPrefixLTE?: InputMaybe<Scalars['String']>;
+  keyPrefixNEQ?: InputMaybe<Scalars['String']>;
+  keyPrefixNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** last_used_at field predicates */
+  lastUsedAt?: InputMaybe<Scalars['Time']>;
+  lastUsedAtGT?: InputMaybe<Scalars['Time']>;
+  lastUsedAtGTE?: InputMaybe<Scalars['Time']>;
+  lastUsedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  lastUsedAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  lastUsedAtLT?: InputMaybe<Scalars['Time']>;
+  lastUsedAtLTE?: InputMaybe<Scalars['Time']>;
+  lastUsedAtNEQ?: InputMaybe<Scalars['Time']>;
+  lastUsedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  lastUsedAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** name field predicates */
+  name?: InputMaybe<Scalars['String']>;
+  nameContains?: InputMaybe<Scalars['String']>;
+  nameContainsFold?: InputMaybe<Scalars['String']>;
+  nameEqualFold?: InputMaybe<Scalars['String']>;
+  nameGT?: InputMaybe<Scalars['String']>;
+  nameGTE?: InputMaybe<Scalars['String']>;
+  nameHasPrefix?: InputMaybe<Scalars['String']>;
+  nameHasSuffix?: InputMaybe<Scalars['String']>;
+  nameIn?: InputMaybe<Array<Scalars['String']>>;
+  nameLT?: InputMaybe<Scalars['String']>;
+  nameLTE?: InputMaybe<Scalars['String']>;
+  nameNEQ?: InputMaybe<Scalars['String']>;
+  nameNotIn?: InputMaybe<Array<Scalars['String']>>;
+  not?: InputMaybe<RpcApiKeyWhereInput>;
+  or?: InputMaybe<Array<RpcApiKeyWhereInput>>;
+  /** team_id field predicates */
+  teamID?: InputMaybe<Scalars['ID']>;
+  teamIDContains?: InputMaybe<Scalars['ID']>;
+  teamIDContainsFold?: InputMaybe<Scalars['ID']>;
+  teamIDEqualFold?: InputMaybe<Scalars['ID']>;
+  teamIDGT?: InputMaybe<Scalars['ID']>;
+  teamIDGTE?: InputMaybe<Scalars['ID']>;
+  teamIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  teamIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  teamIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  teamIDLT?: InputMaybe<Scalars['ID']>;
+  teamIDLTE?: InputMaybe<Scalars['ID']>;
+  teamIDNEQ?: InputMaybe<Scalars['ID']>;
+  teamIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+};
+
+export type RpcCorsDomain = Node & {
+  __typename?: 'RPCCorsDomain';
+  /** Whether this domain is active */
+  active: Scalars['Boolean'];
+  createdAt: Scalars['Time'];
+  /** Domain name for CORS access (e.g., example.com, *.example.com) */
+  domain: Scalars['String'];
+  id: Scalars['ID'];
+  /** Rate limit per IP per minute for this domain */
+  rateLimitPerMinute: Scalars['Int'];
+  team: Team;
+  /** Team that owns this CORS domain */
+  teamID: Scalars['ID'];
+};
+
+/** A connection to a list of items. */
+export type RpcCorsDomainConnection = {
+  __typename?: 'RPCCorsDomainConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<RpcCorsDomainEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type RpcCorsDomainEdge = {
+  __typename?: 'RPCCorsDomainEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<RpcCorsDomain>;
+};
+
+export type RpcCorsDomainInput = {
+  active?: InputMaybe<Scalars['Boolean']>;
+  domain?: InputMaybe<Scalars['String']>;
+  rateLimitPerMinute?: InputMaybe<Scalars['Int']>;
+};
+
+/**
+ * RPCCorsDomainWhereInput is used for filtering RPCCorsDomain objects.
+ * Input was generated by ent.
+ */
+export type RpcCorsDomainWhereInput = {
+  /** active field predicates */
+  active?: InputMaybe<Scalars['Boolean']>;
+  activeNEQ?: InputMaybe<Scalars['Boolean']>;
+  and?: InputMaybe<Array<RpcCorsDomainWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** domain field predicates */
+  domain?: InputMaybe<Scalars['String']>;
+  domainContains?: InputMaybe<Scalars['String']>;
+  domainContainsFold?: InputMaybe<Scalars['String']>;
+  domainEqualFold?: InputMaybe<Scalars['String']>;
+  domainGT?: InputMaybe<Scalars['String']>;
+  domainGTE?: InputMaybe<Scalars['String']>;
+  domainHasPrefix?: InputMaybe<Scalars['String']>;
+  domainHasSuffix?: InputMaybe<Scalars['String']>;
+  domainIn?: InputMaybe<Array<Scalars['String']>>;
+  domainLT?: InputMaybe<Scalars['String']>;
+  domainLTE?: InputMaybe<Scalars['String']>;
+  domainNEQ?: InputMaybe<Scalars['String']>;
+  domainNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** team edge predicates */
+  hasTeam?: InputMaybe<Scalars['Boolean']>;
+  hasTeamWith?: InputMaybe<Array<TeamWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<RpcCorsDomainWhereInput>;
+  or?: InputMaybe<Array<RpcCorsDomainWhereInput>>;
+  /** rate_limit_per_minute field predicates */
+  rateLimitPerMinute?: InputMaybe<Scalars['Int']>;
+  rateLimitPerMinuteGT?: InputMaybe<Scalars['Int']>;
+  rateLimitPerMinuteGTE?: InputMaybe<Scalars['Int']>;
+  rateLimitPerMinuteIn?: InputMaybe<Array<Scalars['Int']>>;
+  rateLimitPerMinuteLT?: InputMaybe<Scalars['Int']>;
+  rateLimitPerMinuteLTE?: InputMaybe<Scalars['Int']>;
+  rateLimitPerMinuteNEQ?: InputMaybe<Scalars['Int']>;
+  rateLimitPerMinuteNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** team_id field predicates */
+  teamID?: InputMaybe<Scalars['ID']>;
+  teamIDContains?: InputMaybe<Scalars['ID']>;
+  teamIDContainsFold?: InputMaybe<Scalars['ID']>;
+  teamIDEqualFold?: InputMaybe<Scalars['ID']>;
+  teamIDGT?: InputMaybe<Scalars['ID']>;
+  teamIDGTE?: InputMaybe<Scalars['ID']>;
+  teamIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  teamIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  teamIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  teamIDLT?: InputMaybe<Scalars['ID']>;
+  teamIDLTE?: InputMaybe<Scalars['ID']>;
+  teamIDNEQ?: InputMaybe<Scalars['ID']>;
+  teamIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+};
+
+export type RpcLog = Node & {
+  __typename?: 'RPCLog';
+  /** API key used (if any) */
+  apiKeyID?: Maybe<Scalars['String']>;
+  /** Authentication outcome for this request */
+  authDecision: RpcLogAuthDecision;
+  /** Whether RPC auth enforcement was enabled for this request */
+  authEnforced: Scalars['Boolean'];
+  /** IP address of the client */
+  clientIP: Scalars['String'];
+  /** CORS domain used (if any) */
+  corsDomainID?: Maybe<Scalars['String']>;
+  /** Cost in micro-dollars (0.000001 USD per unit). Converted to team credits during billing. */
+  costCredits: Scalars['Int'];
+  /** Request duration in milliseconds */
+  durationMs: Scalars['Int'];
+  id: Scalars['ID'];
+  /** Whether this was an internal request (free) */
+  isInternal: Scalars['Boolean'];
+  /** RPC method called */
+  method?: Maybe<Scalars['String']>;
+  /** Starknet network used */
+  network: RpcLogNetwork;
+  /** Origin header from the request */
+  origin?: Maybe<Scalars['String']>;
+  /** When billing was processed. NULL indicates not yet processed. */
+  processedAt?: Maybe<Scalars['Time']>;
+  /** Referer header from the request */
+  referer?: Maybe<Scalars['String']>;
+  /** Size of the response in bytes */
+  responseSizeBytes: Scalars['Int'];
+  /** HTTP response status code */
+  responseStatus: Scalars['Int'];
+  /** Team that made this RPC request */
+  teamID?: Maybe<Scalars['String']>;
+  /** When the request was made */
+  timestamp: Scalars['Time'];
+  /** User agent of the client */
+  userAgent?: Maybe<Scalars['String']>;
+};
+
+/** RPCLogAuthDecision is enum for the field auth_decision */
+export enum RpcLogAuthDecision {
+  Allowed = 'allowed',
+  Blocked = 'blocked',
+  WouldBeBlocked = 'would_be_blocked'
+}
+
+/** A connection to a list of items. */
+export type RpcLogConnection = {
+  __typename?: 'RPCLogConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<RpcLogEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type RpcLogEdge = {
+  __typename?: 'RPCLogEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<RpcLog>;
+};
+
+/** RPCLogNetwork is enum for the field network */
+export enum RpcLogNetwork {
+  Mainnet = 'mainnet',
+  Sepolia = 'sepolia'
+}
+
+/**
+ * RPCLogWhereInput is used for filtering RPCLog objects.
+ * Input was generated by ent.
+ */
+export type RpcLogWhereInput = {
+  and?: InputMaybe<Array<RpcLogWhereInput>>;
+  /** api_key_id field predicates */
+  apiKeyID?: InputMaybe<Scalars['String']>;
+  apiKeyIDContains?: InputMaybe<Scalars['String']>;
+  apiKeyIDContainsFold?: InputMaybe<Scalars['String']>;
+  apiKeyIDEqualFold?: InputMaybe<Scalars['String']>;
+  apiKeyIDGT?: InputMaybe<Scalars['String']>;
+  apiKeyIDGTE?: InputMaybe<Scalars['String']>;
+  apiKeyIDHasPrefix?: InputMaybe<Scalars['String']>;
+  apiKeyIDHasSuffix?: InputMaybe<Scalars['String']>;
+  apiKeyIDIn?: InputMaybe<Array<Scalars['String']>>;
+  apiKeyIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  apiKeyIDLT?: InputMaybe<Scalars['String']>;
+  apiKeyIDLTE?: InputMaybe<Scalars['String']>;
+  apiKeyIDNEQ?: InputMaybe<Scalars['String']>;
+  apiKeyIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  apiKeyIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** auth_decision field predicates */
+  authDecision?: InputMaybe<RpcLogAuthDecision>;
+  authDecisionIn?: InputMaybe<Array<RpcLogAuthDecision>>;
+  authDecisionNEQ?: InputMaybe<RpcLogAuthDecision>;
+  authDecisionNotIn?: InputMaybe<Array<RpcLogAuthDecision>>;
+  /** auth_enforced field predicates */
+  authEnforced?: InputMaybe<Scalars['Boolean']>;
+  authEnforcedNEQ?: InputMaybe<Scalars['Boolean']>;
+  /** client_ip field predicates */
+  clientIP?: InputMaybe<Scalars['String']>;
+  clientIPContains?: InputMaybe<Scalars['String']>;
+  clientIPContainsFold?: InputMaybe<Scalars['String']>;
+  clientIPEqualFold?: InputMaybe<Scalars['String']>;
+  clientIPGT?: InputMaybe<Scalars['String']>;
+  clientIPGTE?: InputMaybe<Scalars['String']>;
+  clientIPHasPrefix?: InputMaybe<Scalars['String']>;
+  clientIPHasSuffix?: InputMaybe<Scalars['String']>;
+  clientIPIn?: InputMaybe<Array<Scalars['String']>>;
+  clientIPLT?: InputMaybe<Scalars['String']>;
+  clientIPLTE?: InputMaybe<Scalars['String']>;
+  clientIPNEQ?: InputMaybe<Scalars['String']>;
+  clientIPNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** cors_domain_id field predicates */
+  corsDomainID?: InputMaybe<Scalars['String']>;
+  corsDomainIDContains?: InputMaybe<Scalars['String']>;
+  corsDomainIDContainsFold?: InputMaybe<Scalars['String']>;
+  corsDomainIDEqualFold?: InputMaybe<Scalars['String']>;
+  corsDomainIDGT?: InputMaybe<Scalars['String']>;
+  corsDomainIDGTE?: InputMaybe<Scalars['String']>;
+  corsDomainIDHasPrefix?: InputMaybe<Scalars['String']>;
+  corsDomainIDHasSuffix?: InputMaybe<Scalars['String']>;
+  corsDomainIDIn?: InputMaybe<Array<Scalars['String']>>;
+  corsDomainIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  corsDomainIDLT?: InputMaybe<Scalars['String']>;
+  corsDomainIDLTE?: InputMaybe<Scalars['String']>;
+  corsDomainIDNEQ?: InputMaybe<Scalars['String']>;
+  corsDomainIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  corsDomainIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** cost_credits field predicates */
+  costCredits?: InputMaybe<Scalars['Int']>;
+  costCreditsGT?: InputMaybe<Scalars['Int']>;
+  costCreditsGTE?: InputMaybe<Scalars['Int']>;
+  costCreditsIn?: InputMaybe<Array<Scalars['Int']>>;
+  costCreditsLT?: InputMaybe<Scalars['Int']>;
+  costCreditsLTE?: InputMaybe<Scalars['Int']>;
+  costCreditsNEQ?: InputMaybe<Scalars['Int']>;
+  costCreditsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** duration_ms field predicates */
+  durationMs?: InputMaybe<Scalars['Int']>;
+  durationMsGT?: InputMaybe<Scalars['Int']>;
+  durationMsGTE?: InputMaybe<Scalars['Int']>;
+  durationMsIn?: InputMaybe<Array<Scalars['Int']>>;
+  durationMsLT?: InputMaybe<Scalars['Int']>;
+  durationMsLTE?: InputMaybe<Scalars['Int']>;
+  durationMsNEQ?: InputMaybe<Scalars['Int']>;
+  durationMsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** is_internal field predicates */
+  isInternal?: InputMaybe<Scalars['Boolean']>;
+  isInternalNEQ?: InputMaybe<Scalars['Boolean']>;
+  /** method field predicates */
+  method?: InputMaybe<Scalars['String']>;
+  methodContains?: InputMaybe<Scalars['String']>;
+  methodContainsFold?: InputMaybe<Scalars['String']>;
+  methodEqualFold?: InputMaybe<Scalars['String']>;
+  methodGT?: InputMaybe<Scalars['String']>;
+  methodGTE?: InputMaybe<Scalars['String']>;
+  methodHasPrefix?: InputMaybe<Scalars['String']>;
+  methodHasSuffix?: InputMaybe<Scalars['String']>;
+  methodIn?: InputMaybe<Array<Scalars['String']>>;
+  methodIsNil?: InputMaybe<Scalars['Boolean']>;
+  methodLT?: InputMaybe<Scalars['String']>;
+  methodLTE?: InputMaybe<Scalars['String']>;
+  methodNEQ?: InputMaybe<Scalars['String']>;
+  methodNotIn?: InputMaybe<Array<Scalars['String']>>;
+  methodNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** network field predicates */
+  network?: InputMaybe<RpcLogNetwork>;
+  networkIn?: InputMaybe<Array<RpcLogNetwork>>;
+  networkNEQ?: InputMaybe<RpcLogNetwork>;
+  networkNotIn?: InputMaybe<Array<RpcLogNetwork>>;
+  not?: InputMaybe<RpcLogWhereInput>;
+  or?: InputMaybe<Array<RpcLogWhereInput>>;
+  /** origin field predicates */
+  origin?: InputMaybe<Scalars['String']>;
+  originContains?: InputMaybe<Scalars['String']>;
+  originContainsFold?: InputMaybe<Scalars['String']>;
+  originEqualFold?: InputMaybe<Scalars['String']>;
+  originGT?: InputMaybe<Scalars['String']>;
+  originGTE?: InputMaybe<Scalars['String']>;
+  originHasPrefix?: InputMaybe<Scalars['String']>;
+  originHasSuffix?: InputMaybe<Scalars['String']>;
+  originIn?: InputMaybe<Array<Scalars['String']>>;
+  originIsNil?: InputMaybe<Scalars['Boolean']>;
+  originLT?: InputMaybe<Scalars['String']>;
+  originLTE?: InputMaybe<Scalars['String']>;
+  originNEQ?: InputMaybe<Scalars['String']>;
+  originNotIn?: InputMaybe<Array<Scalars['String']>>;
+  originNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** processed_at field predicates */
+  processedAt?: InputMaybe<Scalars['Time']>;
+  processedAtGT?: InputMaybe<Scalars['Time']>;
+  processedAtGTE?: InputMaybe<Scalars['Time']>;
+  processedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  processedAtIsNil?: InputMaybe<Scalars['Boolean']>;
+  processedAtLT?: InputMaybe<Scalars['Time']>;
+  processedAtLTE?: InputMaybe<Scalars['Time']>;
+  processedAtNEQ?: InputMaybe<Scalars['Time']>;
+  processedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  processedAtNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** referer field predicates */
+  referer?: InputMaybe<Scalars['String']>;
+  refererContains?: InputMaybe<Scalars['String']>;
+  refererContainsFold?: InputMaybe<Scalars['String']>;
+  refererEqualFold?: InputMaybe<Scalars['String']>;
+  refererGT?: InputMaybe<Scalars['String']>;
+  refererGTE?: InputMaybe<Scalars['String']>;
+  refererHasPrefix?: InputMaybe<Scalars['String']>;
+  refererHasSuffix?: InputMaybe<Scalars['String']>;
+  refererIn?: InputMaybe<Array<Scalars['String']>>;
+  refererIsNil?: InputMaybe<Scalars['Boolean']>;
+  refererLT?: InputMaybe<Scalars['String']>;
+  refererLTE?: InputMaybe<Scalars['String']>;
+  refererNEQ?: InputMaybe<Scalars['String']>;
+  refererNotIn?: InputMaybe<Array<Scalars['String']>>;
+  refererNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** response_size_bytes field predicates */
+  responseSizeBytes?: InputMaybe<Scalars['Int']>;
+  responseSizeBytesGT?: InputMaybe<Scalars['Int']>;
+  responseSizeBytesGTE?: InputMaybe<Scalars['Int']>;
+  responseSizeBytesIn?: InputMaybe<Array<Scalars['Int']>>;
+  responseSizeBytesLT?: InputMaybe<Scalars['Int']>;
+  responseSizeBytesLTE?: InputMaybe<Scalars['Int']>;
+  responseSizeBytesNEQ?: InputMaybe<Scalars['Int']>;
+  responseSizeBytesNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** response_status field predicates */
+  responseStatus?: InputMaybe<Scalars['Int']>;
+  responseStatusGT?: InputMaybe<Scalars['Int']>;
+  responseStatusGTE?: InputMaybe<Scalars['Int']>;
+  responseStatusIn?: InputMaybe<Array<Scalars['Int']>>;
+  responseStatusLT?: InputMaybe<Scalars['Int']>;
+  responseStatusLTE?: InputMaybe<Scalars['Int']>;
+  responseStatusNEQ?: InputMaybe<Scalars['Int']>;
+  responseStatusNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** team_id field predicates */
+  teamID?: InputMaybe<Scalars['String']>;
+  teamIDContains?: InputMaybe<Scalars['String']>;
+  teamIDContainsFold?: InputMaybe<Scalars['String']>;
+  teamIDEqualFold?: InputMaybe<Scalars['String']>;
+  teamIDGT?: InputMaybe<Scalars['String']>;
+  teamIDGTE?: InputMaybe<Scalars['String']>;
+  teamIDHasPrefix?: InputMaybe<Scalars['String']>;
+  teamIDHasSuffix?: InputMaybe<Scalars['String']>;
+  teamIDIn?: InputMaybe<Array<Scalars['String']>>;
+  teamIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  teamIDLT?: InputMaybe<Scalars['String']>;
+  teamIDLTE?: InputMaybe<Scalars['String']>;
+  teamIDNEQ?: InputMaybe<Scalars['String']>;
+  teamIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  teamIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** timestamp field predicates */
+  timestamp?: InputMaybe<Scalars['Time']>;
+  timestampGT?: InputMaybe<Scalars['Time']>;
+  timestampGTE?: InputMaybe<Scalars['Time']>;
+  timestampIn?: InputMaybe<Array<Scalars['Time']>>;
+  timestampLT?: InputMaybe<Scalars['Time']>;
+  timestampLTE?: InputMaybe<Scalars['Time']>;
+  timestampNEQ?: InputMaybe<Scalars['Time']>;
+  timestampNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** user_agent field predicates */
+  userAgent?: InputMaybe<Scalars['String']>;
+  userAgentContains?: InputMaybe<Scalars['String']>;
+  userAgentContainsFold?: InputMaybe<Scalars['String']>;
+  userAgentEqualFold?: InputMaybe<Scalars['String']>;
+  userAgentGT?: InputMaybe<Scalars['String']>;
+  userAgentGTE?: InputMaybe<Scalars['String']>;
+  userAgentHasPrefix?: InputMaybe<Scalars['String']>;
+  userAgentHasSuffix?: InputMaybe<Scalars['String']>;
+  userAgentIn?: InputMaybe<Array<Scalars['String']>>;
+  userAgentIsNil?: InputMaybe<Scalars['Boolean']>;
+  userAgentLT?: InputMaybe<Scalars['String']>;
+  userAgentLTE?: InputMaybe<Scalars['String']>;
+  userAgentNEQ?: InputMaybe<Scalars['String']>;
+  userAgentNotIn?: InputMaybe<Array<Scalars['String']>>;
+  userAgentNotNil?: InputMaybe<Scalars['Boolean']>;
+};
+
+export type Resources = {
+  __typename?: 'Resources';
+  cpu?: Maybe<Scalars['Float']>;
+  memory?: Maybe<Scalars['Float']>;
+};
+
+export type RevokeSessionInput = {
+  chainID: Scalars['String'];
+  sessionHash: Scalars['Felt'];
+  username: Scalars['String'];
+};
+
+export enum Role {
+  Admin = 'ADMIN',
+  User = 'USER'
+}
+
+export type SiwsCredential = {
+  __typename?: 'SIWSCredential';
+  provider: Scalars['String'];
+  publicKey: Scalars['String'];
+};
+
+export type SiwsCredentials = {
+  __typename?: 'SIWSCredentials';
+  siws?: Maybe<Array<SiwsCredential>>;
+};
+
+export type SendEmailVerificationInput = {
+  /** The email address to send the verification code to. */
+  email: Scalars['String'];
+};
+
+export type SendPhoneVerificationInput = {
+  /**
+   * The phone number to send the verification code to.
+   * Must be in E.164 format (e.g., +14155551234).
+   */
+  phoneNumber: Scalars['String'];
+};
+
+export type SendVerificationResponse = {
+  __typename?: 'SendVerificationResponse';
+  /** Human-readable message about the verification status. */
+  message: Scalars['String'];
+  /** Whether the verification code was sent successfully. */
+  success: Scalars['Boolean'];
+};
+
+export type Service = Node & {
+  __typename?: 'Service';
+  createdAt: Scalars['Time'];
+  deployments?: Maybe<Array<Deployment>>;
+  id: Scalars['ID'];
+  updatedAt: Scalars['Time'];
+};
+
+/** A connection to a list of items. */
+export type ServiceConnection = {
+  __typename?: 'ServiceConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<ServiceEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type ServiceEdge = {
+  __typename?: 'ServiceEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Service>;
+};
+
+/** Ordering options for Service connections */
+export type ServiceOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Services. */
+  field: ServiceOrderField;
+};
+
+/** Properties by which Service connections can be ordered. */
+export enum ServiceOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * ServiceWhereInput is used for filtering Service objects.
+ * Input was generated by ent.
+ */
+export type ServiceWhereInput = {
+  and?: InputMaybe<Array<ServiceWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** deployments edge predicates */
+  hasDeployments?: InputMaybe<Scalars['Boolean']>;
+  hasDeploymentsWith?: InputMaybe<Array<DeploymentWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<ServiceWhereInput>;
+  or?: InputMaybe<Array<ServiceWhereInput>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type Session = Node & {
+  __typename?: 'Session';
+  activities: ActivityConnection;
+  appID: Scalars['String'];
+  /** Array of field elements represented as hex strings */
+  authorization: Array<Scalars['String']>;
+  chainID: Scalars['String'];
+  controller: Controller;
+  /** The time when the session was created */
+  createdAt: Scalars['Time'];
+  /** The time when the session expires */
+  expiresAt: Scalars['Long'];
+  id: Scalars['ID'];
+  /** Whether the session has been revoked */
+  isRevoked: Scalars['Boolean'];
+  metadata?: Maybe<SessionMetadata>;
+  sessionKeyGUID?: Maybe<Scalars['String']>;
+  signer?: Maybe<Signer>;
+  updatedAt: Scalars['Time'];
+};
+
+
+export type SessionActivitiesArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<ActivityOrder>;
+  where?: InputMaybe<ActivityWhereInput>;
+};
+
+/** A connection to a list of items. */
+export type SessionConnection = {
+  __typename?: 'SessionConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<SessionEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type SessionEdge = {
+  __typename?: 'SessionEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Session>;
+};
+
+export type SessionInput = {
+  allowedPoliciesRoot: Scalars['Felt'];
+  appId?: InputMaybe<Scalars['String']>;
+  authorization: Array<Scalars['Felt']>;
+  expiresAt: Scalars['Long'];
+  guardianKeyGuid: Scalars['Felt'];
+  metadataHash: Scalars['Felt'];
+  sessionKeyGuid: Scalars['Felt'];
+};
+
+export type SessionMetadata = {
+  __typename?: 'SessionMetadata';
+  browser: Scalars['String'];
+  os: Scalars['String'];
+};
+
+/** Ordering options for Session connections */
+export type SessionOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Sessions. */
+  field: SessionOrderField;
+};
+
+/** Properties by which Session connections can be ordered. */
+export enum SessionOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * SessionWhereInput is used for filtering Session objects.
+ * Input was generated by ent.
+ */
+export type SessionWhereInput = {
+  and?: InputMaybe<Array<SessionWhereInput>>;
+  /** app_id field predicates */
+  appID?: InputMaybe<Scalars['String']>;
+  appIDContains?: InputMaybe<Scalars['String']>;
+  appIDContainsFold?: InputMaybe<Scalars['String']>;
+  appIDEqualFold?: InputMaybe<Scalars['String']>;
+  appIDGT?: InputMaybe<Scalars['String']>;
+  appIDGTE?: InputMaybe<Scalars['String']>;
+  appIDHasPrefix?: InputMaybe<Scalars['String']>;
+  appIDHasSuffix?: InputMaybe<Scalars['String']>;
+  appIDIn?: InputMaybe<Array<Scalars['String']>>;
+  appIDLT?: InputMaybe<Scalars['String']>;
+  appIDLTE?: InputMaybe<Scalars['String']>;
+  appIDNEQ?: InputMaybe<Scalars['String']>;
+  appIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** chain_id field predicates */
+  chainID?: InputMaybe<Scalars['String']>;
+  chainIDContains?: InputMaybe<Scalars['String']>;
+  chainIDContainsFold?: InputMaybe<Scalars['String']>;
+  chainIDEqualFold?: InputMaybe<Scalars['String']>;
+  chainIDGT?: InputMaybe<Scalars['String']>;
+  chainIDGTE?: InputMaybe<Scalars['String']>;
+  chainIDHasPrefix?: InputMaybe<Scalars['String']>;
+  chainIDHasSuffix?: InputMaybe<Scalars['String']>;
+  chainIDIn?: InputMaybe<Array<Scalars['String']>>;
+  chainIDLT?: InputMaybe<Scalars['String']>;
+  chainIDLTE?: InputMaybe<Scalars['String']>;
+  chainIDNEQ?: InputMaybe<Scalars['String']>;
+  chainIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** expires_at field predicates */
+  expiresAt?: InputMaybe<Scalars['Long']>;
+  expiresAtGT?: InputMaybe<Scalars['Long']>;
+  expiresAtGTE?: InputMaybe<Scalars['Long']>;
+  expiresAtIn?: InputMaybe<Array<Scalars['Long']>>;
+  expiresAtLT?: InputMaybe<Scalars['Long']>;
+  expiresAtLTE?: InputMaybe<Scalars['Long']>;
+  expiresAtNEQ?: InputMaybe<Scalars['Long']>;
+  expiresAtNotIn?: InputMaybe<Array<Scalars['Long']>>;
+  /** activities edge predicates */
+  hasActivities?: InputMaybe<Scalars['Boolean']>;
+  hasActivitiesWith?: InputMaybe<Array<ActivityWhereInput>>;
+  /** controller edge predicates */
+  hasController?: InputMaybe<Scalars['Boolean']>;
+  hasControllerWith?: InputMaybe<Array<ControllerWhereInput>>;
+  /** signer edge predicates */
+  hasSigner?: InputMaybe<Scalars['Boolean']>;
+  hasSignerWith?: InputMaybe<Array<SignerWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** is_revoked field predicates */
+  isRevoked?: InputMaybe<Scalars['Boolean']>;
+  isRevokedNEQ?: InputMaybe<Scalars['Boolean']>;
+  not?: InputMaybe<SessionWhereInput>;
+  or?: InputMaybe<Array<SessionWhereInput>>;
+  /** session_key_guid field predicates */
+  sessionKeyGUID?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDContains?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDContainsFold?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDEqualFold?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDGT?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDGTE?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDHasPrefix?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDHasSuffix?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDIn?: InputMaybe<Array<Scalars['String']>>;
+  sessionKeyGUIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  sessionKeyGUIDLT?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDLTE?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDNEQ?: InputMaybe<Scalars['String']>;
+  sessionKeyGUIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  sessionKeyGUIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type Signer = Node & {
+  __typename?: 'Signer';
+  controller: Controller;
+  controllerID: Scalars['ID'];
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  isOriginal: Scalars['Boolean'];
+  isRevoked: Scalars['Boolean'];
+  metadata: CredentialMetadata;
+  session?: Maybe<Session>;
+  type: SignerType;
+  updatedAt: Scalars['Time'];
+};
+
+export type SignerInput = {
+  credential: Scalars['JSON'];
+  type: SignerType;
+};
+
+/** Ordering options for Signer connections */
+export type SignerOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Signers. */
+  field: SignerOrderField;
+};
+
+/** Properties by which Signer connections can be ordered. */
+export enum SignerOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/** SignerType is enum for the field type */
+export enum SignerType {
+  Eip191 = 'eip191',
+  Password = 'password',
+  Secp256k1 = 'secp256k1',
+  Secp256r1 = 'secp256r1',
+  Siws = 'siws',
+  Starknet = 'starknet',
+  StarknetAccount = 'starknet_account',
+  Webauthn = 'webauthn'
+}
+
+/**
+ * SignerWhereInput is used for filtering Signer objects.
+ * Input was generated by ent.
+ */
+export type SignerWhereInput = {
+  and?: InputMaybe<Array<SignerWhereInput>>;
+  /** controller_id field predicates */
+  controllerID?: InputMaybe<Scalars['ID']>;
+  controllerIDContains?: InputMaybe<Scalars['ID']>;
+  controllerIDContainsFold?: InputMaybe<Scalars['ID']>;
+  controllerIDEqualFold?: InputMaybe<Scalars['ID']>;
+  controllerIDGT?: InputMaybe<Scalars['ID']>;
+  controllerIDGTE?: InputMaybe<Scalars['ID']>;
+  controllerIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  controllerIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  controllerIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  controllerIDLT?: InputMaybe<Scalars['ID']>;
+  controllerIDLTE?: InputMaybe<Scalars['ID']>;
+  controllerIDNEQ?: InputMaybe<Scalars['ID']>;
+  controllerIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** controller edge predicates */
+  hasController?: InputMaybe<Scalars['Boolean']>;
+  hasControllerWith?: InputMaybe<Array<ControllerWhereInput>>;
+  /** session edge predicates */
+  hasSession?: InputMaybe<Scalars['Boolean']>;
+  hasSessionWith?: InputMaybe<Array<SessionWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** is_original field predicates */
+  isOriginal?: InputMaybe<Scalars['Boolean']>;
+  isOriginalNEQ?: InputMaybe<Scalars['Boolean']>;
+  /** is_revoked field predicates */
+  isRevoked?: InputMaybe<Scalars['Boolean']>;
+  isRevokedNEQ?: InputMaybe<Scalars['Boolean']>;
+  not?: InputMaybe<SignerWhereInput>;
+  or?: InputMaybe<Array<SignerWhereInput>>;
+  /** type field predicates */
+  type?: InputMaybe<SignerType>;
+  typeIn?: InputMaybe<Array<SignerType>>;
+  typeNEQ?: InputMaybe<SignerType>;
+  typeNotIn?: InputMaybe<Array<SignerType>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type StarknetCredential = {
+  __typename?: 'StarknetCredential';
+  publicKey: Scalars['String'];
+};
+
+export type StarknetCredentials = {
+  __typename?: 'StarknetCredentials';
+  starknet?: Maybe<Array<StarknetCredential>>;
+};
+
+export type Starterpack = Node & {
+  __typename?: 'Starterpack';
+  /** Type of acquisition for the starterpack */
+  acquisitionType: StarterpackAcquisitionType;
+  active: Scalars['Boolean'];
+  chainID: Scalars['String'];
+  createdAt: Scalars['Time'];
+  description?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  issuance: Scalars['Int'];
+  maxIssuance?: Maybe<Scalars['Int']>;
+  /** Maximum number of issuances per account */
+  maxPerAccount?: Maybe<Scalars['Int']>;
+  merkleDrops: MerkleDropConnection;
+  name: Scalars['String'];
+  paymaster?: Maybe<Paymaster>;
+  paymasterID?: Maybe<Scalars['ID']>;
+  starterpackContract: StarterpackContractConnection;
+  starterpackMint: StarterpackMintConnection;
+  team?: Maybe<Team>;
+  updatedAt: Scalars['Time'];
+};
+
+
+export type StarterpackMerkleDropsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<MerkleDropOrder>;
+  where?: InputMaybe<MerkleDropWhereInput>;
+};
+
+
+export type StarterpackStarterpackContractArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StarterpackContractOrder>;
+  where?: InputMaybe<StarterpackContractWhereInput>;
+};
+
+
+export type StarterpackStarterpackMintArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StarterpackMintOrder>;
+  where?: InputMaybe<StarterpackMintWhereInput>;
+};
+
+/** StarterpackAcquisitionType is enum for the field acquisition_type */
+export enum StarterpackAcquisitionType {
+  Claimed = 'CLAIMED',
+  Paid = 'PAID'
+}
+
+/** A connection to a list of items. */
+export type StarterpackConnection = {
+  __typename?: 'StarterpackConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<StarterpackEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+export type StarterpackContract = Node & {
+  __typename?: 'StarterpackContract';
+  /** Calldata for the execution entrypoint */
+  calldata: Array<Scalars['String']>;
+  contractAddress: Scalars['String'];
+  createdAt: Scalars['Time'];
+  description?: Maybe<Scalars['String']>;
+  /** Entrypoint to execute on the contract */
+  entryPoint: Scalars['String'];
+  iconURL?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  starterpack: Starterpack;
+  starterpackID: Scalars['ID'];
+  /** Calldata for the supply check entrypoint */
+  supplyCalldata?: Maybe<Array<Scalars['String']>>;
+  /** Entrypoint to check available supply on the contract */
+  supplyEntryPoint?: Maybe<Scalars['String']>;
+  updatedAt: Scalars['Time'];
+};
+
+/** A connection to a list of items. */
+export type StarterpackContractConnection = {
+  __typename?: 'StarterpackContractConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<StarterpackContractEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type StarterpackContractEdge = {
+  __typename?: 'StarterpackContractEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<StarterpackContract>;
+};
+
+/** Ordering options for StarterpackContract connections */
+export type StarterpackContractOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order StarterpackContracts. */
+  field: StarterpackContractOrderField;
+};
+
+/** Properties by which StarterpackContract connections can be ordered. */
+export enum StarterpackContractOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * StarterpackContractWhereInput is used for filtering StarterpackContract objects.
+ * Input was generated by ent.
+ */
+export type StarterpackContractWhereInput = {
+  and?: InputMaybe<Array<StarterpackContractWhereInput>>;
+  /** contract_address field predicates */
+  contractAddress?: InputMaybe<Scalars['String']>;
+  contractAddressContains?: InputMaybe<Scalars['String']>;
+  contractAddressContainsFold?: InputMaybe<Scalars['String']>;
+  contractAddressEqualFold?: InputMaybe<Scalars['String']>;
+  contractAddressGT?: InputMaybe<Scalars['String']>;
+  contractAddressGTE?: InputMaybe<Scalars['String']>;
+  contractAddressHasPrefix?: InputMaybe<Scalars['String']>;
+  contractAddressHasSuffix?: InputMaybe<Scalars['String']>;
+  contractAddressIn?: InputMaybe<Array<Scalars['String']>>;
+  contractAddressLT?: InputMaybe<Scalars['String']>;
+  contractAddressLTE?: InputMaybe<Scalars['String']>;
+  contractAddressNEQ?: InputMaybe<Scalars['String']>;
+  contractAddressNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** description field predicates */
+  description?: InputMaybe<Scalars['String']>;
+  descriptionContains?: InputMaybe<Scalars['String']>;
+  descriptionContainsFold?: InputMaybe<Scalars['String']>;
+  descriptionEqualFold?: InputMaybe<Scalars['String']>;
+  descriptionGT?: InputMaybe<Scalars['String']>;
+  descriptionGTE?: InputMaybe<Scalars['String']>;
+  descriptionHasPrefix?: InputMaybe<Scalars['String']>;
+  descriptionHasSuffix?: InputMaybe<Scalars['String']>;
+  descriptionIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionIsNil?: InputMaybe<Scalars['Boolean']>;
+  descriptionLT?: InputMaybe<Scalars['String']>;
+  descriptionLTE?: InputMaybe<Scalars['String']>;
+  descriptionNEQ?: InputMaybe<Scalars['String']>;
+  descriptionNotIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** entry_point field predicates */
+  entryPoint?: InputMaybe<Scalars['String']>;
+  entryPointContains?: InputMaybe<Scalars['String']>;
+  entryPointContainsFold?: InputMaybe<Scalars['String']>;
+  entryPointEqualFold?: InputMaybe<Scalars['String']>;
+  entryPointGT?: InputMaybe<Scalars['String']>;
+  entryPointGTE?: InputMaybe<Scalars['String']>;
+  entryPointHasPrefix?: InputMaybe<Scalars['String']>;
+  entryPointHasSuffix?: InputMaybe<Scalars['String']>;
+  entryPointIn?: InputMaybe<Array<Scalars['String']>>;
+  entryPointLT?: InputMaybe<Scalars['String']>;
+  entryPointLTE?: InputMaybe<Scalars['String']>;
+  entryPointNEQ?: InputMaybe<Scalars['String']>;
+  entryPointNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** starterpack edge predicates */
+  hasStarterpack?: InputMaybe<Scalars['Boolean']>;
+  hasStarterpackWith?: InputMaybe<Array<StarterpackWhereInput>>;
+  /** icon_url field predicates */
+  iconURL?: InputMaybe<Scalars['String']>;
+  iconURLContains?: InputMaybe<Scalars['String']>;
+  iconURLContainsFold?: InputMaybe<Scalars['String']>;
+  iconURLEqualFold?: InputMaybe<Scalars['String']>;
+  iconURLGT?: InputMaybe<Scalars['String']>;
+  iconURLGTE?: InputMaybe<Scalars['String']>;
+  iconURLHasPrefix?: InputMaybe<Scalars['String']>;
+  iconURLHasSuffix?: InputMaybe<Scalars['String']>;
+  iconURLIn?: InputMaybe<Array<Scalars['String']>>;
+  iconURLIsNil?: InputMaybe<Scalars['Boolean']>;
+  iconURLLT?: InputMaybe<Scalars['String']>;
+  iconURLLTE?: InputMaybe<Scalars['String']>;
+  iconURLNEQ?: InputMaybe<Scalars['String']>;
+  iconURLNotIn?: InputMaybe<Array<Scalars['String']>>;
+  iconURLNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** name field predicates */
+  name?: InputMaybe<Scalars['String']>;
+  nameContains?: InputMaybe<Scalars['String']>;
+  nameContainsFold?: InputMaybe<Scalars['String']>;
+  nameEqualFold?: InputMaybe<Scalars['String']>;
+  nameGT?: InputMaybe<Scalars['String']>;
+  nameGTE?: InputMaybe<Scalars['String']>;
+  nameHasPrefix?: InputMaybe<Scalars['String']>;
+  nameHasSuffix?: InputMaybe<Scalars['String']>;
+  nameIn?: InputMaybe<Array<Scalars['String']>>;
+  nameLT?: InputMaybe<Scalars['String']>;
+  nameLTE?: InputMaybe<Scalars['String']>;
+  nameNEQ?: InputMaybe<Scalars['String']>;
+  nameNotIn?: InputMaybe<Array<Scalars['String']>>;
+  not?: InputMaybe<StarterpackContractWhereInput>;
+  or?: InputMaybe<Array<StarterpackContractWhereInput>>;
+  /** starterpack_id field predicates */
+  starterpackID?: InputMaybe<Scalars['ID']>;
+  starterpackIDContains?: InputMaybe<Scalars['ID']>;
+  starterpackIDContainsFold?: InputMaybe<Scalars['ID']>;
+  starterpackIDEqualFold?: InputMaybe<Scalars['ID']>;
+  starterpackIDGT?: InputMaybe<Scalars['ID']>;
+  starterpackIDGTE?: InputMaybe<Scalars['ID']>;
+  starterpackIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  starterpackIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  starterpackIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  starterpackIDLT?: InputMaybe<Scalars['ID']>;
+  starterpackIDLTE?: InputMaybe<Scalars['ID']>;
+  starterpackIDNEQ?: InputMaybe<Scalars['ID']>;
+  starterpackIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** supply_entry_point field predicates */
+  supplyEntryPoint?: InputMaybe<Scalars['String']>;
+  supplyEntryPointContains?: InputMaybe<Scalars['String']>;
+  supplyEntryPointContainsFold?: InputMaybe<Scalars['String']>;
+  supplyEntryPointEqualFold?: InputMaybe<Scalars['String']>;
+  supplyEntryPointGT?: InputMaybe<Scalars['String']>;
+  supplyEntryPointGTE?: InputMaybe<Scalars['String']>;
+  supplyEntryPointHasPrefix?: InputMaybe<Scalars['String']>;
+  supplyEntryPointHasSuffix?: InputMaybe<Scalars['String']>;
+  supplyEntryPointIn?: InputMaybe<Array<Scalars['String']>>;
+  supplyEntryPointIsNil?: InputMaybe<Scalars['Boolean']>;
+  supplyEntryPointLT?: InputMaybe<Scalars['String']>;
+  supplyEntryPointLTE?: InputMaybe<Scalars['String']>;
+  supplyEntryPointNEQ?: InputMaybe<Scalars['String']>;
+  supplyEntryPointNotIn?: InputMaybe<Array<Scalars['String']>>;
+  supplyEntryPointNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type StarterpackDetails = {
+  __typename?: 'StarterpackDetails';
+  acquisitionType: StarterpackAcquisitionType;
+  bonusCredits: Credits;
+  mintAllowance?: Maybe<MintAllowance>;
+  price: Credits;
+  starterpack: Starterpack;
+};
+
+/** An edge in a connection. */
+export type StarterpackEdge = {
+  __typename?: 'StarterpackEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Starterpack>;
+};
+
+export type StarterpackInput = {
+  accountId: Scalars['ID'];
+  starterpackId: Scalars['ID'];
+};
+
+export type StarterpackMint = Node & {
+  __typename?: 'StarterpackMint';
+  account: Account;
+  accountID: Scalars['ID'];
+  activity?: Maybe<Activity>;
+  activityID?: Maybe<Scalars['ID']>;
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  starterpack: Starterpack;
+  starterpackID: Scalars['ID'];
+  updatedAt: Scalars['Time'];
+};
+
+/** A connection to a list of items. */
+export type StarterpackMintConnection = {
+  __typename?: 'StarterpackMintConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<StarterpackMintEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+/** An edge in a connection. */
+export type StarterpackMintEdge = {
+  __typename?: 'StarterpackMintEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<StarterpackMint>;
+};
+
+/** Ordering options for StarterpackMint connections */
+export type StarterpackMintOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order StarterpackMints. */
+  field: StarterpackMintOrderField;
+};
+
+/** Properties by which StarterpackMint connections can be ordered. */
+export enum StarterpackMintOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * StarterpackMintWhereInput is used for filtering StarterpackMint objects.
+ * Input was generated by ent.
+ */
+export type StarterpackMintWhereInput = {
+  /** account_id field predicates */
+  accountID?: InputMaybe<Scalars['ID']>;
+  accountIDContains?: InputMaybe<Scalars['ID']>;
+  accountIDContainsFold?: InputMaybe<Scalars['ID']>;
+  accountIDEqualFold?: InputMaybe<Scalars['ID']>;
+  accountIDGT?: InputMaybe<Scalars['ID']>;
+  accountIDGTE?: InputMaybe<Scalars['ID']>;
+  accountIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  accountIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  accountIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  accountIDLT?: InputMaybe<Scalars['ID']>;
+  accountIDLTE?: InputMaybe<Scalars['ID']>;
+  accountIDNEQ?: InputMaybe<Scalars['ID']>;
+  accountIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** activity_id field predicates */
+  activityID?: InputMaybe<Scalars['ID']>;
+  activityIDContains?: InputMaybe<Scalars['ID']>;
+  activityIDContainsFold?: InputMaybe<Scalars['ID']>;
+  activityIDEqualFold?: InputMaybe<Scalars['ID']>;
+  activityIDGT?: InputMaybe<Scalars['ID']>;
+  activityIDGTE?: InputMaybe<Scalars['ID']>;
+  activityIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  activityIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  activityIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  activityIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  activityIDLT?: InputMaybe<Scalars['ID']>;
+  activityIDLTE?: InputMaybe<Scalars['ID']>;
+  activityIDNEQ?: InputMaybe<Scalars['ID']>;
+  activityIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  activityIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  and?: InputMaybe<Array<StarterpackMintWhereInput>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** account edge predicates */
+  hasAccount?: InputMaybe<Scalars['Boolean']>;
+  hasAccountWith?: InputMaybe<Array<AccountWhereInput>>;
+  /** activity edge predicates */
+  hasActivity?: InputMaybe<Scalars['Boolean']>;
+  hasActivityWith?: InputMaybe<Array<ActivityWhereInput>>;
+  /** starterpack edge predicates */
+  hasStarterpack?: InputMaybe<Scalars['Boolean']>;
+  hasStarterpackWith?: InputMaybe<Array<StarterpackWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<StarterpackMintWhereInput>;
+  or?: InputMaybe<Array<StarterpackMintWhereInput>>;
+  /** starterpack_id field predicates */
+  starterpackID?: InputMaybe<Scalars['ID']>;
+  starterpackIDContains?: InputMaybe<Scalars['ID']>;
+  starterpackIDContainsFold?: InputMaybe<Scalars['ID']>;
+  starterpackIDEqualFold?: InputMaybe<Scalars['ID']>;
+  starterpackIDGT?: InputMaybe<Scalars['ID']>;
+  starterpackIDGTE?: InputMaybe<Scalars['ID']>;
+  starterpackIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  starterpackIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  starterpackIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  starterpackIDLT?: InputMaybe<Scalars['ID']>;
+  starterpackIDLTE?: InputMaybe<Scalars['ID']>;
+  starterpackIDNEQ?: InputMaybe<Scalars['ID']>;
+  starterpackIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+/** Ordering options for Starterpack connections */
+export type StarterpackOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order Starterpacks. */
+  field: StarterpackOrderField;
+};
+
+/** Properties by which Starterpack connections can be ordered. */
+export enum StarterpackOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/**
+ * StarterpackWhereInput is used for filtering Starterpack objects.
+ * Input was generated by ent.
+ */
+export type StarterpackWhereInput = {
+  /** acquisition_type field predicates */
+  acquisitionType?: InputMaybe<StarterpackAcquisitionType>;
+  acquisitionTypeIn?: InputMaybe<Array<StarterpackAcquisitionType>>;
+  acquisitionTypeNEQ?: InputMaybe<StarterpackAcquisitionType>;
+  acquisitionTypeNotIn?: InputMaybe<Array<StarterpackAcquisitionType>>;
+  /** active field predicates */
+  active?: InputMaybe<Scalars['Boolean']>;
+  activeNEQ?: InputMaybe<Scalars['Boolean']>;
+  and?: InputMaybe<Array<StarterpackWhereInput>>;
+  /** chain_id field predicates */
+  chainID?: InputMaybe<Scalars['String']>;
+  chainIDContains?: InputMaybe<Scalars['String']>;
+  chainIDContainsFold?: InputMaybe<Scalars['String']>;
+  chainIDEqualFold?: InputMaybe<Scalars['String']>;
+  chainIDGT?: InputMaybe<Scalars['String']>;
+  chainIDGTE?: InputMaybe<Scalars['String']>;
+  chainIDHasPrefix?: InputMaybe<Scalars['String']>;
+  chainIDHasSuffix?: InputMaybe<Scalars['String']>;
+  chainIDIn?: InputMaybe<Array<Scalars['String']>>;
+  chainIDLT?: InputMaybe<Scalars['String']>;
+  chainIDLTE?: InputMaybe<Scalars['String']>;
+  chainIDNEQ?: InputMaybe<Scalars['String']>;
+  chainIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** description field predicates */
+  description?: InputMaybe<Scalars['String']>;
+  descriptionContains?: InputMaybe<Scalars['String']>;
+  descriptionContainsFold?: InputMaybe<Scalars['String']>;
+  descriptionEqualFold?: InputMaybe<Scalars['String']>;
+  descriptionGT?: InputMaybe<Scalars['String']>;
+  descriptionGTE?: InputMaybe<Scalars['String']>;
+  descriptionHasPrefix?: InputMaybe<Scalars['String']>;
+  descriptionHasSuffix?: InputMaybe<Scalars['String']>;
+  descriptionIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionIsNil?: InputMaybe<Scalars['Boolean']>;
+  descriptionLT?: InputMaybe<Scalars['String']>;
+  descriptionLTE?: InputMaybe<Scalars['String']>;
+  descriptionNEQ?: InputMaybe<Scalars['String']>;
+  descriptionNotIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** merkle_drops edge predicates */
+  hasMerkleDrops?: InputMaybe<Scalars['Boolean']>;
+  hasMerkleDropsWith?: InputMaybe<Array<MerkleDropWhereInput>>;
+  /** paymaster edge predicates */
+  hasPaymaster?: InputMaybe<Scalars['Boolean']>;
+  hasPaymasterWith?: InputMaybe<Array<PaymasterWhereInput>>;
+  /** starterpack_contract edge predicates */
+  hasStarterpackContract?: InputMaybe<Scalars['Boolean']>;
+  hasStarterpackContractWith?: InputMaybe<Array<StarterpackContractWhereInput>>;
+  /** starterpack_mint edge predicates */
+  hasStarterpackMint?: InputMaybe<Scalars['Boolean']>;
+  hasStarterpackMintWith?: InputMaybe<Array<StarterpackMintWhereInput>>;
+  /** team edge predicates */
+  hasTeam?: InputMaybe<Scalars['Boolean']>;
+  hasTeamWith?: InputMaybe<Array<TeamWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** issuance field predicates */
+  issuance?: InputMaybe<Scalars['Int']>;
+  issuanceGT?: InputMaybe<Scalars['Int']>;
+  issuanceGTE?: InputMaybe<Scalars['Int']>;
+  issuanceIn?: InputMaybe<Array<Scalars['Int']>>;
+  issuanceLT?: InputMaybe<Scalars['Int']>;
+  issuanceLTE?: InputMaybe<Scalars['Int']>;
+  issuanceNEQ?: InputMaybe<Scalars['Int']>;
+  issuanceNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** max_issuance field predicates */
+  maxIssuance?: InputMaybe<Scalars['Int']>;
+  maxIssuanceGT?: InputMaybe<Scalars['Int']>;
+  maxIssuanceGTE?: InputMaybe<Scalars['Int']>;
+  maxIssuanceIn?: InputMaybe<Array<Scalars['Int']>>;
+  maxIssuanceIsNil?: InputMaybe<Scalars['Boolean']>;
+  maxIssuanceLT?: InputMaybe<Scalars['Int']>;
+  maxIssuanceLTE?: InputMaybe<Scalars['Int']>;
+  maxIssuanceNEQ?: InputMaybe<Scalars['Int']>;
+  maxIssuanceNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  maxIssuanceNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** max_per_account field predicates */
+  maxPerAccount?: InputMaybe<Scalars['Int']>;
+  maxPerAccountGT?: InputMaybe<Scalars['Int']>;
+  maxPerAccountGTE?: InputMaybe<Scalars['Int']>;
+  maxPerAccountIn?: InputMaybe<Array<Scalars['Int']>>;
+  maxPerAccountIsNil?: InputMaybe<Scalars['Boolean']>;
+  maxPerAccountLT?: InputMaybe<Scalars['Int']>;
+  maxPerAccountLTE?: InputMaybe<Scalars['Int']>;
+  maxPerAccountNEQ?: InputMaybe<Scalars['Int']>;
+  maxPerAccountNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  maxPerAccountNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** name field predicates */
+  name?: InputMaybe<Scalars['String']>;
+  nameContains?: InputMaybe<Scalars['String']>;
+  nameContainsFold?: InputMaybe<Scalars['String']>;
+  nameEqualFold?: InputMaybe<Scalars['String']>;
+  nameGT?: InputMaybe<Scalars['String']>;
+  nameGTE?: InputMaybe<Scalars['String']>;
+  nameHasPrefix?: InputMaybe<Scalars['String']>;
+  nameHasSuffix?: InputMaybe<Scalars['String']>;
+  nameIn?: InputMaybe<Array<Scalars['String']>>;
+  nameLT?: InputMaybe<Scalars['String']>;
+  nameLTE?: InputMaybe<Scalars['String']>;
+  nameNEQ?: InputMaybe<Scalars['String']>;
+  nameNotIn?: InputMaybe<Array<Scalars['String']>>;
+  not?: InputMaybe<StarterpackWhereInput>;
+  or?: InputMaybe<Array<StarterpackWhereInput>>;
+  /** paymaster_id field predicates */
+  paymasterID?: InputMaybe<Scalars['ID']>;
+  paymasterIDContains?: InputMaybe<Scalars['ID']>;
+  paymasterIDContainsFold?: InputMaybe<Scalars['ID']>;
+  paymasterIDEqualFold?: InputMaybe<Scalars['ID']>;
+  paymasterIDGT?: InputMaybe<Scalars['ID']>;
+  paymasterIDGTE?: InputMaybe<Scalars['ID']>;
+  paymasterIDHasPrefix?: InputMaybe<Scalars['ID']>;
+  paymasterIDHasSuffix?: InputMaybe<Scalars['ID']>;
+  paymasterIDIn?: InputMaybe<Array<Scalars['ID']>>;
+  paymasterIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  paymasterIDLT?: InputMaybe<Scalars['ID']>;
+  paymasterIDLTE?: InputMaybe<Scalars['ID']>;
+  paymasterIDNEQ?: InputMaybe<Scalars['ID']>;
+  paymasterIDNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  paymasterIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type Streak = {
+  __typename?: 'Streak';
+  currentStreak: Scalars['Int'];
+  maxStreak: Scalars['Int'];
+  playerAddress: Scalars['String'];
+};
+
+export type StreakItem = {
+  __typename?: 'StreakItem';
+  meta: StreakMeta;
+  streaks: Array<Streak>;
+};
+
+export type StreakMeta = {
+  __typename?: 'StreakMeta';
+  count: Scalars['Int'];
+  error?: Maybe<Scalars['String']>;
+  project: Scalars['String'];
+};
+
+export type StreakProject = {
+  project: Scalars['String'];
+};
+
+export type StreakResult = {
+  __typename?: 'StreakResult';
+  items: Array<StreakItem>;
+};
+
+export type StripePayment = {
+  __typename?: 'StripePayment';
+  id: Scalars['ID'];
+  paymentStatus: StripePaymentStatus;
+  purchaseFulfillment?: Maybe<PurchaseFulfillment>;
+};
+
+export type StripePaymentIntent = {
+  __typename?: 'StripePaymentIntent';
+  clientSecret: Scalars['String'];
+  customerSessionClientSecret?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  pricing: StripePricingDetails;
+};
+
+export enum StripePaymentStatus {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Succeeded = 'SUCCEEDED'
+}
+
+export type StripePricingDetails = {
+  __typename?: 'StripePricingDetails';
+  baseCostInCents: Scalars['Int'];
+  processingFeeInCents: Scalars['Int'];
+  totalInCents: Scalars['Int'];
+};
+
+export type StripeStarterpackQuote = {
+  __typename?: 'StripeStarterpackQuote';
+  needsSwap: Scalars['Boolean'];
+  paymentToken: Scalars['String'];
+  pricing: StripePricingDetails;
+};
+
+export type StripeStarterpackQuoteInput = {
+  clientPercentage?: InputMaybe<Scalars['Int']>;
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+  quantity: Scalars['Int'];
+  referral?: InputMaybe<Scalars['String']>;
+  referralGroup?: InputMaybe<Scalars['String']>;
+  registryAddress: Scalars['String'];
+  starterpackId: Scalars['String'];
+};
+
+export type Team = Node & {
+  __typename?: 'Team';
+  address?: Maybe<Scalars['String']>;
+  /** Credits to use for slot billing. 1 credit = 0.01 USD. */
+  credits: Scalars['Int'];
+  /** Soft delete flag for legal and billing purposes. */
+  deleted: Scalars['Boolean'];
+  deployments: DeploymentConnection;
+  description?: Maybe<Scalars['String']>;
+  email?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  /** Incubator tier: kohai (tier 1), senpai (tier 2, $5k free), sensei (tier 3, $20k free), cartridge (internal teams, unlimited). */
+  incubatorStage?: Maybe<TeamIncubatorStage>;
+  invoices: InvoiceConnection;
+  members: AccountConnection;
+  membership: AccountTeamConnection;
+  name: Scalars['String'];
+  paymasters: PaymasterConnection;
+  rpcAPIKeys: RpcApiKeyConnection;
+  rpcCorsDomains: RpcCorsDomainConnection;
+  starterpacks: StarterpackConnection;
+  taxID?: Maybe<Scalars['String']>;
+  /** Total amount debited for incubator stage tracking. 1 credit = 0.01 USD. */
+  totalDebits: Scalars['Int'];
+};
+
+
+export type TeamDeploymentsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<DeploymentOrder>;
+  where?: InputMaybe<DeploymentWhereInput>;
+};
+
+
+export type TeamInvoicesArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<InvoiceOrder>;
+  where?: InputMaybe<InvoiceWhereInput>;
+};
+
+
+export type TeamMembersArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<AccountOrder>;
+  where?: InputMaybe<AccountWhereInput>;
+};
+
+
+export type TeamMembershipArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  where?: InputMaybe<AccountTeamWhereInput>;
+};
+
+
+export type TeamPaymastersArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaymasterOrder>;
+  where?: InputMaybe<PaymasterWhereInput>;
+};
+
+
+export type TeamRpcApiKeysArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  where?: InputMaybe<RpcApiKeyWhereInput>;
+};
+
+
+export type TeamRpcCorsDomainsArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  where?: InputMaybe<RpcCorsDomainWhereInput>;
+};
+
+
+export type TeamStarterpacksArgs = {
+  after?: InputMaybe<Scalars['Cursor']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StarterpackOrder>;
+  where?: InputMaybe<StarterpackWhereInput>;
+};
+
+/** A connection to a list of items. */
+export type TeamConnection = {
+  __typename?: 'TeamConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<TeamEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int'];
+};
+
+export type TeamCreditsHistory = Node & {
+  __typename?: 'TeamCreditsHistory';
+  amount: Scalars['Int'];
+  /** Optional comment for transaction reason */
+  comment?: Maybe<Scalars['String']>;
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  teamID: Scalars['String'];
+  /** Type of transaction: credit or debit */
+  transactionType: TeamCreditsHistoryTransactionType;
+  updatedAt: Scalars['Time'];
+};
+
+/** Ordering options for TeamCreditsHistory connections */
+export type TeamCreditsHistoryOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order TeamCreditsHistories. */
+  field: TeamCreditsHistoryOrderField;
+};
+
+/** Properties by which TeamCreditsHistory connections can be ordered. */
+export enum TeamCreditsHistoryOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+/** TeamCreditsHistoryTransactionType is enum for the field transaction_type */
+export enum TeamCreditsHistoryTransactionType {
+  Credit = 'credit',
+  Debit = 'debit'
+}
+
+/**
+ * TeamCreditsHistoryWhereInput is used for filtering TeamCreditsHistory objects.
+ * Input was generated by ent.
+ */
+export type TeamCreditsHistoryWhereInput = {
+  /** amount field predicates */
+  amount?: InputMaybe<Scalars['Int']>;
+  amountGT?: InputMaybe<Scalars['Int']>;
+  amountGTE?: InputMaybe<Scalars['Int']>;
+  amountIn?: InputMaybe<Array<Scalars['Int']>>;
+  amountLT?: InputMaybe<Scalars['Int']>;
+  amountLTE?: InputMaybe<Scalars['Int']>;
+  amountNEQ?: InputMaybe<Scalars['Int']>;
+  amountNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  and?: InputMaybe<Array<TeamCreditsHistoryWhereInput>>;
+  /** comment field predicates */
+  comment?: InputMaybe<Scalars['String']>;
+  commentContains?: InputMaybe<Scalars['String']>;
+  commentContainsFold?: InputMaybe<Scalars['String']>;
+  commentEqualFold?: InputMaybe<Scalars['String']>;
+  commentGT?: InputMaybe<Scalars['String']>;
+  commentGTE?: InputMaybe<Scalars['String']>;
+  commentHasPrefix?: InputMaybe<Scalars['String']>;
+  commentHasSuffix?: InputMaybe<Scalars['String']>;
+  commentIn?: InputMaybe<Array<Scalars['String']>>;
+  commentIsNil?: InputMaybe<Scalars['Boolean']>;
+  commentLT?: InputMaybe<Scalars['String']>;
+  commentLTE?: InputMaybe<Scalars['String']>;
+  commentNEQ?: InputMaybe<Scalars['String']>;
+  commentNotIn?: InputMaybe<Array<Scalars['String']>>;
+  commentNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars['Time']>;
+  createdAtGT?: InputMaybe<Scalars['Time']>;
+  createdAtGTE?: InputMaybe<Scalars['Time']>;
+  createdAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  createdAtLT?: InputMaybe<Scalars['Time']>;
+  createdAtLTE?: InputMaybe<Scalars['Time']>;
+  createdAtNEQ?: InputMaybe<Scalars['Time']>;
+  createdAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  not?: InputMaybe<TeamCreditsHistoryWhereInput>;
+  or?: InputMaybe<Array<TeamCreditsHistoryWhereInput>>;
+  /** team_id field predicates */
+  teamID?: InputMaybe<Scalars['String']>;
+  teamIDContains?: InputMaybe<Scalars['String']>;
+  teamIDContainsFold?: InputMaybe<Scalars['String']>;
+  teamIDEqualFold?: InputMaybe<Scalars['String']>;
+  teamIDGT?: InputMaybe<Scalars['String']>;
+  teamIDGTE?: InputMaybe<Scalars['String']>;
+  teamIDHasPrefix?: InputMaybe<Scalars['String']>;
+  teamIDHasSuffix?: InputMaybe<Scalars['String']>;
+  teamIDIn?: InputMaybe<Array<Scalars['String']>>;
+  teamIDLT?: InputMaybe<Scalars['String']>;
+  teamIDLTE?: InputMaybe<Scalars['String']>;
+  teamIDNEQ?: InputMaybe<Scalars['String']>;
+  teamIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  /** transaction_type field predicates */
+  transactionType?: InputMaybe<TeamCreditsHistoryTransactionType>;
+  transactionTypeIn?: InputMaybe<Array<TeamCreditsHistoryTransactionType>>;
+  transactionTypeNEQ?: InputMaybe<TeamCreditsHistoryTransactionType>;
+  transactionTypeNotIn?: InputMaybe<Array<TeamCreditsHistoryTransactionType>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars['Time']>;
+  updatedAtGT?: InputMaybe<Scalars['Time']>;
+  updatedAtGTE?: InputMaybe<Scalars['Time']>;
+  updatedAtIn?: InputMaybe<Array<Scalars['Time']>>;
+  updatedAtLT?: InputMaybe<Scalars['Time']>;
+  updatedAtLTE?: InputMaybe<Scalars['Time']>;
+  updatedAtNEQ?: InputMaybe<Scalars['Time']>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+/** An edge in a connection. */
+export type TeamEdge = {
+  __typename?: 'TeamEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['Cursor'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Team>;
+};
+
+/** TeamIncubatorStage is enum for the field incubator_stage */
+export enum TeamIncubatorStage {
+  Cartridge = 'cartridge',
+  Kohai = 'kohai',
+  Senpai = 'senpai',
+  Sensei = 'sensei'
+}
+
+export type TeamInput = {
+  address?: InputMaybe<Scalars['String']>;
+  email?: InputMaybe<Scalars['String']>;
+  taxId?: InputMaybe<Scalars['String']>;
+};
+
+/**
+ * TeamWhereInput is used for filtering Team objects.
+ * Input was generated by ent.
+ */
+export type TeamWhereInput = {
+  /** address field predicates */
+  address?: InputMaybe<Scalars['String']>;
+  addressContains?: InputMaybe<Scalars['String']>;
+  addressContainsFold?: InputMaybe<Scalars['String']>;
+  addressEqualFold?: InputMaybe<Scalars['String']>;
+  addressGT?: InputMaybe<Scalars['String']>;
+  addressGTE?: InputMaybe<Scalars['String']>;
+  addressHasPrefix?: InputMaybe<Scalars['String']>;
+  addressHasSuffix?: InputMaybe<Scalars['String']>;
+  addressIn?: InputMaybe<Array<Scalars['String']>>;
+  addressIsNil?: InputMaybe<Scalars['Boolean']>;
+  addressLT?: InputMaybe<Scalars['String']>;
+  addressLTE?: InputMaybe<Scalars['String']>;
+  addressNEQ?: InputMaybe<Scalars['String']>;
+  addressNotIn?: InputMaybe<Array<Scalars['String']>>;
+  addressNotNil?: InputMaybe<Scalars['Boolean']>;
+  and?: InputMaybe<Array<TeamWhereInput>>;
+  /** credits field predicates */
+  credits?: InputMaybe<Scalars['Int']>;
+  creditsGT?: InputMaybe<Scalars['Int']>;
+  creditsGTE?: InputMaybe<Scalars['Int']>;
+  creditsIn?: InputMaybe<Array<Scalars['Int']>>;
+  creditsLT?: InputMaybe<Scalars['Int']>;
+  creditsLTE?: InputMaybe<Scalars['Int']>;
+  creditsNEQ?: InputMaybe<Scalars['Int']>;
+  creditsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+  /** deleted field predicates */
+  deleted?: InputMaybe<Scalars['Boolean']>;
+  deletedNEQ?: InputMaybe<Scalars['Boolean']>;
+  /** description field predicates */
+  description?: InputMaybe<Scalars['String']>;
+  descriptionContains?: InputMaybe<Scalars['String']>;
+  descriptionContainsFold?: InputMaybe<Scalars['String']>;
+  descriptionEqualFold?: InputMaybe<Scalars['String']>;
+  descriptionGT?: InputMaybe<Scalars['String']>;
+  descriptionGTE?: InputMaybe<Scalars['String']>;
+  descriptionHasPrefix?: InputMaybe<Scalars['String']>;
+  descriptionHasSuffix?: InputMaybe<Scalars['String']>;
+  descriptionIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionIsNil?: InputMaybe<Scalars['Boolean']>;
+  descriptionLT?: InputMaybe<Scalars['String']>;
+  descriptionLTE?: InputMaybe<Scalars['String']>;
+  descriptionNEQ?: InputMaybe<Scalars['String']>;
+  descriptionNotIn?: InputMaybe<Array<Scalars['String']>>;
+  descriptionNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** email field predicates */
+  email?: InputMaybe<Scalars['String']>;
+  emailContains?: InputMaybe<Scalars['String']>;
+  emailContainsFold?: InputMaybe<Scalars['String']>;
+  emailEqualFold?: InputMaybe<Scalars['String']>;
+  emailGT?: InputMaybe<Scalars['String']>;
+  emailGTE?: InputMaybe<Scalars['String']>;
+  emailHasPrefix?: InputMaybe<Scalars['String']>;
+  emailHasSuffix?: InputMaybe<Scalars['String']>;
+  emailIn?: InputMaybe<Array<Scalars['String']>>;
+  emailIsNil?: InputMaybe<Scalars['Boolean']>;
+  emailLT?: InputMaybe<Scalars['String']>;
+  emailLTE?: InputMaybe<Scalars['String']>;
+  emailNEQ?: InputMaybe<Scalars['String']>;
+  emailNotIn?: InputMaybe<Array<Scalars['String']>>;
+  emailNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** deployments edge predicates */
+  hasDeployments?: InputMaybe<Scalars['Boolean']>;
+  hasDeploymentsWith?: InputMaybe<Array<DeploymentWhereInput>>;
+  /** invoices edge predicates */
+  hasInvoices?: InputMaybe<Scalars['Boolean']>;
+  hasInvoicesWith?: InputMaybe<Array<InvoiceWhereInput>>;
+  /** members edge predicates */
+  hasMembers?: InputMaybe<Scalars['Boolean']>;
+  hasMembersWith?: InputMaybe<Array<AccountWhereInput>>;
+  /** membership edge predicates */
+  hasMembership?: InputMaybe<Scalars['Boolean']>;
+  hasMembershipWith?: InputMaybe<Array<AccountTeamWhereInput>>;
+  /** paymasters edge predicates */
+  hasPaymasters?: InputMaybe<Scalars['Boolean']>;
+  hasPaymastersWith?: InputMaybe<Array<PaymasterWhereInput>>;
+  /** rpc_api_keys edge predicates */
+  hasRPCAPIKeys?: InputMaybe<Scalars['Boolean']>;
+  hasRPCAPIKeysWith?: InputMaybe<Array<RpcApiKeyWhereInput>>;
+  /** rpc_cors_domains edge predicates */
+  hasRPCCorsDomains?: InputMaybe<Scalars['Boolean']>;
+  hasRPCCorsDomainsWith?: InputMaybe<Array<RpcCorsDomainWhereInput>>;
+  /** starterpacks edge predicates */
+  hasStarterpacks?: InputMaybe<Scalars['Boolean']>;
+  hasStarterpacksWith?: InputMaybe<Array<StarterpackWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars['ID']>;
+  idContainsFold?: InputMaybe<Scalars['ID']>;
+  idEqualFold?: InputMaybe<Scalars['ID']>;
+  idGT?: InputMaybe<Scalars['ID']>;
+  idGTE?: InputMaybe<Scalars['ID']>;
+  idIn?: InputMaybe<Array<Scalars['ID']>>;
+  idLT?: InputMaybe<Scalars['ID']>;
+  idLTE?: InputMaybe<Scalars['ID']>;
+  idNEQ?: InputMaybe<Scalars['ID']>;
+  idNotIn?: InputMaybe<Array<Scalars['ID']>>;
+  /** incubator_stage field predicates */
+  incubatorStage?: InputMaybe<TeamIncubatorStage>;
+  incubatorStageIn?: InputMaybe<Array<TeamIncubatorStage>>;
+  incubatorStageIsNil?: InputMaybe<Scalars['Boolean']>;
+  incubatorStageNEQ?: InputMaybe<TeamIncubatorStage>;
+  incubatorStageNotIn?: InputMaybe<Array<TeamIncubatorStage>>;
+  incubatorStageNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** name field predicates */
+  name?: InputMaybe<Scalars['String']>;
+  nameContains?: InputMaybe<Scalars['String']>;
+  nameContainsFold?: InputMaybe<Scalars['String']>;
+  nameEqualFold?: InputMaybe<Scalars['String']>;
+  nameGT?: InputMaybe<Scalars['String']>;
+  nameGTE?: InputMaybe<Scalars['String']>;
+  nameHasPrefix?: InputMaybe<Scalars['String']>;
+  nameHasSuffix?: InputMaybe<Scalars['String']>;
+  nameIn?: InputMaybe<Array<Scalars['String']>>;
+  nameLT?: InputMaybe<Scalars['String']>;
+  nameLTE?: InputMaybe<Scalars['String']>;
+  nameNEQ?: InputMaybe<Scalars['String']>;
+  nameNotIn?: InputMaybe<Array<Scalars['String']>>;
+  not?: InputMaybe<TeamWhereInput>;
+  or?: InputMaybe<Array<TeamWhereInput>>;
+  /** tax_id field predicates */
+  taxID?: InputMaybe<Scalars['String']>;
+  taxIDContains?: InputMaybe<Scalars['String']>;
+  taxIDContainsFold?: InputMaybe<Scalars['String']>;
+  taxIDEqualFold?: InputMaybe<Scalars['String']>;
+  taxIDGT?: InputMaybe<Scalars['String']>;
+  taxIDGTE?: InputMaybe<Scalars['String']>;
+  taxIDHasPrefix?: InputMaybe<Scalars['String']>;
+  taxIDHasSuffix?: InputMaybe<Scalars['String']>;
+  taxIDIn?: InputMaybe<Array<Scalars['String']>>;
+  taxIDIsNil?: InputMaybe<Scalars['Boolean']>;
+  taxIDLT?: InputMaybe<Scalars['String']>;
+  taxIDLTE?: InputMaybe<Scalars['String']>;
+  taxIDNEQ?: InputMaybe<Scalars['String']>;
+  taxIDNotIn?: InputMaybe<Array<Scalars['String']>>;
+  taxIDNotNil?: InputMaybe<Scalars['Boolean']>;
+  /** total_debits field predicates */
+  totalDebits?: InputMaybe<Scalars['Int']>;
+  totalDebitsGT?: InputMaybe<Scalars['Int']>;
+  totalDebitsGTE?: InputMaybe<Scalars['Int']>;
+  totalDebitsIn?: InputMaybe<Array<Scalars['Int']>>;
+  totalDebitsLT?: InputMaybe<Scalars['Int']>;
+  totalDebitsLTE?: InputMaybe<Scalars['Int']>;
+  totalDebitsNEQ?: InputMaybe<Scalars['Int']>;
+  totalDebitsNotIn?: InputMaybe<Array<Scalars['Int']>>;
+};
+
+export enum TokenPair {
+  EthUsdc = 'ETH_USDC',
+  LordsUsdc = 'LORDS_USDC',
+  StrkUsdc = 'STRK_USDC'
+}
+
+export type ToriiCreateInput = {
+  replicas?: InputMaybe<Scalars['Int']>;
+  replication?: InputMaybe<Scalars['Boolean']>;
+};
+
+export type ToriiUpdateInput = {
+  replicas?: InputMaybe<Scalars['Int']>;
+};
+
+export type Traceability = {
+  __typename?: 'Traceability';
+  amount: Scalars['String'];
+  contractAddress: Scalars['String'];
+  decimals: Scalars['Int'];
+  eventId: Scalars['String'];
+  executedAt: Scalars['String'];
+  fromAddress: Scalars['String'];
+  metadata: Scalars['String'];
+  name: Scalars['String'];
+  symbol: Scalars['String'];
+  toAddress: Scalars['String'];
+  tokenId: Scalars['String'];
+  transactionHash: Scalars['String'];
+};
+
+export type TraceabilityItem = {
+  __typename?: 'TraceabilityItem';
+  meta: TraceabilityMeta;
+  transfers: Array<Traceability>;
+};
+
+export type TraceabilityMeta = {
+  __typename?: 'TraceabilityMeta';
+  contractAddress: Scalars['String'];
+  count: Scalars['Int'];
+  date: Scalars['String'];
+  error?: Maybe<Scalars['String']>;
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+  tokenId: Scalars['String'];
+};
+
+export type TraceabilityProject = {
+  contractAddress: Scalars['String'];
+  date: Scalars['String'];
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+  tokenId: Scalars['String'];
+};
+
+export type TraceabilityResult = {
+  __typename?: 'TraceabilityResult';
+  items: Array<TraceabilityItem>;
+};
+
+export type Transfer = {
+  __typename?: 'Transfer';
+  amount: Scalars['String'];
+  contractAddress: Scalars['String'];
+  decimals: Scalars['Int'];
+  eventId: Scalars['String'];
+  executedAt: Scalars['String'];
+  fromAddress: Scalars['String'];
+  metadata: Scalars['String'];
+  name: Scalars['String'];
+  symbol: Scalars['String'];
+  toAddress: Scalars['String'];
+  tokenId: Scalars['String'];
+  transactionHash: Scalars['String'];
+};
+
+export type TransferInput = {
+  /** The amount to transfer. */
+  amount: Scalars['Int'];
+  /** The team name to transfer funds to. */
+  team: Scalars['String'];
+};
+
+export type TransferItem = {
+  __typename?: 'TransferItem';
+  meta: TransferMeta;
+  transfers: Array<Transfer>;
+};
+
+export type TransferMeta = {
+  __typename?: 'TransferMeta';
+  address: Scalars['String'];
+  count: Scalars['Int'];
+  date: Scalars['String'];
+  error?: Maybe<Scalars['String']>;
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+};
+
+export type TransferProject = {
+  address: Scalars['String'];
+  date: Scalars['String'];
+  limit: Scalars['Int'];
+  project: Scalars['String'];
+};
+
+export type TransferResponse = {
+  __typename?: 'TransferResponse';
+  accountAfter: Scalars['Int'];
+  accountBefore: Scalars['Int'];
+  amount: Scalars['Int'];
+  teamAfter: Scalars['Int'];
+  teamBefore: Scalars['Int'];
+};
+
+export type TransferResult = {
+  __typename?: 'TransferResult';
+  items: Array<TransferItem>;
+};
+
+export type UsdcTransferAuthorizationInput = {
+  from: Scalars['String'];
+  nonce: Scalars['String'];
+  r: Scalars['String'];
+  s: Scalars['String'];
+  to: Scalars['String'];
+  v: Scalars['Int'];
+  validAfter: Scalars['Int'];
+  validBefore: Scalars['Int'];
+  value: Scalars['String'];
+};
+
+/**
+ * UpdateMerkleClaimInput is used for update MerkleClaim object.
+ * Input was generated by ent.
+ */
+export type UpdateMerkleClaimInput = {
+  address?: InputMaybe<Scalars['String']>;
+  appendData?: InputMaybe<Array<Scalars['String']>>;
+  appendMerkleProof?: InputMaybe<Array<Scalars['String']>>;
+  claimed?: InputMaybe<Scalars['Boolean']>;
+  claimedAt?: InputMaybe<Scalars['Time']>;
+  clearClaimedAt?: InputMaybe<Scalars['Boolean']>;
+  clearMerkleProof?: InputMaybe<Scalars['Boolean']>;
+  createdAt?: InputMaybe<Scalars['Time']>;
+  data?: InputMaybe<Array<Scalars['String']>>;
+  /** Index of the claim in the merkle tree */
+  index?: InputMaybe<Scalars['Int']>;
+  merkleDropID?: InputMaybe<Scalars['ID']>;
+  merkleProof?: InputMaybe<Array<Scalars['String']>>;
+  updatedAt?: InputMaybe<Scalars['Time']>;
+};
+
+/**
+ * UpdateMerkleDropInput is used for update MerkleDrop object.
+ * Input was generated by ent.
+ */
+export type UpdateMerkleDropInput = {
+  addClaimIDs?: InputMaybe<Array<Scalars['ID']>>;
+  appendMetadata?: InputMaybe<Scalars['JSON']>;
+  clearClaims?: InputMaybe<Scalars['Boolean']>;
+  clearDescription?: InputMaybe<Scalars['Boolean']>;
+  clearMetadata?: InputMaybe<Scalars['Boolean']>;
+  clearStarterpack?: InputMaybe<Scalars['Boolean']>;
+  contract?: InputMaybe<Scalars['String']>;
+  createdAt?: InputMaybe<Scalars['Time']>;
+  description?: InputMaybe<Scalars['String']>;
+  entrypoint?: InputMaybe<Scalars['String']>;
+  key?: InputMaybe<Scalars['String']>;
+  matchStarterpackItem?: InputMaybe<Scalars['Boolean']>;
+  merkleRoot?: InputMaybe<Scalars['String']>;
+  /** Additional metadata for the merkle drop */
+  metadata?: InputMaybe<Scalars['JSON']>;
+  network?: InputMaybe<MerkleDropNetwork>;
+  removeClaimIDs?: InputMaybe<Array<Scalars['ID']>>;
+  salt?: InputMaybe<Scalars['String']>;
+  starterpackID?: InputMaybe<Scalars['ID']>;
+  updatedAt?: InputMaybe<Scalars['Time']>;
+};
+
+export type UpdateServiceInput = {
+  config?: InputMaybe<Scalars['String']>;
+  torii?: InputMaybe<ToriiUpdateInput>;
+  type: DeploymentService;
+  version?: InputMaybe<Scalars['String']>;
+};
+
+export type VerifyEmailInput = {
+  /** The 6-digit verification code received via email. */
+  code: Scalars['String'];
+  /**
+   * The email address that was sent the verification code.
+   * Must match the email used in sendEmailVerification.
+   */
+  email: Scalars['String'];
+};
+
+export type VerifyPhoneInput = {
+  /** The 6-digit verification code received via SMS. */
+  code: Scalars['String'];
+  /**
+   * The phone number that was sent the verification code.
+   * Must match the phone number used in sendPhoneVerification.
+   */
+  phoneNumber: Scalars['String'];
+};
+
+export type VerifyResponse = {
+  __typename?: 'VerifyResponse';
+  /** Human-readable message about the verification result. */
+  message: Scalars['String'];
+  /** Whether the verification was successful. */
+  success: Scalars['Boolean'];
+  /** The verified value (phone number or email) if verification succeeded. */
+  verifiedValue?: Maybe<Scalars['String']>;
+};
+
+export type WebauthnCredential = {
+  __typename?: 'WebauthnCredential';
+  AAGUID: Scalars['String'];
+  id: Scalars['ID'];
+  publicKey: Scalars['String'];
+};
+
+export type WebauthnCredentials = {
+  __typename?: 'WebauthnCredentials';
+  webauthn?: Maybe<Array<WebauthnCredential>>;
+};
+
+export type AccountQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type AccountQuery = { __typename?: 'Query', account?: { __typename?: 'Account', username: string, credentials: { __typename?: 'Credentials', webauthn?: Array<{ __typename?: 'WebauthnCredential', id: string, publicKey: string }> | null }, controllers: { __typename?: 'ControllerConnection', edges?: Array<{ __typename?: 'ControllerEdge', node?: { __typename?: 'Controller', address: string, constructorCalldata: Array<string>, signers?: Array<{ __typename?: 'Signer', type: SignerType }> | null } | null } | null> | null } } | null };
+
+export type CreditQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type CreditQuery = { __typename?: 'Query', account?: { __typename?: 'Account', credits: { __typename?: 'Credits', amount: string, decimals: number } } | null };
+
+export type AccountNameQueryVariables = Exact<{
+  address: Scalars['String'];
+}>;
+
+
+export type AccountNameQuery = { __typename?: 'Query', accounts?: { __typename?: 'AccountConnection', edges?: Array<{ __typename?: 'AccountEdge', node?: { __typename?: 'Account', username: string } | null } | null> | null } | null };
+
+export type AccountNamesQueryVariables = Exact<{
+  addresses: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type AccountNamesQuery = { __typename?: 'Query', accounts?: { __typename?: 'AccountConnection', edges?: Array<{ __typename?: 'AccountEdge', node?: { __typename?: 'Account', username: string, controllers: { __typename?: 'ControllerConnection', edges?: Array<{ __typename?: 'ControllerEdge', node?: { __typename?: 'Controller', address: string } | null } | null> | null } } | null } | null> | null } | null };
+
+export type AddressByUsernameQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type AddressByUsernameQuery = { __typename?: 'Query', account?: { __typename?: 'Account', controllers: { __typename?: 'ControllerConnection', edges?: Array<{ __typename?: 'ControllerEdge', node?: { __typename?: 'Controller', address: string } | null } | null> | null } } | null };
+
+export type AccountSearchQueryVariables = Exact<{
+  query: Scalars['String'];
+  limit?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type AccountSearchQuery = { __typename?: 'Query', searchAccounts: Array<{ __typename?: 'Account', username: string, updatedAt: string, credits: { __typename?: 'Credits', amount: string, decimals: number } }> };
+
+export type AchievementsQueryVariables = Exact<{
+  projects: Array<Project> | Project;
+}>;
+
+
+export type AchievementsQuery = { __typename?: 'Query', achievements: { __typename?: 'AchievementResult', items: Array<{ __typename?: 'AchievementItem', meta: { __typename?: 'AchievementMeta', project: string, model: string, namespace: string, count: number }, achievements: Array<{ __typename?: 'Achievement', id: string, hidden: number, page: number, points: number, start: string, end: string, achievementGroup: string, icon: string, title: string, description: string, taskId: string, taskTotal: number, taskDescription: string, data?: string | null }> }> } };
+
+export type ProgressionsQueryVariables = Exact<{
+  projects: Array<Project> | Project;
+}>;
+
+
+export type ProgressionsQuery = { __typename?: 'Query', playerAchievements: { __typename?: 'PlayerAchievementResult', items: Array<{ __typename?: 'PlayerAchievementItem', meta: { __typename?: 'AchievementMeta', project: string, model: string, namespace: string, count: number }, achievements: Array<{ __typename?: 'PlayerAchievement', playerId: string, achievementId: string, points: number, taskId: string, taskTotal: number, total: number, completionTime: string }> }> } };
+
+export type ActivitiesQueryVariables = Exact<{
+  projects: Array<ActivityProject> | ActivityProject;
+}>;
+
+
+export type ActivitiesQuery = { __typename?: 'Query', activities: { __typename?: 'ActivityResult', items: Array<{ __typename?: 'ActivityItem', meta: { __typename?: 'ActivityMeta', project: string, address: string, limit: number, count: number }, activities: Array<{ __typename?: 'ActivityEntry', contractAddress: string, entrypoint: string, executedAt: string, callerAddress: string, transactionHash: string }> }> } };
+
+export type BalancesQueryVariables = Exact<{
+  projects?: InputMaybe<Array<Scalars['String']> | Scalars['String']>;
+  accountAddress: Scalars['String'];
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  after?: InputMaybe<Scalars['Cursor']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  limit?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type BalancesQuery = { __typename?: 'Query', balances: { __typename?: 'BalanceConnection', totalCount: number, edges: Array<{ __typename?: 'BalanceEdge', node: { __typename?: 'Balance', raw: string, amount: number, value: number, meta: { __typename?: 'ERC20Metadata', project: string, decimals: number, contractAddress: string, name: string, symbol: string, price: number, periodPrice: number } } }> } };
+
+export type BalanceQueryVariables = Exact<{
+  projects: Array<Scalars['String']> | Scalars['String'];
+  tokenAddress: Scalars['String'];
+  accountAddress: Scalars['String'];
+}>;
+
+
+export type BalanceQuery = { __typename?: 'Query', balance: { __typename?: 'Balance', raw: string, amount: number, value: number, meta: { __typename?: 'ERC20Metadata', project: string, decimals: number, contractAddress: string, name: string, symbol: string, price: number, periodPrice: number } } };
+
+export type CollectiblesQueryVariables = Exact<{
+  projects?: InputMaybe<Array<Scalars['String']> | Scalars['String']>;
+  accountAddress: Scalars['String'];
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  after?: InputMaybe<Scalars['Cursor']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  limit?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type CollectiblesQuery = { __typename?: 'Query', collectibles: { __typename?: 'CollectibleConnection', edges: Array<{ __typename?: 'CollectibleEdge', node: { __typename?: 'Collectible', assets: Array<{ __typename?: 'AssetEdge', attributes?: string | null, description?: string | null, imageUrl: string, name: string, tokenId: string, amount: number, metadata?: string | null }>, meta: { __typename?: 'ERC1155Metadata', project: string, assetCount: number, contractAddress: string, imagePath: string, name: string } } }> } };
+
+export type CollectibleQueryVariables = Exact<{
+  projects: Array<Scalars['String']> | Scalars['String'];
+  contractAddress: Scalars['String'];
+  accountAddress: Scalars['String'];
+}>;
+
+
+export type CollectibleQuery = { __typename?: 'Query', collectible: { __typename?: 'Collectible', assets: Array<{ __typename?: 'AssetEdge', attributes?: string | null, description?: string | null, imageUrl: string, name: string, tokenId: string, amount: number, metadata?: string | null }>, meta: { __typename?: 'ERC1155Metadata', assetCount: number, contractAddress: string, imagePath: string, name: string } } };
+
+export type CollectionsQueryVariables = Exact<{
+  projects?: InputMaybe<Array<Scalars['String']> | Scalars['String']>;
+  accountAddress: Scalars['String'];
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  before?: InputMaybe<Scalars['Cursor']>;
+  after?: InputMaybe<Scalars['Cursor']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  limit?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type CollectionsQuery = { __typename?: 'Query', collections: { __typename?: 'CollectionConnection', edges: Array<{ __typename?: 'CollectionEdge', node: { __typename?: 'Collection', assets: Array<{ __typename?: 'AssetEdge', attributes?: string | null, description?: string | null, imageUrl: string, name: string, tokenId: string, metadata?: string | null }>, meta: { __typename?: 'ERC721Metadata', project: string, assetCount: number, contractAddress: string, imagePath: string, name: string } } }> } };
+
+export type CollectionQueryVariables = Exact<{
+  projects: Array<Scalars['String']> | Scalars['String'];
+  contractAddress: Scalars['String'];
+  accountAddress: Scalars['String'];
+}>;
+
+
+export type CollectionQuery = { __typename?: 'Query', collection: { __typename?: 'Collection', assets: Array<{ __typename?: 'AssetEdge', attributes?: string | null, description?: string | null, imageUrl: string, name: string, tokenId: string, metadata?: string | null }>, meta: { __typename?: 'ERC721Metadata', assetCount: number, contractAddress: string, imagePath: string, name: string } } };
+
+export type ControllerQueryVariables = Exact<{
+  username: Scalars['String'];
+  chainId: Scalars['String'];
+}>;
+
+
+export type ControllerQuery = { __typename?: 'Query', controller?: { __typename?: 'Controller', id: string, accountID: string, address: string, network: string, constructorCalldata: Array<string>, createdAt: string, updatedAt: string, signers?: Array<{ __typename?: 'Signer', createdAt: string, isRevoked: boolean, isOriginal: boolean, metadata: { __typename: 'Eip191Credentials', eip191?: Array<{ __typename?: 'Eip191Credential', provider: string, ethAddress: string }> | null } | { __typename: 'PasswordCredentials', password?: Array<{ __typename?: 'PasswordCredential', publicKey: string, encryptedPrivateKey: string }> | null } | { __typename: 'SIWSCredentials', siws?: Array<{ __typename?: 'SIWSCredential', publicKey: string }> | null } | { __typename: 'StarknetCredentials', starknet?: Array<{ __typename?: 'StarknetCredential', publicKey: string }> | null } | { __typename: 'WebauthnCredentials', webauthn?: Array<{ __typename?: 'WebauthnCredential', id: string, publicKey: string, AAGUID: string }> | null } }> | null } | null };
+
+export type BeginRegistrationMutationVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type BeginRegistrationMutation = { __typename?: 'Mutation', beginRegistration: any };
+
+export type FinalizeRegistrationMutationVariables = Exact<{
+  credentials: Scalars['String'];
+  network: Scalars['String'];
+}>;
+
+
+export type FinalizeRegistrationMutation = { __typename?: 'Mutation', finalizeRegistration: { __typename?: 'Account', username: string, controllers: { __typename?: 'ControllerConnection', edges?: Array<{ __typename?: 'ControllerEdge', node?: { __typename?: 'Controller', address: string, constructorCalldata: Array<string>, signers?: Array<{ __typename?: 'Signer', type: SignerType }> | null } | null } | null> | null }, credentials: { __typename?: 'Credentials', webauthn?: Array<{ __typename?: 'WebauthnCredential', id: string, publicKey: string }> | null } } };
+
+export type BeginLoginMutationVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type BeginLoginMutation = { __typename?: 'Mutation', beginLogin: any };
+
+export type FinalizeLoginMutationVariables = Exact<{
+  credentials: Scalars['String'];
+}>;
+
+
+export type FinalizeLoginMutation = { __typename?: 'Mutation', finalizeLogin: string };
+
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'Account', id: string, email?: string | null } | null };
+
+export type MerkleDropByKeyQueryVariables = Exact<{
+  key: Scalars['String'];
+}>;
+
+
+export type MerkleDropByKeyQuery = { __typename?: 'Query', merkleDropByKey?: { __typename?: 'MerkleDrop', key: string, salt: string, network: MerkleDropNetwork, contract: string, entrypoint: string, merkleRoot: string, description?: string | null, matchStarterpackItem: boolean } | null };
+
+export type MerkleClaimsForAddressQueryVariables = Exact<{
+  keys: Array<Scalars['String']> | Scalars['String'];
+  address: Scalars['String'];
+}>;
+
+
+export type MerkleClaimsForAddressQuery = { __typename?: 'Query', merkleClaimsForAddress: Array<{ __typename?: 'MerkleClaim', index: number, data: Array<string>, merkleProof?: Array<string> | null, merkleDrop: { __typename?: 'MerkleDrop', key: string, salt: string, network: MerkleDropNetwork, contract: string, entrypoint: string, merkleRoot: string, description?: string | null, matchStarterpackItem: boolean } }> };
+
+export type MetricsQueryVariables = Exact<{
+  projects: Array<MetricsProject> | MetricsProject;
+}>;
+
+
+export type MetricsQuery = { __typename?: 'Query', metrics: { __typename?: 'MetricsResult', items: Array<{ __typename?: 'MetricsItem', meta: { __typename?: 'MetricsMeta', project: string, error?: string | null, count: number }, metrics: Array<{ __typename?: 'MetricsEntry', transactionDate: string, transactionCount: number, callerCount: number }> }> } };
+
+export type OwnershipsQueryVariables = Exact<{
+  projects: Array<OwnershipProject> | OwnershipProject;
+}>;
+
+
+export type OwnershipsQuery = { __typename?: 'Query', ownerships: { __typename?: 'OwnershipResult', items: Array<{ __typename?: 'OwnershipItem', ownerships: Array<{ __typename?: 'Ownership', accountAddress: string, contractAddress: string, tokenId: string, balance: string }>, meta: { __typename?: 'OwnershipMeta', project: string, tokenIds: Array<string>, contractAddresses: Array<string>, limit: number, error?: string | null, count: number } }> } };
+
+export type CryptoPaymentQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type CryptoPaymentQuery = { __typename?: 'Query', cryptoPayment?: { __typename?: 'CryptoPayment', id: string, tokenAmount: string, status: CryptoPaymentStatus, network: Network, tokenAddress: string, depositAddress: string, expiresAt: string } | null };
+
+export type StripePaymentQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type StripePaymentQuery = { __typename?: 'Query', stripePayment: { __typename?: 'StripePayment', id: string, paymentStatus: StripePaymentStatus } };
+
+export type LayerswapSourcesQueryVariables = Exact<{
+  token: Scalars['String'];
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+}>;
+
+
+export type LayerswapSourcesQuery = { __typename?: 'Query', layerswapSources: Array<{ __typename?: 'LayerswapSource', name: string, displayName: string, logo: string, chainId: string, type: string, depositMethods: Array<string>, tokens: Array<{ __typename?: 'LayerswapSourceToken', symbol: string, displayAsset: string, decimals: number, priceInUsd: number, status: string }> }> };
+
+export type CreateCryptoPaymentMutationVariables = Exact<{
+  input: CreateCryptoPaymentInput;
+}>;
+
+
+export type CreateCryptoPaymentMutation = { __typename?: 'Mutation', createCryptoPayment: { __typename?: 'CryptoPayment', id: string, tokenAmount: string, status: CryptoPaymentStatus, network: Network, tokenAddress: string, depositAddress: string, expiresAt: string } };
+
+export type CreateStripePaymentIntentMutationVariables = Exact<{
+  input: CreateStripePaymentIntentInput;
+}>;
+
+
+export type CreateStripePaymentIntentMutation = { __typename?: 'Mutation', createStripePaymentIntent: { __typename?: 'StripePaymentIntent', id: string, clientSecret: string, pricing: { __typename?: 'StripePricingDetails', baseCostInCents: number, processingFeeInCents: number, totalInCents: number } } };
+
+export type CreateLayerswapPaymentMutationVariables = Exact<{
+  input: CreateLayerswapPaymentInput;
+}>;
+
+
+export type CreateLayerswapPaymentMutation = { __typename?: 'Mutation', createLayerswapPayment: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } };
+
+export type CreateLayerswapDepositMutationVariables = Exact<{
+  input: CreateLayerswapDepositInput;
+}>;
+
+
+export type CreateLayerswapDepositMutation = { __typename?: 'Mutation', createLayerswapDeposit: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } };
+
+export type LayerswapQuoteQueryVariables = Exact<{
+  input: CreateLayerswapDepositInput;
+}>;
+
+
+export type LayerswapQuoteQuery = { __typename?: 'Query', layerswapQuote: { __typename?: 'LayerswapQuote', requestedAmount: string, receivedAmount: string, totalFees: string, averageCompletionTime: string } };
+
+export type LayerswapStatusQueryVariables = Exact<{
+  swapId: Scalars['ID'];
+  isMainnet?: InputMaybe<Scalars['Boolean']>;
+}>;
+
+
+export type LayerswapStatusQuery = { __typename?: 'Query', layerswapStatus: { __typename?: 'LayerswapStatusResponse', status: LayerswapStatus } };
+
+export type CoinbaseOnrampTransactionsQueryVariables = Exact<{
+  input: CoinbaseTransactionsInput;
+}>;
+
+
+export type CoinbaseOnrampTransactionsQuery = { __typename?: 'Query', coinbaseOnrampTransactions: { __typename?: 'CoinbaseTransactionsResponse', nextPageKey?: string | null, totalCount?: string | null, transactions: Array<{ __typename?: 'CoinbaseTransaction', transactionId: string, walletAddress?: string | null, type?: string | null, txHash?: string | null, status: CoinbaseTransactionStatus, purchaseCurrency: string, purchaseNetwork: string, purchaseAmount: { __typename?: 'CoinbaseAmount', amount: string, currency: string }, paymentTotal: { __typename?: 'CoinbaseAmount', amount: string, currency: string }, coinbaseFee: { __typename?: 'CoinbaseAmount', amount: string, currency: string }, networkFee: { __typename?: 'CoinbaseAmount', amount: string, currency: string } }> } };
+
+export type CreateCoinbaseOnRampOrderMutationVariables = Exact<{
+  input: CreateCoinbaseOnrampOrderInput;
+}>;
+
+
+export type CreateCoinbaseOnRampOrderMutation = { __typename?: 'Mutation', createCoinbaseOnrampOrder: { __typename?: 'CoinbaseOnrampOrderResponse', coinbaseOrder: { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> }, layerswapPayment?: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } | null } };
+
+export type CreateCoinbaseLayerswapOrderMutationVariables = Exact<{
+  input: CreateCoinbaseLayerswapOrderInput;
+}>;
+
+
+export type CreateCoinbaseLayerswapOrderMutation = { __typename?: 'Mutation', createCoinbaseLayerswapOrder: { __typename?: 'CoinbaseOnrampOrderResponse', coinbaseOrder: { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> }, layerswapPayment?: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } | null } };
+
+export type CoinbaseOnRampOrderQueryVariables = Exact<{
+  orderId: Scalars['String'];
+}>;
+
+
+export type CoinbaseOnRampOrderQuery = { __typename?: 'Query', coinbaseOnrampOrder: { __typename?: 'CoinbaseOnrampOrder', txHash?: string | null, status: CoinbaseOnrampStatus } };
+
+export type CoinbaseOnRampQuoteQueryVariables = Exact<{
+  input: CoinbaseOnrampQuoteInput;
+}>;
+
+
+export type CoinbaseOnRampQuoteQuery = { __typename?: 'Query', coinbaseOnrampQuote: { __typename?: 'CoinbaseOnrampQuote', quoteId: string, paymentTotal: { __typename?: 'CoinbaseAmount', amount: string, currency: string }, purchaseAmount: { __typename?: 'CoinbaseAmount', amount: string, currency: string }, layerswapFees: { __typename?: 'CoinbaseAmount', amount: string, currency: string }, coinbaseFee: { __typename?: 'CoinbaseAmount', amount: string, currency: string }, networkFee: { __typename?: 'CoinbaseAmount', amount: string, currency: string } } };
+
+export type CryptoPaymentFieldsFragment = { __typename?: 'CryptoPayment', id: string, tokenAmount: string, status: CryptoPaymentStatus, network: Network, tokenAddress: string, depositAddress: string, expiresAt: string };
+
+export type LayerswapPaymentFieldsFragment = { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string };
+
+export type CoinbaseOnrampOrderFieldsFragment = { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> };
+
+export type CoinbaseOnrampOrderResponseFieldsFragment = { __typename?: 'CoinbaseOnrampOrderResponse', coinbaseOrder: { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> }, layerswapPayment?: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } | null };
+
+export type PlaythroughsQueryVariables = Exact<{
+  projects: Array<PlaythroughProject> | PlaythroughProject;
+}>;
+
+
+export type PlaythroughsQuery = { __typename?: 'Query', playthroughs: { __typename?: 'PlaythroughResult', items: Array<{ __typename?: 'PlaythroughItem', playthroughs: Array<{ __typename?: 'PlaythroughEntry', entrypoints: string, sessionStart: string, sessionEnd: string, actionCount: number, callerAddress: string }>, meta: { __typename?: 'PlaythroughMeta', project: string, limit: number, error?: string | null, count: number } }> } };
+
+export type PriceQueryVariables = Exact<{
+  pairs: Array<TokenPair> | TokenPair;
+}>;
+
+
+export type PriceQuery = { __typename?: 'Query', price: Array<{ __typename?: 'Price', amount: string, base: string, decimals: number, quote: string }> };
+
+export type PriceByAddressesQueryVariables = Exact<{
+  addresses: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type PriceByAddressesQuery = { __typename?: 'Query', priceByAddresses: Array<{ __typename?: 'Price', amount: string, base: string, decimals: number, quote: string }> };
+
+export type PricePeriodByAddressesQueryVariables = Exact<{
+  addresses: Array<Scalars['String']> | Scalars['String'];
+  start: Scalars['Int'];
+  end: Scalars['Int'];
+}>;
+
+
+export type PricePeriodByAddressesQuery = { __typename?: 'Query', pricePeriodByAddresses: Array<{ __typename?: 'Price', amount: string, base: string, decimals: number, quote: string }> };
+
+export type SessionsQueryVariables = Exact<{
+  where: SessionWhereInput;
+}>;
+
+
+export type SessionsQuery = { __typename?: 'Query', sessions?: { __typename?: 'SessionConnection', edges?: Array<{ __typename?: 'SessionEdge', node?: { __typename?: 'Session', id: string, appID: string, chainID: string, isRevoked: boolean, expiresAt: string, createdAt: string, updatedAt: string, metadata?: { __typename?: 'SessionMetadata', os: string, browser: string } | null } | null } | null> | null } | null };
+
+export type SignerQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type SignerQuery = { __typename?: 'Query', account?: { __typename?: 'Account', username: string, controllers: { __typename?: 'ControllerConnection', edges?: Array<{ __typename?: 'ControllerEdge', node?: { __typename?: 'Controller', signers?: Array<{ __typename?: 'Signer', id: string, type: SignerType, createdAt: string, updatedAt: string, controller: { __typename?: 'Controller', id: string, accountID: string } }> | null } | null } | null> | null } } | null };
+
+export type ClaimFreeStarterpackMutationVariables = Exact<{
+  input: StarterpackInput;
+}>;
+
+
+export type ClaimFreeStarterpackMutation = { __typename?: 'Mutation', claimFreeStarterpack: string };
+
+export type StarterPackQueryVariables = Exact<{
+  input: StarterpackInput;
+}>;
+
+
+export type StarterPackQuery = { __typename?: 'Query', starterpack?: { __typename?: 'StarterpackDetails', starterpack: { __typename?: 'Starterpack', name: string, description?: string | null, active: boolean, issuance: number, maxIssuance?: number | null, acquisitionType: StarterpackAcquisitionType, starterpackContract: { __typename?: 'StarterpackContractConnection', edges?: Array<{ __typename?: 'StarterpackContractEdge', node?: { __typename?: 'StarterpackContract', name: string, description?: string | null, iconURL?: string | null, contractAddress: string, supplyEntryPoint?: string | null, supplyCalldata?: Array<string> | null } | null } | null> | null }, merkleDrops: { __typename?: 'MerkleDropConnection', edges?: Array<{ __typename?: 'MerkleDropEdge', node?: { __typename?: 'MerkleDrop', key: string, salt: string, network: MerkleDropNetwork, contract: string, entrypoint: string, merkleRoot: string, description?: string | null } | null } | null> | null } }, price: { __typename?: 'Credits', amount: string, decimals: number }, bonusCredits: { __typename?: 'Credits', amount: string, decimals: number }, mintAllowance?: { __typename?: 'MintAllowance', count: number, limit: number } | null } | null };
+
+export type TeamsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TeamsQuery = { __typename?: 'Query', me?: { __typename?: 'Account', teams: { __typename?: 'TeamConnection', totalCount: number, edges?: Array<{ __typename?: 'TeamEdge', node?: { __typename?: 'Team', id: string, name: string, credits: number, deployments: { __typename?: 'DeploymentConnection', totalCount: number, edges?: Array<{ __typename?: 'DeploymentEdge', node?: { __typename?: 'Deployment', project: string } | null } | null> | null } } | null } | null> | null } } | null };
+
+export type TraceabilitiesQueryVariables = Exact<{
+  projects: Array<TraceabilityProject> | TraceabilityProject;
+}>;
+
+
+export type TraceabilitiesQuery = { __typename?: 'Query', traceabilities: { __typename?: 'TraceabilityResult', items: Array<{ __typename?: 'TraceabilityItem', transfers: Array<{ __typename?: 'Traceability', amount: string, contractAddress: string, decimals: number, eventId: string, executedAt: string, fromAddress: string, toAddress: string, metadata: string, name: string, symbol: string, tokenId: string, transactionHash: string }>, meta: { __typename?: 'TraceabilityMeta', project: string, tokenId: string, contractAddress: string, date: string, limit: number, error?: string | null, count: number } }> } };
+
+export type TransfersQueryVariables = Exact<{
+  projects: Array<TransferProject> | TransferProject;
+}>;
+
+
+export type TransfersQuery = { __typename?: 'Query', transfers: { __typename?: 'TransferResult', items: Array<{ __typename?: 'TransferItem', meta: { __typename?: 'TransferMeta', project: string, address: string, date: string, limit: number, count: number }, transfers: Array<{ __typename?: 'Transfer', amount: string, decimals: number, metadata: string, name: string, symbol: string, contractAddress: string, executedAt: string, fromAddress: string, toAddress: string, tokenId: string, eventId: string, transactionHash: string }> }> } };
+
+export type SendEmailVerificationMutationVariables = Exact<{
+  input: SendEmailVerificationInput;
+}>;
+
+
+export type SendEmailVerificationMutation = { __typename?: 'Mutation', sendEmailVerification: { __typename?: 'SendVerificationResponse', success: boolean, message: string } };
+
+export type SendPhoneVerificationMutationVariables = Exact<{
+  input: SendPhoneVerificationInput;
+}>;
+
+
+export type SendPhoneVerificationMutation = { __typename?: 'Mutation', sendPhoneVerification: { __typename?: 'SendVerificationResponse', success: boolean, message: string } };
+
+export type VerifyEmailMutationVariables = Exact<{
+  input: VerifyEmailInput;
+}>;
+
+
+export type VerifyEmailMutation = { __typename?: 'Mutation', verifyEmail: { __typename?: 'VerifyResponse', success: boolean, message: string, verifiedValue?: string | null } };
+
+export type VerifyPhoneMutationVariables = Exact<{
+  input: VerifyPhoneInput;
+}>;
+
+
+export type VerifyPhoneMutation = { __typename?: 'Mutation', verifyPhone: { __typename?: 'VerifyResponse', success: boolean, message: string, verifiedValue?: string | null } };
+
+export type TxsHistoryQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type TxsHistoryQuery = { __typename?: 'Query', account?: { __typename?: 'Account', activities: { __typename?: 'ActivityConnection', edges?: Array<{ __typename?: 'ActivityEdge', node?: { __typename?: 'Activity', id: string, paymasterID?: string | null, type: ActivityType, status: ActivityStatus, network?: string | null, transactionHash?: string | null, feeSource: ActivityFeeSource, updatedAt: string } | null } | null> | null } } | null };
+
+export const CryptoPaymentFieldsFragmentDoc = `
+    fragment CryptoPaymentFields on CryptoPayment {
+  id
+  tokenAmount
+  status
+  network
+  tokenAddress
+  depositAddress
+  expiresAt
+}
+    `;
+export const CoinbaseOnrampOrderFieldsFragmentDoc = `
+    fragment CoinbaseOnrampOrderFields on CoinbaseOnrampOrder {
+  orderId
+  paymentLink
+  paymentLinkType
+  paymentTotal
+  paymentCurrency
+  purchaseAmount
+  purchaseCurrency
+  destinationAddress
+  destinationNetwork
+  fees {
+    type
+    amount
+    currency
+  }
+}
+    `;
+export const LayerswapPaymentFieldsFragmentDoc = `
+    fragment LayerswapPaymentFields on LayerswapPayment {
+  cryptoPaymentId
+  swapId
+  status
+  sourceNetwork
+  sourceTokenAmount
+  sourceTokenAddress
+  sourceDepositAddress
+  expiresAt
+}
+    `;
+export const CoinbaseOnrampOrderResponseFieldsFragmentDoc = `
+    fragment CoinbaseOnrampOrderResponseFields on CoinbaseOnrampOrderResponse {
+  coinbaseOrder {
+    ...CoinbaseOnrampOrderFields
+  }
+  layerswapPayment {
+    ...LayerswapPaymentFields
+  }
+}
+    ${CoinbaseOnrampOrderFieldsFragmentDoc}
+${LayerswapPaymentFieldsFragmentDoc}`;
+export const AccountDocument = `
+    query Account($username: String!) {
+  account(username: $username) {
+    username
+    credentials {
+      webauthn {
+        id
+        publicKey
+      }
+    }
+    controllers {
+      edges {
+        node {
+          address
+          constructorCalldata
+          signers {
+            type
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const useAccountQuery = <
+      TData = AccountQuery,
+      TError = unknown
+    >(
+      variables: AccountQueryVariables,
+      options?: UseQueryOptions<AccountQuery, TError, TData>
+    ) =>
+    useQuery<AccountQuery, TError, TData>(
+      ['Account', variables],
+      useFetchData<AccountQuery, AccountQueryVariables>(AccountDocument).bind(null, variables),
+      options
+    );
+export const CreditDocument = `
+    query Credit($username: String!) {
+  account(username: $username) {
+    credits {
+      amount
+      decimals
+    }
+  }
+}
+    `;
+export const useCreditQuery = <
+      TData = CreditQuery,
+      TError = unknown
+    >(
+      variables: CreditQueryVariables,
+      options?: UseQueryOptions<CreditQuery, TError, TData>
+    ) =>
+    useQuery<CreditQuery, TError, TData>(
+      ['Credit', variables],
+      useFetchData<CreditQuery, CreditQueryVariables>(CreditDocument).bind(null, variables),
+      options
+    );
+export const AccountNameDocument = `
+    query AccountName($address: String!) {
+  accounts(where: {hasControllersWith: {address: $address}}, first: 1) {
+    edges {
+      node {
+        username
+      }
+    }
+  }
+}
+    `;
+export const useAccountNameQuery = <
+      TData = AccountNameQuery,
+      TError = unknown
+    >(
+      variables: AccountNameQueryVariables,
+      options?: UseQueryOptions<AccountNameQuery, TError, TData>
+    ) =>
+    useQuery<AccountNameQuery, TError, TData>(
+      ['AccountName', variables],
+      useFetchData<AccountNameQuery, AccountNameQueryVariables>(AccountNameDocument).bind(null, variables),
+      options
+    );
+export const AccountNamesDocument = `
+    query AccountNames($addresses: [String!]!) {
+  accounts(where: {hasControllersWith: {addressIn: $addresses}}) {
+    edges {
+      node {
+        username
+        controllers {
+          edges {
+            node {
+              address
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const useAccountNamesQuery = <
+      TData = AccountNamesQuery,
+      TError = unknown
+    >(
+      variables: AccountNamesQueryVariables,
+      options?: UseQueryOptions<AccountNamesQuery, TError, TData>
+    ) =>
+    useQuery<AccountNamesQuery, TError, TData>(
+      ['AccountNames', variables],
+      useFetchData<AccountNamesQuery, AccountNamesQueryVariables>(AccountNamesDocument).bind(null, variables),
+      options
+    );
+export const AddressByUsernameDocument = `
+    query AddressByUsername($username: String!) {
+  account(username: $username) {
+    controllers(first: 1) {
+      edges {
+        node {
+          address
+        }
+      }
+    }
+  }
+}
+    `;
+export const useAddressByUsernameQuery = <
+      TData = AddressByUsernameQuery,
+      TError = unknown
+    >(
+      variables: AddressByUsernameQueryVariables,
+      options?: UseQueryOptions<AddressByUsernameQuery, TError, TData>
+    ) =>
+    useQuery<AddressByUsernameQuery, TError, TData>(
+      ['AddressByUsername', variables],
+      useFetchData<AddressByUsernameQuery, AddressByUsernameQueryVariables>(AddressByUsernameDocument).bind(null, variables),
+      options
+    );
+export const AccountSearchDocument = `
+    query AccountSearch($query: String!, $limit: Int = 5) {
+  searchAccounts(query: $query, limit: $limit) {
+    username
+    credits {
+      amount
+      decimals
+    }
+    updatedAt
+  }
+}
+    `;
+export const useAccountSearchQuery = <
+      TData = AccountSearchQuery,
+      TError = unknown
+    >(
+      variables: AccountSearchQueryVariables,
+      options?: UseQueryOptions<AccountSearchQuery, TError, TData>
+    ) =>
+    useQuery<AccountSearchQuery, TError, TData>(
+      ['AccountSearch', variables],
+      useFetchData<AccountSearchQuery, AccountSearchQueryVariables>(AccountSearchDocument).bind(null, variables),
+      options
+    );
+export const AchievementsDocument = `
+    query Achievements($projects: [Project!]!) {
+  achievements(projects: $projects) {
+    items {
+      meta {
+        project
+        model
+        namespace
+        count
+      }
+      achievements {
+        id
+        hidden
+        page
+        points
+        start
+        end
+        achievementGroup
+        icon
+        title
+        description
+        taskId
+        taskTotal
+        taskDescription
+        data
+      }
+    }
+  }
+}
+    `;
+export const useAchievementsQuery = <
+      TData = AchievementsQuery,
+      TError = unknown
+    >(
+      variables: AchievementsQueryVariables,
+      options?: UseQueryOptions<AchievementsQuery, TError, TData>
+    ) =>
+    useQuery<AchievementsQuery, TError, TData>(
+      ['Achievements', variables],
+      useFetchData<AchievementsQuery, AchievementsQueryVariables>(AchievementsDocument).bind(null, variables),
+      options
+    );
+export const ProgressionsDocument = `
+    query Progressions($projects: [Project!]!) {
+  playerAchievements(projects: $projects) {
+    items {
+      meta {
+        project
+        model
+        namespace
+        count
+      }
+      achievements {
+        playerId
+        achievementId
+        points
+        taskId
+        taskTotal
+        total
+        completionTime
+      }
+    }
+  }
+}
+    `;
+export const useProgressionsQuery = <
+      TData = ProgressionsQuery,
+      TError = unknown
+    >(
+      variables: ProgressionsQueryVariables,
+      options?: UseQueryOptions<ProgressionsQuery, TError, TData>
+    ) =>
+    useQuery<ProgressionsQuery, TError, TData>(
+      ['Progressions', variables],
+      useFetchData<ProgressionsQuery, ProgressionsQueryVariables>(ProgressionsDocument).bind(null, variables),
+      options
+    );
+export const ActivitiesDocument = `
+    query Activities($projects: [ActivityProject!]!) {
+  activities(projects: $projects) {
+    items {
+      meta {
+        project
+        address
+        limit
+        count
+      }
+      activities {
+        contractAddress
+        entrypoint
+        executedAt
+        callerAddress
+        transactionHash
+      }
+    }
+  }
+}
+    `;
+export const useActivitiesQuery = <
+      TData = ActivitiesQuery,
+      TError = unknown
+    >(
+      variables: ActivitiesQueryVariables,
+      options?: UseQueryOptions<ActivitiesQuery, TError, TData>
+    ) =>
+    useQuery<ActivitiesQuery, TError, TData>(
+      ['Activities', variables],
+      useFetchData<ActivitiesQuery, ActivitiesQueryVariables>(ActivitiesDocument).bind(null, variables),
+      options
+    );
+export const BalancesDocument = `
+    query Balances($projects: [String!], $accountAddress: String!, $first: Int, $last: Int, $before: Cursor, $after: Cursor, $offset: Int, $limit: Int) {
+  balances(
+    projects: $projects
+    accountAddress: $accountAddress
+    first: $first
+    last: $last
+    before: $before
+    after: $after
+    offset: $offset
+    limit: $limit
+  ) {
+    totalCount
+    edges {
+      node {
+        raw
+        amount
+        value
+        meta {
+          project
+          decimals
+          contractAddress
+          name
+          symbol
+          price
+          periodPrice
+        }
+      }
+    }
+  }
+}
+    `;
+export const useBalancesQuery = <
+      TData = BalancesQuery,
+      TError = unknown
+    >(
+      variables: BalancesQueryVariables,
+      options?: UseQueryOptions<BalancesQuery, TError, TData>
+    ) =>
+    useQuery<BalancesQuery, TError, TData>(
+      ['Balances', variables],
+      useFetchData<BalancesQuery, BalancesQueryVariables>(BalancesDocument).bind(null, variables),
+      options
+    );
+export const BalanceDocument = `
+    query Balance($projects: [String!]!, $tokenAddress: String!, $accountAddress: String!) {
+  balance(
+    projects: $projects
+    tokenAddress: $tokenAddress
+    accountAddress: $accountAddress
+  ) {
+    raw
+    amount
+    value
+    meta {
+      project
+      decimals
+      contractAddress
+      name
+      symbol
+      price
+      periodPrice
+    }
+  }
+}
+    `;
+export const useBalanceQuery = <
+      TData = BalanceQuery,
+      TError = unknown
+    >(
+      variables: BalanceQueryVariables,
+      options?: UseQueryOptions<BalanceQuery, TError, TData>
+    ) =>
+    useQuery<BalanceQuery, TError, TData>(
+      ['Balance', variables],
+      useFetchData<BalanceQuery, BalanceQueryVariables>(BalanceDocument).bind(null, variables),
+      options
+    );
+export const CollectiblesDocument = `
+    query Collectibles($projects: [String!], $accountAddress: String!, $first: Int, $last: Int, $before: Cursor, $after: Cursor, $offset: Int, $limit: Int) {
+  collectibles(
+    projects: $projects
+    accountAddress: $accountAddress
+    first: $first
+    last: $last
+    before: $before
+    after: $after
+    offset: $offset
+    limit: $limit
+  ) {
+    edges {
+      node {
+        assets {
+          attributes
+          description
+          imageUrl
+          name
+          tokenId
+          amount
+          metadata
+        }
+        meta {
+          project
+          assetCount
+          contractAddress
+          imagePath
+          name
+        }
+      }
+    }
+  }
+}
+    `;
+export const useCollectiblesQuery = <
+      TData = CollectiblesQuery,
+      TError = unknown
+    >(
+      variables: CollectiblesQueryVariables,
+      options?: UseQueryOptions<CollectiblesQuery, TError, TData>
+    ) =>
+    useQuery<CollectiblesQuery, TError, TData>(
+      ['Collectibles', variables],
+      useFetchData<CollectiblesQuery, CollectiblesQueryVariables>(CollectiblesDocument).bind(null, variables),
+      options
+    );
+export const CollectibleDocument = `
+    query Collectible($projects: [String!]!, $contractAddress: String!, $accountAddress: String!) {
+  collectible(
+    projects: $projects
+    contractAddress: $contractAddress
+    accountAddress: $accountAddress
+  ) {
+    assets {
+      attributes
+      description
+      imageUrl
+      name
+      tokenId
+      amount
+      metadata
+    }
+    meta {
+      assetCount
+      contractAddress
+      imagePath
+      name
+    }
+  }
+}
+    `;
+export const useCollectibleQuery = <
+      TData = CollectibleQuery,
+      TError = unknown
+    >(
+      variables: CollectibleQueryVariables,
+      options?: UseQueryOptions<CollectibleQuery, TError, TData>
+    ) =>
+    useQuery<CollectibleQuery, TError, TData>(
+      ['Collectible', variables],
+      useFetchData<CollectibleQuery, CollectibleQueryVariables>(CollectibleDocument).bind(null, variables),
+      options
+    );
+export const CollectionsDocument = `
+    query Collections($projects: [String!], $accountAddress: String!, $first: Int, $last: Int, $before: Cursor, $after: Cursor, $offset: Int, $limit: Int) {
+  collections(
+    projects: $projects
+    accountAddress: $accountAddress
+    first: $first
+    last: $last
+    before: $before
+    after: $after
+    offset: $offset
+    limit: $limit
+  ) {
+    edges {
+      node {
+        assets {
+          attributes
+          description
+          imageUrl
+          name
+          tokenId
+          metadata
+        }
+        meta {
+          project
+          assetCount
+          contractAddress
+          imagePath
+          name
+        }
+      }
+    }
+  }
+}
+    `;
+export const useCollectionsQuery = <
+      TData = CollectionsQuery,
+      TError = unknown
+    >(
+      variables: CollectionsQueryVariables,
+      options?: UseQueryOptions<CollectionsQuery, TError, TData>
+    ) =>
+    useQuery<CollectionsQuery, TError, TData>(
+      ['Collections', variables],
+      useFetchData<CollectionsQuery, CollectionsQueryVariables>(CollectionsDocument).bind(null, variables),
+      options
+    );
+export const CollectionDocument = `
+    query Collection($projects: [String!]!, $contractAddress: String!, $accountAddress: String!) {
+  collection(
+    projects: $projects
+    contractAddress: $contractAddress
+    accountAddress: $accountAddress
+  ) {
+    assets {
+      attributes
+      description
+      imageUrl
+      name
+      tokenId
+      metadata
+    }
+    meta {
+      assetCount
+      contractAddress
+      imagePath
+      name
+    }
+  }
+}
+    `;
+export const useCollectionQuery = <
+      TData = CollectionQuery,
+      TError = unknown
+    >(
+      variables: CollectionQueryVariables,
+      options?: UseQueryOptions<CollectionQuery, TError, TData>
+    ) =>
+    useQuery<CollectionQuery, TError, TData>(
+      ['Collection', variables],
+      useFetchData<CollectionQuery, CollectionQueryVariables>(CollectionDocument).bind(null, variables),
+      options
+    );
+export const ControllerDocument = `
+    query Controller($username: String!, $chainId: String!) {
+  controller(username: $username, chainId: $chainId) {
+    id
+    accountID
+    address
+    network
+    constructorCalldata
+    createdAt
+    updatedAt
+    signers {
+      createdAt
+      isRevoked
+      isOriginal
+      metadata {
+        ... on WebauthnCredentials {
+          __typename
+          webauthn {
+            id
+            publicKey
+            AAGUID
+          }
+        }
+        ... on StarknetCredentials {
+          __typename
+          starknet {
+            publicKey
+          }
+        }
+        ... on Eip191Credentials {
+          __typename
+          eip191 {
+            provider
+            ethAddress
+          }
+        }
+        ... on SIWSCredentials {
+          __typename
+          siws {
+            publicKey
+          }
+        }
+        ... on PasswordCredentials {
+          __typename
+          password {
+            publicKey
+            encryptedPrivateKey
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const useControllerQuery = <
+      TData = ControllerQuery,
+      TError = unknown
+    >(
+      variables: ControllerQueryVariables,
+      options?: UseQueryOptions<ControllerQuery, TError, TData>
+    ) =>
+    useQuery<ControllerQuery, TError, TData>(
+      ['Controller', variables],
+      useFetchData<ControllerQuery, ControllerQueryVariables>(ControllerDocument).bind(null, variables),
+      options
+    );
+export const BeginRegistrationDocument = `
+    mutation BeginRegistration($username: String!) {
+  beginRegistration(username: $username)
+}
+    `;
+export const useBeginRegistrationMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<BeginRegistrationMutation, TError, BeginRegistrationMutationVariables, TContext>) =>
+    useMutation<BeginRegistrationMutation, TError, BeginRegistrationMutationVariables, TContext>(
+      ['BeginRegistration'],
+      useFetchData<BeginRegistrationMutation, BeginRegistrationMutationVariables>(BeginRegistrationDocument),
+      options
+    );
+export const FinalizeRegistrationDocument = `
+    mutation FinalizeRegistration($credentials: String!, $network: String!) {
+  finalizeRegistration(credentials: $credentials, network: $network) {
+    username
+    controllers {
+      edges {
+        node {
+          address
+          constructorCalldata
+          signers {
+            type
+          }
+        }
+      }
+    }
+    credentials {
+      webauthn {
+        id
+        publicKey
+      }
+    }
+  }
+}
+    `;
+export const useFinalizeRegistrationMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<FinalizeRegistrationMutation, TError, FinalizeRegistrationMutationVariables, TContext>) =>
+    useMutation<FinalizeRegistrationMutation, TError, FinalizeRegistrationMutationVariables, TContext>(
+      ['FinalizeRegistration'],
+      useFetchData<FinalizeRegistrationMutation, FinalizeRegistrationMutationVariables>(FinalizeRegistrationDocument),
+      options
+    );
+export const BeginLoginDocument = `
+    mutation BeginLogin($username: String!) {
+  beginLogin(username: $username)
+}
+    `;
+export const useBeginLoginMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<BeginLoginMutation, TError, BeginLoginMutationVariables, TContext>) =>
+    useMutation<BeginLoginMutation, TError, BeginLoginMutationVariables, TContext>(
+      ['BeginLogin'],
+      useFetchData<BeginLoginMutation, BeginLoginMutationVariables>(BeginLoginDocument),
+      options
+    );
+export const FinalizeLoginDocument = `
+    mutation FinalizeLogin($credentials: String!) {
+  finalizeLogin(credentials: $credentials)
+}
+    `;
+export const useFinalizeLoginMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<FinalizeLoginMutation, TError, FinalizeLoginMutationVariables, TContext>) =>
+    useMutation<FinalizeLoginMutation, TError, FinalizeLoginMutationVariables, TContext>(
+      ['FinalizeLogin'],
+      useFetchData<FinalizeLoginMutation, FinalizeLoginMutationVariables>(FinalizeLoginDocument),
+      options
+    );
+export const MeDocument = `
+    query Me {
+  me {
+    id
+    email
+  }
+}
+    `;
+export const useMeQuery = <
+      TData = MeQuery,
+      TError = unknown
+    >(
+      variables?: MeQueryVariables,
+      options?: UseQueryOptions<MeQuery, TError, TData>
+    ) =>
+    useQuery<MeQuery, TError, TData>(
+      variables === undefined ? ['Me'] : ['Me', variables],
+      useFetchData<MeQuery, MeQueryVariables>(MeDocument).bind(null, variables),
+      options
+    );
+export const MerkleDropByKeyDocument = `
+    query MerkleDropByKey($key: String!) {
+  merkleDropByKey(key: $key) {
+    key
+    salt
+    network
+    contract
+    entrypoint
+    merkleRoot
+    description
+    matchStarterpackItem
+  }
+}
+    `;
+export const useMerkleDropByKeyQuery = <
+      TData = MerkleDropByKeyQuery,
+      TError = unknown
+    >(
+      variables: MerkleDropByKeyQueryVariables,
+      options?: UseQueryOptions<MerkleDropByKeyQuery, TError, TData>
+    ) =>
+    useQuery<MerkleDropByKeyQuery, TError, TData>(
+      ['MerkleDropByKey', variables],
+      useFetchData<MerkleDropByKeyQuery, MerkleDropByKeyQueryVariables>(MerkleDropByKeyDocument).bind(null, variables),
+      options
+    );
+export const MerkleClaimsForAddressDocument = `
+    query MerkleClaimsForAddress($keys: [String!]!, $address: String!) {
+  merkleClaimsForAddress(keys: $keys, address: $address) {
+    index
+    data
+    merkleProof
+    merkleDrop {
+      key
+      salt
+      network
+      contract
+      entrypoint
+      merkleRoot
+      description
+      matchStarterpackItem
+    }
+  }
+}
+    `;
+export const useMerkleClaimsForAddressQuery = <
+      TData = MerkleClaimsForAddressQuery,
+      TError = unknown
+    >(
+      variables: MerkleClaimsForAddressQueryVariables,
+      options?: UseQueryOptions<MerkleClaimsForAddressQuery, TError, TData>
+    ) =>
+    useQuery<MerkleClaimsForAddressQuery, TError, TData>(
+      ['MerkleClaimsForAddress', variables],
+      useFetchData<MerkleClaimsForAddressQuery, MerkleClaimsForAddressQueryVariables>(MerkleClaimsForAddressDocument).bind(null, variables),
+      options
+    );
+export const MetricsDocument = `
+    query Metrics($projects: [MetricsProject!]!) {
+  metrics(projects: $projects) {
+    items {
+      meta {
+        project
+        error
+        count
+      }
+      metrics {
+        transactionDate
+        transactionCount
+        callerCount
+      }
+    }
+  }
+}
+    `;
+export const useMetricsQuery = <
+      TData = MetricsQuery,
+      TError = unknown
+    >(
+      variables: MetricsQueryVariables,
+      options?: UseQueryOptions<MetricsQuery, TError, TData>
+    ) =>
+    useQuery<MetricsQuery, TError, TData>(
+      ['Metrics', variables],
+      useFetchData<MetricsQuery, MetricsQueryVariables>(MetricsDocument).bind(null, variables),
+      options
+    );
+export const OwnershipsDocument = `
+    query Ownerships($projects: [OwnershipProject!]!) {
+  ownerships(projects: $projects) {
+    items {
+      ownerships {
+        accountAddress
+        contractAddress
+        tokenId
+        balance
+      }
+      meta {
+        project
+        tokenIds
+        contractAddresses
+        limit
+        error
+        count
+      }
+    }
+  }
+}
+    `;
+export const useOwnershipsQuery = <
+      TData = OwnershipsQuery,
+      TError = unknown
+    >(
+      variables: OwnershipsQueryVariables,
+      options?: UseQueryOptions<OwnershipsQuery, TError, TData>
+    ) =>
+    useQuery<OwnershipsQuery, TError, TData>(
+      ['Ownerships', variables],
+      useFetchData<OwnershipsQuery, OwnershipsQueryVariables>(OwnershipsDocument).bind(null, variables),
+      options
+    );
+export const CryptoPaymentDocument = `
+    query CryptoPayment($id: ID!) {
+  cryptoPayment(id: $id) {
+    ...CryptoPaymentFields
+  }
+}
+    ${CryptoPaymentFieldsFragmentDoc}`;
+export const useCryptoPaymentQuery = <
+      TData = CryptoPaymentQuery,
+      TError = unknown
+    >(
+      variables: CryptoPaymentQueryVariables,
+      options?: UseQueryOptions<CryptoPaymentQuery, TError, TData>
+    ) =>
+    useQuery<CryptoPaymentQuery, TError, TData>(
+      ['CryptoPayment', variables],
+      useFetchData<CryptoPaymentQuery, CryptoPaymentQueryVariables>(CryptoPaymentDocument).bind(null, variables),
+      options
+    );
+export const StripePaymentDocument = `
+    query StripePayment($id: ID!) {
+  stripePayment(id: $id) {
+    id
+    paymentStatus
+  }
+}
+    `;
+export const useStripePaymentQuery = <
+      TData = StripePaymentQuery,
+      TError = unknown
+    >(
+      variables: StripePaymentQueryVariables,
+      options?: UseQueryOptions<StripePaymentQuery, TError, TData>
+    ) =>
+    useQuery<StripePaymentQuery, TError, TData>(
+      ['StripePayment', variables],
+      useFetchData<StripePaymentQuery, StripePaymentQueryVariables>(StripePaymentDocument).bind(null, variables),
+      options
+    );
+export const LayerswapSourcesDocument = `
+    query LayerswapSources($token: String!, $isMainnet: Boolean) {
+  layerswapSources(token: $token, isMainnet: $isMainnet) {
+    name
+    displayName
+    logo
+    chainId
+    type
+    tokens {
+      symbol
+      displayAsset
+      decimals
+      priceInUsd
+      status
+    }
+    depositMethods
+  }
+}
+    `;
+export const useLayerswapSourcesQuery = <
+      TData = LayerswapSourcesQuery,
+      TError = unknown
+    >(
+      variables: LayerswapSourcesQueryVariables,
+      options?: UseQueryOptions<LayerswapSourcesQuery, TError, TData>
+    ) =>
+    useQuery<LayerswapSourcesQuery, TError, TData>(
+      ['LayerswapSources', variables],
+      useFetchData<LayerswapSourcesQuery, LayerswapSourcesQueryVariables>(LayerswapSourcesDocument).bind(null, variables),
+      options
+    );
+export const CreateCryptoPaymentDocument = `
+    mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
+  createCryptoPayment(input: $input) {
+    ...CryptoPaymentFields
+  }
+}
+    ${CryptoPaymentFieldsFragmentDoc}`;
+export const useCreateCryptoPaymentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateCryptoPaymentMutation, TError, CreateCryptoPaymentMutationVariables, TContext>) =>
+    useMutation<CreateCryptoPaymentMutation, TError, CreateCryptoPaymentMutationVariables, TContext>(
+      ['CreateCryptoPayment'],
+      useFetchData<CreateCryptoPaymentMutation, CreateCryptoPaymentMutationVariables>(CreateCryptoPaymentDocument),
+      options
+    );
+export const CreateStripePaymentIntentDocument = `
+    mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
+  createStripePaymentIntent(input: $input) {
+    id
+    clientSecret
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+  }
+}
+    `;
+export const useCreateStripePaymentIntentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateStripePaymentIntentMutation, TError, CreateStripePaymentIntentMutationVariables, TContext>) =>
+    useMutation<CreateStripePaymentIntentMutation, TError, CreateStripePaymentIntentMutationVariables, TContext>(
+      ['CreateStripePaymentIntent'],
+      useFetchData<CreateStripePaymentIntentMutation, CreateStripePaymentIntentMutationVariables>(CreateStripePaymentIntentDocument),
+      options
+    );
+export const CreateLayerswapPaymentDocument = `
+    mutation CreateLayerswapPayment($input: CreateLayerswapPaymentInput!) {
+  createLayerswapPayment(input: $input) {
+    ...LayerswapPaymentFields
+  }
+}
+    ${LayerswapPaymentFieldsFragmentDoc}`;
+export const useCreateLayerswapPaymentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateLayerswapPaymentMutation, TError, CreateLayerswapPaymentMutationVariables, TContext>) =>
+    useMutation<CreateLayerswapPaymentMutation, TError, CreateLayerswapPaymentMutationVariables, TContext>(
+      ['CreateLayerswapPayment'],
+      useFetchData<CreateLayerswapPaymentMutation, CreateLayerswapPaymentMutationVariables>(CreateLayerswapPaymentDocument),
+      options
+    );
+export const CreateLayerswapDepositDocument = `
+    mutation CreateLayerswapDeposit($input: CreateLayerswapDepositInput!) {
+  createLayerswapDeposit(input: $input) {
+    ...LayerswapPaymentFields
+  }
+}
+    ${LayerswapPaymentFieldsFragmentDoc}`;
+export const useCreateLayerswapDepositMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateLayerswapDepositMutation, TError, CreateLayerswapDepositMutationVariables, TContext>) =>
+    useMutation<CreateLayerswapDepositMutation, TError, CreateLayerswapDepositMutationVariables, TContext>(
+      ['CreateLayerswapDeposit'],
+      useFetchData<CreateLayerswapDepositMutation, CreateLayerswapDepositMutationVariables>(CreateLayerswapDepositDocument),
+      options
+    );
+export const LayerswapQuoteDocument = `
+    query LayerswapQuote($input: CreateLayerswapDepositInput!) {
+  layerswapQuote(input: $input) {
+    requestedAmount
+    receivedAmount
+    totalFees
+    averageCompletionTime
+  }
+}
+    `;
+export const useLayerswapQuoteQuery = <
+      TData = LayerswapQuoteQuery,
+      TError = unknown
+    >(
+      variables: LayerswapQuoteQueryVariables,
+      options?: UseQueryOptions<LayerswapQuoteQuery, TError, TData>
+    ) =>
+    useQuery<LayerswapQuoteQuery, TError, TData>(
+      ['LayerswapQuote', variables],
+      useFetchData<LayerswapQuoteQuery, LayerswapQuoteQueryVariables>(LayerswapQuoteDocument).bind(null, variables),
+      options
+    );
+export const LayerswapStatusDocument = `
+    query LayerswapStatus($swapId: ID!, $isMainnet: Boolean) {
+  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet) {
+    status
+  }
+}
+    `;
+export const useLayerswapStatusQuery = <
+      TData = LayerswapStatusQuery,
+      TError = unknown
+    >(
+      variables: LayerswapStatusQueryVariables,
+      options?: UseQueryOptions<LayerswapStatusQuery, TError, TData>
+    ) =>
+    useQuery<LayerswapStatusQuery, TError, TData>(
+      ['LayerswapStatus', variables],
+      useFetchData<LayerswapStatusQuery, LayerswapStatusQueryVariables>(LayerswapStatusDocument).bind(null, variables),
+      options
+    );
+export const CoinbaseOnrampTransactionsDocument = `
+    query CoinbaseOnrampTransactions($input: CoinbaseTransactionsInput!) {
+  coinbaseOnrampTransactions(input: $input) {
+    transactions {
+      transactionId
+      walletAddress
+      type
+      txHash
+      status
+      purchaseCurrency
+      purchaseNetwork
+      purchaseAmount {
+        amount
+        currency
+      }
+      paymentTotal {
+        amount
+        currency
+      }
+      coinbaseFee {
+        amount
+        currency
+      }
+      networkFee {
+        amount
+        currency
+      }
+    }
+    nextPageKey
+    totalCount
+  }
+}
+    `;
+export const useCoinbaseOnrampTransactionsQuery = <
+      TData = CoinbaseOnrampTransactionsQuery,
+      TError = unknown
+    >(
+      variables: CoinbaseOnrampTransactionsQueryVariables,
+      options?: UseQueryOptions<CoinbaseOnrampTransactionsQuery, TError, TData>
+    ) =>
+    useQuery<CoinbaseOnrampTransactionsQuery, TError, TData>(
+      ['CoinbaseOnrampTransactions', variables],
+      useFetchData<CoinbaseOnrampTransactionsQuery, CoinbaseOnrampTransactionsQueryVariables>(CoinbaseOnrampTransactionsDocument).bind(null, variables),
+      options
+    );
+export const CreateCoinbaseOnRampOrderDocument = `
+    mutation CreateCoinbaseOnRampOrder($input: CreateCoinbaseOnrampOrderInput!) {
+  createCoinbaseOnrampOrder(input: $input) {
+    ...CoinbaseOnrampOrderResponseFields
+  }
+}
+    ${CoinbaseOnrampOrderResponseFieldsFragmentDoc}`;
+export const useCreateCoinbaseOnRampOrderMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateCoinbaseOnRampOrderMutation, TError, CreateCoinbaseOnRampOrderMutationVariables, TContext>) =>
+    useMutation<CreateCoinbaseOnRampOrderMutation, TError, CreateCoinbaseOnRampOrderMutationVariables, TContext>(
+      ['CreateCoinbaseOnRampOrder'],
+      useFetchData<CreateCoinbaseOnRampOrderMutation, CreateCoinbaseOnRampOrderMutationVariables>(CreateCoinbaseOnRampOrderDocument),
+      options
+    );
+export const CreateCoinbaseLayerswapOrderDocument = `
+    mutation CreateCoinbaseLayerswapOrder($input: CreateCoinbaseLayerswapOrderInput!) {
+  createCoinbaseLayerswapOrder(input: $input) {
+    ...CoinbaseOnrampOrderResponseFields
+  }
+}
+    ${CoinbaseOnrampOrderResponseFieldsFragmentDoc}`;
+export const useCreateCoinbaseLayerswapOrderMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateCoinbaseLayerswapOrderMutation, TError, CreateCoinbaseLayerswapOrderMutationVariables, TContext>) =>
+    useMutation<CreateCoinbaseLayerswapOrderMutation, TError, CreateCoinbaseLayerswapOrderMutationVariables, TContext>(
+      ['CreateCoinbaseLayerswapOrder'],
+      useFetchData<CreateCoinbaseLayerswapOrderMutation, CreateCoinbaseLayerswapOrderMutationVariables>(CreateCoinbaseLayerswapOrderDocument),
+      options
+    );
+export const CoinbaseOnRampOrderDocument = `
+    query CoinbaseOnRampOrder($orderId: String!) {
+  coinbaseOnrampOrder(orderId: $orderId) {
+    txHash
+    status
+  }
+}
+    `;
+export const useCoinbaseOnRampOrderQuery = <
+      TData = CoinbaseOnRampOrderQuery,
+      TError = unknown
+    >(
+      variables: CoinbaseOnRampOrderQueryVariables,
+      options?: UseQueryOptions<CoinbaseOnRampOrderQuery, TError, TData>
+    ) =>
+    useQuery<CoinbaseOnRampOrderQuery, TError, TData>(
+      ['CoinbaseOnRampOrder', variables],
+      useFetchData<CoinbaseOnRampOrderQuery, CoinbaseOnRampOrderQueryVariables>(CoinbaseOnRampOrderDocument).bind(null, variables),
+      options
+    );
+export const CoinbaseOnRampQuoteDocument = `
+    query CoinbaseOnRampQuote($input: CoinbaseOnrampQuoteInput!) {
+  coinbaseOnrampQuote(input: $input) {
+    quoteId
+    paymentTotal {
+      amount
+      currency
+    }
+    purchaseAmount {
+      amount
+      currency
+    }
+    layerswapFees {
+      amount
+      currency
+    }
+    coinbaseFee {
+      amount
+      currency
+    }
+    networkFee {
+      amount
+      currency
+    }
+  }
+}
+    `;
+export const useCoinbaseOnRampQuoteQuery = <
+      TData = CoinbaseOnRampQuoteQuery,
+      TError = unknown
+    >(
+      variables: CoinbaseOnRampQuoteQueryVariables,
+      options?: UseQueryOptions<CoinbaseOnRampQuoteQuery, TError, TData>
+    ) =>
+    useQuery<CoinbaseOnRampQuoteQuery, TError, TData>(
+      ['CoinbaseOnRampQuote', variables],
+      useFetchData<CoinbaseOnRampQuoteQuery, CoinbaseOnRampQuoteQueryVariables>(CoinbaseOnRampQuoteDocument).bind(null, variables),
+      options
+    );
+export const PlaythroughsDocument = `
+    query Playthroughs($projects: [PlaythroughProject!]!) {
+  playthroughs(projects: $projects) {
+    items {
+      playthroughs {
+        entrypoints
+        sessionStart
+        sessionEnd
+        actionCount
+        callerAddress
+      }
+      meta {
+        project
+        limit
+        error
+        count
+      }
+    }
+  }
+}
+    `;
+export const usePlaythroughsQuery = <
+      TData = PlaythroughsQuery,
+      TError = unknown
+    >(
+      variables: PlaythroughsQueryVariables,
+      options?: UseQueryOptions<PlaythroughsQuery, TError, TData>
+    ) =>
+    useQuery<PlaythroughsQuery, TError, TData>(
+      ['Playthroughs', variables],
+      useFetchData<PlaythroughsQuery, PlaythroughsQueryVariables>(PlaythroughsDocument).bind(null, variables),
+      options
+    );
+export const PriceDocument = `
+    query Price($pairs: [TokenPair!]!) {
+  price(pairs: $pairs) {
+    amount
+    base
+    decimals
+    quote
+  }
+}
+    `;
+export const usePriceQuery = <
+      TData = PriceQuery,
+      TError = unknown
+    >(
+      variables: PriceQueryVariables,
+      options?: UseQueryOptions<PriceQuery, TError, TData>
+    ) =>
+    useQuery<PriceQuery, TError, TData>(
+      ['Price', variables],
+      useFetchData<PriceQuery, PriceQueryVariables>(PriceDocument).bind(null, variables),
+      options
+    );
+export const PriceByAddressesDocument = `
+    query PriceByAddresses($addresses: [String!]!) {
+  priceByAddresses(addresses: $addresses) {
+    amount
+    base
+    decimals
+    quote
+  }
+}
+    `;
+export const usePriceByAddressesQuery = <
+      TData = PriceByAddressesQuery,
+      TError = unknown
+    >(
+      variables: PriceByAddressesQueryVariables,
+      options?: UseQueryOptions<PriceByAddressesQuery, TError, TData>
+    ) =>
+    useQuery<PriceByAddressesQuery, TError, TData>(
+      ['PriceByAddresses', variables],
+      useFetchData<PriceByAddressesQuery, PriceByAddressesQueryVariables>(PriceByAddressesDocument).bind(null, variables),
+      options
+    );
+export const PricePeriodByAddressesDocument = `
+    query PricePeriodByAddresses($addresses: [String!]!, $start: Int!, $end: Int!) {
+  pricePeriodByAddresses(addresses: $addresses, start: $start, end: $end) {
+    amount
+    base
+    decimals
+    quote
+  }
+}
+    `;
+export const usePricePeriodByAddressesQuery = <
+      TData = PricePeriodByAddressesQuery,
+      TError = unknown
+    >(
+      variables: PricePeriodByAddressesQueryVariables,
+      options?: UseQueryOptions<PricePeriodByAddressesQuery, TError, TData>
+    ) =>
+    useQuery<PricePeriodByAddressesQuery, TError, TData>(
+      ['PricePeriodByAddresses', variables],
+      useFetchData<PricePeriodByAddressesQuery, PricePeriodByAddressesQueryVariables>(PricePeriodByAddressesDocument).bind(null, variables),
+      options
+    );
+export const SessionsDocument = `
+    query Sessions($where: SessionWhereInput!) {
+  sessions(where: $where) {
+    edges {
+      node {
+        id
+        appID
+        chainID
+        isRevoked
+        expiresAt
+        createdAt
+        updatedAt
+        metadata {
+          os
+          browser
+        }
+      }
+    }
+  }
+}
+    `;
+export const useSessionsQuery = <
+      TData = SessionsQuery,
+      TError = unknown
+    >(
+      variables: SessionsQueryVariables,
+      options?: UseQueryOptions<SessionsQuery, TError, TData>
+    ) =>
+    useQuery<SessionsQuery, TError, TData>(
+      ['Sessions', variables],
+      useFetchData<SessionsQuery, SessionsQueryVariables>(SessionsDocument).bind(null, variables),
+      options
+    );
+export const SignerDocument = `
+    query Signer($username: String!) {
+  account(username: $username) {
+    username
+    controllers {
+      edges {
+        node {
+          signers {
+            id
+            type
+            createdAt
+            updatedAt
+            controller {
+              id
+              accountID
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const useSignerQuery = <
+      TData = SignerQuery,
+      TError = unknown
+    >(
+      variables: SignerQueryVariables,
+      options?: UseQueryOptions<SignerQuery, TError, TData>
+    ) =>
+    useQuery<SignerQuery, TError, TData>(
+      ['Signer', variables],
+      useFetchData<SignerQuery, SignerQueryVariables>(SignerDocument).bind(null, variables),
+      options
+    );
+export const ClaimFreeStarterpackDocument = `
+    mutation ClaimFreeStarterpack($input: StarterpackInput!) {
+  claimFreeStarterpack(input: $input)
+}
+    `;
+export const useClaimFreeStarterpackMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<ClaimFreeStarterpackMutation, TError, ClaimFreeStarterpackMutationVariables, TContext>) =>
+    useMutation<ClaimFreeStarterpackMutation, TError, ClaimFreeStarterpackMutationVariables, TContext>(
+      ['ClaimFreeStarterpack'],
+      useFetchData<ClaimFreeStarterpackMutation, ClaimFreeStarterpackMutationVariables>(ClaimFreeStarterpackDocument),
+      options
+    );
+export const StarterPackDocument = `
+    query StarterPack($input: StarterpackInput!) {
+  starterpack(input: $input) {
+    starterpack {
+      name
+      description
+      active
+      issuance
+      maxIssuance
+      acquisitionType
+      starterpackContract {
+        edges {
+          node {
+            name
+            description
+            iconURL
+            contractAddress
+            supplyEntryPoint
+            supplyCalldata
+          }
+        }
+      }
+      merkleDrops {
+        edges {
+          node {
+            key
+            salt
+            network
+            contract
+            entrypoint
+            merkleRoot
+            description
+          }
+        }
+      }
+    }
+    price {
+      amount
+      decimals
+    }
+    bonusCredits {
+      amount
+      decimals
+    }
+    mintAllowance {
+      count
+      limit
+    }
+  }
+}
+    `;
+export const useStarterPackQuery = <
+      TData = StarterPackQuery,
+      TError = unknown
+    >(
+      variables: StarterPackQueryVariables,
+      options?: UseQueryOptions<StarterPackQuery, TError, TData>
+    ) =>
+    useQuery<StarterPackQuery, TError, TData>(
+      ['StarterPack', variables],
+      useFetchData<StarterPackQuery, StarterPackQueryVariables>(StarterPackDocument).bind(null, variables),
+      options
+    );
+export const TeamsDocument = `
+    query Teams {
+  me {
+    teams(where: {deleted: false}) {
+      totalCount
+      edges {
+        node {
+          id
+          name
+          credits
+          deployments(where: {deprecated: false}) {
+            totalCount
+            edges {
+              node {
+                project
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const useTeamsQuery = <
+      TData = TeamsQuery,
+      TError = unknown
+    >(
+      variables?: TeamsQueryVariables,
+      options?: UseQueryOptions<TeamsQuery, TError, TData>
+    ) =>
+    useQuery<TeamsQuery, TError, TData>(
+      variables === undefined ? ['Teams'] : ['Teams', variables],
+      useFetchData<TeamsQuery, TeamsQueryVariables>(TeamsDocument).bind(null, variables),
+      options
+    );
+export const TraceabilitiesDocument = `
+    query Traceabilities($projects: [TraceabilityProject!]!) {
+  traceabilities(projects: $projects) {
+    items {
+      transfers {
+        amount
+        contractAddress
+        decimals
+        eventId
+        executedAt
+        fromAddress
+        toAddress
+        metadata
+        name
+        symbol
+        tokenId
+        transactionHash
+      }
+      meta {
+        project
+        tokenId
+        contractAddress
+        date
+        limit
+        error
+        count
+      }
+    }
+  }
+}
+    `;
+export const useTraceabilitiesQuery = <
+      TData = TraceabilitiesQuery,
+      TError = unknown
+    >(
+      variables: TraceabilitiesQueryVariables,
+      options?: UseQueryOptions<TraceabilitiesQuery, TError, TData>
+    ) =>
+    useQuery<TraceabilitiesQuery, TError, TData>(
+      ['Traceabilities', variables],
+      useFetchData<TraceabilitiesQuery, TraceabilitiesQueryVariables>(TraceabilitiesDocument).bind(null, variables),
+      options
+    );
+export const TransfersDocument = `
+    query Transfers($projects: [TransferProject!]!) {
+  transfers(projects: $projects) {
+    items {
+      meta {
+        project
+        address
+        date
+        limit
+        count
+      }
+      transfers {
+        amount
+        decimals
+        metadata
+        name
+        symbol
+        contractAddress
+        executedAt
+        fromAddress
+        toAddress
+        tokenId
+        eventId
+        transactionHash
+      }
+    }
+  }
+}
+    `;
+export const useTransfersQuery = <
+      TData = TransfersQuery,
+      TError = unknown
+    >(
+      variables: TransfersQueryVariables,
+      options?: UseQueryOptions<TransfersQuery, TError, TData>
+    ) =>
+    useQuery<TransfersQuery, TError, TData>(
+      ['Transfers', variables],
+      useFetchData<TransfersQuery, TransfersQueryVariables>(TransfersDocument).bind(null, variables),
+      options
+    );
+export const SendEmailVerificationDocument = `
+    mutation SendEmailVerification($input: SendEmailVerificationInput!) {
+  sendEmailVerification(input: $input) {
+    success
+    message
+  }
+}
+    `;
+export const useSendEmailVerificationMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<SendEmailVerificationMutation, TError, SendEmailVerificationMutationVariables, TContext>) =>
+    useMutation<SendEmailVerificationMutation, TError, SendEmailVerificationMutationVariables, TContext>(
+      ['SendEmailVerification'],
+      useFetchData<SendEmailVerificationMutation, SendEmailVerificationMutationVariables>(SendEmailVerificationDocument),
+      options
+    );
+export const SendPhoneVerificationDocument = `
+    mutation SendPhoneVerification($input: SendPhoneVerificationInput!) {
+  sendPhoneVerification(input: $input) {
+    success
+    message
+  }
+}
+    `;
+export const useSendPhoneVerificationMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<SendPhoneVerificationMutation, TError, SendPhoneVerificationMutationVariables, TContext>) =>
+    useMutation<SendPhoneVerificationMutation, TError, SendPhoneVerificationMutationVariables, TContext>(
+      ['SendPhoneVerification'],
+      useFetchData<SendPhoneVerificationMutation, SendPhoneVerificationMutationVariables>(SendPhoneVerificationDocument),
+      options
+    );
+export const VerifyEmailDocument = `
+    mutation VerifyEmail($input: VerifyEmailInput!) {
+  verifyEmail(input: $input) {
+    success
+    message
+    verifiedValue
+  }
+}
+    `;
+export const useVerifyEmailMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<VerifyEmailMutation, TError, VerifyEmailMutationVariables, TContext>) =>
+    useMutation<VerifyEmailMutation, TError, VerifyEmailMutationVariables, TContext>(
+      ['VerifyEmail'],
+      useFetchData<VerifyEmailMutation, VerifyEmailMutationVariables>(VerifyEmailDocument),
+      options
+    );
+export const VerifyPhoneDocument = `
+    mutation VerifyPhone($input: VerifyPhoneInput!) {
+  verifyPhone(input: $input) {
+    success
+    message
+    verifiedValue
+  }
+}
+    `;
+export const useVerifyPhoneMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<VerifyPhoneMutation, TError, VerifyPhoneMutationVariables, TContext>) =>
+    useMutation<VerifyPhoneMutation, TError, VerifyPhoneMutationVariables, TContext>(
+      ['VerifyPhone'],
+      useFetchData<VerifyPhoneMutation, VerifyPhoneMutationVariables>(VerifyPhoneDocument),
+      options
+    );
+export const TxsHistoryDocument = `
+    query TxsHistory($username: String!) {
+  account(username: $username) {
+    activities(where: {type: TRANSACTION}) {
+      edges {
+        node {
+          id
+          paymasterID
+          type
+          status
+          network
+          transactionHash
+          feeSource
+          updatedAt
+        }
+      }
+    }
+  }
+}
+    `;
+export const useTxsHistoryQuery = <
+      TData = TxsHistoryQuery,
+      TError = unknown
+    >(
+      variables: TxsHistoryQueryVariables,
+      options?: UseQueryOptions<TxsHistoryQuery, TError, TData>
+    ) =>
+    useQuery<TxsHistoryQuery, TError, TData>(
+      ['TxsHistory', variables],
+      useFetchData<TxsHistoryQuery, TxsHistoryQueryVariables>(TxsHistoryDocument).bind(null, variables),
+      options
+    );

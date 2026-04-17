@@ -1,4 +1,4 @@
-import { Button, MinusIcon, PlusIcon } from "@cartridge/ui";
+import { Button, MinusIcon, PlusIcon } from "@cartridge/controller-ui";
 
 interface QuantityControlsProps {
   quantity: number;

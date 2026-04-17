@@ -1,0 +1,22 @@
+query Teams {
+  me {
+    teams(where: { deleted: false }) {
+      totalCount
+      edges {
+        node {
+          id
+          name
+          credits
+          deployments(where: { deprecated: false }) {
+            totalCount
+            edges {
+              node {
+                project
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

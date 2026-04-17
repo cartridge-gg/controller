@@ -1,0 +1,30 @@
+query MerkleDropByKey($key: String!) {
+  merkleDropByKey(key: $key) {
+    key
+    salt
+    network
+    contract
+    entrypoint
+    merkleRoot
+    description
+    matchStarterpackItem
+  }
+}
+
+query MerkleClaimsForAddress($keys: [String!]!, $address: String!) {
+  merkleClaimsForAddress(keys: $keys, address: $address) {
+    index
+    data
+    merkleProof
+    merkleDrop {
+      key
+      salt
+      network
+      contract
+      entrypoint
+      merkleRoot
+      description
+      matchStarterpackItem
+    }
+  }
+}

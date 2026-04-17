@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SpinnerIcon,
   TrashIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useRef, useState } from "react";
 
 export interface DeleteAccountSheetProps {

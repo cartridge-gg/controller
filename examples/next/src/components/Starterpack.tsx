@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { constants, num } from "starknet";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button, Input } from "@cartridge/ui";
+import { Button, Input } from "@cartridge/controller-ui";
 import { BUNDLE_REGISTRY_MAINNET, BUNDLE_REGISTRY_SEPOLIA } from "./Profile";
 
 export const Starterpack = () => {

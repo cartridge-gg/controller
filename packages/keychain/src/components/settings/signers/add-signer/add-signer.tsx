@@ -23,11 +23,11 @@ import {
   SignerPendingCard,
   SignerPendingCardKind,
   SpinnerIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import {
   ControllerQuery,
   CredentialMetadata,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import { useCallback, useEffect, useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { SignerAlert } from "../signer-alert";

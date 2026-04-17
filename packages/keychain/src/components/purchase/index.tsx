@@ -7,8 +7,8 @@ import {
   LayoutContent,
   LayoutFooter,
   HeaderInner,
-} from "@cartridge/ui";
-import { isIframe } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { isIframe } from "@cartridge/controller-ui/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import { useMemo } from "react";

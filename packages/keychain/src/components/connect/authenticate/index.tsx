@@ -6,7 +6,7 @@ import {
   Button,
   HeaderInner,
   LayoutContainer,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { Unsupported } from "./Unsupported";
 import { FaceIDImage } from "./FaceID";
 import { useIsSupported } from "./useIsSupported";

@@ -1,4 +1,4 @@
-import { LayoutContent, Skeleton } from "@cartridge/ui";
+import { LayoutContent, Skeleton } from "@cartridge/controller-ui";
 
 export const LoadingState = () => {
   return (

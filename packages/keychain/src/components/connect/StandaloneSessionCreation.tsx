@@ -18,7 +18,7 @@ import {
   LayoutContent,
   LayoutFooter,
   SliderIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SpendingLimitPage } from "./SpendingLimitPage";

@@ -1,5 +1,6 @@
 import { Token } from "@/hooks/token";
-import { Amount } from "@cartridge/ui";
+import { formatUsdValue } from "@/utils/format-value";
+import { Amount } from "@cartridge/controller-ui";
 import { useCallback, useMemo } from "react";
 
 export function SendAmount({
@@ -20,7 +21,7 @@ export function SendAmount({
     const value = token.balance.value;
     const max = token.balance.amount;
     const total = (value * amount) / max;
-    return `$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    return formatUsdValue(total);
   }, [token, amount]);
 
   const handleMax = useCallback(

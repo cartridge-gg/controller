@@ -11,8 +11,9 @@ vi.mock("@/utils/url-validator", () => ({
 }));
 
 const mockIsIframe = vi.fn();
-vi.mock("@cartridge/ui/utils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@cartridge/ui/utils")>();
+vi.mock("@cartridge/controller-ui/utils", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@cartridge/controller-ui/utils")>();
   return {
     ...actual,
     isIframe: () => mockIsIframe(),

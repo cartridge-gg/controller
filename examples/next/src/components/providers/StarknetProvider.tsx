@@ -11,11 +11,10 @@ import {
 } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import { constants, num, shortString } from "starknet";
-
-export const ETH_CONTRACT_ADDRESS =
-  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
-export const STRK_CONTRACT_ADDRESS =
-  "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
+import {
+  ETH_CONTRACT_ADDRESS,
+  STRK_CONTRACT_ADDRESS,
+} from "@cartridge/controller-ui/utils";
 
 const messageForChain = (chainId: constants.StarknetChainId) => {
   return {
@@ -106,7 +105,7 @@ if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
       name: "Starknet",
       symbol: "STRK",
       decimals: 18,
-      address: STRK_CONTRACT_ADDRESS,
+      address: STRK_CONTRACT_ADDRESS as `0x${string}`,
     },
     paymasterRpcUrls: {
       default: {

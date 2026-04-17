@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { SpinnerIcon, TimesIcon } from "@cartridge/ui";
+import { SpinnerIcon, TimesIcon } from "@cartridge/controller-ui";
 
 /** Timeout for the payment (10 minutes) */
 const PAYMENT_TIMEOUT_MS = 10 * 60 * 1000;

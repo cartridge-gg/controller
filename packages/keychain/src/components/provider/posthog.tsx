@@ -1,6 +1,6 @@
 import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
-import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
+import { PostHogContext, PostHogWrapper } from "@cartridge/controller-ui/utils";
 import { PropsWithChildren, useContext, useEffect, useState } from "react";
 
 export const posthog = new PostHogWrapper(

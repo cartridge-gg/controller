@@ -16,7 +16,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useNavigation } from "@/context";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useAccountVerifyMutation, useAccountPrivateQuery } from "@/utils/api";

@@ -1,4 +1,4 @@
-import { Button, Input } from "@cartridge/ui";
+import { Button, Input } from "@cartridge/controller-ui";
 import { useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 

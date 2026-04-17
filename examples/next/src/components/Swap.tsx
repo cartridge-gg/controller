@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { BigNumberish, Call } from "starknet";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button } from "@cartridge/ui";
+import { Button } from "@cartridge/controller-ui";
 
 export function Swap() {
   const { account, address, connector } = useAccount();

@@ -1,4 +1,4 @@
-import { Thumbnail, PaperPlaneIcon, TagIcon } from "@cartridge/ui";
+import { Thumbnail, PaperPlaneIcon, TagIcon } from "@cartridge/controller-ui";
 
 interface HeaderProps {
   image?: string;

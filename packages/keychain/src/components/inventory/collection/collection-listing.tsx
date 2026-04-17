@@ -15,14 +15,14 @@ import {
   ToggleGroupItem,
   TagIcon,
   ThumbnailCollectible,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import {
   cn,
   ETH_CONTRACT_ADDRESS,
   LORDS_CONTRACT_ADDRESS,
   STRK_CONTRACT_ADDRESS,
   USDC_CONTRACT_ADDRESS,
-} from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui/utils";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useCollection } from "@/hooks/collection";
@@ -36,6 +36,7 @@ import { useEntrypoints } from "@/hooks/entrypoints";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { formatUsdValue } from "@/utils/format-value";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
@@ -132,7 +133,7 @@ export function CollectionListing() {
     const value = selected.balance.value;
     const max = selected.balance.amount;
     const total = (value * price) / max;
-    return `$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    return formatUsdValue(total);
   }, [selected, price]);
 
   const listingData = useMemo(() => {
@@ -160,7 +161,7 @@ export function CollectionListing() {
     const value = selected.balance.value;
     const max = selected.balance.amount;
     const total = (listingData.assets.length * (value * price)) / max;
-    return `$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    return formatUsdValue(total);
   }, [selected, price, listingData]);
 
   const handleSelection = useCallback(

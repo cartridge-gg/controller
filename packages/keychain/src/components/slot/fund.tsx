@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { useTeamsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { useTeamsQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { Purchase, PurchaseType } from "../purchase";
 import {
   Button,
@@ -13,7 +13,7 @@ import {
   LayoutFooter,
   TokenCard,
   TokenSummary,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { Team, Teams } from "./teams";
 import { formatBalance } from "@/hooks/tokens";
 import { useNavigation } from "@/context/navigation";

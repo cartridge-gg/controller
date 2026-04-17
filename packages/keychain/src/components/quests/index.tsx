@@ -10,7 +10,7 @@ import {
   ClockIcon,
   GiftIcon,
   Button,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function Quests() {

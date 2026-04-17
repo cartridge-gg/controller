@@ -8,8 +8,8 @@ import {
   SheetTitle,
   SpinnerIcon,
   TrashIcon,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import React, { useState } from "react";
 import { SiInstagram, SiTiktok, SiX } from "@icons-pack/react-simple-icons";
 import type {

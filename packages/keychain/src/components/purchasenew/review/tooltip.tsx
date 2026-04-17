@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { convertCentsToDollars } from "./cost";
 import { useMemo } from "react";
 import { getStripeFeeInCents } from "./stripe-pricing";

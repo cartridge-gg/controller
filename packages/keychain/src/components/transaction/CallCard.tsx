@@ -10,7 +10,7 @@ import {
   Badge,
   Address,
   cn,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { humanizeString } from "@cartridge/controller";
 import { ContractLink } from "@/components/ContractLink";
 

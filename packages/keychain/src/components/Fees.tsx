@@ -8,7 +8,7 @@ import {
 import { useTokens } from "@/hooks/token";
 import { ErrorAlert } from "./ErrorAlert";
 import { FeesRow } from "./FeesRow";
-import { cn } from "@cartridge/ui/utils";
+import { cn } from "@cartridge/controller-ui/utils";
 
 export type FeesData = {
   label: string;

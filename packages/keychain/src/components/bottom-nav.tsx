@@ -7,7 +7,7 @@ import {
   PulseIcon,
   LeaderboardIcon,
   ScrollIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useData } from "@/hooks/data";

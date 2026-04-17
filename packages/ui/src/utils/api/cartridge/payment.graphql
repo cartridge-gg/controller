@@ -1,0 +1,201 @@
+query CryptoPayment($id: ID!) {
+  cryptoPayment(id: $id) {
+    ...CryptoPaymentFields
+  }
+}
+
+query StripePayment($id: ID!) {
+  stripePayment(id: $id) {
+    id
+    paymentStatus
+  }
+}
+
+query LayerswapSources($token: String!, $isMainnet: Boolean) {
+  layerswapSources(token: $token, isMainnet: $isMainnet) {
+    name
+    displayName
+    logo
+    chainId
+    type
+    tokens {
+      symbol
+      displayAsset
+      decimals
+      priceInUsd
+      status
+    }
+    depositMethods
+  }
+}
+
+mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
+  createCryptoPayment(input: $input) {
+    ...CryptoPaymentFields
+  }
+}
+
+mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
+  createStripePaymentIntent(input: $input) {
+    id
+    clientSecret
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
+  }
+}
+
+mutation CreateLayerswapPayment($input: CreateLayerswapPaymentInput!) {
+  createLayerswapPayment(input: $input) {
+    ...LayerswapPaymentFields
+  }
+}
+
+mutation CreateLayerswapDeposit($input: CreateLayerswapDepositInput!) {
+  createLayerswapDeposit(input: $input) {
+    ...LayerswapPaymentFields
+  }
+}
+
+query LayerswapQuote($input: CreateLayerswapDepositInput!) {
+  layerswapQuote(input: $input) {
+    requestedAmount
+    receivedAmount
+    totalFees
+    averageCompletionTime
+  }
+}
+
+query LayerswapStatus($swapId: ID!, $isMainnet: Boolean) {
+  layerswapStatus(swapId: $swapId, isMainnet: $isMainnet) {
+    status
+  }
+}
+
+query CoinbaseOnrampTransactions($input: CoinbaseTransactionsInput!) {
+  coinbaseOnrampTransactions(input: $input) {
+    transactions {
+      transactionId
+      walletAddress
+      type
+      txHash
+      status
+      purchaseCurrency
+      purchaseNetwork
+      purchaseAmount {
+        amount
+        currency
+      }
+      paymentTotal {
+        amount
+        currency
+      }
+      coinbaseFee {
+        amount
+        currency
+      }
+      networkFee {
+        amount
+        currency
+      }
+    }
+    nextPageKey
+    totalCount
+  }
+}
+
+mutation CreateCoinbaseOnRampOrder($input: CreateCoinbaseOnrampOrderInput!) {
+  createCoinbaseOnrampOrder(input: $input) {
+    ...CoinbaseOnrampOrderResponseFields
+  }
+}
+
+mutation CreateCoinbaseLayerswapOrder(
+  $input: CreateCoinbaseLayerswapOrderInput!
+) {
+  createCoinbaseLayerswapOrder(input: $input) {
+    ...CoinbaseOnrampOrderResponseFields
+  }
+}
+
+query CoinbaseOnRampOrder($orderId: String!) {
+  coinbaseOnrampOrder(orderId: $orderId) {
+    txHash
+    status
+  }
+}
+
+query CoinbaseOnRampQuote($input: CoinbaseOnrampQuoteInput!) {
+  coinbaseOnrampQuote(input: $input) {
+    quoteId
+    paymentTotal {
+      amount
+      currency
+    }
+    purchaseAmount {
+      amount
+      currency
+    }
+    layerswapFees {
+      amount
+      currency
+    }
+    coinbaseFee {
+      amount
+      currency
+    }
+    networkFee {
+      amount
+      currency
+    }
+  }
+}
+
+fragment CryptoPaymentFields on CryptoPayment {
+  id
+  tokenAmount
+  status
+  network
+  tokenAddress
+  depositAddress
+  expiresAt
+}
+
+fragment LayerswapPaymentFields on LayerswapPayment {
+  cryptoPaymentId
+  swapId
+  status
+  sourceNetwork
+  sourceTokenAmount
+  sourceTokenAddress
+  sourceDepositAddress
+  expiresAt
+}
+
+fragment CoinbaseOnrampOrderFields on CoinbaseOnrampOrder {
+  orderId
+  paymentLink
+  paymentLinkType
+  paymentTotal
+  paymentCurrency
+  purchaseAmount
+  purchaseCurrency
+  destinationAddress
+  destinationNetwork
+  fees {
+    type
+    amount
+    currency
+  }
+}
+
+fragment CoinbaseOnrampOrderResponseFields on CoinbaseOnrampOrderResponse {
+  coinbaseOrder {
+    ...CoinbaseOnrampOrderFields
+  }
+  layerswapPayment {
+    ...LayerswapPaymentFields
+  }
+}

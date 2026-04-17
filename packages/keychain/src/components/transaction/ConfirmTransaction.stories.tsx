@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { ConfirmTransaction } from "./ConfirmTransaction";
-import { ETH_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
+import { ETH_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import type { ControllerError } from "@/utils/connection";
 

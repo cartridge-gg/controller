@@ -11,9 +11,9 @@ import {
   SheetTrigger,
   ArgentIcon,
   CopyAddress,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
-import { formatAddress } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
+import { formatAddress } from "@cartridge/controller-ui/utils";
 
 export interface RegisteredAccount {
   accountName: string;

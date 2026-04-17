@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { SonnerToaster } from "@cartridge/ui";
+import { SonnerToaster } from "@cartridge/controller-ui";
 import { App } from "@/components/app";
 import { Provider } from "@/components/provider";
 import { NavigationProvider } from "@/context/navigation";

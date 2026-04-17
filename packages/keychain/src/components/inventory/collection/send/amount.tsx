@@ -1,4 +1,4 @@
-import { Amount } from "@cartridge/ui";
+import { Amount } from "@cartridge/controller-ui";
 import { useCallback } from "react";
 
 export function SendAmount({

@@ -29,7 +29,7 @@ const nextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       [path.resolve(__dirname, "src/assets")]: path.resolve(
-        path.dirname(require.resolve("@cartridge/ui")),
+        path.dirname(require.resolve("@cartridge/controller-ui")),
         "assets",
       ),
     };

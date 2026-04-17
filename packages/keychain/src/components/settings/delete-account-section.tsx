@@ -1,4 +1,4 @@
-import { Button, TrashIcon } from "@cartridge/ui";
+import { Button, TrashIcon } from "@cartridge/controller-ui";
 import { SectionHeader } from "./section-header";
 
 interface DeleteAccountSectionProps {

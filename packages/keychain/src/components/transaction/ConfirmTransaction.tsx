@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LayoutContent } from "@cartridge/ui";
+import { LayoutContent } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ControllerError } from "@/utils/connection";

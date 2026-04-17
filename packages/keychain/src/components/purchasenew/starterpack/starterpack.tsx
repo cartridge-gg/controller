@@ -21,7 +21,7 @@ import {
   Thumbnail,
   ListIcon,
   ErrorAlertIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useParams, useSearchParams } from "react-router-dom";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";

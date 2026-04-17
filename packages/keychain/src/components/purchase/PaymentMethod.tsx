@@ -1,6 +1,6 @@
 import { StarterpackDetails } from "@/context";
 import { ExternalWallet } from "@cartridge/controller";
-import { Button, CreditCardIcon } from "@cartridge/ui";
+import { Button, CreditCardIcon } from "@cartridge/controller-ui";
 
 export type PaymentMethodProps = {
   starterpackDetails?: StarterpackDetails;

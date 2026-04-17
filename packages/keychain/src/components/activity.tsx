@@ -10,8 +10,8 @@ import {
   LayoutContent,
   PlusIcon,
   Skeleton,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import { useData } from "@/hooks/data";
 import { CardProps } from "@/components/provider/data";

@@ -2,7 +2,7 @@ import { Signer, signerToGuid } from "@cartridge/controller-wasm";
 import {
   ControllerQuery,
   CredentialMetadata,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import { constants } from "starknet";
 import Controller from "./controller";
 

@@ -5,7 +5,7 @@ import {
   SeedlingIcon,
   SparklesIcon,
   cn,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { AccountSearchResult } from "@/hooks/account";
 import { VariantProps, cva } from "class-variance-authority";
 import React, { HTMLAttributes } from "react";

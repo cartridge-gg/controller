@@ -10,7 +10,7 @@ import { client } from "@/utils/graphql";
 import {
   AddressByUsernameDocument,
   AddressByUsernameQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 
 const REFERRAL_STORAGE_KEY = "@cartridge/referral";
 const ATTRIBUTION_WINDOW_DAYS = 30;

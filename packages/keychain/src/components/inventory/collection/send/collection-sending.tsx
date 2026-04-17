@@ -4,7 +4,7 @@ import {
   CardTitle,
   CollectibleAssetCard,
   CollectiblePill,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { Asset } from "@/hooks/collection";
 
 import placeholder from "/placeholder.svg?url";

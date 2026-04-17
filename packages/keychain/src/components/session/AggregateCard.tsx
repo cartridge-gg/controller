@@ -18,8 +18,8 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@cartridge/ui";
-import { formatAddress, cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { formatAddress, cn } from "@cartridge/controller-ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import { Link } from "react-router-dom";
 import { constants } from "starknet";

@@ -5,8 +5,8 @@ import {
   AccordionTrigger,
   CheckboxIcon,
   Thumbnail,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { Call } from "starknet";
 import { humanizeString } from "@cartridge/controller";
 import { useState, PropsWithChildren } from "react";

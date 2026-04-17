@@ -1,6 +1,11 @@
 import * as React from "react";
-import { Card, CardContent, CardDescription, Thumbnail } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  Thumbnail,
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { Item, ItemType } from "@/context";
 
 interface Props {

@@ -1,4 +1,4 @@
-import { cn } from "@cartridge/ui/utils";
+import { cn } from "@cartridge/controller-ui/utils";
 import React from "react";
 import { Status } from "./status";
 

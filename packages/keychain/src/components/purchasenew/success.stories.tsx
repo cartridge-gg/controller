@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { PurchaseSuccessInner } from "./success";
-import { CreditIcon } from "@cartridge/ui";
+import { CreditIcon } from "@cartridge/controller-ui";
 import { ItemType } from "@/context";
 
 const meta = {

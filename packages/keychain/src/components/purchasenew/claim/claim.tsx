@@ -10,7 +10,7 @@ import {
   LayoutContent,
   LayoutFooter,
   Skeleton,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMerkleClaim, MerkleClaim } from "@/hooks/merkle-claim";
@@ -20,7 +20,7 @@ import { CollectionItem } from "../starterpack/collections";
 import { StarterpackReceiving } from "../starterpack/starterpack";
 import { ExternalWalletType } from "@cartridge/controller";
 import { getWallet } from "../wallet/config";
-import { formatAddress } from "@cartridge/ui/utils";
+import { formatAddress } from "@cartridge/controller-ui/utils";
 import { getAddressFromPrivateKey } from "@/utils";
 import { useConnection } from "@/hooks/connection";
 

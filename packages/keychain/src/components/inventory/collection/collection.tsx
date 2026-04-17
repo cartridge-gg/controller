@@ -14,9 +14,9 @@ import {
   Empty,
   PaperPlaneIcon,
   TagIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
-import { cn } from "@cartridge/ui/utils";
+import { cn } from "@cartridge/controller-ui/utils";
 import { useCallback, useMemo, useEffect, useState } from "react";
 import { useCollection, Asset } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";

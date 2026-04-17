@@ -1,4 +1,4 @@
-import { HeaderInner } from "@cartridge/ui";
+import { HeaderInner } from "@cartridge/controller-ui";
 import { useCallback, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigation } from "@/context";

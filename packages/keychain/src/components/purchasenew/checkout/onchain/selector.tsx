@@ -1,5 +1,5 @@
 import React from "react";
-import { ListIcon } from "@cartridge/ui";
+import { ListIcon } from "@cartridge/controller-ui";
 
 interface WalletSelectorProps {
   walletName: string;

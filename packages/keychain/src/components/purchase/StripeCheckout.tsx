@@ -9,7 +9,7 @@ import {
   StripeElements,
   StripePaymentElementOptions,
 } from "@stripe/stripe-js";
-import { LayoutContent, LayoutFooter, Button } from "@cartridge/ui";
+import { LayoutContent, LayoutFooter, Button } from "@cartridge/controller-ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { PricingDetails } from ".";
 import { CostBreakdown } from "./CostBreakdown";

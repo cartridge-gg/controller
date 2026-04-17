@@ -2,7 +2,7 @@ import {
   AchievementCard,
   AchievementFeatured,
   AchievementProgress,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { Item } from "@/hooks/achievements";
 import { useEffect, useMemo, useState } from "react";
 import { EditionModel, GameModel } from "@cartridge/arcade";
