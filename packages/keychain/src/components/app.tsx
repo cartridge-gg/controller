@@ -274,6 +274,9 @@ export function App() {
           <Route path="network/:platforms" element={<ChooseNetwork />} />
           <Route path="wallet/:platforms" element={<SelectWallet />} />
           <Route path="verification" element={<Verification />} />
+          {/* Kept as standalone routes for potential reuse (deep-link,
+              full-screen fallback). The primary starterpack flow opens these
+              as bottom-sheet drawers mounted inside <OnchainCheckout />. */}
           <Route path="checkout/coinflow" element={<CoinflowCheckout />} />
           <Route path="checkout/onchain" element={<OnchainCheckout />} />
           <Route path="checkout/coinbase" element={<CoinbaseCheckout />} />
