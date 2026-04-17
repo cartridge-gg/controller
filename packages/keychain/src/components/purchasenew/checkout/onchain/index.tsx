@@ -124,7 +124,7 @@ export function OnchainCheckout() {
   }, [usdAmount, quantity]);
 
   const isApplePayAmountTooLow = useMemo(() => {
-    return isApplePaySelected && totalUsdAmount < 2;
+    return isApplePaySelected && totalUsdAmount < 1.86;
   }, [isApplePaySelected, totalUsdAmount]);
 
   // Pre-fetch Coinbase limits as soon as Apple Pay is selected so we can gate
