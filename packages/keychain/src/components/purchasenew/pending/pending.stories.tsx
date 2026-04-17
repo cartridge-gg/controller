@@ -140,38 +140,6 @@ export const CryptoPurchaseWithoutWallet: Story = {
   ),
 };
 
-export const StripePurchase: Story = {
-  render: () => (
-    <BridgePending
-      name="Premium Pack"
-      items={[
-        {
-          title: "Premium Credits",
-          icon: <CreditIcon />,
-          value: 2000,
-          type: ItemType.CREDIT,
-        },
-        {
-          title: "Rare Artifact",
-          icon: "https://r2.quddus.my/Frame%203231.png",
-          type: ItemType.NFT,
-        },
-        {
-          title: "USDC",
-          subtitle: "500 USDC tokens",
-          icon: TOKEN_ICONS.USDC,
-          value: 500,
-          type: ItemType.ERC20,
-        },
-      ]}
-      paymentMethod="stripe"
-      swapId="pi_stripe123"
-      selectedPlatform="starknet"
-      waitForDeposit={async () => "0xmocktxhash"}
-    />
-  ),
-};
-
 // Stories for PurchasePending (Onchain Starknet purchases)
 export const OnchainPurchaseWithCredits: Story = {
   render: () => (

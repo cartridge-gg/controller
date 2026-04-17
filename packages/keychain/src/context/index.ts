@@ -29,5 +29,4 @@ export type {
   OnchainPurchaseContextType,
   TokenOption,
   CreditPurchaseContextType,
-  CostDetails,
 } from "./starterpack";

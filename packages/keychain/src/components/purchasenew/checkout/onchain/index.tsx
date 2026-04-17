@@ -82,7 +82,7 @@ export function OnchainCheckout() {
     isFetchingCoinbaseLimits,
     fetchCoinbaseLimits,
   } = useOnchainPurchaseContext();
-  const { onCreditCardPurchase, isStripeLoading, isCoinflowLoading } =
+  const { onCreditCardPurchase, isCoinflowLoading } =
     useCreditPurchaseContext();
 
   const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
@@ -218,9 +218,7 @@ export function OnchainCheckout() {
 
   const globalDisabled = useMemo(() => {
     if (isCoinflowSelected) {
-      return (
-        !isCoinflowStarterpackSupported || isStripeLoading || isCoinflowLoading
-      );
+      return !isCoinflowStarterpackSupported || isCoinflowLoading;
     }
 
     // Disable if there's a fee estimation error (e.g., bridge amount too low)
@@ -255,7 +253,6 @@ export function OnchainCheckout() {
     isApplePayAmountTooLow,
     isCoinflowSelected,
     isCoinflowStarterpackSupported,
-    isStripeLoading,
     isCoinflowLoading,
   ]);
 
@@ -550,7 +547,6 @@ export function OnchainCheckout() {
                 isCheckingFallback ||
                 (bridgeFrom !== null && isFetchingFees) ||
                 isCreatingOrder ||
-                isStripeLoading ||
                 isCoinflowLoading ||
                 applePayLimitsLoading
               }

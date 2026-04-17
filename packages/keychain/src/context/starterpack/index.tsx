@@ -36,7 +36,7 @@ export {
   CreditPurchaseProvider,
   useCreditPurchaseContext,
 } from "./credit-purchase";
-export type { CreditPurchaseContextType, CostDetails } from "./credit-purchase";
+export type { CreditPurchaseContextType } from "./credit-purchase";
 
 // Composed provider for all starterpack contexts
 import { ReactNode } from "react";

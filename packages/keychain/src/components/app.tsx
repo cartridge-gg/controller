@@ -31,8 +31,6 @@ import { AddSignerRoute } from "./settings/AddSignerRoute";
 import { AddConnectionRoute } from "./settings/AddConnectionRoute";
 import { PaymentMethod } from "./purchasenew/method";
 import { Verification } from "./purchasenew/verification";
-import { StripeVerification } from "./purchasenew/verification/stripe";
-import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { CoinflowCheckout } from "./purchasenew/checkout/coinflow";
 import { Success as PurchaseSuccess } from "./purchasenew/success";
 import { Pending as PurchasePending } from "./purchasenew/pending";
@@ -276,8 +274,6 @@ export function App() {
           <Route path="network/:platforms" element={<ChooseNetwork />} />
           <Route path="wallet/:platforms" element={<SelectWallet />} />
           <Route path="verification" element={<Verification />} />
-          <Route path="verification/stripe" element={<StripeVerification />} />
-          <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/coinflow" element={<CoinflowCheckout />} />
           <Route path="checkout/onchain" element={<OnchainCheckout />} />
           <Route path="checkout/coinbase" element={<CoinbaseCheckout />} />
