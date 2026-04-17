@@ -7470,26 +7470,6 @@ export type CryptoPaymentQuery = {
   } | null;
 };
 
-export type StripePaymentQueryVariables = Exact<{
-  id: Scalars["ID"];
-}>;
-
-export type StripePaymentQuery = {
-  __typename?: "Query";
-  stripePayment: {
-    __typename?: "StripePayment";
-    id: string;
-    paymentStatus: StripePaymentStatus;
-    purchaseFulfillment?: {
-      __typename?: "PurchaseFulfillment";
-      id: string;
-      status: PurchaseFulfillmentStatus;
-      transactionHash?: string | null;
-      lastError?: string | null;
-    } | null;
-  };
-};
-
 export type LayerswapSourcesQueryVariables = Exact<{
   token: Scalars["String"];
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
@@ -7541,26 +7521,6 @@ export type CreateStripePaymentIntentMutationVariables = Exact<{
 export type CreateStripePaymentIntentMutation = {
   __typename?: "Mutation";
   createStripePaymentIntent: {
-    __typename?: "StripePaymentIntent";
-    id: string;
-    clientSecret: string;
-    customerSessionClientSecret?: string | null;
-    pricing: {
-      __typename?: "StripePricingDetails";
-      baseCostInCents: number;
-      processingFeeInCents: number;
-      totalInCents: number;
-    };
-  };
-};
-
-export type CreateStripeStarterpackIntentMutationVariables = Exact<{
-  input: CreateStripeStarterpackIntentInput;
-}>;
-
-export type CreateStripeStarterpackIntentMutation = {
-  __typename?: "Mutation";
-  createStripeStarterpackIntent: {
     __typename?: "StripePaymentIntent";
     id: string;
     clientSecret: string;
@@ -8357,34 +8317,6 @@ export const useCryptoPaymentQuery = <
     ).bind(null, variables),
     options,
   );
-export const StripePaymentDocument = `
-    query StripePayment($id: ID!) {
-  stripePayment(id: $id) {
-    id
-    paymentStatus
-    purchaseFulfillment {
-      id
-      status
-      transactionHash
-      lastError
-    }
-  }
-}
-    `;
-export const useStripePaymentQuery = <
-  TData = StripePaymentQuery,
-  TError = unknown,
->(
-  variables: StripePaymentQueryVariables,
-  options?: UseQueryOptions<StripePaymentQuery, TError, TData>,
-) =>
-  useQuery<StripePaymentQuery, TError, TData>(
-    ["StripePayment", variables],
-    useFetchData<StripePaymentQuery, StripePaymentQueryVariables>(
-      StripePaymentDocument,
-    ).bind(null, variables),
-    options,
-  );
 export const LayerswapSourcesDocument = `
     query LayerswapSources($token: String!, $isMainnet: Boolean) {
   layerswapSources(token: $token, isMainnet: $isMainnet) {
@@ -8485,44 +8417,6 @@ export const useCreateStripePaymentIntentMutation = <
       CreateStripePaymentIntentMutation,
       CreateStripePaymentIntentMutationVariables
     >(CreateStripePaymentIntentDocument),
-    options,
-  );
-export const CreateStripeStarterpackIntentDocument = `
-    mutation CreateStripeStarterpackIntent($input: CreateStripeStarterpackIntentInput!) {
-  createStripeStarterpackIntent(input: $input) {
-    id
-    clientSecret
-    customerSessionClientSecret
-    pricing {
-      baseCostInCents
-      processingFeeInCents
-      totalInCents
-    }
-  }
-}
-    `;
-export const useCreateStripeStarterpackIntentMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    CreateStripeStarterpackIntentMutation,
-    TError,
-    CreateStripeStarterpackIntentMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    CreateStripeStarterpackIntentMutation,
-    TError,
-    CreateStripeStarterpackIntentMutationVariables,
-    TContext
-  >(
-    ["CreateStripeStarterpackIntent"],
-    useFetchData<
-      CreateStripeStarterpackIntentMutation,
-      CreateStripeStarterpackIntentMutationVariables
-    >(CreateStripeStarterpackIntentDocument),
     options,
   );
 export const CreateCoinflowStarterpackIntentDocument = `

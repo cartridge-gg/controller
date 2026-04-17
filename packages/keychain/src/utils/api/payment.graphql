@@ -4,19 +4,6 @@ query CryptoPayment($id: ID!) {
   }
 }
 
-query StripePayment($id: ID!) {
-  stripePayment(id: $id) {
-    id
-    paymentStatus
-    purchaseFulfillment {
-      id
-      status
-      transactionHash
-      lastError
-    }
-  }
-}
-
 query LayerswapSources($token: String!, $isMainnet: Boolean) {
   layerswapSources(token: $token, isMainnet: $isMainnet) {
     name
@@ -43,21 +30,6 @@ mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
 
 mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
   createStripePaymentIntent(input: $input) {
-    id
-    clientSecret
-    customerSessionClientSecret
-    pricing {
-      baseCostInCents
-      processingFeeInCents
-      totalInCents
-    }
-  }
-}
-
-mutation CreateStripeStarterpackIntent(
-  $input: CreateStripeStarterpackIntentInput!
-) {
-  createStripeStarterpackIntent(input: $input) {
     id
     clientSecret
     customerSessionClientSecret
