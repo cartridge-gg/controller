@@ -59,13 +59,20 @@ export function Provider({ children }: PropsWithChildren) {
     [connection.controller, connection.project],
   );
 
-  if (connection.isConfigLoading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <SpinnerIcon className="animate-spin text-muted-foreground" size="lg" />
-      </div>
-    );
-  }
+  // Keep the provider tree mounted while preset config is (re)loading.
+  // Previously this branch short-circuited with a spinner, which unmounted
+  // every child provider — orphaning in-flight async work and wiping
+  // globals like window.keychain_wallets. Any new flow that touches state
+  // across this boundary (e.g. OAuth redirect restoring searchParams)
+  // would hit the same class of bug. Rendering the spinner inside the
+  // tree preserves provider lifetimes across config reloads.
+  const body = connection.isConfigLoading ? (
+    <div className="flex h-screen w-screen items-center justify-center bg-background">
+      <SpinnerIcon className="animate-spin text-muted-foreground" size="lg" />
+    </div>
+  ) : (
+    children
+  );
 
   return (
     <FeatureProvider>
@@ -94,7 +101,7 @@ export function Provider({ children }: PropsWithChildren) {
                                     >
                                       <ProfileDataProvider>
                                         <StarterpackProviders>
-                                          {children}
+                                          {body}
                                         </StarterpackProviders>
                                       </ProfileDataProvider>
                                     </MarketplaceClientProvider>
