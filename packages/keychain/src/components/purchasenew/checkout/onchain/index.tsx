@@ -38,6 +38,7 @@ import { SocialClaimCheckout } from "./social-claim";
 import { CoinflowDrawer } from "../coinflow/drawer";
 import { CoinbaseDrawer } from "../coinbase/drawer";
 import { CoinbasePopupStatus } from "../coinbase/popup-status";
+import { VerificationDrawer } from "../../verification/drawer";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { getIpLocation } from "@/utils/ip";
 import { num } from "starknet";
@@ -100,6 +101,9 @@ export function OnchainCheckout() {
   const [isCoinflowDrawerOpen, setIsCoinflowDrawerOpen] = useState(false);
   const [isCoinbaseDrawerOpen, setIsCoinbaseDrawerOpen] = useState(false);
   const [showCoinbasePopupStatus, setShowCoinbasePopupStatus] = useState(false);
+  const [verificationMethod, setVerificationMethod] = useState<
+    "coinflow" | "apple-pay" | null
+  >(null);
   const [countryCode, setCountryCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -301,7 +305,7 @@ export function OnchainCheckout() {
       if (isCoinflowSelected) {
         const { data: meData } = await refetchMe();
         if (!meData?.me?.email) {
-          navigate("/purchase/verification?method=coinflow");
+          setVerificationMethod("coinflow");
           return;
         }
 
@@ -318,7 +322,7 @@ export function OnchainCheckout() {
           !accountPrivate?.phoneNumberVerifiedAt;
 
         if (needsVerification) {
-          navigate("/purchase/verification?method=apple-pay");
+          setVerificationMethod("apple-pay");
           return;
         }
 
@@ -605,6 +609,18 @@ export function OnchainCheckout() {
         onPopupOpened={() => {
           setIsCoinbaseDrawerOpen(false);
           setShowCoinbasePopupStatus(true);
+        }}
+      />
+
+      <VerificationDrawer
+        isOpen={verificationMethod !== null}
+        method={verificationMethod}
+        onClose={() => setVerificationMethod(null)}
+        onSuccess={() => {
+          // Verification done — close drawer and re-run the purchase which
+          // will now pass the email/phone gate and open the payment drawer.
+          setVerificationMethod(null);
+          handlePurchase();
         }}
       />
     </>
