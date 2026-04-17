@@ -55,15 +55,16 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Instantiate KeychainWallets once parent is available
+  // Instantiate KeychainWallets once parent is available. Intentionally
+  // persist across unmount/remount: embedded wallets registered during an
+  // OAuth redirect (e.g. Turnkey social login) must survive the provider
+  // remount that runs when preset config loads after setSearchParams,
+  // otherwise session creation can't find the signer and falls through
+  // to the external bridge, which fails with "No wallet found with
+  // connected address".
   useEffect(() => {
     if (parent && !window.keychain_wallets) {
       window.keychain_wallets = new KeychainWallets(parent);
-
-      // Cleanup on unmount
-      return () => {
-        delete window.keychain_wallets;
-      };
     }
   }, [parent]);
 
