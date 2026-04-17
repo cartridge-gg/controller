@@ -46,7 +46,10 @@ export function SpendingLimitCard({
 
         if (!approveMethod) return null;
 
-        const amount = approveMethod.amount ?? "0";
+        const amount =
+          approveMethod.amount === "*"
+            ? UNLIMITED_VALUE
+            : (approveMethod.amount ?? "0");
         const checksumAddress = getChecksumAddress(address);
         const token = tokens[checksumAddress];
 
