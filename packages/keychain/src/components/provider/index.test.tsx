@@ -14,7 +14,9 @@ vi.mock("@/components/provider/upgrade", () => ({
 }));
 
 vi.mock("@/hooks/wallets", () => ({
-  WalletsProvider: ({ children }: PropsWithChildren) => <>{children}</>,
+  WalletsProvider: ({ children }: PropsWithChildren) => (
+    <div data-testid="wallets-provider">{children}</div>
+  ),
 }));
 
 vi.mock("@/utils/graphql", () => ({
@@ -184,5 +186,36 @@ describe("Provider", () => {
 
     expect(screen.getByText("child content")).toBeInTheDocument();
     expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
+  });
+
+  it("keeps the provider tree mounted while config is loading", () => {
+    // Regression guard: if the loading branch short-circuits above the
+    // provider tree, it unmounts child providers mid-flight. OAuth redirect
+    // flows register embedded wallets on window.keychain_wallets before
+    // triggering a preset reload; those registrations must survive the
+    // loading state.
+    const { rerender } = render(
+      <Provider>
+        <div>child content</div>
+      </Provider>,
+    );
+
+    expect(screen.getByTestId("wallets-provider")).toBeInTheDocument();
+    const walletsProviderBefore = screen.getByTestId("wallets-provider");
+
+    mockUseConnectionValue.mockReturnValue({
+      ...baseConnection,
+      isConfigLoading: true,
+    });
+    rerender(
+      <Provider>
+        <div>child content</div>
+      </Provider>,
+    );
+
+    // Spinner replaces children, but WalletsProvider is still mounted
+    // (same DOM node instance — React kept it alive across the rerender).
+    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
+    expect(screen.getByTestId("wallets-provider")).toBe(walletsProviderBefore);
   });
 });
