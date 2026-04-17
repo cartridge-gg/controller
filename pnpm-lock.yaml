@@ -10,8 +10,8 @@ catalogs:
       specifier: 0.3.12
       version: 0.3.12
     '@cartridge/controller-wasm':
-      specifier: 0.10.0
-      version: 0.10.0
+      specifier: 0.10.1
+      version: 0.10.1
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -319,7 +319,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.10.0
+        version: 0.10.1
       starknet:
         specifier: 'catalog:'
         version: 8.5.4
@@ -433,7 +433,7 @@ importers:
     dependencies:
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.10.0
+        version: 0.10.1
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -561,7 +561,7 @@ importers:
         version: link:../controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.10.0
+        version: 0.10.1
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -1258,8 +1258,8 @@ packages:
     peerDependencies:
       react: ^18.0.0 || ^19.0.0-0
 
-  '@cartridge/controller-wasm@0.10.0':
-    resolution: {integrity: sha512-msmQFjZRRAcAbcGf0mt4z4bTvUY6H3ypgYz+imJp+S36SCabvh42vog7FttuvcVKQoVjS5hNKb3rf0YwU/plig==}
+  '@cartridge/controller-wasm@0.10.1':
+    resolution: {integrity: sha512-NweHJ98lFrV103sT+ud0WOUT+j92bBdaTdT+cFRwPA+XmRB39UekMu35iWlFcBhlnxQF+GdX4G/IrQtfoXf9+A==}
 
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
@@ -11497,7 +11497,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/controller-wasm@0.10.0': {}
+  '@cartridge/controller-wasm@0.10.1': {}
 
   '@cartridge/penpal@6.2.4': {}
 
