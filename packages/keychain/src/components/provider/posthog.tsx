@@ -2,6 +2,7 @@ import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
 import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
 import { PropsWithChildren, useContext, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 export const posthog = new PostHogWrapper(
   import.meta.env.VITE_POSTHOG_KEY ?? "api key",
@@ -12,8 +13,9 @@ export const posthog = new PostHogWrapper(
 );
 
 export function PostHogProvider({ children }: PropsWithChildren) {
-  const { controller, origin } = useConnection();
+  const { controller, origin, preset } = useConnection();
   const { controllerVersion } = useVersion();
+  const { pathname } = useLocation();
 
   // Track the last identified address
   const [lastIdentifiedAddress, setLastIdentifiedAddress] = useState<string>();
@@ -23,7 +25,7 @@ export function PostHogProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!registered && controllerVersion) {
       posthog.registerForSession({
-        controllerVersion: controllerVersion.version,
+        controller_version: controllerVersion.version,
       });
       setRegistered(true);
     }
@@ -58,6 +60,18 @@ export function PostHogProvider({ children }: PropsWithChildren) {
       posthog.register({ chain_id: controller.chainId });
     }
   }, [controller]);
+
+  useEffect(() => {
+    if (preset) {
+      posthog.register({ preset });
+    }
+  }, [preset]);
+
+  // posthog-js-lite has no auto-pageview; fire explicitly on route change
+  // so DAU/weekly-active reflect real usage.
+  useEffect(() => {
+    posthog.capture("$pageview", { pathname });
+  }, [pathname]);
 
   return (
     <PostHogContext.Provider value={{ posthog }}>
