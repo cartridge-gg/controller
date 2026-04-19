@@ -23,7 +23,7 @@ export function PostHogProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!registered && controllerVersion) {
       posthog.registerForSession({
-        controllerVersion: controllerVersion.version,
+        controller_version: controllerVersion.version,
       });
       setRegistered(true);
     }
