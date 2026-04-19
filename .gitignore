@@ -195,3 +195,4 @@ keystore.json
 .claude/settings.local.json
 .dmux/
 .dmux-hooks/
+.gstack/

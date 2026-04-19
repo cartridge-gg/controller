@@ -16,6 +16,8 @@ import { isEqual } from "@/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createDeployUrl } from "@/utils/connection/deploy";
 import { Fees, FeesData } from "@/components/Fees";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -72,6 +74,7 @@ export function ExecutionContainer({
         return;
       }
 
+      const feeStartTime = performance.now();
       try {
         const maxFee = await controller.estimateInvokeFee(transactions);
         // Only clear error if it was from fee estimation, not from props
@@ -79,10 +82,19 @@ export function ExecutionContainer({
           setCtrlError(undefined);
         }
 
+        captureAnalyticsEvent(posthog, "tx_fee_estimated", {
+          fee_token: "eth",
+          duration_ms: Math.round(performance.now() - feeStartTime),
+        });
+
         setMaxFee(maxFee);
         setIsEstimating(false);
       } catch (e) {
         const error = parseControllerError(e as unknown as ControllerError);
+        captureAnalyticsEvent(posthog, "tx_failed", {
+          error_code: sanitizeErrorCode(e),
+          stage: "estimation",
+        });
         onError?.(error);
         setCtrlError(error);
         setIsEstimating(false);
