@@ -357,10 +357,13 @@ export function useConnectionValue() {
     }
 
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if (isSafari) {
+    const isWindows = navigator.userAgent.indexOf("Win") !== -1;
+    const isChromium = /Chrome|Chromium/i.test(navigator.userAgent);
+
+    if (isSafari || (isWindows && isChromium)) {
       return {
         create: true,
-        get: isNestedIframe(),
+        get: isSafari ? isNestedIframe() : true,
       };
     }
 
