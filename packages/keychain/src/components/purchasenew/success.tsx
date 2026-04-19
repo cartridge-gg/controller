@@ -156,7 +156,7 @@ export function CoinflowPurchaseSuccess({
     if (isPurchaseComplete && !hasCapturedPurchase.current) {
       hasCapturedPurchase.current = true;
       captureAnalyticsEvent(posthog, "purchase_completed", {
-        method: "stripe",
+        method: "coinflow",
       });
     }
   }, [isPurchaseComplete]);
@@ -287,10 +287,11 @@ export function PurchaseSuccessInner({
   const quantityText = quantity > 1 ? `(${quantity})` : "";
 
   useEffect(() => {
+    if (type === "claimed") return;
     captureAnalyticsEvent(posthog, "purchase_completed", {
       method: "onchain",
     });
-  }, []);
+  }, [type]);
 
   return (
     <>
