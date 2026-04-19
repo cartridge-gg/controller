@@ -12,7 +12,7 @@ export const posthog = new PostHogWrapper(
 );
 
 export function PostHogProvider({ children }: PropsWithChildren) {
-  const { controller, origin } = useConnection();
+  const { controller, origin, preset } = useConnection();
   const { controllerVersion } = useVersion();
 
   // Track the last identified address
@@ -58,6 +58,12 @@ export function PostHogProvider({ children }: PropsWithChildren) {
       posthog.register({ chain_id: controller.chainId });
     }
   }, [controller]);
+
+  useEffect(() => {
+    if (preset) {
+      posthog.register({ preset });
+    }
+  }, [preset]);
 
   return (
     <PostHogContext.Provider value={{ posthog }}>
