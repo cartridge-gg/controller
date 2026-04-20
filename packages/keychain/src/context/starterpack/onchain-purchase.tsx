@@ -433,7 +433,14 @@ export const OnchainPurchaseProvider = ({
     if (quantity < requiredQuantity) {
       setQuantity(requiredQuantity);
       setApplePayMinQuantity(requiredQuantity);
-    } else if (applePayMinQuantity !== undefined) {
+    } else if (
+      applePayMinQuantity !== undefined &&
+      quantity !== applePayMinQuantity
+    ) {
+      // User manually moved quantity away from the bumped value, so the
+      // notice is no longer relevant. (Keep it while quantity matches the
+      // bumped value — otherwise the warning would flicker off the moment
+      // convertedPrice catches up after the bump.)
       setApplePayMinQuantity(undefined);
     }
   }, [
