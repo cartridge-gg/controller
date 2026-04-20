@@ -1,6 +1,6 @@
 import Controller from "@/utils/controller";
 import { connectToParent } from "@cartridge/penpal";
-import { normalize } from "@cartridge/ui/utils";
+import { normalize } from "@cartridge/controller-ui/utils";
 import { connect } from "./connect";
 import { deployFactory } from "./deploy";
 import { estimateInvokeFee } from "./estimate";

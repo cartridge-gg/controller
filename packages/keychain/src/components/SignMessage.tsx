@@ -11,7 +11,7 @@ import {
   CardListContent,
   CardListItem,
   HeaderInner,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseSignMessageParams } from "@/utils/connection/sign";

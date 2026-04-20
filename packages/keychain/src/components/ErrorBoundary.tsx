@@ -7,7 +7,7 @@ import {
   Button,
   HeaderInner,
   LayoutContainer,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/constants";
 import { Link } from "react-router-dom";

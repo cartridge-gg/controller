@@ -5,7 +5,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ResponseCodes } from "@cartridge/controller";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import {

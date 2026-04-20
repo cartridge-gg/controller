@@ -4,7 +4,7 @@ import {
   MerkleClaimsForAddressDocument,
   MerkleClaimsForAddressQuery,
   MerkleDropNetwork,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import {
   cairo,
   Call,

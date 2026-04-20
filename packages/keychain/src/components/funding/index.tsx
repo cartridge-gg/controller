@@ -6,7 +6,7 @@ import {
   Button,
   ControllerIcon,
   HeaderInner,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { Balance, BalanceType } from "../purchase/Balance";
 
 export type FundingProps = {

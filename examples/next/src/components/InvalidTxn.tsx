@@ -1,10 +1,8 @@
 "use client";
 
-import { Button } from "@cartridge/ui";
+import { Button } from "@cartridge/controller-ui";
 import { useAccount, useSendTransaction } from "@starknet-react/core";
-
-const ETH_CONTRACT =
-  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
+import { ETH_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 
 export function InvalidTxn() {
   const { account } = useAccount();
@@ -32,7 +30,7 @@ export function InvalidTxn() {
           onClick={() =>
             account.execute([
               {
-                contractAddress: ETH_CONTRACT,
+                contractAddress: ETH_CONTRACT_ADDRESS,
                 entrypoint: "approve",
                 calldata: [],
               },
@@ -45,7 +43,7 @@ export function InvalidTxn() {
           onClick={() => {
             account.execute([
               {
-                contractAddress: ETH_CONTRACT,
+                contractAddress: ETH_CONTRACT_ADDRESS,
                 entrypoint: "register_governance_admin",
                 calldata: [],
               },
@@ -60,7 +58,7 @@ export function InvalidTxn() {
             account.execute(
               [
                 {
-                  contractAddress: ETH_CONTRACT,
+                  contractAddress: ETH_CONTRACT_ADDRESS,
                   entrypoint: "approve",
                   calldata: [account.address, "0x0", "0x0"],
                 },

@@ -19,7 +19,7 @@ import {
   LayoutFooter,
   Skeleton,
   Spinner,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { useControllerTheme } from "@/hooks/connection";
 import { useCoinflowCardCheckoutMutation } from "@/utils/api";

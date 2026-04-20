@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@cartridge/ui";
+import { Button } from "@cartridge/controller-ui";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useState } from "react";
-import { ETH_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
+import { ETH_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { Call } from "starknet";
 
 export const ManualTransferEth = () => {

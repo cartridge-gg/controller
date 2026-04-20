@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Project,
   useAchievementsQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import { RawTrophy, Trophy, getSelectorFromTag } from "@/models";
 
 interface Response {

@@ -13,8 +13,8 @@ import {
   Spinner,
   WalletConnectColorIcon,
   LockIcon,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { forwardRef } from "react";
 
 interface SignupButtonProps extends React.ComponentProps<typeof Button> {

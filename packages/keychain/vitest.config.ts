@@ -73,7 +73,7 @@ export default defineConfig({
     server: {
       deps: {
         external: ["**/dojo_wasm_bg.wasm", "@dojoengine/torii-wasm", /\.wasm$/],
-        inline: ["@cartridge/ui", "@cartridge/controller-wasm"],
+        inline: ["@cartridge/controller-ui", "@cartridge/controller-wasm"],
       },
     },
     deps: {

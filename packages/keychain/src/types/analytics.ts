@@ -1,4 +1,4 @@
-import type { PostHogWrapper } from "@cartridge/ui/utils";
+import type { PostHogWrapper } from "@cartridge/controller-ui/utils";
 
 /**
  * Typed event catalog for PostHog analytics.

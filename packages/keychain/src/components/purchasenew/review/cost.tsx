@@ -14,7 +14,7 @@ import {
   StarknetIcon,
   Thumbnail,
   TokenSelectHeader,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ExternalPlatform, humanizeString } from "@cartridge/controller";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
 import type { Quote } from "@/context";

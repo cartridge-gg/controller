@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useUrlTxns } from "@/hooks/transaction";
 import { Transaction, TransactionState } from "@/components/Transaction";
-import { LayoutContent, ClockIcon, HeaderInner } from "@cartridge/ui";
+import {
+  LayoutContent,
+  ClockIcon,
+  HeaderInner,
+} from "@cartridge/controller-ui";
 
 export function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);

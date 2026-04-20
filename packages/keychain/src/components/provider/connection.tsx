@@ -7,7 +7,7 @@ import {
   ExternalWalletType,
   LocationGateOptions,
 } from "@cartridge/controller";
-import { ControllerTheme } from "@cartridge/ui";
+import { ControllerTheme } from "@cartridge/controller-ui";
 import { createContext } from "react";
 import { SemVer } from "semver";
 

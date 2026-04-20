@@ -28,16 +28,17 @@ import {
   loadConfig,
   Policies,
 } from "@cartridge/presets";
-import { useThemeEffect } from "@cartridge/ui";
+import { useThemeEffect } from "@cartridge/controller-ui";
 import {
-  ETH_CONTRACT_ADDRESS,
   isIframe,
   normalizeOrigin,
+  ETH_CONTRACT_ADDRESS,
   STRK_CONTRACT_ADDRESS,
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
-} from "@cartridge/ui/utils";
-import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
+  LORDS_CONTRACT_ADDRESS,
+} from "@cartridge/controller-ui/utils";
+import { Eip191Credentials } from "@cartridge/controller-ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import {
   useCallback,
@@ -49,17 +50,13 @@ import {
 } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SemVer } from "semver";
-import { constants, getChecksumAddress, RpcProvider } from "starknet";
+import { constants, RpcProvider } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import {
   storeReferral,
   lookupReferrerAddress,
   isValidFelt,
 } from "@/utils/referral";
-
-const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
-  "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
-);
 
 const TOKEN_ADDRESSES: Record<Token, string> = {
   eth: ETH_CONTRACT_ADDRESS,

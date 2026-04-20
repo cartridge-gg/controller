@@ -1,10 +1,14 @@
 export { Consent } from "./consent";
 
 import { PageLoading } from "@/components/Loading";
-import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
+import { useMeQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useEffect } from "react";
 import { Outlet, useSearchParams } from "react-router-dom";
-import { CheckIcon, HeaderInner, LayoutContent } from "@cartridge/ui";
+import {
+  CheckIcon,
+  HeaderInner,
+  LayoutContent,
+} from "@cartridge/controller-ui";
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 

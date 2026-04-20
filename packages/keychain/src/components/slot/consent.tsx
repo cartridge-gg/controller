@@ -1,4 +1,9 @@
-import { LayoutFooter, Button, Checkbox, HeaderInner } from "@cartridge/ui";
+import {
+  LayoutFooter,
+  Button,
+  Checkbox,
+  HeaderInner,
+} from "@cartridge/controller-ui";
 import { useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 

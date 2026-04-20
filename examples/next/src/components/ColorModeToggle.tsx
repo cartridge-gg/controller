@@ -10,7 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
 export function ColorModeToggle() {
   const { setTheme } = useTheme();

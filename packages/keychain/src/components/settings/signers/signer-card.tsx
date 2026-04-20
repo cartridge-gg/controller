@@ -21,9 +21,9 @@ import {
   TouchIcon,
   TrashIcon,
   WalletConnectIcon,
-} from "@cartridge/ui";
-import { cn, formatAddress } from "@cartridge/ui/utils";
-import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui";
+import { cn, formatAddress } from "@cartridge/controller-ui/utils";
+import { CredentialMetadata } from "@cartridge/controller-ui/utils/api/cartridge";
 import React, { useEffect, useState } from "react";
 import { credentialToAddress, credentialToAuth } from "../../connect/types";
 export interface Signer {

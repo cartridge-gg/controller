@@ -4,12 +4,12 @@ import {
   useCreditBalance,
   useERC20Balance,
   UseERC20BalanceResponse,
-} from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui/utils";
 import {
   useBalanceQuery,
   useBalancesQuery,
   usePriceByAddressesQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import makeBlockie from "ethereum-blockies-base64";
 import { useAccount } from "./account";
 import { useConnection } from "@/hooks/connection";

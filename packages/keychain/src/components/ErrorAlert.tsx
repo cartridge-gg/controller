@@ -20,8 +20,8 @@ import {
   ErrorAlertIcon,
   ErrorAlertIconProps,
   Separator,
-} from "@cartridge/ui";
-import { cn, formatAddress } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn, formatAddress } from "@cartridge/controller-ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import React, {
   ReactElement,

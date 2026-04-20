@@ -18,7 +18,7 @@ import {
   SignerInput,
   SignerType,
   WebauthnCredentials,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";

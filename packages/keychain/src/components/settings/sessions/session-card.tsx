@@ -6,8 +6,8 @@ import {
   MobileIcon,
   ShapesIcon,
   TrashIcon,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import React, { useState } from "react";
 
 export interface Session {

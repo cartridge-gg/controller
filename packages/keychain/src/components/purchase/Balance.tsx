@@ -10,8 +10,8 @@ import {
   CardTitle,
   TokenCard,
   TokenSummary,
-} from "@cartridge/ui";
-import { useCreditBalance } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { useCreditBalance } from "@cartridge/controller-ui/utils";
 
 export enum BalanceType {
   CREDITS = "credits",

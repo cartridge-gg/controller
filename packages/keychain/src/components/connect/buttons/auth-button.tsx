@@ -16,8 +16,8 @@ import {
   RabbyIcon,
   Spinner,
   WalletConnectIcon,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { forwardRef, useMemo } from "react";
 import { useUsernameValidation } from "../create/useUsernameValidation";
 import { credentialToAuth } from "../types";

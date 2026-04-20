@@ -13,8 +13,8 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { useState, useEffect } from "react";
 
 type MethodWithEnabled = Method & { authorized?: boolean; id?: string };

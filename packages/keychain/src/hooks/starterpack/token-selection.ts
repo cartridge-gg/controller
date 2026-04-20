@@ -2,9 +2,9 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { erc20Metadata, ExternalPlatform } from "@cartridge/controller";
 import { num, getChecksumAddress, constants } from "starknet";
 import {
-  ERC20 as ERC20Contract,
+  ERC20Contract,
   USDC_CONTRACT_ADDRESS,
-} from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui/utils";
 import {
   DEFAULT_TOKENS,
   type ERC20Metadata,

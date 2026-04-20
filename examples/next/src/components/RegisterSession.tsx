@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount } from "@starknet-react/core";
-import { Button } from "@cartridge/ui";
+import { Button } from "@cartridge/controller-ui";
 import { ec, stark } from "starknet";
 import { useCallback, useState } from "react";
 

@@ -1,0 +1,16 @@
+query Metrics($projects: [MetricsProject!]!) {
+  metrics(projects: $projects) {
+    items {
+      meta {
+        project
+        error
+        count
+      }
+      metrics {
+        transactionDate
+        transactionCount
+        callerCount
+      }
+    }
+  }
+}

@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 
 const currencies = [
   {

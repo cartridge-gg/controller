@@ -1,0 +1,19 @@
+query Sessions($where: SessionWhereInput!) {
+  sessions(where: $where) {
+    edges {
+      node {
+        id
+        appID
+        chainID
+        isRevoked
+        expiresAt
+        createdAt
+        updatedAt
+        metadata {
+          os
+          browser
+        }
+      }
+    }
+  }
+}

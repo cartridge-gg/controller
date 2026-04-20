@@ -3,7 +3,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { Receiving } from "../receiving";
 import { ConfirmingTransaction } from "./confirming-transaction";
 import {

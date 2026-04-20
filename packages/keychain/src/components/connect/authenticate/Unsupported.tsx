@@ -1,4 +1,4 @@
-import { AlertIcon, HeaderInner } from "@cartridge/ui";
+import { AlertIcon, HeaderInner } from "@cartridge/controller-ui";
 
 export function Unsupported({ message }: { message: string }) {
   return (

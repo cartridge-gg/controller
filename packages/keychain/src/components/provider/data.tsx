@@ -4,12 +4,12 @@ import { DataContext } from "@/context/data";
 import {
   useActivitiesQuery,
   useTransfersQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
-import { getDate } from "@cartridge/ui/utils";
+import { getDate } from "@cartridge/controller-ui/utils";
 import makeBlockie from "ethereum-blockies-base64";
 import { useLocation } from "react-router-dom";
 

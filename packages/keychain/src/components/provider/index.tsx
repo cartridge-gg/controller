@@ -21,11 +21,11 @@ import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
 import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
 import { ToastProvider, StarterpackProviders } from "@/context";
-import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
-import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
+import { IndexerAPIProvider } from "@cartridge/controller-ui/utils/api/indexer";
+import { CartridgeAPIProvider } from "@cartridge/controller-ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
-import { SpinnerIcon } from "@cartridge/ui";
+import { SpinnerIcon } from "@cartridge/controller-ui";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
