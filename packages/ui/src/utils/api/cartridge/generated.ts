@@ -365,6 +365,14 @@ export type AchievementResult = {
   items: Array<AchievementItem>;
 };
 
+export type ActivePaymasterBudget = {
+  __typename?: 'ActivePaymasterBudget';
+  budget: Scalars['Int'];
+  budgetUnit: FeeUnit;
+  name: Scalars['String'];
+  spend: Scalars['Int'];
+};
+
 export type Activity = Node & {
   __typename?: 'Activity';
   account: Account;
@@ -1033,6 +1041,28 @@ export type CoinbaseAmount = {
   currency: Scalars['String'];
 };
 
+export type CoinbaseDateOfBirthInput = {
+  /** Day of month as a 2-digit string (e.g. "05", "15"). */
+  day: Scalars['String'];
+  /** Month as a 2-digit string (e.g. "01", "08"). */
+  month: Scalars['String'];
+  /** 4-digit year (e.g. "1990"). */
+  year: Scalars['String'];
+};
+
+/**
+ * Status of the user's Coinbase onramp limits upgrade. INELIGIBLE means the user
+ * does not currently meet Coinbase's criteria to request an upgrade (not an error).
+ */
+export enum CoinbaseLimitUpgradeStatus {
+  Active = 'ACTIVE',
+  Inactive = 'INACTIVE',
+  Ineligible = 'INELIGIBLE',
+  Pending = 'PENDING',
+  Resubmit = 'RESUBMIT',
+  Unrequested = 'UNREQUESTED'
+}
+
 export enum CoinbaseNetwork {
   Arbitrum = 'ARBITRUM',
   Base = 'BASE',
@@ -1050,6 +1080,55 @@ export type CoinbaseOnrampFee = {
   currency: Scalars['String'];
   /** The type of fee (FEE_TYPE_NETWORK or FEE_TYPE_EXCHANGE). */
   type: Scalars['String'];
+};
+
+/**
+ * A single Coinbase onramp limit. A value of "-1" for limit or remaining means
+ * unlimited — this applies to lifetime transactions after a successful upgrade.
+ */
+export type CoinbaseOnrampLimit = {
+  __typename?: 'CoinbaseOnrampLimit';
+  /** Currency code (e.g. "USD"). Absent for lifetime_transactions. */
+  currency?: Maybe<Scalars['String']>;
+  /** The maximum limit value as a string-encoded integer. "-1" means unlimited. */
+  limit: Scalars['String'];
+  /** The limit type (e.g. "weekly_spending" or "lifetime_transactions"). */
+  limitType: Scalars['String'];
+  /** How much of the limit remains. "-1" means unlimited. */
+  remaining: Scalars['String'];
+};
+
+/** What a given limit would become after a successful upgrade. */
+export type CoinbaseOnrampLimitUpgrade = {
+  __typename?: 'CoinbaseOnrampLimitUpgrade';
+  limitType: Scalars['String'];
+  maxUpgrade: Scalars['String'];
+};
+
+/**
+ * The user's current Coinbase onramp limits along with any available upgrade
+ * option. requiredFields and maxUpgrades are only populated when upgradeStatus is
+ * UNREQUESTED or RESUBMIT.
+ */
+export type CoinbaseOnrampLimits = {
+  __typename?: 'CoinbaseOnrampLimits';
+  /** The user's current limits as reported by Coinbase. */
+  limits: Array<CoinbaseOnrampLimit>;
+  /**
+   * The limits this user would receive after a successful upgrade. Populated
+   * only when an upgrade option is available.
+   */
+  maxUpgrades?: Maybe<Array<CoinbaseOnrampLimitUpgrade>>;
+  /**
+   * Identity fields Coinbase requires for a submission. Populated only for
+   * UNREQUESTED and RESUBMIT statuses.
+   */
+  requiredFields?: Maybe<Array<Scalars['String']>>;
+  /**
+   * Current upgrade status for this user. INELIGIBLE means Coinbase did not
+   * return a limitUpgradeOptions entry and the upgrade prompt should be hidden.
+   */
+  upgradeStatus: CoinbaseLimitUpgradeStatus;
 };
 
 export type CoinbaseOnrampOrder = {
@@ -3133,6 +3212,13 @@ export type Mutation = {
    */
   sendPhoneVerification: SendVerificationResponse;
   signDocument: Attestation;
+  /**
+   * Submit identity fields (SSN last 4, date of birth) to request an upgrade of
+   * the user's Coinbase onramp limits. Coinbase processes the submission
+   * asynchronously — clients should poll coinbaseOnrampLimits after calling this.
+   * Identity fields are submitted to Coinbase immediately and never persisted.
+   */
+  submitCoinbaseLimitsUpgrade: CoinbaseOnrampLimits;
   transfer: TransferResponse;
   transferDeployment: Scalars['Boolean'];
   updateDeployment: Deployment;
@@ -3413,6 +3499,11 @@ export type MutationSendPhoneVerificationArgs = {
 
 export type MutationSignDocumentArgs = {
   input: AttestationInput;
+};
+
+
+export type MutationSubmitCoinbaseLimitsUpgradeArgs = {
+  input: SubmitCoinbaseLimitsUpgradeInput;
 };
 
 
@@ -4560,9 +4651,16 @@ export type Query = {
   accountPrivate?: Maybe<AccountPrivate>;
   accounts?: Maybe<AccountConnection>;
   achievements: AchievementResult;
+  activePaymasterBudgets: Array<ActivePaymasterBudget>;
   activities: ActivityResult;
   balance: Balance;
   balances: BalanceConnection;
+  /**
+   * Get the authenticated user's current Coinbase onramp spending limits along
+   * with any available limits-upgrade option. Clients should only show the
+   * upgrade prompt when upgradeStatus is UNREQUESTED or RESUBMIT.
+   */
+  coinbaseOnrampLimits: CoinbaseOnrampLimits;
   /**
    * Get a specific Coinbase onramp order by its ID.
    * Queries the internal database for the current status.
@@ -6693,6 +6791,18 @@ export type StripeStarterpackQuoteInput = {
   referralGroup?: InputMaybe<Scalars['String']>;
   registryAddress: Scalars['String'];
   starterpackId: Scalars['String'];
+};
+
+/**
+ * Identity fields required by Coinbase to initiate or retry a limits upgrade.
+ * These fields are submitted to Coinbase and immediately discarded — they must
+ * not be persisted or logged anywhere.
+ */
+export type SubmitCoinbaseLimitsUpgradeInput = {
+  /** The user's date of birth. */
+  dateOfBirth: CoinbaseDateOfBirthInput;
+  /** Last 4 digits of the user's SSN. Must be exactly 4 numeric characters. */
+  ssnLast4: Scalars['String'];
 };
 
 export type Team = Node & {
