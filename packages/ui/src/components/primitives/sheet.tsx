@@ -5,6 +5,7 @@ import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { cva, type VariantProps } from "class-variance-authority";
 import { TimesIcon } from "@/components/icons";
 import { cn } from "@/utils";
+import { Thumbnail } from "@/index";
 
 const Sheet = SheetPrimitive.Root;
 
@@ -73,9 +74,13 @@ const SheetContent = React.forwardRef<
         >
           {children}
           {showClose && (
-            <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-background-200">
-              <TimesIcon size="xs" />
-              <span className="sr-only">Close</span>
+            <SheetPrimitive.Close className="absolute right-4 top-4">
+              <Thumbnail
+                className="bg-background-100 hover:bg-background-200"
+                size="lg"
+                icon={<TimesIcon size="default" />}
+                rounded
+              />
             </SheetPrimitive.Close>
           )}
         </SheetPrimitive.Content>
