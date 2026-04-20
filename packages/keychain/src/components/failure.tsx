@@ -1,4 +1,4 @@
-import { AlertIcon, ExternalIcon, HeaderInner } from "@cartridge/ui";
+import { AlertIcon, ExternalIcon, HeaderInner } from "@cartridge/controller-ui";
 import { CARTRIDGE_DISCORD_LINK } from "@/constants";
 import { Link } from "react-router-dom";
 

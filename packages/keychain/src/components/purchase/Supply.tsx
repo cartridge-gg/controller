@@ -1,4 +1,4 @@
-import { TagIcon } from "@cartridge/ui";
+import { TagIcon } from "@cartridge/controller-ui";
 
 export type SupplyProps = {
   amount: number;

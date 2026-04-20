@@ -2,7 +2,7 @@ import { useQuery } from "react-query";
 import { useConnection } from "@/hooks/connection";
 import { useMemo, useState } from "react";
 import { BigNumberish } from "starknet";
-import { WalletType } from "@cartridge/ui";
+import { WalletType } from "@cartridge/controller-ui";
 
 const ARGENT_ACCOUNT_CLASS_HASHES: BigNumberish[] = [
   BigInt("0x036078334509b514626504edc9fb252328d1a240e4e948bef8d0c08dff45927f"),

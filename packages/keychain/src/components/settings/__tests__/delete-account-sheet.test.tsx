@@ -2,8 +2,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { DeleteAccountSheet } from "../delete-account-sheet";
 
-// Mock @cartridge/ui components
-vi.mock("@cartridge/ui", () => ({
+// Mock @cartridge/controller-ui components
+vi.mock("@cartridge/controller-ui", () => ({
   AlertIcon: ({ ...props }: Record<string, unknown>) => (
     <span data-testid="alert-icon" {...props} />
   ),

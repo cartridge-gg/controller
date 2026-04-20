@@ -8,7 +8,7 @@ import {
   CoinbaseWalletColorIcon,
   ExternalIcon,
   cn,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useOnchainPurchaseContext } from "@/context";
 import { useNavigation } from "@/context";
 import {

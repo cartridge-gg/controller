@@ -8,7 +8,7 @@ import {
   Skeleton,
   GiftIcon,
   Thumbnail,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useCallback, useMemo } from "react";
 import {
   AllowArray,

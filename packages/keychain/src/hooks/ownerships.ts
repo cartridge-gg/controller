@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useOwnershipsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { useOwnershipsQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useConnection } from "@/hooks/connection";
 
 const LIMIT = 0;

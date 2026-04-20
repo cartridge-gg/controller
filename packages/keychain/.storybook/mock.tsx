@@ -1,6 +1,6 @@
 import Controller, { ResponseCodes } from "@cartridge/controller";
 import { defaultTheme, SessionPolicies } from "@cartridge/presets";
-import { useThemeEffect } from "@cartridge/ui";
+import { useThemeEffect } from "@cartridge/controller-ui";
 import { Parameters } from "@storybook/react";
 import React from "react";
 import { constants, RpcProvider } from "starknet";

@@ -1,0 +1,70 @@
+query Collectibles(
+  $projects: [String!]
+  $accountAddress: String!
+  $first: Int
+  $last: Int
+  $before: Cursor
+  $after: Cursor
+  $offset: Int
+  $limit: Int
+) {
+  collectibles(
+    projects: $projects
+    accountAddress: $accountAddress
+    first: $first
+    last: $last
+    before: $before
+    after: $after
+    offset: $offset
+    limit: $limit
+  ) {
+    edges {
+      node {
+        assets {
+          attributes
+          description
+          imageUrl
+          name
+          tokenId
+          amount
+          metadata
+        }
+        meta {
+          project
+          assetCount
+          contractAddress
+          imagePath
+          name
+        }
+      }
+    }
+  }
+}
+
+query Collectible(
+  $projects: [String!]!
+  $contractAddress: String!
+  $accountAddress: String!
+) {
+  collectible(
+    projects: $projects
+    contractAddress: $contractAddress
+    accountAddress: $accountAddress
+  ) {
+    assets {
+      attributes
+      description
+      imageUrl
+      name
+      tokenId
+      amount
+      metadata
+    }
+    meta {
+      assetCount
+      contractAddress
+      imagePath
+      name
+    }
+  }
+}

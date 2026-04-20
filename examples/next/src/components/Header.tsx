@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@cartridge/ui";
+import { Button } from "@cartridge/controller-ui";
 import ControllerConnector from "@cartridge/connector/controller";
 import {
   useAccount,

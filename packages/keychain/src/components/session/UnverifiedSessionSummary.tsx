@@ -5,7 +5,7 @@ import {
 } from "@/hooks/session";
 import { toArray } from "@cartridge/controller";
 import { useMemo } from "react";
-import { AlertIcon } from "@cartridge/ui";
+import { AlertIcon } from "@cartridge/controller-ui";
 import { AggregateCard } from "./AggregateCard";
 import { TokenConsent } from "../connect/token-consent";
 import { SpendingLimitCard } from "../connect/SpendingLimitCard";

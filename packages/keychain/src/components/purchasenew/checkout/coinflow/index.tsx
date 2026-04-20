@@ -6,7 +6,7 @@ import {
   LayoutContent,
   LayoutFooter,
   Spinner,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { CoinflowForm, type CoinflowFormHandle } from "./form";
 

@@ -1,4 +1,4 @@
-import { CloneIcon } from "@cartridge/ui";
+import { CloneIcon } from "@cartridge/controller-ui";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 

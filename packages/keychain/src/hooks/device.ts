@@ -1,5 +1,5 @@
-import { useMediaQuery } from "@cartridge/ui";
-import { isIframe } from "@cartridge/ui/utils";
+import { useMediaQuery } from "@cartridge/controller-ui";
+import { isIframe } from "@cartridge/controller-ui/utils";
 import { useEffect, useState } from "react";
 
 enum DeviceType {

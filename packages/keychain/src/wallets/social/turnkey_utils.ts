@@ -1,6 +1,6 @@
 import { IdToken } from "@auth0/auth0-react";
 import { AuthOption } from "@cartridge/controller";
-import { fetchApiCreator } from "@cartridge/ui/utils";
+import { fetchApiCreator } from "@cartridge/controller-ui/utils";
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { getIframePublicKey } from "./turnkey";

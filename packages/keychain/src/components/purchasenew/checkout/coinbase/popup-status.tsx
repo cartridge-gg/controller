@@ -7,7 +7,7 @@ import {
   LayoutFooter,
   SpinnerIcon,
   TimesIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { useNavigation, useOnchainPurchaseContext } from "@/context";
 import { CoinbaseOnrampStatus } from "@/utils/api";
 

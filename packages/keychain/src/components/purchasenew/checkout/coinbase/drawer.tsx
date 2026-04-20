@@ -7,7 +7,7 @@ import {
   SheetTitle,
   Thumbnail,
   TimesIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { CoinbaseCheckout } from "./index";
 
 interface CoinbaseDrawerProps {

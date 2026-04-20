@@ -50,8 +50,8 @@ export interface CoinbaseQuoteInput {
 const FALLBACK_POLL_INTERVAL_MS = 15_000;
 /** Fast poll interval after popup signals success (1 second) */
 const CONFIRMATION_POLL_INTERVAL_MS = 1_000;
-/** Timeout for the fast confirmation poll after popup reports success (15 seconds) */
-const CONFIRMATION_TIMEOUT_MS = 15_000;
+/** Timeout for the fast confirmation poll after popup reports success (90 seconds) */
+const CONFIRMATION_TIMEOUT_MS = 90_000;
 
 export interface UseCoinbaseOptions {
   onError?: (error: Error) => void;

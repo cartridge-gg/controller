@@ -1,6 +1,6 @@
 import { AuthOption } from "@cartridge/controller";
 import { Signer } from "@cartridge/controller-wasm";
-import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
+import { CredentialMetadata } from "@cartridge/controller-ui/utils/api/cartridge";
 
 export type FormInput = {
   username: string;

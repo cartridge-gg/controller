@@ -1,13 +1,13 @@
 import {
   ControllerQuery,
   CredentialMetadata,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 import { isCurrentSigner } from "@/utils/signers";
 import { JsRemoveSignerInput } from "@cartridge/controller-wasm";
-import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
+import { Button, PlusIcon, Skeleton } from "@cartridge/controller-ui";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
 import { SectionHeader } from "../section-header";

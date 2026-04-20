@@ -9,8 +9,8 @@ import {
   QuestToastOptions,
   MarketplaceToastOptions,
   CONTROLLER_TOAST_MESSAGE_TYPE,
-} from "@cartridge/ui";
-import { isIframe } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { isIframe } from "@cartridge/controller-ui/utils";
 import { toast as sonnerToast } from "sonner";
 
 interface ToastContextType {

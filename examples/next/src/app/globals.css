@@ -1,6 +1,6 @@
-@import "@cartridge/ui/dist/themes/default.css";
-@import "@cartridge/ui/dist/themes/dark.css";
-@import "@cartridge/ui/dist/themes/fonts.css";
+@import "@cartridge/controller-ui/dist/themes/default.css";
+@import "@cartridge/controller-ui/dist/themes/dark.css";
+@import "@cartridge/controller-ui/dist/themes/fonts.css";
 
 @tailwind base;
 @tailwind components;

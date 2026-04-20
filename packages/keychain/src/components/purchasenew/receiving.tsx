@@ -7,15 +7,10 @@ import {
   cn,
   Spinner,
   Thumbnail,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { ReceivingProps } from "./types";
 import { ItemType } from "@/context";
-
-// Helper function to format price display
-const formatPrice = (value: number | undefined, showPrice: boolean): string => {
-  if (!showPrice || !value) return "";
-  return `$${value.toFixed(2)}`;
-};
+import { formatUsdValue } from "@/utils/format-value";
 
 export function Receiving({
   title,
@@ -63,7 +58,11 @@ export function Receiving({
                 Logo={Logo}
                 title="Credits"
                 subTitle={item.value ? `${item.value} CREDITS` : "CREDITS"}
-                topic={formatPrice(item.value, showPrice)}
+                topic={
+                  showPrice && item.value
+                    ? formatUsdValue(item.value)
+                    : undefined
+                }
                 variant="default"
                 className={cn(
                   "pointer-events-none",
@@ -86,7 +85,11 @@ export function Receiving({
                 subTitle={
                   item.value ? `${item.value} ${item.title}` : item.title
                 }
-                topic={formatPrice(item.value, showPrice)}
+                topic={
+                  showPrice && item.value
+                    ? formatUsdValue(item.value)
+                    : undefined
+                }
                 variant="default"
                 className={cn(
                   "pointer-events-none",

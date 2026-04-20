@@ -4,11 +4,11 @@ import { useMemo, useState } from "react";
 import { ResponseCodes, toast } from "@cartridge/controller";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button } from "@cartridge/ui";
+import { Button } from "@cartridge/controller-ui";
 import {
   STRK_CONTRACT_ADDRESS,
   ETH_CONTRACT_ADDRESS,
-} from "./providers/StarknetProvider";
+} from "@cartridge/controller-ui/utils";
 
 export const BUNDLE_REGISTRY_MAINNET =
   "0x1a8516498b484f209aefbbf5af67765a2b1e3889fd00902811f18576a4616b0";

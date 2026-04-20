@@ -4,7 +4,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import type { Quote } from "@/context";
 import type { CoinbaseQuoteResult } from "@/hooks/starterpack";
 

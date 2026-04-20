@@ -28,7 +28,7 @@ import {
   SignerType,
   WebauthnCredentials,
   type ControllerQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import { shortString } from "starknet";
 import {

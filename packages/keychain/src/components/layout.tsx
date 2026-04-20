@@ -1,7 +1,7 @@
 import { NavigationHeader } from "@/components";
 import { LayoutBottomNav } from "@/components/bottom-nav";
 import { useConnection } from "@/hooks/connection";
-import { GearIcon, LayoutContainer } from "@cartridge/ui";
+import { GearIcon, LayoutContainer } from "@cartridge/controller-ui";
 import { useMemo } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 

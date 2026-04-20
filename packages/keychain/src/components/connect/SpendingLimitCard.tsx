@@ -8,7 +8,7 @@ import {
   cn,
   Skeleton,
   Thumbnail,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import {
   convertTokenAmountToUSD,
   formatBalance,

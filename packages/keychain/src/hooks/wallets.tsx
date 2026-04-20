@@ -7,7 +7,7 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "@cartridge/controller";
-import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
+import { CredentialMetadata } from "@cartridge/controller-ui/utils/api/cartridge";
 import { getAddress } from "ethers/address";
 import { ExternalWalletError } from "@/utils/errors";
 import React, {

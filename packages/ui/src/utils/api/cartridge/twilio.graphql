@@ -1,0 +1,29 @@
+mutation SendEmailVerification($input: SendEmailVerificationInput!) {
+  sendEmailVerification(input: $input) {
+    success
+    message
+  }
+}
+
+mutation SendPhoneVerification($input: SendPhoneVerificationInput!) {
+  sendPhoneVerification(input: $input) {
+    success
+    message
+  }
+}
+
+mutation VerifyEmail($input: VerifyEmailInput!) {
+  verifyEmail(input: $input) {
+    success
+    message
+    verifiedValue
+  }
+}
+
+mutation VerifyPhone($input: VerifyPhoneInput!) {
+  verifyPhone(input: $input) {
+    success
+    message
+    verifiedValue
+  }
+}

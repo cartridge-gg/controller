@@ -6,7 +6,7 @@ import {
   SheetTitle,
   Thumbnail,
   TimesIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { Verification } from "./index";
 
 interface VerificationDrawerProps {

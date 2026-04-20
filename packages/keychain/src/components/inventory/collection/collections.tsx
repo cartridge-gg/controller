@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { ERC1155, useCollections } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
-import { CollectibleCard, Skeleton } from "@cartridge/ui";
+import { CollectibleCard, Skeleton } from "@cartridge/controller-ui";
 import { useMemo } from "react";
 import { useControllerTheme } from "@/hooks/connection";
 

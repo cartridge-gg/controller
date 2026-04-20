@@ -2,11 +2,13 @@ import { useConnection } from "@/hooks/connection";
 import { getCallbacks } from "@/utils/connection/callbacks";
 import { ExecuteParams } from "@/utils/connection/execute";
 import { ResponseCodes } from "@cartridge/controller";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { useRouteParams, useRouteCompletion } from "@/hooks/route";
 import { useNavigation } from "@/context";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 
 function parseExecuteParams(searchParams: URLSearchParams): {
   params: ExecuteParams;
@@ -54,6 +56,16 @@ export function Execute() {
   const params = useRouteParams(parseExecuteParams);
   const handleCompletion = useRouteCompletion();
   const { navigateToRoot } = useNavigation();
+  const txStartTime = useRef(performance.now());
+
+  useEffect(() => {
+    if (params) {
+      captureAnalyticsEvent(posthog, "tx_requested", {
+        call_count: params.params.transactions?.length ?? 0,
+      });
+      txStartTime.current = performance.now();
+    }
+  }, [params]);
 
   // Execute has different cancel behavior - it resolves with ERROR instead of CANCELED
   useEffect(() => {
@@ -83,6 +95,10 @@ export function Execute() {
       transactions={params.params.transactions}
       executionError={params.params.error}
       onComplete={(transaction_hash) => {
+        captureAnalyticsEvent(posthog, "tx_submitted", {
+          duration_ms: Math.round(performance.now() - txStartTime.current),
+        });
+
         // Check if there's a returnTo URL parameter and navigate there
         const returnTo = searchParams.get("returnTo");
         if (returnTo) {
@@ -97,6 +113,11 @@ export function Execute() {
         }
       }}
       onError={(error) => {
+        captureAnalyticsEvent(posthog, "tx_failed", {
+          error_code: sanitizeErrorCode(error),
+          stage: "submission",
+        });
+
         if (params.resolve) {
           params.resolve({
             code: ResponseCodes.ERROR,

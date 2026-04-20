@@ -10,7 +10,7 @@ import {
   useStarterpackContext,
   useCreditPurchaseContext,
 } from "@/context";
-import { Input, Skeleton } from "@cartridge/ui";
+import { Input, Skeleton } from "@cartridge/controller-ui";
 import { useControllerTheme } from "@/hooks/connection";
 import { useCoinflowCardCheckoutMutation } from "@/utils/api";
 
@@ -18,7 +18,7 @@ const COINFLOW_PRIMARY_FALLBACK = "#fbcb4a";
 
 // Match Coinflow's iframe to the keychain Input component so the card
 // fields read as a single form with the surrounding inputs. Pulled from
-// @cartridge/ui's default theme + primitives/input.js variants.
+// @cartridge/controller-ui's default theme + primitives/input.js variants.
 const COINFLOW_THEME_BASE = {
   background: "#1e221f",
   backgroundAccent: "#242824",

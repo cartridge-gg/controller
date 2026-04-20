@@ -3,7 +3,7 @@ import {
   TokenCard,
   TokenSummary,
   TransferIcon,
-} from "@cartridge/ui";
+} from "@cartridge/controller-ui";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ControllerError } from "@/utils/connection";
 import { Call, FeeEstimate } from "starknet";
@@ -11,6 +11,7 @@ import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useSwapTransactions } from "@/components/swap/swap";
 import { TokenSwapData, useTokenSwapData } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
+import { formatTokenValue, formatUsdValue } from "@/utils/format-value";
 
 interface ConfirmSwapProps {
   onSubmit: (maxFee?: FeeEstimate) => Promise<void>;
@@ -36,15 +37,7 @@ export function ConfirmSwap({
   );
 
   const formatAmount = (token: TokenSwapData) => {
-    return `${token.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.symbol}`;
-  };
-
-  const formatValue = (token: TokenSwapData) => {
-    return !token.value
-      ? "$0.00"
-      : token.value < 0.01
-        ? "<$0.01"
-        : `~$${token.value.toFixed(2)}`;
+    return `${token.amount === "ALL" ? "ALL" : formatTokenValue(token.amount, 5, token.symbol)} ${token.symbol}`;
   };
 
   return (
@@ -61,7 +54,7 @@ export function ConfirmSwap({
         label: "Cost",
         contractAddress: token.address,
         amount: typeof token?.amount === "number" ? token.amount : 0,
-        usdValue: formatValue(token),
+        usdValue: formatUsdValue(token.value),
         decimals: 2,
       }))}
     >
@@ -80,7 +73,7 @@ export function ConfirmSwap({
                   amount={formatAmount(token)}
                   value={
                     typeof token.value === "number"
-                      ? formatValue(token)
+                      ? formatUsdValue(token.value)
                       : undefined
                   }
                   clickable={false}
@@ -96,7 +89,7 @@ export function ConfirmSwap({
                   amount={formatAmount(token)}
                   value={
                     typeof token.value === "number"
-                      ? formatValue(token)
+                      ? formatUsdValue(token.value)
                       : undefined
                   }
                   clickable={false}

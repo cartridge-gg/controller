@@ -17,8 +17,8 @@ import {
   SheetFooter,
   SheetTrigger,
   SignOutIcon,
-} from "@cartridge/ui";
-import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
+} from "@cartridge/controller-ui";
+import { useControllerQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useDeleteMeMutation } from "@/utils/api";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";

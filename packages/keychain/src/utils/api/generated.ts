@@ -370,6 +370,14 @@ export type AchievementResult = {
   items: Array<AchievementItem>;
 };
 
+export type ActivePaymasterBudget = {
+  __typename?: "ActivePaymasterBudget";
+  budget: Scalars["Int"];
+  budgetUnit: FeeUnit;
+  name: Scalars["String"];
+  spend: Scalars["Int"];
+};
+
 export type Activity = Node & {
   __typename?: "Activity";
   account: Account;
@@ -4590,6 +4598,7 @@ export type Query = {
   accountPrivate?: Maybe<AccountPrivate>;
   accounts?: Maybe<AccountConnection>;
   achievements: AchievementResult;
+  activePaymasterBudgets: Array<ActivePaymasterBudget>;
   activities: ActivityResult;
   balance: Balance;
   balances: BalanceConnection;

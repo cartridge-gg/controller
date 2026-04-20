@@ -10,7 +10,7 @@ export {
 export { Token } from "./token";
 export { SendToken } from "./token/send";
 
-import { LayoutContent } from "@cartridge/ui";
+import { LayoutContent } from "@cartridge/controller-ui";
 import { Collections } from "./collection";
 import { Tokens } from "./token";
 

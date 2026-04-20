@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@cartridge/ui";
+import { Button } from "@cartridge/controller-ui";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useState } from "react";
-import { STRK_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
+import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 
 export const Transfer = () => {
   const [submitted, setSubmitted] = useState<boolean>(false);

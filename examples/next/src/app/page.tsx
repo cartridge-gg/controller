@@ -15,7 +15,7 @@ import { Transfer } from "components/Transfer";
 import { Swap } from "components/Swap";
 import { Starterpack } from "components/Starterpack";
 import { UpdateSession } from "components/UpdateSession";
-import { ControllerToaster } from "@cartridge/ui";
+import { ControllerToaster } from "@cartridge/controller-ui";
 
 const Home: FC = () => {
   return (

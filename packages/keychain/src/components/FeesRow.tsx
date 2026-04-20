@@ -6,8 +6,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
   Spinner,
-} from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+} from "@cartridge/controller-ui";
+import { cn } from "@cartridge/controller-ui/utils";
 import { type Token } from "@/hooks/token";
 import React from "react";
 
