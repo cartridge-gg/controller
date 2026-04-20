@@ -468,9 +468,15 @@ export const OnchainPurchaseProvider = ({
     return (Number(usdcBaseUnits) / 1_000_000).toFixed(6);
   }, [onchainDetails, selectedToken, convertedPrice, quantity]);
 
-  // Fetch Coinbase quote when Apple Pay is selected or USDC amount changes
+  // Fetch Coinbase quote when Apple Pay is selected or USDC amount changes.
+  // Skip when below Coinbase's Apple Pay minimum — the auto-bump effect will
+  // raise the quantity shortly and we'll retrigger with a valid amount.
+  // Firing the doomed request here only produces a lingering error toast.
   useEffect(() => {
     if (!isApplePaySelected || !applePayUsdcAmount) {
+      return;
+    }
+    if (Number(applePayUsdcAmount) < COINBASE_APPLE_PAY_MIN_USD) {
       return;
     }
 
