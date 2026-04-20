@@ -39,7 +39,11 @@ export type {
   UseTokenFallbackReturn,
 } from "./token-fallback";
 
-export { useCoinbase, exceedsLimit } from "./coinbase";
+export {
+  useCoinbase,
+  exceedsLimit,
+  COINBASE_APPLE_PAY_MIN_USD,
+} from "./coinbase";
 export type {
   CreateOrderInput,
   UseCoinbaseOptions,

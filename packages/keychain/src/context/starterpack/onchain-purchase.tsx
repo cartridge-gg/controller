@@ -32,6 +32,7 @@ import {
   useLayerswap,
   useTokenSelection,
   useCoinbase,
+  COINBASE_APPLE_PAY_MIN_USD,
   type TokenOption,
   type CoinbaseOrderResult,
   type CoinbaseTransactionResult,
@@ -68,6 +69,7 @@ export interface OnchainPurchaseContextType {
   setSelectedToken: (token: TokenOption | undefined) => void;
   convertedPrice: {
     amount: bigint;
+    quantity: number;
     tokenMetadata: { symbol: string; decimals: number };
   } | null;
   swapQuote: SwapQuote | null;
@@ -102,6 +104,8 @@ export interface OnchainPurchaseContextType {
   popupClosed: boolean;
   paymentSuccess: boolean;
   coinbaseLsSwapId: string | undefined;
+  /** Quantity we auto-bumped to so Apple Pay's per-transaction minimum is met. Undefined when no bump is active. */
+  applePayMinQuantity: number | undefined;
 
   // Coinbase limits-upgrade state
   coinbaseLimits: CoinbaseLimitsResult | undefined;
@@ -170,8 +174,13 @@ export const OnchainPurchaseProvider = ({
   );
 
   // Compose hooks
-  const { quantity, incrementQuantity, decrementQuantity, resetQuantity } =
-    useQuantity();
+  const {
+    quantity,
+    setQuantity,
+    incrementQuantity,
+    decrementQuantity,
+    resetQuantity,
+  } = useQuantity();
 
   const {
     selectedWallet,
@@ -278,6 +287,9 @@ export const OnchainPurchaseProvider = ({
   const [isCoinflowSelected, setIsCoinflowSelected] = useState(false);
   const [coinbaseLsSwapId, setCoinbaseLsSwapId] = useState<
     string | undefined
+  >();
+  const [applePayMinQuantity, setApplePayMinQuantity] = useState<
+    number | undefined
   >();
   const {
     orderId,
@@ -400,6 +412,37 @@ export const OnchainPurchaseProvider = ({
 
     setRequestedAmount(Number(convertedPrice.amount));
   }, [selectedPlatform, convertedPrice, setRequestedAmount]);
+
+  // Apple Pay has a per-transaction minimum ($1.86). If the starterpack's
+  // unit cost in USDC is below that, bump the quantity so the total clears
+  // the minimum and surface it to the user via applePayMinQuantity.
+  useEffect(() => {
+    if (!isApplePaySelected) {
+      if (applePayMinQuantity !== undefined) setApplePayMinQuantity(undefined);
+      return;
+    }
+    if (!convertedPrice || convertedPrice.quantity !== quantity) return;
+
+    const totalUsdc =
+      Number(convertedPrice.amount) /
+      10 ** convertedPrice.tokenMetadata.decimals;
+    const unitUsdc = totalUsdc / quantity;
+    if (!Number.isFinite(unitUsdc) || unitUsdc <= 0) return;
+
+    const requiredQuantity = Math.ceil(COINBASE_APPLE_PAY_MIN_USD / unitUsdc);
+    if (quantity < requiredQuantity) {
+      setQuantity(requiredQuantity);
+      setApplePayMinQuantity(requiredQuantity);
+    } else if (applePayMinQuantity !== undefined) {
+      setApplePayMinQuantity(undefined);
+    }
+  }, [
+    isApplePaySelected,
+    convertedPrice,
+    quantity,
+    setQuantity,
+    applePayMinQuantity,
+  ]);
 
   // USDC amount to onramp via Coinbase Apple Pay.
   //
@@ -714,6 +757,7 @@ export const OnchainPurchaseProvider = ({
     popupClosed,
     paymentSuccess,
     coinbaseLsSwapId,
+    applePayMinQuantity,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,

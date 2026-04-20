@@ -72,6 +72,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     popupClosed: false,
     paymentSuccess: false,
     coinbaseLsSwapId: undefined,
+    applePayMinQuantity: undefined,
     getTransactions: async () => [],
     coinbaseLimits: undefined,
     isFetchingCoinbaseLimits: false,
