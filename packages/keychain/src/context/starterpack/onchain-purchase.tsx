@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   ReactNode,
 } from "react";
 import { useLocation } from "react-router-dom";
@@ -400,26 +401,41 @@ export const OnchainPurchaseProvider = ({
     setRequestedAmount(Number(convertedPrice.amount));
   }, [selectedPlatform, convertedPrice, setRequestedAmount]);
 
-  // Fetch Coinbase quote when Apple Pay is selected or quantity changes
+  // USDC amount to onramp via Coinbase Apple Pay.
+  //
+  // For Apple Pay the token selector auto-picks USDC, so convertedPrice.amount is
+  // the USDC equivalent of the starterpack (from a live Ekubo quote when the
+  // registry's paymentToken is not USDC, otherwise it's just the USDC totalCost).
+  // When a swap is required we add a 2% buffer so the on-chain swap — which runs
+  // minutes later against a fresh quote — has enough USDC after price drift.
+  const applePayUsdcAmount = useMemo<string | undefined>(() => {
+    if (!onchainDetails?.quote || !selectedToken || !convertedPrice) {
+      return undefined;
+    }
+    if (convertedPrice.quantity !== quantity) {
+      return undefined;
+    }
+
+    const needsSwap =
+      num.toHex(selectedToken.address) !==
+      num.toHex(onchainDetails.quote.paymentToken);
+    const usdcBaseUnits = needsSwap
+      ? (convertedPrice.amount * 102n) / 100n
+      : convertedPrice.amount;
+    return (Number(usdcBaseUnits) / 1_000_000).toFixed(6);
+  }, [onchainDetails, selectedToken, convertedPrice, quantity]);
+
+  // Fetch Coinbase quote when Apple Pay is selected or USDC amount changes
   useEffect(() => {
-    if (!isApplePaySelected || !onchainDetails?.quote) {
+    if (!isApplePaySelected || !applePayUsdcAmount) {
       return;
     }
 
-    const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
-    const purchaseUSDCAmount = (Number(purchaseAmount) / 1_000_000).toFixed(6);
-
     getCoinbaseQuote({
-      purchaseUSDCAmount,
+      purchaseUSDCAmount: applePayUsdcAmount,
       sandbox: !isMainnet,
     });
-  }, [
-    isApplePaySelected,
-    onchainDetails,
-    quantity,
-    isMainnet,
-    getCoinbaseQuote,
-  ]);
+  }, [isApplePaySelected, applePayUsdcAmount, isMainnet, getCoinbaseQuote]);
 
   const onOnchainPurchase = useCallback(async () => {
     if (!controller || !starterpackDetails || !registryAddress) return;
@@ -630,14 +646,15 @@ export const OnchainPurchaseProvider = ({
       if (!onchainDetails?.quote) {
         throw new Error("Quote not loaded yet");
       }
+      if (!applePayUsdcAmount) {
+        throw new Error("USDC pricing not ready");
+      }
 
       const force = opts?.force ?? false;
       if (isCreatingOrder || (paymentLink && !force)) return;
 
-      const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
-
       const order = await createCoinbaseOrder({
-        purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
+        purchaseUSDCAmount: applePayUsdcAmount,
       });
 
       if (order?.layerswapPayment?.swapId) {
@@ -648,7 +665,7 @@ export const OnchainPurchaseProvider = ({
     },
     [
       onchainDetails,
-      quantity,
+      applePayUsdcAmount,
       isCreatingOrder,
       paymentLink,
       createCoinbaseOrder,
