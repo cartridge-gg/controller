@@ -37,6 +37,9 @@ export const LIMIT_TYPE_LIFETIME_TRANSACTIONS = "lifetime_transactions";
 /** Sentinel for unlimited limit / remaining values. */
 export const UNLIMITED_SENTINEL = "-1";
 
+/** Coinbase's minimum USD amount for an Apple Pay onramp purchase. */
+export const COINBASE_APPLE_PAY_MIN_USD = 1.86;
+
 export interface CreateOrderInput {
   purchaseUSDCAmount: string;
 }

@@ -1,11 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 import { num, uint256 } from "starknet";
-import { fetchSwapQuote } from "@/utils/ekubo";
+import { fetchSwapQuote, USDC_ADDRESSES, USDCE_ADDRESSES } from "@/utils/ekubo";
 import { isOnchainStarterpack } from "@/context/starterpack/types";
 import type { OnchainStarterpackDetails } from "@/context/starterpack/types";
 import type { TokenOption } from "./token-selection";
 import type { ExternalPlatform } from "@cartridge/controller";
 import Controller from "@/utils/controller";
+
+/**
+ * USDC and USDC.e are 1:1 pegged stablecoins with the same decimals, so swap
+ * quotes between them are wasted Ekubo requests. Treat the pair as equivalent
+ * when estimating how much of a fallback candidate the user would need.
+ */
+function isUsdcVariantPair(a: string, b: string, chainId: string): boolean {
+  const usdc = USDC_ADDRESSES[chainId];
+  const usdce = USDCE_ADDRESSES[chainId];
+  if (!usdc || !usdce) return false;
+  const variants = new Set([num.toHex(usdc), num.toHex(usdce)]);
+  return variants.has(num.toHex(a)) && variants.has(num.toHex(b));
+}
 
 export interface UseTokenFallbackOptions {
   controller: Controller | undefined;
@@ -107,60 +120,68 @@ export function useTokenFallback({
 
     const checkFallbacks = async () => {
       setIsCheckingFallback(true);
+      try {
+        const candidates = availableTokens.filter(
+          (token) => token.address !== selectedToken.address,
+        );
 
-      const candidates = availableTokens.filter(
-        (token) => token.address !== selectedToken.address,
-      );
+        const ownerAddress = controller.address();
+        const chainId = controller.chainId();
+        const totalCost = quote.totalCost * BigInt(quantity);
 
-      const ownerAddress = controller.address();
-      const totalCost = quote.totalCost * BigInt(quantity);
+        for (const candidate of candidates) {
+          if (abortController.signal.aborted) return;
 
-      for (const candidate of candidates) {
-        if (abortController.signal.aborted) return;
+          try {
+            const isPaymentToken =
+              num.toHex(candidate.address) === num.toHex(quote.paymentToken);
 
-        try {
-          const isPaymentToken =
-            num.toHex(candidate.address) === num.toHex(quote.paymentToken);
+            let requiredAmount: bigint;
 
-          let requiredAmount: bigint;
+            if (
+              isPaymentToken ||
+              isUsdcVariantPair(candidate.address, quote.paymentToken, chainId)
+            ) {
+              // Same token or USDC ↔ USDC.e (1:1 pegged); no Ekubo quote needed.
+              requiredAmount = totalCost;
+            } else {
+              const swapResult = await fetchSwapQuote(
+                totalCost,
+                quote.paymentToken,
+                candidate.address,
+                chainId,
+                abortController.signal,
+              );
+              requiredAmount = swapResult.total;
+            }
 
-          if (isPaymentToken) {
-            requiredAmount = totalCost;
-          } else {
-            const swapResult = await fetchSwapQuote(
-              totalCost,
-              quote.paymentToken,
+            if (abortController.signal.aborted) return;
+
+            const balance = await fetchBalance(
+              controller,
               candidate.address,
-              controller.chainId(),
-              abortController.signal,
+              ownerAddress,
             );
-            requiredAmount = swapResult.total;
+
+            if (abortController.signal.aborted) return;
+
+            if (balance !== null && balance >= requiredAmount) {
+              setSelectedToken(candidate);
+              return;
+            }
+          } catch (error) {
+            console.warn(
+              `Fallback check failed for ${candidate.symbol}:`,
+              error,
+            );
+            continue;
           }
-
-          if (abortController.signal.aborted) return;
-
-          const balance = await fetchBalance(
-            controller,
-            candidate.address,
-            ownerAddress,
-          );
-
-          if (abortController.signal.aborted) return;
-
-          if (balance !== null && balance >= requiredAmount) {
-            setSelectedToken(candidate);
-            setIsCheckingFallback(false);
-            return;
-          }
-        } catch (error) {
-          console.warn(`Fallback check failed for ${candidate.symbol}:`, error);
-          continue;
         }
+      } finally {
+        // Always clear the loading flag, even on abort / early return, so the
+        // Buy button doesn't stick in a spinning state.
+        setIsCheckingFallback(false);
       }
-
-      if (abortController.signal.aborted) return;
-
-      setIsCheckingFallback(false);
     };
 
     checkFallbacks();
