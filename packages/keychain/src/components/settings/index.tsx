@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 import { processControllerQuery } from "@/utils/signers";
 import {
@@ -32,6 +31,7 @@ import { SectionHeader } from "./section-header";
 import { SessionsSection } from "./sessions/sessions-section";
 import { SignersSection } from "./signers/signers-section";
 import { ConnectionsSection } from "./connections/connections-section";
+import { RecoveryAccountSection } from "./recovery/recovery-section";
 import { useFeature } from "@/hooks/features";
 
 const registeredAccounts: RegisteredAccount[] = [
@@ -43,7 +43,6 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
-  const { navigate } = useNavigation();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const deleteMe = useDeleteMeMutation();
   const isRegisteredAccountsEnabled = useFeature("registered-accounts");
@@ -90,23 +89,7 @@ export function Settings() {
 
         <ConnectionsSection />
 
-        <section className="space-y-4">
-          <SectionHeader
-            title="Recovery Accounts"
-            description="Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
-          />
-          <Button
-            type="button"
-            variant="outline"
-            className="py-2.5 px-3 text-foreground-300 gap-1"
-            onClick={() => navigate("/settings/recovery")}
-          >
-            <PlusIcon size="sm" variant="line" />
-            <span className="normal-case font-normal font-sans text-sm">
-              Add Recovery Account
-            </span>
-          </Button>
-        </section>
+        <RecoveryAccountSection />
 
         {/* {featureFlags.delegate && (
           <section className="space-y-4">
