@@ -17,7 +17,8 @@ export type Feature =
   | "apple-pay-support"
   | "coinflow-support"
   | "sms"
-  | "registered-accounts";
+  | "registered-accounts"
+  | "recovery-accounts";
 
 // --- Helper Functions ---
 
