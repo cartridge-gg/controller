@@ -46,6 +46,7 @@ export function Settings() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const deleteMe = useDeleteMeMutation();
   const isRegisteredAccountsEnabled = useFeature("registered-accounts");
+  const isRecoveryAccountsEnabled = useFeature("recovery-accounts");
 
   const handleDeleteAccount = useCallback(async () => {
     const result = await deleteMe.mutateAsync({});
@@ -89,7 +90,7 @@ export function Settings() {
 
         <ConnectionsSection />
 
-        <RecoveryAccountSection />
+        {isRecoveryAccountsEnabled && <RecoveryAccountSection />}
 
         {/* {featureFlags.delegate && (
           <section className="space-y-4">
