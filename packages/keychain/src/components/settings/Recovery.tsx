@@ -38,7 +38,9 @@ export function Recovery() {
       },
     ];
 
-    const url = createExecuteUrl(transactions);
+    const url = createExecuteUrl(transactions, {
+      returnTo: "/settings",
+    });
     navigate(url, { replace: true });
   }, [controller, externalOwnerAddress, navigate]);
 

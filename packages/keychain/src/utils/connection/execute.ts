@@ -41,6 +41,7 @@ export function createExecuteUrl(
     resolve?: (res: InvokeFunctionResponse | ConnectError) => void;
     reject?: (reason?: unknown) => void;
     onCancel?: () => void;
+    returnTo?: string;
   } = {},
 ): string {
   const id = generateCallbackId();
@@ -63,6 +64,10 @@ export function createExecuteUrl(
   if (options.error) {
     const errorJson = JSON.stringify(options.error);
     url += `&error=${encodeURIComponent(errorJson)}`;
+  }
+
+  if (options.returnTo) {
+    url += `&returnTo=${encodeURIComponent(options.returnTo)}`;
   }
 
   return url;
