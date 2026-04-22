@@ -21,6 +21,7 @@ import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
 import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
 import { ToastProvider, StarterpackProviders } from "@/context";
+import { DrawerProvider } from "@/context/drawer";
 import { IndexerAPIProvider } from "@cartridge/controller-ui/utils/api/indexer";
 import { CartridgeAPIProvider } from "@cartridge/controller-ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
@@ -101,7 +102,9 @@ export function Provider({ children }: PropsWithChildren) {
                                     >
                                       <ProfileDataProvider>
                                         <StarterpackProviders>
-                                          {body}
+                                          <DrawerProvider>
+                                            {body}
+                                          </DrawerProvider>
                                         </StarterpackProviders>
                                       </ProfileDataProvider>
                                     </MarketplaceClientProvider>
