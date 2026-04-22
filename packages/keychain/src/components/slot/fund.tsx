@@ -32,26 +32,24 @@ const SLOT_FUNDING_DISABLED: boolean = true;
 export function Fund() {
   if (SLOT_FUNDING_DISABLED) {
     return (
-      <HeaderInner
-        variant="expanded"
-        Icon={AlertIcon}
-        title="Slot Funding Temporarily Unavailable"
-        hideIcon
-        description={
-          <>
+      <LayoutContent className="flex flex-1 flex-col items-center justify-center gap-6 py-10 text-center">
+        <AlertIcon size="3xl" className="text-foreground-400" />
+        <div className="flex flex-col gap-2">
+          <h2 className="text-lg font-semibold text-foreground-100">
+            Slot Funding Temporarily Unavailable
+          </h2>
+          <p className="text-sm text-foreground-300 max-w-sm mx-auto">
             Slot funding is currently out of order. To top up your paymasters,
-            please reach out in the Cartridge support channel on{" "}
-            <Link
-              to={CARTRIDGE_DISCORD_LINK}
-              target="_blank"
-              className="inline-flex items-center gap-1 hover:underline text-foreground-200 font-semibold"
-            >
-              Discord
-              <ExternalIcon size="sm" />
-            </Link>
-          </>
-        }
-      />
+            please reach out in the Cartridge support channel on Discord.
+          </p>
+        </div>
+        <Link to={CARTRIDGE_DISCORD_LINK} target="_blank">
+          <Button variant="secondary">
+            Contact Support on Discord
+            <ExternalIcon size="sm" />
+          </Button>
+        </Link>
+      </LayoutContent>
     );
   }
 
