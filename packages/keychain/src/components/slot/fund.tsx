@@ -1,13 +1,15 @@
 import { useEffect, useState, useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { Purchase, PurchaseType } from "../purchase";
 import {
+  AlertIcon,
   Button,
   Card,
   CardHeader,
   CardTitle,
   CheckIcon,
+  ExternalIcon,
   HeaderInner,
   LayoutContent,
   LayoutFooter,
@@ -17,6 +19,7 @@ import {
 import { Team, Teams } from "./teams";
 import { formatBalance } from "@/hooks/tokens";
 import { useNavigation } from "@/context/navigation";
+import { CARTRIDGE_DISCORD_LINK } from "@/constants";
 
 enum FundState {
   SELECT_TEAM,
@@ -24,7 +27,38 @@ enum FundState {
   SUCCESS,
 }
 
+const SLOT_FUNDING_DISABLED: boolean = true;
+
 export function Fund() {
+  if (SLOT_FUNDING_DISABLED) {
+    return (
+      <HeaderInner
+        variant="expanded"
+        Icon={AlertIcon}
+        title="Slot Funding Temporarily Unavailable"
+        hideIcon
+        description={
+          <>
+            Slot funding is currently out of order. To top up your paymasters,
+            please reach out in the Cartridge support channel on{" "}
+            <Link
+              to={CARTRIDGE_DISCORD_LINK}
+              target="_blank"
+              className="inline-flex items-center gap-1 hover:underline text-foreground-200 font-semibold"
+            >
+              Discord
+              <ExternalIcon size="sm" />
+            </Link>
+          </>
+        }
+      />
+    );
+  }
+
+  return <FundInner />;
+}
+
+function FundInner() {
   const { navigate } = useNavigation();
   const { pathname } = useLocation();
   const [state, setState] = useState<FundState>(FundState.SELECT_TEAM);
