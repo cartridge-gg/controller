@@ -13,7 +13,8 @@ import {
 export const BUNDLE_REGISTRY_MAINNET =
   "0x1a8516498b484f209aefbbf5af67765a2b1e3889fd00902811f18576a4616b0";
 export const BUNDLE_REGISTRY_SEPOLIA =
-  "0x3110295929fc665972ae2ea4b99d5fa57547aa56d140dc73a7e85ddcaf5eaf1";
+  "0x290c4a02520e83373acbf2f7ffe461cd92277e50a07a4eec919fad680020898"; // USDC
+  // "0x3110295929fc665972ae2ea4b99d5fa57547aa56d140dc73a7e85ddcaf5eaf1"; // USDC-Nums
 
 export function Profile() {
   const { account, connector } = useAccount();

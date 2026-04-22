@@ -25,6 +25,7 @@ import {
   useTokenBalance,
   useTokenFallback,
 } from "@/hooks/starterpack";
+import { useDrawerContext } from "@/context/drawer";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "../../receiving";
 import { OnchainCostBreakdown } from "../../review/cost";
@@ -41,6 +42,7 @@ import { num } from "starknet";
 
 export function OnchainCheckout() {
   const { navigate } = useNavigation();
+  const { openDrawer } = useDrawerContext();
   const { controller } = useConnection();
   const {
     isStarterpackLoading,
@@ -295,7 +297,8 @@ export function OnchainCheckout() {
       if (isCoinflowSelected) {
         const { data: meData } = await refetchMe();
         if (!meData?.me?.email) {
-          navigate("/purchase/verification?method=coinflow");
+          // navigate("/purchase/verification?method=coinflow");
+          openDrawer("verification", { method: "coinflow" });
           return;
         }
 
@@ -312,7 +315,8 @@ export function OnchainCheckout() {
           !accountPrivate?.phoneNumberVerifiedAt;
 
         if (needsVerification) {
-          navigate("/purchase/verification?method=apple-pay");
+          // navigate("/purchase/verification?method=apple-pay");
+          openDrawer("verification", { method: "apple-pay" });
           return;
         }
 
@@ -365,6 +369,7 @@ export function OnchainCheckout() {
     navigate,
     clearError,
     isApplePayAmountTooLow,
+    openDrawer,
   ]);
 
   const handleBridge = useCallback(async () => {

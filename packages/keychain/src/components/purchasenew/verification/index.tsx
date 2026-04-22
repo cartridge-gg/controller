@@ -16,20 +16,18 @@ import {
   SpinnerIcon,
   EnvelopeIcon,
   MobileIcon,
-  LayoutContent,
-  LayoutFooter,
   Card,
   CardContent,
-  HeaderInner,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  DrawerContent,
 } from "@cartridge/controller-ui";
 import { useNavigation } from "@/context";
-import { useLocation } from "react-router-dom";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { useDrawerContext } from "@/context/drawer";
 
 type Step =
   | "EMAIL_INPUT"
@@ -70,8 +68,7 @@ const VerificationStepView = ({
   countryCode,
 }: VerificationStepViewProps) => (
   <>
-    <HeaderInner title={title} icon={icon} variant="compressed" />
-    <LayoutContent className="p-4 gap-4">
+    <DrawerContent title={title} icon={icon}>
       <div className="flex flex-col gap-2">
         <label className="text-xs text-foreground-300 font-medium">
           {label}
@@ -133,8 +130,6 @@ const VerificationStepView = ({
           />
         )}
       </div>
-    </LayoutContent>
-    <LayoutFooter>
       {error && (
         <ErrorAlert title="Error" description={error} isExpanded={true} />
       )}
@@ -147,7 +142,7 @@ const VerificationStepView = ({
       >
         CONTINUE
       </Button>
-    </LayoutFooter>
+    </DrawerContent>
   </>
 );
 
@@ -177,8 +172,7 @@ const CodeStepView = ({
   error,
 }: CodeStepViewProps) => (
   <>
-    <HeaderInner title={title} icon={icon} variant="compressed" />
-    <LayoutContent className="p-4 gap-12">
+    <DrawerContent title={title} icon={icon}>
       <p className="text-xs text-foreground-300">
         Please check {target} for a message and enter your code below.
       </p>
@@ -198,8 +192,7 @@ const CodeStepView = ({
           Resend Code
         </button>
       </p>
-    </LayoutContent>
-    <LayoutFooter>
+
       {error && (
         <ErrorAlert title="Error" description={error} isExpanded={true} />
       )}
@@ -212,15 +205,15 @@ const CodeStepView = ({
       >
         CONTINUE
       </Button>
-    </LayoutFooter>
+    </DrawerContent>
   </>
 );
 
 export function Verification() {
+  const {
+    verificationOptions: { method },
+  } = useDrawerContext();
   const { navigate } = useNavigation();
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const method = searchParams.get("method");
   const { toast } = useToast();
 
   const {
@@ -517,12 +510,7 @@ export function Verification() {
     case "SUCCESS":
       return (
         <>
-          <HeaderInner
-            title="Success!"
-            icon={<CheckIcon />}
-            variant="compressed"
-          />
-          <LayoutContent className="p-4 flex flex-col items-center justify-center">
+          <DrawerContent title="Success!" icon={<CheckIcon />}>
             <Card className="w-full max-w-sm bg-background-200 border-background-300">
               <CardContent className="p-8 flex flex-col items-center gap-4 text-center">
                 <Thumbnail
@@ -546,8 +534,7 @@ export function Verification() {
                 </div>
               </CardContent>
             </Card>
-          </LayoutContent>
-          <LayoutFooter />
+          </DrawerContent>
         </>
       );
     default:
