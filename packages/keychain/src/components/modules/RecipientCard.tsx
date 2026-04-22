@@ -1,5 +1,4 @@
-import { useUsername } from "@/hooks/account";
-import { useWallet } from "@/hooks/wallet";
+import { useAccountInfo } from "@/hooks/account";
 import { formatAddress } from "@cartridge/controller-ui/utils";
 import {
   UserIcon,
@@ -21,14 +20,11 @@ export function RecipientCard({
   walletType: providedWalletType,
 }: RecipientCardProps) {
   // Only fetch if not provided
-  const { username } = useUsername({
-    address: providedName ? "" : address,
-  });
-  const { wallet } = useWallet({
-    address: providedWalletType ? "" : address,
+  const { name: accountName, wallet } = useAccountInfo({
+    nameOrAddress: providedName && providedWalletType ? "" : address,
   });
 
-  const name = providedName || username;
+  const name = providedName || accountName;
   const walletType = providedWalletType || wallet;
 
   // Get appropriate wallet icon based on wallet type

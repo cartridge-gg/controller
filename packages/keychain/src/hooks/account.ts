@@ -410,7 +410,12 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     ) {
       return "Please input a valid Starknet address";
     }
-    if (!!nameOrAddress && !address) {
+    if (
+      !!nameOrAddress &&
+      !address &&
+      !isFetchingStarkAddress &&
+      !isFetchingControllerAddress
+    ) {
       return "Please input a valid Starknet address";
     }
     return "";
@@ -421,6 +426,8 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     controllerName,
     starkName,
     nameOrAddress,
+    isFetchingStarkAddress,
+    isFetchingControllerAddress,
   ]);
 
   const warning = useMemo(() => {

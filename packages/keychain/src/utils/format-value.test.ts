@@ -3,7 +3,25 @@ import {
   formatUsdValue,
   formatTokenValue,
   formatUsdValueDifference,
+  formatTokenAmount,
 } from "./format-value";
+import type { Metadata } from "@/hooks/token";
+
+const meta6: Metadata = {
+  name: "USD Coin",
+  symbol: "USDC",
+  decimals: 6,
+  address: "0x0",
+  image: undefined,
+};
+
+const meta18: Metadata = {
+  name: "Ether",
+  symbol: "ETH",
+  decimals: 18,
+  address: "0x0",
+  image: undefined,
+};
 
 describe("formatUsdValue", () => {
   it("zero", () => {
@@ -173,5 +191,87 @@ describe("formatTokenValue", () => {
   });
   it("- small decimals", () => {
     expect(formatTokenValue(-0.009, 2, "ETH")).toBe("<-0.01 ETH");
+  });
+});
+
+describe("formatTokenAmount", () => {
+  describe("6 decimals (USDC)", () => {
+    it("zero", () => {
+      expect(formatTokenAmount(0n, 2, meta6)).toBe("0 USDC");
+    });
+    it("null", () => {
+      expect(formatTokenAmount(null, 2, meta6)).toBe("0 USDC");
+    });
+    it("undefined", () => {
+      expect(formatTokenAmount(undefined, 2, meta6)).toBe("0 USDC");
+    });
+    it("number input", () => {
+      expect(formatTokenAmount(1_000_000, 2, meta6)).toBe("1 USDC");
+    });
+    it("string input", () => {
+      expect(formatTokenAmount("1000000", 2, meta6)).toBe("1 USDC");
+    });
+    it("+ small integer", () => {
+      expect(formatTokenAmount(1_000_000n, 2, meta6)).toBe("1 USDC");
+    });
+    it("+ large integer", () => {
+      expect(formatTokenAmount(12_345_000_000n, 2, meta6)).toBe("12345 USDC");
+    });
+    it("+ one decimal", () => {
+      expect(formatTokenAmount(1_100_000n, 2, meta6)).toBe("1.1 USDC");
+    });
+    it("+ two decimals", () => {
+      expect(formatTokenAmount(1_120_000n, 2, meta6)).toBe("1.12 USDC");
+    });
+    it("+ three decimals", () => {
+      expect(formatTokenAmount(1_123_000n, 2, meta6)).toBe("1.12 USDC");
+    });
+    it("+ ignore decimals", () => {
+      expect(formatTokenAmount(1_001_000n, 2, meta6)).toBe("1 USDC");
+    });
+    it("+ rounded decimals", () => {
+      expect(formatTokenAmount(1_009_000n, 2, meta6)).toBe("1.01 USDC");
+    });
+    it("+ small decimals", () => {
+      expect(formatTokenAmount(9_000n, 2, meta6)).toBe("<0.01 USDC");
+    });
+  });
+
+  describe("18 decimals (ETH)", () => {
+    it("zero", () => {
+      expect(formatTokenAmount(0n, 2, meta18)).toBe("0 ETH");
+    });
+    it("null", () => {
+      expect(formatTokenAmount(null, 2, meta18)).toBe("0 ETH");
+    });
+    it("undefined", () => {
+      expect(formatTokenAmount(undefined, 2, meta18)).toBe("0 ETH");
+    });
+    it("+ small integer", () => {
+      expect(formatTokenAmount(10n ** 18n, 2, meta18)).toBe("1 ETH");
+    });
+    it("+ large integer", () => {
+      expect(formatTokenAmount(12345n * 10n ** 18n, 2, meta18)).toBe(
+        "12345 ETH",
+      );
+    });
+    it("+ one decimal", () => {
+      expect(formatTokenAmount(11n * 10n ** 17n, 2, meta18)).toBe("1.1 ETH");
+    });
+    it("+ two decimals", () => {
+      expect(formatTokenAmount(112n * 10n ** 16n, 2, meta18)).toBe("1.12 ETH");
+    });
+    it("+ three decimals", () => {
+      expect(formatTokenAmount(1123n * 10n ** 15n, 2, meta18)).toBe("1.12 ETH");
+    });
+    it("+ ignore decimals", () => {
+      expect(formatTokenAmount(1001n * 10n ** 15n, 2, meta18)).toBe("1 ETH");
+    });
+    it("+ rounded decimals", () => {
+      expect(formatTokenAmount(1009n * 10n ** 15n, 2, meta18)).toBe("1.01 ETH");
+    });
+    it("+ small decimals", () => {
+      expect(formatTokenAmount(9n * 10n ** 15n, 2, meta18)).toBe("<0.01 ETH");
+    });
   });
 });
