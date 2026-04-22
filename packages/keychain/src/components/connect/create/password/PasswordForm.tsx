@@ -63,6 +63,7 @@ export function PasswordForm({
           placeholder="Enter password (min. 8 characters)"
           autoComplete={isLogin ? "current-password" : "new-password"}
           disabled={isLoading}
+          autoFocus
         />
       </div>
 
