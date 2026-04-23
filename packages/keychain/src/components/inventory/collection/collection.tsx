@@ -14,6 +14,7 @@ import {
   Empty,
   PaperPlaneIcon,
   TagIcon,
+  useDisclosure,
 } from "@cartridge/controller-ui";
 
 import { cn } from "@cartridge/controller-ui/utils";
@@ -24,6 +25,7 @@ import { CollectionHeader } from "./header";
 import { useControllerTheme } from "@/hooks/connection";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useIntersectionObserver } from "@/hooks/intersection";
+import { SendCollectionDrawer } from "./send/collection-drawer";
 
 export function Collection() {
   const { address: contractAddress } = useParams();
@@ -77,17 +79,7 @@ export function Collection() {
     [selectedTokenIds],
   );
 
-  // Create search params with selected tokens for navigation
-  const createNavigationParams = useCallback(() => {
-    const params = new URLSearchParams(searchParams);
-    // Clear existing tokenIds
-    params.delete("tokenIds");
-    // Add selected tokenIds
-    selectedTokenIds.forEach((tokenId) => {
-      params.append("tokenIds", tokenId);
-    });
-    return params.toString();
-  }, [searchParams, selectedTokenIds]);
+  const sendCollectionDisclosure = useDisclosure();
 
   return (
     <>
@@ -151,7 +143,11 @@ export function Collection() {
                   "flex items-center justify-center gap-x-4 w-full",
                   !allUnlisted && "pointer-events-none",
                 )}
-                to={allUnlisted ? `list?${createNavigationParams()}` : ""}
+                to={
+                  allUnlisted
+                    ? `list?${createNavigationParams(searchParams, selectedTokenIds).toString()}`
+                    : ""
+                }
               >
                 <Button
                   variant="secondary"
@@ -162,22 +158,43 @@ export function Collection() {
                   List
                 </Button>
               </Link>
-              <Link
-                className="flex items-center justify-center gap-x-4 w-full"
-                to={`send?${createNavigationParams()}`}
+              <Button
+                variant="secondary"
+                className="w-full gap-2"
+                onClick={() => sendCollectionDisclosure.onOpen()}
+                disabled={!contractAddress || selectedTokenIds.length === 0}
               >
-                <Button variant="secondary" className="w-full gap-2">
-                  <PaperPlaneIcon variant="solid" size="sm" />
-                  Send
-                </Button>
-              </Link>
+                <PaperPlaneIcon variant="solid" size="sm" />
+                Send
+              </Button>
             </div>
           </LayoutFooter>
+
+          <SendCollectionDrawer
+            disclosure={sendCollectionDisclosure}
+            contractAddress={contractAddress!}
+            tokenIds={selectedTokenIds}
+          />
         </>
       )}
     </>
   );
 }
+
+// Create search params with selected tokens for navigation
+export const createNavigationParams = (
+  searchParams: URLSearchParams,
+  selectedTokenIds: string[],
+) => {
+  const params = new URLSearchParams(searchParams);
+  // Clear existing tokenIds
+  params.delete("tokenIds");
+  // Add selected tokenIds
+  selectedTokenIds.forEach((tokenId) => {
+    params.append("tokenIds", tokenId);
+  });
+  return params;
+};
 
 const LoadingState = () => {
   return (

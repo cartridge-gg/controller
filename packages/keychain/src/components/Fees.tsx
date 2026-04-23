@@ -24,11 +24,13 @@ export function Fees({
   maxFee,
   ctrlError,
   additionalFees,
+  isWaiting,
 }: {
   isLoading: boolean;
   maxFee?: FeeEstimate;
   ctrlError?: React.ReactElement;
   additionalFees?: FeesData[];
+  isWaiting?: boolean;
 }) {
   const { isLoading: isPriceLoading, token: feeToken, error } = useFeeToken();
   const [feeValue, setFeeValue] = useState<number>();
@@ -101,7 +103,13 @@ export function Fees({
           ))}
           {displayFees && (
             <FeesRow
-              label={isLoading ? "Calculating Fees" : "Network Fee"}
+              label={
+                isWaiting
+                  ? "Building transactions"
+                  : isLoading
+                    ? "Calculating Fees"
+                    : "Network Fee"
+              }
               amount={feeValue ?? 0}
               decimals={2}
               usdValue={usdFee}

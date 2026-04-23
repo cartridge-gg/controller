@@ -69,7 +69,7 @@ export function ExecutionContainer({
 
   const estimateFees = useCallback(
     async (transactions: Call[]) => {
-      if (!controller) {
+      if (!controller || transactions.length == 0) {
         setIsEstimating(false);
         return;
       }
@@ -271,6 +271,7 @@ export function ExecutionContainer({
                     isLoading={isEstimating}
                     maxFee={maxFee}
                     additionalFees={additionalFees}
+                    isWaiting={transactions.length == 0}
                   />
                   <Button
                     onClick={handleSubmit}
@@ -311,6 +312,7 @@ export function ExecutionContainer({
                       ctrlError && <ControllerErrorAlert error={ctrlError} />
                     }
                     additionalFees={additionalFees}
+                    isWaiting={transactions.length == 0}
                   />
                   <LayoutButtons onCancel={onCancel}>
                     <Button

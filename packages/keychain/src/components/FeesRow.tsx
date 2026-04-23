@@ -73,7 +73,7 @@ const FeesRowContents = React.forwardRef<
         {...props} // required by TooltipTrigger
         ref={forwardedRef} // required by TooltipTrigger
         className={cn(
-          "flex gap-1 w-full items-center justify-between cursor-default",
+          "flex gap-1 w-full items-center justify-between cursor-default select-none",
           className,
         )}
       >

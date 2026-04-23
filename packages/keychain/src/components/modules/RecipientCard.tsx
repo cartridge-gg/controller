@@ -19,7 +19,7 @@ export function RecipientCard({
   name: providedName,
   walletType: providedWalletType,
 }: RecipientCardProps) {
-  // Only fetch if not provided
+  // do not fetch if both name and wallet type are provided
   const { name: accountName, wallet } = useAccountInfo({
     nameOrAddress: providedName && providedWalletType ? "" : address,
   });
@@ -61,7 +61,7 @@ export function RecipientCard({
     <div className="flex flex-col gap-px rounded-[4px] overflow-hidden">
       <div className="bg-background-200 box-border flex gap-1 items-center justify-start p-3">
         <p className="text-foreground-400 text-xs font-semibold tracking-[0.24px]">
-          Recipient
+          Destination
         </p>
       </div>
       <div className="bg-background-200 box-border flex gap-3 items-center justify-start overflow-hidden px-3 py-3">

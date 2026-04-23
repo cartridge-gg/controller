@@ -195,7 +195,7 @@ function ERC20() {
     [explorer],
   );
 
-  const disclosure = useDisclosure();
+  const sendTokenDisclosure = useDisclosure();
 
   if (!token) {
     return null;
@@ -268,7 +268,7 @@ function ERC20() {
         <LayoutFooter className="p-4">
           <Button
             className="w-full space-x-2"
-            onClick={() => disclosure.onOpen()}
+            onClick={() => sendTokenDisclosure.onOpen()}
           >
             <PaperPlaneIcon variant="solid" />
             Send
@@ -277,7 +277,7 @@ function ERC20() {
       )}
 
       <SendTokenDrawer
-        disclosure={disclosure}
+        disclosure={sendTokenDisclosure}
         tokenAddress={address ?? "0x0"}
       />
     </>

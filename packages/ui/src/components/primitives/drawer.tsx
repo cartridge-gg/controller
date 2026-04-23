@@ -52,7 +52,7 @@ export const DrawerContent = ({
   return (
     <>
       <SheetTitle className="text-lg text-start font-semibold">
-        <div className={cn("flex flex-row gap-3 items-center", className)}>
+        <div className="flex flex-row gap-3 items-center">
           <Thumbnail
             icon={React.cloneElement(icon as React.ReactElement, {
               size: "lg",
@@ -63,7 +63,7 @@ export const DrawerContent = ({
           <div className="flex-grow truncate">{title}</div>
         </div>
       </SheetTitle>
-      {children}
+      <div className={cn("flex flex-col gap-4", className)}>{children}</div>
     </>
   );
 };
