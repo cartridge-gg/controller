@@ -58,13 +58,28 @@ describe("ConfirmTransaction", () => {
     onClose: vi.fn(),
   };
 
+  const controllerConfig = {
+    estimateInvokeFee: vi.fn().mockResolvedValue({
+      suggestedMaxFee: BigInt(1000),
+    }),
+    isRequestedSession: vi.fn().mockResolvedValue(true),
+    address: vi.fn().mockImplementation(() => "0x123456789abcdef"),
+    username: vi.fn().mockImplementation(() => "testuser"),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any;
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("renders transaction confirmation form", async () => {
     await act(async () => {
-      renderWithProviders(<ConfirmTransaction {...defaultProps} />);
+      renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
+        connection: {
+          controller: controllerConfig,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      });
     });
     expect(screen.getByText("Review Transaction")).toBeInTheDocument();
   });
@@ -77,11 +92,6 @@ describe("ConfirmTransaction", () => {
     };
 
     const mockExecute = vi.fn().mockRejectedValue(validationError);
-    const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
-    });
-    const address = vi.fn().mockResolvedValue("0x123456789abcdef");
-    const username = vi.fn().mockResolvedValue("testuser");
 
     await act(async () => {
       renderWithProviders(
@@ -92,11 +102,8 @@ describe("ConfirmTransaction", () => {
         {
           connection: {
             controller: {
+              ...controllerConfig,
               execute: mockExecute,
-              estimateInvokeFee,
-              isRequestedSession: vi.fn().mockResolvedValue(true),
-              address,
-              username,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
@@ -122,17 +129,13 @@ describe("ConfirmTransaction", () => {
     };
 
     const mockExecute = vi.fn().mockRejectedValue(validationError);
-    const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
-    });
 
     await act(async () => {
       renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
         connection: {
           controller: {
+            ...controllerConfig,
             execute: mockExecute,
-            estimateInvokeFee,
-            isRequestedSession: vi.fn().mockResolvedValue(true),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any,
         },
@@ -176,9 +179,6 @@ describe("ConfirmTransaction", () => {
     const mockExecute = vi.fn().mockResolvedValue({
       transaction_hash: "0xabc123",
     });
-    const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
-    });
 
     await act(async () => {
       renderWithProviders(
@@ -189,11 +189,11 @@ describe("ConfirmTransaction", () => {
         {
           connection: {
             controller: {
+              ...controllerConfig,
               isRequestedSession: vi
                 .fn()
                 .mockResolvedValueOnce(false) // First check returns false
                 .mockResolvedValue(true), // After "skip" it should proceed
-              estimateInvokeFee,
               execute: mockExecute,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
@@ -225,7 +225,7 @@ describe("ConfirmTransaction", () => {
         {
           connection: {
             controller: {
-              isRequestedSession: vi.fn().mockResolvedValue(true),
+              ...controllerConfig,
               estimateInvokeFee: vi.fn().mockResolvedValue({
                 suggestedMaxFee: BigInt(1000),
               }),
@@ -259,17 +259,12 @@ describe("ConfirmTransaction", () => {
         transaction_hash: "0xabc123",
       });
 
-    const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
-    });
-
     await act(async () => {
       renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
         connection: {
           controller: {
+            ...controllerConfig,
             execute: mockExecute,
-            estimateInvokeFee,
-            isRequestedSession: vi.fn().mockResolvedValue(true),
             trySessionExecute: vi
               .fn()
               .mockRejectedValueOnce({
@@ -309,17 +304,13 @@ describe("ConfirmTransaction", () => {
     const mockExecute = vi.fn().mockResolvedValue({
       transaction_hash: mockTransactionHash,
     });
-    const estimateInvokeFee = vi.fn().mockResolvedValue({
-      suggestedMaxFee: BigInt(1000),
-    });
 
     await act(async () => {
       renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
         connection: {
           controller: {
+            ...controllerConfig,
             execute: mockExecute,
-            estimateInvokeFee,
-            isRequestedSession: vi.fn().mockResolvedValue(true),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any,
         },

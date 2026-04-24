@@ -25,8 +25,17 @@ vi.mock("@/hooks/tokens", () => ({
 const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
   suggestedMaxFee: BigInt(1000),
 }));
-const address = vi.fn().mockImplementation(async () => "0x123456789abcdef");
-const username = vi.fn().mockImplementation(async () => "testuser");
+
+const providersConfig = {
+  connection: {
+    controller: {
+      estimateInvokeFee,
+      address: vi.fn().mockImplementation(() => "0x123456789abcdef"),
+      username: vi.fn().mockImplementation(() => "testuser"),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any,
+  },
+};
 
 describe("ExecutionContainer", () => {
   const defaultProps = {
@@ -44,7 +53,10 @@ describe("ExecutionContainer", () => {
 
   it("renders basic content correctly", async () => {
     await act(async () => {
-      renderWithProviders(<ExecutionContainer {...defaultProps} />);
+      renderWithProviders(
+        <ExecutionContainer {...defaultProps} />,
+        providersConfig,
+      );
     });
     expect(screen.getByText("Test Content")).toBeInTheDocument();
     expect(screen.getByText("SUBMIT")).toBeInTheDocument();
@@ -63,16 +75,7 @@ describe("ExecutionContainer", () => {
             },
           ]}
         />,
-        {
-          connection: {
-            controller: {
-              estimateInvokeFee,
-              address,
-              username,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any,
-          },
-        },
+        providersConfig,
       );
     });
 
@@ -97,16 +100,7 @@ describe("ExecutionContainer", () => {
           ]}
           onSubmit={onSubmit}
         />,
-        {
-          connection: {
-            controller: {
-              estimateInvokeFee,
-              address,
-              username,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any,
-          },
-        },
+        providersConfig,
       );
     });
 
@@ -155,16 +149,7 @@ describe("ExecutionContainer", () => {
           onSubmit={onSubmit}
           onError={onError}
         />,
-        {
-          connection: {
-            controller: {
-              estimateInvokeFee,
-              address,
-              username,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any,
-          },
-        },
+        providersConfig,
       );
     });
 
@@ -222,6 +207,7 @@ describe("ExecutionContainer", () => {
             message: "Insufficient balance",
           }}
         />,
+        providersConfig,
       );
     });
 
