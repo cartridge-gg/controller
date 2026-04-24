@@ -8,14 +8,6 @@ query Teams {
           name
           credits
           strk
-          deployments(where: { deprecated: false }) {
-            totalCount
-            edges {
-              node {
-                project
-              }
-            }
-          }
         }
       }
     }

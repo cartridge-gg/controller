@@ -5,8 +5,6 @@ import {
   LayoutFooter,
   LayoutContent,
   Spinner,
-  BranchIcon,
-  Badge,
   TokenSummary,
   TokenCard,
   Empty,
@@ -20,16 +18,6 @@ export interface Team {
   name: string;
   credits: number;
   strk: number;
-  deployments: {
-    totalCount: number;
-    edges?:
-      | ({
-          node?: {
-            project: string;
-          } | null;
-        } | null)[]
-      | null;
-  };
 }
 
 const STRK_ICON =
@@ -78,8 +66,8 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
                 <TokenCard
                   title={team.name}
                   image={<UsersIcon variant="solid" size="lg" />}
-                  amount={`${team.deployments?.totalCount} Deployments`}
-                  value={`$${formatBalance(BigInt(team.credits), 8, 2)}`}
+                  amount={`${formatBalance(BigInt(team.credits), 8, 2)} USD`}
+                  value={`${formatBalance(BigInt(team.strk || 0), 6, 2)} STRK`}
                 />
               </TokenSummary>
             ))
@@ -122,37 +110,6 @@ export const TeamCard = ({
             className={"pointer-events-none"}
           />
         </TokenSummary>
-        <div className="flex flex-col gap-4 mt-2">
-          <div className="flex flex-row items-center justify-between">
-            <h3 className="text-foreground-400 text-xs font-medium">
-              Deployments
-            </h3>
-            {team.deployments?.totalCount > 0 && (
-              <Badge className="px-2 rounded-full text-foreground-300 text-xs">
-                {team.deployments?.totalCount || 0} total
-              </Badge>
-            )}
-          </div>
-          {(team.deployments?.totalCount || 0) === 0 ? (
-            <Empty
-              icon="discover"
-              title="No Deployments"
-              className="h-[240px]"
-            />
-          ) : (
-            <div className="flex flex-col gap-2">
-              {team.deployments?.edges?.map((edge, index) => (
-                <div
-                  key={index}
-                  className="flex flex-row items-center gap-2 bg-background-200 rounded-md p-3"
-                >
-                  <BranchIcon size="sm" />
-                  <p className=" text-sm font-medium">{edge?.node?.project}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </LayoutContent>
       <LayoutFooter>
         <Button className="w-full " onClick={() => onFundTeam(team)}>

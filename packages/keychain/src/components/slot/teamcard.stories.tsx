@@ -8,50 +8,18 @@ const mockTeams = [
     name: "cartridge",
     credits: 200000000,
     strk: 250000000,
-    deployments: {
-      totalCount: 6,
-      edges: [
-        { node: { project: "dopewars" } },
-        { node: { project: "provable-dw" } },
-        { node: { project: "slot-e2e-infra" } },
-        { node: { project: "trading-game" } },
-        { node: { project: "nft-marketplace" } },
-        { node: { project: "defi-protocol" } },
-      ],
-    },
   },
   {
     id: "cmcv7v80x0004qgmy5pqja22d",
     name: "click-deleteme",
     credits: 0,
     strk: 0,
-    deployments: {
-      totalCount: 0,
-      edges: [],
-    },
   },
   {
     id: "cmcv7v80x0004qgmy5pqja23e",
     name: "my-game-studio",
     credits: 1500000000,
     strk: 1250000000,
-    deployments: {
-      totalCount: 12,
-      edges: [
-        { node: { project: "pixel-rpg" } },
-        { node: { project: "racing-game" } },
-        { node: { project: "puzzle-quest" } },
-        { node: { project: "strategy-war" } },
-        { node: { project: "adventure-land" } },
-        { node: { project: "sports-arena" } },
-        { node: { project: "card-battle" } },
-        { node: { project: "tower-defense" } },
-        { node: { project: "match-three" } },
-        { node: { project: "platformer-jump" } },
-        { node: { project: "shooter-space" } },
-        { node: { project: "simulation-city" } },
-      ],
-    },
   },
 ];
 
@@ -91,7 +59,7 @@ export const WithCredits: Story = {
   parameters: {
     docs: {
       description: {
-        story: "Shows a team card with credits and multiple deployments.",
+        story: "Shows a team card with credits and STRK balance.",
       },
     },
   },
@@ -99,31 +67,26 @@ export const WithCredits: Story = {
 
 export const EmptyState: Story = {
   args: {
-    team: mockTeams[1], // click-deleteme with no credits/deployments
+    team: mockTeams[1], // click-deleteme with no funding balance
     onFundTeam: () => {},
     onBack: () => {},
   },
   parameters: {
     docs: {
       description: {
-        story:
-          "Shows a team card with no credits and no deployments (empty state).",
+        story: "Shows a team card with no credits or STRK balance.",
       },
     },
   },
 };
 
-export const SingleDeployment: Story = {
+export const LowBalance: Story = {
   args: {
     team: {
       id: "single-deploy-team",
       name: "simple-project",
       credits: 50000000,
       strk: 10000000,
-      deployments: {
-        totalCount: 1,
-        edges: [{ node: { project: "hello-world" } }],
-      },
     },
     onFundTeam: () => {},
     onBack: () => {},
@@ -131,8 +94,7 @@ export const SingleDeployment: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Shows a team card with moderate credits and a single deployment.",
+        story: "Shows a team card with moderate funding balances.",
       },
     },
   },
