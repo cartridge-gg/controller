@@ -1,4 +1,4 @@
-name: doc-sync
+name: docs-sync
 
 on:
   pull_request:
@@ -13,183 +13,23 @@ on:
 
 jobs:
   docs-sync:
-    if:
-      github.event.pull_request.merged == true || github.event_name ==
-      'workflow_dispatch'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-      id-token: write
-
-    steps:
-      - name: Checkout controller repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get changed files
-        id: changed-files
-        run: |
-          set -e
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            git fetch origin
-            DIFF_BASE="${{ github.event.inputs.commit_sha }}~1"
-            DIFF_HEAD="${{ github.event.inputs.commit_sha }}"
-          else
-            git fetch origin main
-            DIFF_BASE="${{ github.event.pull_request.base.sha }}"
-            DIFF_HEAD="${{ github.event.pull_request.merge_commit_sha }}"
-          fi
-          CHANGED_FILES=$(git diff --name-only "$DIFF_BASE" "$DIFF_HEAD")
-          # Truncate diff to avoid blowing up the prompt
-          DIFF_CONTENT=$(git diff "$DIFF_BASE" "$DIFF_HEAD" -- '*.ts' '*.tsx' '*.md' | head -c 60000)
-          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          echo "diff_content<<EOF" >> $GITHUB_OUTPUT
-          echo "$DIFF_CONTENT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Check if docs update needed
-        id: check-docs
-        run: |
-          NEEDS_DOCS_UPDATE=false
-
-          DOCS_PATTERNS=(
-            "^packages/.*/src/.*\.ts$"
-            "^packages/.*/src/.*\.tsx$"
-            "^docs/"
-            "^api/"
-            "^schema/"
-          )
-
-          while IFS= read -r file; do
-            for pattern in "${DOCS_PATTERNS[@]}"; do
-              if [[ $file =~ $pattern ]]; then
-                NEEDS_DOCS_UPDATE=true
-                break 2
-              fi
-            done
-          done <<< "${{ steps.changed-files.outputs.changed_files }}"
-
-          echo "needs_update=$NEEDS_DOCS_UPDATE" >> $GITHUB_OUTPUT
-          echo "Files that may need docs updates: $(echo '${{ steps.changed-files.outputs.changed_files }}' | tr '\n' ' ')"
-
-      - name: Checkout docs repository
-        if: steps.check-docs.outputs.needs_update == 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: cartridge-gg/docs
-          token: ${{ secrets.CREATE_PR_TOKEN }}
-          path: docs-repo
-
-      - name: Analyze changes and update docs
-        if: steps.check-docs.outputs.needs_update == 'true'
-        uses: anthropics/claude-code-action@beta
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          model: "claude-sonnet-4-5-20250929"
-          direct_prompt: |
-            Analyze changes in this controller repository and update documentation
-            in the cartridge-gg/docs repository ONLY if user-facing behavior changed.
-
-            **Change Information:**
-            - Title: ${{ github.event.pull_request.title || format('Manual trigger for commit {0}', github.event.inputs.commit_sha) }}
-            - Description: ${{ github.event.pull_request.body || 'Manually triggered documentation sync' }}
-            - Files changed: ${{ steps.changed-files.outputs.changed_files }}
-            - Commit SHA: ${{ github.event.pull_request.merge_commit_sha || github.event.inputs.commit_sha }}
-
-            **Diff of user-facing files:**
-            ${{ steps.changed-files.outputs.diff_content }}
-
-            **Docs repo structure** (checked out in `docs-repo/`):
-            The site uses Vocs. Content lives in `docs-repo/src/pages/` with three sections:
-            - `controller/` — wallet, sessions, policies, presets, achievements, inventory, native integrations, examples
-            - `slot/` — Katana/Torii deployment, billing, scale, paymaster, vRNG, RPC
-            - `arcade/` — game hub setup, marketplace
-            Sidebar config is in `docs-repo/vocs.config.ts`.
-
-            **Rules — read these carefully:**
-            1. DEFAULT TO NO CHANGES. Most code PRs do not need docs updates.
-               Internal refactors, test changes, CI changes, and dependency bumps need nothing.
-               Only proceed if there is a concrete user-facing change (new API, changed behavior,
-               new feature, removed feature, changed configuration).
-            2. SINGLE CANONICAL LOCATION. Each piece of information belongs on exactly one page.
-               Find the one page that owns the topic and make your substantive edits there.
-               Other pages MAY add a brief cross-reference linking to the canonical page,
-               but do NOT duplicate explanations, code samples, or configuration details
-               across multiple pages.
-            3. MINIMAL EDITS. Update only the specific section affected. Do not rewrite
-               surrounding paragraphs, add new sections for context, or reorganize existing content.
-            4. ONE CODE EXAMPLE per concept. If a code sample is needed, add it once in the
-               canonical location. Do not add the same or similar examples to multiple pages.
-            5. Do NOT create git branches, commits, or PRs — just update files.
-            6. If no documentation updates are needed, state that clearly and exit.
-
-          allowed_tools: "Read,Write,Edit,MultiEdit,Glob,Grep"
-
-      - name: Create branch and commit changes
-        if: steps.check-docs.outputs.needs_update == 'true'
-        working-directory: docs-repo
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          if [ -n "$(git status --porcelain)" ]; then
-            BRANCH_NAME="docs-update-$(date +%s)"
-            git checkout -b "$BRANCH_NAME"
-
-            git add .
-            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-              git commit -m "docs: Update documentation for controller commit ${{ github.event.inputs.commit_sha }}
-
-              Updates documentation to reflect changes made in commit:
-              ${{ github.event.inputs.commit_sha }}
-
-              Manually triggered documentation sync"
-            else
-              git commit -m "docs: Update documentation for controller PR #${{ github.event.pull_request.number }}
-
-              Updates documentation to reflect changes made in:
-              ${{ github.event.pull_request.title }}
-
-              Related controller PR: cartridge-gg/controller#${{ github.event.pull_request.number }}"
-            fi
-
-            git push origin "$BRANCH_NAME"
-
-            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-              gh pr create \
-                --title "docs: Update documentation for controller commit ${{ github.event.inputs.commit_sha }}" \
-                --body "This PR updates the documentation to reflect changes made in cartridge-gg/controller commit ${{ github.event.inputs.commit_sha }}
-
-              **Commit Details:**
-              - Commit SHA: ${{ github.event.inputs.commit_sha }}
-              - Files changed: ${{ steps.changed-files.outputs.changed_files }}
-              - Trigger: Manual documentation sync
-
-              Please review the documentation changes to ensure they accurately reflect the controller updates."
-              gh pr merge --auto --squash
-            else
-              gh pr create \
-                --title "docs: Update documentation for controller PR #${{ github.event.pull_request.number }}" \
-                --body "This PR updates the documentation to reflect changes made in cartridge-gg/controller#${{ github.event.pull_request.number }}
-
-              **Original PR Details:**
-              - Title: ${{ github.event.pull_request.title }}
-              - Files changed: ${{ steps.changed-files.outputs.changed_files }}
-
-              Please review the documentation changes to ensure they accurately reflect the controller updates."
-              gh pr merge --auto --squash
-            fi
-          else
-            echo "No documentation changes were made by Claude"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.CREATE_PR_TOKEN }}
-
-      - name: Cleanup
-        if: always()
-        run: |
-          rm -rf docs-repo || true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    uses: dojoengine/book/.github/workflows/docs-sync.yml@main
+    with:
+      target-docs-repo: cartridge-gg/docs
+      source-repo-slug: cartridge-gg/controller
+      diff-globs: |
+        *.ts
+        *.tsx
+        *.md
+      docs-patterns: |
+        ^packages/.*/src/.*\.ts$
+        ^packages/.*/src/.*\.tsx$
+        ^docs/
+        ^api/
+        ^schema/
+      canonical-desc: |
+        Controller is documented at docs-repo/src/pages/controller/ — this is the single canonical location for wallet, sessions, policies, presets, achievements, inventory, native integrations, and examples.
+      docs-structure-desc: |
+        The site uses Vocs. Content lives in `docs-repo/src/pages/` with three top-level sections: `controller/` (wallet, sessions, policies, presets, achievements, inventory, native integrations, examples), `slot/` (Katana/Torii deployment, billing, scale, paymaster, vRNG, RPC), and `arcade/` (game hub setup, marketplace). Sidebar config is in `docs-repo/vocs.config.ts`.
+    secrets: inherit
