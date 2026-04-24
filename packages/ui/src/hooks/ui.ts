@@ -8,8 +8,8 @@ export type Disclosure = {
   onToggle: () => void;
 };
 
-export function useDisclosure(): Disclosure {
-  const [isOpen, setIsOpen] = useState(false);
+export function useDisclosure(defaultOpen: boolean = false): Disclosure {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const onOpen = useCallback(() => {
     setIsOpen(true);

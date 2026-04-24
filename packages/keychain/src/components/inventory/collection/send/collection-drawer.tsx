@@ -11,7 +11,7 @@ import {
 } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { SendRecipient } from "../../../modules/recipient";
 import { useCollection } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
@@ -27,6 +27,7 @@ export function SendCollectionDrawer({
   tokenIds: string[];
 }) {
   const [searchParams] = useSearchParams();
+  const { pathname } = useLocation();
 
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
@@ -49,9 +50,10 @@ export function SendCollectionDrawer({
     ) {
       return "";
     } else {
+      const path = pathname.endsWith("/send") ? "" : "send";
       const sendParams = createNavigationParams(searchParams, tokenIds);
       sendParams.set("recipient", to);
-      return `send?${sendParams.toString()}`;
+      return `${path}?${sendParams.toString()}`;
     }
   }, [
     recipientValidated,
@@ -60,6 +62,7 @@ export function SendCollectionDrawer({
     recipientLoading,
     status,
     searchParams,
+    pathname,
     tokenIds,
     to,
   ]);

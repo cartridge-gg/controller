@@ -4,8 +4,9 @@ import {
   Skeleton,
   Empty,
   PaperPlaneIcon,
+  useDisclosure,
 } from "@cartridge/controller-ui";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
 import { uint256, Call, FeeEstimate } from "starknet";
@@ -17,6 +18,7 @@ import placeholder from "/placeholder.svg?url";
 import { useConnection } from "@/hooks/connection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useToast } from "@/context/toast";
+import { SendCollectionDrawer } from "./collection-drawer";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
@@ -133,6 +135,15 @@ export function SendCollection() {
     [transactions, controller, goBack, toast, submitToast],
   );
 
+  // backward compatibility with Arcade
+  // when this page is called without a recipient, open the drawer
+  const sendCollectionDisclosure = useDisclosure(true);
+  useEffect(() => {
+    if (!recipient && !sendCollectionDisclosure.isOpen) {
+      sendCollectionDisclosure.onOpen();
+    }
+  }, [recipient, sendCollectionDisclosure.isOpen]);
+
   return (
     <>
       {status === "loading" || !collection || !assets ? (
@@ -154,13 +165,19 @@ export function SendCollection() {
             onSubmit={onSubmitSend}
             buttonText="Send"
           >
-            {!!recipient && (
-              <div className="p-4 pt-2 flex flex-col gap-6">
-                <RecipientCard address={recipient} />
-                <Sending assets={assets} description={collection.name} />
-              </div>
-            )}
+            <div className="p-4 pt-2 flex flex-col gap-6">
+              {!!recipient && <RecipientCard address={recipient} />}
+              <Sending assets={assets} description={collection.name} />
+            </div>
           </ExecutionContainer>
+
+          {!recipient && (
+            <SendCollectionDrawer
+              disclosure={sendCollectionDisclosure}
+              contractAddress={contractAddress!}
+              tokenIds={tokenIds}
+            />
+          )}
         </>
       )}
     </>
