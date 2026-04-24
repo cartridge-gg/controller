@@ -7,6 +7,7 @@ const mockTeams = [
     id: "cmcv7v80x0004qgmy5pqja21c",
     name: "cartridge",
     credits: 200000000,
+    strk: 250000000,
     deployments: {
       totalCount: 6,
       edges: [
@@ -23,6 +24,7 @@ const mockTeams = [
     id: "cmcv7v80x0004qgmy5pqja22d",
     name: "click-deleteme",
     credits: 0,
+    strk: 0,
     deployments: {
       totalCount: 0,
       edges: [],
@@ -32,6 +34,7 @@ const mockTeams = [
     id: "cmcv7v80x0004qgmy5pqja23e",
     name: "my-game-studio",
     credits: 1500000000,
+    strk: 1250000000,
     deployments: {
       totalCount: 12,
       edges: [
@@ -116,6 +119,7 @@ export const SingleDeployment: Story = {
       id: "single-deploy-team",
       name: "simple-project",
       credits: 50000000,
+      strk: 10000000,
       deployments: {
         totalCount: 1,
         edges: [{ node: { project: "hello-world" } }],

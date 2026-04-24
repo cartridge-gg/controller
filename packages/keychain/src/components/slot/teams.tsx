@@ -19,6 +19,7 @@ export interface Team {
   id: string;
   name: string;
   credits: number;
+  strk: number;
   deployments: {
     totalCount: number;
     edges?:
@@ -30,6 +31,9 @@ export interface Team {
       | null;
   };
 }
+
+const STRK_ICON =
+  "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo";
 
 interface TeamsProps {
   teams: Team[];
@@ -94,6 +98,7 @@ export const TeamCard = ({
   onFundTeam: (team: Team) => void;
 }) => {
   const usdBalance = formatBalance(BigInt(team.credits), 8, 2);
+  const strkBalance = formatBalance(BigInt(team.strk || 0), 6, 2);
   return (
     <>
       <HeaderInner
@@ -108,6 +113,12 @@ export const TeamCard = ({
             image={"https://static.cartridge.gg/media/usd_icon.svg"}
             amount={`${usdBalance} USD`}
             value={`$${usdBalance}`}
+            className={"pointer-events-none"}
+          />
+          <TokenCard
+            title={"STRK"}
+            image={STRK_ICON}
+            amount={`${strkBalance} STRK`}
             className={"pointer-events-none"}
           />
         </TokenSummary>

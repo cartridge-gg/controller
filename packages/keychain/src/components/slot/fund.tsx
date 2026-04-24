@@ -1,15 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/controller-ui/utils/api/cartridge";
-import { Purchase, PurchaseType } from "../purchase";
 import {
-  AlertIcon,
   Button,
   Card,
   CardHeader,
   CardTitle,
   CheckIcon,
-  ExternalIcon,
   HeaderInner,
   LayoutContent,
   LayoutFooter,
@@ -19,7 +16,7 @@ import {
 import { Team, Teams } from "./teams";
 import { formatBalance } from "@/hooks/tokens";
 import { useNavigation } from "@/context/navigation";
-import { CARTRIDGE_DISCORD_LINK } from "@/constants";
+import { SlotCryptoFund, SlotFundingResult } from "./crypto-fund";
 
 enum FundState {
   SELECT_TEAM,
@@ -27,45 +24,20 @@ enum FundState {
   SUCCESS,
 }
 
-const SLOT_FUNDING_DISABLED: boolean = true;
-
 export function Fund() {
-  if (SLOT_FUNDING_DISABLED) {
-    return (
-      <LayoutContent className="flex flex-1 flex-col items-center justify-center gap-6 py-10 text-center">
-        <AlertIcon size="3xl" className="text-foreground-400" />
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold text-foreground-100">
-            Slot Funding Temporarily Unavailable
-          </h2>
-          <p className="text-sm text-foreground-300 max-w-sm mx-auto">
-            Slot funding is currently out of order. To top up your paymasters,
-            please reach out in the Cartridge support channel on Discord.
-          </p>
-        </div>
-        <Link to={CARTRIDGE_DISCORD_LINK} target="_blank">
-          <Button variant="secondary">
-            Contact Support on Discord
-            <ExternalIcon size="sm" />
-          </Button>
-        </Link>
-      </LayoutContent>
-    );
-  }
-
-  return <FundInner />;
-}
-
-function FundInner() {
   const { navigate } = useNavigation();
   const { pathname } = useLocation();
   const [state, setState] = useState<FundState>(FundState.SELECT_TEAM);
   const [selectedTeam, setSelectedTeam] = useState<Team | undefined>();
+  const [lastFunding, setLastFunding] = useState<
+    SlotFundingResult | undefined
+  >();
 
   const {
     data: teamsData,
     isLoading,
     error,
+    refetch: refetchTeams,
   } = useTeamsQuery(undefined, { refetchInterval: 1000 });
 
   useEffect(() => {
@@ -80,7 +52,10 @@ function FundInner() {
     () =>
       teamsData?.me?.teams?.edges
         ?.filter((edge) => edge?.node != null)
-        .map((edge) => edge!.node!) || [],
+        .map((edge) => {
+          const node = edge!.node! as Team & { strk?: number };
+          return { ...node, strk: node.strk ?? 0 };
+        }) || [],
     [teamsData?.me?.teams?.edges],
   );
 
@@ -108,19 +83,35 @@ function FundInner() {
   }
 
   if (state === FundState.PURCHASE) {
+    if (!selectedTeam) {
+      return null;
+    }
+
     return (
-      <Purchase
-        title={`Fund ${selectedTeam?.name}`}
-        type={PurchaseType.Credits}
-        isSlot={true}
-        teamId={selectedTeam?.id}
-        // onBack={() => {
-        //   setState(FundState.SELECT_TEAM);
-        // }}
-        onComplete={() => setState(FundState.SUCCESS)}
+      <SlotCryptoFund
+        team={selectedTeam}
+        onBack={() => setState(FundState.SELECT_TEAM)}
+        onComplete={(result) => {
+          setLastFunding(result);
+          refetchTeams();
+          setState(FundState.SUCCESS);
+        }}
       />
     );
   }
+
+  const fundedAmount =
+    lastFunding &&
+    `${formatBalance(lastFunding.amount, lastFunding.token.decimals, 2)} ${lastFunding.token.symbol}`;
+  const teamCreditsUsd = formatBalance(
+    BigInt(selectedTeam?.credits || 0),
+    8,
+    2,
+  );
+  const teamBalance =
+    lastFunding?.token.key === "STRK"
+      ? `${formatBalance(BigInt(selectedTeam?.strk || 0), 6, 2)} STRK`
+      : `${teamCreditsUsd} USD`;
 
   return (
     <>
@@ -137,11 +128,28 @@ function FundInner() {
             </CardTitle>
           </CardHeader>
           <TokenSummary className="rounded-tl-none rounded-tr-none">
+            {lastFunding && (
+              <TokenCard
+                image={lastFunding.token.icon}
+                title={lastFunding.token.symbol}
+                amount={fundedAmount ?? ""}
+              />
+            )}
             <TokenCard
-              image={"https://static.cartridge.gg/media/usd_icon.svg"}
-              title={"USD"}
-              amount={`${formatBalance(BigInt(selectedTeam?.credits || 0), 8, 2)} USD`}
-              value={`$${formatBalance(BigInt(selectedTeam?.credits || 0), 8, 2)}`}
+              image={
+                lastFunding?.token.key === "STRK"
+                  ? lastFunding.token.icon
+                  : "https://static.cartridge.gg/media/usd_icon.svg"
+              }
+              title={
+                lastFunding?.token.key === "STRK" ? "Team STRK" : "Team Credits"
+              }
+              amount={teamBalance}
+              value={
+                lastFunding?.token.key === "STRK"
+                  ? undefined
+                  : `$${teamCreditsUsd}`
+              }
             />
           </TokenSummary>
         </Card>
@@ -151,6 +159,7 @@ function FundInner() {
           onClick={() => {
             setState(FundState.SELECT_TEAM);
             setSelectedTeam(undefined);
+            setLastFunding(undefined);
           }}
         >
           Fund More Teams

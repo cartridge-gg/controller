@@ -7,6 +7,7 @@ query Teams {
           id
           name
           credits
+          strk
           deployments(where: { deprecated: false }) {
             totalCount
             edges {
