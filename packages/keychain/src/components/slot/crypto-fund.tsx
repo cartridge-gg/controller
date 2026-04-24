@@ -35,21 +35,13 @@ import {
   TokenSelectHeader,
   TokenSummary,
 } from "@cartridge/controller-ui";
-import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
-import {
-  convertTokenAmountToUSD,
-  formatBalance,
-  useFeeToken,
-} from "@/hooks/tokens";
+import { formatBalance } from "@/hooks/tokens";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { createStarknetCryptoPayment } from "@/hooks/payments/crypto";
 import { Team } from "./teams";
-
-const STRK_ICON =
-  "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo";
 
 type SlotFundingToken = {
   key: "USDC" | "STRK";
@@ -93,7 +85,6 @@ function SlotCryptoFundInner({
   const { setOnBackCallback } = useNavigation();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { account: extAccount } = useAccount();
-  const { token: feeToken } = useFeeToken();
 
   useEffect(() => {
     setOnBackCallback(() => onBack);
@@ -101,10 +92,6 @@ function SlotCryptoFundInner({
   }, [setOnBackCallback, onBack]);
 
   const teamUsdBalance = formatBalance(BigInt(team.credits || 0), 8, 2);
-  const teamStrkBalance = formatBalance(BigInt(team.strk || 0), 6, 2);
-  const teamStrkUsdValue = feeToken?.price
-    ? convertTokenAmountToUSD(BigInt(team.strk || 0), 6, feeToken.price)
-    : undefined;
 
   const [selectedTokenKey, setSelectedTokenKey] =
     useState<SlotFundingToken["key"]>("USDC");
@@ -130,15 +117,6 @@ function SlotCryptoFundInner({
         address: usdcAddress,
         icon: "https://static.cartridge.gg/tokens/usdc.svg",
         defaultAmount: "10",
-      },
-      {
-        key: "STRK",
-        symbol: "STRK",
-        name: "Starknet Token",
-        decimals: 18,
-        address: STRK_CONTRACT_ADDRESS,
-        icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
-        defaultAmount: "100",
       },
     ];
   }, [controller]);
@@ -295,13 +273,6 @@ function SlotCryptoFundInner({
               image="https://static.cartridge.gg/media/usd_icon.svg"
               amount={`${teamUsdBalance} USD`}
               value={`$${teamUsdBalance}`}
-              className="pointer-events-none"
-            />
-            <TokenCard
-              title="STRK"
-              image={STRK_ICON}
-              amount={`${teamStrkBalance} STRK`}
-              value={teamStrkUsdValue}
               className="pointer-events-none"
             />
           </TokenSummary>
