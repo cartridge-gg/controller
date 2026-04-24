@@ -24,6 +24,7 @@ import {
   TagIcon,
   Spinner,
   Thumbnail,
+  useDisclosure,
 } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
 import {
@@ -36,6 +37,7 @@ import {
 } from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { SendCollectibleDrawer } from "./send/collectible-drawer";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
 import { useExplorer } from "@starknet-react/core";
@@ -100,6 +102,8 @@ export function CollectibleAsset() {
       contractAddress: contractAddress ?? "",
       tokenId: tokenId ?? "",
     });
+
+  const sendCollectibleDisclosure = useDisclosure();
 
   const asset = useMemo(() => {
     return assets?.[0];
@@ -371,20 +375,25 @@ export function CollectibleAsset() {
                   Purchase
                 </Button>
               </Link>
-              <Link
+              <Button
+                variant="secondary"
                 className={cn(
                   "flex items-center justify-center gap-x-4 w-full",
                   purchaseView && "hidden",
                 )}
-                to={`send?${searchParams.toString()}`}
+                onClick={() => sendCollectibleDisclosure.onOpen()}
               >
-                <Button variant="secondary" className="w-full gap-2">
-                  <PaperPlaneIcon variant="solid" size="sm" />
-                  Send
-                </Button>
-              </Link>
+                <PaperPlaneIcon variant="solid" size="sm" />
+                Send
+              </Button>
             </div>
           </LayoutFooter>
+
+          <SendCollectibleDrawer
+            disclosure={sendCollectibleDisclosure}
+            contractAddress={contractAddress!}
+            tokenId={tokenId!}
+          />
         </>
       )}
     </>

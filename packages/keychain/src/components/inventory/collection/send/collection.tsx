@@ -8,17 +8,17 @@ import {
 } from "@cartridge/controller-ui";
 import { useCallback, useEffect, useMemo } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import { useToast } from "@/context/toast";
 import { useNavigation } from "@/context/navigation";
 import { uint256, Call, FeeEstimate } from "starknet";
 import { RecipientCard } from "../../../modules/RecipientCard";
 import { useCollection } from "@/hooks/collection";
-import { Sending } from "./collection-sending";
 import { useEntrypoints } from "@/hooks/entrypoints";
-import placeholder from "/placeholder.svg?url";
 import { useConnection } from "@/hooks/connection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { useToast } from "@/context/toast";
 import { SendCollectionDrawer } from "./collection-drawer";
+import { Sending } from "./sending";
+import placeholder from "/placeholder.svg?url";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
@@ -137,12 +137,12 @@ export function SendCollection() {
 
   // backward compatibility with Arcade
   // when this page is called without a recipient, open the drawer
-  const sendCollectionDisclosure = useDisclosure(true);
+  const sendDisclosure = useDisclosure(true);
   useEffect(() => {
-    if (!recipient && !sendCollectionDisclosure.isOpen) {
-      sendCollectionDisclosure.onOpen();
+    if (!recipient && !sendDisclosure.isOpen) {
+      goBack();
     }
-  }, [recipient, sendCollectionDisclosure.isOpen]);
+  }, [recipient, sendDisclosure.isOpen, goBack]);
 
   return (
     <>
@@ -165,7 +165,7 @@ export function SendCollection() {
             onSubmit={onSubmitSend}
             buttonText="Send"
           >
-            <div className="p-4 pt-2 flex flex-col gap-6">
+            <div className="p-4 pt-2 flex flex-col gap-4">
               {!!recipient && <RecipientCard address={recipient} />}
               <Sending assets={assets} description={collection.name} />
             </div>
@@ -173,7 +173,7 @@ export function SendCollection() {
 
           {!recipient && (
             <SendCollectionDrawer
-              disclosure={sendCollectionDisclosure}
+              disclosure={sendDisclosure}
               contractAddress={contractAddress!}
               tokenIds={tokenIds}
             />
