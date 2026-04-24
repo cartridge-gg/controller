@@ -1,13 +1,23 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  CallData,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
-  cairo,
-  constants,
-  uint256,
-} from "starknet";
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { mainnet, sepolia } from "@starknet-react/chains";
 import {
+  Connector,
+  StarknetConfig,
+  cartridge,
+  useAccount,
+  useConnect,
+  useInjectedConnectors,
+} from "@starknet-react/core";
+import { CallData, cairo, constants, num, uint256, wallet } from "starknet";
+import {
+  ArgentIcon,
+  BraavosIcon,
   Button,
   Card,
   CardHeader,
@@ -16,22 +26,30 @@ import {
   Input,
   LayoutContent,
   LayoutFooter,
-  Separator,
+  Select,
+  SelectContent,
+  SelectItem,
   SlotIcon,
+  Thumbnail,
   TokenCard,
+  TokenSelectHeader,
   TokenSummary,
 } from "@cartridge/controller-ui";
 import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
-import { cn } from "@cartridge/controller-ui/utils";
 import { useConnection } from "@/hooks/connection";
-import { formatBalance } from "@/hooks/tokens";
+import { useNavigation } from "@/context/navigation";
+import {
+  convertTokenAmountToUSD,
+  formatBalance,
+  useFeeToken,
+} from "@/hooks/tokens";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import {
-  createStarknetCryptoPayment,
-  waitForCryptoPaymentConfirmation,
-} from "@/hooks/payments/crypto";
+import { createStarknetCryptoPayment } from "@/hooks/payments/crypto";
 import { Team } from "./teams";
+
+const STRK_ICON =
+  "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo";
 
 type SlotFundingToken = {
   key: "USDC" | "STRK";
@@ -40,7 +58,7 @@ type SlotFundingToken = {
   decimals: number;
   address: string;
   icon: string;
-  presetAmounts: string[];
+  defaultAmount: string;
 };
 
 export type SlotFundingResult = {
@@ -56,14 +74,38 @@ type SlotCryptoFundProps = {
   onComplete: (result: SlotFundingResult) => void;
 };
 
-type FundingPhase = "idle" | "creating" | "transferring" | "confirming";
+type FundingPhase = "idle" | "creating" | "transferring";
 
-export function SlotCryptoFund({
+export function SlotCryptoFund(props: SlotCryptoFundProps) {
+  return (
+    <ExternalWalletProvider>
+      <SlotCryptoFundInner {...props} />
+    </ExternalWalletProvider>
+  );
+}
+
+function SlotCryptoFundInner({
   team,
   onBack,
   onComplete,
 }: SlotCryptoFundProps) {
   const { controller } = useConnection();
+  const { setOnBackCallback } = useNavigation();
+  const { connectAsync, connectors, isPending: isConnecting } = useConnect();
+  const { account: extAccount } = useAccount();
+  const { token: feeToken } = useFeeToken();
+
+  useEffect(() => {
+    setOnBackCallback(() => onBack);
+    return () => setOnBackCallback(undefined);
+  }, [setOnBackCallback, onBack]);
+
+  const teamUsdBalance = formatBalance(BigInt(team.credits || 0), 8, 2);
+  const teamStrkBalance = formatBalance(BigInt(team.strk || 0), 6, 2);
+  const teamStrkUsdValue = feeToken?.price
+    ? convertTokenAmountToUSD(BigInt(team.strk || 0), 6, feeToken.price)
+    : undefined;
+
   const [selectedTokenKey, setSelectedTokenKey] =
     useState<SlotFundingToken["key"]>("USDC");
   const [amountInput, setAmountInput] = useState("10");
@@ -87,7 +129,7 @@ export function SlotCryptoFund({
         decimals: 6,
         address: usdcAddress,
         icon: "https://static.cartridge.gg/tokens/usdc.svg",
-        presetAmounts: ["10", "25", "50"],
+        defaultAmount: "10",
       },
       {
         key: "STRK",
@@ -96,7 +138,7 @@ export function SlotCryptoFund({
         decimals: 18,
         address: STRK_CONTRACT_ADDRESS,
         icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
-        presetAmounts: ["100", "500", "1000"],
+        defaultAmount: "100",
       },
     ];
   }, [controller]);
@@ -107,12 +149,15 @@ export function SlotCryptoFund({
   );
 
   useEffect(() => {
-    setAmountInput(selectedToken.presetAmounts[0]);
+    setAmountInput(selectedToken.defaultAmount);
     setError(null);
   }, [selectedToken]);
 
   useEffect(() => {
-    if (!controller || !selectedToken) {
+    if (!controller || !extAccount || !selectedToken) {
+      setBalance(null);
+      setIsBalanceLoading(false);
+      setBalanceError(null);
       return;
     }
 
@@ -124,7 +169,7 @@ export function SlotCryptoFund({
     fetchTokenBalance(
       controller.provider,
       selectedToken.address,
-      controller.address(),
+      extAccount.address,
     )
       .then((nextBalance) => {
         if (!cancelled) {
@@ -145,7 +190,7 @@ export function SlotCryptoFund({
     return () => {
       cancelled = true;
     };
-  }, [controller, selectedToken]);
+  }, [controller, extAccount, selectedToken]);
 
   const amount = useMemo(
     () => parseTokenAmount(amountInput, selectedToken.decimals),
@@ -157,13 +202,35 @@ export function SlotCryptoFund({
     amount !== undefined && balance !== null && amount > balance;
   const canSubmit =
     !!controller &&
+    !!extAccount &&
     amount !== undefined &&
     amount > 0n &&
     !hasInsufficientBalance &&
     !isSubmitting;
 
+  const onConnect = useCallback(
+    (c: Connector) => {
+      if (!controller) return;
+
+      connectAsync({ connector: c })
+        .then(async () => {
+          const connectedChain = await c.chainId();
+          if (num.toHex(connectedChain) !== controller.chainId()) {
+            await wallet.switchStarknetChain(
+              window.starknet,
+              controller.chainId(),
+            );
+          }
+        })
+        .catch(() => {
+          /* user abort */
+        });
+    },
+    [connectAsync, controller],
+  );
+
   const handleSubmit = useCallback(async () => {
-    if (!controller || !amount || amount <= 0n) {
+    if (!controller || !extAccount || !amount || amount <= 0n) {
       return;
     }
 
@@ -179,7 +246,7 @@ export function SlotCryptoFund({
       });
 
       setPhase("transferring");
-      const { transaction_hash } = await controller.execute([
+      const { transaction_hash } = await extAccount.execute([
         {
           contractAddress: selectedToken.address,
           entrypoint: "transfer",
@@ -190,23 +257,6 @@ export function SlotCryptoFund({
         },
       ]);
 
-      const receipt = await controller.provider.waitForTransaction(
-        transaction_hash,
-        {
-          retryInterval: 1000,
-          successStates: [
-            TransactionExecutionStatus.SUCCEEDED,
-            TransactionFinalityStatus.ACCEPTED_ON_L2,
-          ],
-        },
-      );
-
-      if (isReceiptError(receipt)) {
-        throw new Error(receipt.value.message || "Transfer failed");
-      }
-
-      setPhase("confirming");
-      await waitForCryptoPaymentConfirmation(payment.id);
       onComplete({
         token: selectedToken,
         amount,
@@ -218,78 +268,52 @@ export function SlotCryptoFund({
     } finally {
       setPhase("idle");
     }
-  }, [amount, controller, onComplete, selectedToken, team.id]);
+  }, [amount, controller, extAccount, onComplete, selectedToken, team.id]);
 
-  const creditsUsd = formatBalance(BigInt(team.credits || 0), 8, 2);
-  const strkBalance = formatBalance(BigInt(team.strk || 0), 6, 2);
   const phaseLabel = getPhaseLabel(phase);
+  const walletConnectors = connectors.filter((c) =>
+    ["argentX", "braavos"].includes(c.id),
+  );
 
   return (
     <>
       <HeaderInner
-        title={`Fund ${team.name}`}
+        title={`Fund Team ${team.name}`}
         icon={<SlotIcon size="lg" />}
         hideIcon
       />
-      <LayoutContent className="pb-3 flex flex-col gap-3">
+      <LayoutContent className="pb-8 flex flex-col gap-4">
         <Card>
           <CardHeader>
             <CardTitle className="normal-case font-semibold text-xs">
-              Team Balance
+              Balances
             </CardTitle>
           </CardHeader>
           <TokenSummary className="rounded-tl-none rounded-tr-none">
             <TokenCard
-              title="Credits"
-              image="https://static.cartridge.gg/presets/credit/icon.svg"
-              amount={`${creditsUsd} USD`}
-              value={`$${creditsUsd}`}
+              title="USD"
+              image="https://static.cartridge.gg/media/usd_icon.svg"
+              amount={`${teamUsdBalance} USD`}
+              value={`$${teamUsdBalance}`}
+              className="pointer-events-none"
             />
             <TokenCard
               title="STRK"
-              image={tokens[1].icon}
-              amount={`${strkBalance} STRK`}
+              image={STRK_ICON}
+              amount={`${teamStrkBalance} STRK`}
+              value={teamStrkUsdValue}
+              className="pointer-events-none"
             />
           </TokenSummary>
         </Card>
 
-        <Card className="p-3 flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <div className="text-xs font-semibold text-foreground-400 tracking-wide select-none">
-              Token
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {tokens.map((token) => (
-                <Button
-                  key={token.key}
-                  variant="secondary"
-                  disabled={isSubmitting}
-                  className={cn(
-                    "h-auto justify-start gap-3 p-3",
-                    token.key === selectedToken.key
-                      ? "bg-background-400 text-foreground-100 hover:bg-background-400 hover:text-foreground-100"
-                      : "bg-background-200 text-foreground-300 hover:bg-background-300 hover:text-foreground-200",
-                  )}
-                  onClick={() => setSelectedTokenKey(token.key)}
-                >
-                  <img
-                    src={token.icon}
-                    alt=""
-                    className="h-5 w-5 rounded-full shrink-0"
-                  />
-                  <span className="min-w-0 truncate">{token.symbol}</span>
-                </Button>
-              ))}
-            </div>
+        <div className="flex flex-col gap-2">
+          <div className="text-xs font-semibold text-foreground-400 tracking-wide select-none">
+            Amount
           </div>
-
-          <Separator className="bg-spacer" />
-
-          <div className="flex flex-col gap-2">
-            <div className="text-xs font-semibold text-foreground-400 tracking-wide select-none">
-              Amount
-            </div>
+          <div className="flex gap-3">
             <Input
+              containerClassName="flex-1"
               value={amountInput}
               disabled={isSubmitting}
               type="text"
@@ -299,19 +323,42 @@ export function SlotCryptoFund({
                 setError(null);
               }}
             />
-            <div className="grid grid-cols-3 gap-2">
-              {selectedToken.presetAmounts.map((preset) => (
-                <Button
-                  key={`${selectedToken.key}-${preset}`}
-                  variant="secondary"
-                  className="text-sm font-sans font-medium"
-                  disabled={isSubmitting}
-                  onClick={() => setAmountInput(preset)}
-                >
-                  {preset}
-                </Button>
-              ))}
-            </div>
+            <Select
+              value={selectedToken.address}
+              onValueChange={(address) => {
+                const next = tokens.find((t) => t.address === address);
+                if (next) setSelectedTokenKey(next.key);
+              }}
+              disabled={isSubmitting}
+            >
+              <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2" />
+              <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
+                {tokens.map((token) => (
+                  <SelectItem
+                    key={token.address}
+                    simplified
+                    value={token.address}
+                    data-active={token.address === selectedToken.address}
+                    className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:hover:bg-background-300 data-[active=true]:text-foreground-100 rounded-none"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Thumbnail
+                        icon={token.icon}
+                        rounded
+                        size="sm"
+                        variant="light"
+                        className="group-hover:bg-background-400"
+                      />
+                      <span className="font-medium text-sm">
+                        {token.symbol}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {extAccount && (
             <div className="text-xs text-foreground-400">
               Available:{" "}
               {isBalanceLoading
@@ -320,8 +367,8 @@ export function SlotCryptoFund({
                   ? `${formatBalance(balance, selectedToken.decimals, 2)} ${selectedToken.symbol}`
                   : "-"}
             </div>
-          </div>
-        </Card>
+          )}
+        </div>
       </LayoutContent>
       <LayoutFooter>
         {balanceError && (
@@ -352,26 +399,69 @@ export function SlotCryptoFund({
             description={getHumanReadableError(error)}
           />
         )}
-        <div className="flex gap-3">
+        {!extAccount ? (
+          isConnecting ? (
+            <Button isLoading />
+          ) : walletConnectors.length > 0 ? (
+            <div className="flex gap-3">
+              {walletConnectors.map((c) => (
+                <Button
+                  key={c.id}
+                  className="flex-1"
+                  onClick={() => onConnect(c)}
+                >
+                  {c.id === "argentX" ? (
+                    <ArgentIcon size="sm" />
+                  ) : c.id === "braavos" ? (
+                    <BraavosIcon size="sm" />
+                  ) : null}
+                  {c.name}
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <ErrorAlert
+              variant="info"
+              title="No Starknet wallet detected"
+              description="Install Argent or Braavos to fund this team."
+            />
+          )
+        ) : (
           <Button
-            variant="secondary"
-            className="flex-1"
-            disabled={isSubmitting}
-            onClick={onBack}
-          >
-            Back
-          </Button>
-          <Button
-            className="flex-1"
             isLoading={isSubmitting}
             disabled={!canSubmit}
             onClick={handleSubmit}
           >
             {phaseLabel}
           </Button>
-        </div>
+        )}
       </LayoutFooter>
     </>
+  );
+}
+
+function ExternalWalletProvider({ children }: PropsWithChildren) {
+  const { connectors } = useInjectedConnectors({});
+  const { controller } = useConnection();
+  const defaultChainId = useMemo(
+    () => num.toBigInt(controller?.chainId() || 0),
+    [controller],
+  );
+
+  if (!controller) {
+    return <>{children}</>;
+  }
+
+  return (
+    <StarknetConfig
+      chains={[sepolia, mainnet]}
+      defaultChainId={defaultChainId}
+      provider={() => controller.provider}
+      connectors={connectors}
+      explorer={cartridge}
+    >
+      {children}
+    </StarknetConfig>
   );
 }
 
@@ -437,29 +527,22 @@ function getPhaseLabel(phase: FundingPhase) {
       return "Creating";
     case "transferring":
       return "Sending";
-    case "confirming":
-      return "Confirming";
     case "idle":
       return "Fund";
   }
 }
 
-function isReceiptError(
-  receipt: unknown,
-): receipt is { isError: () => true; value: { message?: string } } {
-  return (
-    typeof receipt === "object" &&
-    receipt !== null &&
-    "isError" in receipt &&
-    typeof receipt.isError === "function" &&
-    receipt.isError()
-  );
-}
-
 function getHumanReadableError(error: Error): string {
   if (error.message.includes("USER_REFUSED_OP")) {
-    return "Transaction approval refused";
+    return "Transaction approval refused in wallet";
   }
 
   return error.message;
+}
+
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    starknet: any;
+  }
 }

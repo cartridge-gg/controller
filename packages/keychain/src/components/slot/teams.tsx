@@ -2,6 +2,9 @@ import {
   UsersIcon,
   SlotIcon,
   Button,
+  Card,
+  CardHeader,
+  CardTitle,
   LayoutFooter,
   LayoutContent,
   Spinner,
@@ -10,8 +13,11 @@ import {
   Empty,
   HeaderInner,
 } from "@cartridge/controller-ui";
-import { formatBalance } from "@/hooks/tokens";
-import { useState } from "react";
+import {
+  convertTokenAmountToUSD,
+  formatBalance,
+  useFeeToken,
+} from "@/hooks/tokens";
 
 export interface Team {
   id: string;
@@ -31,12 +37,6 @@ interface TeamsProps {
 }
 
 export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
-
-  if (selectedTeam) {
-    return <TeamCard team={selectedTeam} onFundTeam={onFundTeam} />;
-  }
-
   const sortedTeams = [...teams].sort(
     (a, b) => (b.credits || 0) - (a.credits || 0),
   );
@@ -62,12 +62,11 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
             />
           ) : (
             sortedTeams.map((team) => (
-              <TokenSummary key={team.id} onClick={() => setSelectedTeam(team)}>
+              <TokenSummary key={team.id} onClick={() => onFundTeam(team)}>
                 <TokenCard
                   title={team.name}
                   image={<UsersIcon variant="solid" size="lg" />}
-                  amount={`${formatBalance(BigInt(team.credits), 8, 2)} USD`}
-                  value={`${formatBalance(BigInt(team.strk || 0), 6, 2)} STRK`}
+                  amount=""
                 />
               </TokenSummary>
             ))
@@ -81,12 +80,18 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
 export const TeamCard = ({
   team,
   onFundTeam,
+  onBack,
 }: {
   team: Team;
   onFundTeam: (team: Team) => void;
+  onBack?: () => void;
 }) => {
+  const { token: feeToken } = useFeeToken();
   const usdBalance = formatBalance(BigInt(team.credits), 8, 2);
   const strkBalance = formatBalance(BigInt(team.strk || 0), 6, 2);
+  const strkUsdValue = feeToken?.price
+    ? convertTokenAmountToUSD(BigInt(team.strk || 0), 6, feeToken.price)
+    : undefined;
   return (
     <>
       <HeaderInner
@@ -95,26 +100,41 @@ export const TeamCard = ({
         title={team.name}
       />
       <LayoutContent className="pb-3">
-        <TokenSummary>
-          <TokenCard
-            title={"USD"}
-            image={"https://static.cartridge.gg/media/usd_icon.svg"}
-            amount={`${usdBalance} USD`}
-            value={`$${usdBalance}`}
-            className={"pointer-events-none"}
-          />
-          <TokenCard
-            title={"STRK"}
-            image={STRK_ICON}
-            amount={`${strkBalance} STRK`}
-            className={"pointer-events-none"}
-          />
-        </TokenSummary>
+        <Card>
+          <CardHeader>
+            <CardTitle className="normal-case font-semibold text-xs">
+              Balances
+            </CardTitle>
+          </CardHeader>
+          <TokenSummary className="rounded-tl-none rounded-tr-none">
+            <TokenCard
+              title={"USD"}
+              image={"https://static.cartridge.gg/media/usd_icon.svg"}
+              amount={`${usdBalance} USD`}
+              value={`$${usdBalance}`}
+              className={"pointer-events-none"}
+            />
+            <TokenCard
+              title={"STRK"}
+              image={STRK_ICON}
+              amount={`${strkBalance} STRK`}
+              value={strkUsdValue}
+              className={"pointer-events-none"}
+            />
+          </TokenSummary>
+        </Card>
       </LayoutContent>
       <LayoutFooter>
-        <Button className="w-full " onClick={() => onFundTeam(team)}>
-          FUND TEAM
-        </Button>
+        <div className="flex gap-3">
+          {onBack && (
+            <Button variant="secondary" className="flex-1" onClick={onBack}>
+              Back
+            </Button>
+          )}
+          <Button className="flex-1" onClick={() => onFundTeam(team)}>
+            FUND TEAM
+          </Button>
+        </div>
       </LayoutFooter>
     </>
   );

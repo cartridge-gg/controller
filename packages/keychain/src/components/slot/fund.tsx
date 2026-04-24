@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import {
@@ -13,10 +13,19 @@ import {
   TokenCard,
   TokenSummary,
 } from "@cartridge/controller-ui";
+import {
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
 import { Team, Teams } from "./teams";
 import { formatBalance } from "@/hooks/tokens";
+import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
 import { SlotCryptoFund, SlotFundingResult } from "./crypto-fund";
+import { waitForCryptoPaymentConfirmation } from "@/hooks/payments/crypto";
+import { ConfirmingTransaction } from "@/components/purchasenew/pending";
+import { getExplorer } from "@/hooks/starterpack/layerswap";
+import { ErrorAlert } from "@/components/ErrorAlert";
 
 enum FundState {
   SELECT_TEAM,
@@ -93,75 +102,159 @@ export function Fund() {
         onBack={() => setState(FundState.SELECT_TEAM)}
         onComplete={(result) => {
           setLastFunding(result);
-          refetchTeams();
           setState(FundState.SUCCESS);
         }}
       />
     );
   }
 
-  const fundedAmount =
-    lastFunding &&
-    `${formatBalance(lastFunding.amount, lastFunding.token.decimals, 2)} ${lastFunding.token.symbol}`;
-  const teamCreditsUsd = formatBalance(
-    BigInt(selectedTeam?.credits || 0),
-    8,
-    2,
+  if (!selectedTeam || !lastFunding) {
+    return null;
+  }
+
+  return (
+    <FundingComplete
+      team={selectedTeam}
+      funding={lastFunding}
+      onPaymentConfirmed={refetchTeams}
+      onDone={() => {
+        setState(FundState.SELECT_TEAM);
+        setSelectedTeam(undefined);
+        setLastFunding(undefined);
+      }}
+    />
   );
+}
+
+type Step = "loading" | "success" | "error";
+
+function FundingComplete({
+  team,
+  funding,
+  onDone,
+  onPaymentConfirmed,
+}: {
+  team: Team;
+  funding: SlotFundingResult;
+  onDone: () => void;
+  onPaymentConfirmed: () => void;
+}) {
+  const { controller, isMainnet } = useConnection();
+  const [txStatus, setTxStatus] = useState<Step>("loading");
+  const [paymentStatus, setPaymentStatus] = useState<Step>("loading");
+  const [error, setError] = useState<Error>();
+
+  useEffect(() => {
+    if (!controller) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        await controller.provider.waitForTransaction(funding.transactionHash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+        if (cancelled) return;
+        setTxStatus("success");
+
+        await waitForCryptoPaymentConfirmation(funding.paymentId);
+        if (cancelled) return;
+        setPaymentStatus("success");
+        onPaymentConfirmed();
+      } catch (err) {
+        if (cancelled) return;
+        const asError = err instanceof Error ? err : new Error(String(err));
+        setError(asError);
+        setTxStatus((prev) => (prev === "success" ? prev : "error"));
+        setPaymentStatus((prev) =>
+          prev === "success" ? prev : prev === "loading" ? "error" : prev,
+        );
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    controller,
+    funding.paymentId,
+    funding.transactionHash,
+    onPaymentConfirmed,
+  ]);
+
+  const allDone = paymentStatus === "success";
+  const teamCreditsUsd = formatBalance(BigInt(team.credits || 0), 8, 2);
   const teamBalance =
-    lastFunding?.token.key === "STRK"
-      ? `${formatBalance(BigInt(selectedTeam?.strk || 0), 6, 2)} STRK`
+    funding.token.key === "STRK"
+      ? `${formatBalance(BigInt(team.strk || 0), 6, 2)} STRK`
       : `${teamCreditsUsd} USD`;
+
+  const explorer = getExplorer(
+    "starknet",
+    funding.transactionHash,
+    !!isMainnet,
+  );
 
   return (
     <>
       <HeaderInner
         icon={<CheckIcon />}
         variant="compressed"
-        title="Purchase Complete"
+        title={allDone ? "Purchase Complete" : "Funding Team"}
       />
       <LayoutContent className="pb-3">
         <Card>
           <CardHeader>
             <CardTitle className="normal-case font-semibold text-xs">
-              {`Funded ${selectedTeam?.name}`}
+              {`Funded ${team.name}`}
             </CardTitle>
           </CardHeader>
           <TokenSummary className="rounded-tl-none rounded-tr-none">
-            {lastFunding && (
-              <TokenCard
-                image={lastFunding.token.icon}
-                title={lastFunding.token.symbol}
-                amount={fundedAmount ?? ""}
-              />
-            )}
             <TokenCard
               image={
-                lastFunding?.token.key === "STRK"
-                  ? lastFunding.token.icon
+                funding.token.key === "STRK"
+                  ? funding.token.icon
                   : "https://static.cartridge.gg/media/usd_icon.svg"
               }
-              title={
-                lastFunding?.token.key === "STRK" ? "Team STRK" : "Team Credits"
-              }
+              title={funding.token.key === "STRK" ? "STRK" : "USD"}
               amount={teamBalance}
-              value={
-                lastFunding?.token.key === "STRK"
-                  ? undefined
-                  : `$${teamCreditsUsd}`
-              }
             />
           </TokenSummary>
         </Card>
       </LayoutContent>
       <LayoutFooter>
-        <Button
-          onClick={() => {
-            setState(FundState.SELECT_TEAM);
-            setSelectedTeam(undefined);
-            setLastFunding(undefined);
-          }}
-        >
+        {error && allDone === false && (
+          <ErrorAlert
+            variant="error"
+            title="Funding Error"
+            description={error.message}
+          />
+        )}
+        <ConfirmingTransaction
+          title={
+            txStatus === "success"
+              ? "Confirmed on Starknet"
+              : txStatus === "error"
+                ? "Transaction failed"
+                : "Confirming on Starknet"
+          }
+          status={txStatus}
+          externalLink={explorer?.url}
+        />
+        <ConfirmingTransaction
+          title={
+            paymentStatus === "success"
+              ? "Payment received"
+              : paymentStatus === "error"
+                ? "Payment not received"
+                : "Processing payment"
+          }
+          status={paymentStatus}
+        />
+        <Button disabled={!allDone} onClick={onDone}>
           Fund More Teams
         </Button>
       </LayoutFooter>
