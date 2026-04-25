@@ -7,35 +7,19 @@ const mockTeams = [
     id: "cmcv7v80x0004qgmy5pqja21c",
     name: "cartridge",
     credits: 200000000,
-    deployments: {
-      totalCount: 1,
-      edges: [{ node: { project: "dopewars" } }],
-    },
+    strk: 250000000,
   },
   {
     id: "cmcv7v80x0004qgmy5pqja22d",
     name: "click-deleteme",
     credits: 0,
-    deployments: {
-      totalCount: 0,
-      edges: [],
-    },
+    strk: 0,
   },
   {
     id: "cmcv7v80x0004qgmy5pqja23e",
     name: "my-game-studio",
     credits: 1500000000,
-    deployments: {
-      totalCount: 6,
-      edges: [
-        { node: { project: "pixel-rpg" } },
-        { node: { project: "racing-game" } },
-        { node: { project: "puzzle-quest" } },
-        { node: { project: "strategy-war" } },
-        { node: { project: "adventure-land" } },
-        { node: { project: "sports-arena" } },
-      ],
-    },
+    strk: 1250000000,
   },
 ];
 
@@ -81,8 +65,7 @@ export const Default: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Shows the Teams component with sample team data including credits and deployments.",
+        story: "Shows the Teams component with sample team funding balances.",
       },
     },
   },
@@ -130,8 +113,7 @@ export const MultipleTeams: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Shows multiple team cards with different credit amounts and deployment counts.",
+        story: "Shows multiple team cards with different funding balances.",
       },
     },
   },
