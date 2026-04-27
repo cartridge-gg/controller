@@ -123,7 +123,7 @@ export const ConnectionTooltipContent = ({
       className={cn(
         connectionTooltipContentVariants({ variant }),
         className,
-        "relative",
+        "relative w-[320px]",
       )}
     >
       <div className="flex items-start w-full gap-3 justify-between">
@@ -148,9 +148,7 @@ export const ConnectionTooltipContent = ({
               className="flex items-center gap-1 cursor-pointer text-foreground-300 hover:text-foreground-200"
               onClick={onCopy}
             >
-              <p className="text-sm font-mono font-normal">
-                {formattedAddress}
-              </p>
+              <p className="text-sm font-normal">{formattedAddress}</p>
               <CopyIcon size="sm" />
             </div>
           </div>
