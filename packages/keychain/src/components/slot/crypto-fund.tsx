@@ -30,6 +30,7 @@ import {
   SelectContent,
   SelectItem,
   SlotIcon,
+  StarknetIcon,
   Thumbnail,
   TokenCard,
   TokenSelectHeader,
@@ -43,10 +44,7 @@ import {
   useFeeToken,
 } from "@/hooks/tokens";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
-import {
-  STRK_CONTRACT_ADDRESS,
-  STRK_LOGO_URL,
-} from "@cartridge/controller-ui/utils";
+import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { createStarknetCryptoPayment } from "@/hooks/payments/crypto";
 import { Team } from "./teams";
@@ -57,7 +55,7 @@ type SlotFundingToken = {
   name: string;
   decimals: number;
   address: string;
-  icon: string;
+  icon: string | React.ReactNode;
   defaultAmount: string;
   min: number;
   max: number;
@@ -141,7 +139,7 @@ function SlotCryptoFundInner({
         name: "Starknet Token",
         decimals: 18,
         address: STRK_CONTRACT_ADDRESS,
-        icon: STRK_LOGO_URL,
+        icon: <StarknetIcon />,
         defaultAmount: "10",
         min: 1,
         max: 50000,
@@ -322,7 +320,7 @@ function SlotCryptoFundInner({
             />
             <TokenCard
               title="STRK"
-              image={STRK_LOGO_URL}
+              image={<StarknetIcon />}
               amount={`${teamStrkBalance} STRK`}
               value={teamStrkUsdValue}
               className="pointer-events-none"

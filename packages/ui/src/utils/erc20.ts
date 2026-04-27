@@ -39,9 +39,6 @@ export const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
 );
 
-export const STRK_LOGO_URL =
-  "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo";
-
 export class ERC20Contract {
   private address: string;
   private logoUrl?: string;
