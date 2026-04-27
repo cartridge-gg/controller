@@ -30,7 +30,7 @@ import {
   SelectContent,
   SelectItem,
   SlotIcon,
-  StarknetIcon,
+  StarknetColorIcon,
   Thumbnail,
   TokenCard,
   TokenSelectHeader,
@@ -139,7 +139,7 @@ function SlotCryptoFundInner({
         name: "Starknet Token",
         decimals: 18,
         address: STRK_CONTRACT_ADDRESS,
-        icon: <StarknetIcon />,
+        icon: <StarknetColorIcon />,
         defaultAmount: "10",
         min: 1,
         max: 50000,
@@ -320,7 +320,7 @@ function SlotCryptoFundInner({
             />
             <TokenCard
               title="STRK"
-              image={<StarknetIcon />}
+              image={<StarknetColorIcon />}
               amount={`${teamStrkBalance} STRK`}
               value={teamStrkUsdValue}
               className="pointer-events-none"
