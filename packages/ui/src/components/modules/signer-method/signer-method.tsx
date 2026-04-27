@@ -10,9 +10,19 @@ import {
 } from "@/components/icons/brand-color";
 import { FingerprintIcon } from "@/components/icons/brand/fingerprint";
 import { cn } from "@/utils";
-import { SignerPendingCardKind } from "../signer-pending-card/signer-pending-card";
 
-export type SignerMethodKind = SignerPendingCardKind;
+export type SignerMethodKind =
+  | "google"
+  | "sms"
+  | "passkey"
+  | "discord"
+  | "metamask"
+  | "argent"
+  | "rabby"
+  | "phantom"
+  | "phantom-evm"
+  | "walletconnect"
+  | "wallet";
 
 interface SignerMethodProps {
   className?: string;

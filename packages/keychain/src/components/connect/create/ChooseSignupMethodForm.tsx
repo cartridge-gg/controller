@@ -1,5 +1,11 @@
 import { AuthOption } from "@cartridge/controller";
-import { cn, SheetContent, SheetTitle } from "@cartridge/controller-ui";
+import {
+  AchievementPlayerAvatar,
+  cn,
+  Drawer,
+  DrawerContent,
+  PlusIcon,
+} from "@cartridge/controller-ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 import { credentialToAuth } from "../types";
@@ -9,6 +15,8 @@ import { PasswordForm } from "./password/PasswordForm";
 interface ChooseSignupMethodProps {
   isLoading: boolean;
   validation: ReturnType<typeof useUsernameValidation>;
+  username?: string;
+  onClose: () => void;
   onSubmit: (authenticationMode?: AuthOption, password?: string) => void;
   authOptions: AuthOption[];
   isOpen?: boolean;
@@ -17,7 +25,9 @@ interface ChooseSignupMethodProps {
 export function ChooseSignupMethodForm({
   isLoading,
   validation,
+  username,
   onSubmit,
+  onClose,
   authOptions,
   isOpen = true,
 }: ChooseSignupMethodProps) {
@@ -142,13 +152,15 @@ export function ChooseSignupMethodForm({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  const handleInteractOutside = (
-    event: CustomEvent<{ originalEvent: Event }>,
-  ) => {
-    const overlayElement = document.getElementById("wallet-connect-overlay");
-    if (overlayElement && overlayElement.contains(event.target as Node)) {
-      event.preventDefault();
+  const handleInteractOutside = (event?: Event) => {
+    if (event) {
+      const overlayElement = document.getElementById("wallet-connect-overlay");
+      if (overlayElement && overlayElement.contains(event.target as Node)) {
+        event.preventDefault();
+        return;
+      }
     }
+    onClose?.();
   };
 
   const handleSelectedOption = (
@@ -189,64 +201,66 @@ export function ChooseSignupMethodForm({
   }, [isOpen, showPasswordInput]);
 
   return (
-    <SheetContent
-      side="bottom"
-      className="absolute flex flex-col bg-spacer-100 w-fill h-fit justify-end p-6 gap-4 border-t-0 rounded-tl-[16px] rounded-tr-[16px]"
-      showClose={false}
-      portal={false}
-      onInteractOutside={handleInteractOutside}
-    >
-      {showPasswordInput ? (
-        <PasswordForm
-          isLogin={!!validation.exists}
-          isLoading={isLoading}
-          onSubmit={handlePasswordSubmit}
-          onCancel={handlePasswordCancel}
-        />
-      ) : (
-        <>
-          <SheetTitle className="text-lg text-start font-semibold">
-            {validation.exists ? "Login" : "Choose your method"}
-          </SheetTitle>
-          <div className="flex flex-col gap-3">
-            {options.map((option, index) => {
-              const isWebauthn = option === "webauthn";
-              const isHighlighted = highlightedIndex === index;
-              const hasWebauthn = options.includes("webauthn");
-              const isFirstAndWebauthn = index === 0 && isWebauthn;
+    <Drawer isOpen={isOpen} onClose={handleInteractOutside}>
+      <DrawerContent
+        title={validation.exists ? "Login" : "Choose your method"}
+        icon={
+          validation.exists ? (
+            <AchievementPlayerAvatar username={username ?? ""} />
+          ) : (
+            <PlusIcon variant="line" />
+          )
+        }
+      >
+        {showPasswordInput ? (
+          <PasswordForm
+            isLogin={!!validation.exists}
+            isLoading={isLoading}
+            onSubmit={handlePasswordSubmit}
+            onCancel={handlePasswordCancel}
+          />
+        ) : (
+          <>
+            <div className="flex flex-col gap-3">
+              {options.map((option, index) => {
+                const isWebauthn = option === "webauthn";
+                const isHighlighted = highlightedIndex === index;
+                const hasWebauthn = options.includes("webauthn");
+                const isFirstAndWebauthn = index === 0 && isWebauthn;
 
-              return (
-                <div
-                  key={option}
-                  className={cn(
-                    isFirstAndWebauthn &&
-                      hasWebauthn &&
-                      "border-b border-background-125 pb-4",
-                  )}
-                >
-                  <SignupButton
-                    ref={(el) => {
-                      buttonRefs.current[index] = el;
-                    }}
-                    authMethod={option}
+                return (
+                  <div
+                    key={option}
                     className={cn(
-                      "ring-0 focus-visible:ring-0 ring-offset-0 focus-visible:ring-offset-0 outline-none",
-                      isWebauthn ? "justify-center" : "justify-start",
-                      isHighlighted &&
-                        (isWebauthn ? "opacity-80" : "bg-background-300"),
+                      isFirstAndWebauthn &&
+                        hasWebauthn &&
+                        "border-b border-background-125 pb-4",
                     )}
-                    onClick={(e) => handleSelectedOption(e, option)}
-                    onKeyDown={(e) => handleSelectedOption(e, option)}
-                    disabled={isLoading && selectedAuth !== option}
-                    isLoading={isLoading && selectedAuth === option}
-                    data-highlighted={isHighlighted}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-    </SheetContent>
+                  >
+                    <SignupButton
+                      ref={(el) => {
+                        buttonRefs.current[index] = el;
+                      }}
+                      authMethod={option}
+                      className={cn(
+                        "ring-0 focus-visible:ring-0 ring-offset-0 focus-visible:ring-offset-0 outline-none",
+                        isWebauthn ? "justify-center" : "justify-start",
+                        isHighlighted &&
+                          (isWebauthn ? "opacity-80" : "bg-background-300"),
+                      )}
+                      onClick={(e) => handleSelectedOption(e, option)}
+                      onKeyDown={(e) => handleSelectedOption(e, option)}
+                      disabled={isLoading && selectedAuth !== option}
+                      isLoading={isLoading && selectedAuth === option}
+                      data-highlighted={isHighlighted}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </DrawerContent>
+    </Drawer>
   );
 }

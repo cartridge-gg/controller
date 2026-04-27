@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTitle, Thumbnail } from "@/index";
 export interface DrawerProps extends React.HTMLAttributes<HTMLDivElement> {
   isOpen?: boolean;
   showClose?: boolean;
-  onClose?: () => void;
+  onClose?: (event?: Event) => void;
   className?: string;
   children: React.ReactNode;
 }
@@ -27,7 +27,7 @@ export const Drawer = ({
         )}
         showClose={showClose}
         portal={false}
-        onInteractOutside={() => onClose?.()}
+        onInteractOutside={(event: Event) => onClose?.(event)}
       >
         {children}
       </SheetContent>

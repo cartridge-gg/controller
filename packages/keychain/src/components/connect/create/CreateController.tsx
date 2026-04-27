@@ -11,7 +11,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  Sheet,
 } from "@cartridge/controller-ui";
 import { CreateAccount } from "./username";
 import InAppSpy from "inapp-spy";
@@ -310,8 +309,8 @@ export function CreateControllerView({
   isSlot,
   webauthnPopup,
 }: CreateControllerViewProps) {
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
+  const onClose = () => {
+    if (authenticationStep === AuthenticationStep.ChooseMethod) {
       setAuthenticationStep(AuthenticationStep.FillForm);
     }
   };
@@ -333,10 +332,7 @@ export function CreateControllerView({
 
   return (
     <LayoutContainer>
-      <Sheet
-        open={authenticationStep === AuthenticationStep.ChooseMethod}
-        onOpenChange={handleOpenChange}
-      >
+      <>
         <CreateControllerForm
           theme={theme}
           usernameField={usernameField}
@@ -364,11 +360,13 @@ export function CreateControllerView({
         <ChooseSignupMethodForm
           isLoading={isLoading}
           validation={validation}
+          username={usernameField.value}
+          onClose={onClose}
           onSubmit={onSubmit}
           authOptions={authOptions}
           isOpen={authenticationStep === AuthenticationStep.ChooseMethod}
         />
-      </Sheet>
+      </>
     </LayoutContainer>
   );
 }

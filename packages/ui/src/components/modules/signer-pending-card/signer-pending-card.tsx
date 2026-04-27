@@ -9,31 +9,19 @@ import {
   WalletConnectColorIcon,
 } from "@/components/icons/brand-color";
 import { FingerprintIcon } from "@/components/icons/brand/fingerprint";
+import { SignerMethodKind } from "@/components/modules/signer-method/signer-method";
 import { cn, formatAddress } from "@/utils";
-
-export type SignerPendingCardKind =
-  | "google"
-  | "sms"
-  | "passkey"
-  | "discord"
-  | "metamask"
-  | "argent"
-  | "rabby"
-  | "phantom"
-  | "phantom-evm"
-  | "walletconnect"
-  | "wallet";
 
 interface SignerPendingCardProps {
   className?: string;
-  kind: SignerPendingCardKind;
+  kind: SignerMethodKind;
   inProgress: boolean;
   error?: string;
   authedAddress?: string;
 }
 
 const variants: Record<
-  SignerPendingCardKind,
+  SignerMethodKind,
   {
     icon: React.ReactNode;
     primaryText: string;

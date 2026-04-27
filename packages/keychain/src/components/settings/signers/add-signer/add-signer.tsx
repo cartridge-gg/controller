@@ -21,7 +21,6 @@ import {
   SignerMethod,
   SignerMethodKind,
   SignerPendingCard,
-  SignerPendingCardKind,
   SpinnerIcon,
 } from "@cartridge/controller-ui";
 import {
@@ -138,7 +137,7 @@ export function AddSigner({
         {!signerPending && <SignerAlert />}
         {signerPending ? (
           <SignerPendingCard
-            kind={signerPending.kind as SignerPendingCardKind}
+            kind={signerPending.kind}
             inProgress={signerPending.inProgress}
             error={signerPending.error}
             authedAddress={signerPending.authedAddress}
