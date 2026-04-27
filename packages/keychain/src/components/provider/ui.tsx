@@ -13,16 +13,25 @@ import { QRCodeOverlay } from "../connect/create/wallet-connect/qr-code-overlay"
 
 function QrCodeDisplay({
   showQrCode,
-  setShowQrCode,
   username,
+  displayAvatar = false,
+  setShowQrCode,
 }: {
   showQrCode: boolean;
   username: string;
+  displayAvatar?: boolean;
   setShowQrCode: (value: boolean) => void;
 }) {
   const handleOpenChange = (open: boolean) => {
     setShowQrCode(open);
   };
+
+  // qrcode.react just removes the center to show the logo, breaking it
+  // need to fix it or choose another generator that supports logos properly
+  const qrSize = 144;
+  const logoSize = 48;
+  const logoX = (qrSize - logoSize) / 2;
+  const logoY = (qrSize - logoSize) / 2;
 
   return (
     <Dialog open={showQrCode} onOpenChange={handleOpenChange}>
@@ -35,21 +44,35 @@ function QrCodeDisplay({
         </p>
         <div className="p-4 bg-translucent-light-150 backdrop-blur-sm rounded-3xl">
           <div className="flex items-center justify-center relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg">
-              <AchievementPlayerAvatar
-                username={username}
-                size="xl"
-                className="bg-background-100"
-              />
-            </div>
+            {displayAvatar && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg">
+                <AchievementPlayerAvatar
+                  username={username}
+                  size="xl"
+                  className="bg-background-100"
+                />
+              </div>
+            )}
             <div className="flex items-center justify-center w-[160px] h-[160px] bg-background-100">
               <QRCodeSVG
                 level="L"
                 value={`https://play.cartridge.gg/player/${username}`}
-                size={144}
+                size={qrSize}
                 bgColor="#00000000"
                 fgColor="#ffffff"
                 boostLevel={true}
+                imageSettings={
+                  displayAvatar
+                    ? {
+                        src: "/logos/cartridge.svg",
+                        x: logoX,
+                        y: logoY,
+                        height: logoSize,
+                        width: logoSize,
+                        excavate: true,
+                      }
+                    : undefined
+                }
               />
             </div>
           </div>
