@@ -55,6 +55,8 @@ type SlotFundingToken = {
   address: string;
   icon: string;
   defaultAmount: string;
+  min: number;
+  max: number;
 };
 
 export type SlotFundingResult = {
@@ -122,6 +124,8 @@ function SlotCryptoFundInner({
         address: usdcAddress,
         icon: "https://static.cartridge.gg/tokens/usdc.svg",
         defaultAmount: "10",
+        min: 1,
+        max: 2000,
       },
       {
         key: "STRK",
@@ -131,6 +135,8 @@ function SlotCryptoFundInner({
         address: STRK_CONTRACT_ADDRESS,
         icon: STRK_ICON,
         defaultAmount: "10",
+        min: 1,
+        max: 50000,
       },
     ];
   }, [controller]);
@@ -189,15 +195,32 @@ function SlotCryptoFundInner({
     [amountInput, selectedToken.decimals],
   );
 
+  const minAmount = useMemo(
+    () =>
+      parseTokenAmount(selectedToken.min.toString(), selectedToken.decimals),
+    [selectedToken.min, selectedToken.decimals],
+  );
+  const maxAmount = useMemo(
+    () =>
+      parseTokenAmount(selectedToken.max.toString(), selectedToken.decimals),
+    [selectedToken.max, selectedToken.decimals],
+  );
+
   const isSubmitting = phase !== "idle";
   const hasInsufficientBalance =
     amount !== undefined && balance !== null && amount > balance;
+  const isBelowMin =
+    amount !== undefined && minAmount !== undefined && amount < minAmount;
+  const isAboveMax =
+    amount !== undefined && maxAmount !== undefined && amount > maxAmount;
   const canSubmit =
     !!controller &&
     !!extAccount &&
     amount !== undefined &&
     amount > 0n &&
     !hasInsufficientBalance &&
+    !isBelowMin &&
+    !isAboveMax &&
     !isSubmitting;
 
   const onConnect = useCallback(
@@ -374,6 +397,20 @@ function SlotCryptoFundInner({
             variant="error"
             title="Invalid Amount"
             description={`Enter a valid ${selectedToken.symbol} amount.`}
+          />
+        )}
+        {isBelowMin && (
+          <ErrorAlert
+            variant="error"
+            title="Amount Too Low"
+            description={`Minimum is ${selectedToken.min} ${selectedToken.symbol}.`}
+          />
+        )}
+        {isAboveMax && (
+          <ErrorAlert
+            variant="error"
+            title="Amount Too High"
+            description={`Maximum is ${selectedToken.max.toLocaleString()} ${selectedToken.symbol}.`}
           />
         )}
         {hasInsufficientBalance && (
