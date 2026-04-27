@@ -37,7 +37,11 @@ import {
 } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
-import { formatBalance } from "@/hooks/tokens";
+import {
+  convertTokenAmountToUSD,
+  formatBalance,
+  useFeeToken,
+} from "@/hooks/tokens";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { ErrorAlert } from "@/components/ErrorAlert";
@@ -97,8 +101,12 @@ function SlotCryptoFundInner({
     return () => setOnBackCallback(undefined);
   }, [setOnBackCallback, onBack]);
 
+  const { token: feeToken } = useFeeToken();
   const teamUsdBalance = formatBalance(BigInt(team.credits || 0), 8, 2);
   const teamStrkBalance = formatBalance(BigInt(team.strk || 0), 6, 2);
+  const teamStrkUsdValue = feeToken?.price
+    ? convertTokenAmountToUSD(BigInt(team.strk || 0), 6, feeToken.price)
+    : undefined;
 
   const [selectedTokenKey, setSelectedTokenKey] =
     useState<SlotFundingToken["key"]>("USDC");
@@ -316,6 +324,7 @@ function SlotCryptoFundInner({
               title="STRK"
               image={STRK_ICON}
               amount={`${teamStrkBalance} STRK`}
+              value={teamStrkUsdValue}
               className="pointer-events-none"
             />
           </TokenSummary>
