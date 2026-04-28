@@ -30,6 +30,7 @@ import {
   SelectContent,
   SelectItem,
   SlotIcon,
+  StarknetColorIcon,
   Thumbnail,
   TokenCard,
   TokenSelectHeader,
@@ -37,8 +38,13 @@ import {
 } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
-import { formatBalance } from "@/hooks/tokens";
+import {
+  convertTokenAmountToUSD,
+  formatBalance,
+  useFeeToken,
+} from "@/hooks/tokens";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
+import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { createStarknetCryptoPayment } from "@/hooks/payments/crypto";
 import { Team } from "./teams";
@@ -49,8 +55,10 @@ type SlotFundingToken = {
   name: string;
   decimals: number;
   address: string;
-  icon: string;
+  icon: string | React.ReactNode;
   defaultAmount: string;
+  min: number;
+  max: number;
 };
 
 export type SlotFundingResult = {
@@ -91,7 +99,12 @@ function SlotCryptoFundInner({
     return () => setOnBackCallback(undefined);
   }, [setOnBackCallback, onBack]);
 
+  const { token: feeToken } = useFeeToken();
   const teamUsdBalance = formatBalance(BigInt(team.credits || 0), 8, 2);
+  const teamStrkBalance = formatBalance(BigInt(team.strk || 0), 6, 2);
+  const teamStrkUsdValue = feeToken?.price
+    ? convertTokenAmountToUSD(BigInt(team.strk || 0), 6, feeToken.price)
+    : undefined;
 
   const [selectedTokenKey, setSelectedTokenKey] =
     useState<SlotFundingToken["key"]>("USDC");
@@ -117,6 +130,19 @@ function SlotCryptoFundInner({
         address: usdcAddress,
         icon: "https://static.cartridge.gg/tokens/usdc.svg",
         defaultAmount: "10",
+        min: 1,
+        max: 2000,
+      },
+      {
+        key: "STRK",
+        symbol: "STRK",
+        name: "Starknet Token",
+        decimals: 18,
+        address: STRK_CONTRACT_ADDRESS,
+        icon: <StarknetColorIcon />,
+        defaultAmount: "10",
+        min: 1,
+        max: 50000,
       },
     ];
   }, [controller]);
@@ -175,15 +201,32 @@ function SlotCryptoFundInner({
     [amountInput, selectedToken.decimals],
   );
 
+  const minAmount = useMemo(
+    () =>
+      parseTokenAmount(selectedToken.min.toString(), selectedToken.decimals),
+    [selectedToken.min, selectedToken.decimals],
+  );
+  const maxAmount = useMemo(
+    () =>
+      parseTokenAmount(selectedToken.max.toString(), selectedToken.decimals),
+    [selectedToken.max, selectedToken.decimals],
+  );
+
   const isSubmitting = phase !== "idle";
   const hasInsufficientBalance =
     amount !== undefined && balance !== null && amount > balance;
+  const isBelowMin =
+    amount !== undefined && minAmount !== undefined && amount < minAmount;
+  const isAboveMax =
+    amount !== undefined && maxAmount !== undefined && amount > maxAmount;
   const canSubmit =
     !!controller &&
     !!extAccount &&
     amount !== undefined &&
     amount > 0n &&
     !hasInsufficientBalance &&
+    !isBelowMin &&
+    !isAboveMax &&
     !isSubmitting;
 
   const onConnect = useCallback(
@@ -275,6 +318,13 @@ function SlotCryptoFundInner({
               value={`$${teamUsdBalance}`}
               className="pointer-events-none"
             />
+            <TokenCard
+              title="STRK"
+              image={<StarknetColorIcon />}
+              amount={`${teamStrkBalance} STRK`}
+              value={teamStrkUsdValue}
+              className="pointer-events-none"
+            />
           </TokenSummary>
         </Card>
 
@@ -354,6 +404,20 @@ function SlotCryptoFundInner({
             variant="error"
             title="Invalid Amount"
             description={`Enter a valid ${selectedToken.symbol} amount.`}
+          />
+        )}
+        {isBelowMin && (
+          <ErrorAlert
+            variant="error"
+            title="Amount Too Low"
+            description={`Minimum is ${selectedToken.min} ${selectedToken.symbol}.`}
+          />
+        )}
+        {isAboveMax && (
+          <ErrorAlert
+            variant="error"
+            title="Amount Too High"
+            description={`Maximum is ${selectedToken.max.toLocaleString()} ${selectedToken.symbol}.`}
           />
         )}
         {hasInsufficientBalance && (
