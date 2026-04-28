@@ -238,6 +238,8 @@ export function useCoinbase({
   const confirmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Whether a terminal status has been reached (prevents popup-closed from overriding) */
   const terminalReachedRef = useRef(false);
+  /** Whether Coinbase has reported that funds were sent for this order. */
+  const successObservedRef = useRef(false);
 
   /** Clean up message listener, popup watcher, and poll */
   const cleanup = useCallback(() => {
@@ -292,7 +294,9 @@ export function useCoinbase({
 
         if (result.status === CoinbaseOnrampStatus.Completed) {
           setOrderStatus(CoinbaseOnrampStatus.Completed);
+          setPaymentSuccess(true);
           terminalReachedRef.current = true;
+          successObservedRef.current = true;
           stopPoll();
           // Close the popup directly via window reference
           console.log(
@@ -300,6 +304,12 @@ export function useCoinbase({
           );
           popupRef.current?.close();
         } else if (result.status === CoinbaseOnrampStatus.Failed) {
+          if (successObservedRef.current) {
+            console.warn(
+              "[coinbase-hook] Ignoring failed order status after success",
+            );
+            return;
+          }
           setOrderStatus(CoinbaseOnrampStatus.Failed);
           terminalReachedRef.current = true;
           stopPoll();
@@ -328,7 +338,7 @@ export function useCoinbase({
 
   /**
    * Switch to fast 1s poll after popup signals success.
-   * Also starts a 15s timeout — if the backend doesn't confirm
+   * Also starts a timeout — if the backend doesn't confirm
    * Completed within this window, treat it as fatal.
    */
   const startConfirmationPoll = useCallback(
@@ -377,6 +387,7 @@ export function useCoinbase({
       setOrderStatus(undefined);
       setOrderTxHash(undefined);
       terminalReachedRef.current = false;
+      successObservedRef.current = false;
 
       // Clean up any previous session
       cleanup();
@@ -417,10 +428,44 @@ export function useCoinbase({
 
         console.log("[coinbase-hook] postMessage event:", type, data);
 
+        const resetAttemptFailure = () => {
+          setPopupClosed(false);
+          setOrderStatus((status) =>
+            status === CoinbaseOnrampStatus.Failed ? undefined : status,
+          );
+          if (!pollRef.current && !successObservedRef.current) {
+            startFallbackPoll(targetOrderId);
+          }
+        };
+
+        const isErrorEvent =
+          type === "onramp_api.polling_error" ||
+          type === "onramp_api.load_error" ||
+          type === "onramp_api.cancel";
+
+        if (successObservedRef.current && isErrorEvent) {
+          console.warn(
+            "[coinbase-hook] Ignoring Coinbase error event after success:",
+            type,
+            data,
+          );
+          return;
+        }
+
         switch (type) {
+          case "onramp_api.apple_pay_button_pressed":
+          case "onramp_api.pending_payment_auth":
+          case "onramp_api.payment_authorized":
+          case "onramp_api.commit_success":
+          case "onramp_api.polling_start":
+            resetAttemptFailure();
+            break;
+
           case "onramp_api.polling_success":
             // Mark terminal immediately so popup-close watcher doesn't interfere
             terminalReachedRef.current = true;
+            successObservedRef.current = true;
+            resetAttemptFailure();
             // Signal success so UI can navigate to bridge screen immediately
             setPaymentSuccess(true);
             // Close the popup directly via window reference
@@ -459,10 +504,9 @@ export function useCoinbase({
             break;
 
           case "onramp_api.cancel":
-            setOrderStatus(CoinbaseOnrampStatus.Failed);
-            terminalReachedRef.current = true;
-            stopPoll();
-            onError?.(new Error("Payment was cancelled."));
+            // Native payment-sheet cancellation is scoped to this attempt. The
+            // Coinbase iframe can stay open and the user can retry the same order.
+            setPopupClosed(false);
             break;
         }
       };
@@ -520,6 +564,7 @@ export function useCoinbase({
         setPopupClosed(false);
         setPaymentSuccess(false);
         terminalReachedRef.current = false;
+        successObservedRef.current = false;
 
         // Clean up any previous session
         cleanup();

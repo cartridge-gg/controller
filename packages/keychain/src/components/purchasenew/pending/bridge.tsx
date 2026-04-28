@@ -85,6 +85,7 @@ export function BridgePending({
   const onOnchainPurchase = onchainContext.onOnchainPurchase;
   const orderStatus = onchainContext.orderStatus;
   const orderTxHash = onchainContext.orderTxHash;
+  const paymentSuccess = onchainContext.paymentSuccess;
 
   const [initialBridgeHash, setInitialBridgeHash] = useState(bridgeTxHash);
 
@@ -110,13 +111,14 @@ export function BridgePending({
   // Handle Apple Pay (Coinbase) order status from context polling
   useEffect(() => {
     if (paymentMethod === "apple-pay" && !paymentCompleted) {
-      if (orderStatus === CoinbaseOnrampStatus.Completed) {
+      if (paymentSuccess || orderStatus === CoinbaseOnrampStatus.Completed) {
+        setError(undefined);
         setDepositCompleted(true);
       } else if (orderStatus === CoinbaseOnrampStatus.Failed) {
         setError(new Error("Coinbase payment failed. Please try again."));
       }
     }
-  }, [paymentMethod, orderStatus, paymentCompleted]);
+  }, [paymentMethod, paymentSuccess, orderStatus, paymentCompleted]);
 
   useEffect(() => {
     if (wallet && initialBridgeHash) {
