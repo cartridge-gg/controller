@@ -7,7 +7,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { useEffect, useState } from "react";
 
 const meta: Meta<typeof DrawerStory> = {
-  title: "Primitives/Drawer",
+  title: "Primitives/Drawers/Simple",
   component: DrawerStory,
   tags: ["autodocs"],
 };

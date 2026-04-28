@@ -10,31 +10,31 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 import { credentialToAuth } from "../types";
 import { useUsernameValidation } from "./useUsernameValidation";
-import { PasswordForm } from "./password/PasswordForm";
 
 interface ChooseSignupMethodProps {
+  isOpen?: boolean;
   isLoading: boolean;
   validation: ReturnType<typeof useUsernameValidation>;
   username?: string;
   onClose: () => void;
-  onSubmit: (authenticationMode?: AuthOption, password?: string) => void;
+  onSubmit: (authenticationMode?: AuthOption) => void;
+  onPasswordSwitch: (enablePasswordInput: boolean) => void;
   authOptions: AuthOption[];
-  isOpen?: boolean;
 }
 
 export function ChooseSignupMethodForm({
+  isOpen = true,
   isLoading,
   validation,
   username,
   onSubmit,
   onClose,
+  onPasswordSwitch,
   authOptions,
-  isOpen = true,
 }: ChooseSignupMethodProps) {
   const [selectedAuth, setSelectedAuth] = useState<AuthOption | undefined>(
     undefined,
   );
-  const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -67,7 +67,7 @@ export function ChooseSignupMethodForm({
 
   // Auto-focus first button when sheet opens
   useEffect(() => {
-    if (!showPasswordInput && options.length > 0) {
+    if (options.length > 0) {
       setHighlightedIndex(0);
       // Small delay to ensure the sheet is fully rendered
       const timer = setTimeout(() => {
@@ -75,34 +75,19 @@ export function ChooseSignupMethodForm({
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [showPasswordInput, options.length]);
-
-  // Automatically show password form for login if password is the only option
-  useEffect(() => {
-    if (
-      validation.exists &&
-      options.length === 1 &&
-      options[0] === "password"
-    ) {
-      setShowPasswordInput(true);
-      setSelectedAuth("password");
-    }
-  }, [validation.exists, options]);
+  }, [options.length]);
 
   useEffect(() => {
     if (!isLoading) {
-      // Don't reset if we're showing password input
-      if (!showPasswordInput) {
-        setSelectedAuth(undefined);
-      }
+      setSelectedAuth(undefined);
     }
-  }, [isLoading, showPasswordInput]);
+  }, [isLoading]);
 
   // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       // Only handle keyboard events when the sheet is actually open
-      if (!isOpen || showPasswordInput || isLoading) return;
+      if (!isOpen || isLoading) return;
 
       switch (e.key) {
         case "ArrowDown":
@@ -129,8 +114,7 @@ export function ChooseSignupMethodForm({
           if (options[highlightedIndex]) {
             const option = options[highlightedIndex];
             if (option === "password") {
-              setShowPasswordInput(true);
-              setSelectedAuth(option);
+              onPasswordSwitch(true);
             } else {
               setSelectedAuth(option);
               onSubmit(option);
@@ -144,7 +128,7 @@ export function ChooseSignupMethodForm({
           break;
       }
     },
-    [isOpen, showPasswordInput, isLoading, options, highlightedIndex, onSubmit],
+    [isOpen, isLoading, options, highlightedIndex, onSubmit, onPasswordSwitch],
   );
 
   useEffect(() => {
@@ -152,7 +136,8 @@ export function ChooseSignupMethodForm({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  const handleInteractOutside = (event?: Event) => {
+  const handleClose = (event?: Event) => {
+    if (!isOpen) return; // avoid closing if another drawer is opening
     if (event) {
       const overlayElement = document.getElementById("wallet-connect-overlay");
       if (overlayElement && overlayElement.contains(event.target as Node)) {
@@ -176,90 +161,66 @@ export function ChooseSignupMethodForm({
     e.preventDefault();
 
     if (option === "password") {
-      setShowPasswordInput(true);
-      setSelectedAuth(option);
+      onPasswordSwitch(true);
     } else {
       setSelectedAuth(option);
       onSubmit(option);
     }
   };
 
-  const handlePasswordSubmit = (password: string) => {
-    onSubmit("password", password);
-  };
-
-  const handlePasswordCancel = () => {
-    setShowPasswordInput(false);
-    setSelectedAuth(undefined);
-  };
-
-  useEffect(() => {
-    // sheet closed from password form
-    if (!isOpen && showPasswordInput) {
-      handlePasswordCancel();
+  const { title, icon } = useMemo(() => {
+    if (validation.exists) {
+      return {
+        title: "Login",
+        icon: <AchievementPlayerAvatar username={username ?? ""} />,
+      };
     }
-  }, [isOpen, showPasswordInput]);
+    return {
+      title: "Choose your method",
+      icon: <PlusIcon variant="line" />,
+    };
+  }, [validation.exists, username]);
 
   return (
-    <Drawer isOpen={isOpen} onClose={handleInteractOutside}>
-      <DrawerContent
-        title={validation.exists ? "Login" : "Choose your method"}
-        icon={
-          validation.exists ? (
-            <AchievementPlayerAvatar username={username ?? ""} />
-          ) : (
-            <PlusIcon variant="line" />
-          )
-        }
-      >
-        {showPasswordInput ? (
-          <PasswordForm
-            isLogin={!!validation.exists}
-            isLoading={isLoading}
-            onSubmit={handlePasswordSubmit}
-            onCancel={handlePasswordCancel}
-          />
-        ) : (
-          <>
-            <div className="flex flex-col gap-3">
-              {options.map((option, index) => {
-                const isWebauthn = option === "webauthn";
-                const isHighlighted = highlightedIndex === index;
-                const hasWebauthn = options.includes("webauthn");
-                const isFirstAndWebauthn = index === 0 && isWebauthn;
+    <Drawer isOpen={isOpen} onClose={handleClose}>
+      <DrawerContent title={title} icon={icon}>
+        <div className="flex flex-col gap-3">
+          {options.map((option, index) => {
+            const isWebauthn = option === "webauthn";
+            const isHighlighted = highlightedIndex === index;
+            const hasWebauthn = options.includes("webauthn");
+            const isFirstAndWebauthn = index === 0 && isWebauthn;
 
-                return (
-                  <div
-                    key={option}
-                    className={cn(
-                      isFirstAndWebauthn &&
-                        hasWebauthn &&
-                        "border-b border-background-125 pb-4",
-                    )}
-                  >
-                    <SignupButton
-                      ref={(el) => {
-                        buttonRefs.current[index] = el;
-                      }}
-                      authMethod={option}
-                      className={cn(
-                        "ring-0 focus-visible:ring-0 ring-offset-0 focus-visible:ring-offset-0 outline-none",
-                        isWebauthn ? "justify-center" : "justify-start",
-                        isHighlighted &&
-                          (isWebauthn ? "opacity-80" : "bg-background-300"),
-                      )}
-                      onClick={(e) => handleSelectedOption(e, option)}
-                      onKeyDown={(e) => handleSelectedOption(e, option)}
-                      disabled={isLoading && selectedAuth !== option}
-                      isLoading={isLoading && selectedAuth === option}
-                      data-highlighted={isHighlighted}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
+            return (
+              <div
+                key={option}
+                className={cn(
+                  isFirstAndWebauthn &&
+                    hasWebauthn &&
+                    "border-b border-background-125 pb-4",
+                )}
+              >
+                <SignupButton
+                  ref={(el) => {
+                    buttonRefs.current[index] = el;
+                  }}
+                  authMethod={option}
+                  className={cn(
+                    "ring-0 focus-visible:ring-0 ring-offset-0 focus-visible:ring-offset-0 outline-none",
+                    isWebauthn ? "justify-center" : "justify-start",
+                    isHighlighted &&
+                      (isWebauthn ? "opacity-80" : "bg-background-300"),
+                  )}
+                  onClick={(e) => handleSelectedOption(e, option)}
+                  onKeyDown={(e) => handleSelectedOption(e, option)}
+                  disabled={isLoading && selectedAuth !== option}
+                  isLoading={isLoading && selectedAuth === option}
+                  data-highlighted={isHighlighted}
+                />
+              </div>
+            );
+          })}
+        </div>
       </DrawerContent>
     </Drawer>
   );

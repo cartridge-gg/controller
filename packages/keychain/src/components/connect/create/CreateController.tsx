@@ -31,6 +31,7 @@ import {
 } from "@/hooks/viewport";
 import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
+import { PasswordForm } from "./password/PasswordForm";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -260,7 +261,7 @@ function CreateControllerForm({
             isLoading={isLoading}
             disabled={
               validation.status !== "valid" ||
-              authenticationStep === AuthenticationStep.ChooseMethod ||
+              authenticationStep !== AuthenticationStep.FillForm ||
               isDropdownOpen
             }
             data-testid="submit-button"
@@ -309,11 +310,20 @@ export function CreateControllerView({
   isSlot,
   webauthnPopup,
 }: CreateControllerViewProps) {
-  const onClose = () => {
-    if (authenticationStep === AuthenticationStep.ChooseMethod) {
-      setAuthenticationStep(AuthenticationStep.FillForm);
-    }
-  };
+  const onClose = useCallback(() => {
+    setAuthenticationStep(AuthenticationStep.FillForm);
+  }, [setAuthenticationStep]);
+
+  const onPasswordSwitch = useCallback(
+    (enablePasswordInput: boolean) => {
+      setAuthenticationStep(
+        enablePasswordInput
+          ? AuthenticationStep.PasswordForm
+          : AuthenticationStep.ChooseMethod,
+      );
+    },
+    [setAuthenticationStep],
+  );
 
   // Handles scroll to top on mobile when keyboard opens
   const { isMobile } = useDevice();
@@ -331,8 +341,8 @@ export function CreateControllerView({
   }, [isMobile, authenticationStep]);
 
   return (
-    <LayoutContainer>
-      <>
+    <>
+      <LayoutContainer>
         <CreateControllerForm
           theme={theme}
           usernameField={usernameField}
@@ -357,17 +367,26 @@ export function CreateControllerView({
           isSlot={isSlot}
           webauthnPopup={webauthnPopup}
         />
-        <ChooseSignupMethodForm
-          isLoading={isLoading}
-          validation={validation}
-          username={usernameField.value}
-          onClose={onClose}
-          onSubmit={onSubmit}
-          authOptions={authOptions}
-          isOpen={authenticationStep === AuthenticationStep.ChooseMethod}
-        />
-      </>
-    </LayoutContainer>
+      </LayoutContainer>
+      <ChooseSignupMethodForm
+        isOpen={authenticationStep === AuthenticationStep.ChooseMethod}
+        isLoading={isLoading}
+        validation={validation}
+        username={usernameField.value}
+        onClose={onClose}
+        onSubmit={onSubmit}
+        onPasswordSwitch={onPasswordSwitch}
+        authOptions={authOptions}
+      />
+      <PasswordForm
+        isOpen={authenticationStep === AuthenticationStep.PasswordForm}
+        isLoading={isLoading}
+        isLogin={!!validation.exists}
+        onClose={onClose}
+        onSubmit={onSubmit}
+        onPasswordSwitch={onPasswordSwitch}
+      />
+    </>
   );
 }
 
@@ -464,6 +483,17 @@ export function CreateController({
 
         if (forcedAction === "login" && !validation.exists) {
           setError(new Error("Account not found"));
+          return;
+        }
+
+        if (
+          selectedAuthenticationMode === undefined &&
+          validation.signers &&
+          allUseSameAuth(validation.signers) &&
+          credentialToAuth(validation.signers[0]) === "password"
+        ) {
+          // Automatically show password form for login if password is the only option
+          setAuthenticationStep(AuthenticationStep.PasswordForm);
           return;
         }
 

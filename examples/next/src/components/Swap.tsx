@@ -3,12 +3,10 @@
 import { useCallback } from "react";
 import { BigNumberish, Call } from "starknet";
 import { useAccount } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector/controller";
 import { Button } from "@cartridge/controller-ui";
 
 export function Swap() {
-  const { account, address, connector } = useAccount();
-  const ctrlConnector = connector as unknown as ControllerConnector;
+  const { account, address } = useAccount();
 
   const execute = useCallback(
     (transactions: Call[]) => {
@@ -24,11 +22,11 @@ export function Swap() {
       }));
       if (account) {
         account.execute(calls);
-        // this is causing the controller to close on validation error
+        // this causes the controller to close on validation error
         // ctrlConnector.controller.openExecute(calls);
       }
     },
-    [account, address, ctrlConnector],
+    [account, address],
   );
 
   if (!account) {

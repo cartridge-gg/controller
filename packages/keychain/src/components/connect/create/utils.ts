@@ -66,4 +66,9 @@ type Nullable<T> = T | null | undefined;
 export enum AuthenticationStep {
   FillForm,
   ChooseMethod,
+  PasswordForm,
+  // Pending,
+  // Success,
+  // Error,
+  // Welcome,
 }
