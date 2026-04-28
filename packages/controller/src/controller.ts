@@ -1,8 +1,11 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
 import { Policy } from "@cartridge/presets";
-import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
-import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
+import {
+  StarknetInjectedWallet,
+  type WalletWithStarknetFeatures,
+} from "@starknet-io/get-starknet-core";
+import { registerWallet } from "@wallet-standard/wallet";
 import {
   AddInvokeTransactionResult,
   AddStarknetChainParameters,
@@ -155,6 +158,11 @@ export default class ControllerProvider extends BaseProvider {
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;
+      // Publish via wallet-standard discovery so consumers like starknet-start
+      // (which discovers via @starknet-io/get-starknet-core) pick up our
+      // WalletWithStarknetFeatures wrapper instead of auto-wrapping the legacy
+      // window injection.
+      registerWallet(this.asWalletStandard());
     }
   }
 
@@ -415,8 +423,14 @@ export default class ControllerProvider extends BaseProvider {
 
     // Disconnect the keychain (clears iframe localStorage) before emitting
     // state changes, because emitAccountsChanged can trigger framework
-    // re-renders that navigate or reload the page.
-    await this.keychain.disconnect();
+    // re-renders that navigate or reload the page. The keychain reloads its
+    // iframe as part of teardown, so the RPC response may never arrive — treat
+    // that rejection as success and continue cleanup.
+    try {
+      await this.keychain.disconnect();
+    } catch {
+      // Iframe unloaded before responding; teardown still happened.
+    }
     this.close();
 
     this.emitAccountsChanged([]);
@@ -730,13 +744,6 @@ export default class ControllerProvider extends BaseProvider {
    * This allows using the controller with libraries that expect the wallet standard interface.
    */
   asWalletStandard(): WalletWithStarknetFeatures {
-    if (typeof window !== "undefined") {
-      console.warn(
-        `Casting Controller to WalletWithStarknetFeatures is an experimental feature. ` +
-          `Please report any issues at https://github.com/cartridge-gg/controller/issues`,
-      );
-    }
-
     const controller = this;
     const inner = new StarknetInjectedWallet(controller);
 
