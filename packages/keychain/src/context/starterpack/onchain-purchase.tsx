@@ -127,6 +127,7 @@ export interface OnchainPurchaseContextType {
     force?: boolean;
   }) => Promise<CoinbaseOrderResult | undefined>;
   openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
+  resetCoinbasePurchase: () => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
   fetchCoinbaseLimits: () => Promise<CoinbaseLimitsResult | undefined>;
   submitCoinbaseLimitsUpgrade: (
@@ -305,6 +306,7 @@ export const OnchainPurchaseProvider = ({
     popupClosed,
     paymentSuccess,
     openPaymentPopup,
+    resetOrder: resetCoinbaseOrder,
     limits: coinbaseLimits,
     isFetchingLimits: isFetchingCoinbaseLimits,
     isSubmittingLimitsUpgrade,
@@ -314,23 +316,36 @@ export const OnchainPurchaseProvider = ({
     onError: setDisplayError,
   });
 
+  const resetCoinbasePurchase = useCallback(() => {
+    resetCoinbaseOrder();
+    setCoinbaseLsSwapId(undefined);
+  }, [resetCoinbaseOrder]);
+
   // Handle Apple Pay selection from URL (returning from verification)
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     if (searchParams.get("method") === "apple-pay") {
+      resetCoinbasePurchase();
       setIsApplePaySelected(true);
       clearSelectedWalletInternal();
     }
-  }, [location.search, clearSelectedWalletInternal]);
+  }, [location.search, clearSelectedWalletInternal, resetCoinbasePurchase]);
 
   // Reset state when starterpack changes
   useEffect(() => {
+    resetCoinbasePurchase();
     resetTokenSelection();
     resetQuantity();
     setPurchaseItems([]);
     setPurchaseDescription(undefined);
     setIssueSignature(undefined);
-  }, [bundleId, starterpackId, resetTokenSelection, resetQuantity]);
+  }, [
+    bundleId,
+    starterpackId,
+    resetTokenSelection,
+    resetQuantity,
+    resetCoinbasePurchase,
+  ]);
 
   // Update purchase items and USD amount when starterpack details change
   useEffect(() => {
@@ -685,17 +700,19 @@ export const OnchainPurchaseProvider = ({
   ]);
 
   const onApplePaySelect = useCallback(() => {
+    resetCoinbasePurchase();
     setIsApplePaySelected(true);
     setIsCoinflowSelected(false);
     clearSelectedWalletInternal();
-  }, [clearSelectedWalletInternal]);
+  }, [clearSelectedWalletInternal, resetCoinbasePurchase]);
 
   const onCoinflowSelect = useCallback(() => {
+    resetCoinbasePurchase();
     setIsCoinflowSelected(true);
     setIsApplePaySelected(false);
     clearSelectedWalletInternal();
     savePaymentMethod("coinflow");
-  }, [clearSelectedWalletInternal, savePaymentMethod]);
+  }, [clearSelectedWalletInternal, savePaymentMethod, resetCoinbasePurchase]);
 
   const onCreateCoinbaseOrder = useCallback(
     async (opts?: { force?: boolean }) => {
@@ -707,7 +724,20 @@ export const OnchainPurchaseProvider = ({
       }
 
       const force = opts?.force ?? false;
-      if (isCreatingOrder || (paymentLink && !force)) return;
+      const hasStaleCoinbaseOrder =
+        paymentSuccess ||
+        popupClosed ||
+        orderStatus === CoinbaseOnrampStatus.Completed ||
+        orderStatus === CoinbaseOnrampStatus.Failed;
+
+      if (
+        isCreatingOrder ||
+        (paymentLink && !force && !hasStaleCoinbaseOrder)
+      ) {
+        return;
+      }
+
+      setCoinbaseLsSwapId(undefined);
 
       const order = await createCoinbaseOrder({
         purchaseUSDCAmount: applePayUsdcAmount,
@@ -724,6 +754,9 @@ export const OnchainPurchaseProvider = ({
       applePayUsdcAmount,
       isCreatingOrder,
       paymentLink,
+      paymentSuccess,
+      popupClosed,
+      orderStatus,
       createCoinbaseOrder,
     ],
   );
@@ -779,6 +812,7 @@ export const OnchainPurchaseProvider = ({
     onCoinflowSelect,
     onCreateCoinbaseOrder,
     openPaymentPopup,
+    resetCoinbasePurchase,
     getTransactions,
     coinbaseLimits,
     isFetchingCoinbaseLimits,

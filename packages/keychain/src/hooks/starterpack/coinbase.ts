@@ -84,6 +84,7 @@ export interface UseCoinbaseReturn {
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
   getQuote: (input: CoinbaseQuoteInput) => Promise<CoinbaseQuoteResult>;
   openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
+  resetOrder: () => void;
   fetchLimits: () => Promise<CoinbaseLimitsResult | undefined>;
   submitLimitsUpgrade: (
     input: SubmitCoinbaseLimitsUpgradeInput,
@@ -263,6 +264,19 @@ export function useCoinbase({
 
   // Clean up on unmount
   useEffect(() => cleanup, [cleanup]);
+
+  const resetOrder = useCallback(() => {
+    cleanup();
+    setOrderId(undefined);
+    setPaymentLink(undefined);
+    setOrderError(null);
+    setOrderStatus(undefined);
+    setOrderTxHash(undefined);
+    setPopupClosed(false);
+    setPaymentSuccess(false);
+    terminalReachedRef.current = false;
+    successObservedRef.current = false;
+  }, [cleanup]);
 
   /** Stop polling and clear timeout */
   const stopPoll = useCallback(() => {
@@ -558,16 +572,7 @@ export function useCoinbase({
 
       try {
         setIsCreatingOrder(true);
-        setOrderError(null);
-        setOrderStatus(undefined);
-        setOrderTxHash(undefined);
-        setPopupClosed(false);
-        setPaymentSuccess(false);
-        terminalReachedRef.current = false;
-        successObservedRef.current = false;
-
-        // Clean up any previous session
-        cleanup();
+        resetOrder();
 
         const order = await createCoinbaseOrder(input, !isMainnet);
 
@@ -584,7 +589,7 @@ export function useCoinbase({
         setIsCreatingOrder(false);
       }
     },
-    [controller, isMainnet, onError, cleanup],
+    [controller, isMainnet, onError, resetOrder],
   );
 
   const getTransactions = useCallback(
@@ -672,6 +677,7 @@ export function useCoinbase({
     getTransactions,
     getQuote,
     openPaymentPopup,
+    resetOrder,
     fetchLimits,
     submitLimitsUpgrade,
   };

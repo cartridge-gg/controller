@@ -77,6 +77,7 @@ export function OnchainCheckout() {
     isCoinflowSelected,
     onCoinflowSelect,
     onCreateCoinbaseOrder,
+    resetCoinbasePurchase,
     isCreatingOrder,
     usdAmount,
     coinbaseLimits,
@@ -326,6 +327,7 @@ export function OnchainCheckout() {
         await onCreditCardPurchase();
         navigate("/purchase/checkout/coinflow");
       } else if (isApplePaySelected) {
+        resetCoinbasePurchase();
         const [{ data: meData }, { data: accountPrivateData }] =
           await Promise.all([refetchMe(), refetchAccountPrivate()]);
         const me = meData?.me;
@@ -348,7 +350,7 @@ export function OnchainCheckout() {
         }
 
         try {
-          await onCreateCoinbaseOrder();
+          await onCreateCoinbaseOrder({ force: true });
         } catch (err) {
           // Safety net: Coinbase can still reject if /limits was stale.
           // Navigate anyway so the verify flow takes over.
@@ -381,6 +383,7 @@ export function OnchainCheckout() {
     isApplePaySelected,
     applePayLimitExceeded,
     fetchCoinbaseLimits,
+    resetCoinbasePurchase,
     onCreditCardPurchase,
     refetchMe,
     refetchAccountPrivate,

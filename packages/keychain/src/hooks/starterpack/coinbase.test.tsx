@@ -127,6 +127,49 @@ describe("useCoinbase", () => {
 
     unmount();
   });
+
+  it("clears a completed session before starting a fresh purchase", async () => {
+    vi.spyOn(window, "open").mockReturnValue({
+      closed: false,
+      close: vi.fn(),
+    } as unknown as Window);
+
+    const { result, unmount } = renderHook(() =>
+      useCoinbase({ onError: vi.fn() }),
+    );
+
+    await act(async () => {
+      await result.current.createOrder({ purchaseUSDCAmount: "2.000000" });
+    });
+
+    expect(result.current.orderId).toBe("order-1");
+    expect(result.current.paymentLink).toBe("https://pay.coinbase.com/buy");
+
+    act(() => {
+      result.current.openPaymentPopup();
+    });
+
+    act(() => {
+      dispatchCoinbaseRelay("onramp_api.polling_success");
+    });
+
+    await waitFor(() => {
+      expect(result.current.paymentSuccess).toBe(true);
+    });
+
+    act(() => {
+      result.current.resetOrder();
+    });
+
+    expect(result.current.orderId).toBeUndefined();
+    expect(result.current.paymentLink).toBeUndefined();
+    expect(result.current.orderStatus).toBeUndefined();
+    expect(result.current.orderTxHash).toBeUndefined();
+    expect(result.current.popupClosed).toBe(false);
+    expect(result.current.paymentSuccess).toBe(false);
+
+    unmount();
+  });
 });
 
 function dispatchCoinbaseRelay(
