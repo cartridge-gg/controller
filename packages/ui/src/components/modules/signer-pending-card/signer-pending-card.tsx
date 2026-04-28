@@ -1,6 +1,13 @@
-import { MobileIcon, WalletIcon } from "@/components/icons";
+import {
+  LockIcon,
+  MobileIcon,
+  WalletIcon,
+  WarningIcon,
+} from "@/components/icons";
 import {
   ArgentColorIcon,
+  BaseColorIcon,
+  BraavosColorIcon,
   DiscordColorIcon,
   GoogleColorIcon,
   MetaMaskColorIcon,
@@ -50,6 +57,16 @@ const variants: Record<
     primaryText: "Waiting for Confirmation",
     secondaryText: "Continue in browser",
   },
+  webauthn: {
+    icon: <FingerprintIcon size="xl" variant="line" />,
+    primaryText: "Waiting for Confirmation",
+    secondaryText: "Continue in browser",
+  },
+  password: {
+    icon: <LockIcon size="xl" />,
+    primaryText: "Waiting for Confirmation",
+    secondaryText: "Continue in browser",
+  },
   metamask: {
     icon: <MetaMaskColorIcon size="xl" />,
     primaryText: "Waiting for Signature",
@@ -57,6 +74,16 @@ const variants: Record<
   },
   argent: {
     icon: <ArgentColorIcon size="xl" />,
+    primaryText: "Waiting for Signature",
+    secondaryText: "Don't see your wallet? Check your other browser windows",
+  },
+  braavos: {
+    icon: <BraavosColorIcon size="xl" />,
+    primaryText: "Waiting for Signature",
+    secondaryText: "Don't see your wallet? Check your other browser windows",
+  },
+  base: {
+    icon: <BaseColorIcon size="xl" />,
     primaryText: "Waiting for Signature",
     secondaryText: "Don't see your wallet? Check your other browser windows",
   },
@@ -97,7 +124,15 @@ export function SignerPendingCard({
   error,
   authedAddress,
 }: SignerPendingCardProps) {
-  const { icon, primaryText, secondaryText, label } = variants[kind];
+  const signerExist = kind in variants;
+  const { icon, label, primaryText, secondaryText } = signerExist
+    ? variants[kind]
+    : {
+        icon: <WarningIcon size="xl" />,
+        primaryText: "",
+        secondaryText: "",
+        label: kind,
+      };
 
   if (kind === "sms" && (inProgress || error)) {
     return <></>;

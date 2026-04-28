@@ -1,6 +1,13 @@
-import { MobileIcon, WalletIcon, WarningIcon } from "@/components/icons";
+import {
+  LockIcon,
+  MobileIcon,
+  WalletIcon,
+  WarningIcon,
+} from "@/components/icons";
 import {
   ArgentColorIcon,
+  BaseColorIcon,
+  BraavosColorIcon,
   DiscordColorIcon,
   GoogleColorIcon,
   MetaMaskColorIcon,
@@ -14,15 +21,19 @@ import { cn } from "@/utils";
 export type SignerMethodKind =
   | "google"
   | "sms"
-  | "passkey"
   | "discord"
+  | "passkey"
+  | "webauthn"
+  | "password"
+  | "wallet"
   | "metamask"
   | "argent"
+  | "braavos"
+  | "base"
   | "rabby"
   | "phantom"
   | "phantom-evm"
-  | "walletconnect"
-  | "wallet";
+  | "walletconnect";
 
 interface SignerMethodProps {
   className?: string;
@@ -40,21 +51,40 @@ const signers: Record<
   google: {
     icon: <GoogleColorIcon size="sm" />,
   },
-  discord: {
-    icon: <DiscordColorIcon size="sm" />,
-  },
   sms: {
     icon: <MobileIcon variant="solid" size="sm" />,
     label: "SMS",
   },
+  discord: {
+    icon: <DiscordColorIcon size="sm" />,
+  },
   passkey: {
     icon: <FingerprintIcon size="sm" variant="solid" />,
+  },
+  webauthn: {
+    icon: <FingerprintIcon size="sm" variant="solid" />,
+    label: "Passkey",
+  },
+  password: {
+    icon: <LockIcon size="sm" />,
   },
   wallet: {
     icon: <WalletIcon variant="solid" size="sm" />,
   },
+  metamask: {
+    icon: <MetaMaskColorIcon size="sm" />,
+  },
   argent: {
     icon: <ArgentColorIcon size="sm" />,
+  },
+  braavos: {
+    icon: <BraavosColorIcon size="sm" />,
+  },
+  base: {
+    icon: <BaseColorIcon size="sm" />,
+  },
+  rabby: {
+    icon: <RabbyColorIcon size="sm" />,
   },
   phantom: {
     icon: <PhantomColorIcon size="sm" />,
@@ -62,12 +92,6 @@ const signers: Record<
   "phantom-evm": {
     icon: <PhantomColorIcon size="sm" />,
     label: "Phantom",
-  },
-  metamask: {
-    icon: <MetaMaskColorIcon size="sm" />,
-  },
-  rabby: {
-    icon: <RabbyColorIcon size="sm" />,
   },
   walletconnect: {
     icon: <WalletConnectColorIcon size="sm" />,
