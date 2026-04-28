@@ -11,12 +11,11 @@ import {
   usePriceByAddressesQuery,
 } from "@cartridge/controller-ui/utils/api/cartridge";
 import makeBlockie from "ethereum-blockies-base64";
-import { useAccount } from "./account";
+import { useAccount, useUsername } from "./account";
 import { useConnection } from "@/hooks/connection";
 import { constants, getChecksumAddress } from "starknet";
 import { useEffect, useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
-import { useUsername } from "./username";
 import * as torii from "@dojoengine/torii-wasm";
 
 const CONTRACT_TYPES: torii.ContractType[] = ["ERC20"];

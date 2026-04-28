@@ -28,9 +28,9 @@ export function Sending({
         </div>
       </CardHeader>
 
-      {assets.map((asset) => (
+      {assets.map((asset, index) => (
         <CollectibleAssetCard
-          key={asset.tokenId}
+          key={index}
           image={asset.imageUrls[0] || placeholder}
           title={asset.name}
           description={description}

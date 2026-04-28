@@ -1,47 +1,54 @@
+import { GlobeIcon } from "@/components";
 import { Button } from "@/components/primitives/button";
-import {
-  Drawer as UIDrawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/primitives/drawer";
+import { Drawer, DrawerContent } from "@/components/primitives/drawer";
+import { ControllerContainer } from "@/utils/mock/controller-container";
 
 import { Meta, StoryObj } from "@storybook/react";
+import { useEffect, useState } from "react";
 
-const meta: Meta<typeof Drawer> = {
+const meta: Meta<typeof DrawerStory> = {
   title: "Primitives/Drawer",
-  component: Drawer,
+  component: DrawerStory,
   tags: ["autodocs"],
 };
 
 export default meta;
 
-type Story = StoryObj<typeof Drawer>;
+type Story = StoryObj<typeof DrawerStory>;
 
 export const Default: Story = {};
 
-function Drawer() {
+function DrawerStory() {
+  const [counter, setCounter] = useState<number>(-1);
+  const [drawerId, setDrawerId] = useState<string | null>(null);
+
+  useEffect(
+    () => setDrawerId(counter >= 0 ? `drawer-${counter}` : null),
+    [counter],
+  );
+  useEffect(() => {
+    if (drawerId === null) setCounter(-1);
+  }, [drawerId]);
+
   return (
-    <UIDrawer>
-      <DrawerTrigger>Open</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-          <DrawerDescription>This action cannot be undone.</DrawerDescription>
-        </DrawerHeader>
-        <DrawerFooter>
-          <Button>Submit</Button>
-          <DrawerClose>
-            <Button variant="outline" className="w-full">
-              Cancel
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </UIDrawer>
+    <ControllerContainer>
+      <div className="flex-grow" />
+      <Button onClick={() => setCounter(5)}>Open</Button>
+      <Drawer isOpen={drawerId !== null} onClose={() => setCounter(-1)}>
+        <DrawerContent
+          title="Drawer Example"
+          icon={<GlobeIcon variant="solid" />}
+        >
+          {Array.from({ length: counter }).map((_, i) => (
+            <div key={i} className="bg-background-300">
+              step {counter - i}
+            </div>
+          ))}
+          <Button onClick={() => setCounter(counter - 1)}>
+            {counter > 0 ? `Complete step ${counter}` : "Finish"}
+          </Button>
+        </DrawerContent>
+      </Drawer>
+    </ControllerContainer>
   );
 }

@@ -10,7 +10,7 @@ import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useData } from "@/hooks/data";
 import { getChecksumAddress } from "starknet";
-import { useUsername } from "@/hooks/username";
+import { useUsername } from "@/hooks/account";
 
 export function Leaderboard() {
   const account = useAccount();

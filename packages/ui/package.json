@@ -102,7 +102,6 @@
     "swr": "catalog:",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "^1.1.1",
     "viem": "catalog:"
   },
   "devDependencies": {
