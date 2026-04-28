@@ -269,12 +269,6 @@ export function useCreateController({
 
   useRouteCallbacks(params, CANCEL_RESPONSE);
 
-  useEffect(() => {
-    if (error) {
-      setAuthenticationStep(AuthenticationStep.FillForm);
-    }
-  }, [error]);
-
   const signupOptions: AuthOptions = useMemo(() => {
     return [...EMBEDDED_WALLETS, ...supportedWalletsForAuth].filter(
       (option) =>
@@ -1157,17 +1151,20 @@ export function useCreateController({
           }
         }
       } catch (e: unknown) {
-        console.error(e);
-        setError(e as Error);
+        const error: unknown = (e as Error)?.message
+          ? e
+          : new Error("Unknown error");
+        console.error("Login error:", (error as Error).message);
+        setError(error as Error);
         if (exists) {
           captureAnalyticsEvent(posthog, "login_failed", {
             method,
-            error_code: sanitizeErrorCode(e),
+            error_code: sanitizeErrorCode(error),
           });
         } else {
           captureAnalyticsEvent(posthog, "signup_failed", {
             method,
-            error_code: sanitizeErrorCode(e),
+            error_code: sanitizeErrorCode(error),
           });
         }
       } finally {

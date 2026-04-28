@@ -23,7 +23,12 @@ export function usePasswordAuthentication() {
       const { privateKey, publicKey } = generateStarknetKeypair();
 
       // Encrypt the private key with the password
-      const encryptedPrivateKey = await encryptPrivateKey(privateKey, password);
+      let encryptedPrivateKey: string;
+      try {
+        encryptedPrivateKey = await encryptPrivateKey(privateKey, password);
+      } catch {
+        throw new Error("Failed to encrypt private key");
+      }
 
       // Create a signer with the actual private key
       const signer: Signer = {
@@ -57,7 +62,12 @@ export function usePasswordAuthentication() {
       }
 
       // Decrypt the private key using the password
-      const privateKey = await decryptPrivateKey(encryptedPrivateKey, password);
+      let privateKey: string;
+      try {
+        privateKey = await decryptPrivateKey(encryptedPrivateKey, password);
+      } catch {
+        throw new Error("Invalid password");
+      }
 
       // Create a signer with the decrypted private key
       const signer: Signer = {

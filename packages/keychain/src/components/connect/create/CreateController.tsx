@@ -32,6 +32,7 @@ import {
 import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
 import { PasswordForm } from "./password/PasswordForm";
+import { SignupPendingDrawer } from "./SignupPendingDrawer";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -42,6 +43,7 @@ interface CreateControllerViewProps {
   validation: ReturnType<typeof useUsernameValidation>;
   isLoading: boolean;
   error?: Error;
+  setError: (error: Error | undefined) => void;
   prefillUsername?: string;
   onUsernameChange: (value: string) => void;
   onUsernameFocus: () => void;
@@ -291,6 +293,7 @@ export function CreateControllerView({
   validation,
   isLoading,
   error,
+  setError,
   prefillUsername,
   onUsernameChange,
   onUsernameFocus,
@@ -325,6 +328,23 @@ export function CreateControllerView({
     [setAuthenticationStep],
   );
 
+  useEffect(() => {
+    if (isLoading) {
+      setAuthenticationStep(AuthenticationStep.Pending);
+    }
+  }, [isLoading, setAuthenticationStep]);
+
+  useEffect(() => {
+    if (error) {
+      setAuthenticationStep(AuthenticationStep.Error);
+    }
+  }, [error, setAuthenticationStep]);
+
+  const onClosePending = useCallback(() => {
+    setAuthenticationStep(AuthenticationStep.FillForm);
+    // setError(undefined);
+  }, [setAuthenticationStep]);
+
   // Handles scroll to top on mobile when keyboard opens
   const { isMobile } = useDevice();
   useEffect(() => {
@@ -349,6 +369,7 @@ export function CreateControllerView({
           validation={validation}
           isLoading={isLoading}
           error={error}
+          setError={setError}
           prefillUsername={prefillUsername}
           onUsernameChange={onUsernameChange}
           onUsernameFocus={onUsernameFocus}
@@ -385,6 +406,16 @@ export function CreateControllerView({
         onClose={onClose}
         onSubmit={onSubmit}
         onPasswordSwitch={onPasswordSwitch}
+      />
+      <SignupPendingDrawer
+        isOpen={
+          authenticationStep === AuthenticationStep.Pending ||
+          authenticationStep === AuthenticationStep.Error
+        }
+        isLoading={isLoading}
+        error={error}
+        authenticationMode={authMethod}
+        onClose={onClosePending}
       />
     </>
   );
@@ -492,8 +523,8 @@ export function CreateController({
           allUseSameAuth(validation.signers) &&
           credentialToAuth(validation.signers[0]) === "password"
         ) {
-          // Automatically show password form for login if password is the only option
           setAuthenticationStep(AuthenticationStep.PasswordForm);
+          setError(undefined);
           return;
         }
 
@@ -659,6 +690,7 @@ export function CreateController({
         validation={debouncedValidation}
         isLoading={isLoading}
         error={error}
+        setError={setError}
         prefillUsername={prefillUsername}
         isSlot={isSlot}
         onUsernameChange={handleUsernameChange}
