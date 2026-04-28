@@ -12,7 +12,7 @@ const mockFeatures = {
   "starknet:walletApi": { version: "1.0.0", request: jest.fn() },
 };
 
-jest.mock("@starknet-io/get-starknet-wallet-standard", () => ({
+jest.mock("@starknet-io/get-starknet-core", () => ({
   StarknetInjectedWallet: jest.fn().mockImplementation(() => ({
     version: "1.0.0",
     name: "Controller",

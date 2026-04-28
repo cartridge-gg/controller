@@ -110,10 +110,16 @@ export function connectToController<
         // Reset handled by navigation
       },
       disconnect: () => async () => {
-        // First clear the React state
+        // First clear the React state. Order preserved from #1322 so reactive
+        // observers (e.g. PostHogProvider's useEffect on `controller`) see the
+        // transition to undefined while window.controller is still live.
         setController(undefined);
         // Then cleanup the controller
         await window.controller?.disconnect();
+        // Reload the iframe so the next bootstrap (main.tsx -> Controller.fromStore)
+        // runs against cleared storage and lands on a fresh login, matching the
+        // internal "Log out" flow (packages/keychain/src/hooks/connection.ts).
+        window.location.reload();
       },
       logout: () => async () => {
         // First clear the React state
