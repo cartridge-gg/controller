@@ -1,4 +1,11 @@
-import { Button, Input, MobileIcon } from "@cartridge/controller-ui";
+import { AuthOption } from "@cartridge/controller";
+import {
+  Button,
+  Drawer,
+  DrawerContent,
+  Input,
+  MobileIcon,
+} from "@cartridge/controller-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface SmsOtpFormProps {
@@ -150,5 +157,138 @@ export function SmsOtpForm({
         )}
       </div>
     </div>
+  );
+}
+
+export interface SmsOtpDrawerProps {
+  isOpen: boolean;
+  isLoading: boolean;
+  isLogin: boolean;
+  onClose: () => void;
+  onSubmit: (authenticationMode?: AuthOption, phoneNumber?: string) => void;
+  onSubmitCode: (otpCode: string) => Promise<void>;
+}
+
+export function SmsOtpDrawer({
+  isOpen,
+  isLoading,
+  isLogin,
+  onClose,
+  onSubmit,
+  onSubmitCode,
+}: SmsOtpDrawerProps) {
+  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const otpRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setStep("phone");
+      setPhoneNumber("");
+      setOtpCode("");
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (step === "phone") {
+      phoneRef.current?.focus();
+    } else {
+      otpRef.current?.focus();
+    }
+  }, [step]);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (step === "phone") {
+        if (!phoneNumber) return;
+        onSubmit("sms", phoneNumber);
+        setStep("otp");
+      } else {
+        if (!otpCode) return;
+        await onSubmitCode(otpCode);
+      }
+    },
+    [step, phoneNumber, otpCode, onSubmit, onSubmitCode],
+  );
+
+  const handleClose = () => {
+    if (!isOpen) return;
+    onClose();
+  };
+
+  return (
+    <Drawer isOpen={isOpen} onClose={handleClose}>
+      <DrawerContent
+        title={`${isLogin ? "Login" : "Sign Up"} with SMS`}
+        icon={<MobileIcon variant="solid" />}
+      >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="phoneNumber"
+              className="text-xs font-medium text-foreground-400"
+            >
+              Phone Number
+            </label>
+            <Input
+              ref={phoneRef}
+              id="phoneNumber"
+              type="tel"
+              placeholder="+1 234 567 8900"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value.trim())}
+              disabled={isLoading || step === "otp"}
+              autoComplete="tel"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="otpCode"
+              className="text-xs font-medium text-foreground-400"
+            >
+              Verification Code
+            </label>
+            <Input
+              ref={otpRef}
+              id="otpCode"
+              type="text"
+              inputMode="numeric"
+              placeholder="Enter code"
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value.trim())}
+              disabled={isLoading || step === "phone"}
+              autoComplete="one-time-code"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            {step === "phone" && (
+              <Button
+                type="submit"
+                disabled={isLoading || !phoneNumber}
+                isLoading={isLoading}
+                className="flex-1"
+              >
+                {isLogin ? "Login" : "Sign Up"}
+              </Button>
+            )}
+            {step === "otp" && (
+              <Button
+                type="submit"
+                disabled={isLoading || !otpCode}
+                isLoading={isLoading}
+                className="flex-1"
+              >
+                Continue
+              </Button>
+            )}
+          </div>
+        </form>
+      </DrawerContent>
+    </Drawer>
   );
 }

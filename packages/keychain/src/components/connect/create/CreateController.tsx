@@ -31,7 +31,8 @@ import {
 } from "@/hooks/viewport";
 import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
-import { PasswordForm } from "./password/PasswordForm";
+import { PasswordFormDrawer } from "./password/PasswordForm";
+import { SmsOtpDrawer } from "./sms/SmsOtpForm";
 import { SignupPendingDrawer } from "./SignupPendingDrawer";
 
 interface CreateControllerViewProps {
@@ -313,16 +314,14 @@ export function CreateControllerView({
   isSlot,
   webauthnPopup,
 }: CreateControllerViewProps) {
-  const onClose = useCallback(() => {
-    setAuthenticationStep(AuthenticationStep.FillForm);
-  }, [setAuthenticationStep]);
-
-  const onPasswordSwitch = useCallback(
-    (enablePasswordInput: boolean) => {
+  const onClose = useCallback(
+    (authenticationMode?: AuthOption) => {
       setAuthenticationStep(
-        enablePasswordInput
+        authenticationMode === "password"
           ? AuthenticationStep.PasswordForm
-          : AuthenticationStep.ChooseMethod,
+          : authenticationMode === "sms"
+            ? AuthenticationStep.SmsForm
+            : AuthenticationStep.FillForm,
       );
     },
     [setAuthenticationStep],
@@ -396,16 +395,22 @@ export function CreateControllerView({
         username={usernameField.value}
         onClose={onClose}
         onSubmit={onSubmit}
-        onPasswordSwitch={onPasswordSwitch}
         authOptions={authOptions}
       />
-      <PasswordForm
+      <PasswordFormDrawer
         isOpen={authenticationStep === AuthenticationStep.PasswordForm}
         isLoading={isLoading}
         isLogin={!!validation.exists}
         onClose={onClose}
         onSubmit={onSubmit}
-        onPasswordSwitch={onPasswordSwitch}
+      />
+      <SmsOtpDrawer
+        isOpen={authenticationStep === AuthenticationStep.SmsForm}
+        isLoading={isLoading}
+        isLogin={!!validation.exists}
+        onClose={onClose}
+        onSubmit={onSubmit}
+        onSubmitCode={async () => {}}
       />
       <SignupPendingDrawer
         isOpen={

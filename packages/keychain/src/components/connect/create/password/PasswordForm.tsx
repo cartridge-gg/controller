@@ -9,23 +9,21 @@ import { useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { AuthOption } from "@cartridge/controller";
 
-export interface PasswordFormProps {
+export interface PasswordFormDrawerProps {
   isOpen: boolean;
   isLoading: boolean;
   isLogin: boolean;
   onClose: () => void;
   onSubmit: (authenticationMode?: AuthOption, password?: string) => void;
-  onPasswordSwitch: (enablePasswordInput: boolean) => void;
 }
 
-export function PasswordForm({
+export function PasswordFormDrawer({
   isOpen = true,
   isLoading,
   isLogin,
   onClose,
   onSubmit,
-  onPasswordSwitch,
-}: PasswordFormProps) {
+}: PasswordFormDrawerProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -59,12 +57,15 @@ export function PasswordForm({
   return (
     <Drawer isOpen={isOpen} onClose={handleClose}>
       <DrawerContent
-        title={`${isLogin ? "Login" : "Create Account"} with Password`}
+        title={`${isLogin ? "Login" : "Sign Up"} with Password`}
         icon={<KeyIcon variant="solid" />}
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <label htmlFor="password" className="text-sm font-medium">
+            <label
+              htmlFor="password"
+              className="text-xs font-medium text-foreground-400"
+            >
               Password
             </label>
             <Input
@@ -83,7 +84,10 @@ export function PasswordForm({
 
           {!isLogin && (
             <div className="flex flex-col gap-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">
+              <label
+                htmlFor="confirmPassword"
+                className="text-xs font-medium text-foreground-400"
+              >
                 Confirm Password
               </label>
               <Input
@@ -94,7 +98,7 @@ export function PasswordForm({
                   setConfirmPassword(e.target.value);
                   setPasswordError(null);
                 }}
-                placeholder="Confirm your password"
+                placeholder="Confirm password"
                 autoComplete="new-password"
                 disabled={isLoading}
               />
@@ -108,24 +112,14 @@ export function PasswordForm({
           {!isLogin && (
             <ErrorAlert
               title="Password accounts are not recoverable"
-              description="Password cannot be recovered if you forget your password. We recommend using a different authentication method."
+              description="Passwords cannot be recovered if lost. We recommend using a different authentication method."
               variant="warning"
+              className="mt-2"
               isExpanded
             />
           )}
 
           <div className="flex gap-2">
-            {!isLogin && (
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => onPasswordSwitch(false)}
-                disabled={isLoading}
-                className="flex-1"
-              >
-                Back
-              </Button>
-            )}
             <Button
               type="submit"
               disabled={isLoading}
@@ -133,7 +127,7 @@ export function PasswordForm({
               id="primary-button"
               isLoading={isLoading}
             >
-              {isLogin ? "Login" : "Create Account"}
+              {isLogin ? "Login" : "Sign Up"}
             </Button>
           </div>
         </form>

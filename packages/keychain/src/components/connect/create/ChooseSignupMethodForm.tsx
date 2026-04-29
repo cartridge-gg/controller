@@ -16,9 +16,8 @@ interface ChooseSignupMethodProps {
   isLoading: boolean;
   validation: ReturnType<typeof useUsernameValidation>;
   username?: string;
-  onClose: () => void;
+  onClose: (authenticationMode?: AuthOption) => void;
   onSubmit: (authenticationMode?: AuthOption) => void;
-  onPasswordSwitch: (enablePasswordInput: boolean) => void;
   authOptions: AuthOption[];
 }
 
@@ -29,7 +28,6 @@ export function ChooseSignupMethodForm({
   username,
   onSubmit,
   onClose,
-  onPasswordSwitch,
   authOptions,
 }: ChooseSignupMethodProps) {
   const [selectedAuth, setSelectedAuth] = useState<AuthOption | undefined>(
@@ -113,8 +111,8 @@ export function ChooseSignupMethodForm({
           e.preventDefault();
           if (options[highlightedIndex]) {
             const option = options[highlightedIndex];
-            if (option === "password") {
-              onPasswordSwitch(true);
+            if (option === "password" || option === "sms") {
+              onClose(option);
             } else {
               setSelectedAuth(option);
               onSubmit(option);
@@ -128,7 +126,7 @@ export function ChooseSignupMethodForm({
           break;
       }
     },
-    [isOpen, isLoading, options, highlightedIndex, onSubmit, onPasswordSwitch],
+    [isOpen, isLoading, options, highlightedIndex, onSubmit, onClose],
   );
 
   useEffect(() => {
@@ -145,7 +143,7 @@ export function ChooseSignupMethodForm({
         return;
       }
     }
-    onClose?.();
+    onClose();
   };
 
   const handleSelectedOption = (
@@ -160,8 +158,8 @@ export function ChooseSignupMethodForm({
     }
     e.preventDefault();
 
-    if (option === "password") {
-      onPasswordSwitch(true);
+    if (option === "password" || option === "sms") {
+      onClose(option);
     } else {
       setSelectedAuth(option);
       onSubmit(option);

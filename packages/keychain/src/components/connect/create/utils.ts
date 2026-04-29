@@ -67,6 +67,7 @@ export enum AuthenticationStep {
   FillForm,
   ChooseMethod,
   PasswordForm,
+  SmsForm,
   Pending,
   Error,
 }
