@@ -4329,11 +4329,15 @@ export type PaymasterPolicyWhereInput = {
 
 export type PaymasterStats = {
   __typename?: 'PaymasterStats';
+  avgStrkFee?: Maybe<Scalars['Float']>;
   avgUsdFee?: Maybe<Scalars['Float']>;
+  maxStrkFee?: Maybe<Scalars['Float']>;
   maxUsdFee?: Maybe<Scalars['Float']>;
+  minStrkFee?: Maybe<Scalars['Float']>;
   minUsdFee?: Maybe<Scalars['Float']>;
   revertedTransactions: Scalars['Int'];
   successfulTransactions: Scalars['Int'];
+  totalStrkFees?: Maybe<Scalars['Float']>;
   totalTransactions: Scalars['Int'];
   totalUsdFees?: Maybe<Scalars['Float']>;
   uniqueUsers: Scalars['Int'];
@@ -4343,6 +4347,7 @@ export type PaymasterTransaction = {
   __typename?: 'PaymasterTransaction';
   executedAt: Scalars['Time'];
   status: ActivityStatus;
+  strkFee: Scalars['Float'];
   transactionHash: Scalars['String'];
   usdFee: Scalars['Float'];
 };

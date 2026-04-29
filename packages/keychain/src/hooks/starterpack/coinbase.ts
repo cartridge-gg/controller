@@ -295,12 +295,6 @@ export function useCoinbase({
     async (targetOrderId: string) => {
       try {
         const result = await getCoinbaseOrderStatus(targetOrderId);
-        console.log(
-          "[coinbase-hook] pollOnce result:",
-          result.status,
-          "txHash:",
-          result.txHash,
-        );
 
         if (result.txHash) {
           setOrderTxHash(result.txHash);
@@ -312,10 +306,6 @@ export function useCoinbase({
           terminalReachedRef.current = true;
           successObservedRef.current = true;
           stopPoll();
-          // Close the popup directly via window reference
-          console.log(
-            "[coinbase-hook] Poll detected completed — closing popup directly",
-          );
           popupRef.current?.close();
         } else if (result.status === CoinbaseOnrampStatus.Failed) {
           if (successObservedRef.current) {
@@ -440,8 +430,6 @@ export function useCoinbase({
           data?: { errorCode?: string; errorMessage?: string };
         };
 
-        console.log("[coinbase-hook] postMessage event:", type, data);
-
         const resetAttemptFailure = () => {
           setPopupClosed(false);
           setOrderStatus((status) =>
@@ -482,8 +470,6 @@ export function useCoinbase({
             resetAttemptFailure();
             // Signal success so UI can navigate to bridge screen immediately
             setPaymentSuccess(true);
-            // Close the popup directly via window reference
-            console.log("[coinbase-hook] Closing popup directly");
             popupRef.current?.close();
             // Switch from 15s fallback to fast 1s poll + 15s timeout
             startConfirmationPoll(targetOrderId);
@@ -531,24 +517,13 @@ export function useCoinbase({
       // Watch for the popup being closed by the user
       popupCheckRef.current = setInterval(() => {
         if (popup && popup.closed) {
-          console.log(
-            "[coinbase-hook] Popup closed detected. terminalReachedRef:",
-            terminalReachedRef.current,
-          );
           if (popupCheckRef.current) {
             clearInterval(popupCheckRef.current);
             popupCheckRef.current = null;
           }
           if (!terminalReachedRef.current) {
-            console.log(
-              "[coinbase-hook] No terminal status — stopping poll and setting popupClosed",
-            );
             stopPoll();
             setPopupClosed(true);
-          } else {
-            console.log(
-              "[coinbase-hook] Terminal already reached — ignoring popup close",
-            );
           }
         }
       }, 1000);
