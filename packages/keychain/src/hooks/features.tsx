@@ -14,7 +14,6 @@ export type Feature =
   | "none"
   | "connection-instagram"
   | "connection-tiktok"
-  | "apple-pay-support"
   | "coinflow-support"
   | "sms"
   | "registered-accounts"

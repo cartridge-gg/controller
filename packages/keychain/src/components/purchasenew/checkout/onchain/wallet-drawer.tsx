@@ -34,7 +34,6 @@ export function WalletSelectionDrawer({
   onClose,
   showFiatOptions = true,
 }: WalletSelectionDrawerProps) {
-  const isApplePayEnabled = useFeature("apple-pay-support");
   const isCoinflowEnabled = useFeature("coinflow-support");
 
   const { isMainnet, externalDetectWallets } = useConnection();
@@ -301,7 +300,7 @@ export function WalletSelectionDrawer({
                   )}
                 />
               )}
-              {showFiatOptions && isApplePayEnabled && (
+              {showFiatOptions && (
                 <PurchaseCard
                   key="apple-pay"
                   text="Apple Pay"
