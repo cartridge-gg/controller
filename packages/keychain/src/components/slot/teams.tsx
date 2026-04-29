@@ -2,34 +2,32 @@ import {
   UsersIcon,
   SlotIcon,
   Button,
+  Card,
+  CardHeader,
+  CardTitle,
   LayoutFooter,
   LayoutContent,
   Spinner,
-  BranchIcon,
-  Badge,
   TokenSummary,
   TokenCard,
   Empty,
   HeaderInner,
 } from "@cartridge/controller-ui";
-import { formatBalance } from "@/hooks/tokens";
-import { useState } from "react";
+import {
+  convertTokenAmountToUSD,
+  formatBalance,
+  useFeeToken,
+} from "@/hooks/tokens";
 
 export interface Team {
   id: string;
   name: string;
   credits: number;
-  deployments: {
-    totalCount: number;
-    edges?:
-      | ({
-          node?: {
-            project: string;
-          } | null;
-        } | null)[]
-      | null;
-  };
+  strk: number;
 }
+
+const STRK_ICON =
+  "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo";
 
 interface TeamsProps {
   teams: Team[];
@@ -39,12 +37,6 @@ interface TeamsProps {
 }
 
 export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
-
-  if (selectedTeam) {
-    return <TeamCard team={selectedTeam} onFundTeam={onFundTeam} />;
-  }
-
   const sortedTeams = [...teams].sort(
     (a, b) => (b.credits || 0) - (a.credits || 0),
   );
@@ -70,12 +62,11 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
             />
           ) : (
             sortedTeams.map((team) => (
-              <TokenSummary key={team.id} onClick={() => setSelectedTeam(team)}>
+              <TokenSummary key={team.id} onClick={() => onFundTeam(team)}>
                 <TokenCard
                   title={team.name}
                   image={<UsersIcon variant="solid" size="lg" />}
-                  amount={`${team.deployments?.totalCount} Deployments`}
-                  value={`$${formatBalance(BigInt(team.credits), 8, 2)}`}
+                  amount=""
                 />
               </TokenSummary>
             ))
@@ -89,11 +80,18 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
 export const TeamCard = ({
   team,
   onFundTeam,
+  onBack,
 }: {
   team: Team;
   onFundTeam: (team: Team) => void;
+  onBack?: () => void;
 }) => {
+  const { token: feeToken } = useFeeToken();
   const usdBalance = formatBalance(BigInt(team.credits), 8, 2);
+  const strkBalance = formatBalance(BigInt(team.strk || 0), 6, 2);
+  const strkUsdValue = feeToken?.price
+    ? convertTokenAmountToUSD(BigInt(team.strk || 0), 6, feeToken.price)
+    : undefined;
   return (
     <>
       <HeaderInner
@@ -102,51 +100,41 @@ export const TeamCard = ({
         title={team.name}
       />
       <LayoutContent className="pb-3">
-        <TokenSummary>
-          <TokenCard
-            title={"USD"}
-            image={"https://static.cartridge.gg/media/usd_icon.svg"}
-            amount={`${usdBalance} USD`}
-            value={`$${usdBalance}`}
-            className={"pointer-events-none"}
-          />
-        </TokenSummary>
-        <div className="flex flex-col gap-4 mt-2">
-          <div className="flex flex-row items-center justify-between">
-            <h3 className="text-foreground-400 text-xs font-medium">
-              Deployments
-            </h3>
-            {team.deployments?.totalCount > 0 && (
-              <Badge className="px-2 rounded-full text-foreground-300 text-xs">
-                {team.deployments?.totalCount || 0} total
-              </Badge>
-            )}
-          </div>
-          {(team.deployments?.totalCount || 0) === 0 ? (
-            <Empty
-              icon="discover"
-              title="No Deployments"
-              className="h-[240px]"
+        <Card>
+          <CardHeader>
+            <CardTitle className="normal-case font-semibold text-xs">
+              Balances
+            </CardTitle>
+          </CardHeader>
+          <TokenSummary className="rounded-tl-none rounded-tr-none">
+            <TokenCard
+              title={"USD"}
+              image={"https://static.cartridge.gg/media/usd_icon.svg"}
+              amount={`${usdBalance} USD`}
+              value={`$${usdBalance}`}
+              className={"pointer-events-none"}
             />
-          ) : (
-            <div className="flex flex-col gap-2">
-              {team.deployments?.edges?.map((edge, index) => (
-                <div
-                  key={index}
-                  className="flex flex-row items-center gap-2 bg-background-200 rounded-md p-3"
-                >
-                  <BranchIcon size="sm" />
-                  <p className=" text-sm font-medium">{edge?.node?.project}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+            <TokenCard
+              title={"STRK"}
+              image={STRK_ICON}
+              amount={`${strkBalance} STRK`}
+              value={strkUsdValue}
+              className={"pointer-events-none"}
+            />
+          </TokenSummary>
+        </Card>
       </LayoutContent>
       <LayoutFooter>
-        <Button className="w-full " onClick={() => onFundTeam(team)}>
-          FUND TEAM
-        </Button>
+        <div className="flex gap-3">
+          {onBack && (
+            <Button variant="secondary" className="flex-1" onClick={onBack}>
+              Back
+            </Button>
+          )}
+          <Button className="flex-1" onClick={() => onFundTeam(team)}>
+            FUND TEAM
+          </Button>
+        </div>
       </LayoutFooter>
     </>
   );

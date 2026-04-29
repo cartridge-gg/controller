@@ -13,7 +13,7 @@ import {
 import base64url from "base64url";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMatch, useSearchParams } from "react-router-dom";
-import { constants, getChecksumAddress } from "starknet";
+import { constants, getChecksumAddress, num } from "starknet";
 import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
@@ -260,15 +260,21 @@ export function useAccount() {
 }
 
 export function useUsername({ address }: { address: string }) {
-  const { data } = useAccountNameQuery({ address }, { enabled: !!address });
-
-  return { username: data?.accounts?.edges?.[0]?.node?.username ?? "" };
+  const normalizedAddress = num.toHex(address ?? "");
+  const { data } = useAccountNameQuery(
+    { address: normalizedAddress },
+    { enabled: !!normalizedAddress },
+  );
+  const username = data?.accounts?.edges?.[0]?.node?.username ?? "";
+  return { username };
 }
 
 export function useUsernames({ addresses }: { addresses: string[] }) {
+  const normalizedAddresses = addresses.map((address) => num.toHex(address));
+
   const { data } = useAccountNamesQuery(
-    { addresses },
-    { enabled: addresses.length > 0 },
+    { addresses: normalizedAddresses },
+    { enabled: normalizedAddresses.length > 0 },
   );
 
   const usernames = useMemo(() => {
@@ -394,6 +400,16 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     isFetching: isFetchingClassHash,
   } = useWallet({ address });
 
+  // fetch controller name if it is a controller and nameOrAddress is an address
+  const { username } = useUsername({
+    address: wallet === "Controller" && !controllerName ? address : "",
+  });
+  useEffect(() => {
+    if (username) {
+      setControllerName(username);
+    }
+  }, [username]);
+
   const error = useMemo(() => {
     if (starkName && starkError) {
       return "Could not get address from stark name";
@@ -410,7 +426,12 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     ) {
       return "Please input a valid Starknet address";
     }
-    if (!!nameOrAddress && !address) {
+    if (
+      !!nameOrAddress &&
+      !address &&
+      !isFetchingStarkAddress &&
+      !isFetchingControllerAddress
+    ) {
       return "Please input a valid Starknet address";
     }
     return "";
@@ -421,6 +442,8 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     controllerName,
     starkName,
     nameOrAddress,
+    isFetchingStarkAddress,
+    isFetchingControllerAddress,
   ]);
 
   const warning = useMemo(() => {

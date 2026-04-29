@@ -122,7 +122,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       ) => {
         if (message) sonnerToast.success(message);
         emitToast({
-          duration: 10000,
           safeToClose: true,
           ...options,
           variant: "marketplace",

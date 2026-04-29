@@ -1,15 +1,22 @@
 import { UIContext } from "@/context";
 import { useCallback, useContext, useState } from "react";
 
-export function useDisclosure() {
-  const [isOpen, setIsOpen] = useState(false);
+export type Disclosure = {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onToggle: () => void;
+};
+
+export function useDisclosure(defaultOpen: boolean = false): Disclosure {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const onOpen = useCallback(() => {
     setIsOpen(true);
   }, []);
 
   const onClose = useCallback(() => {
-    setIsOpen(true);
+    setIsOpen(false);
   }, []);
 
   const onToggle = useCallback(() => {

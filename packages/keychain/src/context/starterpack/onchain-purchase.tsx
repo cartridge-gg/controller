@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   ReactNode,
 } from "react";
 import { useLocation } from "react-router-dom";
@@ -31,6 +32,7 @@ import {
   useLayerswap,
   useTokenSelection,
   useCoinbase,
+  COINBASE_APPLE_PAY_MIN_USD,
   type TokenOption,
   type CoinbaseOrderResult,
   type CoinbaseTransactionResult,
@@ -67,6 +69,7 @@ export interface OnchainPurchaseContextType {
   setSelectedToken: (token: TokenOption | undefined) => void;
   convertedPrice: {
     amount: bigint;
+    quantity: number;
     tokenMetadata: { symbol: string; decimals: number };
   } | null;
   swapQuote: SwapQuote | null;
@@ -101,6 +104,8 @@ export interface OnchainPurchaseContextType {
   popupClosed: boolean;
   paymentSuccess: boolean;
   coinbaseLsSwapId: string | undefined;
+  /** Quantity we auto-bumped to so Apple Pay's per-transaction minimum is met. Undefined when no bump is active. */
+  applePayMinQuantity: number | undefined;
 
   // Coinbase limits-upgrade state
   coinbaseLimits: CoinbaseLimitsResult | undefined;
@@ -122,6 +127,7 @@ export interface OnchainPurchaseContextType {
     force?: boolean;
   }) => Promise<CoinbaseOrderResult | undefined>;
   openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
+  resetCoinbasePurchase: () => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
   fetchCoinbaseLimits: () => Promise<CoinbaseLimitsResult | undefined>;
   submitCoinbaseLimitsUpgrade: (
@@ -169,8 +175,13 @@ export const OnchainPurchaseProvider = ({
   );
 
   // Compose hooks
-  const { quantity, incrementQuantity, decrementQuantity, resetQuantity } =
-    useQuantity();
+  const {
+    quantity,
+    setQuantity,
+    incrementQuantity,
+    decrementQuantity,
+    resetQuantity,
+  } = useQuantity();
 
   const {
     selectedWallet,
@@ -278,6 +289,9 @@ export const OnchainPurchaseProvider = ({
   const [coinbaseLsSwapId, setCoinbaseLsSwapId] = useState<
     string | undefined
   >();
+  const [applePayMinQuantity, setApplePayMinQuantity] = useState<
+    number | undefined
+  >();
   const {
     orderId,
     paymentLink,
@@ -292,6 +306,7 @@ export const OnchainPurchaseProvider = ({
     popupClosed,
     paymentSuccess,
     openPaymentPopup,
+    resetOrder: resetCoinbaseOrder,
     limits: coinbaseLimits,
     isFetchingLimits: isFetchingCoinbaseLimits,
     isSubmittingLimitsUpgrade,
@@ -301,23 +316,36 @@ export const OnchainPurchaseProvider = ({
     onError: setDisplayError,
   });
 
+  const resetCoinbasePurchase = useCallback(() => {
+    resetCoinbaseOrder();
+    setCoinbaseLsSwapId(undefined);
+  }, [resetCoinbaseOrder]);
+
   // Handle Apple Pay selection from URL (returning from verification)
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     if (searchParams.get("method") === "apple-pay") {
+      resetCoinbasePurchase();
       setIsApplePaySelected(true);
       clearSelectedWalletInternal();
     }
-  }, [location.search, clearSelectedWalletInternal]);
+  }, [location.search, clearSelectedWalletInternal, resetCoinbasePurchase]);
 
   // Reset state when starterpack changes
   useEffect(() => {
+    resetCoinbasePurchase();
     resetTokenSelection();
     resetQuantity();
     setPurchaseItems([]);
     setPurchaseDescription(undefined);
     setIssueSignature(undefined);
-  }, [bundleId, starterpackId, resetTokenSelection, resetQuantity]);
+  }, [
+    bundleId,
+    starterpackId,
+    resetTokenSelection,
+    resetQuantity,
+    resetCoinbasePurchase,
+  ]);
 
   // Update purchase items and USD amount when starterpack details change
   useEffect(() => {
@@ -400,26 +428,85 @@ export const OnchainPurchaseProvider = ({
     setRequestedAmount(Number(convertedPrice.amount));
   }, [selectedPlatform, convertedPrice, setRequestedAmount]);
 
-  // Fetch Coinbase quote when Apple Pay is selected or quantity changes
+  // Apple Pay has a per-transaction minimum ($1.86). If the starterpack's
+  // unit cost in USDC is below that, bump the quantity so the total clears
+  // the minimum and surface it to the user via applePayMinQuantity.
   useEffect(() => {
-    if (!isApplePaySelected || !onchainDetails?.quote) {
+    if (!isApplePaySelected) {
+      if (applePayMinQuantity !== undefined) setApplePayMinQuantity(undefined);
+      return;
+    }
+    if (!convertedPrice || convertedPrice.quantity !== quantity) return;
+
+    const totalUsdc =
+      Number(convertedPrice.amount) /
+      10 ** convertedPrice.tokenMetadata.decimals;
+    const unitUsdc = totalUsdc / quantity;
+    if (!Number.isFinite(unitUsdc) || unitUsdc <= 0) return;
+
+    const requiredQuantity = Math.ceil(COINBASE_APPLE_PAY_MIN_USD / unitUsdc);
+    if (quantity < requiredQuantity) {
+      setQuantity(requiredQuantity);
+      setApplePayMinQuantity(requiredQuantity);
+    } else if (
+      applePayMinQuantity !== undefined &&
+      quantity !== applePayMinQuantity
+    ) {
+      // User manually moved quantity away from the bumped value, so the
+      // notice is no longer relevant. (Keep it while quantity matches the
+      // bumped value — otherwise the warning would flicker off the moment
+      // convertedPrice catches up after the bump.)
+      setApplePayMinQuantity(undefined);
+    }
+  }, [
+    isApplePaySelected,
+    convertedPrice,
+    quantity,
+    setQuantity,
+    applePayMinQuantity,
+  ]);
+
+  // USDC amount to onramp via Coinbase Apple Pay.
+  //
+  // For Apple Pay the token selector auto-picks USDC, so convertedPrice.amount is
+  // the USDC equivalent of the starterpack (from a live Ekubo quote when the
+  // registry's paymentToken is not USDC, otherwise it's just the USDC totalCost).
+  // When a swap is required we add a 2% buffer so the on-chain swap — which runs
+  // minutes later against a fresh quote — has enough USDC after price drift.
+  const applePayUsdcAmount = useMemo<string | undefined>(() => {
+    if (!onchainDetails?.quote || !selectedToken || !convertedPrice) {
+      return undefined;
+    }
+    if (convertedPrice.quantity !== quantity) {
+      return undefined;
+    }
+
+    const needsSwap =
+      num.toHex(selectedToken.address) !==
+      num.toHex(onchainDetails.quote.paymentToken);
+    const usdcBaseUnits = needsSwap
+      ? (convertedPrice.amount * 102n) / 100n
+      : convertedPrice.amount;
+    return (Number(usdcBaseUnits) / 1_000_000).toFixed(6);
+  }, [onchainDetails, selectedToken, convertedPrice, quantity]);
+
+  // Fetch Coinbase quote when Apple Pay is selected or USDC amount changes.
+  // Skip when below Coinbase's Apple Pay minimum — the auto-bump effect will
+  // raise the quantity shortly and we'll retrigger with a valid amount.
+  // Firing the doomed request here only produces a lingering error toast.
+  useEffect(() => {
+    if (!isApplePaySelected || !applePayUsdcAmount) {
+      return;
+    }
+    if (Number(applePayUsdcAmount) < COINBASE_APPLE_PAY_MIN_USD) {
       return;
     }
 
-    const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
-    const purchaseUSDCAmount = (Number(purchaseAmount) / 1_000_000).toFixed(6);
-
     getCoinbaseQuote({
-      purchaseUSDCAmount,
+      purchaseUSDCAmount: applePayUsdcAmount,
       sandbox: !isMainnet,
     });
-  }, [
-    isApplePaySelected,
-    onchainDetails,
-    quantity,
-    isMainnet,
-    getCoinbaseQuote,
-  ]);
+  }, [isApplePaySelected, applePayUsdcAmount, isMainnet, getCoinbaseQuote]);
 
   const onOnchainPurchase = useCallback(async () => {
     if (!controller || !starterpackDetails || !registryAddress) return;
@@ -613,31 +700,47 @@ export const OnchainPurchaseProvider = ({
   ]);
 
   const onApplePaySelect = useCallback(() => {
+    resetCoinbasePurchase();
     setIsApplePaySelected(true);
     setIsCoinflowSelected(false);
     clearSelectedWalletInternal();
-  }, [clearSelectedWalletInternal]);
+  }, [clearSelectedWalletInternal, resetCoinbasePurchase]);
 
   const onCoinflowSelect = useCallback(() => {
+    resetCoinbasePurchase();
     setIsCoinflowSelected(true);
     setIsApplePaySelected(false);
     clearSelectedWalletInternal();
     savePaymentMethod("coinflow");
-  }, [clearSelectedWalletInternal, savePaymentMethod]);
+  }, [clearSelectedWalletInternal, savePaymentMethod, resetCoinbasePurchase]);
 
   const onCreateCoinbaseOrder = useCallback(
     async (opts?: { force?: boolean }) => {
       if (!onchainDetails?.quote) {
         throw new Error("Quote not loaded yet");
       }
+      if (!applePayUsdcAmount) {
+        throw new Error("USDC pricing not ready");
+      }
 
       const force = opts?.force ?? false;
-      if (isCreatingOrder || (paymentLink && !force)) return;
+      const hasStaleCoinbaseOrder =
+        paymentSuccess ||
+        popupClosed ||
+        orderStatus === CoinbaseOnrampStatus.Completed ||
+        orderStatus === CoinbaseOnrampStatus.Failed;
 
-      const purchaseAmount = onchainDetails.quote.totalCost * BigInt(quantity);
+      if (
+        isCreatingOrder ||
+        (paymentLink && !force && !hasStaleCoinbaseOrder)
+      ) {
+        return;
+      }
+
+      setCoinbaseLsSwapId(undefined);
 
       const order = await createCoinbaseOrder({
-        purchaseUSDCAmount: (Number(purchaseAmount) / 1_000_000).toString(),
+        purchaseUSDCAmount: applePayUsdcAmount,
       });
 
       if (order?.layerswapPayment?.swapId) {
@@ -648,9 +751,12 @@ export const OnchainPurchaseProvider = ({
     },
     [
       onchainDetails,
-      quantity,
+      applePayUsdcAmount,
       isCreatingOrder,
       paymentLink,
+      paymentSuccess,
+      popupClosed,
+      orderStatus,
       createCoinbaseOrder,
     ],
   );
@@ -697,6 +803,7 @@ export const OnchainPurchaseProvider = ({
     popupClosed,
     paymentSuccess,
     coinbaseLsSwapId,
+    applePayMinQuantity,
     onOnchainPurchase,
     onExternalConnect,
     onSendDeposit,
@@ -705,6 +812,7 @@ export const OnchainPurchaseProvider = ({
     onCoinflowSelect,
     onCreateCoinbaseOrder,
     openPaymentPopup,
+    resetCoinbasePurchase,
     getTransactions,
     coinbaseLimits,
     isFetchingCoinbaseLimits,

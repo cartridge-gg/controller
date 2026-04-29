@@ -24,6 +24,7 @@ import {
   exceedsLimit,
   useTokenBalance,
   useTokenFallback,
+  COINBASE_APPLE_PAY_MIN_USD,
 } from "@/hooks/starterpack";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Receiving } from "../../receiving";
@@ -80,11 +81,13 @@ export function OnchainCheckout() {
     isCoinflowSelected,
     onCoinflowSelect,
     onCreateCoinbaseOrder,
+    resetCoinbasePurchase,
     isCreatingOrder,
     usdAmount,
     coinbaseLimits,
     isFetchingCoinbaseLimits,
     fetchCoinbaseLimits,
+    applePayMinQuantity,
   } = useOnchainPurchaseContext();
   const { onCreditCardPurchase, isCoinflowLoading } =
     useCreditPurchaseContext();
@@ -133,9 +136,31 @@ export function OnchainCheckout() {
     return usdAmount * quantity;
   }, [usdAmount, quantity]);
 
+  // Derive the actual USDC the user will onramp. For non-USDC payment tokens
+  // convertedPrice.amount is the USDC equivalent from useTokenSelection's Ekubo
+  // quote, which usdAmount/totalUsdAmount (computed from totalCost/1e6) does not
+  // reflect. Fall back to totalUsdAmount when no converted price is available.
+  const totalUsdcAmount = useMemo(() => {
+    if (
+      isApplePaySelected &&
+      convertedPrice &&
+      convertedPrice.quantity === quantity
+    ) {
+      return (
+        Number(convertedPrice.amount) /
+        10 ** convertedPrice.tokenMetadata.decimals
+      );
+    }
+    return totalUsdAmount;
+  }, [isApplePaySelected, convertedPrice, quantity, totalUsdAmount]);
+
   const isApplePayAmountTooLow = useMemo(() => {
-    return isApplePaySelected && totalUsdAmount < 1.86;
-  }, [isApplePaySelected, totalUsdAmount]);
+    return (
+      isApplePaySelected &&
+      applePayMinQuantity === undefined &&
+      totalUsdcAmount < COINBASE_APPLE_PAY_MIN_USD
+    );
+  }, [isApplePaySelected, applePayMinQuantity, totalUsdcAmount]);
 
   // Pre-fetch Coinbase limits as soon as Apple Pay is selected so we can gate
   // the Buy button and skip a doomed order-create for users over the cap.
@@ -153,8 +178,8 @@ export function OnchainCheckout() {
     () =>
       isApplePaySelected &&
       !!coinbaseLimits &&
-      exceedsLimit(totalUsdAmount, coinbaseLimits),
-    [isApplePaySelected, coinbaseLimits, totalUsdAmount],
+      exceedsLimit(totalUsdcAmount, coinbaseLimits),
+    [isApplePaySelected, coinbaseLimits, totalUsdcAmount],
   );
 
   const quote = useMemo(() => {
@@ -312,6 +337,7 @@ export function OnchainCheckout() {
         await onCreditCardPurchase();
         setIsCoinflowDrawerOpen(true);
       } else if (isApplePaySelected) {
+        resetCoinbasePurchase();
         const [{ data: meData }, { data: accountPrivateData }] =
           await Promise.all([refetchMe(), refetchAccountPrivate()]);
         const me = meData?.me;
@@ -334,7 +360,7 @@ export function OnchainCheckout() {
         }
 
         try {
-          await onCreateCoinbaseOrder();
+          await onCreateCoinbaseOrder({ force: true });
         } catch (err) {
           // Safety net: Coinbase can still reject if /limits was stale.
           // Open the drawer anyway so the verify flow takes over.
@@ -367,6 +393,7 @@ export function OnchainCheckout() {
     isApplePaySelected,
     applePayLimitExceeded,
     fetchCoinbaseLimits,
+    resetCoinbasePurchase,
     onCreditCardPurchase,
     refetchMe,
     refetchAccountPrivate,
@@ -533,6 +560,14 @@ export function OnchainCheckout() {
                 variant="warning"
                 title="Amount Too Low"
                 message="Minimum purchase amount is $2.00 for Apple Pay."
+              />
+            )}
+
+            {isApplePaySelected && applePayMinQuantity !== undefined && (
+              <ErrorCard
+                variant="warning"
+                title="Quantity Adjusted"
+                message={`Quantity set to ${applePayMinQuantity} to meet the $2.00 Apple Pay minimum.`}
               />
             )}
 

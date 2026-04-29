@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   LayoutContent,
   LayoutFooter,
@@ -10,6 +10,7 @@ import {
   InfoIcon,
   Skeleton,
   Thumbnail,
+  useDisclosure,
 } from "@cartridge/controller-ui";
 
 import { useData } from "@/hooks/data";
@@ -27,6 +28,7 @@ import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
 import { useNavigation } from "@/context/navigation";
 import { EmptyState, LoadingState } from "@/components/activity";
+import { SendTokenDrawer } from "./send/send-drawer";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -126,7 +128,6 @@ function ERC20() {
 
   const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
   const { token } = useToken({ tokenAddress: address! });
-  const [searchParams] = useSearchParams();
 
   const compatibility = useMemo(() => {
     return isControllerGte("0.5.6");
@@ -193,6 +194,8 @@ function ERC20() {
     },
     [explorer],
   );
+
+  const sendTokenDisclosure = useDisclosure();
 
   if (!token) {
     return null;
@@ -263,14 +266,20 @@ function ERC20() {
 
       {compatibility && controller && (
         <LayoutFooter className="p-4">
-          <Link to={`send?${searchParams.toString()}`} className="w-full">
-            <Button className="w-full space-x-2">
-              <PaperPlaneIcon variant="solid" />
-              Send
-            </Button>
-          </Link>
+          <Button
+            className="w-full space-x-2"
+            onClick={() => sendTokenDisclosure.onOpen()}
+          >
+            <PaperPlaneIcon variant="solid" />
+            Send
+          </Button>
         </LayoutFooter>
       )}
+
+      <SendTokenDrawer
+        disclosure={sendTokenDisclosure}
+        tokenAddress={address ?? "0x0"}
+      />
     </>
   );
 }

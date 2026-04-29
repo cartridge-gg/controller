@@ -7,14 +7,7 @@ query Teams {
           id
           name
           credits
-          deployments(where: { deprecated: false }) {
-            totalCount
-            edges {
-              node {
-                project
-              }
-            }
-          }
+          strk
         }
       }
     }

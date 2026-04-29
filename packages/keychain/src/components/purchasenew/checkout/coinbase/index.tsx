@@ -314,7 +314,7 @@ export function CoinbaseCheckout({
             }
           >
             {!hasLimitsLoaded || isFetchingCoinbaseLimits
-              ? "CHECKING LIMITS…"
+              ? "CHECKING LIMITS"
               : isCreatingOrder || isOpeningPopup
                 ? "LOADING..."
                 : "CONTINUE"}

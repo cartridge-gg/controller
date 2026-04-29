@@ -1,3 +1,5 @@
+import { Metadata } from "@/hooks/token";
+
 const formatValue = ({
   value,
   fractionDigits,
@@ -70,6 +72,19 @@ export const formatTokenValue = (
     value: typeof value === "bigint" ? Number(value) : value,
     fractionDigits,
     suffix: symbol ? ` ${symbol}` : "",
+    trim: true,
+  });
+};
+
+export const formatTokenAmount = (
+  amount: bigint | string | number | undefined | null,
+  fractionDigits: number,
+  tokenMetadata: Metadata,
+): string => {
+  return formatValue({
+    value: Number(amount ?? 0) / Number(10n ** BigInt(tokenMetadata.decimals)),
+    fractionDigits,
+    suffix: ` ${tokenMetadata.symbol || "ERC20"}`,
     trim: true,
   });
 };

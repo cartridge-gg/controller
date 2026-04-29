@@ -40,6 +40,7 @@ export interface ConnectionTooltipContentProps
   followers?: number;
   followings?: number;
   hideNetwork?: boolean;
+  qrCode?: boolean;
   setOpen?: (open: boolean) => void;
   onFollowersClick?: () => void;
   onFollowingsClick?: () => void;
@@ -53,7 +54,8 @@ export const ConnectionTooltipContent = ({
   chainId,
   followers,
   followings,
-  hideNetwork,
+  hideNetwork = false,
+  qrCode = false,
   setOpen,
   onFollowersClick,
   onFollowingsClick,
@@ -123,7 +125,7 @@ export const ConnectionTooltipContent = ({
       className={cn(
         connectionTooltipContentVariants({ variant }),
         className,
-        "relative",
+        "relative w-[320px]",
       )}
     >
       <div className="flex items-start w-full gap-3 justify-between">
@@ -131,7 +133,7 @@ export const ConnectionTooltipContent = ({
           <AchievementPlayerBadge username={username} size="xl" />
           <p className="text-lg/[22px] font-semibold">{username}</p>
         </div>
-        {address && (
+        {address && qrCode && (
           <div
             onClick={handleShowQrCode}
             className=" absolute flex top-4 right-4 items-center gap-3 w-10 h-10 bg-background-200 rounded-full justify-center cursor-pointer hover:bg-background-300 transition-all"
@@ -148,9 +150,7 @@ export const ConnectionTooltipContent = ({
               className="flex items-center gap-1 cursor-pointer text-foreground-300 hover:text-foreground-200"
               onClick={onCopy}
             >
-              <p className="text-sm font-mono font-normal">
-                {formattedAddress}
-              </p>
+              <p className="text-sm font-normal">{formattedAddress}</p>
               <CopyIcon size="sm" />
             </div>
           </div>

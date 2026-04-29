@@ -18,6 +18,7 @@ import {
   Token,
   Spinner,
   Thumbnail,
+  useDisclosure,
 } from "@cartridge/controller-ui";
 
 import { cn } from "@cartridge/controller-ui/utils";
@@ -28,14 +29,14 @@ import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
 import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
-import { useUsername } from "@/hooks/username";
+import { useAccount, useUsername } from "@/hooks/account";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
-import { useAccount } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
 import { createExecuteUrl } from "@/utils/connection/execute";
+import { SendCollectionDrawer } from "./send/collection-drawer";
 
 const OFFSET = 10;
 
@@ -188,6 +189,8 @@ export function CollectionAsset() {
     });
   }, [order, searchParams, setAmount, setSearchParams]);
 
+  const sendCollectionDisclosure = useDisclosure();
+
   return (
     <>
       {status === "loading" || !collection || !asset ? (
@@ -337,20 +340,25 @@ export function CollectionAsset() {
                   Purchase
                 </Button>
               </Link>
-              <Link
+              <Button
+                variant="secondary"
                 className={cn(
                   "flex items-center justify-center gap-x-4 w-full",
                   !isOwner && "hidden",
                 )}
-                to={`send?${searchParams.toString()}`}
+                onClick={() => sendCollectionDisclosure.onOpen()}
               >
-                <Button variant="secondary" className="w-full gap-2">
-                  <PaperPlaneIcon variant="solid" size="sm" />
-                  Send
-                </Button>
-              </Link>
+                <PaperPlaneIcon variant="solid" size="sm" />
+                Send
+              </Button>
             </div>
           </LayoutFooter>
+
+          <SendCollectionDrawer
+            disclosure={sendCollectionDisclosure}
+            contractAddress={contractAddress!}
+            tokenIds={[tokenId!]}
+          />
         </>
       )}
     </>
