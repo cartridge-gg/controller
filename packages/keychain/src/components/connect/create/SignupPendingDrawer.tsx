@@ -1,5 +1,6 @@
 import { AuthOption } from "@cartridge/controller";
 import {
+  Button,
   Drawer,
   DrawerContent,
   SignerPendingCard,
@@ -14,6 +15,7 @@ interface SignupPendingDrawerProps {
   error?: Error | undefined;
   authenticationMode: AuthOption | undefined;
   onClose: () => void;
+  onRetry?: () => void;
 }
 
 export function SignupPendingDrawer({
@@ -22,6 +24,7 @@ export function SignupPendingDrawer({
   error,
   authenticationMode,
   onClose,
+  onRetry,
 }: SignupPendingDrawerProps) {
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>
@@ -36,6 +39,11 @@ export function SignupPendingDrawer({
             error={error ? error.message || "Unknown error" : undefined}
             // authedAddress={signerPending.authedAddress}
           />
+        )}
+        {onRetry && !isLoading && error && (
+          <Button onClick={onRetry} className="w-full">
+            Try Again
+          </Button>
         )}
       </DrawerContent>
     </Drawer>

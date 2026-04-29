@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Button,
   Drawer,
@@ -5,7 +6,6 @@ import {
   Input,
   KeyIcon,
 } from "@cartridge/controller-ui";
-import { useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { AuthOption } from "@cartridge/controller";
 
@@ -27,6 +27,14 @@ export function PasswordFormDrawer({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPassword("");
+      setConfirmPassword("");
+      setPasswordError(null);
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

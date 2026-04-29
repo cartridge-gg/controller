@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
@@ -20,7 +21,6 @@ import {
   WebauthnCredentials,
 } from "@cartridge/controller-ui/utils/api/cartridge";
 import { getAddress } from "ethers";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { constants, shortString } from "starknet";
 import {
@@ -217,8 +217,11 @@ export function useCreateController({
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
-  const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
   const [changeWallet, setChangeWallet] = useState<boolean>(false);
+  const [smsState, setSmsState] = useState<{
+    phoneNumber: string;
+    otpId: string;
+  } | null>(null);
 
   const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(
     undefined,
@@ -266,6 +269,26 @@ export function useCreateController({
   const smsAuth = useSmsAuthentication();
   const isSmsEnabled = useFeature("sms");
   const { supportedWalletsForAuth } = useWallets();
+
+  const handleInitOtp = useCallback(
+    async (phoneNumber: string) => {
+      try {
+        setError(undefined);
+        setSmsState({ phoneNumber, otpId: "" });
+        const { otpId } = await smsAuth.initSms(phoneNumber);
+        setSmsState({ phoneNumber, otpId });
+      } catch (e: unknown) {
+        setError(e as Error);
+      }
+    },
+    [smsAuth],
+  );
+
+  useEffect(() => {
+    if (authenticationStep === AuthenticationStep.FillForm) {
+      setSmsState(null);
+    }
+  }, [authenticationStep]);
 
   useRouteCallbacks(params, CANCEL_RESPONSE);
 
@@ -503,65 +526,18 @@ export function useCreateController({
           break;
         }
         case "sms": {
-          // SMS requires multi-step UI. We stop loading to show the form,
-          // then drive the rest of the flow from the overlay callbacks.
-          setIsLoading(false);
-
-          const { SmsOtpForm } = await import("./sms/SmsOtpForm");
-
-          const smsResult = await new Promise<SignupResponse | undefined>(
-            (resolve, reject) => {
-              let phoneNumber = "";
-              let otpId = "";
-
-              const showForm = (phone: string, error?: string) => {
-                setOverlay(
-                  React.createElement(SmsOtpForm, {
-                    phoneNumber: phone,
-                    onSubmitPhone: async (p: string) => {
-                      phoneNumber = p;
-                      try {
-                        const initResponse = await smsAuth.initSms(p);
-                        otpId = initResponse.otpId;
-                        showForm(p);
-                      } catch (e) {
-                        showForm("", (e as Error).message);
-                      }
-                    },
-                    onSubmitOtp: async (otpCode: string) => {
-                      try {
-                        const result = await smsAuth.completeSms(
-                          username,
-                          phoneNumber,
-                          otpId,
-                          otpCode,
-                        );
-                        setOverlay(null);
-                        resolve(result);
-                      } catch (e) {
-                        reject(e);
-                      }
-                    },
-                    onBack: () => {
-                      setOverlay(null);
-                      resolve(undefined);
-                    },
-                    isLoading: false,
-                    error,
-                  }),
-                );
-              };
-
-              showForm("");
-            },
-          );
-
-          if (!smsResult) {
-            return;
+          if (!password) {
+            throw new Error("OTP code required for SMS authentication");
           }
-
-          setIsLoading(true);
-          signupResponse = smsResult;
+          if (!smsState?.otpId) {
+            throw new Error("SMS not initialized — phone number not submitted");
+          }
+          signupResponse = await smsAuth.completeSms(
+            username,
+            smsState.phoneNumber,
+            smsState.otpId,
+            password,
+          );
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
@@ -591,7 +567,7 @@ export function useCreateController({
       signupWithWalletConnect,
       passwordAuth,
       smsAuth,
-      setOverlay,
+      smsState,
       finishSignup,
       locationGatePending,
       params,
@@ -881,62 +857,19 @@ export function useCreateController({
           break;
         }
         case "sms": {
-          setIsLoading(false);
-
-          const { SmsOtpForm } = await import("./sms/SmsOtpForm");
-
-          const smsLoginResult = await new Promise<LoginResponse | undefined>(
-            (resolve, reject) => {
-              let phoneNumber = "";
-              let otpId = "";
-
-              const showForm = (phone: string, error?: string) => {
-                setOverlay(
-                  React.createElement(SmsOtpForm, {
-                    phoneNumber: phone,
-                    onSubmitPhone: async (p: string) => {
-                      phoneNumber = p;
-                      try {
-                        const initResponse = await smsAuth.initSms(p);
-                        otpId = initResponse.otpId;
-                        showForm(p);
-                      } catch (e) {
-                        showForm("", (e as Error).message);
-                      }
-                    },
-                    onSubmitOtp: async (otpCode: string) => {
-                      try {
-                        const result = await smsAuth.completeSms(
-                          username,
-                          phoneNumber,
-                          otpId,
-                          otpCode,
-                        );
-                        setOverlay(null);
-                        resolve({ signer: result.signer });
-                      } catch (e) {
-                        reject(e);
-                      }
-                    },
-                    onBack: () => {
-                      setOverlay(null);
-                      resolve(undefined);
-                    },
-                    isLoading: false,
-                    error,
-                  }),
-                );
-              };
-
-              showForm("");
-            },
-          );
-
-          if (!smsLoginResult) {
-            return;
+          if (!smsState?.otpId) {
+            throw new Error("SMS not initialized — phone number not submitted");
           }
-          setIsLoading(true);
-          loginResponse = smsLoginResult;
+          if (!password) {
+            throw new Error("OTP code required for SMS authentication");
+          }
+          const smsResult = await smsAuth.completeSms(
+            username,
+            smsState.phoneNumber,
+            smsState.otpId,
+            password,
+          );
+          loginResponse = { signer: smsResult.signer };
           break;
         }
         case "phantom":
@@ -975,7 +908,7 @@ export function useCreateController({
       finishLogin,
       passwordAuth,
       smsAuth,
-      setOverlay,
+      smsState,
       setWaitingForConfirmation,
     ],
   );
@@ -1193,8 +1126,8 @@ export function useCreateController({
     error,
     setError,
     handleSubmit,
-    overlay,
-    setOverlay,
+    handleInitOtp,
+    smsState,
     changeWallet,
     setChangeWallet,
     signupOptions,

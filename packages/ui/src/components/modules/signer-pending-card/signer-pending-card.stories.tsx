@@ -47,10 +47,12 @@ export const Default: Story = {
       />
       <SignerPendingCard kind="google" inProgress={false} />
 
-      {/* <SignerPendingCard kind="sms" inProgress={true} /> */}
-      {/* <SignerPendingCard kind="sms" inProgress={false} error="Error connecting to SMS" /> */}
-      <SignerPendingCard kind="sms" inProgress={false} />
-      <SignerPendingCard kind="sms" inProgress={false} />
+      <SignerPendingCard kind="sms" inProgress={true} />
+      <SignerPendingCard
+        kind="sms"
+        inProgress={false}
+        error="Error Verifying code"
+      />
       <SignerPendingCard kind="sms" inProgress={false} />
 
       <SignerPendingCard kind="discord" inProgress={true} />

@@ -48,8 +48,8 @@ const variants: Record<
   },
   sms: {
     icon: <MobileIcon variant="solid" size="xl" />,
-    primaryText: "",
-    secondaryText: "",
+    primaryText: "Verifying code",
+    secondaryText: "Please wait...",
     label: "SMS",
   },
   passkey: {
@@ -64,8 +64,8 @@ const variants: Record<
   },
   password: {
     icon: <LockIcon size="xl" />,
-    primaryText: "Waiting for Confirmation",
-    secondaryText: "Continue in browser",
+    primaryText: "Verifying password",
+    secondaryText: "Please wait...",
   },
   metamask: {
     icon: <MetaMaskColorIcon size="xl" />,
@@ -134,9 +134,6 @@ export function SignerPendingCard({
         label: kind,
       };
 
-  if (kind === "sms" && (inProgress || error)) {
-    return <></>;
-  }
   return (
     <div
       className={cn(
