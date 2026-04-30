@@ -136,13 +136,7 @@ export function ChooseSignupMethodForm({
 
   const handleClose = (event?: Event) => {
     if (!isOpen) return; // avoid closing if another drawer is opening
-    if (event) {
-      const overlayElement = document.getElementById("wallet-connect-overlay");
-      if (overlayElement && overlayElement.contains(event.target as Node)) {
-        event.preventDefault();
-        return;
-      }
-    }
+    event?.preventDefault();
     onClose();
   };
 

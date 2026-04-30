@@ -57,8 +57,9 @@ export function PasswordFormDrawer({
     onSubmit("password", password);
   };
 
-  const handleClose = () => {
+  const handleClose = (event?: Event) => {
     if (!isOpen) return; // avoid closing if another drawer is opening
+    event?.preventDefault();
     onClose?.();
   };
 

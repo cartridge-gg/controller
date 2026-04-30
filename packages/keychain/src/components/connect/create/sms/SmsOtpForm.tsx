@@ -82,8 +82,9 @@ export function SmsOtpDrawer({
     [step, phoneInput, otpCode, onInitOtp, onSubmit],
   );
 
-  const handleClose = () => {
-    if (!isOpen) return;
+  const handleClose = (event?: Event) => {
+    if (!isOpen) return; // avoid closing if another drawer is opening
+    event?.preventDefault();
     onClose();
   };
 

@@ -338,10 +338,10 @@ export function CreateControllerView({
   }, [isLoading, setAuthenticationStep]);
 
   useEffect(() => {
-    if (error) {
+    if (error && !!authMethod) {
       setAuthenticationStep(AuthenticationStep.Error);
     }
-  }, [error, setAuthenticationStep]);
+  }, [error, authMethod, setAuthenticationStep]);
 
   const onClosePending = useCallback(() => {
     setAuthenticationStep(AuthenticationStep.FillForm);
@@ -351,7 +351,15 @@ export function CreateControllerView({
   const isLogin = !!validation.exists;
 
   const canRetry = useMemo(
-    () => (isLogin && authMethod === "password") || smsState != null,
+    () =>
+      smsState != null ||
+      (authMethod === "password" && isLogin) ||
+      authMethod === "google" ||
+      authMethod === "discord" ||
+      authMethod === "metamask" ||
+      authMethod === "phantom-evm" ||
+      authMethod === "rabby" ||
+      authMethod === "walletconnect",
     [isLogin, authMethod, smsState],
   );
 
@@ -361,8 +369,10 @@ export function CreateControllerView({
       setAuthenticationStep(AuthenticationStep.SmsForm);
     } else if (authMethod === "password") {
       setAuthenticationStep(AuthenticationStep.PasswordForm);
+    } else {
+      onSubmit(authMethod);
     }
-  }, [authMethod, smsState, setError, setAuthenticationStep]);
+  }, [authMethod, smsState, setError, setAuthenticationStep, onSubmit]);
 
   // Handles scroll to top on mobile when keyboard opens
   const { isMobile } = useDevice();
