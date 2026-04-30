@@ -1,48 +1,103 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import {
+  Badge,
+  Button,
+  GearIcon,
+  HeaderInner,
+  LayoutContent,
+  LayoutFooter,
+} from "@cartridge/controller-ui";
 import { Feature, useFeatures } from "@/hooks/features";
 
 type FeatureParams = {
   name: Feature;
-  action: "enable" | "disable" | string; // Allow string initially for validation
+  action: "enable" | "disable" | string;
 };
 
 export function FeatureToggle() {
   const { name, action } = useParams<FeatureParams>();
-  const { enableFeature, disableFeature } = useFeatures();
+  const { features, enableFeature, disableFeature } = useFeatures();
   const navigate = useNavigate();
+
+  const isValidAction = action === "enable" || action === "disable";
 
   useEffect(() => {
     if (!name) {
       console.error("Feature name missing in URL.");
-      navigate("/"); // Redirect to home or an error page
       return;
     }
 
     if (action === "enable") {
       enableFeature(name);
-      console.log(`Feature '${name}' enabled.`);
     } else if (action === "disable") {
       disableFeature(name);
-      console.log(`Feature '${name}' disabled.`);
     } else {
       console.error(`Invalid action '${action}' for feature '${name}'.`);
-      // Optionally navigate away or show an error message
     }
+  }, [name, action, enableFeature, disableFeature]);
 
-    // Redirect to home page after toggling
-    // Consider showing a success message briefly before redirecting
-    const timer = setTimeout(() => {
-      navigate("/");
-    }, 1000); // Redirect after 1 second
+  const enabledFeatures = useMemo(
+    () =>
+      Object.entries(features)
+        .filter(([, enabled]) => enabled)
+        .map(([feature]) => feature),
+    [features],
+  );
 
-    return () => clearTimeout(timer); // Cleanup timer on unmount
-  }, [name, action, enableFeature, disableFeature, navigate]);
+  const title = !name ? (
+    "Missing feature"
+  ) : !isValidAction ? (
+    <>
+      Invalid action <Badge variant="primary">{action}</Badge>
+    </>
+  ) : action === "enable" ? (
+    <>
+      Enabled <Badge variant="primary">{name}</Badge>
+    </>
+  ) : (
+    <>
+      Disabled <Badge variant="primary">{name}</Badge>
+    </>
+  );
 
-  // Display a message while processing/redirecting
+  const description = !name
+    ? "No feature name was provided in the URL."
+    : !isValidAction
+      ? `Use 'enable' or 'disable' to toggle '${name}'.`
+      : "Feature preference saved.";
+
   return (
-    <div>
-      Updating feature '{name}' to '{action}' state... Redirecting soon.
-    </div>
+    <>
+      <HeaderInner Icon={GearIcon} title={title} description={description} />
+      <LayoutContent>
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-semibold uppercase text-foreground-400">
+            Enabled features
+          </p>
+          {enabledFeatures.length === 0 ? (
+            <p className="text-sm text-foreground-300">
+              No features are currently enabled.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {enabledFeatures.map((feature) => (
+                <span
+                  key={feature}
+                  className="px-3 py-1 rounded-full bg-background-200 border border-background-300 text-sm text-foreground-200"
+                >
+                  {feature}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </LayoutContent>
+      <LayoutFooter>
+        <Button variant="secondary" onClick={() => navigate("/")}>
+          Back
+        </Button>
+      </LayoutFooter>
+    </>
   );
 }

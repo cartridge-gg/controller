@@ -77,6 +77,15 @@ const policies: SessionPolicies = {
         { name: "allowance", entrypoint: "allowance" },
       ],
     },
+    "0x01c3c8284d7EED443b42F47e764032a56eAf50A9079D67993B633930E3689814": {
+      methods: [
+        {
+          name: "approve",
+          entrypoint: "approve",
+          amount: "50000000000000000000000",
+        },
+      ],
+    },
     "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e": {
       methods: [{ name: "new_game", entrypoint: "new_game" }],
     },
@@ -219,7 +228,7 @@ export const controllerConnector = new ControllerConnector({
   preset: "nums",
 
   // Pistols (achievements, no quests)
-  // slot: "arcade-pistols",
+  // slot: "pistols-mainnet-2",
   // namespace: "pistols",
   // preset: "pistols",
 

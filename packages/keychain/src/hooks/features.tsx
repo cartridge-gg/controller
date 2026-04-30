@@ -18,8 +18,7 @@ export type Feature =
   | "coinflow-support"
   | "sms"
   | "registered-accounts"
-  | "recovery-accounts"
-  | "profile-qr-code";
+  | "recovery-accounts";
 
 // --- Helper Functions ---
 
