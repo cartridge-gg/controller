@@ -40,23 +40,19 @@ type PanelMode =
   | "verify-inactive";
 
 interface CoinbaseCheckoutProps {
-  /** Fires when the flow transitions to the popup-tracking state. Drawer hosts
-   * use this to dismiss the drawer so the takeover status view can render. */
-  onPopupOpened?: () => void;
   /** Overrides the default navigation back to /purchase/checkout/method. */
   onBack?: () => void;
-  /** When true, suppresses the internal "status" panel — the host is
-   * responsible for rendering popup status via <CoinbasePopupStatus />. */
-  hideStatus?: boolean;
+  /** When true, suppresses the internal policies header — the host (e.g. the
+   * drawer) renders its own header. */
+  hideHeader?: boolean;
   /** Streams the combined "committing payment" signal (creating order or
    * opening popup) so drawer hosts can block dismissal mid-flight. */
   onLoadingChange?: (loading: boolean) => void;
 }
 
 export function CoinbaseCheckout({
-  onPopupOpened,
   onBack,
-  hideStatus,
+  hideHeader,
   onLoadingChange,
 }: CoinbaseCheckoutProps = {}) {
   const {
@@ -199,7 +195,6 @@ export function CoinbaseCheckout({
           paymentLink: nextPaymentLink,
           orderId: nextOrderId,
         });
-        onPopupOpened?.();
       }
     } catch (err) {
       // Coinbase can still reject after we pass our local check — for example,
@@ -224,7 +219,6 @@ export function CoinbaseCheckout({
     paymentLink,
     openPaymentPopup,
     fetchCoinbaseLimits,
-    onPopupOpened,
   ]);
 
   const handleVerifySubmit = useCallback(
@@ -276,11 +270,13 @@ export function CoinbaseCheckout({
           (mode !== "policies" || waitingForLimits) && "hidden",
         )}
       >
-        <HeaderInner
-          title="Coinbase"
-          description="Policies"
-          icon={<CoinbaseWalletColorIcon size="lg" />}
-        />
+        {!hideHeader && (
+          <HeaderInner
+            title="Coinbase"
+            description="Policies"
+            icon={<CoinbaseWalletColorIcon size="lg" />}
+          />
+        )}
         <LayoutContent className="p-4 flex flex-col gap-4">
           <div className="bg-[#181C19] border border-background-200 p-4 rounded-[4px] text-xs text-foreground-300">
             By clicking 'Continue' you are agreeing to the following Coinbase
@@ -322,19 +318,20 @@ export function CoinbaseCheckout({
         </LayoutFooter>
       </div>
 
-      {/* Payment Status Screen. Hidden when hosted in a drawer — the drawer
-          closes on popup open and the parent renders <CoinbasePopupStatus />
-          as a takeover. */}
-      {!hideStatus && (
-        <div
-          className={cn(
-            "flex flex-col h-full",
-            mode !== "status" && "invisible absolute inset-0 -z-10",
-          )}
-        >
-          <CoinbasePopupStatus />
-        </div>
-      )}
+      {/* Payment Status Screen — rendered as another internal panel so the
+          host (e.g. the Coinbase drawer) keeps the same chrome across the
+          policies → popup-status transition. */}
+      <div
+        className={cn(
+          "flex flex-col h-full",
+          mode !== "status" && "invisible absolute inset-0 -z-10",
+        )}
+      >
+        <CoinbasePopupStatus
+          hideHeader={hideHeader}
+          onBack={() => setMode("policies")}
+        />
+      </div>
 
       {/* Verify Form */}
       {mode === "verify-form" && coinbaseLimits && (

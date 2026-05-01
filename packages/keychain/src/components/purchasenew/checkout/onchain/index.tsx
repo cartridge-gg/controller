@@ -38,7 +38,6 @@ import { WalletSelectionDrawer } from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
 import { CoinflowDrawer } from "../coinflow/drawer";
 import { CoinbaseDrawer } from "../coinbase/drawer";
-import { CoinbasePopupStatus } from "../coinbase/popup-status";
 import { VerificationDrawer } from "../../verification/drawer";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { getIpLocation } from "@/utils/ip";
@@ -103,7 +102,6 @@ export function OnchainCheckout() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isCoinflowDrawerOpen, setIsCoinflowDrawerOpen] = useState(false);
   const [isCoinbaseDrawerOpen, setIsCoinbaseDrawerOpen] = useState(false);
-  const [showCoinbasePopupStatus, setShowCoinbasePopupStatus] = useState(false);
   const [verificationMethod, setVerificationMethod] = useState<
     "coinflow" | "apple-pay" | null
   >(null);
@@ -453,14 +451,6 @@ export function OnchainCheckout() {
     return <LoadingState />;
   }
 
-  // Coinbase popup is active — take over the screen until payment resolves
-  // (navigates to /pending) or the user backs out.
-  if (showCoinbasePopupStatus) {
-    return (
-      <CoinbasePopupStatus onBack={() => setShowCoinbasePopupStatus(false)} />
-    );
-  }
-
   return (
     <>
       <HeaderInner
@@ -641,10 +631,6 @@ export function OnchainCheckout() {
       <CoinbaseDrawer
         isOpen={isCoinbaseDrawerOpen}
         onClose={() => setIsCoinbaseDrawerOpen(false)}
-        onPopupOpened={() => {
-          setIsCoinbaseDrawerOpen(false);
-          setShowCoinbasePopupStatus(true);
-        }}
       />
 
       <VerificationDrawer

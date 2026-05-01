@@ -13,16 +13,9 @@ import { CoinbaseCheckout } from "./index";
 interface CoinbaseDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Called when the Coinbase payment popup opens — the caller should close
-   * the drawer and render <CoinbasePopupStatus /> as a takeover. */
-  onPopupOpened: () => void;
 }
 
-export function CoinbaseDrawer({
-  isOpen,
-  onClose,
-  onPopupOpened,
-}: CoinbaseDrawerProps) {
+export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
   const [isCommitting, setIsCommitting] = useState(false);
 
   return (
@@ -44,7 +37,7 @@ export function CoinbaseDrawer({
               size="lg"
               className="bg-background-100"
             />
-            Apple Pay
+            Coinbase Policies
           </SheetTitle>
           <Button
             variant="icon"
@@ -60,8 +53,7 @@ export function CoinbaseDrawer({
 
         <div className="flex flex-col flex-1 min-h-0">
           <CoinbaseCheckout
-            hideStatus
-            onPopupOpened={onPopupOpened}
+            hideHeader
             onBack={onClose}
             onLoadingChange={setIsCommitting}
           />

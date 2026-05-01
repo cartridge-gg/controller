@@ -15,9 +15,15 @@ interface CoinbasePopupStatusProps {
   /** Overrides the default "go back one step" behavior. Used when hosted as a
    * takeover view (there's no previous history entry to pop). */
   onBack?: () => void;
+  /** When true, suppresses the internal header — the host (e.g. the drawer)
+   * renders its own header. */
+  hideHeader?: boolean;
 }
 
-export function CoinbasePopupStatus({ onBack }: CoinbasePopupStatusProps = {}) {
+export function CoinbasePopupStatus({
+  onBack,
+  hideHeader,
+}: CoinbasePopupStatusProps = {}) {
   const { orderStatus, popupClosed, paymentSuccess } =
     useOnchainPurchaseContext();
   const { navigate } = useNavigation();
@@ -33,11 +39,13 @@ export function CoinbasePopupStatus({ onBack }: CoinbasePopupStatusProps = {}) {
 
   return (
     <>
-      <HeaderInner
-        title="Apple Pay"
-        description="via Coinbase"
-        icon={<CoinbaseWalletColorIcon size="lg" />}
-      />
+      {!hideHeader && (
+        <HeaderInner
+          title="Apple Pay"
+          description="via Coinbase"
+          icon={<CoinbaseWalletColorIcon size="lg" />}
+        />
+      )}
       <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6 pb-24">
         {isFailed ? (
           <div className="flex flex-col items-center gap-4 text-center">
