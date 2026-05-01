@@ -8,13 +8,11 @@ import {
   CoinbaseWalletColorIcon,
   ExternalIcon,
   cn,
-  TimesIcon,
 } from "@cartridge/controller-ui";
 import { useOnchainPurchaseContext } from "@/context";
 import { useNavigation } from "@/context";
 import {
   CoinbaseLimitUpgradeStatus,
-  CoinbaseOnrampStatus,
   type SubmitCoinbaseLimitsUpgradeInput,
 } from "@/utils/api";
 import { exceedsLimit } from "@/hooks/starterpack/coinbase";
@@ -25,13 +23,14 @@ import {
   VerifyPendingPanel,
   VerifyTimeoutPanel,
 } from "./limits-verify-panels";
+import { CoinbasePopupStatus } from "./popup-status";
 
 /** How often to refresh limits while waiting for a terminal status. */
 const VERIFY_POLL_INTERVAL_MS = 5_000;
 /** Max time to sit in the pending state before falling back to a timeout message. */
 const VERIFY_TIMEOUT_MS = 3 * 60 * 1_000;
 
-type PanelMode =
+export type PanelMode =
   | "policies"
   | "status"
   | "verify-form"
@@ -40,13 +39,29 @@ type PanelMode =
   | "verify-active"
   | "verify-inactive";
 
-export function CoinbaseCheckout() {
+interface CoinbaseCheckoutProps {
+  /** Overrides the default navigation back to /purchase/checkout/method. */
+  onBack?: () => void;
+  /** When true, suppresses internal panel headers — the host (e.g. the
+   * drawer) renders its own header chrome. */
+  hideHeader?: boolean;
+  /** Streams the combined "committing payment" signal (creating order or
+   * opening popup) so drawer hosts can block dismissal mid-flight. */
+  onLoadingChange?: (loading: boolean) => void;
+  /** Streams the active panel mode so drawer hosts can update their header
+   * chrome to match the current screen. */
+  onModeChange?: (mode: PanelMode) => void;
+}
+
+export function CoinbaseCheckout({
+  onBack,
+  hideHeader,
+  onLoadingChange,
+  onModeChange,
+}: CoinbaseCheckoutProps = {}) {
   const {
     paymentLink,
     isCreatingOrder,
-    orderStatus,
-    popupClosed,
-    paymentSuccess,
     onCreateCoinbaseOrder,
     openPaymentPopup,
     coinbaseQuote,
@@ -69,6 +84,14 @@ export function CoinbaseCheckout() {
   useEffect(() => {
     fetchCoinbaseLimits();
   }, [fetchCoinbaseLimits]);
+
+  useEffect(() => {
+    onLoadingChange?.(isCreatingOrder || isOpeningPopup);
+  }, [isCreatingOrder, isOpeningPopup, onLoadingChange]);
+
+  useEffect(() => {
+    onModeChange?.(mode);
+  }, [mode, onModeChange]);
 
   const paymentTotalUsd = useMemo(() => {
     const raw = coinbaseQuote?.paymentTotal?.amount;
@@ -128,13 +151,6 @@ export function CoinbaseCheckout() {
       onCreateCoinbaseOrder();
     }
   }, [paymentLink, hasLimitsLoaded, limitExceeded, onCreateCoinbaseOrder]);
-
-  // Navigate to pending when payment success is signaled or order is completed.
-  useEffect(() => {
-    if (paymentSuccess || orderStatus === CoinbaseOnrampStatus.Completed) {
-      navigate("/purchase/pending", { reset: true });
-    }
-  }, [paymentSuccess, orderStatus, navigate]);
 
   // Poll limits while waiting for a terminal verify status.
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -227,8 +243,12 @@ export function CoinbaseCheckout() {
   );
 
   const handleBackToMethod = useCallback(() => {
+    if (onBack) {
+      onBack();
+      return;
+    }
     navigate("/purchase/checkout/method");
-  }, [navigate]);
+  }, [navigate, onBack]);
 
   const handleContinueAfterActive = useCallback(() => {
     // Refresh limits so exceedsLimit recomputes with upgraded remaining, then
@@ -236,8 +256,6 @@ export function CoinbaseCheckout() {
     fetchCoinbaseLimits();
     setMode("policies");
   }, [fetchCoinbaseLimits]);
-
-  const isFailed = orderStatus === CoinbaseOnrampStatus.Failed;
 
   const waitingForLimits = !hasLimitsLoaded && isFetchingCoinbaseLimits;
 
@@ -260,11 +278,13 @@ export function CoinbaseCheckout() {
           (mode !== "policies" || waitingForLimits) && "hidden",
         )}
       >
-        <HeaderInner
-          title="Coinbase"
-          description="Policies"
-          icon={<CoinbaseWalletColorIcon size="lg" />}
-        />
+        {!hideHeader && (
+          <HeaderInner
+            title="Coinbase"
+            description="Policies"
+            icon={<CoinbaseWalletColorIcon size="lg" />}
+          />
+        )}
         <LayoutContent className="p-4 flex flex-col gap-4">
           <div className="bg-[#181C19] border border-background-200 p-4 rounded-[4px] text-xs text-foreground-300">
             By clicking 'Continue' you are agreeing to the following Coinbase
@@ -306,68 +326,19 @@ export function CoinbaseCheckout() {
         </LayoutFooter>
       </div>
 
-      {/* Payment Status Screen */}
+      {/* Payment Status Screen — rendered as another internal panel so the
+          host (e.g. the Coinbase drawer) keeps the same chrome across the
+          policies → popup-status transition. */}
       <div
         className={cn(
           "flex flex-col h-full",
           mode !== "status" && "invisible absolute inset-0 -z-10",
         )}
       >
-        <HeaderInner
-          title="Apple Pay"
-          description="via Coinbase"
-          icon={<CoinbaseWalletColorIcon size="lg" />}
+        <CoinbasePopupStatus
+          hideHeader={hideHeader}
+          onBack={() => setMode("policies")}
         />
-        <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6 pb-24">
-          {isFailed ? (
-            <div className="flex flex-col items-center gap-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                <TimesIcon size="lg" className="text-destructive" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground-100">
-                  Payment Failed
-                </p>
-                <p className="text-xs text-foreground-300 mt-1">
-                  The payment could not be completed. Please try again.
-                </p>
-              </div>
-            </div>
-          ) : popupClosed ? (
-            <div className="flex flex-col items-center gap-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                <TimesIcon size="lg" className="text-foreground-300" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground-100">
-                  Payment Window Closed
-                </p>
-                <p className="text-xs text-foreground-300 mt-1">
-                  The payment window was closed. Go back to try again.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-4 text-center">
-              <SpinnerIcon className="animate-spin" size="lg" />
-              <div>
-                <p className="text-sm font-semibold text-foreground-100">
-                  Complete in Popup
-                </p>
-                <p className="text-xs text-foreground-300 mt-1">
-                  Complete the payment in the popup window that opened.
-                </p>
-              </div>
-            </div>
-          )}
-        </LayoutContent>
-        {(isFailed || popupClosed) && (
-          <LayoutFooter>
-            <Button className="w-full" onClick={() => navigate(-1)}>
-              GO BACK
-            </Button>
-          </LayoutFooter>
-        )}
       </div>
 
       {/* Verify Form */}
@@ -381,6 +352,7 @@ export function CoinbaseCheckout() {
             }
             isSubmitting={isSubmittingLimitsUpgrade}
             onSubmit={handleVerifySubmit}
+            hideHeader={hideHeader}
           />
         </div>
       )}
@@ -388,14 +360,17 @@ export function CoinbaseCheckout() {
       {/* Verify Pending */}
       {mode === "verify-pending" && (
         <div className="flex flex-col h-full">
-          <VerifyPendingPanel />
+          <VerifyPendingPanel hideHeader={hideHeader} />
         </div>
       )}
 
       {/* Verify Timeout */}
       {mode === "verify-timeout" && (
         <div className="flex flex-col h-full">
-          <VerifyTimeoutPanel onClose={handleBackToMethod} />
+          <VerifyTimeoutPanel
+            onClose={handleBackToMethod}
+            hideHeader={hideHeader}
+          />
         </div>
       )}
 
@@ -405,6 +380,7 @@ export function CoinbaseCheckout() {
           <VerifyActivePanel
             limits={coinbaseLimits}
             onContinue={handleContinueAfterActive}
+            hideHeader={hideHeader}
           />
         </div>
       )}
@@ -412,7 +388,10 @@ export function CoinbaseCheckout() {
       {/* Verify Inactive */}
       {mode === "verify-inactive" && (
         <div className="flex flex-col h-full">
-          <VerifyInactivePanel onClose={handleBackToMethod} />
+          <VerifyInactivePanel
+            onClose={handleBackToMethod}
+            hideHeader={hideHeader}
+          />
         </div>
       )}
     </>

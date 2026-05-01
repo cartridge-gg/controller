@@ -216,11 +216,23 @@ const CodeStepView = ({
   </>
 );
 
-export function Verification() {
+interface VerificationProps {
+  /** Overrides the `method` URL search param. Host this in a drawer by
+   * passing the method directly instead of relying on navigation. */
+  method?: string | null;
+  /** Called when verification completes. When provided, suppresses the
+   * default navigation to /purchase/checkout/{method}. */
+  onSuccess?: () => void;
+}
+
+export function Verification({
+  method: methodProp,
+  onSuccess,
+}: VerificationProps = {}) {
   const { navigate } = useNavigation();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const method = searchParams.get("method");
+  const method = methodProp ?? searchParams.get("method");
   const { toast } = useToast();
 
   const {
@@ -287,6 +299,10 @@ export function Verification() {
 
     if (step === "SUCCESS" && method && isVerified && !isTransientSuccess) {
       const timer = setTimeout(() => {
+        if (onSuccess) {
+          onSuccess();
+          return;
+        }
         if (method === "apple-pay") {
           navigate("/purchase/checkout/coinbase");
         } else if (method === "coinflow") {
@@ -307,6 +323,7 @@ export function Verification() {
     accountPrivateData,
     isTransientSuccess,
     emailOnly,
+    onSuccess,
   ]);
 
   const handleSendEmail = async () => {

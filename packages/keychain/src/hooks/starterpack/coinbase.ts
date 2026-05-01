@@ -84,6 +84,10 @@ export interface UseCoinbaseReturn {
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
   getQuote: (input: CoinbaseQuoteInput) => Promise<CoinbaseQuoteResult>;
   openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
+  /** Force-close the in-flight payment popup. The internal popup-closed
+   * watcher then runs its normal cleanup path (stops polling, sets
+   * `popupClosed=true` if no terminal status was reached). */
+  closePaymentPopup: () => void;
   resetOrder: () => void;
   fetchLimits: () => Promise<CoinbaseLimitsResult | undefined>;
   submitLimitsUpgrade: (
@@ -564,6 +568,10 @@ export function useCoinbase({
     ],
   );
 
+  const closePaymentPopup = useCallback(() => {
+    popupRef.current?.close();
+  }, []);
+
   const createOrder = useCallback(
     async (input: CreateOrderInput) => {
       if (!controller) {
@@ -677,6 +685,7 @@ export function useCoinbase({
     getTransactions,
     getQuote,
     openPaymentPopup,
+    closePaymentPopup,
     resetOrder,
     fetchLimits,
     submitLimitsUpgrade,

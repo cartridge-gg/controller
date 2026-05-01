@@ -73,6 +73,7 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   onCoinflowSelect: () => {},
   onCreateCoinbaseOrder: async () => undefined,
   openPaymentPopup: () => {},
+  closePaymentPopup: () => {},
   resetCoinbasePurchase: () => {},
   orderId: undefined,
   orderStatus: undefined,

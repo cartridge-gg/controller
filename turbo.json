@@ -8,6 +8,14 @@
         "dist/**"
       ]
     },
+    "@cartridge/controller-ui#build": {
+      "dependsOn": [
+        "@cartridge/controller-ui#build:deps"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
     "build:deps": {
       "dependsOn": [
         "@cartridge/controller-ui#build:deps",

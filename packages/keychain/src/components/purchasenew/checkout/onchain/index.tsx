@@ -36,6 +36,9 @@ import { WalletSelector } from "./selector";
 import { QuantityControls } from "./quantity";
 import { WalletSelectionDrawer } from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
+import { CoinflowDrawer } from "../coinflow/drawer";
+import { CoinbaseDrawer } from "../coinbase/drawer";
+import { VerificationDrawer } from "../../verification/drawer";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { getIpLocation } from "@/utils/ip";
 import { num } from "starknet";
@@ -97,6 +100,11 @@ export function OnchainCheckout() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isCoinflowDrawerOpen, setIsCoinflowDrawerOpen] = useState(false);
+  const [isCoinbaseDrawerOpen, setIsCoinbaseDrawerOpen] = useState(false);
+  const [verificationMethod, setVerificationMethod] = useState<
+    "coinflow" | "apple-pay" | null
+  >(null);
   const [countryCode, setCountryCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -320,12 +328,12 @@ export function OnchainCheckout() {
       if (isCoinflowSelected) {
         const { data: meData } = await refetchMe();
         if (!meData?.me?.email) {
-          navigate("/purchase/verification?method=coinflow");
+          setVerificationMethod("coinflow");
           return;
         }
 
         await onCreditCardPurchase();
-        navigate("/purchase/checkout/coinflow");
+        setIsCoinflowDrawerOpen(true);
       } else if (isApplePaySelected) {
         resetCoinbasePurchase();
         const [{ data: meData }, { data: accountPrivateData }] =
@@ -338,14 +346,14 @@ export function OnchainCheckout() {
           !accountPrivate?.phoneNumberVerifiedAt;
 
         if (needsVerification) {
-          navigate("/purchase/verification?method=apple-pay");
+          setVerificationMethod("apple-pay");
           return;
         }
 
         // User is over the Coinbase cap — skip the order create entirely;
-        // CoinbaseCheckout will surface the verify flow.
+        // the drawer will surface the verify flow.
         if (applePayLimitExceeded) {
-          navigate("/purchase/checkout/coinbase");
+          setIsCoinbaseDrawerOpen(true);
           return;
         }
 
@@ -353,19 +361,19 @@ export function OnchainCheckout() {
           await onCreateCoinbaseOrder({ force: true });
         } catch (err) {
           // Safety net: Coinbase can still reject if /limits was stale.
-          // Navigate anyway so the verify flow takes over.
+          // Open the drawer anyway so the verify flow takes over.
           const message = err instanceof Error ? err.message : String(err);
           if (
             message.includes("guest_transaction_count") ||
             message.includes("guest_transaction_limit")
           ) {
             await fetchCoinbaseLimits();
-            navigate("/purchase/checkout/coinbase");
+            setIsCoinbaseDrawerOpen(true);
             return;
           }
           throw err;
         }
-        navigate("/purchase/checkout/coinbase");
+        setIsCoinbaseDrawerOpen(true);
       } else {
         await onOnchainPurchase();
         navigate("/purchase/pending", { reset: true });
@@ -442,6 +450,7 @@ export function OnchainCheckout() {
   if (isStarterpackLoading || !quote) {
     return <LoadingState />;
   }
+
   return (
     <>
       <HeaderInner
@@ -612,6 +621,28 @@ export function OnchainCheckout() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         showFiatOptions={countryCode === "US"}
+      />
+
+      <CoinflowDrawer
+        isOpen={isCoinflowDrawerOpen}
+        onClose={() => setIsCoinflowDrawerOpen(false)}
+      />
+
+      <CoinbaseDrawer
+        isOpen={isCoinbaseDrawerOpen}
+        onClose={() => setIsCoinbaseDrawerOpen(false)}
+      />
+
+      <VerificationDrawer
+        isOpen={verificationMethod !== null}
+        method={verificationMethod}
+        onClose={() => setVerificationMethod(null)}
+        onSuccess={() => {
+          // Verification done — close drawer and re-run the purchase which
+          // will now pass the email/phone gate and open the payment drawer.
+          setVerificationMethod(null);
+          handlePurchase();
+        }}
       />
     </>
   );

@@ -90,6 +90,7 @@ export interface VerifyFormPanelProps {
   isResubmit: boolean;
   isSubmitting: boolean;
   onSubmit: (input: SubmitCoinbaseLimitsUpgradeInput) => void;
+  hideHeader?: boolean;
 }
 
 export function VerifyFormPanel({
@@ -97,6 +98,7 @@ export function VerifyFormPanel({
   isResubmit,
   isSubmitting,
   onSubmit,
+  hideHeader,
 }: VerifyFormPanelProps) {
   const [ssn, setSsn] = useState("");
   const [month, setMonth] = useState("");
@@ -147,11 +149,13 @@ export function VerifyFormPanel({
 
   return (
     <>
-      <HeaderInner
-        title="Verify to continue"
-        description="Raise your Coinbase limit"
-        icon={<CoinbaseWalletColorIcon size="lg" />}
-      />
+      {!hideHeader && (
+        <HeaderInner
+          title="Verify to continue"
+          description="Raise your Coinbase limit"
+          icon={<CoinbaseWalletColorIcon size="lg" />}
+        />
+      )}
       <LayoutContent className="p-4 flex flex-col gap-4">
         <div className="bg-[#181C19] border border-background-200 p-4 rounded-[4px] text-xs text-foreground-300 flex flex-col gap-2">
           {isResubmit ? (
@@ -248,14 +252,22 @@ export function VerifyFormPanel({
   );
 }
 
-export function VerifyPendingPanel() {
+export interface VerifyPendingPanelProps {
+  hideHeader?: boolean;
+}
+
+export function VerifyPendingPanel({
+  hideHeader,
+}: VerifyPendingPanelProps = {}) {
   return (
     <>
-      <HeaderInner
-        title="Verifying"
-        description="Coinbase limits upgrade"
-        icon={<CoinbaseWalletColorIcon size="lg" />}
-      />
+      {!hideHeader && (
+        <HeaderInner
+          title="Verifying"
+          description="Coinbase limits upgrade"
+          icon={<CoinbaseWalletColorIcon size="lg" />}
+        />
+      )}
       <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6 pb-24">
         <SpinnerIcon className="animate-spin" size="lg" />
         <div className="text-center">
@@ -273,16 +285,22 @@ export function VerifyPendingPanel() {
 
 export interface VerifyTimeoutPanelProps {
   onClose: () => void;
+  hideHeader?: boolean;
 }
 
-export function VerifyTimeoutPanel({ onClose }: VerifyTimeoutPanelProps) {
+export function VerifyTimeoutPanel({
+  onClose,
+  hideHeader,
+}: VerifyTimeoutPanelProps) {
   return (
     <>
-      <HeaderInner
-        title="Still processing"
-        description="Coinbase limits upgrade"
-        icon={<CoinbaseWalletColorIcon size="lg" />}
-      />
+      {!hideHeader && (
+        <HeaderInner
+          title="Still processing"
+          description="Coinbase limits upgrade"
+          icon={<CoinbaseWalletColorIcon size="lg" />}
+        />
+      )}
       <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6 pb-24 text-center">
         <SpinnerIcon className="animate-spin" size="lg" />
         <div>
@@ -306,11 +324,13 @@ export function VerifyTimeoutPanel({ onClose }: VerifyTimeoutPanelProps) {
 export interface VerifyActivePanelProps {
   limits: CoinbaseLimitsResult;
   onContinue: () => void;
+  hideHeader?: boolean;
 }
 
 export function VerifyActivePanel({
   limits,
   onContinue,
+  hideHeader,
 }: VerifyActivePanelProps) {
   const weekly = limits.limits.find(
     (l) => l.limitType === LIMIT_TYPE_WEEKLY_SPENDING,
@@ -319,11 +339,13 @@ export function VerifyActivePanel({
 
   return (
     <>
-      <HeaderInner
-        title="Limits updated"
-        description="Coinbase limits upgrade"
-        icon={<CoinbaseWalletColorIcon size="lg" />}
-      />
+      {!hideHeader && (
+        <HeaderInner
+          title="Limits updated"
+          description="Coinbase limits upgrade"
+          icon={<CoinbaseWalletColorIcon size="lg" />}
+        />
+      )}
       <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6 pb-24 text-center">
         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
           <CheckIcon size="lg" className="text-primary" />
@@ -349,16 +371,22 @@ export function VerifyActivePanel({
 
 export interface VerifyInactivePanelProps {
   onClose: () => void;
+  hideHeader?: boolean;
 }
 
-export function VerifyInactivePanel({ onClose }: VerifyInactivePanelProps) {
+export function VerifyInactivePanel({
+  onClose,
+  hideHeader,
+}: VerifyInactivePanelProps) {
   return (
     <>
-      <HeaderInner
-        title="Not eligible"
-        description="Coinbase limits upgrade"
-        icon={<CoinbaseWalletColorIcon size="lg" />}
-      />
+      {!hideHeader && (
+        <HeaderInner
+          title="Not eligible"
+          description="Coinbase limits upgrade"
+          icon={<CoinbaseWalletColorIcon size="lg" />}
+        />
+      )}
       <LayoutContent className="p-4 flex flex-col items-center justify-center gap-6 pb-24 text-center">
         <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
           <TimesIcon size="lg" className="text-destructive" />
