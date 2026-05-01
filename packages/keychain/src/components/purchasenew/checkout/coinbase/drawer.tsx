@@ -9,15 +9,46 @@ import {
   TimesIcon,
 } from "@cartridge/controller-ui";
 import { useOnchainPurchaseContext } from "@/context";
-import { CoinbaseCheckout } from "./index";
+import { CoinbaseCheckout, type PanelMode } from "./index";
 
 interface CoinbaseDrawerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+interface DrawerHeader {
+  title: string;
+  description?: string;
+}
+
+const HEADER_BY_MODE: Record<PanelMode, DrawerHeader> = {
+  policies: { title: "Coinbase Policies" },
+  status: { title: "Coinbase Policies" },
+  "verify-form": {
+    title: "Verify to Continue",
+    description: "Raise your Coinbase limit",
+  },
+  "verify-pending": {
+    title: "Verifying",
+    description: "Coinbase limits upgrade",
+  },
+  "verify-timeout": {
+    title: "Still Processing",
+    description: "Coinbase limits upgrade",
+  },
+  "verify-active": {
+    title: "Limits Updated",
+    description: "Coinbase limits upgrade",
+  },
+  "verify-inactive": {
+    title: "Not Eligible",
+    description: "Coinbase limits upgrade",
+  },
+};
+
 export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
   const [isCommitting, setIsCommitting] = useState(false);
+  const [mode, setMode] = useState<PanelMode>("policies");
   const { closePaymentPopup } = useOnchainPurchaseContext();
 
   const handleClose = useCallback(() => {
@@ -26,6 +57,8 @@ export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
     closePaymentPopup();
     onClose();
   }, [closePaymentPopup, onClose]);
+
+  const header = HEADER_BY_MODE[mode];
 
   return (
     <Sheet
@@ -40,13 +73,22 @@ export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
         showClose={false}
       >
         <div className="flex items-center justify-between p-4">
-          <SheetTitle className="flex items-center gap-3 text-lg text-start font-semibold">
-            <Thumbnail
-              icon={<CoinbaseWalletColorIcon />}
-              size="lg"
-              className="bg-background-100"
-            />
-            Coinbase Policies
+          <SheetTitle asChild>
+            <div className="flex items-center gap-3 text-start">
+              <Thumbnail
+                icon={<CoinbaseWalletColorIcon />}
+                size="lg"
+                className="bg-background-100"
+              />
+              <div className="flex flex-col">
+                <span className="text-lg font-semibold">{header.title}</span>
+                {header.description && (
+                  <span className="text-xs text-foreground-300">
+                    {header.description}
+                  </span>
+                )}
+              </div>
+            </div>
           </SheetTitle>
           <Button
             variant="icon"
@@ -65,6 +107,7 @@ export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
             hideHeader
             onBack={handleClose}
             onLoadingChange={setIsCommitting}
+            onModeChange={setMode}
           />
         </div>
       </SheetContent>

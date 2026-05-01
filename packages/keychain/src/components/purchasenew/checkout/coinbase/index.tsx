@@ -30,7 +30,7 @@ const VERIFY_POLL_INTERVAL_MS = 5_000;
 /** Max time to sit in the pending state before falling back to a timeout message. */
 const VERIFY_TIMEOUT_MS = 3 * 60 * 1_000;
 
-type PanelMode =
+export type PanelMode =
   | "policies"
   | "status"
   | "verify-form"
@@ -42,18 +42,22 @@ type PanelMode =
 interface CoinbaseCheckoutProps {
   /** Overrides the default navigation back to /purchase/checkout/method. */
   onBack?: () => void;
-  /** When true, suppresses the internal policies header — the host (e.g. the
-   * drawer) renders its own header. */
+  /** When true, suppresses internal panel headers — the host (e.g. the
+   * drawer) renders its own header chrome. */
   hideHeader?: boolean;
   /** Streams the combined "committing payment" signal (creating order or
    * opening popup) so drawer hosts can block dismissal mid-flight. */
   onLoadingChange?: (loading: boolean) => void;
+  /** Streams the active panel mode so drawer hosts can update their header
+   * chrome to match the current screen. */
+  onModeChange?: (mode: PanelMode) => void;
 }
 
 export function CoinbaseCheckout({
   onBack,
   hideHeader,
   onLoadingChange,
+  onModeChange,
 }: CoinbaseCheckoutProps = {}) {
   const {
     paymentLink,
@@ -84,6 +88,10 @@ export function CoinbaseCheckout({
   useEffect(() => {
     onLoadingChange?.(isCreatingOrder || isOpeningPopup);
   }, [isCreatingOrder, isOpeningPopup, onLoadingChange]);
+
+  useEffect(() => {
+    onModeChange?.(mode);
+  }, [mode, onModeChange]);
 
   const paymentTotalUsd = useMemo(() => {
     const raw = coinbaseQuote?.paymentTotal?.amount;
@@ -344,6 +352,7 @@ export function CoinbaseCheckout({
             }
             isSubmitting={isSubmittingLimitsUpgrade}
             onSubmit={handleVerifySubmit}
+            hideHeader={hideHeader}
           />
         </div>
       )}
@@ -351,14 +360,17 @@ export function CoinbaseCheckout({
       {/* Verify Pending */}
       {mode === "verify-pending" && (
         <div className="flex flex-col h-full">
-          <VerifyPendingPanel />
+          <VerifyPendingPanel hideHeader={hideHeader} />
         </div>
       )}
 
       {/* Verify Timeout */}
       {mode === "verify-timeout" && (
         <div className="flex flex-col h-full">
-          <VerifyTimeoutPanel onClose={handleBackToMethod} />
+          <VerifyTimeoutPanel
+            onClose={handleBackToMethod}
+            hideHeader={hideHeader}
+          />
         </div>
       )}
 
@@ -368,6 +380,7 @@ export function CoinbaseCheckout({
           <VerifyActivePanel
             limits={coinbaseLimits}
             onContinue={handleContinueAfterActive}
+            hideHeader={hideHeader}
           />
         </div>
       )}
@@ -375,7 +388,10 @@ export function CoinbaseCheckout({
       {/* Verify Inactive */}
       {mode === "verify-inactive" && (
         <div className="flex flex-col h-full">
-          <VerifyInactivePanel onClose={handleBackToMethod} />
+          <VerifyInactivePanel
+            onClose={handleBackToMethod}
+            hideHeader={hideHeader}
+          />
         </div>
       )}
     </>
