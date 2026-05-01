@@ -127,6 +127,7 @@ export interface OnchainPurchaseContextType {
     force?: boolean;
   }) => Promise<CoinbaseOrderResult | undefined>;
   openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
+  closePaymentPopup: () => void;
   resetCoinbasePurchase: () => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
   fetchCoinbaseLimits: () => Promise<CoinbaseLimitsResult | undefined>;
@@ -306,6 +307,7 @@ export const OnchainPurchaseProvider = ({
     popupClosed,
     paymentSuccess,
     openPaymentPopup,
+    closePaymentPopup,
     resetOrder: resetCoinbaseOrder,
     limits: coinbaseLimits,
     isFetchingLimits: isFetchingCoinbaseLimits,
@@ -812,6 +814,7 @@ export const OnchainPurchaseProvider = ({
     onCoinflowSelect,
     onCreateCoinbaseOrder,
     openPaymentPopup,
+    closePaymentPopup,
     resetCoinbasePurchase,
     getTransactions,
     coinbaseLimits,

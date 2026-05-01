@@ -66,6 +66,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     onCoinflowSelect: () => {},
     onCreateCoinbaseOrder: async () => undefined,
     openPaymentPopup: () => {},
+    closePaymentPopup: () => {},
     resetCoinbasePurchase: () => {},
     orderId: undefined,
     orderStatus: undefined,

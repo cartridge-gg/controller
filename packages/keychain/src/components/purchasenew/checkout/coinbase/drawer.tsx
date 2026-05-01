@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Button,
   CoinbaseWalletColorIcon,
@@ -8,6 +8,7 @@ import {
   Thumbnail,
   TimesIcon,
 } from "@cartridge/controller-ui";
+import { useOnchainPurchaseContext } from "@/context";
 import { CoinbaseCheckout } from "./index";
 
 interface CoinbaseDrawerProps {
@@ -17,12 +18,20 @@ interface CoinbaseDrawerProps {
 
 export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
   const [isCommitting, setIsCommitting] = useState(false);
+  const { closePaymentPopup } = useOnchainPurchaseContext();
+
+  const handleClose = useCallback(() => {
+    // Kill any in-flight payment popup so dismissing the drawer also dismisses
+    // the Coinbase window. No-op if the popup isn't open.
+    closePaymentPopup();
+    onClose();
+  }, [closePaymentPopup, onClose]);
 
   return (
     <Sheet
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open && !isCommitting) onClose();
+        if (!open && !isCommitting) handleClose();
       }}
     >
       <SheetContent
@@ -42,7 +51,7 @@ export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
           <Button
             variant="icon"
             size="icon"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isCommitting}
             tabIndex={-1}
             className="rounded-full bg-background-100 hover:bg-background-200"
@@ -54,7 +63,7 @@ export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
         <div className="flex flex-col flex-1 min-h-0">
           <CoinbaseCheckout
             hideHeader
-            onBack={onClose}
+            onBack={handleClose}
             onLoadingChange={setIsCommitting}
           />
         </div>
