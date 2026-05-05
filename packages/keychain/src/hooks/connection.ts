@@ -66,6 +66,45 @@ const TOKEN_ADDRESSES: Record<Token, string> = {
   usdt: USDT_CONTRACT_ADDRESS,
 };
 
+type ResolvedUrlParams = {
+  theme: string | null;
+  preset: string | null;
+  policies: string | null;
+  shouldOverridePresetPolicies: boolean;
+  version: string | null;
+  project: string | null;
+  namespace: string | null;
+  tokens: string[];
+  ref: string | null;
+  refGroup: string | null;
+  propagateError: boolean;
+  errorDisplayMode?: "modal" | "notification" | "silent";
+};
+
+export const URL_PARAMS_STORAGE_KEY = "keychain.urlParams";
+export const PRESERVE_URL_PARAMS_FLAG = "keychain.preserveOnReload";
+
+// Runs once per iframe load. If the previous unload set the preserve flag
+// (e.g. disconnect's window.location.reload), keep the stored params so the
+// next mount can repopulate them. Otherwise, treat this as a fresh full-page
+// load and wipe the snapshot. The flag is single-shot — always consumed.
+const initialResolvedUrlParams: ResolvedUrlParams | null = (() => {
+  if (typeof window === "undefined") return null;
+  try {
+    const shouldPreserve =
+      sessionStorage.getItem(PRESERVE_URL_PARAMS_FLAG) === "1";
+    sessionStorage.removeItem(PRESERVE_URL_PARAMS_FLAG);
+    if (!shouldPreserve) {
+      sessionStorage.removeItem(URL_PARAMS_STORAGE_KEY);
+      return null;
+    }
+    const raw = sessionStorage.getItem(URL_PARAMS_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as ResolvedUrlParams) : null;
+  } catch {
+    return null;
+  }
+})();
+
 type ParentCallbackMethods = {
   // Session creation callback (for standalone auth flow)
   onSessionCreated?: () => Promise<void>;
@@ -410,20 +449,9 @@ export function useConnectionValue() {
     })();
   }, [controller, urlRpcUrl, setController, setRpcUrl]);
 
-  const urlParamsRef = useRef<{
-    theme: string | null;
-    preset: string | null;
-    policies: string | null;
-    shouldOverridePresetPolicies: boolean;
-    version: string | null;
-    project: string | null;
-    namespace: string | null;
-    tokens: string[];
-    ref: string | null;
-    refGroup: string | null;
-    propagateError: boolean;
-    errorDisplayMode?: "modal" | "notification" | "silent";
-  }>();
+  const urlParamsRef = useRef<ResolvedUrlParams | null>(
+    initialResolvedUrlParams,
+  );
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(searchParams);
@@ -466,7 +494,7 @@ export function useConnectionValue() {
     }
 
     // Build params object, preserving previous values for any param that is null/empty
-    const newParams = {
+    const newParams: ResolvedUrlParams = {
       theme: theme || urlParamsRef.current?.theme || null,
       preset: preset || urlParamsRef.current?.preset || null,
       policies: policies || urlParamsRef.current?.policies || null,
@@ -488,6 +516,13 @@ export function useConnectionValue() {
 
     // Store the new params for future reference
     urlParamsRef.current = newParams;
+
+    // preserve params between keychain reload
+    try {
+      sessionStorage.setItem(URL_PARAMS_STORAGE_KEY, JSON.stringify(newParams));
+    } catch {
+      // sessionStorage may be unavailable
+    }
     return newParams;
   }, [searchParams]);
 
@@ -865,6 +900,11 @@ export function useConnectionValue() {
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
+    try {
+      sessionStorage.setItem(PRESERVE_URL_PARAMS_FLAG, "1");
+    } catch {
+      // sessionStorage may be unavailable
+    }
     window.location.reload();
     if (parent) {
       parent.close();

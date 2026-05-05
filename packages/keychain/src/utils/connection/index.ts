@@ -27,6 +27,7 @@ import type {
 import { waitForHeadlessApprovalRequest } from "./headless-requests";
 import { createConnectHandler } from "./connect-routing";
 import { locationPromptFactory } from "./location";
+import { PRESERVE_URL_PARAMS_FLAG } from "@/hooks/connection";
 
 export type { ControllerError } from "./execute";
 
@@ -116,6 +117,15 @@ export function connectToController<
         setController(undefined);
         // Then cleanup the controller
         await window.controller?.disconnect();
+        // Single-shot flag the boot path consumes to keep the cached urlParams
+        // snapshot through the reload (policies/preset/etc. survive reconnect).
+        // Fresh tab loads or host-page reloads won't have this flag set, so
+        // their snapshot is wiped — see initialStoredUrlParams in connection.ts.
+        try {
+          sessionStorage.setItem(PRESERVE_URL_PARAMS_FLAG, "1");
+        } catch {
+          // sessionStorage may be unavailable
+        }
         // Reload the iframe so the next bootstrap (main.tsx -> Controller.fromStore)
         // runs against cleared storage and lands on a fresh login, matching the
         // internal "Log out" flow (packages/keychain/src/hooks/connection.ts).
