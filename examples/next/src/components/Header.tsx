@@ -1,6 +1,13 @@
 "use client";
 
-import { Button } from "@cartridge/controller-ui";
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@cartridge/controller-ui";
 import ControllerConnector from "@cartridge/connector/controller";
 import {
   useAccount,
@@ -14,6 +21,7 @@ import { constants, num, shortString } from "starknet";
 import { Chain } from "@starknet-react/chains";
 import SessionConnector from "@cartridge/connector/session";
 import { HeadlessLogin } from "components/HeadlessLogin";
+import { ConnectOptions, presets } from "./providers/StarknetProvider";
 
 type HeadlessModalState = "closed" | "open" | "hidden";
 
@@ -88,176 +96,228 @@ const Header = () => {
   }, []);
 
   return (
-    <div className="w-full absolute top-0 left-0 p-5 flex items-center space-x-2">
-      <div className="flex-1" />
+    <>
+      <div className="w-full absolute top-0 left-0 p-5 flex items-center space-x-2">
+        <div className="flex-1" />
 
-      {status === "connected" && (
-        <>
-          <div className="relative" ref={networkRef}>
+        {status === "connected" && (
+          <>
+            <div className="relative" ref={networkRef}>
+              <Button
+                onClick={() => {
+                  setNetworkOpen(!networkOpen);
+                  setProfileOpen(false);
+                }}
+                className="flex items-center gap-2 min-w-[120px]"
+              >
+                {chain.network}
+                <span
+                  className={`transition-transform duration-200 ${
+                    networkOpen ? "rotate-180" : ""
+                  }`}
+                >
+                  ▼
+                </span>
+              </Button>
+              {networkOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-background shadow-lg rounded-md min-w-[160px] py-1 z-10 border border-gray-600">
+                  {chains.map((c: Chain) => (
+                    <button
+                      key={c.id}
+                      className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
+                      onClick={() => {
+                        switchChain({ chainId: num.toHex(c.id) });
+                        setNetworkOpen(false);
+                      }}
+                    >
+                      {c.network}
+                    </button>
+                  ))}
+                  <button
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
+                    onClick={() => {
+                      switchChain({
+                        chainId: shortString.encodeShortString("UNSUPPORTED"),
+                      });
+                      setNetworkOpen(false);
+                    }}
+                  >
+                    unsupported
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+        {address ? (
+          <div ref={profileRef}>
             <Button
               onClick={() => {
-                setNetworkOpen(!networkOpen);
-                setProfileOpen(false);
+                setProfileOpen(!profileOpen);
+                setNetworkOpen(false);
               }}
               className="flex items-center gap-2 min-w-[120px]"
             >
-              {chain.network}
+              <strong className="truncate max-w-[120px]">{address}</strong>
               <span
                 className={`transition-transform duration-200 ${
-                  networkOpen ? "rotate-180" : ""
+                  profileOpen ? "rotate-180" : ""
                 }`}
               >
                 ▼
               </span>
             </Button>
-            {networkOpen && (
+            {profileOpen && (
               <div className="absolute right-0 top-full mt-1 bg-background shadow-lg rounded-md min-w-[160px] py-1 z-10 border border-gray-600">
-                {chains.map((c: Chain) => (
-                  <button
-                    key={c.id}
-                    className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
-                    onClick={() => {
-                      switchChain({ chainId: num.toHex(c.id) });
-                      setNetworkOpen(false);
-                    }}
-                  >
-                    {c.network}
-                  </button>
-                ))}
                 <button
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
-                  onClick={() => {
-                    switchChain({
-                      chainId: shortString.encodeShortString("UNSUPPORTED"),
-                    });
-                    setNetworkOpen(false);
-                  }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600"
+                  onClick={() => controllerConnector.controller.openProfile()}
                 >
-                  unsupported
+                  Profile
+                </button>
+                <button
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600"
+                  onClick={() => controllerConnector.controller.openSettings()}
+                >
+                  Settings
+                </button>
+                <button
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors"
+                  onClick={() => disconnect()}
+                >
+                  Disconnect
                 </button>
               </div>
             )}
           </div>
-        </>
-      )}
-      {address ? (
-        <div ref={profileRef}>
-          <Button
-            onClick={() => {
-              setProfileOpen(!profileOpen);
-              setNetworkOpen(false);
-            }}
-            className="flex items-center gap-2 min-w-[120px]"
-          >
-            <strong className="truncate max-w-[120px]">{address}</strong>
-            <span
-              className={`transition-transform duration-200 ${
-                profileOpen ? "rotate-180" : ""
-              }`}
-            >
-              ▼
-            </span>
-          </Button>
-          {profileOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-background shadow-lg rounded-md min-w-[160px] py-1 z-10 border border-gray-600">
-              <button
-                className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600"
-                onClick={() => controllerConnector.controller.openProfile()}
-              >
-                Profile
-              </button>
-              <button
-                className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600"
-                onClick={() => controllerConnector.controller.openSettings()}
-              >
-                Settings
-              </button>
-              <button
-                className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors"
-                onClick={() => disconnect()}
-              >
-                Disconnect
-              </button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex gap-2">
-          <Button
-            onClick={() => {
-              controllerConnector.controller.open({
-                redirectUrl: window.location.href,
-              });
-            }}
-            disabled={!isControllerReady}
-          >
-            Standalone
-          </Button>
-          <Button
-            onClick={() => setHeadlessState("open")}
-            disabled={!isControllerReady}
-          >
-            Headless
-          </Button>
-          <Button
-            onClick={() => {
-              connect({ connector: controllerConnector });
-            }}
-            disabled={!isControllerReady}
-          >
-            {isControllerReady ? "Connect" : "Waiting for keychain..."}
-          </Button>
-          <Button
-            onClick={() => {
-              controllerConnector.connect({
-                signupOptions: ["phantom-evm"],
-              });
-            }}
-            disabled={!isControllerReady}
-            className="bg-[#AB9FF2] hover:bg-[#9B8FE2] text-white"
-          >
-            Phantom
-          </Button>
-          {sessionConnector && (
+        ) : (
+          <div className="flex gap-2">
             <Button
-              onClick={() => connect({ connector: sessionConnector })}
+              onClick={() => {
+                controllerConnector.controller.open({
+                  redirectUrl: window.location.href,
+                });
+              }}
               disabled={!isControllerReady}
             >
-              Register Session
+              Standalone
             </Button>
-          )}
-        </div>
-      )}
-
-      {headlessState !== "closed" && (
-        <div
-          className={
-            headlessState === "open"
-              ? "fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
-              : "hidden"
-          }
-          onClick={() => setHeadlessState("closed")}
-        >
-          <div
-            className="relative w-full max-w-xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setHeadlessState("closed")}
-              className="absolute -top-3 -right-3 rounded-full bg-white px-3 py-1 text-sm font-medium text-gray-700 shadow hover:bg-gray-100"
+            <Button
+              onClick={() => setHeadlessState("open")}
+              disabled={!isControllerReady}
             >
-              Close
-            </button>
-            <HeadlessLogin
-              onStart={() => setHeadlessState("hidden")}
-              onDone={() => setHeadlessState("closed")}
-              onError={() => setHeadlessState("open")}
-            />
+              Headless
+            </Button>
+            <Button
+              onClick={() => {
+                connect({ connector: controllerConnector });
+              }}
+              disabled={!isControllerReady}
+            >
+              {isControllerReady ? "Connect" : "Waiting for keychain..."}
+            </Button>
+            <Button
+              onClick={() => {
+                controllerConnector.connect({
+                  signupOptions: ["phantom-evm"],
+                });
+              }}
+              disabled={!isControllerReady}
+              className="bg-[#AB9FF2] hover:bg-[#9B8FE2] text-white"
+            >
+              Phantom
+            </Button>
+            {sessionConnector && (
+              <Button
+                onClick={() => connect({ connector: sessionConnector })}
+                disabled={!isControllerReady}
+              >
+                Register Session
+              </Button>
+            )}
+          </div>
+        )}
+
+        {headlessState !== "closed" && (
+          <div
+            className={
+              headlessState === "open"
+                ? "fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
+                : "hidden"
+            }
+            onClick={() => setHeadlessState("closed")}
+          >
+            <div
+              className="relative w-full max-w-xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setHeadlessState("closed")}
+                className="absolute -top-3 -right-3 rounded-full bg-white px-3 py-1 text-sm font-medium text-gray-700 shadow hover:bg-gray-100"
+              >
+                Close
+              </button>
+              <HeadlessLogin
+                onStart={() => setHeadlessState("hidden")}
+                onDone={() => setHeadlessState("closed")}
+                onError={() => setHeadlessState("open")}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {!address && (
+        <div className="w-full p-5 flex items-center space-x-2">
+          <div className="flex-grow" />
+          <h1>Connect options:</h1>
+          <Button
+            onClick={() => {
+              if (
+                localStorage.getItem(ConnectOptions.OverridePolicies) === "true"
+              ) {
+                localStorage.removeItem(ConnectOptions.OverridePolicies);
+              } else {
+                localStorage.setItem(ConnectOptions.OverridePolicies, "true");
+              }
+              window.location.reload();
+            }}
+            disabled={!isControllerReady}
+            variant="secondary"
+          >
+            {localStorage.getItem(ConnectOptions.OverridePolicies) === "true"
+              ? "Override Policies"
+              : "Preset Policies"}
+          </Button>
+          <div className="w-[150px]">
+            <Select
+              value={localStorage.getItem(ConnectOptions.Preset) || "none"}
+              onValueChange={(v: string) => {
+                if (v === "none") {
+                  localStorage.removeItem(ConnectOptions.Preset);
+                } else {
+                  localStorage.setItem(ConnectOptions.Preset, v);
+                }
+                window.location.reload();
+              }}
+              disabled={!isControllerReady}
+            >
+              <SelectTrigger simplified>
+                <SelectValue placeholder="Preset:" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(presets).map((preset) => (
+                  <SelectItem key={preset} value={preset}>
+                    {preset}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

@@ -16,6 +16,19 @@ import {
   STRK_CONTRACT_ADDRESS,
 } from "@cartridge/controller-ui/utils";
 
+export enum ConnectOptions {
+  OverridePolicies = "connect-override-policies",
+  Preset = "connect-preset",
+}
+const overridePolicies =
+  localStorage.getItem(ConnectOptions.OverridePolicies) === "true";
+const controllerPreset = localStorage.getItem(
+  ConnectOptions.Preset,
+) as keyof typeof presets;
+console.log(
+  `:: overridePolicies[${overridePolicies}] preset[${controllerPreset}]`,
+);
+
 const messageForChain = (chainId: constants.StarknetChainId) => {
   return {
     types: {
@@ -204,6 +217,34 @@ const signupOptions: AuthOptions = [
   "sms",
 ];
 
+export const presets = {
+  none: {},
+  nums: {
+    // nums (achievements, quests)
+    slot: "nums-mainnet",
+    namespace: "NUMS",
+    preset: "nums",
+  },
+  lootSurvivor: {
+    // Loot Survivor (no achievements, no quests)
+    namespace: "ls_0_0_9",
+    slot: "pg-mainnet-10",
+    preset: "loot-survivor",
+  },
+  summit: {
+    // Summit (no achievements, no quests)
+    namespace: "relayer_0_0_1",
+    slot: "pg-mainnet-10",
+    preset: "savage-summit",
+  },
+  pistols: {
+    // Pistols (achievements, no quests)
+    slot: "pistols-mainnet-2",
+    namespace: "pistols",
+    preset: "pistols",
+  },
+};
+
 export const controllerConnector = new ControllerConnector({
   // With the defaults, you can omit chains if you want to use:
   // - chains: [
@@ -217,34 +258,16 @@ export const controllerConnector = new ControllerConnector({
   signupOptions,
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
-  // shouldOverridePresetPolicies: true,
-  policies,
+  shouldOverridePresetPolicies: overridePolicies,
+  policies: overridePolicies ? policies : undefined,
   tokens: {
     erc20: ["lords", "strk"],
   },
-  // nums (achievements, quests)
-  slot: "nums-mainnet",
-  namespace: "NUMS",
-  preset: "nums",
-
-  // Pistols (achievements, no quests)
-  // slot: "pistols-mainnet-2",
-  // namespace: "pistols",
-  // preset: "pistols",
-
-  // Loot Survivor (no achievements, no quests)
-  // namespace: "ls_0_0_9",
-  // slot: "pg-mainnet-10",
-  // preset: "loot-survivor",
-
-  // Summit (no achievements, no quests)
-  // namespace: "relayer_0_0_1",
-  // slot: "pg-mainnet-10",
-  // preset: "savage-summit",
+  ...(controllerPreset ? presets[controllerPreset] : {}),
 });
 
 const session = new SessionConnector({
-  policies,
+  policies: overridePolicies ? policies : {},
   rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
   chainId: constants.StarknetChainId.SN_MAIN,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
