@@ -23,20 +23,20 @@ const variants = [
   "lightest",
   "ghost",
 ] as const;
-const sizes = ["xl", "2xl", "3xl"] as const;
+const sizes = ["xl", "2xl", "3xl", "4xl"] as const;
 const ranks = ["bronze", "silver", "gold"] as const;
 
 export const Default: Story = {
   render: (args) => {
     return (
-      <div className="flex flex-col gap-3">
-        {variants.map((variant) => (
-          <div key={variant} className="grid grid-cols-4 items-center gap-6">
-            <p className="text-sm text-foreground-100 capitalize text-medium">
+      <div className="flex flex-col gap-6">
+        {variants.map((variant, index) => (
+          <div key={variant} className="flex items-center gap-6 h-16">
+            <p className="text-sm text-foreground-100 capitalize text-medium min-w-16">
               {variant}
             </p>
             {ranks.map((rank) => (
-              <div key={`${variant}-${rank}`} className="flex gap-3">
+              <div key={`${variant}-${rank}`} className="flex gap-6">
                 {sizes.map((size) => (
                   <AchievementPlayerBadge
                     key={`${variant}-${rank}-${size}`}
@@ -44,6 +44,7 @@ export const Default: Story = {
                     variant={variant}
                     size={size}
                     rank={rank}
+                    username={`player${index}`}
                   />
                 ))}
               </div>

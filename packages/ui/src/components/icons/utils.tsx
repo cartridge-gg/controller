@@ -11,6 +11,7 @@ export const size = {
   xl: "h-12 w-12",
   "2xl": "h-14 w-14",
   "3xl": "h-[72px] w-[72px]",
+  "4xl": "h-[96px] w-[96px]",
   collectible: "h-[24px] w-[24px]",
 };
 
