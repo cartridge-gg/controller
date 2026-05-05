@@ -369,10 +369,15 @@ export function useConnectionValue() {
   const [onModalClose, setOnModalCloseInternal] = useState<
     (() => void) | undefined
   >();
-
   const setOnModalClose = useCallback((fn: (() => void) | undefined) => {
     setOnModalCloseInternal(() => fn);
   }, []);
+
+  // Using ref because create controller is async and state will not update before it resolves
+  const isNewControllerRef = useRef(false);
+  const setIsNewController = (value: boolean) => {
+    isNewControllerRef.current = value;
+  };
 
   // Decide which WebAuthn ceremonies need to escape the iframe.
   // `create` covers passkey registration, `get` covers passkey login/session auth.
@@ -1056,6 +1061,8 @@ export function useConnectionValue() {
     locationGate: locationGateRef.current,
     locationGateVerified,
     setLocationGateVerified,
+    isNewControllerRef,
+    setIsNewController,
   };
 }
 

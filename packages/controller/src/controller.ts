@@ -275,6 +275,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
+    let connectReply: ConnectReply | undefined;
     try {
       if (headless) {
         // Headless auth should not open the UI until the keychain determines
@@ -329,18 +330,18 @@ export default class ControllerProvider extends BaseProvider {
         : (connectOptions?.signupOptions ?? this.options.signupOptions);
 
       // Pass options to keychain
-      let response = await this.keychain.connect({
+      const response = await this.keychain.connect({
         signupOptions: effectiveOptions,
       });
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
 
-      response = response as ConnectReply;
+      connectReply = response as ConnectReply;
       this.account = new ControllerAccount(
         this,
         this.rpcUrl(),
-        response.address,
+        connectReply.address,
         this.keychain,
         this.options,
         this.iframes.keychain,
@@ -363,7 +364,7 @@ export default class ControllerProvider extends BaseProvider {
       }
       console.log(e);
     } finally {
-      if (!headless) {
+      if (!headless && !connectReply?.keepOpen) {
         this.iframes.keychain.close();
       }
     }

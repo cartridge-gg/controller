@@ -81,6 +81,7 @@ export type ConnectReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
   policies?: SessionPolicies;
+  keepOpen?: boolean;
 };
 
 export type ExecuteReply =

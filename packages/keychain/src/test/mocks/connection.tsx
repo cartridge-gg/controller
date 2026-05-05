@@ -62,6 +62,8 @@ export const defaultMockConnection: ConnectionContextValue = {
   locationGate: undefined,
   locationGateVerified: false,
   setLocationGateVerified: vi.fn(),
+  isNewControllerRef: { current: false },
+  setIsNewController: vi.fn(),
 };
 
 export function createMockConnection(

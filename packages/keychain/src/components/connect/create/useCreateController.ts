@@ -71,6 +71,7 @@ const resolveConnect = async ({
   closeModal,
   searchParams,
   missingParamsMessage,
+  isNewController,
 }: {
   controller: Controller;
   params?: ReturnType<typeof parseConnectParams>;
@@ -78,6 +79,7 @@ const resolveConnect = async ({
   closeModal?: () => void;
   searchParams: URLSearchParams;
   missingParamsMessage: string;
+  isNewController: boolean;
 }) => {
   let currentParams = params;
   if (!currentParams) {
@@ -103,6 +105,7 @@ const resolveConnect = async ({
   currentParams.resolve?.({
     code: ResponseCodes.SUCCESS,
     address: controller.address(),
+    keepOpen: isNewController,
   });
   if (currentParams.params.id) {
     cleanupCallbacks(currentParams.params.id);
@@ -118,6 +121,7 @@ const createSession = async ({
   handleCompletion,
   closeModal,
   searchParams,
+  isNewController,
 }: {
   controller: Controller;
   origin: string;
@@ -126,6 +130,7 @@ const createSession = async ({
   handleCompletion: () => void;
   closeModal?: () => void;
   searchParams: URLSearchParams;
+  isNewController: boolean;
 }) => {
   // Handle no policies case - try to resolve connection, fallback to just closing modal
   if (!policies) {
@@ -137,6 +142,7 @@ const createSession = async ({
       searchParams,
       missingParamsMessage:
         "No params available for no-policies case, falling back to closeModal",
+      isNewController,
     });
     return;
   }
@@ -170,6 +176,7 @@ const createSession = async ({
     currentParams.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
+      keepOpen: isNewController,
     });
     if (currentParams.params.id) {
       cleanupCallbacks(currentParams.params.id);
@@ -189,12 +196,14 @@ const completePopupConnect = async ({
   handleCompletion,
   closeModal,
   searchParams,
+  isNewController,
 }: {
   controller: Controller;
   params?: ReturnType<typeof parseConnectParams>;
   handleCompletion: () => void;
   closeModal?: () => void;
   searchParams: URLSearchParams;
+  isNewController: boolean;
 }) => {
   await resolveConnect({
     controller,
@@ -204,6 +213,7 @@ const completePopupConnect = async ({
     searchParams,
     missingParamsMessage:
       "Params not available after popup auth, falling back to closeModal",
+    isNewController,
   });
 };
 
@@ -235,11 +245,11 @@ export function useCreateController({
     chainId,
     setController,
     policies,
-    closeModal,
     isConfigLoading,
     isPoliciesResolved,
     locationGate,
     locationGateVerified,
+    setIsNewController,
   } = useConnection();
 
   // When location gate is configured and not yet verified, skip auto-session
@@ -404,8 +414,8 @@ export function useCreateController({
             policies,
             params,
             handleCompletion,
-            closeModal,
             searchParams,
+            isNewController: true,
           });
         }
 
@@ -421,7 +431,6 @@ export function useCreateController({
       locationGatePending,
       handleCompletion,
       params,
-      closeModal,
       searchParams,
       shouldAutoCreateSession,
     ],
@@ -449,8 +458,8 @@ export function useCreateController({
                 controller: webauthnResult.controller,
                 params,
                 handleCompletion,
-                closeModal,
                 searchParams,
+                isNewController: true,
               });
             }
             return;
@@ -572,7 +581,6 @@ export function useCreateController({
       locationGatePending,
       params,
       handleCompletion,
-      closeModal,
       searchParams,
     ],
   );
@@ -700,8 +708,8 @@ export function useCreateController({
           policies,
           params,
           handleCompletion,
-          closeModal,
           searchParams,
+          isNewController: false,
         });
       }
 
@@ -716,7 +724,6 @@ export function useCreateController({
       locationGatePending,
       handleCompletion,
       params,
-      closeModal,
       searchParams,
       shouldAutoCreateSession,
     ],
@@ -772,8 +779,8 @@ export function useCreateController({
                 controller: loginController.controller,
                 params,
                 handleCompletion,
-                closeModal,
                 searchParams,
+                isNewController: false,
               });
             }
             return;
@@ -786,8 +793,8 @@ export function useCreateController({
               policies,
               params,
               handleCompletion,
-              closeModal,
               searchParams,
+              isNewController: false,
             });
           }
 
@@ -902,7 +909,6 @@ export function useCreateController({
       locationGatePending,
       params,
       handleCompletion,
-      closeModal,
       searchParams,
       shouldAutoCreateSession,
       finishLogin,
@@ -1048,6 +1054,7 @@ export function useCreateController({
     ) => {
       setError(undefined);
       setIsLoading(true);
+      setIsNewController(!exists);
 
       setAuthMethod(authenticationMethod);
 
@@ -1114,6 +1121,7 @@ export function useCreateController({
       setError,
       setIsLoading,
       setWaitingForConfirmation,
+      setIsNewController,
     ],
   );
 

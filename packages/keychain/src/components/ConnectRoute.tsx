@@ -54,6 +54,7 @@ export function ConnectRoute() {
     rpcUrl,
     locationGate,
     locationGateVerified,
+    isNewControllerRef,
   } = useConnection();
   const navigate = useNavigate();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
@@ -164,6 +165,7 @@ export function ConnectRoute() {
     params.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
+      keepOpen: isNewControllerRef.current,
     });
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
@@ -208,6 +210,7 @@ export function ConnectRoute() {
     handleCompletion,
     isStandalone,
     redirectUrl,
+    isNewControllerRef,
   ]);
 
   const handleSkip = useCallback(async () => {
@@ -226,6 +229,7 @@ export function ConnectRoute() {
     params.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
+      keepOpen: isNewControllerRef.current,
     });
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
@@ -270,6 +274,7 @@ export function ConnectRoute() {
     handleCompletion,
     isStandalone,
     redirectUrl,
+    isNewControllerRef,
   ]);
 
   // Handle cases where we can connect immediately (embedded mode only)
@@ -301,6 +306,7 @@ export function ConnectRoute() {
         params.resolve?.({
           code: ResponseCodes.SUCCESS,
           address: controller.address(),
+          keepOpen: isNewControllerRef.current,
         });
 
         if (params.params.id) {
@@ -345,6 +351,7 @@ export function ConnectRoute() {
       params.resolve?.({
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
+        keepOpen: isNewControllerRef.current,
       });
 
       if (params.params.id) {
@@ -372,6 +379,7 @@ export function ConnectRoute() {
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
+            keepOpen: isNewControllerRef.current,
           });
           if (params.params.id) {
             cleanupCallbacks(params.params.id);
@@ -411,6 +419,7 @@ export function ConnectRoute() {
     locationGate,
     locationGateVerified,
     navigate,
+    isNewControllerRef,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
@@ -450,6 +459,7 @@ export function ConnectRoute() {
           params?.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),
+            keepOpen: isNewControllerRef.current,
           });
           if (params?.params.id) {
             cleanupCallbacks(params.params.id);

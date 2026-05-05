@@ -68,6 +68,7 @@ import { hasApprovalPolicies } from "@/hooks/session";
 import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { CoinbasePopup } from "./coinbase-popup";
 import { PopupAuth } from "./PopupAuth";
+import { Welcome } from "./connect/create/Welcome";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -336,6 +337,7 @@ export function App() {
         <Route path="/location" element={<LocationPrompt />} />
         <Route path="/deploy" element={<DeployController />} />
         <Route path="/connect" element={<ConnectRoute />} />
+        <Route path="/welcome" element={<Welcome />} />
         <Route path="/update-session" element={<UpdateSessionRoute />} />
         <Route
           path="/headless-approval/:requestId"
