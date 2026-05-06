@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthOption } from "@cartridge/controller";
 import {
   Button,
@@ -35,7 +35,8 @@ export function SmsOtpDrawer({
   const [phoneInput, setPhoneInput] = useState(smsState?.phoneNumber ?? "");
   const [otpCode, setOtpCode] = useState("");
   const [sendingCode, setSendingCode] = useState(false);
-  const [initError, setInitError] = useState<string | undefined>();
+  const [phoneInputError, setPhoneInputError] = useState<string | undefined>();
+  const [otpCodeError, setOtpCodeError] = useState<string | undefined>();
   const phoneRef = useRef<HTMLInputElement>(null);
   const otpRef = useRef<HTMLInputElement>(null);
 
@@ -48,7 +49,8 @@ export function SmsOtpDrawer({
     } else {
       setOtpCode("");
       setSendingCode(false);
-      setInitError(undefined);
+      setPhoneInputError(undefined);
+      setOtpCodeError(undefined);
     }
   }, [isOpen]);
 
@@ -60,26 +62,64 @@ export function SmsOtpDrawer({
     }
   }, [step]);
 
+  // E.164 international phone number format
+  const isPhoneInputValid = useMemo(
+    () => !!phoneInput && /^\+[1-9]\d{6,14}$/.test(phoneInput),
+    [phoneInput],
+  );
+
+  // Alphanumeric, 6 to 9 characters long
+  const isOtpCodeValid = useMemo(
+    () => !!otpCode && /^[a-zA-Z0-9]{6,9}$/.test(otpCode),
+    [otpCode],
+  );
+
+  useEffect(() => {
+    if (phoneInputError && isPhoneInputValid) {
+      setPhoneInputError(undefined);
+    }
+  }, [phoneInputError, isPhoneInputValid, setPhoneInputError]);
+
+  useEffect(() => {
+    if (otpCodeError && isOtpCodeValid) {
+      setOtpCodeError(undefined);
+    }
+  }, [otpCodeError, isOtpCodeValid, setOtpCodeError]);
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (step === "phone") {
-        if (!phoneInput) return;
+        if (!isPhoneInputValid) {
+          setPhoneInputError("Invalid phone format");
+          return;
+        }
+        setPhoneInputError(undefined);
         setSendingCode(true);
-        setInitError(undefined);
         try {
           await onInitOtp(phoneInput);
         } catch (err) {
-          setInitError((err as Error).message ?? "Failed to send code");
+          setPhoneInputError((err as Error).message ?? "Failed to send code");
         } finally {
           setSendingCode(false);
         }
       } else {
-        if (!otpCode) return;
+        if (!isOtpCodeValid) {
+          setOtpCodeError("Invalid code");
+          return;
+        }
         onSubmit("sms", otpCode);
       }
     },
-    [step, phoneInput, otpCode, onInitOtp, onSubmit],
+    [
+      step,
+      phoneInput,
+      isPhoneInputValid,
+      otpCode,
+      isOtpCodeValid,
+      onInitOtp,
+      onSubmit,
+    ],
   );
 
   const handleClose = (event?: Event) => {
@@ -117,7 +157,10 @@ export function SmsOtpDrawer({
               autoComplete="tel"
             />
           </div>
-          {initError && <p className="text-sm text-destructive">{initError}</p>}
+
+          {phoneInputError && (
+            <p className="text-sm text-destructive">{phoneInputError}</p>
+          )}
 
           <div className="flex flex-col gap-2">
             <label
@@ -133,11 +176,15 @@ export function SmsOtpDrawer({
               inputMode="numeric"
               placeholder="Enter code"
               value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value.trim())}
+              onChange={(e) => setOtpCode(e.target.value.trim().toUpperCase())}
               disabled={busy || step === "phone"}
               autoComplete="one-time-code"
             />
           </div>
+
+          {otpCodeError && (
+            <p className="text-sm text-destructive">{otpCodeError}</p>
+          )}
 
           <div className="flex gap-2">
             <Button
