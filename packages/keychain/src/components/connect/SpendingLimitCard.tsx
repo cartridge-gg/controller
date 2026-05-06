@@ -262,7 +262,9 @@ function SpendingLimitCardInnerVerified({
               )
             ) : null}
           </div>
-          <p className="text-foreground-400 text-xs font-medium">All Tokens</p>
+          <p className="text-foreground-400 text-xs font-medium">
+            {`${processedTokens.length} Token${processedTokens.length !== 1 ? "s" : ""}`}
+          </p>
         </div>
         {isLoading ? (
           <Skeleton className="w-full h-8" />

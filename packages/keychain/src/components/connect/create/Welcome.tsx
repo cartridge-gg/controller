@@ -8,7 +8,6 @@ import {
   AchievementPlayerBadge,
   useCSSCustomProperty,
   Button,
-  Confetti as UIConfetti,
 } from "@cartridge/controller-ui";
 import Confetti from "react-confetti";
 
@@ -26,8 +25,6 @@ export function Welcome() {
   return (
     <>
       <LayoutContent className="overflow-hidden items-center gap-1">
-        <UIConfetti className="absolute top-[52px] left-1/2 -translate-x-1/2" />
-
         <Confetti
           width={320}
           height={700}
