@@ -110,8 +110,11 @@ The project uses an **iframe-based security model** where:
 
 **Working with Components:**
 
--   After modifying components, run `pnpm storybook` to verify visually
--   Update Storybook snapshots with `pnpm test:storybook:update` if needed
+-   **Required:** When modifying UI components, verify changes in Storybook before opening a PR
+-   Run `pnpm storybook` to visually inspect the component
+-   Run `pnpm test:storybook` to check for visual regressions  
+-   Update snapshots with `pnpm test:storybook:update` if intentional changes are made
+-   Components live in `packages/keychain/src/components/` with colocated `.stories.tsx` files
 
 **Adding New Features:**
 
