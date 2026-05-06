@@ -344,9 +344,11 @@ export function CreateControllerView({
   }, [error, authMethod, setAuthenticationStep]);
 
   const onClosePending = useCallback(() => {
-    setAuthenticationStep(AuthenticationStep.FillForm);
-    // setError(undefined);
-  }, [setAuthenticationStep]);
+    if (authenticationStep === AuthenticationStep.Error) {
+      setAuthenticationStep(AuthenticationStep.FillForm);
+      setError(undefined);
+    }
+  }, [authenticationStep, setAuthenticationStep, setError]);
 
   const isLogin = !!validation.exists;
 
