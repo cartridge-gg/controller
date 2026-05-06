@@ -17,6 +17,7 @@ import {
 import type { ParsedSessionPolicies } from "@/hooks/session";
 import { getChecksumAddress } from "starknet";
 import makeBlockie from "ethereum-blockies-base64";
+import { Price } from "@/utils/api";
 
 // Maximum value for uint256
 const UNLIMITED_VALUE = "0xffffffffffffffffffffffffffffffff";
@@ -27,6 +28,19 @@ interface SpendingLimitCardProps {
   showCost?: boolean;
 }
 
+interface SpendingLimitTokens {
+  address: string;
+  icon: string | React.ReactNode;
+  name: string;
+  symbol: string;
+  decimals: number;
+  price: Price | undefined;
+  isUnlimited: boolean;
+  formattedAmount: string;
+  usdValue: string;
+  usdAmount: number | undefined;
+}
+
 export function SpendingLimitCard({
   className,
   policies,
@@ -35,7 +49,7 @@ export function SpendingLimitCard({
   const { tokens, registerPair, isLoading } = useTokens();
   const registeredAddresses = useRef<Set<string>>(new Set());
 
-  const processedTokens = useMemo(() => {
+  const processedTokens = useMemo<SpendingLimitTokens[]>(() => {
     if (!policies?.contracts) return [];
 
     const result = Object.entries(policies.contracts)
@@ -75,6 +89,14 @@ export function SpendingLimitCard({
             ? convertTokenAmountToUSD(amountBigInt, decimals, price)
             : "Unlimited";
 
+        const usdAmount =
+          !isUnlimited && price
+            ? Number(
+                (amountBigInt * BigInt(price.amount)) / BigInt(10 ** decimals),
+              ) /
+              10 ** price.decimals
+            : undefined;
+
         return {
           address: checksumAddress,
           icon,
@@ -85,6 +107,7 @@ export function SpendingLimitCard({
           isUnlimited,
           formattedAmount,
           usdValue,
+          usdAmount,
         };
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
@@ -113,6 +136,36 @@ export function SpendingLimitCard({
     return null;
   }
 
+  return policies.verified ? (
+    <SpendingLimitCardInnerVerified
+      className={className}
+      showCost={showCost}
+      isLoading={isLoading}
+      processedTokens={processedTokens}
+    />
+  ) : (
+    <SpendingLimitCardInnerUnverified
+      className={className}
+      showCost={showCost}
+      isLoading={isLoading}
+      processedTokens={processedTokens}
+    />
+  );
+}
+
+interface SpendingLimitCarInnerProps {
+  className?: string;
+  showCost: boolean;
+  isLoading: boolean;
+  processedTokens: SpendingLimitTokens[];
+}
+
+function SpendingLimitCardInnerUnverified({
+  className,
+  showCost,
+  isLoading,
+  processedTokens,
+}: SpendingLimitCarInnerProps) {
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between h-10">
@@ -164,6 +217,70 @@ export function SpendingLimitCard({
           </div>
         </CardContent>
       ))}
+    </Card>
+  );
+}
+
+function SpendingLimitCardInnerVerified({
+  className,
+  showCost,
+  isLoading,
+  processedTokens,
+}: SpendingLimitCarInnerProps) {
+  const hasUnlimited = processedTokens.some((t) => t.isUnlimited);
+  const totalUsd = processedTokens.reduce(
+    (sum, t) => sum + (t.usdAmount ?? 0),
+    0,
+  );
+  const formattedTotal = totalUsd.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+
+  return (
+    <Card className={className}>
+      <CardContent className="flex flex-col gap-2 p-3 w-full">
+        <div className="flex flex-col gap-1">
+          <div className="w-full flex flex-row items-center justify-between text-sm font-medium">
+            <p className="text-foreground-100">Spending Limit</p>
+            {showCost ? (
+              isLoading ? (
+                <Skeleton className="w-20 h-5" />
+              ) : hasUnlimited ? (
+                <div className="flex flex-row items-center gap-1">
+                  <Thumbnail
+                    size="xs"
+                    icon={
+                      <AlertIcon className="!w-4 !h-4 text-destructive-100" />
+                    }
+                    centered
+                  />
+                  <p className="text-destructive-100">Unlimited</p>
+                </div>
+              ) : (
+                <p className="text-foreground-100">{formattedTotal}</p>
+              )
+            ) : null}
+          </div>
+          <p className="text-foreground-400 text-xs font-medium">All Tokens</p>
+        </div>
+        {isLoading ? (
+          <Skeleton className="w-full h-8" />
+        ) : (
+          <div className="flex flex-row items-center gap-1 flex-wrap w-full h-8">
+            {processedTokens.map((token) => (
+              <Thumbnail
+                key={token.address}
+                icon={token.icon}
+                size="md"
+                variant="lighter"
+                rounded
+                className="-mr-3"
+              />
+            ))}
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }
