@@ -18,6 +18,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",
+    "test:wasm": "node --experimental-wasm-modules --test src/__tests__/wasm-integration.test.mjs",
     "version": "pnpm pkg get version"
   },
   "exports": {
