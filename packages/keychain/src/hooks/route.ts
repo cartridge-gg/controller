@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
+import { useConnection } from "@/hooks/connection";
+import { useNavigation } from "@/context";
 
 /**
  * Common hook for parsing route params from URL and managing callbacks
@@ -53,18 +54,31 @@ export function useRouteParams<
  * Hook for handling route completion (returnTo navigation or modal close)
  */
 export function useRouteCompletion() {
-  const { closeModal } = useConnection();
+  const { closeModal, isNewControllerRef, setIsNewController } =
+    useConnection();
   const navigate = useNavigate();
+  const { navigate: navigateWithStack } = useNavigation();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo");
 
   const handleCompletion = useCallback(() => {
-    if (returnTo) {
+    if (isNewControllerRef.current) {
+      setIsNewController(false);
+      navigateWithStack(`/welcome?${searchParams.toString()}`, { reset: true });
+    } else if (returnTo) {
       navigate(returnTo, { replace: true });
     } else {
       closeModal?.();
     }
-  }, [returnTo, navigate, closeModal]);
+  }, [
+    returnTo,
+    navigate,
+    navigateWithStack,
+    closeModal,
+    searchParams,
+    isNewControllerRef,
+    setIsNewController,
+  ]);
 
   return handleCompletion;
 }

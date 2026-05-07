@@ -104,6 +104,8 @@ describe("Session", () => {
       locationGate: undefined,
       locationGateVerified: false,
       setLocationGateVerified: vi.fn(),
+      isNewControllerRef: { current: false },
+      setIsNewController: vi.fn(),
     };
 
     render(

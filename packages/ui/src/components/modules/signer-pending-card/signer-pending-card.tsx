@@ -1,6 +1,13 @@
-import { MobileIcon, WalletIcon } from "@/components/icons";
+import {
+  LockIcon,
+  MobileIcon,
+  WalletIcon,
+  WarningIcon,
+} from "@/components/icons";
 import {
   ArgentColorIcon,
+  BaseColorIcon,
+  BraavosColorIcon,
   DiscordColorIcon,
   GoogleColorIcon,
   MetaMaskColorIcon,
@@ -9,31 +16,19 @@ import {
   WalletConnectColorIcon,
 } from "@/components/icons/brand-color";
 import { FingerprintIcon } from "@/components/icons/brand/fingerprint";
+import { SignerMethodKind } from "@/components/modules/signer-method/signer-method";
 import { cn, formatAddress } from "@/utils";
-
-export type SignerPendingCardKind =
-  | "google"
-  | "sms"
-  | "passkey"
-  | "discord"
-  | "metamask"
-  | "argent"
-  | "rabby"
-  | "phantom"
-  | "phantom-evm"
-  | "walletconnect"
-  | "wallet";
 
 interface SignerPendingCardProps {
   className?: string;
-  kind: SignerPendingCardKind;
+  kind: SignerMethodKind;
   inProgress: boolean;
   error?: string;
   authedAddress?: string;
 }
 
 const variants: Record<
-  SignerPendingCardKind,
+  SignerMethodKind,
   {
     icon: React.ReactNode;
     primaryText: string;
@@ -53,14 +48,24 @@ const variants: Record<
   },
   sms: {
     icon: <MobileIcon variant="solid" size="xl" />,
-    primaryText: "",
-    secondaryText: "",
+    primaryText: "Verifying code",
+    secondaryText: "Please wait...",
     label: "SMS",
   },
   passkey: {
     icon: <FingerprintIcon size="xl" variant="line" />,
     primaryText: "Waiting for Confirmation",
     secondaryText: "Continue in browser",
+  },
+  webauthn: {
+    icon: <FingerprintIcon size="xl" variant="line" />,
+    primaryText: "Waiting for Confirmation",
+    secondaryText: "Continue in browser",
+  },
+  password: {
+    icon: <LockIcon size="xl" />,
+    primaryText: "Verifying password",
+    secondaryText: "Please wait...",
   },
   metamask: {
     icon: <MetaMaskColorIcon size="xl" />,
@@ -69,6 +74,16 @@ const variants: Record<
   },
   argent: {
     icon: <ArgentColorIcon size="xl" />,
+    primaryText: "Waiting for Signature",
+    secondaryText: "Don't see your wallet? Check your other browser windows",
+  },
+  braavos: {
+    icon: <BraavosColorIcon size="xl" />,
+    primaryText: "Waiting for Signature",
+    secondaryText: "Don't see your wallet? Check your other browser windows",
+  },
+  base: {
+    icon: <BaseColorIcon size="xl" />,
     primaryText: "Waiting for Signature",
     secondaryText: "Don't see your wallet? Check your other browser windows",
   },
@@ -109,11 +124,16 @@ export function SignerPendingCard({
   error,
   authedAddress,
 }: SignerPendingCardProps) {
-  const { icon, primaryText, secondaryText, label } = variants[kind];
+  const signerExist = kind in variants;
+  const { icon, label, primaryText, secondaryText } = signerExist
+    ? variants[kind]
+    : {
+        icon: <WarningIcon size="xl" />,
+        primaryText: "",
+        secondaryText: "",
+        label: kind,
+      };
 
-  if (kind === "sms" && (inProgress || error)) {
-    return <></>;
-  }
   return (
     <div
       className={cn(

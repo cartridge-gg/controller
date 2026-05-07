@@ -44,6 +44,7 @@ const defaultConnection = {
   },
   locationGate: undefined,
   locationGateVerified: false,
+  isNewControllerRef: { current: false },
 };
 
 const mockUseConnection = vi.fn();
@@ -145,6 +146,7 @@ describe("ConnectRoute", () => {
         expect(mockParams.resolve).toHaveBeenCalledWith({
           code: ResponseCodes.SUCCESS,
           address: "0x123456789abcdef",
+          keepOpen: false,
         });
         expect(mockCleanupCallbacks).toHaveBeenCalledWith("test-id");
       });
@@ -170,6 +172,7 @@ describe("ConnectRoute", () => {
         expect(mockParams.resolve).toHaveBeenCalledWith({
           code: ResponseCodes.SUCCESS,
           address: "0x123456789abcdef",
+          keepOpen: false,
         });
       });
     });
@@ -285,6 +288,7 @@ describe("ConnectRoute", () => {
       expect(mockParams.resolve).toHaveBeenCalledWith({
         code: ResponseCodes.SUCCESS,
         address: "0x123456789abcdef",
+        keepOpen: false,
       });
     });
 
@@ -371,6 +375,7 @@ describe("ConnectRoute", () => {
       expect(mockParams.resolve).toHaveBeenCalledWith({
         code: ResponseCodes.SUCCESS,
         address: "0x123456789abcdef",
+        keepOpen: false,
       });
     });
 
@@ -390,6 +395,7 @@ describe("ConnectRoute", () => {
         expect(mockParams.resolve).toHaveBeenCalledWith({
           code: ResponseCodes.SUCCESS,
           address: "0x123456789abcdef",
+          keepOpen: false,
         });
       });
     });

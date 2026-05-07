@@ -16,6 +16,7 @@ import { Swap } from "components/Swap";
 import { Starterpack } from "components/Starterpack";
 import { UpdateSession } from "components/UpdateSession";
 import { ControllerToaster } from "@cartridge/controller-ui";
+import { Features } from "components/Features";
 
 const Home: FC = () => {
   return (
@@ -28,6 +29,7 @@ const Home: FC = () => {
       </div>
       <Header />
       <PlayButton />
+      <Features />
       <Profile />
       <Transfer />
       <Swap />

@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
@@ -20,7 +21,6 @@ import {
   WebauthnCredentials,
 } from "@cartridge/controller-ui/utils/api/cartridge";
 import { getAddress } from "ethers";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { constants, shortString } from "starknet";
 import {
@@ -71,6 +71,7 @@ const resolveConnect = async ({
   closeModal,
   searchParams,
   missingParamsMessage,
+  isNewController,
 }: {
   controller: Controller;
   params?: ReturnType<typeof parseConnectParams>;
@@ -78,6 +79,7 @@ const resolveConnect = async ({
   closeModal?: () => void;
   searchParams: URLSearchParams;
   missingParamsMessage: string;
+  isNewController: boolean;
 }) => {
   let currentParams = params;
   if (!currentParams) {
@@ -103,6 +105,7 @@ const resolveConnect = async ({
   currentParams.resolve?.({
     code: ResponseCodes.SUCCESS,
     address: controller.address(),
+    keepOpen: isNewController,
   });
   if (currentParams.params.id) {
     cleanupCallbacks(currentParams.params.id);
@@ -118,6 +121,7 @@ const createSession = async ({
   handleCompletion,
   closeModal,
   searchParams,
+  isNewController,
 }: {
   controller: Controller;
   origin: string;
@@ -126,6 +130,7 @@ const createSession = async ({
   handleCompletion: () => void;
   closeModal?: () => void;
   searchParams: URLSearchParams;
+  isNewController: boolean;
 }) => {
   // Handle no policies case - try to resolve connection, fallback to just closing modal
   if (!policies) {
@@ -137,6 +142,7 @@ const createSession = async ({
       searchParams,
       missingParamsMessage:
         "No params available for no-policies case, falling back to closeModal",
+      isNewController,
     });
     return;
   }
@@ -170,6 +176,7 @@ const createSession = async ({
     currentParams.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
+      keepOpen: isNewController,
     });
     if (currentParams.params.id) {
       cleanupCallbacks(currentParams.params.id);
@@ -189,12 +196,14 @@ const completePopupConnect = async ({
   handleCompletion,
   closeModal,
   searchParams,
+  isNewController,
 }: {
   controller: Controller;
   params?: ReturnType<typeof parseConnectParams>;
   handleCompletion: () => void;
   closeModal?: () => void;
   searchParams: URLSearchParams;
+  isNewController: boolean;
 }) => {
   await resolveConnect({
     controller,
@@ -204,6 +213,7 @@ const completePopupConnect = async ({
     searchParams,
     missingParamsMessage:
       "Params not available after popup auth, falling back to closeModal",
+    isNewController,
   });
 };
 
@@ -217,8 +227,11 @@ export function useCreateController({
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
-  const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
   const [changeWallet, setChangeWallet] = useState<boolean>(false);
+  const [smsState, setSmsState] = useState<{
+    phoneNumber: string;
+    otpId: string;
+  } | null>(null);
 
   const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(
     undefined,
@@ -232,11 +245,11 @@ export function useCreateController({
     chainId,
     setController,
     policies,
-    closeModal,
     isConfigLoading,
     isPoliciesResolved,
     locationGate,
     locationGateVerified,
+    setIsNewController,
   } = useConnection();
 
   // When location gate is configured and not yet verified, skip auto-session
@@ -267,13 +280,27 @@ export function useCreateController({
   const isSmsEnabled = useFeature("sms");
   const { supportedWalletsForAuth } = useWallets();
 
-  useRouteCallbacks(params, CANCEL_RESPONSE);
+  const handleInitOtp = useCallback(
+    async (phoneNumber: string) => {
+      try {
+        setError(undefined);
+        setSmsState({ phoneNumber, otpId: "" });
+        const { otpId } = await smsAuth.initSms(phoneNumber);
+        setSmsState({ phoneNumber, otpId });
+      } catch (e: unknown) {
+        setError(e as Error);
+      }
+    },
+    [smsAuth],
+  );
 
   useEffect(() => {
-    if (error) {
-      setAuthenticationStep(AuthenticationStep.FillForm);
+    if (authenticationStep === AuthenticationStep.FillForm) {
+      setSmsState(null);
     }
-  }, [error]);
+  }, [authenticationStep]);
+
+  useRouteCallbacks(params, CANCEL_RESPONSE);
 
   const signupOptions: AuthOptions = useMemo(() => {
     return [...EMBEDDED_WALLETS, ...supportedWalletsForAuth].filter(
@@ -387,8 +414,8 @@ export function useCreateController({
             policies,
             params,
             handleCompletion,
-            closeModal,
             searchParams,
+            isNewController: true,
           });
         }
 
@@ -404,7 +431,6 @@ export function useCreateController({
       locationGatePending,
       handleCompletion,
       params,
-      closeModal,
       searchParams,
       shouldAutoCreateSession,
     ],
@@ -432,8 +458,8 @@ export function useCreateController({
                 controller: webauthnResult.controller,
                 params,
                 handleCompletion,
-                closeModal,
                 searchParams,
+                isNewController: true,
               });
             }
             return;
@@ -509,65 +535,18 @@ export function useCreateController({
           break;
         }
         case "sms": {
-          // SMS requires multi-step UI. We stop loading to show the form,
-          // then drive the rest of the flow from the overlay callbacks.
-          setIsLoading(false);
-
-          const { SmsOtpForm } = await import("./sms/SmsOtpForm");
-
-          const smsResult = await new Promise<SignupResponse | undefined>(
-            (resolve, reject) => {
-              let phoneNumber = "";
-              let otpId = "";
-
-              const showForm = (phone: string, error?: string) => {
-                setOverlay(
-                  React.createElement(SmsOtpForm, {
-                    phoneNumber: phone,
-                    onSubmitPhone: async (p: string) => {
-                      phoneNumber = p;
-                      try {
-                        const initResponse = await smsAuth.initSms(p);
-                        otpId = initResponse.otpId;
-                        showForm(p);
-                      } catch (e) {
-                        showForm("", (e as Error).message);
-                      }
-                    },
-                    onSubmitOtp: async (otpCode: string) => {
-                      try {
-                        const result = await smsAuth.completeSms(
-                          username,
-                          phoneNumber,
-                          otpId,
-                          otpCode,
-                        );
-                        setOverlay(null);
-                        resolve(result);
-                      } catch (e) {
-                        reject(e);
-                      }
-                    },
-                    onBack: () => {
-                      setOverlay(null);
-                      resolve(undefined);
-                    },
-                    isLoading: false,
-                    error,
-                  }),
-                );
-              };
-
-              showForm("");
-            },
-          );
-
-          if (!smsResult) {
-            return;
+          if (!password) {
+            throw new Error("OTP code required for SMS authentication");
           }
-
-          setIsLoading(true);
-          signupResponse = smsResult;
+          if (!smsState?.otpId) {
+            throw new Error("SMS not initialized — phone number not submitted");
+          }
+          signupResponse = await smsAuth.completeSms(
+            username,
+            smsState.phoneNumber,
+            smsState.otpId,
+            password,
+          );
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
@@ -597,12 +576,11 @@ export function useCreateController({
       signupWithWalletConnect,
       passwordAuth,
       smsAuth,
-      setOverlay,
+      smsState,
       finishSignup,
       locationGatePending,
       params,
       handleCompletion,
-      closeModal,
       searchParams,
     ],
   );
@@ -730,8 +708,8 @@ export function useCreateController({
           policies,
           params,
           handleCompletion,
-          closeModal,
           searchParams,
+          isNewController: false,
         });
       }
 
@@ -746,7 +724,6 @@ export function useCreateController({
       locationGatePending,
       handleCompletion,
       params,
-      closeModal,
       searchParams,
       shouldAutoCreateSession,
     ],
@@ -802,8 +779,8 @@ export function useCreateController({
                 controller: loginController.controller,
                 params,
                 handleCompletion,
-                closeModal,
                 searchParams,
+                isNewController: false,
               });
             }
             return;
@@ -816,8 +793,8 @@ export function useCreateController({
               policies,
               params,
               handleCompletion,
-              closeModal,
               searchParams,
+              isNewController: false,
             });
           }
 
@@ -887,62 +864,19 @@ export function useCreateController({
           break;
         }
         case "sms": {
-          setIsLoading(false);
-
-          const { SmsOtpForm } = await import("./sms/SmsOtpForm");
-
-          const smsLoginResult = await new Promise<LoginResponse | undefined>(
-            (resolve, reject) => {
-              let phoneNumber = "";
-              let otpId = "";
-
-              const showForm = (phone: string, error?: string) => {
-                setOverlay(
-                  React.createElement(SmsOtpForm, {
-                    phoneNumber: phone,
-                    onSubmitPhone: async (p: string) => {
-                      phoneNumber = p;
-                      try {
-                        const initResponse = await smsAuth.initSms(p);
-                        otpId = initResponse.otpId;
-                        showForm(p);
-                      } catch (e) {
-                        showForm("", (e as Error).message);
-                      }
-                    },
-                    onSubmitOtp: async (otpCode: string) => {
-                      try {
-                        const result = await smsAuth.completeSms(
-                          username,
-                          phoneNumber,
-                          otpId,
-                          otpCode,
-                        );
-                        setOverlay(null);
-                        resolve({ signer: result.signer });
-                      } catch (e) {
-                        reject(e);
-                      }
-                    },
-                    onBack: () => {
-                      setOverlay(null);
-                      resolve(undefined);
-                    },
-                    isLoading: false,
-                    error,
-                  }),
-                );
-              };
-
-              showForm("");
-            },
-          );
-
-          if (!smsLoginResult) {
-            return;
+          if (!smsState?.otpId) {
+            throw new Error("SMS not initialized — phone number not submitted");
           }
-          setIsLoading(true);
-          loginResponse = smsLoginResult;
+          if (!password) {
+            throw new Error("OTP code required for SMS authentication");
+          }
+          const smsResult = await smsAuth.completeSms(
+            username,
+            smsState.phoneNumber,
+            smsState.otpId,
+            password,
+          );
+          loginResponse = { signer: smsResult.signer };
           break;
         }
         case "phantom":
@@ -975,13 +909,12 @@ export function useCreateController({
       locationGatePending,
       params,
       handleCompletion,
-      closeModal,
       searchParams,
       shouldAutoCreateSession,
       finishLogin,
       passwordAuth,
       smsAuth,
-      setOverlay,
+      smsState,
       setWaitingForConfirmation,
     ],
   );
@@ -1121,6 +1054,7 @@ export function useCreateController({
     ) => {
       setError(undefined);
       setIsLoading(true);
+      setIsNewController(!exists);
 
       setAuthMethod(authenticationMethod);
 
@@ -1157,17 +1091,20 @@ export function useCreateController({
           }
         }
       } catch (e: unknown) {
-        console.error(e);
-        setError(e as Error);
+        const error: unknown = (e as Error)?.message
+          ? e
+          : new Error("Unknown error");
+        console.error("Login error:", (error as Error).message);
+        setError(error as Error);
         if (exists) {
           captureAnalyticsEvent(posthog, "login_failed", {
             method,
-            error_code: sanitizeErrorCode(e),
+            error_code: sanitizeErrorCode(error),
           });
         } else {
           captureAnalyticsEvent(posthog, "signup_failed", {
             method,
-            error_code: sanitizeErrorCode(e),
+            error_code: sanitizeErrorCode(error),
           });
         }
       } finally {
@@ -1184,6 +1121,7 @@ export function useCreateController({
       setError,
       setIsLoading,
       setWaitingForConfirmation,
+      setIsNewController,
     ],
   );
 
@@ -1196,8 +1134,8 @@ export function useCreateController({
     error,
     setError,
     handleSubmit,
-    overlay,
-    setOverlay,
+    handleInitOtp,
+    smsState,
     changeWallet,
     setChangeWallet,
     signupOptions,

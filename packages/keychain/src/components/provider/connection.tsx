@@ -77,6 +77,8 @@ export type ConnectionContextValue = {
   locationGate?: LocationGateOptions;
   locationGateVerified: boolean;
   setLocationGateVerified: (verified: boolean) => void;
+  isNewControllerRef: React.RefObject<boolean>;
+  setIsNewController: (value: boolean) => void;
 };
 
 export type VerifiableControllerTheme = ControllerTheme & {

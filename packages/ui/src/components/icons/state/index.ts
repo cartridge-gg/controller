@@ -24,6 +24,7 @@ export * from "./gem";
 export * from "./globe";
 export * from "./grid";
 export * from "./joystick";
+export * from "./key";
 export * from "./laptop";
 export * from "./laurel";
 export * from "./leaderboard";

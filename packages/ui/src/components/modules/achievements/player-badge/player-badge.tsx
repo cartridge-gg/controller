@@ -48,6 +48,7 @@ export const achievementPlayerBadgeVariants = cva(
         xl: "",
         "2xl": "",
         "3xl": "",
+        "4xl": "",
       },
     },
     defaultVariants: {
@@ -131,13 +132,15 @@ export const AchievementPlayerBadge = ({
         icon={ThumbnailIcon}
         variant={variant}
         size={
-          size === "3xl"
-            ? "xl"
-            : size === "2xl"
-              ? "lg"
-              : size === "lg"
-                ? "sm"
-                : "md"
+          size === "4xl"
+            ? "xxl"
+            : size === "3xl"
+              ? "xl"
+              : size === "2xl"
+                ? "lg"
+                : size === "lg"
+                  ? "sm"
+                  : "md"
         }
         className="rounded-full"
         centered

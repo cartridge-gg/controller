@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { SignerPendingCard } from "./signer-pending-card";
+import { SignerMethodKind } from "../signer-method";
 
 const meta: Meta<typeof SignerPendingCard> = {
   title: "Modules/SignerPendingCard",
@@ -13,16 +14,20 @@ const meta: Meta<typeof SignerPendingCard> = {
       control: { type: "select" },
       options: [
         "google",
-        "discord",
         "sms",
+        "discord",
         "passkey",
+        "webauthn",
+        "password",
+        "wallet",
         "metamask",
         "argent",
+        "braavos",
+        "base",
         "rabby",
         "phantom",
-        "walletconnect",
         "phantom-evm",
-        "wallet",
+        "walletconnect",
       ],
     },
   },
@@ -31,150 +36,172 @@ const meta: Meta<typeof SignerPendingCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const GoogleSuccess: Story = {
-  args: {
-    kind: "google",
-  },
-};
-
-export const DiscordSuccess: Story = {
-  args: {
-    kind: "discord",
-  },
-};
-
-export const SMSSuccess: Story = {
-  args: {
-    kind: "sms",
-  },
-};
-
-export const PasskeySuccess: Story = {
-  args: {
-    kind: "passkey",
-  },
-};
-
-export const MetamaskSuccess: Story = {
-  args: {
-    kind: "metamask",
-  },
-};
-
-export const ArgentSuccess: Story = {
-  args: {
-    kind: "argent",
-  },
-};
-
-export const RabbySuccess: Story = {
-  args: {
-    kind: "rabby",
-  },
-};
-
-export const PhantomSuccess: Story = {
-  args: {
-    kind: "phantom",
-  },
-};
-
-export const WalletConnectSuccess: Story = {
-  args: {
-    kind: "walletconnect",
-  },
-};
-
-export const GoogleInProgress: Story = {
-  args: {
-    kind: "google",
-    inProgress: true,
-  },
-};
-
-export const DiscordInProgress: Story = {
-  args: {
-    kind: "discord",
-    inProgress: true,
-  },
-};
-
-export const SMSInProgress: Story = {
-  args: {
-    kind: "sms",
-    inProgress: true,
-  },
-};
-
-export const PasskeyInProgress: Story = {
-  args: {
-    kind: "passkey",
-    inProgress: true,
-  },
-};
-
-export const MetamaskInProgress: Story = {
-  args: {
-    kind: "metamask",
-    inProgress: true,
-  },
-};
-
-export const ArgentInProgress: Story = {
-  args: {
-    kind: "argent",
-    inProgress: true,
-  },
-};
-
-export const RabbyInProgress: Story = {
-  args: {
-    kind: "rabby",
-    inProgress: true,
-  },
-};
-
-export const WalletConnectInProgress: Story = {
-  args: {
-    kind: "walletconnect",
-    inProgress: true,
-  },
-};
-
-export const GoogleError: Story = {
-  args: {
-    kind: "google",
-    error: "Error connecting to Google",
-  },
-};
-
-export const WalletConnectError: Story = {
-  args: {
-    kind: "walletconnect",
-    error: "Error connecting to WalletConnect",
-  },
-};
-
-export const MetamaskAlreadyAuthenticated: Story = {
-  args: {
-    kind: "metamask",
-    authedAddress: "0x1234567890123456789012345678901234567890",
-  },
-};
-
-export const AllMethods: Story = {
+export const Default: Story = {
   render: () => (
-    <div className="space-y-4">
+    <div className="space-y-4 grid grid-cols-3 gap-2">
+      <SignerPendingCard kind="google" inProgress={true} />
+      <SignerPendingCard
+        kind="google"
+        inProgress={false}
+        error="Error connecting to Google"
+      />
       <SignerPendingCard kind="google" inProgress={false} />
-      <SignerPendingCard kind="discord" inProgress={false} />
+
+      <SignerPendingCard kind="sms" inProgress={true} />
+      <SignerPendingCard
+        kind="sms"
+        inProgress={false}
+        error="Error Verifying code"
+      />
       <SignerPendingCard kind="sms" inProgress={false} />
+
+      <SignerPendingCard kind="discord" inProgress={true} />
+      <SignerPendingCard
+        kind="discord"
+        inProgress={false}
+        error="Error connecting to Discord"
+      />
+      <SignerPendingCard kind="discord" inProgress={false} />
+
+      <SignerPendingCard kind="passkey" inProgress={true} />
+      <SignerPendingCard
+        kind="passkey"
+        inProgress={false}
+        error="Error connecting to Passkey"
+      />
       <SignerPendingCard kind="passkey" inProgress={false} />
-      <SignerPendingCard kind="metamask" inProgress={false} />
-      <SignerPendingCard kind="argent" inProgress={false} />
-      <SignerPendingCard kind="rabby" inProgress={false} />
-      <SignerPendingCard kind="phantom" inProgress={false} />
-      <SignerPendingCard kind="walletconnect" inProgress={false} />
-      <SignerPendingCard kind="wallet" inProgress={false} />
+
+      <SignerPendingCard kind="webauthn" inProgress={true} />
+      <SignerPendingCard
+        kind="webauthn"
+        inProgress={false}
+        error="Error connecting to WebAuthn"
+      />
+      <SignerPendingCard kind="webauthn" inProgress={false} />
+
+      <SignerPendingCard kind="password" inProgress={true} />
+      <SignerPendingCard
+        kind="password"
+        inProgress={false}
+        error="Error connecting to Password"
+      />
+      <SignerPendingCard kind="password" inProgress={false} />
+
+      <SignerPendingCard kind="wallet" inProgress={true} />
+      <SignerPendingCard
+        kind="wallet"
+        inProgress={false}
+        error="Error connecting to Wallet"
+      />
+      <SignerPendingCard
+        kind="wallet"
+        inProgress={false}
+        authedAddress="0x1234567890123456789012345678901234567890"
+      />
+
+      <SignerPendingCard kind="metamask" inProgress={true} />
+      <SignerPendingCard
+        kind="metamask"
+        inProgress={false}
+        error="Error connecting to Metamask"
+      />
+      <SignerPendingCard
+        kind="metamask"
+        inProgress={false}
+        authedAddress="0x1234567890123456789012345678901234567890"
+      />
+
+      <SignerPendingCard kind="argent" inProgress={true} />
+      <SignerPendingCard
+        kind="argent"
+        inProgress={false}
+        error="Error connecting to Argent"
+      />
+      <SignerPendingCard
+        kind="argent"
+        inProgress={false}
+        authedAddress="0x1234567890123456789012345678901234567890"
+      />
+
+      <SignerPendingCard kind="braavos" inProgress={true} />
+      <SignerPendingCard
+        kind="braavos"
+        inProgress={false}
+        error="Error connecting to Braavos"
+      />
+      <SignerPendingCard
+        kind="braavos"
+        inProgress={false}
+        authedAddress="0x1234567890123456789012345678901234567890"
+      />
+
+      <SignerPendingCard kind="base" inProgress={true} />
+      <SignerPendingCard
+        kind="base"
+        inProgress={false}
+        error="Error connecting to Base"
+      />
+      <SignerPendingCard
+        kind="base"
+        inProgress={false}
+        authedAddress="0x1234567890123456789012345678901234567890"
+      />
+
+      <SignerPendingCard kind="rabby" inProgress={true} />
+      <SignerPendingCard
+        kind="rabby"
+        inProgress={false}
+        error="Error connecting to Rabby"
+      />
+      <SignerPendingCard
+        kind="rabby"
+        inProgress={false}
+        authedAddress="0x1234567890123456789012345678901234567890"
+      />
+
+      <SignerPendingCard kind="phantom" inProgress={true} />
+      <SignerPendingCard
+        kind="phantom"
+        inProgress={false}
+        error="Error connecting to Phantom"
+      />
+      <SignerPendingCard
+        kind="phantom"
+        inProgress={false}
+        authedAddress="0x1234567890123456789012345678901234567890"
+      />
+
+      <SignerPendingCard kind="phantom-evm" inProgress={true} />
+      <SignerPendingCard
+        kind="phantom-evm"
+        inProgress={false}
+        error="Error connecting to Phantom EVM"
+      />
+      <SignerPendingCard
+        kind="phantom-evm"
+        inProgress={false}
+        authedAddress="0x1234567890123456789012345678901234567890"
+      />
+
+      <SignerPendingCard kind="walletconnect" inProgress={true} />
+      <SignerPendingCard
+        kind="walletconnect"
+        inProgress={false}
+        error="Error connecting to WalletConnect"
+      />
+      <SignerPendingCard
+        kind="walletconnect"
+        inProgress={false}
+        authedAddress="0x1234567890123456789012345678901234567890"
+      />
+
+      <SignerPendingCard kind={"abc" as SignerMethodKind} inProgress={true} />
+      <SignerPendingCard
+        kind={"abc" as SignerMethodKind}
+        inProgress={false}
+        error="Error connecting to ??"
+      />
+      <SignerPendingCard kind={"abc" as SignerMethodKind} inProgress={false} />
     </div>
   ),
 };

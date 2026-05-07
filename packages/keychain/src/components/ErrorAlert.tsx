@@ -65,7 +65,10 @@ export function ErrorAlert({
       case "info":
         return { bg: "bg-[#95c1ea]", text: "text-[black]" };
       case "warning":
-        return { bg: "bg-[#1f2320]", text: "text-[white]" };
+        return {
+          bg: "bg-[#1f2320] border border-foreground-100",
+          text: "text-[white] text-sm",
+        };
       case "error":
         return {
           bg: "shadow-[inset_0_0_0_1px] shadow-destructive",
@@ -86,7 +89,7 @@ export function ErrorAlert({
       <AccordionItem
         value="item-1"
         className={cn(
-          "flex flex-col rounded gap-3 h-fit box-border",
+          "flex flex-col rounded gap-2 h-fit box-border",
           styles.bg,
           styles.text,
         )}
@@ -95,7 +98,7 @@ export function ErrorAlert({
           hideIcon={!collapsible}
           color={"text-destructive-100"}
           tabIndex={collapsible ? undefined : -1}
-          className={`px-3 pt-2.5 pb-2 items-start gap-1`}
+          className={`px-3 pt-2.5 pb-2 items-start gap-2`}
           parentClassName={`${collapsible ? "" : "cursor-auto"}`}
           wedgeIconSize={"sm"}
           wedgeClassName="mr-2.5"

@@ -131,19 +131,6 @@ export function Profile() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2>Open Starterpack</h2>
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap gap-1">
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openBundle(1, BUNDLE_REGISTRY_MAINNET)
-            }
-          >
-            Nums
-          </Button>
-        </div>
-      </div>
-
       <h2>Location Prompt (Blocked Demo)</h2>
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-1">
@@ -191,16 +178,6 @@ export function Profile() {
             onClick={() => ctrlConnector.controller.openProfile("activity")}
           >
             Activity
-          </Button>
-          <Button
-            onClick={() => ctrlConnector.controller.openProfileTo("followers")}
-          >
-            Followers
-          </Button>
-          <Button
-            onClick={() => ctrlConnector.controller.openProfileTo("following")}
-          >
-            Following
           </Button>
           <Button
             onClick={() => ctrlConnector.controller.openProfileAt("/funding")}

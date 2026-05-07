@@ -11,7 +11,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  Sheet,
 } from "@cartridge/controller-ui";
 import { CreateAccount } from "./username";
 import InAppSpy from "inapp-spy";
@@ -32,6 +31,9 @@ import {
 } from "@/hooks/viewport";
 import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
+import { PasswordFormDrawer } from "./password/PasswordForm";
+import { SmsOtpDrawer } from "./sms/SmsOtpForm";
+import { SignerPendingDrawer } from "./SignerPendingDrawer";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -42,12 +44,15 @@ interface CreateControllerViewProps {
   validation: ReturnType<typeof useUsernameValidation>;
   isLoading: boolean;
   error?: Error;
+  setError: (error: Error | undefined) => void;
   prefillUsername?: string;
   onUsernameChange: (value: string) => void;
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
-  onSubmit: (authenticationMode?: AuthOption) => void;
+  onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  onInitOtp: (phoneNumber: string) => Promise<void>;
+  smsState: { phoneNumber: string; otpId: string } | null;
   isSlot?: boolean;
   authenticationStep: AuthenticationStep;
   setAuthenticationStep: (value: AuthenticationStep) => void;
@@ -67,7 +72,7 @@ interface CreateControllerViewProps {
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
-  "setAuthenticationStep"
+  "setAuthenticationStep" | "onInitOtp" | "smsState"
 >;
 
 function CreateControllerForm({
@@ -261,7 +266,7 @@ function CreateControllerForm({
             isLoading={isLoading}
             disabled={
               validation.status !== "valid" ||
-              authenticationStep === AuthenticationStep.ChooseMethod ||
+              authenticationStep !== AuthenticationStep.FillForm ||
               isDropdownOpen
             }
             data-testid="submit-button"
@@ -291,12 +296,15 @@ export function CreateControllerView({
   validation,
   isLoading,
   error,
+  setError,
   prefillUsername,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
   onSubmit,
   onKeyDown,
+  onInitOtp,
+  smsState,
   authenticationStep,
   setAuthenticationStep,
   waitingForConfirmation,
@@ -310,11 +318,63 @@ export function CreateControllerView({
   isSlot,
   webauthnPopup,
 }: CreateControllerViewProps) {
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      setAuthenticationStep(AuthenticationStep.FillForm);
+  const onClose = useCallback(
+    (authenticationMode?: AuthOption) => {
+      setAuthenticationStep(
+        authenticationMode === "password"
+          ? AuthenticationStep.PasswordForm
+          : authenticationMode === "sms"
+            ? AuthenticationStep.SmsForm
+            : AuthenticationStep.FillForm,
+      );
+    },
+    [setAuthenticationStep],
+  );
+
+  useEffect(() => {
+    if (isLoading) {
+      setAuthenticationStep(AuthenticationStep.Pending);
     }
-  };
+  }, [isLoading, setAuthenticationStep]);
+
+  useEffect(() => {
+    if (error && !!authMethod) {
+      setAuthenticationStep(AuthenticationStep.Error);
+    }
+  }, [error, authMethod, setAuthenticationStep]);
+
+  const onClosePending = useCallback(() => {
+    if (authenticationStep === AuthenticationStep.Error) {
+      setAuthenticationStep(AuthenticationStep.FillForm);
+      setError(undefined);
+    }
+  }, [authenticationStep, setAuthenticationStep, setError]);
+
+  const isLogin = !!validation.exists;
+
+  const canRetry = useMemo(
+    () =>
+      smsState != null ||
+      (authMethod === "password" && isLogin) ||
+      authMethod === "google" ||
+      authMethod === "discord" ||
+      authMethod === "metamask" ||
+      authMethod === "phantom-evm" ||
+      authMethod === "rabby" ||
+      authMethod === "walletconnect",
+    [isLogin, authMethod, smsState],
+  );
+
+  const handleRetry = useCallback(() => {
+    setError(undefined);
+    if (smsState != null) {
+      setAuthenticationStep(AuthenticationStep.SmsForm);
+    } else if (authMethod === "password") {
+      setAuthenticationStep(AuthenticationStep.PasswordForm);
+    } else {
+      onSubmit(authMethod);
+    }
+  }, [authMethod, smsState, setError, setAuthenticationStep, onSubmit]);
 
   // Handles scroll to top on mobile when keyboard opens
   const { isMobile } = useDevice();
@@ -332,17 +392,15 @@ export function CreateControllerView({
   }, [isMobile, authenticationStep]);
 
   return (
-    <LayoutContainer>
-      <Sheet
-        open={authenticationStep === AuthenticationStep.ChooseMethod}
-        onOpenChange={handleOpenChange}
-      >
+    <>
+      <LayoutContainer>
         <CreateControllerForm
           theme={theme}
           usernameField={usernameField}
           validation={validation}
           isLoading={isLoading}
           error={error}
+          setError={setError}
           prefillUsername={prefillUsername}
           onUsernameChange={onUsernameChange}
           onUsernameFocus={onUsernameFocus}
@@ -361,15 +419,43 @@ export function CreateControllerView({
           isSlot={isSlot}
           webauthnPopup={webauthnPopup}
         />
-        <ChooseSignupMethodForm
-          isLoading={isLoading}
-          validation={validation}
-          onSubmit={onSubmit}
-          authOptions={authOptions}
-          isOpen={authenticationStep === AuthenticationStep.ChooseMethod}
-        />
-      </Sheet>
-    </LayoutContainer>
+      </LayoutContainer>
+      <ChooseSignupMethodForm
+        isOpen={authenticationStep === AuthenticationStep.ChooseMethod}
+        isLoading={isLoading}
+        validation={validation}
+        username={usernameField.value}
+        onClose={onClose}
+        onSubmit={onSubmit}
+        authOptions={authOptions}
+      />
+      <PasswordFormDrawer
+        isOpen={authenticationStep === AuthenticationStep.PasswordForm}
+        isLoading={isLoading}
+        isLogin={isLogin}
+        onClose={onClose}
+        onSubmit={onSubmit}
+      />
+      <SmsOtpDrawer
+        isOpen={authenticationStep === AuthenticationStep.SmsForm}
+        isLogin={isLogin}
+        onClose={onClose}
+        onInitOtp={onInitOtp}
+        onSubmit={onSubmit}
+        smsState={smsState}
+      />
+      <SignerPendingDrawer
+        isOpen={
+          authenticationStep === AuthenticationStep.Pending ||
+          authenticationStep === AuthenticationStep.Error
+        }
+        isLoading={isLoading}
+        error={error}
+        authenticationMode={smsState != null ? "sms" : authMethod}
+        onClose={onClosePending}
+        onRetry={canRetry ? handleRetry : undefined}
+      />
+    </>
   );
 }
 
@@ -414,9 +500,10 @@ export function CreateController({
     error,
     setError,
     handleSubmit,
+    handleInitOtp,
+    smsState,
     authenticationStep,
     setAuthenticationStep,
-    overlay,
     waitingForConfirmation,
     changeWallet,
     setChangeWallet,
@@ -472,6 +559,28 @@ export function CreateController({
         if (
           selectedAuthenticationMode === undefined &&
           validation.signers &&
+          allUseSameAuth(validation.signers) &&
+          credentialToAuth(validation.signers[0]) === "password"
+        ) {
+          setAuthenticationStep(AuthenticationStep.PasswordForm);
+          setError(undefined);
+          return;
+        }
+
+        if (
+          selectedAuthenticationMode === undefined &&
+          validation.signers &&
+          allUseSameAuth(validation.signers) &&
+          credentialToAuth(validation.signers[0]) === "sms"
+        ) {
+          setAuthenticationStep(AuthenticationStep.SmsForm);
+          setError(undefined);
+          return;
+        }
+
+        if (
+          selectedAuthenticationMode === undefined &&
+          validation.signers &&
           validation.signers.length > 1 &&
           !allUseSameAuth(validation.signers)
         ) {
@@ -500,6 +609,13 @@ export function CreateController({
         // which will trigger the password form
         if (authenticationMethod === "password" && !password) {
           setAuthenticationStep(AuthenticationStep.ChooseMethod);
+          return;
+        }
+
+        // If SMS auth is detected and no OTP code provided, open the SMS drawer
+        if (authenticationMethod === "sms" && !password) {
+          setAuthenticationStep(AuthenticationStep.SmsForm);
+          setError(undefined);
           return;
         }
 
@@ -631,6 +747,7 @@ export function CreateController({
         validation={debouncedValidation}
         isLoading={isLoading}
         error={error}
+        setError={setError}
         prefillUsername={prefillUsername}
         isSlot={isSlot}
         onUsernameChange={handleUsernameChange}
@@ -638,6 +755,8 @@ export function CreateController({
         onUsernameClear={handleUsernameClear}
         onSubmit={handleFormSubmit}
         onKeyDown={handleKeyDown}
+        onInitOtp={handleInitOtp}
+        smsState={smsState}
         authenticationStep={authenticationStep}
         setAuthenticationStep={setAuthenticationStep}
         waitingForConfirmation={waitingForConfirmation}
@@ -650,7 +769,6 @@ export function CreateController({
         onDropdownOpenChange={setIsDropdownOpen}
         webauthnPopup={webauthnPopup}
       />
-      {overlay}
     </>
   );
 }

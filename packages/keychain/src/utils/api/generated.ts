@@ -45,6 +45,7 @@ export type Account = Node & {
   id: Scalars["ID"];
   membership: AccountTeamConnection;
   name?: Maybe<Scalars["String"]>;
+  notificationDevices: NotificationDeviceConnection;
   oauthConnections?: Maybe<Array<OAuthConnection>>;
   /** If true, the account is billed for paid slot deployments */
   slotBilling: Scalars["Boolean"];
@@ -87,6 +88,15 @@ export type AccountMembershipArgs = {
   first?: InputMaybe<Scalars["Int"]>;
   last?: InputMaybe<Scalars["Int"]>;
   where?: InputMaybe<AccountTeamWhereInput>;
+};
+
+export type AccountNotificationDevicesArgs = {
+  after?: InputMaybe<Scalars["Cursor"]>;
+  before?: InputMaybe<Scalars["Cursor"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<NotificationDeviceOrder>;
+  where?: InputMaybe<NotificationDeviceWhereInput>;
 };
 
 export type AccountStarterpackMintArgs = {
@@ -252,6 +262,9 @@ export type AccountWhereInput = {
   /** membership edge predicates */
   hasMembership?: InputMaybe<Scalars["Boolean"]>;
   hasMembershipWith?: InputMaybe<Array<AccountTeamWhereInput>>;
+  /** notification_devices edge predicates */
+  hasNotificationDevices?: InputMaybe<Scalars["Boolean"]>;
+  hasNotificationDevicesWith?: InputMaybe<Array<NotificationDeviceWhereInput>>;
   /** oauth_connections edge predicates */
   hasOauthConnections?: InputMaybe<Scalars["Boolean"]>;
   hasOauthConnectionsWith?: InputMaybe<Array<OAuthConnectionWhereInput>>;
@@ -3204,11 +3217,13 @@ export type Mutation = {
   deleteRpcCorsDomain: Scalars["Boolean"];
   deleteTeam: Scalars["Boolean"];
   deploy: Account;
+  disableNotificationDevice: Scalars["Boolean"];
   disconnectOAuth: Scalars["Boolean"];
   finalizeLogin: Scalars["String"];
   finalizeRegistration: Account;
   increaseBudget: Paymaster;
   register: Account;
+  registerNotificationDevice: NotificationDevice;
   removeAllPolicies: Scalars["Boolean"];
   removeFromTeam: Scalars["Boolean"];
   removeOwner: Scalars["Boolean"];
@@ -3220,6 +3235,7 @@ export type Mutation = {
    * The code expires after 10 minutes.
    */
   sendEmailVerification: SendVerificationResponse;
+  sendNotification: NotificationSendResult;
   /**
    * Send a verification code via SMS to the specified phone number.
    * The code expires after 10 minutes.
@@ -3403,6 +3419,10 @@ export type MutationDeployArgs = {
   username: Scalars["String"];
 };
 
+export type MutationDisableNotificationDeviceArgs = {
+  id: Scalars["ID"];
+};
+
 export type MutationDisconnectOAuthArgs = {
   provider: OAuthProvider;
 };
@@ -3429,6 +3449,10 @@ export type MutationRegisterArgs = {
   owner: SignerInput;
   session: SessionInput;
   username: Scalars["String"];
+};
+
+export type MutationRegisterNotificationDeviceArgs = {
+  input: RegisterNotificationDeviceInput;
 };
 
 export type MutationRemoveAllPoliciesArgs = {
@@ -3462,6 +3486,10 @@ export type MutationRevokeSessionsArgs = {
 
 export type MutationSendEmailVerificationArgs = {
   input: SendEmailVerificationInput;
+};
+
+export type MutationSendNotificationArgs = {
+  input: SendNotificationInput;
 };
 
 export type MutationSendPhoneVerificationArgs = {
@@ -3541,6 +3569,168 @@ export enum Network {
 export type Node = {
   /** The id of the object. */
   id: Scalars["ID"];
+};
+
+export type NotificationDataInput = {
+  key: Scalars["String"];
+  value: Scalars["String"];
+};
+
+export type NotificationDevice = Node & {
+  __typename?: "NotificationDevice";
+  account: Account;
+  /** Application namespace for the token, such as dopewars or cartridge */
+  appID: Scalars["String"];
+  createdAt: Scalars["Time"];
+  enabled: Scalars["Boolean"];
+  id: Scalars["ID"];
+  lastSeenAt: Scalars["Time"];
+  platform: NotificationDevicePlatform;
+  provider: NotificationDeviceProvider;
+  revokedAt?: Maybe<Scalars["Time"]>;
+  updatedAt: Scalars["Time"];
+};
+
+/** A connection to a list of items. */
+export type NotificationDeviceConnection = {
+  __typename?: "NotificationDeviceConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<NotificationDeviceEdge>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type NotificationDeviceEdge = {
+  __typename?: "NotificationDeviceEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["Cursor"];
+  /** The item at the end of the edge. */
+  node?: Maybe<NotificationDevice>;
+};
+
+/** Ordering options for NotificationDevice connections */
+export type NotificationDeviceOrder = {
+  /** The ordering direction. */
+  direction?: OrderDirection;
+  /** The field by which to order NotificationDevices. */
+  field: NotificationDeviceOrderField;
+};
+
+/** Properties by which NotificationDevice connections can be ordered. */
+export enum NotificationDeviceOrderField {
+  CreatedAt = "CREATED_AT",
+}
+
+/** NotificationDevicePlatform is enum for the field platform */
+export enum NotificationDevicePlatform {
+  Android = "ANDROID",
+  Ios = "IOS",
+  Web = "WEB",
+}
+
+/** NotificationDeviceProvider is enum for the field provider */
+export enum NotificationDeviceProvider {
+  Apns = "APNS",
+  Fcm = "FCM",
+}
+
+/**
+ * NotificationDeviceWhereInput is used for filtering NotificationDevice objects.
+ * Input was generated by ent.
+ */
+export type NotificationDeviceWhereInput = {
+  and?: InputMaybe<Array<NotificationDeviceWhereInput>>;
+  /** app_id field predicates */
+  appID?: InputMaybe<Scalars["String"]>;
+  appIDContains?: InputMaybe<Scalars["String"]>;
+  appIDContainsFold?: InputMaybe<Scalars["String"]>;
+  appIDEqualFold?: InputMaybe<Scalars["String"]>;
+  appIDGT?: InputMaybe<Scalars["String"]>;
+  appIDGTE?: InputMaybe<Scalars["String"]>;
+  appIDHasPrefix?: InputMaybe<Scalars["String"]>;
+  appIDHasSuffix?: InputMaybe<Scalars["String"]>;
+  appIDIn?: InputMaybe<Array<Scalars["String"]>>;
+  appIDLT?: InputMaybe<Scalars["String"]>;
+  appIDLTE?: InputMaybe<Scalars["String"]>;
+  appIDNEQ?: InputMaybe<Scalars["String"]>;
+  appIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars["Time"]>;
+  createdAtGT?: InputMaybe<Scalars["Time"]>;
+  createdAtGTE?: InputMaybe<Scalars["Time"]>;
+  createdAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  createdAtLT?: InputMaybe<Scalars["Time"]>;
+  createdAtLTE?: InputMaybe<Scalars["Time"]>;
+  createdAtNEQ?: InputMaybe<Scalars["Time"]>;
+  createdAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  /** enabled field predicates */
+  enabled?: InputMaybe<Scalars["Boolean"]>;
+  enabledNEQ?: InputMaybe<Scalars["Boolean"]>;
+  /** account edge predicates */
+  hasAccount?: InputMaybe<Scalars["Boolean"]>;
+  hasAccountWith?: InputMaybe<Array<AccountWhereInput>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars["ID"]>;
+  idContainsFold?: InputMaybe<Scalars["ID"]>;
+  idEqualFold?: InputMaybe<Scalars["ID"]>;
+  idGT?: InputMaybe<Scalars["ID"]>;
+  idGTE?: InputMaybe<Scalars["ID"]>;
+  idIn?: InputMaybe<Array<Scalars["ID"]>>;
+  idLT?: InputMaybe<Scalars["ID"]>;
+  idLTE?: InputMaybe<Scalars["ID"]>;
+  idNEQ?: InputMaybe<Scalars["ID"]>;
+  idNotIn?: InputMaybe<Array<Scalars["ID"]>>;
+  /** last_seen_at field predicates */
+  lastSeenAt?: InputMaybe<Scalars["Time"]>;
+  lastSeenAtGT?: InputMaybe<Scalars["Time"]>;
+  lastSeenAtGTE?: InputMaybe<Scalars["Time"]>;
+  lastSeenAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  lastSeenAtLT?: InputMaybe<Scalars["Time"]>;
+  lastSeenAtLTE?: InputMaybe<Scalars["Time"]>;
+  lastSeenAtNEQ?: InputMaybe<Scalars["Time"]>;
+  lastSeenAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  not?: InputMaybe<NotificationDeviceWhereInput>;
+  or?: InputMaybe<Array<NotificationDeviceWhereInput>>;
+  /** platform field predicates */
+  platform?: InputMaybe<NotificationDevicePlatform>;
+  platformIn?: InputMaybe<Array<NotificationDevicePlatform>>;
+  platformNEQ?: InputMaybe<NotificationDevicePlatform>;
+  platformNotIn?: InputMaybe<Array<NotificationDevicePlatform>>;
+  /** provider field predicates */
+  provider?: InputMaybe<NotificationDeviceProvider>;
+  providerIn?: InputMaybe<Array<NotificationDeviceProvider>>;
+  providerNEQ?: InputMaybe<NotificationDeviceProvider>;
+  providerNotIn?: InputMaybe<Array<NotificationDeviceProvider>>;
+  /** revoked_at field predicates */
+  revokedAt?: InputMaybe<Scalars["Time"]>;
+  revokedAtGT?: InputMaybe<Scalars["Time"]>;
+  revokedAtGTE?: InputMaybe<Scalars["Time"]>;
+  revokedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  revokedAtIsNil?: InputMaybe<Scalars["Boolean"]>;
+  revokedAtLT?: InputMaybe<Scalars["Time"]>;
+  revokedAtLTE?: InputMaybe<Scalars["Time"]>;
+  revokedAtNEQ?: InputMaybe<Scalars["Time"]>;
+  revokedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  revokedAtNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars["Time"]>;
+  updatedAtGT?: InputMaybe<Scalars["Time"]>;
+  updatedAtGTE?: InputMaybe<Scalars["Time"]>;
+  updatedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  updatedAtLT?: InputMaybe<Scalars["Time"]>;
+  updatedAtLTE?: InputMaybe<Scalars["Time"]>;
+  updatedAtNEQ?: InputMaybe<Scalars["Time"]>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+};
+
+export type NotificationSendResult = {
+  __typename?: "NotificationSendResult";
+  disabled: Scalars["Int"];
+  failed: Scalars["Int"];
+  sent: Scalars["Int"];
 };
 
 export type OAuthConnection = Node & {
@@ -4678,6 +4868,7 @@ export type Query = {
   node?: Maybe<Node>;
   /** Lookup nodes by a list of IDs. */
   nodes: Array<Maybe<Node>>;
+  notificationDevices: Array<NotificationDevice>;
   ownerships: OwnershipResult;
   paymaster?: Maybe<Paymaster>;
   paymasterStats: PaymasterStats;
@@ -4893,6 +5084,10 @@ export type QueryNodeArgs = {
 
 export type QueryNodesArgs = {
   ids: Array<Scalars["ID"]>;
+};
+
+export type QueryNotificationDevicesArgs = {
+  appId?: InputMaybe<Scalars["String"]>;
 };
 
 export type QueryOwnershipsArgs = {
@@ -5586,6 +5781,13 @@ export type RpcLogWhereInput = {
   userAgentNotNil?: InputMaybe<Scalars["Boolean"]>;
 };
 
+export type RegisterNotificationDeviceInput = {
+  appId: Scalars["String"];
+  platform: NotificationDevicePlatform;
+  provider: NotificationDeviceProvider;
+  token: Scalars["String"];
+};
+
 export type Resources = {
   __typename?: "Resources";
   cpu?: Maybe<Scalars["Float"]>;
@@ -5617,6 +5819,14 @@ export type SiwsCredentials = {
 export type SendEmailVerificationInput = {
   /** The email address to send the verification code to. */
   email: Scalars["String"];
+};
+
+export type SendNotificationInput = {
+  accountId: Scalars["ID"];
+  appId: Scalars["String"];
+  body: Scalars["String"];
+  data?: InputMaybe<Array<NotificationDataInput>>;
+  title: Scalars["String"];
 };
 
 export type SendPhoneVerificationInput = {
