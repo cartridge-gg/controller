@@ -91,9 +91,7 @@ export function CoinbasePopup() {
     const handleKeychainMessage = (event: MessageEvent) => {
       if (event.origin !== keychainOrigin) return;
       if (event.data?.__coinbase_relay) return; // Ignore our own relayed events
-      console.log("[coinbase-popup] Message from keychain:", event.data);
       if (event.data?.type === "close") {
-        console.log("[coinbase-popup] Close command received from keychain");
         window.close();
       }
     };
@@ -106,47 +104,19 @@ export function CoinbasePopup() {
   useEffect(() => {
     // Derive the allowed origin from the payment link URL
     const allowedOrigin = paymentLink ? new URL(paymentLink).origin : null;
-    console.log(
-      "[coinbase-popup] Listening for postMessages, allowedOrigin:",
-      allowedOrigin,
-    );
-    console.log("[coinbase-popup] paymentLink:", paymentLink);
-    console.log(
-      "[coinbase-popup] sandbox attrs: allow-scripts allow-same-origin",
-    );
 
     const handleMessage = (event: MessageEvent) => {
-      // Log ALL incoming messages for debugging
-      console.log("[coinbase-popup] Raw postMessage received:", {
-        origin: event.origin,
-        data: event.data,
-        type: typeof event.data,
-        source: event.source ? "has source" : "no source",
-      });
-
       // Verify the message origin matches the Coinbase payment link domain
       if (allowedOrigin && event.origin !== allowedOrigin) {
-        console.warn(
-          `[coinbase-popup] Origin mismatch: got "${event.origin}", expected "${allowedOrigin}"`,
-        );
         return;
       }
 
       // Coinbase may send object payloads or JSON-encoded strings.
       const data = parseCoinbaseMessage(event.data);
       if (!data?.eventName?.startsWith("onramp_api.")) {
-        console.log(
-          "[coinbase-popup] Ignoring non-Coinbase message:",
-          event.data,
-        );
         return;
       }
 
-      console.log(
-        "[coinbase-popup] ✅ Coinbase event:",
-        data.eventName,
-        data.data,
-      );
       coinbaseEventReceived.current = true;
 
       // Clear the load timeout since we got a valid Coinbase event
@@ -157,12 +127,6 @@ export function CoinbasePopup() {
 
       // Relay every Coinbase event to the keychain via postMessage
       const opener = window.opener;
-      console.log(
-        "[coinbase-popup] postMessage relay:",
-        data.eventName,
-        "opener:",
-        !!opener,
-      );
       if (opener) {
         opener.postMessage(
           {
@@ -172,7 +136,6 @@ export function CoinbasePopup() {
           },
           keychainOrigin,
         );
-        console.log("[coinbase-popup] Message posted via postMessage");
       } else {
         console.error(
           "[coinbase-popup] window.opener is null — message NOT relayed!",
@@ -345,7 +308,6 @@ export function CoinbasePopup() {
           referrerPolicy="no-referrer"
           title="Coinbase Onramp"
           onLoad={() => {
-            console.log("[coinbase-popup] iframe onLoad fired");
             setIframeReady(true);
 
             // If no Coinbase postMessage event arrives within the timeout,
