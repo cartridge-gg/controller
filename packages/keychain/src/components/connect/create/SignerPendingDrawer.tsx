@@ -9,7 +9,7 @@ import {
   CheckIcon,
 } from "@cartridge/controller-ui";
 
-interface SignupPendingDrawerProps {
+interface SignerPendingDrawerProps {
   isOpen: boolean;
   isLoading: boolean;
   error?: Error | undefined;
@@ -18,14 +18,14 @@ interface SignupPendingDrawerProps {
   onRetry?: () => void;
 }
 
-export function SignupPendingDrawer({
+export function SignerPendingDrawer({
   isOpen = true,
   isLoading,
   error,
   authenticationMode,
   onClose,
   onRetry,
-}: SignupPendingDrawerProps) {
+}: SignerPendingDrawerProps) {
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>
       <DrawerContent

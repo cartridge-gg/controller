@@ -33,7 +33,7 @@ import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
 import { PasswordFormDrawer } from "./password/PasswordForm";
 import { SmsOtpDrawer } from "./sms/SmsOtpForm";
-import { SignupPendingDrawer } from "./SignupPendingDrawer";
+import { SignerPendingDrawer } from "./SignerPendingDrawer";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -444,7 +444,7 @@ export function CreateControllerView({
         onSubmit={onSubmit}
         smsState={smsState}
       />
-      <SignupPendingDrawer
+      <SignerPendingDrawer
         isOpen={
           authenticationStep === AuthenticationStep.Pending ||
           authenticationStep === AuthenticationStep.Error

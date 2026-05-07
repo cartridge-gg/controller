@@ -1,36 +1,32 @@
-import { credentialToAddress } from "@/components/connect/types";
-import { useNavigation } from "@/context/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
+import { credentialToAddress } from "@/components/connect/types";
+import { SignerPendingDrawer } from "@/components/connect/create/SignerPendingDrawer";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
   ExternalWalletResponse,
   ExternalWalletType,
   WalletAdapter,
+  AuthOption,
 } from "@cartridge/controller";
 import { JsAddSignerInput, Signer } from "@cartridge/controller-wasm";
 import {
   AddUserIcon,
-  AlertIcon,
   Button,
-  CheckIcon,
-  HeaderInner,
-  LayoutContent,
-  LayoutFooter,
+  Drawer,
+  DrawerContent,
   SignerMethod,
   SignerMethodKind,
-  SignerPendingCard,
-  SpinnerIcon,
 } from "@cartridge/controller-ui";
 import {
   ControllerQuery,
   CredentialMetadata,
 } from "@cartridge/controller-ui/utils/api/cartridge";
-import { useCallback, useEffect, useState } from "react";
 import { QueryObserverResult } from "react-query";
-import { SignerAlert } from "../signer-alert";
 import { ExternalWalletError } from "@/utils/errors";
+import { SignerAlert } from "../signer-alert";
 
 type SignerPending = {
   kind: SignerMethodKind;
@@ -56,18 +52,20 @@ function getErrorMessage(error: unknown): string {
   return "Unknown error";
 }
 
-export function AddSigner({
-  controllerQuery,
-}: {
+interface AddSignerDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
   controllerQuery: QueryObserverResult<ControllerQuery>;
-}) {
-  const { navigate } = useNavigation();
+}
+
+export function AddSignerDrawer({
+  isOpen,
+  onClose,
+  controllerQuery,
+}: AddSignerDrawerProps) {
   const [wallets, setWallets] = useState<boolean>(false);
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
     null,
-  );
-  const [headerIcon, setHeaderIcon] = useState<React.ReactElement>(
-    <AddUserIcon size="lg" />,
   );
 
   const handleClick = useCallback(
@@ -81,9 +79,7 @@ export function AddSigner({
           inProgress: true,
         });
 
-        setHeaderIcon(<SpinnerIcon className="animate-spin" size="lg" />);
         const alreadyOwner = await authFn(auth);
-        setHeaderIcon(<CheckIcon size="lg" />);
 
         if (alreadyOwner) {
           setSignerPending({
@@ -101,7 +97,6 @@ export function AddSigner({
       } catch (error) {
         console.error(error);
         const errorMessage = getErrorMessage(error);
-        setHeaderIcon(<AlertIcon size="lg" />);
         setSignerPending({
           kind: auth,
           inProgress: false,
@@ -112,6 +107,12 @@ export function AddSigner({
     [setSignerPending],
   );
 
+  const handleClose = useCallback(() => {
+    setSignerPending(null);
+    setWallets(false);
+    onClose();
+  }, [setSignerPending, setWallets, onClose]);
+
   useEffect(() => {
     if (
       signerPending &&
@@ -119,69 +120,63 @@ export function AddSigner({
       !signerPending.error &&
       !signerPending.authedAddress
     ) {
-      setTimeout(async () => {
+      const timer = setTimeout(async () => {
         await controllerQuery.refetch();
-        navigate("/settings");
+        handleClose();
       }, 2000);
+      return () => clearTimeout(timer);
     }
-  }, [signerPending, signerPending?.inProgress, controllerQuery, navigate]);
+  }, [signerPending, controllerQuery, handleClose]);
+
+  const isChooseOpen = isOpen && signerPending === null;
+  const isPendingOpen = isOpen && signerPending !== null;
 
   return (
     <>
-      <HeaderInner
-        icon={headerIcon}
-        variant="compressed"
-        title={`Add ${signerPending?.kind ? `${signerPending.kind.charAt(0).toUpperCase() + signerPending.kind.slice(1)} ` : ""} Signer`}
-      />
-      <LayoutContent className="flex flex-col gap-3 w-full h-fit">
-        {!signerPending && <SignerAlert />}
-        {signerPending ? (
-          <SignerPendingCard
-            kind={signerPending.kind}
-            inProgress={signerPending.inProgress}
-            error={signerPending.error}
-            authedAddress={signerPending.authedAddress}
-          />
-        ) : wallets ? (
-          <WalletAuths
-            currentSigners={controllerQuery.data?.controller?.signers?.map(
-              (signer) => signer.metadata as CredentialMetadata,
+      <Drawer
+        isOpen={isChooseOpen}
+        onClose={() => {
+          if (signerPending) return;
+          handleClose();
+        }}
+      >
+        <DrawerContent title="Add Signer" icon={<AddUserIcon />}>
+          <div className="flex flex-col gap-3">
+            <SignerAlert />
+            {wallets ? (
+              <>
+                <WalletAuths
+                  currentSigners={controllerQuery.data?.controller?.signers?.map(
+                    (signer) => signer.metadata as CredentialMetadata,
+                  )}
+                  handleClick={handleClick}
+                />
+                <Button variant="secondary" onClick={() => setWallets(false)}>
+                  Back
+                </Button>
+              </>
+            ) : (
+              <RegularAuths
+                setWallets={setWallets}
+                currentSigners={controllerQuery.data?.controller?.signers?.map(
+                  (signer) => signer.metadata as CredentialMetadata,
+                )}
+                handleClick={handleClick}
+              />
             )}
-            handleClick={handleClick}
-          />
-        ) : (
-          <RegularAuths
-            setWallets={setWallets}
-            currentSigners={controllerQuery.data?.controller?.signers?.map(
-              (signer) => signer.metadata as CredentialMetadata,
-            )}
-            handleClick={handleClick}
-          />
-        )}
-      </LayoutContent>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
-      <LayoutFooter>
-        {(wallets || signerPending?.error) && (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setHeaderIcon(<AddUserIcon size="lg" />);
-              if (signerPending?.error || signerPending?.authedAddress) {
-                setSignerPending(null);
-              } else {
-                setWallets(false);
-              }
-            }}
-          >
-            Cancel
-          </Button>
-        )}
-        {!wallets && !signerPending && (
-          <Button variant="secondary" onClick={() => navigate("/settings")}>
-            Back
-          </Button>
-        )}
-      </LayoutFooter>
+      <SignerPendingDrawer
+        isOpen={isPendingOpen}
+        isLoading={signerPending?.inProgress ?? false}
+        error={
+          signerPending?.error ? new Error(signerPending.error) : undefined
+        }
+        authenticationMode={signerPending?.kind as AuthOption | undefined}
+        onClose={handleClose}
+      />
     </>
   );
 }
