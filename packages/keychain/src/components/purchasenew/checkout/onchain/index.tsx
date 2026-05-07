@@ -92,9 +92,11 @@ export function OnchainCheckout() {
     useCreditPurchaseContext();
 
   const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
-  const { refetch: refetchAccountPrivate } = useAccountPrivateQuery(undefined, {
-    enabled: false,
-  });
+  const { data: accountPrivateData, refetch: refetchAccountPrivate } =
+    useAccountPrivateQuery();
+  const hasVerifiedPhone =
+    !!accountPrivateData?.accountPrivate?.phoneNumber &&
+    !!accountPrivateData?.accountPrivate?.phoneNumberVerifiedAt;
   const isCoinflowEnabled = useFeature("coinflow-support");
   const { enableFeature } = useFeatures();
 
@@ -162,11 +164,13 @@ export function OnchainCheckout() {
 
   // Pre-fetch Coinbase limits as soon as Apple Pay is selected so we can gate
   // the Buy button and skip a doomed order-create for users over the cap.
+  // Skip when the user lacks a verified phone — the limits query requires one
+  // and would error; handlePurchase will route those users to verification.
   useEffect(() => {
-    if (isApplePaySelected) {
+    if (isApplePaySelected && hasVerifiedPhone) {
       fetchCoinbaseLimits();
     }
-  }, [isApplePaySelected, fetchCoinbaseLimits]);
+  }, [isApplePaySelected, hasVerifiedPhone, fetchCoinbaseLimits]);
 
   const applePayLimitsLoading = useMemo(
     () => isApplePaySelected && !coinbaseLimits && isFetchingCoinbaseLimits,
