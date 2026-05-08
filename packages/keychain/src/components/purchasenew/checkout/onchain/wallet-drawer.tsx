@@ -21,7 +21,7 @@ import { useFeature } from "@/hooks/features";
 import { networkWalletData } from "../../wallet/config";
 import { Network } from "../../types";
 
-type DrawerStep = "network" | "wallet";
+type DrawerStep = "method" | "network" | "wallet";
 
 interface WalletSelectionDrawerProps {
   isOpen: boolean;
@@ -45,7 +45,7 @@ export function WalletSelectionDrawer({
     onCoinflowSelect,
   } = useOnchainPurchaseContext();
 
-  const [step, setStep] = useState<DrawerStep>("network");
+  const [step, setStep] = useState<DrawerStep>("method");
   const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -87,7 +87,7 @@ export function WalletSelectionDrawer({
   // Reset state when drawer closes
   useEffect(() => {
     if (!isOpen) {
-      setStep("network");
+      setStep("method");
       setSelectedNetwork(null);
       setError(null);
       setIsConnecting(false);
@@ -146,6 +146,10 @@ export function WalletSelectionDrawer({
   const handleNetworkSelect = useCallback((network: Network) => {
     setSelectedNetwork(network);
     setStep("wallet");
+  }, []);
+
+  const handleWalletStepSelect = useCallback(() => {
+    setStep("network");
   }, []);
 
   const handleApplePaySelect = useCallback(async () => {
@@ -243,6 +247,27 @@ export function WalletSelectionDrawer({
     onExternalWalletSelect,
   ]);
 
+  const { title, icon } = useMemo(() => {
+    switch (step) {
+      case "network":
+        return {
+          title: "Choose Network",
+          icon: <WalletIcon variant="solid" />,
+        };
+      case "wallet":
+        return {
+          title: "Choose Wallet",
+          icon: <WalletIcon variant="solid" />,
+        };
+      case "method":
+      default:
+        return {
+          title: "Payment Method",
+          icon: <DepositIcon variant="solid" />,
+        };
+    }
+  }, [step]);
+
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetContent
@@ -252,25 +277,8 @@ export function WalletSelectionDrawer({
       >
         <div className="flex items-center justify-between">
           <SheetTitle className="flex items-center gap-3 text-lg text-start font-semibold">
-            {step === "network" ? (
-              <>
-                <Thumbnail
-                  icon={<DepositIcon variant="solid" />}
-                  size="lg"
-                  className="bg-background-100"
-                />
-                Payment Method
-              </>
-            ) : (
-              <>
-                <Thumbnail
-                  icon={<WalletIcon variant="solid" />}
-                  size="lg"
-                  className="bg-background-100"
-                />
-                Choose Wallet
-              </>
-            )}
+            <Thumbnail icon={icon} size="lg" className="bg-background-100" />
+            {title}
           </SheetTitle>
           <Button
             variant="icon"
@@ -284,8 +292,7 @@ export function WalletSelectionDrawer({
         </div>
 
         <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
-          {step === "network" ? (
-            // Network selection step
+          {step === "method" ? (
             <>
               {showFiatOptions && isCoinflowEnabled && (
                 <PurchaseCard
@@ -312,27 +319,37 @@ export function WalletSelectionDrawer({
                   )}
                 />
               )}
-              {selectedNetworks.length > 0 ? (
-                selectedNetworks.map((network) => (
-                  <PurchaseCard
-                    key={network.platform}
-                    text={network.name}
-                    icon={network.icon}
-                    onClick={() => handleNetworkSelect(network)}
-                    className={cn(
-                      "rounded-lg",
-                      isApplePayLoading && "opacity-50 pointer-events-none",
-                    )}
-                  />
-                ))
-              ) : (
-                <div className="text-center text-foreground-300 py-8">
-                  No networks available
-                </div>
-              )}
+              <PurchaseCard
+                key="wallet"
+                text="Wallet"
+                icon={<WalletIcon variant="solid" />}
+                onClick={handleWalletStepSelect}
+                className={cn(
+                  "rounded-lg",
+                  isApplePayLoading && "opacity-50 pointer-events-none",
+                )}
+              />
             </>
-          ) : // Wallet selection step
-          isDetecting ? (
+          ) : step === "network" ? (
+            selectedNetworks.length > 0 ? (
+              selectedNetworks.map((network) => (
+                <PurchaseCard
+                  key={network.platform}
+                  text={network.name}
+                  icon={network.icon}
+                  onClick={() => handleNetworkSelect(network)}
+                  className={cn(
+                    "rounded-lg",
+                    isApplePayLoading && "opacity-50 pointer-events-none",
+                  )}
+                />
+              ))
+            ) : (
+              <div className="text-center text-foreground-300 py-8">
+                No networks available
+              </div>
+            )
+          ) : isDetecting ? (
             <div className="flex items-center justify-center py-8">
               <SpinnerIcon className="animate-spin" size="lg" />
             </div>
