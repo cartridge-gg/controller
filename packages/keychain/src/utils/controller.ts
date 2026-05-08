@@ -32,6 +32,7 @@ import {
 
 import { credentialToAuth } from "@/components/connect/types";
 import { ParsedSessionPolicies } from "@/hooks/session";
+import { clearBearerToken } from "@/utils/bearer-token";
 import { toWasmPolicies } from "@cartridge/controller";
 import { CredentialMetadata } from "@cartridge/controller-ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
@@ -81,6 +82,7 @@ export default class Controller {
 
   async disconnect() {
     await this.cartridge.disconnect();
+    clearBearerToken();
     delete window.controller;
   }
 
