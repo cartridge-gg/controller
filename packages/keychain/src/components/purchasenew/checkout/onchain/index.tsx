@@ -27,6 +27,8 @@ import {
   COINBASE_APPLE_PAY_MIN_USD,
 } from "@/hooks/starterpack";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
+import { useWebauthnAuthentication } from "@/components/connect/create/webauthn";
+import { isUnauthenticatedError } from "@/utils/bearer-token";
 import { Receiving } from "../../receiving";
 import { OnchainCostBreakdown } from "../../review/cost";
 import { LoadingState } from "../../loading";
@@ -94,6 +96,7 @@ export function OnchainCheckout() {
   const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
   const { data: accountPrivateData, refetch: refetchAccountPrivate } =
     useAccountPrivateQuery();
+  const { loginViaPopup: loginWithWebauthnPopup } = useWebauthnAuthentication();
   const hasVerifiedPhone =
     !!accountPrivateData?.accountPrivate?.phoneNumber &&
     !!accountPrivateData?.accountPrivate?.phoneNumberVerifiedAt;
@@ -315,6 +318,35 @@ export function OnchainCheckout() {
     setIsDrawerOpen(true);
   }, []);
 
+  // Bearer-token expiry on the iframe surfaces here as an Authentication
+  // Required error. Re-mint via the popup-backed login (cookie session is
+  // first-party there), then clear the error and refetch — the user can
+  // continue without leaving the screen.
+  const needsReauth = useMemo(
+    () => isUnauthenticatedError(displayError),
+    [displayError],
+  );
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const handleSignIn = useCallback(async () => {
+    if (!controller) return;
+    setIsSigningIn(true);
+    try {
+      await loginWithWebauthnPopup(controller.username());
+      clearError();
+      await Promise.all([refetchMe(), refetchAccountPrivate()]);
+    } catch (e) {
+      console.error("Re-auth popup failed:", e);
+    } finally {
+      setIsSigningIn(false);
+    }
+  }, [
+    controller,
+    loginWithWebauthnPopup,
+    clearError,
+    refetchMe,
+    refetchAccountPrivate,
+  ]);
+
   const handlePurchase = useCallback(async () => {
     if (isApplePayAmountTooLow) return;
     if (isCoinflowSelected) {
@@ -485,137 +517,158 @@ export function OnchainCheckout() {
       </LayoutContent>
 
       <LayoutFooter>
-        {displayError && !showBridgeAmountTooLow && (
-          <ControllerErrorAlert error={displayError} />
-        )}
-
-        {socialClaimConditions ? (
-          <SocialClaimCheckout
-            bundleId={(starterpackDetails as OnchainStarterpackDetails).id}
-            options={socialClaimOptions}
-            conditions={socialClaimConditions}
-            isLoading={isLoading}
-            handlePurchase={handlePurchase}
-            isFree={isFree}
-          />
-        ) : isFree ? (
-          <Button
-            className="w-full"
-            isLoading={isLoading}
-            onClick={handlePurchase}
-          >
-            Claim
-          </Button>
+        {needsReauth ? (
+          <>
+            <ErrorCard
+              variant="warning"
+              title="Sign in required"
+              message="Your session has expired. Please sign in again to complete your purchase."
+            />
+            <Button
+              className="w-full"
+              isLoading={isSigningIn}
+              onClick={handleSignIn}
+            >
+              Sign in
+            </Button>
+          </>
         ) : (
           <>
-            {balanceError && (
-              <ErrorCard
-                variant="error"
-                title="Balance Check Failed"
-                message={balanceError}
-              />
+            {displayError && !showBridgeAmountTooLow && (
+              <ControllerErrorAlert error={displayError} />
             )}
 
-            {showInsufficientBalance && (
-              <ErrorCard
-                variant="warning"
-                title="Insufficient Balance"
-                message={`You need more ${tokenSymbol} to complete this purchase.`}
+            {socialClaimConditions ? (
+              <SocialClaimCheckout
+                bundleId={(starterpackDetails as OnchainStarterpackDetails).id}
+                options={socialClaimOptions}
+                conditions={socialClaimConditions}
+                isLoading={isLoading}
+                handlePurchase={handlePurchase}
+                isFree={isFree}
               />
+            ) : isFree ? (
+              <Button
+                className="w-full"
+                isLoading={isLoading}
+                onClick={handlePurchase}
+              >
+                Claim
+              </Button>
+            ) : (
+              <>
+                {balanceError && (
+                  <ErrorCard
+                    variant="error"
+                    title="Balance Check Failed"
+                    message={balanceError}
+                  />
+                )}
+
+                {showInsufficientBalance && (
+                  <ErrorCard
+                    variant="warning"
+                    title="Insufficient Balance"
+                    message={`You need more ${tokenSymbol} to complete this purchase.`}
+                  />
+                )}
+
+                {showConversionError && (
+                  <ErrorCard
+                    variant="error"
+                    title="Insufficient Liquidity"
+                    message={`Unable to swap to ${selectedToken?.symbol}. Try selecting a different token.`}
+                  />
+                )}
+
+                {showBridgeAmountTooLow && (
+                  <ErrorCard
+                    variant="warning"
+                    title="Amount Too Low"
+                    message="Bridge amount is too low for this network. Try increasing quantity or selecting a different network."
+                  />
+                )}
+
+                {isCoinflowSelected && !isCoinflowStarterpackSupported && (
+                  <ErrorCard
+                    variant="error"
+                    title="Credit Card Checkout Unavailable"
+                    message="Credit card checkout is only available for starterpacks priced in USDC."
+                  />
+                )}
+
+                {isApplePayAmountTooLow && (
+                  <ErrorCard
+                    variant="warning"
+                    title="Amount Too Low"
+                    message="Minimum purchase amount is $2.00 for Apple Pay."
+                  />
+                )}
+
+                {isApplePaySelected && applePayMinQuantity !== undefined && (
+                  <ErrorCard
+                    variant="warning"
+                    title="Quantity Adjusted"
+                    message={`Quantity set to ${applePayMinQuantity} to meet the $2.00 Apple Pay minimum.`}
+                  />
+                )}
+
+                <WalletSelector
+                  walletName={
+                    isCoinflowSelected
+                      ? "Credit Card"
+                      : isApplePaySelected
+                        ? "Apple Pay"
+                        : wallet.name
+                  }
+                  walletIcon={
+                    isCoinflowSelected ? (
+                      <CreditCardIcon size="xs" variant="solid" />
+                    ) : isApplePaySelected ? (
+                      <AppleIcon size="xs" />
+                    ) : (
+                      wallet.subIcon
+                    )
+                  }
+                  bridgeFrom={bridgeFrom}
+                  onClick={handleWalletSelect}
+                />
+
+                <OnchainCostBreakdown quote={quote} />
+
+                <QuantityControls
+                  quantity={quantity}
+                  isLoading={
+                    isLoading ||
+                    isCheckingFallback ||
+                    (bridgeFrom !== null && isFetchingFees) ||
+                    isCreatingOrder ||
+                    isCoinflowLoading ||
+                    applePayLimitsLoading
+                  }
+                  isSendingDeposit={isSendingDeposit}
+                  globalDisabled={globalDisabled}
+                  hasSufficientBalance={
+                    hasSufficientBalance ||
+                    isApplePaySelected ||
+                    isCoinflowSelected
+                  }
+                  bridgeFrom={bridgeFrom}
+                  onIncrement={incrementQuantity}
+                  onDecrement={decrementQuantity}
+                  onPurchase={handlePurchase}
+                  onBridge={handleBridge}
+                  isApplePayAmountTooLow={isApplePayAmountTooLow}
+                  purchaseLabel={
+                    isCoinflowSelected
+                      ? "Continue"
+                      : applePayLimitExceeded
+                        ? "Verify to continue"
+                        : undefined
+                  }
+                />
+              </>
             )}
-
-            {showConversionError && (
-              <ErrorCard
-                variant="error"
-                title="Insufficient Liquidity"
-                message={`Unable to swap to ${selectedToken?.symbol}. Try selecting a different token.`}
-              />
-            )}
-
-            {showBridgeAmountTooLow && (
-              <ErrorCard
-                variant="warning"
-                title="Amount Too Low"
-                message="Bridge amount is too low for this network. Try increasing quantity or selecting a different network."
-              />
-            )}
-
-            {isCoinflowSelected && !isCoinflowStarterpackSupported && (
-              <ErrorCard
-                variant="error"
-                title="Credit Card Checkout Unavailable"
-                message="Credit card checkout is only available for starterpacks priced in USDC."
-              />
-            )}
-
-            {isApplePayAmountTooLow && (
-              <ErrorCard
-                variant="warning"
-                title="Amount Too Low"
-                message="Minimum purchase amount is $2.00 for Apple Pay."
-              />
-            )}
-
-            {isApplePaySelected && applePayMinQuantity !== undefined && (
-              <ErrorCard
-                variant="warning"
-                title="Quantity Adjusted"
-                message={`Quantity set to ${applePayMinQuantity} to meet the $2.00 Apple Pay minimum.`}
-              />
-            )}
-
-            <WalletSelector
-              walletName={
-                isCoinflowSelected
-                  ? "Credit Card"
-                  : isApplePaySelected
-                    ? "Apple Pay"
-                    : wallet.name
-              }
-              walletIcon={
-                isCoinflowSelected ? (
-                  <CreditCardIcon size="xs" variant="solid" />
-                ) : isApplePaySelected ? (
-                  <AppleIcon size="xs" />
-                ) : (
-                  wallet.subIcon
-                )
-              }
-              bridgeFrom={bridgeFrom}
-              onClick={handleWalletSelect}
-            />
-
-            <OnchainCostBreakdown quote={quote} />
-
-            <QuantityControls
-              quantity={quantity}
-              isLoading={
-                isLoading ||
-                isCheckingFallback ||
-                (bridgeFrom !== null && isFetchingFees) ||
-                isCreatingOrder ||
-                isCoinflowLoading ||
-                applePayLimitsLoading
-              }
-              isSendingDeposit={isSendingDeposit}
-              globalDisabled={globalDisabled}
-              hasSufficientBalance={
-                hasSufficientBalance || isApplePaySelected || isCoinflowSelected
-              }
-              bridgeFrom={bridgeFrom}
-              onIncrement={incrementQuantity}
-              onDecrement={decrementQuantity}
-              onPurchase={handlePurchase}
-              onBridge={handleBridge}
-              isApplePayAmountTooLow={isApplePayAmountTooLow}
-              purchaseLabel={
-                isCoinflowSelected
-                  ? "Continue"
-                  : applePayLimitExceeded
-                    ? "Verify to continue"
-                    : undefined
-              }
-            />
           </>
         )}
       </LayoutFooter>

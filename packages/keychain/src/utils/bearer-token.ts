@@ -40,6 +40,17 @@ export function clearBearerToken(): void {
   }
 }
 
+// Heuristic: does this error look like the API rejected our auth?
+// Matches both the GRPC code surfaced by the Go resolvers ("Unauthenticated")
+// and the friendly summary text from utils/errors.ts.
+export function isUnauthenticatedError(error?: Error | null): boolean {
+  if (!error) return false;
+  const msg = error.message?.toLowerCase() ?? "";
+  return (
+    msg.includes("unauthenticated") || msg.includes("authentication required")
+  );
+}
+
 // Calls createBearerToken in the popup, where the cookie is first-party.
 // Returns null on failure so the popup can still complete (the iframe will
 // fall back to whatever auth path it can — useful in non-Safari contexts).
