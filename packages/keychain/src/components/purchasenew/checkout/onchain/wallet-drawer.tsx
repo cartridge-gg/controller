@@ -152,6 +152,13 @@ export function WalletSelectionDrawer({
     setStep("network");
   }, []);
 
+  useEffect(() => {
+    // select network when theres no fiat options
+    if (step === "method" && (!showFiatOptions || !isCoinflowEnabled)) {
+      setStep("network");
+    }
+  }, [step, showFiatOptions, isCoinflowEnabled, setStep]);
+
   const handleApplePaySelect = useCallback(async () => {
     onApplePaySelect();
     onClose();
