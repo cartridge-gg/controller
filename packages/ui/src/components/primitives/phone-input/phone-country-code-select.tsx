@@ -42,7 +42,9 @@ export function PhoneCountryCodeSelect({
       <SelectContent>
         {visibleCountries.map((country) => (
           <SelectItem key={country.code} value={country.code}>
-            <span className="font-mono">{country.dial_code}</span>{" "}
+            <span className="font-mono inline-block w-[6ch]">
+              {country.dial_code}
+            </span>
             <span>{country.name}</span>
           </SelectItem>
         ))}
