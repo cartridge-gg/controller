@@ -131,6 +131,40 @@ export function Profile() {
 
   return (
     <div className="flex flex-col gap-4">
+      <h2>Identity</h2>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-1">
+          <Button
+            onClick={() => ctrlConnector.controller.openProfileAt(`/welcome`)}
+          >
+            Welcome
+          </Button>
+          <Button
+            onClick={() => ctrlConnector.controller.openProfileAt("/age-gate")}
+          >
+            Age Gate
+          </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                "/purchase/verification?method=coinflow",
+              )
+            }
+          >
+            Coinflow
+          </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                "/purchase/verification?method=apple-pay",
+              )
+            }
+          >
+            Coinbase / Apple Pay
+          </Button>
+        </div>
+      </div>
+
       <h2>Location Prompt (Blocked Demo)</h2>
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-1">

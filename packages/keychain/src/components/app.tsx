@@ -67,6 +67,7 @@ import { PurchaseStarterpack } from "./purchase/starterpack/starterpack";
 import { CoinbasePopup } from "./coinbase-popup";
 import { PopupAuth } from "./PopupAuth";
 import { Welcome } from "./connect/create/Welcome";
+import { AgeGate } from "./identity/AgeGate";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -314,6 +315,7 @@ export function App() {
         <Route path="/deploy" element={<DeployController />} />
         <Route path="/connect" element={<ConnectRoute />} />
         <Route path="/welcome" element={<Welcome />} />
+        <Route path="/age-gate" element={<AgeGate />} />
         <Route path="/update-session" element={<UpdateSessionRoute />} />
         <Route
           path="/headless-approval/:requestId"
