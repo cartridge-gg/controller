@@ -9,6 +9,11 @@
 // localStorage is automatically partitioned per parent site by both Safari
 // and Chrome, so each embedding site gets its own token without extra keying.
 
+// Intentionally NOT prefixed `@cartridge/` — keys with that prefix are bundled
+// into the cross-domain encrypted snapshot (see utils/storageSnapshot.ts) and
+// would follow the user across embedding sites. We want the bearer token to
+// stay scoped to its parent-site-partitioned localStorage, so each embedding
+// site requires its own popup-auth.
 const STORAGE_KEY = "cartridge.bearerToken";
 
 export function setBearerToken(token: string): void {
