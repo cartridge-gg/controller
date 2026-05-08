@@ -401,10 +401,19 @@ export function useConnectionValue() {
     const isWindows = navigator.userAgent.indexOf("Win") !== -1;
     const isChromium = /Chrome|Chromium/i.test(navigator.userAgent);
 
+    // Safari ITP partitions the cookie jar by parent site, so any iframe
+    // context (not just nested) needs the popup to mint a bearer token.
+    let isIframed = false;
+    try {
+      isIframed = window.self !== window.top;
+    } catch {
+      isIframed = true;
+    }
+
     if (isSafari || (isWindows && isChromium)) {
       return {
         create: true,
-        get: isSafari ? isNestedIframe() : true,
+        get: isSafari ? isIframed : true,
       };
     }
 

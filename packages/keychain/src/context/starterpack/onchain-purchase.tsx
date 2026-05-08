@@ -126,7 +126,11 @@ export interface OnchainPurchaseContextType {
   onCreateCoinbaseOrder: (opts?: {
     force?: boolean;
   }) => Promise<CoinbaseOrderResult | undefined>;
-  openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
+  openPaymentPopup: (opts?: {
+    paymentLink?: string;
+    orderId?: string;
+    preOpenedPopup?: Window | null;
+  }) => void;
   closePaymentPopup: () => void;
   resetCoinbasePurchase: () => void;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;

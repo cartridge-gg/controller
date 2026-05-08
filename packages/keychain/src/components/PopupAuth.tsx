@@ -8,6 +8,7 @@ import {
   createVerifiedSession,
   requiresSessionApproval,
 } from "@/utils/connection/session-creation";
+import { issueBearerToken } from "@/utils/bearer-token";
 
 const POPUP_CLOSE_FALLBACK_MS = 2000;
 
@@ -62,12 +63,13 @@ export function PopupAuth() {
   }, [channelId, popupOrigin]);
 
   const signalComplete = useCallback(
-    (state: ImportedControllerState) => {
+    (state: ImportedControllerState, sessionToken: string | null) => {
       window.opener?.postMessage(
         {
           type: "auth-complete",
           channelId,
           state,
+          sessionToken,
         },
         popupOrigin,
       );
@@ -104,8 +106,11 @@ export function PopupAuth() {
       return;
     }
 
-    const state = await controller.exportState(origin || undefined);
-    signalComplete(state);
+    const [state, sessionToken] = await Promise.all([
+      controller.exportState(origin || undefined),
+      issueBearerToken(),
+    ]);
+    signalComplete(state, sessionToken);
     setSessionComplete(true);
   }, [controller, origin, signalComplete]);
 

@@ -5,12 +5,42 @@ import {
 } from "graphql-request";
 import { fetchDataCreator } from "@cartridge/controller-ui/utils";
 import { parseClientError, type ErrorWithGraphQL } from "./errors";
+import { getBearerToken } from "./bearer-token";
 
 export const ENDPOINT = `${import.meta.env.VITE_CARTRIDGE_API_URL}/query`;
 
-export const client = new GraphQLClient(ENDPOINT, { credentials: "include" });
+// Read fresh per request — bearer token can appear/change after popup login
+// without anything calling fetchDataCreator/GraphQLClient again.
+function authHeader(): Record<string, string> {
+  const token = getBearerToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
-export const fetchData = fetchDataCreator(ENDPOINT);
+export const client = new GraphQLClient(ENDPOINT, {
+  credentials: "include",
+  requestMiddleware: (req) => ({
+    ...req,
+    headers: { ...req.headers, ...authHeader() },
+  }),
+});
+
+const baseFetchData = fetchDataCreator(ENDPOINT);
+export async function fetchData<TData, TVariables>(
+  query: string,
+  variables?: TVariables,
+  signal?: AbortSignal,
+): Promise<TData> {
+  const headers = authHeader();
+  if (Object.keys(headers).length === 0) {
+    return baseFetchData<TData, TVariables>(query, variables, signal);
+  }
+  // Build a fresh fetcher with the current bearer; cheap, captures token at call time.
+  return fetchDataCreator(ENDPOINT, { headers })<TData, TVariables>(
+    query,
+    variables,
+    signal,
+  );
+}
 
 /**
  * Wrapper for GraphQL requests that handles RPC errors wrapped in GraphQL errors.
