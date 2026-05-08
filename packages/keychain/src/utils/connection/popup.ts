@@ -11,6 +11,7 @@ type PopupMessage =
       type: "auth-complete";
       channelId: string;
       state: ImportedControllerState;
+      sessionToken: string | null;
     }
   | {
       type: "auth-error";
@@ -27,7 +28,10 @@ export interface PopupAuthOptions {
   username?: string;
 }
 
-export type PopupAuthResult = ImportedControllerState;
+export type PopupAuthResult = {
+  state: ImportedControllerState;
+  sessionToken: string | null;
+};
 
 let activePopup: Window | null = null;
 
@@ -109,7 +113,7 @@ export function openPopupAuth(
           window.location.origin,
         );
         cleanup();
-        resolve(data.state);
+        resolve({ state: data.state, sessionToken: data.sessionToken });
       } else if (data.type === "auth-error") {
         cleanup();
         reject(new Error(data.error ?? "Popup authentication failed"));

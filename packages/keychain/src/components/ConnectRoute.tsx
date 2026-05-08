@@ -21,6 +21,7 @@ import { isIframe } from "@cartridge/controller-ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
 import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { openPopupAuth } from "@/utils/connection/popup";
+import { setBearerToken } from "@/utils/bearer-token";
 import Controller from "@/utils/controller";
 import {
   Button,
@@ -611,7 +612,7 @@ async function createSessionViaPopup(
     origin?: string;
   },
 ): Promise<void> {
-  const popupState = await openPopupAuth({
+  const { state, sessionToken } = await openPopupAuth({
     action: "login",
     username: currentController.username(),
     preset: params.preset ?? undefined,
@@ -620,7 +621,11 @@ async function createSessionViaPopup(
     origin: params.origin ?? undefined,
   });
 
-  const controller = await Controller.importState(popupState);
+  if (sessionToken) {
+    setBearerToken(sessionToken);
+  }
+
+  const controller = await Controller.importState(state);
   window.controller = controller;
   setController(controller);
 }

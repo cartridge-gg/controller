@@ -3,6 +3,7 @@ import { doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
 import { openPopupAuth } from "@/utils/connection/popup";
+import { setBearerToken } from "@/utils/bearer-token";
 import { Owner } from "@cartridge/controller-wasm";
 import { ControllerQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useCallback } from "react";
@@ -29,7 +30,7 @@ export function useWebauthnAuthentication() {
       if (!chainId) throw new Error("No chainId found");
 
       if (webauthnPopup.create) {
-        const popupState = await openPopupAuth({
+        const { state, sessionToken } = await openPopupAuth({
           action: "signup",
           username,
           preset: preset ?? undefined,
@@ -38,7 +39,11 @@ export function useWebauthnAuthentication() {
           origin: origin ?? undefined,
         });
 
-        const controller = await Controller.importState(popupState);
+        if (sessionToken) {
+          setBearerToken(sessionToken);
+        }
+
+        const controller = await Controller.importState(state);
 
         window.controller = controller;
         setController(controller);
@@ -105,7 +110,7 @@ export function useWebauthnAuthentication() {
       if (!chainId) throw new Error("No chainId found");
 
       if (webauthnPopup.get) {
-        const popupState = await openPopupAuth({
+        const { state, sessionToken } = await openPopupAuth({
           action: "login",
           username: controllerQuery.accountID,
           preset: preset ?? undefined,
@@ -114,7 +119,11 @@ export function useWebauthnAuthentication() {
           origin: origin ?? undefined,
         });
 
-        const controller = await Controller.importState(popupState);
+        if (sessionToken) {
+          setBearerToken(sessionToken);
+        }
+
+        const controller = await Controller.importState(state);
 
         window.controller = controller;
         setController(controller);

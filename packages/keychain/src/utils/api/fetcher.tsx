@@ -1,4 +1,5 @@
 import { useCartridgeAPI } from "@cartridge/controller-ui/utils";
+import { getBearerToken } from "@/utils/bearer-token";
 
 export function fetchDataCreator(
   url: string,
@@ -12,11 +13,13 @@ export function fetchDataCreator(
     variables?: TVariables,
     signal?: AbortSignal,
   ): Promise<TData> => {
+    const bearerToken = getBearerToken();
     const res = await fetch(url, {
       method: "POST",
       credentials: options?.credentials || "include",
       headers: {
         "Content-Type": "application/json",
+        ...(bearerToken && { Authorization: `Bearer ${bearerToken}` }),
         ...options?.headers,
       },
       body: JSON.stringify({
