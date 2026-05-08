@@ -35,15 +35,40 @@ export type PopupAuthResult = {
 
 let activePopup: Window | null = null;
 
-export function openPopupAuth(
-  options: PopupAuthOptions,
-): Promise<PopupAuthResult> {
-  // Prevent multiple concurrent popups
+const POPUP_NAME = "cartridge-popup-auth";
+
+function popupFeatures(): string {
+  const left = Math.round(
+    (window.screen.width - POPUP_WIDTH) / 2 + (window.screenX || 0),
+  );
+  const top = Math.round(
+    (window.screen.height - POPUP_HEIGHT) / 2 + (window.screenY || 0),
+  );
+  return `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},left=${left},top=${top},scrollbars=yes,resizable=yes`;
+}
+
+// Synchronously open an empty popup window. Use when the caller needs to do
+// async work (e.g. requestStorageAccess) before navigating — the user gesture
+// for window.open() must be consumed inside the click handler, before any
+// await yields a microtask. The returned window can later be passed to
+// openPopupAuth, which will navigate it to the auth URL.
+export function preOpenPopupWindow(): Window | null {
   if (activePopup && !activePopup.closed) {
     activePopup.focus();
-    return Promise.reject(new Error("A popup auth window is already open"));
+    return null;
   }
 
+  const popup = window.open("about:blank", POPUP_NAME, popupFeatures());
+  if (popup) {
+    activePopup = popup;
+  }
+  return popup;
+}
+
+export function openPopupAuth(
+  options: PopupAuthOptions,
+  preOpened?: Window | null,
+): Promise<PopupAuthResult> {
   const channelId = crypto.randomUUID();
 
   const url = new URL(`${window.location.origin}/auth`);
@@ -66,29 +91,25 @@ export function openPopupAuth(
     url.searchParams.set("username", options.username);
   }
 
-  // Center the popup on screen
-  const left = Math.round(
-    (window.screen.width - POPUP_WIDTH) / 2 + (window.screenX || 0),
-  );
-  const top = Math.round(
-    (window.screen.height - POPUP_HEIGHT) / 2 + (window.screenY || 0),
-  );
-
-  const popup = window.open(
-    url.toString(),
-    "cartridge-popup-auth",
-    `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},left=${left},top=${top},scrollbars=yes,resizable=yes`,
-  );
-
-  if (!popup) {
-    return Promise.reject(
-      new Error(
-        "Popup blocked. Please allow popups for this site and try again.",
-      ),
-    );
+  let popup: Window | null;
+  if (preOpened && !preOpened.closed) {
+    popup = preOpened;
+    popup.location.href = url.toString();
+  } else {
+    if (activePopup && !activePopup.closed) {
+      activePopup.focus();
+      return Promise.reject(new Error("A popup auth window is already open"));
+    }
+    popup = window.open(url.toString(), POPUP_NAME, popupFeatures());
+    if (!popup) {
+      return Promise.reject(
+        new Error(
+          "Popup blocked. Please allow popups for this site and try again.",
+        ),
+      );
+    }
+    activePopup = popup;
   }
-
-  activePopup = popup;
 
   return new Promise<PopupAuthResult>((resolve, reject) => {
     let settled = false;
