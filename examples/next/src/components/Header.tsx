@@ -35,6 +35,17 @@ const Header = () => {
   const [headlessState, setHeadlessState] =
     useState<HeadlessModalState>("closed");
   const [isControllerReady, setIsControllerReady] = useState(false);
+  const [overridePolicies, setOverridePolicies] = useState(false);
+  const [presetValue, setPresetValue] = useState<string>("none");
+
+  useEffect(() => {
+    setOverridePolicies(
+      window.localStorage.getItem(ConnectOptions.OverridePolicies) === "true",
+    );
+    setPresetValue(
+      window.localStorage.getItem(ConnectOptions.Preset) || "none",
+    );
+  }, []);
   const { switchChain } = useSwitchChain({
     params: {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
@@ -275,29 +286,31 @@ const Header = () => {
           <Button
             onClick={() => {
               if (
-                localStorage.getItem(ConnectOptions.OverridePolicies) === "true"
+                window.localStorage.getItem(ConnectOptions.OverridePolicies) ===
+                "true"
               ) {
-                localStorage.removeItem(ConnectOptions.OverridePolicies);
+                window.localStorage.removeItem(ConnectOptions.OverridePolicies);
               } else {
-                localStorage.setItem(ConnectOptions.OverridePolicies, "true");
+                window.localStorage.setItem(
+                  ConnectOptions.OverridePolicies,
+                  "true",
+                );
               }
               window.location.reload();
             }}
             disabled={!isControllerReady}
             variant="secondary"
           >
-            {localStorage.getItem(ConnectOptions.OverridePolicies) === "true"
-              ? "Override Policies"
-              : "Preset Policies"}
+            {overridePolicies ? "Override Policies" : "Preset Policies"}
           </Button>
           <div className="w-[150px]">
             <Select
-              value={localStorage.getItem(ConnectOptions.Preset) || "none"}
+              value={presetValue}
               onValueChange={(v: string) => {
                 if (v === "none") {
-                  localStorage.removeItem(ConnectOptions.Preset);
+                  window.localStorage.removeItem(ConnectOptions.Preset);
                 } else {
-                  localStorage.setItem(ConnectOptions.Preset, v);
+                  window.localStorage.setItem(ConnectOptions.Preset, v);
                 }
                 window.location.reload();
               }}

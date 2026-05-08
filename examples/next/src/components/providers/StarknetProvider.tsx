@@ -21,9 +21,12 @@ export enum ConnectOptions {
   Preset = "connect-preset",
 }
 const overridePolicies =
-  localStorage.getItem(ConnectOptions.OverridePolicies) === "true";
-const controllerPreset = localStorage.getItem(
-  ConnectOptions.Preset,
+  typeof window !== "undefined" &&
+  window.localStorage.getItem(ConnectOptions.OverridePolicies) === "true";
+const controllerPreset = (
+  typeof window !== "undefined"
+    ? window.localStorage.getItem(ConnectOptions.Preset)
+    : null
 ) as keyof typeof presets;
 console.log(
   `:: overridePolicies[${overridePolicies}] preset[${controllerPreset}]`,
