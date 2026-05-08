@@ -3182,6 +3182,12 @@ export type Mutation = {
    */
   coinflowCardCheckout: CoinflowCardCheckoutResult;
   /**
+   * Issues a 14-day Bearer JWT for the currently authenticated cookie session.
+   * Used to bridge first-party cookie auth (e.g. set in a top-level popup) to
+   * contexts where the cookie is unavailable, like a third-party iframe in Safari.
+   */
+  createBearerToken: Scalars["String"];
+  /**
    * Create a unified Coinbase onramp order.
    * This mutation orchestrates both Coinbase and Layerswap to bridge USDC from Apple Pay to Starknet.
    */
