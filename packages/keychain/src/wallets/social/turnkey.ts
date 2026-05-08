@@ -20,6 +20,7 @@ import {
   SocialProvider,
   OIDC_INVALID_TOKEN_ERROR,
 } from "./turnkey_utils";
+import { normalizeTurnkeyPublicKey } from "./turnkey_public_key";
 
 export const Auth0SocialProviderName: Record<SocialProvider, string> = {
   discord: "discord",
@@ -496,7 +497,7 @@ export class TurnkeyWallet {
     const turnkeyIframeClient = await this.getTurnkeyIframeClient(10_000);
     const iFramePublicKey = await turnkeyIframeClient.getEmbeddedPublicKey();
     if (iFramePublicKey) {
-      return iFramePublicKey;
+      return normalizeTurnkeyPublicKey(iFramePublicKey);
     }
 
     return new Promise((resolve, reject) => {
@@ -505,7 +506,7 @@ export class TurnkeyWallet {
           await turnkeyIframeClient.getEmbeddedPublicKey();
         if (iFramePublicKey) {
           clearInterval(intervalId);
-          resolve(iFramePublicKey);
+          resolve(normalizeTurnkeyPublicKey(iFramePublicKey));
         } else {
           elapsedTime += intervalMs;
           if (elapsedTime >= pollTimeMs) {
@@ -561,7 +562,7 @@ export const getIframePublicKey = async (
     await resetIframePublicKey(authIframeClient);
     throw new Error("No iframe public key, please try again");
   }
-  return iframePublicKey;
+  return normalizeTurnkeyPublicKey(iframePublicKey);
 };
 
 const isIOS = () => {

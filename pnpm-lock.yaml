@@ -625,6 +625,9 @@ importers:
       '@stripe/stripe-js':
         specifier: ^4.8.0
         version: 4.10.0
+      '@turnkey/encoding':
+        specifier: ^0.6.0
+        version: 0.6.0
       '@turnkey/sdk-browser':
         specifier: ^5.15.2
         version: 5.15.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
@@ -14078,7 +14081,7 @@ snapshots:
       '@peculiar/asn1-ecc': 2.6.1
       '@peculiar/asn1-pkcs9': 2.6.1
       '@peculiar/asn1-rsa': 2.6.1
-      '@peculiar/asn1-schema': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
       '@peculiar/asn1-x509': 2.6.1
       pvtsutils: 1.3.6
       reflect-metadata: 0.2.2
