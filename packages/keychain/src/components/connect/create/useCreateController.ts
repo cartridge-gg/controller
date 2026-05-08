@@ -250,6 +250,7 @@ export function useCreateController({
     locationGate,
     locationGateVerified,
     setIsNewController,
+    webauthnPopup,
   } = useConnection();
 
   // When location gate is configured and not yet verified, skip auto-session
@@ -267,8 +268,11 @@ export function useCreateController({
   const hasPolicies = !!policies;
   const shouldAutoCreateSession = canAutoCreateSession(policies);
 
-  const { signup: signupWithWebauthn, login: loginWithWebauthn } =
-    useWebauthnAuthentication();
+  const {
+    signup: signupWithWebauthn,
+    login: loginWithWebauthn,
+    loginViaPopup: loginWithWebauthnPopup,
+  } = useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
     useSocialAuthentication(setChangeWallet);
   const { signup: signupWithExternalWallet, login: loginWithExternalWallet } =
@@ -739,6 +743,27 @@ export function useCreateController({
         throw new Error("No chainId");
       }
 
+      // Safari blocks window.open() if any await runs between the user
+      // gesture and the call. The popup path doesn't need fetchController
+      // here (the popup itself looks up the controller from the username),
+      // so route to it before any async work to keep the gesture intact.
+      if (authenticationMethod === "webauthn" && webauthnPopup.get) {
+        const loginController = await loginWithWebauthnPopup(username);
+        if (!loginController) {
+          throw new Error("Login failed");
+        }
+        if (loginController.completedInPopup && !locationGatePending) {
+          await completePopupConnect({
+            controller: loginController.controller,
+            params,
+            handleCompletion,
+            searchParams,
+            isNewController: false,
+          });
+        }
+        return;
+      }
+
       const controller = (await fetchController(chainId, username))?.controller;
       if (!controller) {
         throw new Error("Undefined controller");
@@ -899,6 +924,8 @@ export function useCreateController({
     [
       isSlot,
       loginWithWebauthn,
+      loginWithWebauthnPopup,
+      webauthnPopup,
       loginWithSocial,
       loginWithWalletConnect,
       loginWithExternalWallet,

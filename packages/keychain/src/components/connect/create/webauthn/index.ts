@@ -100,6 +100,35 @@ export function useWebauthnAuthentication() {
     ],
   );
 
+  // Popup-only login path. Skips the iframe-side controller lookup so
+  // window.open() fires synchronously from the user gesture — Safari
+  // otherwise blocks the popup because the gesture has expired by the
+  // time fetchController's await resolves. The popup handles its own
+  // controller bootstrap from the username.
+  const loginViaPopup = useCallback(
+    async (username: string) => {
+      const { state, sessionToken } = await openPopupAuth({
+        action: "login",
+        username,
+        preset: preset ?? undefined,
+        rpcUrl: rpcUrl ?? undefined,
+        policies: policiesStr ?? undefined,
+        origin: origin ?? undefined,
+      });
+
+      if (sessionToken) {
+        setBearerToken(sessionToken);
+      }
+
+      const controller = await Controller.importState(state);
+
+      window.controller = controller;
+      setController(controller);
+      return { controller, completedInPopup: true } as WebauthnAuthResult;
+    },
+    [origin, rpcUrl, setController, preset, policiesStr],
+  );
+
   const login = useCallback(
     async (
       controllerQuery: ControllerQuery["controller"],
@@ -110,24 +139,7 @@ export function useWebauthnAuthentication() {
       if (!chainId) throw new Error("No chainId found");
 
       if (webauthnPopup.get) {
-        const { state, sessionToken } = await openPopupAuth({
-          action: "login",
-          username: controllerQuery.accountID,
-          preset: preset ?? undefined,
-          rpcUrl: rpcUrl ?? undefined,
-          policies: policiesStr ?? undefined,
-          origin: origin ?? undefined,
-        });
-
-        if (sessionToken) {
-          setBearerToken(sessionToken);
-        }
-
-        const controller = await Controller.importState(state);
-
-        window.controller = controller;
-        setController(controller);
-        return { controller, completedInPopup: true } as WebauthnAuthResult;
+        return loginViaPopup(controllerQuery.accountID);
       }
 
       let controller: Controller;
@@ -158,19 +170,12 @@ export function useWebauthnAuthentication() {
       setController(controller);
       return { controller, completedInPopup: false } as WebauthnAuthResult;
     },
-    [
-      chainId,
-      rpcUrl,
-      origin,
-      setController,
-      webauthnPopup,
-      preset,
-      policiesStr,
-    ],
+    [chainId, rpcUrl, origin, setController, webauthnPopup, loginViaPopup],
   );
 
   return {
     signup,
     login,
+    loginViaPopup,
   };
 }
