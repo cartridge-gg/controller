@@ -4,6 +4,7 @@ import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
 import { openPopupAuth } from "@/utils/connection/popup";
 import { setBearerToken } from "@/utils/bearer-token";
+import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { Owner } from "@cartridge/controller-wasm";
 import { ControllerQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useCallback } from "react";
@@ -107,6 +108,15 @@ export function useWebauthnAuthentication() {
   // controller bootstrap from the username.
   const loginViaPopup = useCallback(
     async (username: string) => {
+      // iOS Safari partitions iframe localStorage strictly by parent site,
+      // so a bearer token written after the popup return can land in a
+      // partition the fetcher can't see — leaving the user stuck on
+      // "Sign in required". Fire requestStorageAccess synchronously
+      // (no await before window.open or the gesture is gone) so by the
+      // time we write the token, the iframe shares the unpartitioned
+      // x.cartridge.gg storage the popup just wrote into.
+      const storageAccessGranted = requestStorageAccess().catch(() => false);
+
       const { state, sessionToken } = await openPopupAuth({
         action: "login",
         username,
@@ -115,6 +125,8 @@ export function useWebauthnAuthentication() {
         policies: policiesStr ?? undefined,
         origin: origin ?? undefined,
       });
+
+      await storageAccessGranted;
 
       if (sessionToken) {
         setBearerToken(sessionToken);
