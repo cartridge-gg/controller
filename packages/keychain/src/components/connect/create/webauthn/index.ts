@@ -2,7 +2,7 @@ import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
-import { openPopupAuth, preOpenPopupWindow } from "@/utils/connection/popup";
+import { openPopupAuth } from "@/utils/connection/popup";
 import { setBearerToken } from "@/utils/bearer-token";
 import { requestStorageAccess } from "@/utils/connection/storage-access";
 import { Owner } from "@cartridge/controller-wasm";
@@ -109,32 +109,24 @@ export function useWebauthnAuthentication() {
   const loginViaPopup = useCallback(
     async (username: string) => {
       // iOS Safari partitions iframe localStorage strictly by parent site,
-      // so a bearer token written after the popup returns can land in a
+      // so a bearer token written after the popup return can land in a
       // partition the fetcher can't see — leaving the user stuck on
-      // "Sign in required". requestStorageAccess() lifts the partition,
-      // but it shows a native permission prompt that the popup window
-      // will steal focus from and dismiss if both fire from the same
-      // click.
-      //
-      // Order: (1) synchronously pre-open the popup at about:blank to
-      // consume the user gesture for window.open, (2) await the storage
-      // access prompt while the popup sits empty in the background, (3)
-      // navigate the already-open popup to the auth URL. Now the prompt
-      // has uninterrupted time to be answered.
-      const popup = preOpenPopupWindow();
-      await requestStorageAccess().catch(() => false);
+      // "Sign in required". Fire requestStorageAccess synchronously
+      // (no await before window.open or the gesture is gone) so by the
+      // time we write the token, the iframe shares the unpartitioned
+      // x.cartridge.gg storage the popup just wrote into.
+      const storageAccessGranted = requestStorageAccess().catch(() => false);
 
-      const { state, sessionToken } = await openPopupAuth(
-        {
-          action: "login",
-          username,
-          preset: preset ?? undefined,
-          rpcUrl: rpcUrl ?? undefined,
-          policies: policiesStr ?? undefined,
-          origin: origin ?? undefined,
-        },
-        popup,
-      );
+      const { state, sessionToken } = await openPopupAuth({
+        action: "login",
+        username,
+        preset: preset ?? undefined,
+        rpcUrl: rpcUrl ?? undefined,
+        policies: policiesStr ?? undefined,
+        origin: origin ?? undefined,
+      });
+
+      await storageAccessGranted;
 
       if (sessionToken) {
         setBearerToken(sessionToken);
