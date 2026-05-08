@@ -191,6 +191,20 @@ export function CoinbaseCheckout({
     // will flip us into verify-* if the user is actually blocked.
     if (!hasLimitsLoaded || limitExceeded) return;
 
+    // iOS Safari requires window.open() to fire synchronously from the user
+    // gesture. onCreateCoinbaseOrder is async and would consume the gesture
+    // before we get a payment link, so pre-open at about:blank now and
+    // navigate the same window after the order resolves.
+    const width = 500;
+    const height = 700;
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    const preOpenedPopup = window.open(
+      "about:blank",
+      "coinbase-payment",
+      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
+    );
+
     setMode("status");
     setIsOpeningPopup(true);
     try {
@@ -202,9 +216,15 @@ export function CoinbaseCheckout({
         openPaymentPopup({
           paymentLink: nextPaymentLink,
           orderId: nextOrderId,
+          preOpenedPopup,
         });
+      } else if (preOpenedPopup && !preOpenedPopup.closed) {
+        preOpenedPopup.close();
       }
     } catch (err) {
+      if (preOpenedPopup && !preOpenedPopup.closed) {
+        preOpenedPopup.close();
+      }
       // Coinbase can still reject after we pass our local check — for example,
       // if /limits came back stale. Re-fetch limits so the mode-setting effect
       // can transition to the verify flow on the next render.

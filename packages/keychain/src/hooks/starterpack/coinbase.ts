@@ -83,7 +83,11 @@ export interface UseCoinbaseReturn {
   createOrder: (input: CreateOrderInput) => Promise<CoinbaseOrderResult>;
   getTransactions: (username: string) => Promise<CoinbaseTransactionResult[]>;
   getQuote: (input: CoinbaseQuoteInput) => Promise<CoinbaseQuoteResult>;
-  openPaymentPopup: (opts?: { paymentLink?: string; orderId?: string }) => void;
+  openPaymentPopup: (opts?: {
+    paymentLink?: string;
+    orderId?: string;
+    preOpenedPopup?: Window | null;
+  }) => void;
   /** Force-close the in-flight payment popup. The internal popup-closed
    * watcher then runs its normal cleanup path (stops polling, sets
    * `popupClosed=true` if no terminal status was reached). */
@@ -384,10 +388,21 @@ export function useCoinbase({
 
   /** Open the payment link in a popup and listen via postMessage */
   const openPaymentPopup = useCallback(
-    (opts?: { paymentLink?: string; orderId?: string }) => {
+    (opts?: {
+      paymentLink?: string;
+      orderId?: string;
+      preOpenedPopup?: Window | null;
+    }) => {
       const targetPaymentLink = opts?.paymentLink ?? paymentLink;
       const targetOrderId = opts?.orderId ?? orderId;
-      if (!targetPaymentLink || !targetOrderId) return;
+      if (!targetPaymentLink || !targetOrderId) {
+        // Caller pre-opened a window but we have nothing to navigate it to;
+        // close it so the user doesn't see a stranded blank popup.
+        if (opts?.preOpenedPopup && !opts.preOpenedPopup.closed) {
+          opts.preOpenedPopup.close();
+        }
+        return;
+      }
 
       // Reset state for a new popup session
       setPopupClosed(false);
@@ -412,11 +427,19 @@ export function useCoinbase({
       const left = (window.screen.width - width) / 2;
       const top = (window.screen.height - height) / 2;
 
-      const popup = window.open(
-        popupUrl.toString(),
-        "coinbase-payment",
-        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
-      );
+      let popup: Window | null;
+      if (opts?.preOpenedPopup && !opts.preOpenedPopup.closed) {
+        // Reuse the popup the caller pre-opened to keep window.open
+        // synchronous to the user gesture (iOS Safari blocks otherwise).
+        popup = opts.preOpenedPopup;
+        popup.location.href = popupUrl.toString();
+      } else {
+        popup = window.open(
+          popupUrl.toString(),
+          "coinbase-payment",
+          `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
+        );
+      }
       popupRef.current = popup;
 
       // Start slow 15s fallback poll (catches completions even if postMessage signal is lost)
