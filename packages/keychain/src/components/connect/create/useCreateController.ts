@@ -36,7 +36,6 @@ import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
-import { useFeature } from "@/hooks/features";
 import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { ParsedSessionPolicies } from "@/hooks/session";
@@ -281,7 +280,6 @@ export function useCreateController({
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
   const smsAuth = useSmsAuthentication();
-  const isSmsEnabled = useFeature("sms");
   const { supportedWalletsForAuth } = useWallets();
 
   const handleInitOtp = useCallback(
@@ -308,11 +306,9 @@ export function useCreateController({
 
   const signupOptions: AuthOptions = useMemo(() => {
     return [...EMBEDDED_WALLETS, ...supportedWalletsForAuth].filter(
-      (option) =>
-        (!signers || signers.includes(option)) &&
-        (option !== "sms" || isSmsEnabled),
+      (option) => !signers || signers.includes(option),
     );
-  }, [supportedWalletsForAuth, signers, isSmsEnabled]);
+  }, [supportedWalletsForAuth, signers]);
 
   const finishSignup = useCallback(
     async ({
