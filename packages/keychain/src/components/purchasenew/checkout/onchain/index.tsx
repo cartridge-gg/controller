@@ -110,10 +110,14 @@ export function OnchainCheckout() {
   const [verificationMethod, setVerificationMethod] = useState<
     "coinflow" | "apple-pay" | null
   >(null);
+  const [countryCodeLoaded, setCountryCodeLoaded] = useState<boolean>(false);
   const [countryCode, setCountryCode] = useState<string | null>(null);
 
   useEffect(() => {
-    getIpLocation().then((geo) => setCountryCode(geo.countryCode));
+    getIpLocation()
+      .then((geo) => setCountryCode(geo.countryCode))
+      .catch((e) => console.error(`getIpLocation failed`, e))
+      .finally(() => setCountryCodeLoaded(true));
   }, []);
 
   // Triple-click on the header icon unlocks the hidden Coinflow credit card
@@ -482,7 +486,7 @@ export function OnchainCheckout() {
     return () => clearError();
   }, [clearError]);
 
-  if (isStarterpackLoading || !quote) {
+  if (isStarterpackLoading || !quote || !countryCodeLoaded) {
     return <LoadingState />;
   }
 

@@ -21,11 +21,8 @@ import {
   Card,
   CardContent,
   HeaderInner,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  PhoneNumberInput,
+  isValidPhoneNumber,
 } from "@cartridge/controller-ui";
 import { useNavigation } from "@/context";
 import { useLocation } from "react-router-dom";
@@ -43,7 +40,7 @@ interface VerificationStepViewProps {
   icon: React.ReactElement;
   label: string;
   value: string;
-  placeholder: string;
+  placeholder?: string;
   onChange: (val: string) => void;
   onContinue: () => void;
   isLoading: boolean;
@@ -51,7 +48,9 @@ interface VerificationStepViewProps {
   error: string | null;
   autoComplete?: string;
   name?: string;
-  countryCode?: string;
+  /** ISO country codes (e.g. ["US"]). When set, renders PhoneNumberInput
+   * restricted to these countries instead of a plain Input. */
+  allowedCountries?: string[];
 }
 
 const VerificationStepView = ({
@@ -67,7 +66,7 @@ const VerificationStepView = ({
   error,
   autoComplete,
   name,
-  countryCode,
+  allowedCountries,
 }: VerificationStepViewProps) => (
   <>
     <HeaderInner title={title} icon={icon} variant="compressed" />
@@ -76,47 +75,13 @@ const VerificationStepView = ({
         <label className="text-xs text-foreground-300 font-medium">
           {label}
         </label>
-        {countryCode ? (
-          <div className="flex w-full gap-2">
-            <Select value={countryCode} disabled>
-              <SelectTrigger className="w-16 shrink-0 h-10 justify-between">
-                <SelectValue placeholder={countryCode} />
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 10 6"
-                  className="h-1.5 w-2.5 shrink-0 text-foreground-300"
-                  fill="none"
-                >
-                  <path
-                    d="M1 1L5 5L9 1"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={countryCode}>{countryCode}</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="min-w-0 flex-1">
-              <Input
-                className="w-full"
-                name={name}
-                autoComplete={autoComplete}
-                placeholder={placeholder}
-                value={value}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onChange(e.target.value)
-                }
-                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                  e.key === "Enter" && value && onContinue()
-                }
-                type={type}
-              />
-            </div>
-          </div>
+        {allowedCountries ? (
+          <PhoneNumberInput
+            value={value}
+            setValue={onChange}
+            allowedCountries={allowedCountries}
+            disabled={isLoading}
+          />
         ) : (
           <Input
             name={name}
@@ -143,7 +108,7 @@ const VerificationStepView = ({
         className="w-full"
         onClick={onContinue}
         isLoading={isLoading}
-        disabled={!value}
+        disabled={allowedCountries ? !isValidPhoneNumber(value) : !value}
       >
         CONTINUE
       </Button>
@@ -249,7 +214,6 @@ export function Verification({
   const [step, setStep] = useState<Step | null>(null);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [formattedPhone, setFormattedPhone] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -385,29 +349,18 @@ export function Verification({
 
   const handleSendPhone = async () => {
     setError(null);
-    const cleanPhone = phone.replace(/\D/g, "");
-    let formatted = "";
-
-    if (cleanPhone.length === 10) {
-      formatted = `+1${cleanPhone}`;
-    } else if (cleanPhone.length === 11 && cleanPhone.startsWith("1")) {
-      formatted = `+${cleanPhone}`;
-    } else if (cleanPhone.length > 0) {
-      if (!cleanPhone.startsWith("1")) {
-        toast.error("Apple Pay is only supported for US phone numbers.");
-        return;
-      }
-      setError("Please enter a valid 10-digit US phone number.");
+    if (!isValidPhoneNumber(phone)) {
+      setError("Please enter a valid phone number.");
       return;
-    } else {
-      setError("Please enter a phone number.");
+    }
+    if (!phone.startsWith("+1")) {
+      toast.error("Only US phone numbers are supported.");
       return;
     }
 
-    setFormattedPhone(formatted);
     try {
       const res = await sendPhoneMutation.mutateAsync({
-        input: { phoneNumber: formatted },
+        input: { phoneNumber: phone },
       });
       if (res.sendPhoneVerification.success) {
         setStep("PHONE_CODE");
@@ -426,7 +379,7 @@ export function Verification({
     setError(null);
     try {
       const res = await verifyPhoneMutation.mutateAsync({
-        input: { phoneNumber: formattedPhone, code },
+        input: { phoneNumber: phone, code },
       });
       if (res.verifyPhone.success) {
         await Promise.all([refetchMe(), refetchAccountPrivate()]);
@@ -502,7 +455,6 @@ export function Verification({
           icon={<MobileIcon variant="solid" />}
           label="Phone Number"
           value={phone}
-          placeholder="111-222-3333"
           onChange={(val) => {
             setPhone(val);
             setError(null);
@@ -513,7 +465,7 @@ export function Verification({
           autoComplete="tel-national"
           name="phone"
           error={error}
-          countryCode="+1"
+          allowedCountries={["US"]}
         />
       );
     case "PHONE_CODE":

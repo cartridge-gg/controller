@@ -6,6 +6,8 @@ import {
   DrawerContent,
   Input,
   MobileIcon,
+  PhoneNumberInput,
+  isValidPhoneNumber,
 } from "@cartridge/controller-ui";
 
 export interface SmsOtpDrawerProps {
@@ -62,9 +64,8 @@ export function SmsOtpDrawer({
     }
   }, [step]);
 
-  // E.164 international phone number format
   const isPhoneInputValid = useMemo(
-    () => !!phoneInput && /^\+[1-9]\d{6,14}$/.test(phoneInput),
+    () => isValidPhoneNumber(phoneInput),
     [phoneInput],
   );
 
@@ -128,8 +129,6 @@ export function SmsOtpDrawer({
     onClose();
   };
 
-  const busy = sendingCode;
-
   return (
     <Drawer isOpen={isOpen} onClose={handleClose}>
       <DrawerContent
@@ -144,23 +143,17 @@ export function SmsOtpDrawer({
             >
               Phone Number
             </label>
-            <Input
+            <PhoneNumberInput
               ref={phoneRef}
-              id="sms-phone"
-              type="tel"
-              placeholder="+1 234 567 8900"
+              inputId="sms-phone"
               value={
                 step === "phone" ? phoneInput : (smsState?.phoneNumber ?? "")
               }
-              onChange={(e) => setPhoneInput(e.target.value.trim())}
-              disabled={busy || step === "otp"}
-              autoComplete="tel"
+              setValue={setPhoneInput}
+              disabled={sendingCode || step === "otp"}
+              error={phoneInputError}
             />
           </div>
-
-          {phoneInputError && (
-            <p className="text-sm text-destructive">{phoneInputError}</p>
-          )}
 
           <div className="flex flex-col gap-2">
             <label
@@ -177,7 +170,7 @@ export function SmsOtpDrawer({
               placeholder="Enter code"
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value.trim().toUpperCase())}
-              disabled={busy || step === "phone"}
+              disabled={sendingCode || step === "phone"}
               autoComplete="one-time-code"
             />
           </div>
@@ -189,11 +182,13 @@ export function SmsOtpDrawer({
           <div className="flex gap-2">
             <Button
               type="submit"
-              disabled={busy || (step === "phone" ? !phoneInput : !otpCode)}
-              isLoading={busy}
+              disabled={
+                sendingCode || (step === "phone" ? !phoneInput : !otpCode)
+              }
+              isLoading={sendingCode}
               className="flex-1"
             >
-              {step === "phone" ? "Continue" : "Sign Up"}
+              {step === "phone" ? "Send Code" : "Sign Up"}
             </Button>
           </div>
         </form>
