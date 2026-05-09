@@ -344,8 +344,8 @@ export function CreateControllerView({
   }, [error, authMethod, setAuthenticationStep]);
 
   const onClosePending = useCallback(() => {
+    setAuthenticationStep(AuthenticationStep.FillForm);
     if (authenticationStep === AuthenticationStep.Error) {
-      setAuthenticationStep(AuthenticationStep.FillForm);
       setError(undefined);
     }
   }, [authenticationStep, setAuthenticationStep, setError]);
