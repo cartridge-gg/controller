@@ -303,7 +303,7 @@ export function CoinbasePopup() {
         <iframe
           src={paymentLink}
           className="h-full w-full border-none"
-          allow="payment"
+          allow="accelerometer; gyroscope; magnetometer; clipboard-write; payment"
           sandbox="allow-scripts allow-same-origin"
           referrerPolicy="no-referrer"
           title="Coinbase Onramp"
