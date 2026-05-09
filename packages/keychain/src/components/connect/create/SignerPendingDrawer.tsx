@@ -16,6 +16,7 @@ interface SignerPendingDrawerProps {
   authenticationMode: AuthOption | undefined;
   onClose: () => void;
   onRetry?: () => void;
+  children?: React.ReactNode;
 }
 
 export function SignerPendingDrawer({
@@ -25,6 +26,7 @@ export function SignerPendingDrawer({
   authenticationMode,
   onClose,
   onRetry,
+  children,
 }: SignerPendingDrawerProps) {
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>
@@ -40,6 +42,7 @@ export function SignerPendingDrawer({
             // authedAddress={signerPending.authedAddress}
           />
         )}
+        {children}
         {onRetry && !isLoading && error && (
           <Button onClick={onRetry} className="w-full">
             Try Again

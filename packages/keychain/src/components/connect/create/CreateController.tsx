@@ -72,7 +72,12 @@ interface CreateControllerViewProps {
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
-  "setAuthenticationStep" | "onInitOtp" | "smsState"
+  | "setAuthenticationStep"
+  | "onInitOtp"
+  | "smsState"
+  | "changeWallet"
+  | "setChangeWallet"
+  | "authMethod"
 >;
 
 function CreateControllerForm({
@@ -88,9 +93,6 @@ function CreateControllerForm({
   onKeyDown,
   onSubmit,
   waitingForConfirmation,
-  changeWallet,
-  setChangeWallet,
-  authMethod,
   authenticationStep,
   submitButtonRef,
   isDropdownOpen,
@@ -253,13 +255,6 @@ function CreateControllerForm({
             />
           )}
 
-          <ChangeWallet
-            validation={validation}
-            changeWallet={changeWallet}
-            setChangeWallet={setChangeWallet}
-            authMethod={authMethod}
-          />
-
           <AuthButton
             ref={submitButtonRef}
             type="submit"
@@ -352,8 +347,11 @@ export function CreateControllerView({
 
   const isLogin = !!validation.exists;
 
-  const canRetry = useMemo(
-    () =>
+  const canRetry = useMemo(() => {
+    if (changeWallet) {
+      return false;
+    }
+    return (
       smsState != null ||
       (authMethod === "password" && isLogin) ||
       authMethod === "google" ||
@@ -361,9 +359,9 @@ export function CreateControllerView({
       authMethod === "metamask" ||
       authMethod === "phantom-evm" ||
       authMethod === "rabby" ||
-      authMethod === "walletconnect",
-    [isLogin, authMethod, smsState],
-  );
+      authMethod === "walletconnect"
+    );
+  }, [isLogin, authMethod, smsState, changeWallet]);
 
   const handleRetry = useCallback(() => {
     setError(undefined);
@@ -408,9 +406,6 @@ export function CreateControllerView({
           onSubmit={onSubmit}
           onKeyDown={onKeyDown}
           waitingForConfirmation={waitingForConfirmation}
-          changeWallet={changeWallet}
-          setChangeWallet={setChangeWallet}
-          authMethod={authMethod}
           authenticationStep={authenticationStep}
           submitButtonRef={submitButtonRef}
           isDropdownOpen={isDropdownOpen}
@@ -454,7 +449,14 @@ export function CreateControllerView({
         authenticationMode={smsState != null ? "sms" : authMethod}
         onClose={onClosePending}
         onRetry={canRetry ? handleRetry : undefined}
-      />
+      >
+        <ChangeWallet
+          validation={validation}
+          changeWallet={changeWallet}
+          setChangeWallet={setChangeWallet}
+          authMethod={authMethod}
+        />
+      </SignerPendingDrawer>
     </>
   );
 }

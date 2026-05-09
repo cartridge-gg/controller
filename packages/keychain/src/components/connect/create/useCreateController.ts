@@ -646,6 +646,7 @@ export function useCreateController({
           )
         ) {
           setChangeWallet(true);
+          setError(new Error("Wrong Signer"));
           return;
         }
       }
