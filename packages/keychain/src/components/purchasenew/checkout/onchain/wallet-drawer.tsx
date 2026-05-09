@@ -154,10 +154,10 @@ export function WalletSelectionDrawer({
 
   useEffect(() => {
     // select network when theres no fiat options
-    if (step === "method" && (!showFiatOptions || !isCoinflowEnabled)) {
+    if (step === "method" && !showFiatOptions) {
       setStep("network");
     }
-  }, [step, showFiatOptions, isCoinflowEnabled, setStep]);
+  }, [step, showFiatOptions, setStep]);
 
   const handleApplePaySelect = useCallback(async () => {
     onApplePaySelect();
@@ -328,7 +328,7 @@ export function WalletSelectionDrawer({
               )}
               <PurchaseCard
                 key="wallet"
-                text="Wallet"
+                text="Crypto"
                 icon={<WalletIcon variant="solid" />}
                 onClick={handleWalletStepSelect}
                 className={cn(
