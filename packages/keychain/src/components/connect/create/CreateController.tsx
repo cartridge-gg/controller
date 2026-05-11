@@ -52,7 +52,11 @@ interface CreateControllerViewProps {
   onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onInitOtp: (phoneNumber: string) => Promise<void>;
-  smsState: { phoneNumber: string; otpId: string } | null;
+  smsState: {
+    phoneNumber: string;
+    otpId: string;
+    otpEncryptionTargetBundle: string;
+  } | null;
   isSlot?: boolean;
   authenticationStep: AuthenticationStep;
   setAuthenticationStep: (value: AuthenticationStep) => void;
