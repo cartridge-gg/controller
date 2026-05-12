@@ -163,7 +163,7 @@ export function ChooseSignupMethodForm({
   const { title, icon } = useMemo(() => {
     if (validation.exists) {
       return {
-        title: "Login",
+        title: "Log In",
         icon: <AchievementPlayerAvatar username={username ?? ""} />,
       };
     }
