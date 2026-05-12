@@ -29,6 +29,8 @@ import {
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { useWebauthnAuthentication } from "@/components/connect/create/webauthn";
 import { isUnauthenticatedError } from "@/utils/bearer-token";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 import { Receiving } from "../../receiving";
 import { OnchainCostBreakdown } from "../../review/cost";
 import { LoadingState } from "../../loading";
@@ -360,6 +362,13 @@ export function OnchainCheckout() {
       return;
     }
 
+    const method = isCoinflowSelected
+      ? "coinflow"
+      : isApplePaySelected
+        ? "apple-pay"
+        : "onchain";
+    captureAnalyticsEvent(posthog, "purchase_checkout_started", { method });
+
     setIsLoading(true);
     clearError();
 
@@ -419,6 +428,11 @@ export function OnchainCheckout() {
       }
     } catch (error) {
       console.error("Purchase failed:", error);
+      captureAnalyticsEvent(posthog, "purchase_failed", {
+        method,
+        error_code: sanitizeErrorCode(error),
+        stage: "checkout",
+      });
     } finally {
       setIsLoading(false);
     }

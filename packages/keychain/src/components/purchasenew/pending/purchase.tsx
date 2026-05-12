@@ -26,6 +26,7 @@ export function PurchasePending({
       completedTitle="Confirmed on Starknet"
       buttonText="Play"
       onCompleted={onCompleted}
+      analyticsMethod="onchain"
     />
   );
 }
