@@ -8,7 +8,11 @@ import {
 import { isIframe } from "@cartridge/controller-ui/utils";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
-import { Turnkey, TurnkeyIframeClient } from "@turnkey/sdk-browser";
+import {
+  Turnkey,
+  TurnkeyBrowserClient,
+  TurnkeyIframeClient,
+} from "@turnkey/sdk-browser";
 import { ethers, getAddress, getBytes, Signature } from "ethers";
 import {
   authenticateToTurnkey,
@@ -36,6 +40,10 @@ export class TurnkeyWallet {
   readonly platform: ExternalPlatform = "ethereum";
   account: string | undefined = undefined;
   subOrganizationId: string | undefined = undefined;
+  // When set, signTransaction/signMessage stamp Turnkey calls through this
+  // ApiKeyStamper-backed client instead of the iframe. Used by the SMS flow,
+  // which holds the session key outside the iframe.
+  apiKeyClient: TurnkeyBrowserClient | undefined = undefined;
   private turnkeyIframePromise: Promise<TurnkeyIframeClient> | undefined =
     undefined;
 
@@ -356,10 +364,11 @@ export class TurnkeyWallet {
         throw new Error("Turnkey is not connected");
       }
 
-      const turnkeyIframeClient = await this.getTurnkeyIframeClient(10_000);
+      const signingClient =
+        this.apiKeyClient ?? (await this.getTurnkeyIframeClient(10_000));
 
       const result = (
-        await turnkeyIframeClient.signTransaction({
+        await signingClient.signTransaction({
           organizationId: this.subOrganizationId,
           signWith: this.account,
           unsignedTransaction: transaction,
@@ -402,9 +411,10 @@ export class TurnkeyWallet {
       const messageBytes = getBytes(paddedMessage);
       const messageHash = ethers.hashMessage(messageBytes);
 
-      const turnkeyIframeClient = await this.getTurnkeyIframeClient(10_000);
+      const signingClient =
+        this.apiKeyClient ?? (await this.getTurnkeyIframeClient(10_000));
 
-      const { r, s, v } = await turnkeyIframeClient.signRawPayload({
+      const { r, s, v } = await signingClient.signRawPayload({
         organizationId: this.subOrganizationId,
         signWith: this.account,
         payload: messageHash,
