@@ -353,7 +353,9 @@ export function OnchainCheckout() {
     refetchAccountPrivate,
   ]);
 
+  const purchaseInFlightRef = useRef(false);
   const handlePurchase = useCallback(async () => {
+    if (purchaseInFlightRef.current) return;
     if (isApplePayAmountTooLow) return;
     if (isCoinflowSelected) {
       if (!isCoinflowStarterpackSupported) return;
@@ -361,6 +363,8 @@ export function OnchainCheckout() {
       console.warn("no means to pay");
       return;
     }
+
+    purchaseInFlightRef.current = true;
 
     const method = isCoinflowSelected
       ? "coinflow"
@@ -435,6 +439,7 @@ export function OnchainCheckout() {
       });
     } finally {
       setIsLoading(false);
+      purchaseInFlightRef.current = false;
     }
   }, [
     hasSufficientBalance,
