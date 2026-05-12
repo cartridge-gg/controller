@@ -1,4 +1,6 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npx -y pnpm@11.0.5 install --frozen-lockfile",
   "redirects": [
     {
       "source": "/((?!ofac\\.html$).*)",
