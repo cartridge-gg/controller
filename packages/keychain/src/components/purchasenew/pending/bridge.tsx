@@ -137,7 +137,13 @@ export function BridgePending({
         reportFailure(err, "payment");
       }
     }
-  }, [paymentMethod, paymentSuccess, orderStatus, paymentCompleted, reportFailure]);
+  }, [
+    paymentMethod,
+    paymentSuccess,
+    orderStatus,
+    paymentCompleted,
+    reportFailure,
+  ]);
 
   useEffect(() => {
     if (wallet && initialBridgeHash) {
