@@ -61,6 +61,7 @@ export function CoinbaseCheckout({
 }: CoinbaseCheckoutProps = {}) {
   const {
     paymentLink,
+    orderId,
     isCreatingOrder,
     onCreateCoinbaseOrder,
     openPaymentPopup,
@@ -208,9 +209,15 @@ export function CoinbaseCheckout({
     setMode("status");
     setIsOpeningPopup(true);
     try {
-      const order = await onCreateCoinbaseOrder({ force: true });
+      // Don't pass `force` — if `handlePurchase` already pre-created an order
+      // and its paymentLink is still fresh, the guard inside
+      // `onCreateCoinbaseOrder` short-circuits and we reuse it. The
+      // `hasStaleCoinbaseOrder` branch of that guard still creates a new order
+      // when the previous one is in a terminal state (popupClosed,
+      // paymentSuccess, Completed, Failed).
+      const order = await onCreateCoinbaseOrder();
       const nextPaymentLink = order?.coinbaseOrder.paymentLink ?? paymentLink;
-      const nextOrderId = order?.coinbaseOrder.orderId;
+      const nextOrderId = order?.coinbaseOrder.orderId ?? orderId;
 
       if (nextPaymentLink && nextOrderId) {
         openPaymentPopup({
@@ -245,6 +252,7 @@ export function CoinbaseCheckout({
     limitExceeded,
     onCreateCoinbaseOrder,
     paymentLink,
+    orderId,
     openPaymentPopup,
     fetchCoinbaseLimits,
   ]);
