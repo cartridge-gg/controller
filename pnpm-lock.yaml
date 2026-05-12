@@ -625,6 +625,15 @@ importers:
       '@stripe/stripe-js':
         specifier: ^4.8.0
         version: 4.10.0
+      '@turnkey/api-key-stamper':
+        specifier: ^0.6.3
+        version: 0.6.3
+      '@turnkey/crypto':
+        specifier: ^2.9.0
+        version: 2.9.0
+      '@turnkey/encoding':
+        specifier: ^0.6.0
+        version: 0.6.0
       '@turnkey/sdk-browser':
         specifier: ^5.15.2
         version: 5.15.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
@@ -3106,9 +3115,6 @@ packages:
   '@peculiar/asn1-rsa@2.6.1':
     resolution: {integrity: sha512-1nVMEh46SElUt5CB3RUTV4EG/z7iYc7EoaDY5ECwganibQPkZ/Y2eMsTKB/LeyrUJ+W/tKoD9WUqIy8vB+CEdA==}
 
-  '@peculiar/asn1-schema@2.5.0':
-    resolution: {integrity: sha512-YM/nFfskFJSlHqv59ed6dZlLZqtZQwjRVJ4bBAiWV08Oc+1rSd5lDZcBEx0lGDHfSoH3UziI2pXt2UM33KerPQ==}
-
   '@peculiar/asn1-schema@2.6.0':
     resolution: {integrity: sha512-xNLYLBFTBKkCzEZIw842BxytQQATQv+lDTCEMZ8C196iJcJJMBUZxrhSTxLaohMyKK8QlzRNTRkUmanucnDSqg==}
 
@@ -4611,6 +4617,10 @@ packages:
     resolution: {integrity: sha512-6BjVp/4SR9JnKvOPteoQJR12lSlm/ajyAN+BPq0V+2/faHeEJrBjZIyiVpxAdRb5l9Qqjc+MczmR4PAhkng3XQ==}
     engines: {node: '>=18.0.0'}
 
+  '@turnkey/crypto@2.9.0':
+    resolution: {integrity: sha512-6gLdy+yON0CIVxiW8qyKAhjvO56eE4uuT7XViWvGB0SuKZEAwfcZVvCc8GnjzL0hu0/uq83PxW3LbOp/36WdRg==}
+    engines: {node: '>=18.0.0'}
+
   '@turnkey/encoding@0.6.0':
     resolution: {integrity: sha512-IC8qXvy36+iGAeiaVIuJvB35uU2Ld/RAWI/DRTKS+ttBej0GXhOn48Ouu5mlca4jt8ZEuwXmDVv74A8uBQclsA==}
     engines: {node: '>=18.0.0'}
@@ -4647,6 +4657,10 @@ packages:
 
   '@turnkey/sdk-types@0.12.1':
     resolution: {integrity: sha512-j6baPjet3WfoaHO9n47s/YZ+iI9tJ3fTUaoQ6Bw+1VJb6G78HxdhBDZiRE2EHJ4bTAXA5PvwDUprMlOPbeNkKg==}
+    engines: {node: '>=18.0.0'}
+
+  '@turnkey/sdk-types@1.0.0':
+    resolution: {integrity: sha512-/PusBP35VfQ6jbhbpmoi5MBcveaWbC/gKG1npwkUgGwoZVkfVNlBBVNiqzjYkXds6KN/pZio4ZturmpkGB3ZAA==}
     engines: {node: '>=18.0.0'}
 
   '@turnkey/wallet-stamper@1.1.14':
@@ -5214,6 +5228,7 @@ packages:
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -10837,19 +10852,22 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@3.3.2:
     resolution: {integrity: sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==}
-    deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   v8-compile-cache-lib@3.0.1:
@@ -14033,12 +14051,6 @@ snapshots:
       asn1js: 3.0.6
       tslib: 2.8.1
 
-  '@peculiar/asn1-schema@2.5.0':
-    dependencies:
-      asn1js: 3.0.6
-      pvtsutils: 1.3.6
-      tslib: 2.8.1
-
   '@peculiar/asn1-schema@2.6.0':
     dependencies:
       asn1js: 3.0.6
@@ -14065,7 +14077,7 @@ snapshots:
 
   '@peculiar/webcrypto@1.5.0':
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
       '@peculiar/json-schema': 1.1.12
       pvtsutils: 1.3.6
       tslib: 2.8.1
@@ -14078,7 +14090,7 @@ snapshots:
       '@peculiar/asn1-ecc': 2.6.1
       '@peculiar/asn1-pkcs9': 2.6.1
       '@peculiar/asn1-rsa': 2.6.1
-      '@peculiar/asn1-schema': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
       '@peculiar/asn1-x509': 2.6.1
       pvtsutils: 1.3.6
       reflect-metadata: 0.2.2
@@ -15904,6 +15916,17 @@ snapshots:
       borsh: 2.0.0
       cbor-js: 0.1.0
 
+  '@turnkey/crypto@2.9.0':
+    dependencies:
+      '@noble/ciphers': 1.3.0
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@peculiar/x509': 1.12.3
+      '@turnkey/encoding': 0.6.0
+      '@turnkey/sdk-types': 1.0.0
+      borsh: 2.0.0
+      cbor-js: 0.1.0
+
   '@turnkey/encoding@0.6.0':
     dependencies:
       bs58: 6.0.0
@@ -16001,6 +16024,8 @@ snapshots:
       - zod
 
   '@turnkey/sdk-types@0.12.1': {}
+
+  '@turnkey/sdk-types@1.0.0': {}
 
   '@turnkey/wallet-stamper@1.1.14(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
@@ -17121,7 +17146,7 @@ snapshots:
   '@walletconnect/utils@2.20.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
       '@noble/ciphers': 1.2.1
-      '@noble/curves': 1.9.0
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/keyvaluestorage': 1.1.1
@@ -24322,7 +24347,7 @@ snapshots:
 
   webcrypto-core@1.8.1:
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
       '@peculiar/json-schema': 1.1.12
       asn1js: 3.0.6
       pvtsutils: 1.3.6
