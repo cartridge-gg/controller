@@ -36,7 +36,6 @@ import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
-import { useFeature } from "@/hooks/features";
 import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { ParsedSessionPolicies } from "@/hooks/session";
@@ -231,6 +230,7 @@ export function useCreateController({
   const [smsState, setSmsState] = useState<{
     phoneNumber: string;
     otpId: string;
+    otpEncryptionTargetBundle: string;
   } | null>(null);
 
   const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(
@@ -281,16 +281,16 @@ export function useCreateController({
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
   const smsAuth = useSmsAuthentication();
-  const isSmsEnabled = useFeature("sms");
   const { supportedWalletsForAuth } = useWallets();
 
   const handleInitOtp = useCallback(
     async (phoneNumber: string) => {
       try {
         setError(undefined);
-        setSmsState({ phoneNumber, otpId: "" });
-        const { otpId } = await smsAuth.initSms(phoneNumber);
-        setSmsState({ phoneNumber, otpId });
+        setSmsState({ phoneNumber, otpId: "", otpEncryptionTargetBundle: "" });
+        const { otpId, otpEncryptionTargetBundle } =
+          await smsAuth.initSms(phoneNumber);
+        setSmsState({ phoneNumber, otpId, otpEncryptionTargetBundle });
       } catch (e: unknown) {
         setError(e as Error);
       }
@@ -308,11 +308,9 @@ export function useCreateController({
 
   const signupOptions: AuthOptions = useMemo(() => {
     return [...EMBEDDED_WALLETS, ...supportedWalletsForAuth].filter(
-      (option) =>
-        (!signers || signers.includes(option)) &&
-        (option !== "sms" || isSmsEnabled),
+      (option) => !signers || signers.includes(option),
     );
-  }, [supportedWalletsForAuth, signers, isSmsEnabled]);
+  }, [supportedWalletsForAuth, signers]);
 
   const finishSignup = useCallback(
     async ({
@@ -549,6 +547,7 @@ export function useCreateController({
             username,
             smsState.phoneNumber,
             smsState.otpId,
+            smsState.otpEncryptionTargetBundle,
             password,
           );
           signer = {
@@ -900,6 +899,7 @@ export function useCreateController({
             username,
             smsState.phoneNumber,
             smsState.otpId,
+            smsState.otpEncryptionTargetBundle,
             password,
           );
           loginResponse = { signer: smsResult.signer };
@@ -1119,11 +1119,11 @@ export function useCreateController({
           }
         }
       } catch (e: unknown) {
-        const error: unknown = (e as Error)?.message
-          ? e
+        const error = (e as Error)?.message
+          ? (e as Error)
           : new Error("Unknown error");
-        console.error("Login error:", (error as Error).message);
-        setError(error as Error);
+        console.error("Login error:", error.message);
+        setError(error);
         if (exists) {
           captureAnalyticsEvent(posthog, "login_failed", {
             method,

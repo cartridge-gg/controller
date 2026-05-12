@@ -52,7 +52,11 @@ interface CreateControllerViewProps {
   onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onInitOtp: (phoneNumber: string) => Promise<void>;
-  smsState: { phoneNumber: string; otpId: string } | null;
+  smsState: {
+    phoneNumber: string;
+    otpId: string;
+    otpEncryptionTargetBundle: string;
+  } | null;
   isSlot?: boolean;
   authenticationStep: AuthenticationStep;
   setAuthenticationStep: (value: AuthenticationStep) => void;
@@ -352,7 +356,7 @@ export function CreateControllerView({
       return false;
     }
     return (
-      smsState != null ||
+      // sms needs a new otp code to retry
       (authMethod === "password" && isLogin) ||
       authMethod === "google" ||
       authMethod === "discord" ||
@@ -361,7 +365,7 @@ export function CreateControllerView({
       authMethod === "rabby" ||
       authMethod === "walletconnect"
     );
-  }, [isLogin, authMethod, smsState, changeWallet]);
+  }, [isLogin, authMethod, changeWallet]);
 
   const handleRetry = useCallback(() => {
     setError(undefined);

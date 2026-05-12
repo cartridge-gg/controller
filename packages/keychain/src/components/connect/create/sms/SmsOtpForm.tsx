@@ -4,9 +4,9 @@ import {
   Button,
   Drawer,
   DrawerContent,
-  Input,
   MobileIcon,
   PhoneNumberInput,
+  PinInput,
   isValidPhoneNumber,
 } from "@cartridge/controller-ui";
 
@@ -19,7 +19,11 @@ export interface SmsOtpDrawerProps {
   /** Called with ("sms", otpCode) to complete authentication. */
   onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
   /** null = phone step; non-null = otp step (phone number confirmed). */
-  smsState: { phoneNumber: string; otpId: string } | null;
+  smsState: {
+    phoneNumber: string;
+    otpId: string;
+    otpEncryptionTargetBundle: string;
+  } | null;
 }
 
 export function SmsOtpDrawer({
@@ -70,10 +74,7 @@ export function SmsOtpDrawer({
   );
 
   // Alphanumeric, 6 to 9 characters long
-  const isOtpCodeValid = useMemo(
-    () => !!otpCode && /^[a-zA-Z0-9]{6,9}$/.test(otpCode),
-    [otpCode],
-  );
+  const isOtpCodeValid = useMemo(() => otpCode.length == 6, [otpCode]);
 
   useEffect(() => {
     if (phoneInputError && isPhoneInputValid) {
@@ -132,7 +133,7 @@ export function SmsOtpDrawer({
   return (
     <Drawer isOpen={isOpen} onClose={handleClose}>
       <DrawerContent
-        title={`${isLogin ? "Login" : "Sign Up"} with SMS`}
+        title={`${isLogin ? "Log In" : "Sign Up"} with SMS`}
         icon={<MobileIcon variant="solid" />}
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -162,16 +163,15 @@ export function SmsOtpDrawer({
             >
               Verification Code
             </label>
-            <Input
+            <PinInput
+              type="numeric"
+              length={6}
               ref={otpRef}
-              id="sms-otp"
-              type="text"
-              inputMode="numeric"
-              placeholder="Enter code"
               value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value.trim().toUpperCase())}
+              onChange={setOtpCode}
               disabled={sendingCode || step === "phone"}
-              autoComplete="one-time-code"
+              variant={otpCodeError ? "destructive" : "default"}
+              className="py-6"
             />
           </div>
 
@@ -183,7 +183,8 @@ export function SmsOtpDrawer({
             <Button
               type="submit"
               disabled={
-                sendingCode || (step === "phone" ? !phoneInput : !otpCode)
+                sendingCode ||
+                (step === "phone" ? !isPhoneInputValid : !isOtpCodeValid)
               }
               isLoading={sendingCode}
               className="flex-1"

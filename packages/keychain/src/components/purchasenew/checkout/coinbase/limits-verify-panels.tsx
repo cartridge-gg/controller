@@ -1,19 +1,17 @@
 import { useMemo, useState } from "react";
 import {
   Button,
+  DateSelect,
   HeaderInner,
   Input,
   LayoutContent,
   LayoutFooter,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   SpinnerIcon,
   CoinbaseWalletColorIcon,
   CheckIcon,
   TimesIcon,
+  isValidCalendarDate,
+  type DateValue,
 } from "@cartridge/controller-ui";
 import type { SubmitCoinbaseLimitsUpgradeInput } from "@/utils/api";
 import {
@@ -22,68 +20,6 @@ import {
   UNLIMITED_SENTINEL,
 } from "@/hooks/starterpack/coinbase";
 import type { CoinbaseLimitsResult } from "@/hooks/starterpack";
-
-const MONTH_OPTIONS = [
-  { value: "01", label: "January" },
-  { value: "02", label: "February" },
-  { value: "03", label: "March" },
-  { value: "04", label: "April" },
-  { value: "05", label: "May" },
-  { value: "06", label: "June" },
-  { value: "07", label: "July" },
-  { value: "08", label: "August" },
-  { value: "09", label: "September" },
-  { value: "10", label: "October" },
-  { value: "11", label: "November" },
-  { value: "12", label: "December" },
-];
-
-const CURRENT_YEAR = new Date().getFullYear();
-const YEAR_OPTIONS = Array.from({ length: 121 }, (_, i) =>
-  String(CURRENT_YEAR - i),
-);
-
-function daysInMonth(year: string, month: string): number {
-  if (!year || !month) return 31;
-  return new Date(Number(year), Number(month), 0).getDate();
-}
-
-function isValidCalendarDate(
-  year: string,
-  month: string,
-  day: string,
-): boolean {
-  if (!year || !month || !day) return false;
-  const parsed = new Date(`${year}-${month}-${day}T00:00:00.000Z`);
-  return (
-    !Number.isNaN(parsed.getTime()) &&
-    parsed.getUTCFullYear() === Number(year) &&
-    parsed.getUTCMonth() + 1 === Number(month) &&
-    parsed.getUTCDate() === Number(day)
-  );
-}
-
-function DobSelectTrigger({ placeholder }: { placeholder: string }) {
-  return (
-    <SelectTrigger className="h-10 w-full justify-between">
-      <SelectValue placeholder={placeholder} />
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 10 6"
-        className="h-1.5 w-2.5 shrink-0 text-foreground-300"
-        fill="none"
-      >
-        <path
-          d="M1 1L5 5L9 1"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </SelectTrigger>
-  );
-}
 
 export interface VerifyFormPanelProps {
   limits: CoinbaseLimitsResult;
@@ -101,9 +37,7 @@ export function VerifyFormPanel({
   hideHeader,
 }: VerifyFormPanelProps) {
   const [ssn, setSsn] = useState("");
-  const [month, setMonth] = useState("");
-  const [day, setDay] = useState("");
-  const [year, setYear] = useState("");
+  const [dob, setDob] = useState<DateValue>({ year: "", month: "", day: "" });
 
   const weeklyUpgrade = useMemo(
     () =>
@@ -136,14 +70,14 @@ export function VerifyFormPanel({
   }, [limits.limits]);
 
   const ssnValid = /^\d{4}$/.test(ssn);
-  const dobValid = isValidCalendarDate(year, month, day);
+  const dobValid = isValidCalendarDate(dob);
   const canSubmit = ssnValid && dobValid && !isSubmitting;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
     onSubmit({
       ssnLast4: ssn,
-      dateOfBirth: { day, month, year },
+      dateOfBirth: { day: dob.day, month: dob.month, year: dob.year },
     });
   };
 
@@ -202,40 +136,7 @@ export function VerifyFormPanel({
           <label className="text-xs text-foreground-300 font-medium">
             Date of Birth
           </label>
-          <div className="grid grid-cols-3 gap-2">
-            <Select value={month} onValueChange={setMonth}>
-              <DobSelectTrigger placeholder="Month" />
-              <SelectContent>
-                {MONTH_OPTIONS.map((m) => (
-                  <SelectItem key={m.value} value={m.value}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={day} onValueChange={setDay}>
-              <DobSelectTrigger placeholder="Day" />
-              <SelectContent>
-                {Array.from({ length: daysInMonth(year, month) }, (_, i) =>
-                  String(i + 1).padStart(2, "0"),
-                ).map((d) => (
-                  <SelectItem key={d} value={d}>
-                    {Number(d)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={year} onValueChange={setYear}>
-              <DobSelectTrigger placeholder="Year" />
-              <SelectContent>
-                {YEAR_OPTIONS.map((y) => (
-                  <SelectItem key={y} value={y}>
-                    {y}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <DateSelect value={dob} setValue={setDob} disabled={isSubmitting} />
         </div>
       </LayoutContent>
       <LayoutFooter>
