@@ -18,6 +18,7 @@ export * from "./input";
 export * from "./label";
 export * from "./menubar";
 export * from "./phone-input";
+export * from "./pin-input";
 export * from "./popover";
 export * from "./progress";
 export * from "./radio-group";
