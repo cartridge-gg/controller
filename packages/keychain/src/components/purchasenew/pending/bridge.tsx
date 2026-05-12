@@ -21,6 +21,8 @@ import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { TransactionFinalityStatus } from "starknet";
 import { CoinbaseOnrampStatus } from "@/utils/api";
 import { useStarterpackPlayHandler } from "@/hooks/starterpack";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 
 interface TransitionStepProps {
   isVisible: boolean;
@@ -108,6 +110,18 @@ export function BridgePending({
 
   const purchaseTriggered = useRef(false);
 
+  const analyticsMethod = paymentMethod ?? "crypto";
+  const failedReportedRef = useRef(false);
+  const reportFailure = (err: Error, stage: string) => {
+    if (failedReportedRef.current) return;
+    failedReportedRef.current = true;
+    captureAnalyticsEvent(posthog, "purchase_failed", {
+      method: analyticsMethod,
+      error_code: sanitizeErrorCode(err),
+      stage,
+    });
+  };
+
   // Handle Apple Pay (Coinbase) order status from context polling
   useEffect(() => {
     if (paymentMethod === "apple-pay" && !paymentCompleted) {
@@ -115,7 +129,9 @@ export function BridgePending({
         setError(undefined);
         setDepositCompleted(true);
       } else if (orderStatus === CoinbaseOnrampStatus.Failed) {
-        setError(new Error("Coinbase payment failed. Please try again."));
+        const err = new Error("Coinbase payment failed. Please try again.");
+        setError(err);
+        reportFailure(err, "payment");
       }
     }
   }, [paymentMethod, paymentSuccess, orderStatus, paymentCompleted]);
@@ -132,6 +148,7 @@ export function BridgePending({
             err,
           );
           setError(err as Error);
+          reportFailure(err as Error, "deposit");
         });
     }
   }, [wallet, initialBridgeHash, externalWaitForTransaction]);
@@ -157,6 +174,7 @@ export function BridgePending({
         .catch((err) => {
           console.error("Failed to wait for deposit:", err);
           setError(err as Error);
+          reportFailure(err as Error, "bridge");
         });
     }
   }, [swapId, waitForDeposit, controller]);
@@ -176,6 +194,7 @@ export function BridgePending({
       onOnchainPurchase().catch((err) => {
         console.error("Auto-purchase failed:", err);
         setError(err as Error);
+        reportFailure(err as Error, "purchase");
         setIsPurchasing(false);
       });
     }
@@ -194,6 +213,7 @@ export function BridgePending({
   // Wait for Starknet purchase transaction
   useEffect(() => {
     if (purchaseTxHash && controller) {
+      const startedAt = Date.now();
       retryWithBackoff(() =>
         controller.provider.waitForTransaction(purchaseTxHash, {
           retryInterval: 1000,
@@ -203,13 +223,20 @@ export function BridgePending({
           ],
         }),
       )
-        .then(() => setPurchaseCompleted(true))
+        .then(() => {
+          setPurchaseCompleted(true);
+          captureAnalyticsEvent(posthog, "purchase_completed", {
+            method: analyticsMethod,
+            duration_ms: Date.now() - startedAt,
+          });
+        })
         .catch((err) => {
           console.error("Purchase confirmation failed:", err);
           setError(err as Error);
+          reportFailure(err as Error, "confirm");
         });
     }
-  }, [purchaseTxHash, controller]);
+  }, [purchaseTxHash, controller, analyticsMethod]);
 
   return (
     <>
