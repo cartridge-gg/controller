@@ -10,6 +10,27 @@ function dialCodeOf(code: string): string {
   return COUNTRIES.find((c) => c.code === code)?.dial_code ?? "";
 }
 
+// Display-only mask. `setValue` always receives a plain "+digits" string.
+function formatPhoneDigits(dialCode: string, digits: string): string {
+  let mask: string;
+  if (dialCode === "+1") mask = "(XXX)XXX-XXXX";
+  else if (dialCode === "+55") mask = "(XX)XXXXX-XXXX";
+  else return digits;
+
+  const maxDigits = (mask.match(/X/g) ?? []).length;
+  const d = digits.slice(0, maxDigits);
+  if (!d) return "";
+
+  let out = "";
+  let di = 0;
+  for (let i = 0; i < mask.length; i++) {
+    if (di >= d.length) break;
+    if (mask[i] === "X") out += d[di++];
+    else out += mask[i];
+  }
+  return out;
+}
+
 // Find the country whose dial_code is the longest prefix of `value`.
 // Multiple countries can share a dial_code (e.g. US/CA both "+1"); the
 // caller's last explicit selection wins via internal state.
@@ -53,7 +74,7 @@ export const PhoneNumberInput = forwardRef<
     disabled,
     allowedCountries,
     inputId,
-    placeholder = "234 567 8900",
+    placeholder = "(234)567-8900",
   },
   ref,
 ) {
@@ -90,6 +111,11 @@ export const PhoneNumberInput = forwardRef<
     return "";
   }, [value, dialCode]);
 
+  const displayValue = useMemo(
+    () => formatPhoneDigits(dialCode, digits),
+    [dialCode, digits],
+  );
+
   const handleCountryChange = (newCountry: string) => {
     setCountry(newCountry);
     setValue(`${dialCodeOf(newCountry)}${digits}`);
@@ -97,7 +123,9 @@ export const PhoneNumberInput = forwardRef<
 
   const handleDigitsChange = (raw: string) => {
     const sanitized = raw.replace(/\D/g, "");
-    setValue(`${dialCode}${sanitized}`);
+    // Re-format to apply the format's digit cap, then strip back to digits.
+    const capped = formatPhoneDigits(dialCode, sanitized).replace(/\D/g, "");
+    setValue(`${dialCode}${capped}`);
   };
 
   return (
@@ -118,7 +146,7 @@ export const PhoneNumberInput = forwardRef<
           autoComplete="tel-national"
           placeholder={placeholder}
           containerClassName="min-w-0 flex-1"
-          value={digits}
+          value={displayValue}
           onChange={(e) => handleDigitsChange(e.target.value)}
           disabled={disabled}
         />
