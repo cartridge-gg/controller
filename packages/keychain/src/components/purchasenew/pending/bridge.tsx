@@ -14,7 +14,7 @@ import {
 } from "@/context";
 import { Explorer, getExplorer } from "@/hooks/starterpack/layerswap";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useConnection } from "@/hooks/connection";
 import { retryWithBackoff } from "@/utils/retry";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
@@ -112,15 +112,18 @@ export function BridgePending({
 
   const analyticsMethod = paymentMethod ?? "crypto";
   const failedReportedRef = useRef(false);
-  const reportFailure = (err: Error, stage: string) => {
-    if (failedReportedRef.current) return;
-    failedReportedRef.current = true;
-    captureAnalyticsEvent(posthog, "purchase_failed", {
-      method: analyticsMethod,
-      error_code: sanitizeErrorCode(err),
-      stage,
-    });
-  };
+  const reportFailure = useCallback(
+    (err: Error, stage: string) => {
+      if (failedReportedRef.current) return;
+      failedReportedRef.current = true;
+      captureAnalyticsEvent(posthog, "purchase_failed", {
+        method: analyticsMethod,
+        error_code: sanitizeErrorCode(err),
+        stage,
+      });
+    },
+    [analyticsMethod],
+  );
 
   // Handle Apple Pay (Coinbase) order status from context polling
   useEffect(() => {
@@ -134,7 +137,7 @@ export function BridgePending({
         reportFailure(err, "payment");
       }
     }
-  }, [paymentMethod, paymentSuccess, orderStatus, paymentCompleted]);
+  }, [paymentMethod, paymentSuccess, orderStatus, paymentCompleted, reportFailure]);
 
   useEffect(() => {
     if (wallet && initialBridgeHash) {
@@ -151,7 +154,7 @@ export function BridgePending({
           reportFailure(err as Error, "deposit");
         });
     }
-  }, [wallet, initialBridgeHash, externalWaitForTransaction]);
+  }, [wallet, initialBridgeHash, externalWaitForTransaction, reportFailure]);
 
   useEffect(() => {
     if (swapId) {
@@ -177,7 +180,7 @@ export function BridgePending({
           reportFailure(err as Error, "bridge");
         });
     }
-  }, [swapId, waitForDeposit, controller]);
+  }, [swapId, waitForDeposit, controller, reportFailure]);
 
   useEffect(() => {
     if (depositCompleted) {
@@ -198,7 +201,7 @@ export function BridgePending({
         setIsPurchasing(false);
       });
     }
-  }, [paymentCompleted, onOnchainPurchase]);
+  }, [paymentCompleted, onOnchainPurchase, reportFailure]);
 
   // Detect purchase transaction hash from context
   useEffect(() => {
@@ -236,7 +239,7 @@ export function BridgePending({
           reportFailure(err as Error, "confirm");
         });
     }
-  }, [purchaseTxHash, controller, analyticsMethod]);
+  }, [purchaseTxHash, controller, analyticsMethod, reportFailure]);
 
   return (
     <>
