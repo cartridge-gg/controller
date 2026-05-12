@@ -607,6 +607,9 @@ importers:
       '@icons-pack/react-simple-icons':
         specifier: ^13.8.0
         version: 13.8.0(react@18.3.1)
+      '@noble/curves':
+        specifier: ^1.9.0
+        version: 1.9.7
       '@noble/hashes':
         specifier: ^1.8.0
         version: 1.8.0

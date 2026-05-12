@@ -4,11 +4,9 @@ import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { getIframePublicKey } from "@/wallets/social/turnkey";
 import { WalletAdapter } from "@cartridge/controller";
 import { useCallback } from "react";
-import { encryptOtpCodeToBundle, fromDerSignature } from "@turnkey/crypto";
-import {
-  decodeBase64urlToString,
-  uint8ArrayToHexString,
-} from "@turnkey/encoding";
+import { encryptOtpCodeToBundle, generateP256KeyPair } from "@turnkey/crypto";
+import { p256 } from "@noble/curves/p256";
+import { sha256 } from "@noble/hashes/sha2";
 import { Turnkey, TurnkeyIframeClient } from "@turnkey/sdk-browser";
 
 type InitSmsResponse = {
@@ -34,20 +32,6 @@ type TurnkeyClientSignature = {
 type VerificationTokenPayload = {
   id?: string;
   public_key?: unknown;
-};
-
-type TurnkeyStamp = {
-  publicKey?: string;
-  signature?: string;
-};
-
-type TurnkeyStampResponse = {
-  stampHeaderName: string;
-  stampHeaderValue: string;
-};
-
-type TurnkeyStamper = {
-  stamp: (payload: string) => Promise<TurnkeyStampResponse>;
 };
 
 let iframeClientPromise: Promise<TurnkeyIframeClient> | null = null;
@@ -107,11 +91,12 @@ export const useSmsAuthentication = () => {
 
       // Get iframe public key for the credential bundle
       const targetPublicKey = await getIframePublicKey(iframeClient);
+      const otpVerificationKeyPair = generateP256KeyPair();
 
       const encryptedOtpBundle = await encryptOtpCodeToBundle(
         otpCode.trim(),
         otpEncryptionTargetBundle,
-        targetPublicKey,
+        otpVerificationKeyPair.publicKey,
       );
 
       const verifyResponse = await fetchApi<VerifySmsResponse>("sms/verify", {
@@ -150,8 +135,9 @@ export const useSmsAuthentication = () => {
       }
 
       const clientSignature = await buildOtpLoginClientSignature(
-        iframeClient,
         verifyResponse.verificationToken,
+        otpVerificationKeyPair.publicKey,
+        otpVerificationKeyPair.privateKey,
         targetPublicKey,
       );
 
@@ -214,12 +200,27 @@ export const useSmsAuthentication = () => {
 function decodeVerificationToken(
   verificationToken: string,
 ): VerificationTokenPayload {
-  const [, payloadB64] = verificationToken.split(".");
-  if (!payloadB64) {
+  const parts = verificationToken.trim().split(".");
+  if (parts.length < 2 || !parts[1]) {
     throw new Error("Invalid verification token: missing payload");
   }
 
-  return JSON.parse(decodeBase64urlToString(payloadB64));
+  try {
+    return JSON.parse(decodeBase64urlToString(parts[1]));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Invalid verification token: invalid payload (${reason})`);
+  }
+}
+
+function decodeBase64urlToString(value: string): string {
+  const base64 = value
+    .trim()
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(Math.ceil(value.trim().length / 4) * 4, "=");
+  const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
 }
 
 function getClientSignatureMessageForLogin(
@@ -250,31 +251,27 @@ function getClientSignatureMessageForLogin(
 }
 
 async function buildOtpLoginClientSignature(
-  iframeClient: TurnkeyIframeClient,
   verificationToken: string,
+  otpVerificationPublicKey: string,
+  otpVerificationPrivateKey: string,
   sessionPublicKey: string,
 ): Promise<TurnkeyClientSignature> {
   const { message, publicKey } = getClientSignatureMessageForLogin(
     verificationToken,
     sessionPublicKey,
   );
-  const stamper = (iframeClient as unknown as { stamper?: TurnkeyStamper })
-    .stamper;
-  if (!stamper) {
-    throw new Error("Turnkey iframe stamper is not available");
+  if (publicKey !== otpVerificationPublicKey) {
+    throw new Error("OTP verification token public key does not match signer");
   }
-  const stamp = await stamper.stamp(message);
-  const decodedStamp = JSON.parse(
-    decodeBase64urlToString(stamp.stampHeaderValue),
-  ) as TurnkeyStamp;
-  if (!decodedStamp.signature) {
-    throw new Error("Turnkey iframe did not return a signature");
-  }
+  const signature = p256.sign(
+    sha256(new TextEncoder().encode(message)),
+    otpVerificationPrivateKey,
+  );
 
   return {
     publicKey,
     scheme: "CLIENT_SIGNATURE_SCHEME_API_P256",
     message,
-    signature: uint8ArrayToHexString(fromDerSignature(decodedStamp.signature)),
+    signature: signature.toCompactHex(),
   };
 }
