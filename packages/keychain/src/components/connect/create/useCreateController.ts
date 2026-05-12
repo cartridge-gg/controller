@@ -1119,11 +1119,11 @@ export function useCreateController({
           }
         }
       } catch (e: unknown) {
-        const error: unknown = (e as Error)?.message
-          ? e
+        const error = (e as Error)?.message
+          ? (e as Error)
           : new Error("Unknown error");
-        console.error("Login error:", (error as Error).message);
-        setError(error as Error);
+        console.error("Login error:", error.message);
+        setError(error);
         if (exists) {
           captureAnalyticsEvent(posthog, "login_failed", {
             method,
