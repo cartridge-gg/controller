@@ -43,6 +43,8 @@ export function SmsOtpDrawer({
   const [sendingCode, setSendingCode] = useState(false);
   const [phoneInputError, setPhoneInputError] = useState<string | undefined>();
   const [otpCodeError, setOtpCodeError] = useState<string | undefined>();
+  const [otpSentAt, setOtpSentAt] = useState<number | null>(null);
+  const [secondsRemaining, setSecondsRemaining] = useState(0);
   const phoneRef = useRef<HTMLInputElement>(null);
   const otpRef = useRef<HTMLInputElement>(null);
 
@@ -57,8 +59,31 @@ export function SmsOtpDrawer({
       setSendingCode(false);
       setPhoneInputError(undefined);
       setOtpCodeError(undefined);
+      setOtpSentAt(null);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (smsState?.otpId) {
+      setOtpSentAt(Date.now());
+    }
+  }, [smsState?.otpId]);
+
+  useEffect(() => {
+    if (otpSentAt === null) {
+      setSecondsRemaining(0);
+      return;
+    }
+    const compute = () =>
+      Math.max(0, 60 - Math.floor((Date.now() - otpSentAt) / 1000));
+    setSecondsRemaining(compute());
+    const id = setInterval(() => {
+      const remaining = compute();
+      setSecondsRemaining(remaining);
+      if (remaining === 0) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [otpSentAt]);
 
   useEffect(() => {
     if (step === "phone") {
@@ -124,6 +149,19 @@ export function SmsOtpDrawer({
     ],
   );
 
+  const handleResend = useCallback(async () => {
+    if (secondsRemaining > 0 || sendingCode || !smsState?.phoneNumber) return;
+    setOtpCodeError(undefined);
+    setSendingCode(true);
+    try {
+      await onInitOtp(smsState.phoneNumber);
+    } catch (err) {
+      setOtpCodeError((err as Error).message ?? "Failed to resend code");
+    } finally {
+      setSendingCode(false);
+    }
+  }, [secondsRemaining, sendingCode, smsState?.phoneNumber, onInitOtp]);
+
   const handleClose = (event?: Event) => {
     if (!isOpen) return; // avoid closing if another drawer is opening
     event?.preventDefault();
@@ -173,6 +211,23 @@ export function SmsOtpDrawer({
               variant={otpCodeError ? "destructive" : "default"}
               className="py-6"
             />
+            {step === "otp" && otpSentAt !== null && (
+              <p className="text-xs text-foreground-300">
+                Didn't get a message?{" "}
+                {secondsRemaining > 0 ? (
+                  <>Resend in {secondsRemaining}...</>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={sendingCode}
+                    className="text-primary-100 hover:underline disabled:opacity-50"
+                  >
+                    Resend Code
+                  </button>
+                )}
+              </p>
+            )}
           </div>
 
           {otpCodeError && (
