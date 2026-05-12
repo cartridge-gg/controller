@@ -36,6 +36,8 @@ export function ChooseSignupMethodForm({
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
+  const firstOptions = useMemo(() => ["sms", "webauthn"], []);
+
   const options = useMemo(() => {
     let opts: AuthOption[];
     if (validation.signers?.length) {
@@ -52,11 +54,14 @@ export function ChooseSignupMethodForm({
 
     // Sort to ensure webauthn is first if it exists
     return opts.sort((a, b) => {
-      if (a === "webauthn") return -1;
-      if (b === "webauthn") return 1;
-      return 0;
+      const aIndex = firstOptions.indexOf(a);
+      const bIndex = firstOptions.indexOf(b);
+      if (aIndex === bIndex) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
     });
-  }, [validation.signers, authOptions]);
+  }, [validation.signers, authOptions, firstOptions]);
 
   // Initialize button refs array
   useEffect(() => {
@@ -178,18 +183,14 @@ export function ChooseSignupMethodForm({
       <DrawerContent title={title} icon={icon}>
         <div className="flex flex-col gap-3">
           {options.map((option, index) => {
-            const isWebauthn = option === "webauthn";
+            const isPrimary = index === 0 && firstOptions.includes(option);
             const isHighlighted = highlightedIndex === index;
-            const hasWebauthn = options.includes("webauthn");
-            const isFirstAndWebauthn = index === 0 && isWebauthn;
 
             return (
               <div
                 key={option}
                 className={cn(
-                  isFirstAndWebauthn &&
-                    hasWebauthn &&
-                    "border-b border-background-125 pb-4",
+                  isPrimary && "border-b border-background-125 pb-4",
                 )}
               >
                 <SignupButton
@@ -197,11 +198,12 @@ export function ChooseSignupMethodForm({
                     buttonRefs.current[index] = el;
                   }}
                   authMethod={option}
+                  isPrimary={isPrimary}
                   className={cn(
                     "ring-0 focus-visible:ring-0 ring-offset-0 focus-visible:ring-offset-0 outline-none",
-                    isWebauthn ? "justify-center" : "justify-start",
+                    isPrimary ? "justify-center" : "justify-start",
                     isHighlighted &&
-                      (isWebauthn ? "opacity-80" : "bg-background-300"),
+                      (isPrimary ? "opacity-80" : "bg-background-300"),
                   )}
                   onClick={(e) => handleSelectedOption(e, option)}
                   onKeyDown={(e) => handleSelectedOption(e, option)}
