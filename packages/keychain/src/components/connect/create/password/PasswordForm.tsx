@@ -66,7 +66,7 @@ export function PasswordFormDrawer({
   return (
     <Drawer isOpen={isOpen} onClose={handleClose}>
       <DrawerContent
-        title={`${isLogin ? "Login" : "Sign Up"} with Password`}
+        title={`${isLogin ? "Log In" : "Sign Up"} with Password`}
         icon={<KeyIcon variant="solid" />}
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -136,7 +136,7 @@ export function PasswordFormDrawer({
               id="primary-button"
               isLoading={isLoading}
             >
-              {isLogin ? "Login" : "Sign Up"}
+              {isLogin ? "Log In" : "Sign Up"}
             </Button>
           </div>
         </form>
