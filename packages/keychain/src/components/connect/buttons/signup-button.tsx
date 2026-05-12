@@ -19,6 +19,7 @@ import { forwardRef } from "react";
 
 interface SignupButtonProps extends React.ComponentProps<typeof Button> {
   authMethod: string;
+  isPrimary?: boolean;
 }
 
 const OPTIONS: Partial<
@@ -91,7 +92,7 @@ const OPTIONS: Partial<
 };
 
 export const SignupButton = forwardRef<HTMLButtonElement, SignupButtonProps>(
-  ({ authMethod, ...props }, ref) => {
+  ({ authMethod, isPrimary, ...props }, ref) => {
     const { isLoading, disabled, ...restProps } = props;
 
     const option = OPTIONS[authMethod];
@@ -103,7 +104,15 @@ export const SignupButton = forwardRef<HTMLButtonElement, SignupButtonProps>(
       return null;
     }
 
-    const { Icon, label, ...restOptionProps } = option;
+    const { Icon, label, ...restOptionProps } = {
+      ...option,
+      variant:
+        isPrimary === true
+          ? "primary"
+          : isPrimary === false
+            ? "secondary"
+            : option.variant,
+    };
 
     return (
       <Button
