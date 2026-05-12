@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/context/toast";
 import {
   useMeQuery,
@@ -22,6 +22,7 @@ import {
   CardContent,
   HeaderInner,
   PhoneNumberInput,
+  PinInput,
   isValidPhoneNumber,
 } from "@cartridge/controller-ui";
 import { useNavigation } from "@/context";
@@ -522,73 +523,4 @@ export function Verification({
     default:
       return null;
   }
-}
-
-function PinInput({
-  length = 6,
-  value,
-  onChange,
-  onEnter,
-  disabled,
-}: {
-  length?: number;
-  value: string;
-  onChange: (val: string) => void;
-  onEnter?: () => void;
-  disabled?: boolean;
-}) {
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number,
-  ) => {
-    const val = e.target.value;
-    if (!/^\d*$/.test(val)) return;
-    const newVal = value.split("");
-    newVal[index] = val.slice(-1);
-    onChange(newVal.join(""));
-    if (val && index < length - 1) inputRefs.current[index + 1]?.focus();
-  };
-
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    index: number,
-  ) => {
-    if (e.key === "Backspace" && !value[index] && index > 0)
-      inputRefs.current[index - 1]?.focus();
-    if (e.key === "Enter" && value.length === length && onEnter) onEnter();
-  };
-
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const pastedData = e.clipboardData.getData("text");
-    const digits = pastedData.replace(/\D/g, "").slice(0, length);
-    if (digits) {
-      onChange(digits);
-      inputRefs.current[Math.min(digits.length, length - 1)]?.focus();
-    }
-  };
-
-  return (
-    <div className="flex gap-3 justify-center">
-      {Array.from({ length }).map((_, i) => (
-        <Input
-          key={i}
-          ref={(el: HTMLInputElement | null) => (inputRefs.current[i] = el)}
-          className="w-11 h-14 text-center text-md bg-background-100 border-background-200 focus:border-primary-100"
-          value={value[i] || ""}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            handleChange(e, i)
-          }
-          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
-            handleKeyDown(e, i)
-          }
-          onPaste={handlePaste}
-          disabled={disabled}
-          maxLength={1}
-          inputMode="numeric"
-        />
-      ))}
-    </div>
-  );
 }
