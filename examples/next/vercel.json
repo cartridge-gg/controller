@@ -1,6 +1,4 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npx -y pnpm@11.0.5 install --frozen-lockfile",
   "git": {
     "deploymentEnabled": true
   }
