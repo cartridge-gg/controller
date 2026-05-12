@@ -45,6 +45,12 @@ export function WalletSelectionDrawer({
     onCoinflowSelect,
   } = useOnchainPurchaseContext();
 
+  const isAndroid = useMemo(
+    () =>
+      typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent),
+    [],
+  );
+
   const [step, setStep] = useState<DrawerStep>("method");
   const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
@@ -314,7 +320,7 @@ export function WalletSelectionDrawer({
                   )}
                 />
               )}
-              {showFiatOptions && (
+              {showFiatOptions && !isAndroid && (
                 <PurchaseCard
                   key="apple-pay"
                   text="Apple Pay"

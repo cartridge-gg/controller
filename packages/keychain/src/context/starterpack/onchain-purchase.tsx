@@ -329,6 +329,9 @@ export const OnchainPurchaseProvider = ({
 
   // Handle Apple Pay selection from URL (returning from verification)
   useEffect(() => {
+    const isAndroid =
+      typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent);
+    if (isAndroid) return;
     const searchParams = new URLSearchParams(location.search);
     if (searchParams.get("method") === "apple-pay") {
       resetCoinbasePurchase();
