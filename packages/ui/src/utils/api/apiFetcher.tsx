@@ -49,7 +49,9 @@ export async function doFetch<TData>(
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throw new Error(
+      `HTTP error ${response.status}: ${(await response.text()) || "Unknown error"}`,
+    );
   }
 
   const json = await response.json();

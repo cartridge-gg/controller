@@ -358,7 +358,7 @@ export function CreateControllerView({
       return false;
     }
     return (
-      smsState != null ||
+      // sms needs a new otp code to retry
       (authMethod === "password" && isLogin) ||
       authMethod === "google" ||
       authMethod === "discord" ||
@@ -367,7 +367,7 @@ export function CreateControllerView({
       authMethod === "rabby" ||
       authMethod === "walletconnect"
     );
-  }, [isLogin, authMethod, smsState, changeWallet]);
+  }, [isLogin, authMethod, changeWallet]);
 
   const handleRetry = useCallback(() => {
     setError(undefined);
