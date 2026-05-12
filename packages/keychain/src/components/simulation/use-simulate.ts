@@ -47,6 +47,7 @@ export const useSimulateBalanceChanges = (
       return await parseSimulationEvents(results, provider, BigInt(address));
     };
 
+    let timeoutId: NodeJS.Timeout;
     if (controller && calls.length > 0) {
       setIsLoading(true);
       simulateTransactions()
@@ -61,7 +62,7 @@ export const useSimulateBalanceChanges = (
         .finally(() => {
           setIsLoading(false);
           if (repeatDelayInSeconds > 0) {
-            setTimeout(() => {
+            timeoutId = setTimeout(() => {
               if (mounted) {
                 setRepeatCounter((c) => c + 1);
               }
@@ -72,6 +73,7 @@ export const useSimulateBalanceChanges = (
 
     return () => {
       mounted = false;
+      clearTimeout(timeoutId);
     };
   }, [
     controller,
