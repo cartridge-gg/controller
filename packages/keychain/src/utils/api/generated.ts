@@ -2634,7 +2634,7 @@ export enum LayerswapDestinationNetwork {
 
 export type LayerswapPayment = {
   __typename?: "LayerswapPayment";
-  cryptoPaymentId: Scalars["ID"];
+  cryptoPaymentId?: Maybe<Scalars["ID"]>;
   expiresAt: Scalars["Time"];
   sourceDepositAddress: Scalars["String"];
   sourceNetwork: LayerswapSourceNetwork;
@@ -7983,7 +7983,7 @@ export type CreateLayerswapPaymentMutation = {
   __typename?: "Mutation";
   createLayerswapPayment: {
     __typename?: "LayerswapPayment";
-    cryptoPaymentId: string;
+    cryptoPaymentId?: string | null;
     swapId: string;
     status: LayerswapStatus;
     sourceNetwork: LayerswapSourceNetwork;
@@ -8002,7 +8002,7 @@ export type CreateLayerswapDepositMutation = {
   __typename?: "Mutation";
   createLayerswapDeposit: {
     __typename?: "LayerswapPayment";
-    cryptoPaymentId: string;
+    cryptoPaymentId?: string | null;
     swapId: string;
     status: LayerswapStatus;
     sourceNetwork: LayerswapSourceNetwork;
@@ -8113,7 +8113,7 @@ export type CreateCoinbaseOnRampOrderMutation = {
     };
     layerswapPayment?: {
       __typename?: "LayerswapPayment";
-      cryptoPaymentId: string;
+      cryptoPaymentId?: string | null;
       swapId: string;
       status: LayerswapStatus;
       sourceNetwork: LayerswapSourceNetwork;
@@ -8153,7 +8153,7 @@ export type CreateCoinbaseLayerswapOrderMutation = {
     };
     layerswapPayment?: {
       __typename?: "LayerswapPayment";
-      cryptoPaymentId: string;
+      cryptoPaymentId?: string | null;
       swapId: string;
       status: LayerswapStatus;
       sourceNetwork: LayerswapSourceNetwork;
@@ -8296,7 +8296,7 @@ export type CryptoPaymentFieldsFragment = {
 
 export type LayerswapPaymentFieldsFragment = {
   __typename?: "LayerswapPayment";
-  cryptoPaymentId: string;
+  cryptoPaymentId?: string | null;
   swapId: string;
   status: LayerswapStatus;
   sourceNetwork: LayerswapSourceNetwork;
@@ -8347,7 +8347,7 @@ export type CoinbaseOnrampOrderResponseFieldsFragment = {
   };
   layerswapPayment?: {
     __typename?: "LayerswapPayment";
-    cryptoPaymentId: string;
+    cryptoPaymentId?: string | null;
     swapId: string;
     status: LayerswapStatus;
     sourceNetwork: LayerswapSourceNetwork;
