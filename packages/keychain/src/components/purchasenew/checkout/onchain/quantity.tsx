@@ -1,4 +1,4 @@
-import { Button, MinusIcon, PlusIcon } from "@cartridge/controller-ui";
+import { Button } from "@cartridge/controller-ui";
 
 interface QuantityControlsProps {
   quantity: number;
@@ -20,36 +20,15 @@ export function QuantityControls({
   isLoading,
   isSendingDeposit,
   globalDisabled,
-  hasSufficientBalance,
   bridgeFrom,
-  onIncrement,
-  onDecrement,
   onPurchase,
   onBridge,
   purchaseLabel: customPurchaseLabel,
-  isApplePayAmountTooLow,
 }: QuantityControlsProps) {
   const purchaseLabel = customPurchaseLabel || `Buy ${quantity}`;
-  const isQuantityDisabled =
-    (globalDisabled && hasSufficientBalance && !isApplePayAmountTooLow) ||
-    isSendingDeposit;
 
   return (
     <div className="flex flex-row gap-3">
-      <Button
-        variant="secondary"
-        onClick={onDecrement}
-        disabled={isQuantityDisabled || quantity <= 1}
-      >
-        <MinusIcon size="xs" />
-      </Button>
-      <Button
-        variant="secondary"
-        onClick={onIncrement}
-        disabled={isQuantityDisabled}
-      >
-        <PlusIcon size="xs" variant="solid" />
-      </Button>
       <Button
         className="w-full"
         isLoading={isLoading || isSendingDeposit}
