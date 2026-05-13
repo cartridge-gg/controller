@@ -53,6 +53,7 @@ import {
   type SignupAuthStep,
   type SignupErrorCategory,
 } from "@/types/analytics";
+import { SmsOtpState } from "./sms/SmsOtpForm";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -250,11 +251,7 @@ export function useCreateController({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [changeWallet, setChangeWallet] = useState<boolean>(false);
-  const [smsState, setSmsState] = useState<{
-    phoneNumber: string;
-    otpId: string;
-    otpEncryptionTargetBundle: string;
-  } | null>(null);
+  const [smsState, setSmsState] = useState<SmsOtpState | null>(null);
 
   const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(
     undefined,

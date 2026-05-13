@@ -135,7 +135,8 @@ interface DecodedIdToken extends JwtPayload {
   tknonce?: string;
 }
 
-export type SocialProvider = Extract<AuthOption, "discord" | "google">;
+export type SocialProviderType = "google" | "discord";
+export type SocialProvider = Extract<AuthOption, SocialProviderType>;
 
 export const fetchApi = fetchApiCreator(
   `${import.meta.env.VITE_CARTRIDGE_API_URL}/oauth2`,
