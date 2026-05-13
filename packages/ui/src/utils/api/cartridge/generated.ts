@@ -2629,7 +2629,7 @@ export enum LayerswapDestinationNetwork {
 
 export type LayerswapPayment = {
   __typename?: 'LayerswapPayment';
-  cryptoPaymentId: Scalars['ID'];
+  cryptoPaymentId?: Maybe<Scalars['ID']>;
   expiresAt: Scalars['Time'];
   sourceDepositAddress: Scalars['String'];
   sourceNetwork: LayerswapSourceNetwork;
@@ -8046,14 +8046,14 @@ export type CreateLayerswapPaymentMutationVariables = Exact<{
 }>;
 
 
-export type CreateLayerswapPaymentMutation = { __typename?: 'Mutation', createLayerswapPayment: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } };
+export type CreateLayerswapPaymentMutation = { __typename?: 'Mutation', createLayerswapPayment: { __typename?: 'LayerswapPayment', cryptoPaymentId?: string | null, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } };
 
 export type CreateLayerswapDepositMutationVariables = Exact<{
   input: CreateLayerswapDepositInput;
 }>;
 
 
-export type CreateLayerswapDepositMutation = { __typename?: 'Mutation', createLayerswapDeposit: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } };
+export type CreateLayerswapDepositMutation = { __typename?: 'Mutation', createLayerswapDeposit: { __typename?: 'LayerswapPayment', cryptoPaymentId?: string | null, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } };
 
 export type LayerswapQuoteQueryVariables = Exact<{
   input: CreateLayerswapDepositInput;
@@ -8082,14 +8082,14 @@ export type CreateCoinbaseOnRampOrderMutationVariables = Exact<{
 }>;
 
 
-export type CreateCoinbaseOnRampOrderMutation = { __typename?: 'Mutation', createCoinbaseOnrampOrder: { __typename?: 'CoinbaseOnrampOrderResponse', coinbaseOrder: { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> }, layerswapPayment?: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } | null } };
+export type CreateCoinbaseOnRampOrderMutation = { __typename?: 'Mutation', createCoinbaseOnrampOrder: { __typename?: 'CoinbaseOnrampOrderResponse', coinbaseOrder: { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> }, layerswapPayment?: { __typename?: 'LayerswapPayment', cryptoPaymentId?: string | null, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } | null } };
 
 export type CreateCoinbaseLayerswapOrderMutationVariables = Exact<{
   input: CreateCoinbaseLayerswapOrderInput;
 }>;
 
 
-export type CreateCoinbaseLayerswapOrderMutation = { __typename?: 'Mutation', createCoinbaseLayerswapOrder: { __typename?: 'CoinbaseOnrampOrderResponse', coinbaseOrder: { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> }, layerswapPayment?: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } | null } };
+export type CreateCoinbaseLayerswapOrderMutation = { __typename?: 'Mutation', createCoinbaseLayerswapOrder: { __typename?: 'CoinbaseOnrampOrderResponse', coinbaseOrder: { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> }, layerswapPayment?: { __typename?: 'LayerswapPayment', cryptoPaymentId?: string | null, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } | null } };
 
 export type CoinbaseOnRampOrderQueryVariables = Exact<{
   orderId: Scalars['String'];
@@ -8107,11 +8107,11 @@ export type CoinbaseOnRampQuoteQuery = { __typename?: 'Query', coinbaseOnrampQuo
 
 export type CryptoPaymentFieldsFragment = { __typename?: 'CryptoPayment', id: string, tokenAmount: string, status: CryptoPaymentStatus, network: Network, tokenAddress: string, depositAddress: string, expiresAt: string };
 
-export type LayerswapPaymentFieldsFragment = { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string };
+export type LayerswapPaymentFieldsFragment = { __typename?: 'LayerswapPayment', cryptoPaymentId?: string | null, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string };
 
 export type CoinbaseOnrampOrderFieldsFragment = { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> };
 
-export type CoinbaseOnrampOrderResponseFieldsFragment = { __typename?: 'CoinbaseOnrampOrderResponse', coinbaseOrder: { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> }, layerswapPayment?: { __typename?: 'LayerswapPayment', cryptoPaymentId: string, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } | null };
+export type CoinbaseOnrampOrderResponseFieldsFragment = { __typename?: 'CoinbaseOnrampOrderResponse', coinbaseOrder: { __typename?: 'CoinbaseOnrampOrder', orderId: string, paymentLink: string, paymentLinkType: string, paymentTotal: string, paymentCurrency: string, purchaseAmount: string, purchaseCurrency: string, destinationAddress: string, destinationNetwork: string, fees: Array<{ __typename?: 'CoinbaseOnrampFee', type: string, amount: string, currency: string }> }, layerswapPayment?: { __typename?: 'LayerswapPayment', cryptoPaymentId?: string | null, swapId: string, status: LayerswapStatus, sourceNetwork: LayerswapSourceNetwork, sourceTokenAmount: string, sourceTokenAddress: string, sourceDepositAddress: string, expiresAt: string } | null };
 
 export type PlaythroughsQueryVariables = Exact<{
   projects: Array<PlaythroughProject> | PlaythroughProject;
