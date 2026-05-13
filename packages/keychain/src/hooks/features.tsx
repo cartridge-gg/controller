@@ -12,9 +12,10 @@ const LOCAL_STORAGE_KEY = "@cartridge/features";
 
 export type Feature =
   | "none"
+  | "coinflow-support"
+  | "user-data"
   | "connection-instagram"
   | "connection-tiktok"
-  | "coinflow-support"
   | "registered-accounts"
   | "recovery-accounts";
 
