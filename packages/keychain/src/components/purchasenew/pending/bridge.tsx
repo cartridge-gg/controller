@@ -14,13 +14,15 @@ import {
 } from "@/context";
 import { Explorer, getExplorer } from "@/hooks/starterpack/layerswap";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useConnection } from "@/hooks/connection";
 import { retryWithBackoff } from "@/utils/retry";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { TransactionFinalityStatus } from "starknet";
 import { CoinbaseOnrampStatus } from "@/utils/api";
 import { useStarterpackPlayHandler } from "@/hooks/starterpack";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 
 interface TransitionStepProps {
   isVisible: boolean;
@@ -108,6 +110,21 @@ export function BridgePending({
 
   const purchaseTriggered = useRef(false);
 
+  const analyticsMethod = paymentMethod ?? "crypto";
+  const failedReportedRef = useRef(false);
+  const reportFailure = useCallback(
+    (err: Error, stage: string) => {
+      if (failedReportedRef.current) return;
+      failedReportedRef.current = true;
+      captureAnalyticsEvent(posthog, "purchase_failed", {
+        method: analyticsMethod,
+        error_code: sanitizeErrorCode(err),
+        stage,
+      });
+    },
+    [analyticsMethod],
+  );
+
   // Handle Apple Pay (Coinbase) order status from context polling
   useEffect(() => {
     if (paymentMethod === "apple-pay" && !paymentCompleted) {
@@ -115,10 +132,18 @@ export function BridgePending({
         setError(undefined);
         setDepositCompleted(true);
       } else if (orderStatus === CoinbaseOnrampStatus.Failed) {
-        setError(new Error("Coinbase payment failed. Please try again."));
+        const err = new Error("Coinbase payment failed. Please try again.");
+        setError(err);
+        reportFailure(err, "payment");
       }
     }
-  }, [paymentMethod, paymentSuccess, orderStatus, paymentCompleted]);
+  }, [
+    paymentMethod,
+    paymentSuccess,
+    orderStatus,
+    paymentCompleted,
+    reportFailure,
+  ]);
 
   useEffect(() => {
     if (wallet && initialBridgeHash) {
@@ -132,9 +157,10 @@ export function BridgePending({
             err,
           );
           setError(err as Error);
+          reportFailure(err as Error, "deposit");
         });
     }
-  }, [wallet, initialBridgeHash, externalWaitForTransaction]);
+  }, [wallet, initialBridgeHash, externalWaitForTransaction, reportFailure]);
 
   useEffect(() => {
     if (swapId) {
@@ -157,9 +183,10 @@ export function BridgePending({
         .catch((err) => {
           console.error("Failed to wait for deposit:", err);
           setError(err as Error);
+          reportFailure(err as Error, "bridge");
         });
     }
-  }, [swapId, waitForDeposit, controller]);
+  }, [swapId, waitForDeposit, controller, reportFailure]);
 
   useEffect(() => {
     if (depositCompleted) {
@@ -176,10 +203,11 @@ export function BridgePending({
       onOnchainPurchase().catch((err) => {
         console.error("Auto-purchase failed:", err);
         setError(err as Error);
+        reportFailure(err as Error, "purchase");
         setIsPurchasing(false);
       });
     }
-  }, [paymentCompleted, onOnchainPurchase]);
+  }, [paymentCompleted, onOnchainPurchase, reportFailure]);
 
   // Detect purchase transaction hash from context
   useEffect(() => {
@@ -194,6 +222,7 @@ export function BridgePending({
   // Wait for Starknet purchase transaction
   useEffect(() => {
     if (purchaseTxHash && controller) {
+      const startedAt = Date.now();
       retryWithBackoff(() =>
         controller.provider.waitForTransaction(purchaseTxHash, {
           retryInterval: 1000,
@@ -203,13 +232,20 @@ export function BridgePending({
           ],
         }),
       )
-        .then(() => setPurchaseCompleted(true))
+        .then(() => {
+          setPurchaseCompleted(true);
+          captureAnalyticsEvent(posthog, "purchase_completed", {
+            method: analyticsMethod,
+            duration_ms: Date.now() - startedAt,
+          });
+        })
         .catch((err) => {
           console.error("Purchase confirmation failed:", err);
           setError(err as Error);
+          reportFailure(err as Error, "confirm");
         });
     }
-  }, [purchaseTxHash, controller]);
+  }, [purchaseTxHash, controller, analyticsMethod, reportFailure]);
 
   return (
     <>

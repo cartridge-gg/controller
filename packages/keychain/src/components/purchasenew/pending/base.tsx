@@ -13,6 +13,8 @@ import { TransactionFinalityStatus } from "starknet";
 import { retryWithBackoff } from "@/utils/retry";
 import { getExplorer } from "@/hooks/starterpack/layerswap";
 import { useStarterpackPlayHandler } from "@/hooks/starterpack";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 
 export interface TransactionPendingBaseProps {
   /** Header title (e.g., "Purchasing Village Kit") */
@@ -31,6 +33,8 @@ export interface TransactionPendingBaseProps {
   quantityText?: string;
   /** Callback function to handle completion */
   onCompleted?: () => void;
+  /** Payment method for analytics. When set, fires purchase_completed/failed on resolution. */
+  analyticsMethod?: string;
 }
 
 /**
@@ -46,6 +50,7 @@ export function TransactionPendingBase({
   buttonText,
   quantityText,
   onCompleted,
+  analyticsMethod,
 }: TransactionPendingBaseProps) {
   const { isMainnet, controller } = useConnection();
   const handlePlay = useStarterpackPlayHandler();
@@ -53,6 +58,7 @@ export function TransactionPendingBase({
 
   useEffect(() => {
     if (controller) {
+      const startedAt = Date.now();
       retryWithBackoff(() =>
         controller.provider.waitForTransaction(transactionHash, {
           retryInterval: 1000,
@@ -64,13 +70,25 @@ export function TransactionPendingBase({
       )
         .then(() => {
           setIsPending(false);
+          if (analyticsMethod) {
+            captureAnalyticsEvent(posthog, "purchase_completed", {
+              method: analyticsMethod,
+              duration_ms: Date.now() - startedAt,
+            });
+          }
         })
         .catch((error) => {
           console.error("Failed to wait for transaction after retries:", error);
-          // Could set an error state here if needed
+          if (analyticsMethod) {
+            captureAnalyticsEvent(posthog, "purchase_failed", {
+              method: analyticsMethod,
+              error_code: sanitizeErrorCode(error),
+              stage: "confirm",
+            });
+          }
         });
     }
-  }, [controller, transactionHash]);
+  }, [controller, transactionHash, analyticsMethod]);
 
   useEffect(() => {
     if (!isPending && onCompleted && handlePlay) {

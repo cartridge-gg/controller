@@ -18,6 +18,8 @@ import { ExternalWallet } from "@cartridge/controller";
 import { useOnchainPurchaseContext, useStarterpackContext } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { useFeature } from "@/hooks/features";
+import { posthog } from "@/components/provider/posthog";
+import { captureAnalyticsEvent } from "@/types/analytics";
 import { networkWalletData } from "../../wallet/config";
 import { Network } from "../../types";
 
@@ -166,22 +168,34 @@ export function WalletSelectionDrawer({
   }, [step, showFiatOptions, setStep]);
 
   const handleApplePaySelect = useCallback(async () => {
+    captureAnalyticsEvent(posthog, "purchase_method_selected", {
+      method: "apple-pay",
+    });
     onApplePaySelect();
     onClose();
   }, [onApplePaySelect, onClose]);
 
   const handleCoinflowSelect = useCallback(async () => {
+    captureAnalyticsEvent(posthog, "purchase_method_selected", {
+      method: "coinflow",
+    });
     onCoinflowSelect();
     onClose();
   }, [onCoinflowSelect, onClose]);
 
   const onControllerWalletSelect = useCallback(() => {
+    captureAnalyticsEvent(posthog, "purchase_method_selected", {
+      method: "controller-starknet",
+    });
     clearSelectedWallet();
     onClose();
   }, [clearSelectedWallet, onClose]);
 
   const onExternalWalletSelect = useCallback(
     async (wallet: ExternalWallet, network: Network) => {
+      captureAnalyticsEvent(posthog, "purchase_method_selected", {
+        method: `${wallet.type}-${network.platform}`,
+      });
       setIsConnecting(true);
       setError(null);
 
