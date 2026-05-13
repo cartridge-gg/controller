@@ -30,8 +30,7 @@ const accountSearchResultVariants = cva(
 );
 
 export interface AccountSearchResultItemProps
-  extends
-    Omit<HTMLAttributes<HTMLDivElement>, "id">,
+  extends Omit<HTMLAttributes<HTMLDivElement>, "id">,
     VariantProps<typeof accountSearchResultVariants> {
   result: AccountSearchResult;
   isSelected?: boolean;
