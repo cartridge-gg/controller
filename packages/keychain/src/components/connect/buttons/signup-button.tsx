@@ -13,6 +13,8 @@ import {
   Spinner,
   WalletConnectColorIcon,
   LockIcon,
+  KeyIcon,
+  WalletIcon,
 } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
 import { forwardRef } from "react";
@@ -89,6 +91,16 @@ const OPTIONS: Partial<
     Icon: (props: IconProps) => <MobileIcon {...props} variant="solid" />,
     label: AUTH_METHODS_LABELS.sms,
   },
+  other: {
+    variant: "secondary",
+    Icon: (props: IconProps) => <KeyIcon {...props} variant="solid" />,
+    label: "Other Options",
+  },
+  crypto: {
+    variant: "secondary",
+    Icon: (props: IconProps) => <WalletIcon {...props} variant="solid" />,
+    label: "Crypto",
+  },
 };
 
 export const SignupButton = forwardRef<HTMLButtonElement, SignupButtonProps>(
@@ -119,7 +131,12 @@ export const SignupButton = forwardRef<HTMLButtonElement, SignupButtonProps>(
         ref={ref}
         {...restProps}
         {...restOptionProps}
-        className={cn(restProps.className, "w-full h-fit px-3 py-2.5 gap-2")}
+        className={cn(
+          "w-full h-fit px-3 py-2.5 gap-2 justify-start",
+          "ring-0 focus-visible:ring-0 ring-offset-0 focus-visible:ring-offset-0 outline-none",
+          isPrimary && "justify-center data-[highlighted=true]:opacity-80",
+          restProps.className,
+        )}
         isLoading={false}
         disabled={isLoading || disabled}
       >

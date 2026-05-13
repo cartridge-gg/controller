@@ -1,15 +1,22 @@
-import { AuthOption } from "@cartridge/controller";
+import { AuthOption, EXTERNAL_WALLETS } from "@cartridge/controller";
 import {
   AchievementPlayerAvatar,
   cn,
   Drawer,
   DrawerContent,
   PlusIcon,
+  WalletIcon,
 } from "@cartridge/controller-ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 import { credentialToAuth } from "../types";
 import { useUsernameValidation } from "./useUsernameValidation";
+
+export const INITIAL_OPTIONS: AuthOption[] = ["sms", "webauthn"];
+export const WALLET_OPTIONS: AuthOption[] = [
+  ...EXTERNAL_WALLETS,
+  "walletconnect",
+];
 
 interface ChooseSignupMethodProps {
   isOpen?: boolean;
@@ -36,7 +43,17 @@ export function ChooseSignupMethodForm({
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const firstOptions = useMemo(() => ["sms", "webauthn"], []);
+  const [mode, setMode] = useState<"initial" | "expanded" | "crypto">(
+    "initial",
+  );
+
+  const isLogin = validation.exists;
+
+  useEffect(() => {
+    if (isOpen) {
+      setMode("initial");
+    }
+  }, [isOpen, setMode]);
 
   const options = useMemo(() => {
     let opts: AuthOption[];
@@ -52,16 +69,31 @@ export function ChooseSignupMethodForm({
       opts = authOptions;
     }
 
+    if (!isLogin) {
+      switch (mode) {
+        default:
+        case "initial":
+          opts = opts.filter((opt) => INITIAL_OPTIONS.includes(opt));
+          break;
+        case "expanded":
+          opts = opts.filter((opt) => !WALLET_OPTIONS.includes(opt));
+          break;
+        case "crypto":
+          opts = opts.filter((opt) => WALLET_OPTIONS.includes(opt));
+          break;
+      }
+    }
+
     // Sort to ensure webauthn is first if it exists
     return opts.sort((a, b) => {
-      const aIndex = firstOptions.indexOf(a);
-      const bIndex = firstOptions.indexOf(b);
+      const aIndex = INITIAL_OPTIONS.indexOf(a);
+      const bIndex = INITIAL_OPTIONS.indexOf(b);
       if (aIndex === bIndex) return 0;
       if (aIndex === -1) return 1;
       if (bIndex === -1) return -1;
       return aIndex - bIndex;
     });
-  }, [validation.signers, authOptions, firstOptions]);
+  }, [validation.signers, authOptions, mode, isLogin]);
 
   // Initialize button refs array
   useEffect(() => {
@@ -166,24 +198,30 @@ export function ChooseSignupMethodForm({
   };
 
   const { title, icon } = useMemo(() => {
-    if (validation.exists) {
+    if (isLogin) {
       return {
         title: "Log In",
         icon: <AchievementPlayerAvatar username={username ?? ""} />,
       };
     }
+    if (mode === "crypto") {
+      return {
+        title: "Choose Wallet",
+        icon: <WalletIcon variant="solid" />,
+      };
+    }
     return {
-      title: "Choose your method",
+      title: "Create Controller",
       icon: <PlusIcon variant="line" />,
     };
-  }, [validation.exists, username]);
+  }, [isLogin, username, mode]);
 
   return (
     <Drawer isOpen={isOpen} onClose={handleClose}>
       <DrawerContent title={title} icon={icon}>
         <div className="flex flex-col gap-3">
           {options.map((option, index) => {
-            const isPrimary = index === 0 && firstOptions.includes(option);
+            const isPrimary = index === 0 && INITIAL_OPTIONS.includes(option);
             const isHighlighted = highlightedIndex === index;
 
             return (
@@ -199,12 +237,6 @@ export function ChooseSignupMethodForm({
                   }}
                   authMethod={option}
                   isPrimary={isPrimary}
-                  className={cn(
-                    "ring-0 focus-visible:ring-0 ring-offset-0 focus-visible:ring-offset-0 outline-none",
-                    isPrimary ? "justify-center" : "justify-start",
-                    isHighlighted &&
-                      (isPrimary ? "opacity-80" : "bg-background-300"),
-                  )}
                   onClick={(e) => handleSelectedOption(e, option)}
                   onKeyDown={(e) => handleSelectedOption(e, option)}
                   disabled={isLoading && selectedAuth !== option}
@@ -214,6 +246,18 @@ export function ChooseSignupMethodForm({
               </div>
             );
           })}
+          {!isLogin && mode === "initial" && (
+            <SignupButton
+              authMethod="other"
+              onClick={() => setMode("expanded")}
+            />
+          )}
+          {!isLogin && mode === "expanded" && (
+            <SignupButton
+              authMethod="crypto"
+              onClick={() => setMode("crypto")}
+            />
+          )}
         </div>
       </DrawerContent>
     </Drawer>

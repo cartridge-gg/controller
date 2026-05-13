@@ -1,3 +1,4 @@
+import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
 import { AuthOption } from "@cartridge/controller";
 import {
   Button,
@@ -29,16 +30,10 @@ export function SignerPendingDrawer({
   onRetry,
   children,
 }: SignerPendingDrawerProps) {
-  const authName = useMemo(() => {
-    switch (authenticationMode) {
-      case undefined:
-        return "";
-      case "sms":
-        return "SMS";
-      default:
-        return `${authenticationMode.slice(0, 1).toUpperCase()}${authenticationMode.slice(1).toLowerCase()}`;
-    }
-  }, [authenticationMode]);
+  const authName = useMemo(
+    () => (authenticationMode ? AUTH_METHODS_LABELS[authenticationMode] : "?"),
+    [authenticationMode],
+  );
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>
       <DrawerContent
