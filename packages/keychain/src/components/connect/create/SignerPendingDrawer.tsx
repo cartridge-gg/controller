@@ -8,6 +8,7 @@ import {
   WarningIcon,
   CheckIcon,
 } from "@cartridge/controller-ui";
+import { useMemo } from "react";
 
 interface SignerPendingDrawerProps {
   isOpen: boolean;
@@ -28,10 +29,20 @@ export function SignerPendingDrawer({
   onRetry,
   children,
 }: SignerPendingDrawerProps) {
+  const authName = useMemo(() => {
+    switch (authenticationMode) {
+      case undefined:
+        return "";
+      case "sms":
+        return "SMS";
+      default:
+        return `${authenticationMode.slice(0, 1).toUpperCase()}${authenticationMode.slice(1).toLowerCase()}`;
+    }
+  }, [authenticationMode]);
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>
       <DrawerContent
-        title={`Signup with ${authenticationMode}`}
+        title={`Sign Up with ${authName}`}
         icon={isLoading ? <Spinner /> : error ? <WarningIcon /> : <CheckIcon />}
       >
         {authenticationMode && (

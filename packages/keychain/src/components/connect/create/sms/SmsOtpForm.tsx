@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AuthOption } from "@cartridge/controller";
 import {
   Button,
   Drawer,
@@ -10,6 +9,12 @@ import {
   isValidPhoneNumber,
 } from "@cartridge/controller-ui";
 
+export interface SmsOtpState {
+  phoneNumber: string;
+  otpId: string;
+  otpEncryptionTargetBundle: string;
+}
+
 export interface SmsOtpDrawerProps {
   isOpen: boolean;
   isLogin: boolean;
@@ -17,13 +22,9 @@ export interface SmsOtpDrawerProps {
   /** Sends the SMS. On success the hook sets smsState (null → otp step). */
   onInitOtp: (phoneNumber: string) => Promise<void>;
   /** Called with ("sms", otpCode) to complete authentication. */
-  onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
+  onSubmitCode: (otpCode: string) => void;
   /** null = phone step; non-null = otp step (phone number confirmed). */
-  smsState: {
-    phoneNumber: string;
-    otpId: string;
-    otpEncryptionTargetBundle: string;
-  } | null;
+  smsState: SmsOtpState | null;
 }
 
 export function SmsOtpDrawer({
@@ -31,7 +32,7 @@ export function SmsOtpDrawer({
   isLogin,
   onClose,
   onInitOtp,
-  onSubmit,
+  onSubmitCode,
   smsState,
 }: SmsOtpDrawerProps) {
   const step = smsState?.otpId ? "otp" : "phone";
@@ -135,7 +136,7 @@ export function SmsOtpDrawer({
           setOtpCodeError("Invalid code");
           return;
         }
-        onSubmit("sms", otpCode);
+        onSubmitCode(otpCode);
       }
     },
     [
@@ -145,7 +146,7 @@ export function SmsOtpDrawer({
       otpCode,
       isOtpCodeValid,
       onInitOtp,
-      onSubmit,
+      onSubmitCode,
     ],
   );
 

@@ -33,7 +33,7 @@ import { useDevice } from "@/hooks/device";
 import { posthog } from "@/components/provider/posthog";
 import { AccountSearchResult } from "@/hooks/account";
 import { PasswordFormDrawer } from "./password/PasswordForm";
-import { SmsOtpDrawer } from "./sms/SmsOtpForm";
+import { SmsOtpDrawer, SmsOtpState } from "./sms/SmsOtpForm";
 import { SignerPendingDrawer } from "./SignerPendingDrawer";
 
 interface CreateControllerViewProps {
@@ -53,11 +53,7 @@ interface CreateControllerViewProps {
   onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onInitOtp: (phoneNumber: string) => Promise<void>;
-  smsState: {
-    phoneNumber: string;
-    otpId: string;
-    otpEncryptionTargetBundle: string;
-  } | null;
+  smsState: SmsOtpState | null;
   isSlot?: boolean;
   authenticationStep: AuthenticationStep;
   setAuthenticationStep: (value: AuthenticationStep) => void;
@@ -441,7 +437,7 @@ export function CreateControllerView({
         isLogin={isLogin}
         onClose={onClose}
         onInitOtp={onInitOtp}
-        onSubmit={onSubmit}
+        onSubmitCode={(otpCode: string) => onSubmit("sms", otpCode)}
         smsState={smsState}
       />
       <SignerPendingDrawer
