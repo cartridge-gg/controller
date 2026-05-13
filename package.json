@@ -1,6 +1,6 @@
 {
   "name": "controller",
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@11.0.5+sha512.94fa09e72016402aefce788e46994e18eb1922998b16b6fd5aa6bafd8ae4dea05d0852f60247fdb7d5ab8199a7b0beda830398f3f80cb9f822398522a1535481",
   "private": true,
   "repository": {
     "type": "git",
@@ -39,7 +39,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#e94909f",
+    "@cartridge/presets": "catalog:",
     "@cartridge/controller-ui": "workspace:*",
     "tailwindcss": "catalog:",
     "@graphql-codegen/cli": "^2.6.2",
@@ -52,20 +52,6 @@
     "husky": "^9.1.7",
     "turbo": "^2.5.4",
     "vercel": "^37.14.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@radix-ui/react-accordion": "1.2.1",
-      "typescript": "catalog:",
-      "@noble/curves": "catalog:",
-      "@noble/hashes": "catalog:",
-      "@dojoengine/core": "catalog:",
-      "@dojoengine/torii-wasm": "catalog:",
-      "@dojoengine/sdk": "catalog:",
-      "@starknet-react/core": "catalog:",
-      "@starknet-react/chains": "catalog:",
-      "@starknet-io/types-js": "catalog:"
-    }
   },
   "files": [
     "*.js",

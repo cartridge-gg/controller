@@ -70,7 +70,7 @@
     "test:ci": "vitest --passWithNoTests"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#90a5fe0",
+    "@cartridge/presets": "catalog:",
     "@radix-ui/react-accordion": "^1.2.6",
     "@radix-ui/react-alert-dialog": "^1.1.9",
     "@radix-ui/react-aspect-ratio": "^1.1.4",
@@ -153,7 +153,7 @@
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0",
     "sonner": "catalog:",
-    "starknet": "^8.5.4",
+    "starknet": "catalog:",
     "viem": "catalog:"
   },
   "sideEffects": false

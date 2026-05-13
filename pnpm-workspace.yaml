@@ -4,19 +4,31 @@ packages:
   - examples/svelte
   - examples/capacitor
   - packages/*
+allowBuilds:
+  "@biomejs/biome": true
+  "@reown/appkit": false
+  "@swc/core": true
+  browser-tabs-lock: true
+  cbor-extract: false
+  esbuild: true
+  msgpackr-extract: false
+  protobufjs: false
+  sharp: false
+  unrs-resolver: false
 catalog:
   "@cartridge/arcade": "0.3.12"
   "@cartridge/controller-wasm": "0.10.1"
   "@cartridge/penpal": "^6.2.4"
-  "@eslint/js": "^9.18.0"
-  "@noble/curves": "^1.9.0"
-  "@noble/hashes": "^1.8.0"
+  "@cartridge/presets": "github:cartridge-gg/presets#0f9ded0"
   "@dojoengine/core": 1.8.8
-  "@dojoengine/sdk": 1.8.12
   "@dojoengine/react": 1.8.7
+  "@dojoengine/sdk": 1.8.12
   "@dojoengine/torii-wasm": 1.8.2
   "@effect-atom/atom": "^0.1.22"
   "@effect-atom/atom-react": "^0.1.17"
+  "@eslint/js": "^9.18.0"
+  "@noble/curves": "^1.9.0"
+  "@noble/hashes": "^1.8.0"
   "@starknet-io/types-js": "^0.8.4"
   "@starknet-react/chains": "^5.0.1"
   "@starknet-react/core": "^5.0.1"
@@ -28,13 +40,13 @@ catalog:
   "@storybook/test": "^8.5.0"
   "@storybook/test-runner": "^0.21.0"
   "@storybook/theming": "^8.5.0"
+  "@types/jest": "^29.5.14"
   "@types/jest-image-snapshot": "^6.4.0"
   "@types/lodash": "^4.17.14"
+  "@types/mocha": "^10.0.10"
   "@types/node": "^18.0.6"
   "@types/react": "^18.2.0"
   "@types/react-dom": "^18.2.0"
-  "@types/jest": "^29.5.14"
-  "@types/mocha": "^10.0.10"
   "@vitejs/plugin-react-swc": "^3.5.0"
   "@vitest/coverage-v8": "^3.1.3"
   autoprefixer: "^10.4.18"
@@ -50,29 +62,46 @@ catalog:
   jest-image-snapshot: "^6.4.0"
   lodash: "^4.17.21"
   playwright: "^1.49.1"
-  posthog-js-lite: "3.2.1"
   postcss: "^8.4.35"
   postcss-import: "^16.1.0"
+  posthog-js-lite: "3.2.1"
   prettier: "^3.4.2"
+  "qrcode.react": "^4.2.0"
   react: "^18.2.0"
   react-dom: "^18.2.0"
   react-query: "^3.39.2"
   react-router-dom: "^6.27.0"
   sonner: "^2.0.7"
-  start-server-and-test: "^2.0.9"
   starknet: 8.5.4
+  start-server-and-test: "^2.0.9"
   storybook: "^8.5.0"
   swr: "^2.2.5"
   tailwindcss: "^3.4.3"
-  tsx: "^4.19.2"
   tsup: "^8.0.1"
-  typescript: "^5.7.3"
+  tsx: "^4.19.2"
+  typescript: 5.8.3
   typescript-eslint: "^8.20.0"
   viem: "^2.21.32"
-  vite: "^6.0.0"
-  vitest: "^3.1.3"
+  vite: 6.3.4
   vite-plugin-top-level-await: "^1.4.4"
   vite-plugin-wasm: "^3.4.1"
   vite-tsconfig-paths: "^5.1.4"
+  vitest: "^3.1.3"
   wasm-pack: "^0.13.0"
-  "qrcode.react": "^4.2.0"
+overrides:
+  "@dojoengine/core": "catalog:"
+  "@dojoengine/sdk": "catalog:"
+  "@dojoengine/torii-wasm": "catalog:"
+  "@noble/curves": "catalog:"
+  "@noble/hashes": "catalog:"
+  "@radix-ui/react-accordion": "1.2.1"
+  "@starknet-io/types-js": "catalog:"
+  "@starknet-react/chains": "catalog:"
+  "@starknet-react/core": "catalog:"
+  react: "catalog:"
+  react-dom: "catalog:"
+  react-query: "catalog:"
+  starknet: "catalog:"
+  typescript: "catalog:"
+  vite: "catalog:"
+  vite-plugin-node-polyfills: 0.23.0
