@@ -6,6 +6,7 @@ import {
   MobileIcon,
   PhoneNumberInput,
   PinInput,
+  formatPhoneNumber,
   isValidPhoneNumber,
 } from "@cartridge/controller-ui";
 
@@ -176,63 +177,60 @@ export function SmsOtpDrawer({
         icon={<MobileIcon variant="solid" />}
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="sms-phone"
-              className="text-xs font-medium text-foreground-400"
-            >
-              Phone Number
-            </label>
-            <PhoneNumberInput
-              ref={phoneRef}
-              inputId="sms-phone"
-              value={
-                step === "phone" ? phoneInput : (smsState?.phoneNumber ?? "")
-              }
-              setValue={setPhoneInput}
-              disabled={sendingCode || step === "otp"}
-              error={phoneInputError}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="sms-otp"
-              className="text-xs font-medium text-foreground-400"
-            >
-              Verification Code
-            </label>
-            <PinInput
-              type="numeric"
-              length={6}
-              ref={otpRef}
-              value={otpCode}
-              onChange={setOtpCode}
-              disabled={sendingCode || step === "phone"}
-              variant={otpCodeError ? "destructive" : "default"}
-              className="py-6"
-            />
-            {step === "otp" && otpSentAt !== null && (
-              <p className="text-xs text-foreground-300">
-                Didn't get a message?{" "}
-                {secondsRemaining > 0 ? (
-                  <>Resend in {secondsRemaining}...</>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={sendingCode}
-                    className="text-primary-100 hover:underline disabled:opacity-50"
-                  >
-                    Resend Code
-                  </button>
-                )}
-              </p>
-            )}
-          </div>
-
-          {otpCodeError && (
-            <p className="text-sm text-destructive">{otpCodeError}</p>
+          {step === "phone" ? (
+            <div className="flex flex-col gap-3">
+              <label
+                htmlFor="sms-phone"
+                className="text-xs font-medium text-foreground-400"
+              >
+                Phone
+              </label>
+              <PhoneNumberInput
+                ref={phoneRef}
+                inputId="sms-phone"
+                value={phoneInput}
+                setValue={setPhoneInput}
+                disabled={sendingCode}
+                error={phoneInputError}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <label htmlFor="sms-otp" className="text-xs text-foreground-300">
+                Please check {formatPhoneNumber(smsState?.phoneNumber ?? "")}{" "}
+                for a message from Cartridge and enter your code below.
+              </label>
+              <PinInput
+                type="numeric"
+                length={6}
+                ref={otpRef}
+                value={otpCode}
+                onChange={setOtpCode}
+                disabled={sendingCode}
+                variant={otpCodeError ? "destructive" : "default"}
+                className="py-4"
+              />
+              {otpSentAt !== null && (
+                <p className="text-xs text-foreground-300">
+                  Didn't get a message?{" "}
+                  {secondsRemaining > 0 ? (
+                    <>Resend in {secondsRemaining}...</>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={sendingCode}
+                      className="text-primary-100 hover:underline disabled:opacity-50"
+                    >
+                      Resend Code
+                    </button>
+                  )}
+                </p>
+              )}
+              {otpCodeError && (
+                <p className="text-sm text-destructive">{otpCodeError}</p>
+              )}
+            </div>
           )}
 
           <div className="flex gap-2">
@@ -245,7 +243,7 @@ export function SmsOtpDrawer({
               isLoading={sendingCode}
               className="flex-1"
             >
-              {step === "phone" ? "Send Code" : "Sign Up"}
+              {step === "phone" ? "Continue" : "Sign Up"}
             </Button>
           </div>
         </form>
