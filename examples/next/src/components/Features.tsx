@@ -7,6 +7,7 @@ import ControllerConnector from "@cartridge/connector/controller";
 
 const FEATURES = [
   "coinflow-support",
+  "user-data",
   "registered-accounts",
   "recovery-accounts",
   "connection-instagram",
