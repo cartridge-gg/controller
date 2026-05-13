@@ -6,15 +6,15 @@ import { COUNTRIES } from "./countries";
 
 const DEFAULT_COUNTRY = "US";
 
-function dialCodeOf(code: string): string {
+function countryDialCodeOf(code: string): string {
   return COUNTRIES.find((c) => c.code === code)?.dial_code ?? "";
 }
 
 // Display-only mask. `setValue` always receives a plain "+digits" string.
-function formatPhoneDigits(dialCode: string, digits: string): string {
+function formatPhoneDigits(countryDialCode: string, digits: string): string {
   let mask: string;
-  if (dialCode === "+1") mask = "(XXX)XXX-XXXX";
-  else if (dialCode === "+55") mask = "(XX)XXXXX-XXXX";
+  if (countryDialCode === "+1") mask = "(XXX)XXX-XXXX";
+  else if (countryDialCode === "+55") mask = "(XX)XXXXX-XXXX";
   else return digits;
 
   const maxDigits = (mask.match(/X/g) ?? []).length;
@@ -29,6 +29,21 @@ function formatPhoneDigits(dialCode: string, digits: string): string {
     else out += mask[i];
   }
   return out;
+}
+
+// only numbers, with dial code, +###########
+export function formatPhoneNumber(phoneNumber: string): string {
+  let codeLength: number = 0;
+  if (phoneNumber.startsWith("+1") && phoneNumber.length === 12) {
+    codeLength = 2;
+  } else if (phoneNumber.startsWith("+55") && phoneNumber.length === 14) {
+    codeLength = 3;
+  }
+  if (codeLength > 0) {
+    const countryDialCode = phoneNumber.slice(0, codeLength);
+    return `${countryDialCode}${formatPhoneDigits(countryDialCode, phoneNumber.slice(codeLength))}`;
+  }
+  return phoneNumber;
 }
 
 // Find the country whose dial_code is the longest prefix of `value`.
@@ -92,7 +107,7 @@ export const PhoneNumberInput = forwardRef<
   });
 
   const effectiveCountry = lockedCountry ?? country;
-  const dialCode = dialCodeOf(effectiveCountry);
+  const dialCode = countryDialCodeOf(effectiveCountry);
 
   // Sync country if the value was set externally to a different dial code.
   useEffect(() => {
@@ -118,7 +133,7 @@ export const PhoneNumberInput = forwardRef<
 
   const handleCountryChange = (newCountry: string) => {
     setCountry(newCountry);
-    setValue(`${dialCodeOf(newCountry)}${digits}`);
+    setValue(`${countryDialCodeOf(newCountry)}${digits}`);
   };
 
   const handleDigitsChange = (raw: string) => {
