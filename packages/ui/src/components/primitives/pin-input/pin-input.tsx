@@ -78,9 +78,40 @@ export const PinInput = forwardRef<HTMLInputElement, PinInputProps>(
       e: React.KeyboardEvent<HTMLInputElement>,
       index: number,
     ) => {
-      if (e.key === "Backspace" && !value[index] && index > 0)
-        inputRefs.current[index - 1]?.focus();
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        const next = value.split("");
+        if (next[index]) {
+          next[index] = "";
+        } else if (index > 0) {
+          next[index - 1] = "";
+        }
+        onChange(next.join(""));
+        if (index > 0) inputRefs.current[index - 1]?.focus();
+        return;
+      }
       if (e.key === "Enter" && value.length === length && onEnter) onEnter();
+    };
+
+    const maxFocusable = Math.min(value.length, length - 1);
+    const isFocusable = (i: number) => i <= maxFocusable;
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      e.target.select();
+    };
+
+    const handleMouseDown = (
+      e: React.MouseEvent<HTMLInputElement>,
+      index: number,
+    ) => {
+      if (!isFocusable(index)) {
+        e.preventDefault();
+        inputRefs.current[maxFocusable]?.focus();
+      }
+    };
+
+    const handleClick = (e: React.MouseEvent<HTMLInputElement>) => {
+      (e.target as HTMLInputElement).select();
     };
 
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -109,8 +140,14 @@ export const PinInput = forwardRef<HTMLInputElement, PinInputProps>(
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
               handleKeyDown(e, i)
             }
+            onFocus={handleFocus}
+            onMouseDown={(e: React.MouseEvent<HTMLInputElement>) =>
+              handleMouseDown(e, i)
+            }
+            onClick={handleClick}
             onPaste={handlePaste}
             disabled={disabled}
+            tabIndex={isFocusable(i) ? 0 : -1}
             maxLength={1}
             inputMode={type === "numeric" ? "numeric" : "text"}
             autoCapitalize="characters"
