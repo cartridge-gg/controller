@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
@@ -47,12 +47,35 @@ import {
 } from "@/utils/connection/session-creation";
 import { hasConfiguredLocationGate } from "@/utils/location-gate";
 import { posthog } from "@/components/provider/posthog";
-import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
+import {
+  captureAnalyticsEvent,
+  categorizeError,
+  sanitizeErrorCode,
+  type SignupAuthStep,
+  type SignupErrorCategory,
+} from "@/types/analytics";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
   message: "Canceled",
 };
+
+function mapAuthStep(step: AuthenticationStep): SignupAuthStep {
+  switch (step) {
+    case AuthenticationStep.FillForm:
+      return "fill_form";
+    case AuthenticationStep.ChooseMethod:
+      return "choose_method";
+    case AuthenticationStep.PasswordForm:
+      return "password_form";
+    case AuthenticationStep.SmsForm:
+      return "sms_form";
+    case AuthenticationStep.Pending:
+      return "pending";
+    case AuthenticationStep.Error:
+      return "error";
+  }
+}
 
 export interface SignupResponse {
   address: string;
@@ -238,6 +261,38 @@ export function useCreateController({
   );
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
+
+  const signupAttemptIndexRef = useRef(0);
+  const signupMethodsTriedRef = useRef<AuthOption[]>([]);
+  const signupPreviousMethodRef = useRef<AuthOption | undefined>(undefined);
+  const signupPreviousErrorCategoryRef = useRef<
+    SignupErrorCategory | undefined
+  >(undefined);
+  const signupStartedRef = useRef(false);
+  const signupResolvedRef = useRef(false);
+  const signupStartTimeRef = useRef(performance.now());
+  const authStepRef = useRef<AuthenticationStep>(AuthenticationStep.FillForm);
+
+  useEffect(() => {
+    authStepRef.current = authenticationStep;
+  }, [authenticationStep]);
+
+  useEffect(() => {
+    const handlePageHide = () => {
+      if (!signupStartedRef.current || signupResolvedRef.current) return;
+      captureAnalyticsEvent(posthog, "signup_abandoned", {
+        last_step: mapAuthStep(authStepRef.current),
+        methods_tried: [...signupMethodsTriedRef.current],
+        attempt_count: signupAttemptIndexRef.current,
+        time_on_page_ms: Math.round(
+          performance.now() - signupStartTimeRef.current,
+        ),
+      });
+    };
+    window.addEventListener("pagehide", handlePageHide);
+    return () => window.removeEventListener("pagehide", handlePageHide);
+  }, []);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const {
     origin,
@@ -1092,10 +1147,29 @@ export function useCreateController({
       if (exists) {
         captureAnalyticsEvent(posthog, "login_started", {});
       } else {
+        signupStartedRef.current = true;
+        signupAttemptIndexRef.current += 1;
+        const attemptIndex = signupAttemptIndexRef.current;
+        const previousMethod = signupPreviousMethodRef.current;
+        const previousErrorCategory = signupPreviousErrorCategoryRef.current;
+        if (!signupMethodsTriedRef.current.includes(method)) {
+          signupMethodsTriedRef.current.push(method);
+        }
         captureAnalyticsEvent(posthog, "signup_started", {
           has_existing_account: false,
         });
-        captureAnalyticsEvent(posthog, "signup_method_selected", { method });
+        captureAnalyticsEvent(posthog, "signup_method_selected", {
+          method,
+          attempt_index: attemptIndex,
+          previous_method: previousMethod,
+        });
+        captureAnalyticsEvent(posthog, "signup_method_attempted", {
+          method,
+          attempt_index: attemptIndex,
+          previous_method: previousMethod,
+          previous_error_category: previousErrorCategory,
+        });
+        signupPreviousMethodRef.current = method;
       }
 
       try {
@@ -1112,9 +1186,12 @@ export function useCreateController({
         } else {
           await handleSignup(username, method, password);
           if (window.controller) {
+            signupResolvedRef.current = true;
             captureAnalyticsEvent(posthog, "signup_completed", {
               method,
               duration_ms: Math.round(performance.now() - startTime),
+              attempt_count: signupAttemptIndexRef.current,
+              methods_tried: [...signupMethodsTriedRef.current],
             });
           }
         }
@@ -1130,9 +1207,12 @@ export function useCreateController({
             error_code: sanitizeErrorCode(error),
           });
         } else {
+          const errorCategory = categorizeError(error, method);
+          signupPreviousErrorCategoryRef.current = errorCategory;
           captureAnalyticsEvent(posthog, "signup_failed", {
             method,
             error_code: sanitizeErrorCode(error),
+            error_category: errorCategory,
           });
         }
       } finally {
