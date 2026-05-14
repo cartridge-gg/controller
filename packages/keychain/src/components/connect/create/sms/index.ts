@@ -12,14 +12,30 @@ import { WalletAdapter } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 
+type InitSmsInput = { phoneNumber: string } | { username: string };
+
 type InitSmsResponse = {
   otpId: string;
   otpEncryptionTargetBundle: string;
+  // Only present when init was called with { username }.
+  phoneLast4?: string;
 };
 
 type VerifySmsResponse = {
   verificationToken: string;
+  // Server-resolved suborg when one already exists for this signer. When
+  // absent, the client falls back to looking up by phone or creating one.
+  subOrganizationId?: string;
 };
+
+// Thrown when initSms({ username }) finds no SMS signer for that username.
+// Callers should silently fall back to the phone-entry flow.
+export class SmsUsernameNotFoundError extends Error {
+  constructor() {
+    super("No SMS signer found for username");
+    this.name = "SmsUsernameNotFoundError";
+  }
+}
 
 // Each in-flight OTP attempt gets a P-256 keypair held here until the user
 // submits the verification code. The same key is sent to InitOtp (embedded
@@ -34,13 +50,34 @@ const otpKeyPairs = new Map<
 export const useSmsAuthentication = () => {
   const { chainId, rpcUrl } = useConnection();
 
-  const initSms = useCallback(async (phoneNumber: string) => {
+  const initSms = useCallback(async (input: InitSmsInput) => {
     const keyPair = generateP256KeyPair();
 
-    const response = await fetchApi<InitSmsResponse>("sms", {
-      phoneNumber,
-      publicKey: keyPair.publicKey,
-    });
+    const body: Record<string, unknown> = { publicKey: keyPair.publicKey };
+    if ("phoneNumber" in input) {
+      body.phoneNumber = input.phoneNumber;
+    } else {
+      body.username = input.username;
+    }
+
+    let response: InitSmsResponse;
+    try {
+      response = await fetchApi<InitSmsResponse>("sms", body);
+    } catch (err) {
+      // doFetch surfaces HTTP errors as `HTTP error <status>: ...`. A 404 on
+      // the username path means no SMS signer is registered for that username
+      // — callers should silently fall back to manual phone entry. The
+      // backend also returns 404 to avoid enumeration leaks (no signer,
+      // decrypt failed, etc.), all of which map to the same fallback.
+      if (
+        "username" in input &&
+        err instanceof Error &&
+        err.message.startsWith("HTTP error 404")
+      ) {
+        throw new SmsUsernameNotFoundError();
+      }
+      throw err;
+    }
 
     otpKeyPairs.set(response.otpId, keyPair);
 
@@ -67,31 +104,6 @@ export const useSmsAuthentication = () => {
       }
 
       try {
-        const suborgResponse = await fetchApi<{ organizationIds: string[] }>(
-          "suborgs",
-          {
-            filterType: "PHONE_NUMBER",
-            filterValue: phoneNumber,
-          },
-        );
-
-        let subOrgId: string;
-        if (
-          !suborgResponse?.organizationIds ||
-          suborgResponse.organizationIds.length === 0
-        ) {
-          const createResponse = await fetchApi<{ subOrganizationId: string }>(
-            "create-suborg",
-            {
-              rootUserUserName: username,
-              phoneNumber,
-            },
-          );
-          subOrgId = createResponse.subOrganizationId;
-        } else {
-          subOrgId = suborgResponse.organizationIds[0];
-        }
-
         const encryptedOtpBundle = await encryptOtpCodeToBundle(
           otpCode,
           otpEncryptionTargetBundle,
@@ -105,6 +117,30 @@ export const useSmsAuthentication = () => {
 
         if (!verifyResponse?.verificationToken) {
           throw new Error("SMS verification failed: no verification token");
+        }
+
+        // /oauth2/sms/verify is authoritative for suborg resolution: it
+        // returns the id when one exists for this phone, an empty string
+        // only when Turnkey definitively reports none, and a 5xx if the
+        // lookup itself failed. So a non-empty value means "use this",
+        // and empty means "no suborg exists — safe to create one". We
+        // intentionally do NOT retry the lookup here: a transient Turnkey
+        // failure that slipped through as empty would route an existing
+        // user into the fresh-signup path and duplicate their account.
+        let subOrgId: string | undefined = verifyResponse.subOrganizationId;
+        if (!subOrgId) {
+          if (!phoneNumber) {
+            throw new Error(
+              "Cannot resolve suborg: verify response missing subOrganizationId and no phone number available",
+            );
+          }
+          const createResponse = await fetchApi<{
+            subOrganizationId: string;
+          }>("create-suborg", {
+            rootUserUserName: username,
+            phoneNumber,
+          });
+          subOrgId = createResponse.subOrganizationId;
         }
 
         const { message, verificationPublicKey } = buildClientSignatureMessage(

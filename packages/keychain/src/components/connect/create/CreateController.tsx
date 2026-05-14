@@ -53,6 +53,7 @@ interface CreateControllerViewProps {
   onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onInitOtp: (phoneNumber: string) => Promise<void>;
+  onResetOtp: () => void;
   smsState: SmsOtpState | null;
   isSlot?: boolean;
   authenticationStep: AuthenticationStep;
@@ -75,6 +76,7 @@ type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
   | "setAuthenticationStep"
   | "onInitOtp"
+  | "onResetOtp"
   | "smsState"
   | "changeWallet"
   | "setChangeWallet"
@@ -300,6 +302,7 @@ export function CreateControllerView({
   onSubmit,
   onKeyDown,
   onInitOtp,
+  onResetOtp,
   smsState,
   authenticationStep,
   setAuthenticationStep,
@@ -437,6 +440,7 @@ export function CreateControllerView({
         isLogin={isLogin}
         onClose={onClose}
         onInitOtp={onInitOtp}
+        onResetOtp={onResetOtp}
         onSubmitCode={(otpCode: string) => onSubmit("sms", otpCode)}
         smsState={smsState}
       />
@@ -445,6 +449,7 @@ export function CreateControllerView({
           authenticationStep === AuthenticationStep.Pending ||
           authenticationStep === AuthenticationStep.Error
         }
+        isLogin={isLogin}
         isLoading={isLoading}
         error={error}
         authenticationMode={smsState != null ? "sms" : authMethod}
@@ -504,7 +509,9 @@ export function CreateController({
     setError,
     handleSubmit,
     handleInitOtp,
+    handleInitOtpWithUsername,
     smsState,
+    setSmsState,
     authenticationStep,
     setAuthenticationStep,
     waitingForConfirmation,
@@ -583,6 +590,7 @@ export function CreateController({
           allUseSameAuth(validation.signers) &&
           credentialToAuth(validation.signers[0]) === "sms"
         ) {
+          handleInitOtpWithUsername(usernameField.value.trim());
           setAuthenticationStep(AuthenticationStep.SmsForm);
           setError(undefined);
           return;
@@ -624,6 +632,10 @@ export function CreateController({
 
         // If SMS auth is detected and no OTP code provided, open the SMS drawer
         if (authenticationMethod === "sms" && !password) {
+          if (accountExists) {
+            // For returning users, try the username-derived OTP path first
+            handleInitOtpWithUsername(usernameField.value.trim());
+          }
           setAuthenticationStep(AuthenticationStep.SmsForm);
           setError(undefined);
           return;
@@ -640,6 +652,7 @@ export function CreateController({
     [
       isDropdownOpen,
       handleSubmit,
+      handleInitOtpWithUsername,
       usernameField.value,
       validation.exists,
       validation.status,
@@ -766,6 +779,7 @@ export function CreateController({
         onSubmit={handleFormSubmit}
         onKeyDown={handleKeyDown}
         onInitOtp={handleInitOtp}
+        onResetOtp={() => setSmsState(null)}
         smsState={smsState}
         authenticationStep={authenticationStep}
         setAuthenticationStep={setAuthenticationStep}

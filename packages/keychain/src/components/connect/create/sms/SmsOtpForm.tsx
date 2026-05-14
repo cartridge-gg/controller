@@ -20,12 +20,14 @@ export interface SmsOtpDrawerProps {
   isOpen: boolean;
   isLogin: boolean;
   onClose: () => void;
-  /** Sends the SMS. On success the hook sets smsState (null → otp step). */
+  // Sends the SMS. On success the hook sets smsState
   onInitOtp: (phoneNumber: string) => Promise<void>;
-  /** Called with ("sms", otpCode) to complete authentication. */
+  // Called to complete authentication.
   onSubmitCode: (otpCode: string) => void;
-  /** null = phone step; non-null = otp step (phone number confirmed). */
+  // null = phone step; non-null = otp step (phone number confirmed).
   smsState: SmsOtpState | null;
+  // When provided and isLogin, renders a "Use a different phone" link in the OTP step
+  onResetOtp?: () => void;
 }
 
 export function SmsOtpDrawer({
@@ -33,10 +35,12 @@ export function SmsOtpDrawer({
   isLogin,
   onClose,
   onInitOtp,
+  onResetOtp,
   onSubmitCode,
   smsState,
 }: SmsOtpDrawerProps) {
   const step = smsState?.otpId ? "otp" : "phone";
+  const isResolvingPhoneNumber = !!smsState?.phoneNumber.endsWith("*");
 
   // Local input for typing the phone number before it's confirmed by the hook.
   // Re-synced from the confirmed phone number each time the drawer opens.
@@ -53,20 +57,24 @@ export function SmsOtpDrawer({
   const smsStateRef = useRef(smsState);
   smsStateRef.current = smsState;
 
+  const resetState = useCallback(() => {
+    setPhoneInput("");
+    setOtpCode("");
+    setOtpCodeError(undefined);
+    setOtpSentAt(null);
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       setPhoneInput(smsStateRef.current?.phoneNumber ?? "");
     } else {
-      setOtpCode("");
-      setSendingCode(false);
-      setPhoneInputError(undefined);
-      setOtpCodeError(undefined);
-      setOtpSentAt(null);
+      resetState();
     }
-  }, [isOpen]);
+  }, [isOpen, resetState]);
 
   useEffect(() => {
     if (smsState?.otpId) {
+      // start resend timeout
       setOtpSentAt(Date.now());
     }
   }, [smsState?.otpId]);
@@ -151,6 +159,11 @@ export function SmsOtpDrawer({
     ],
   );
 
+  const handleUseDifferentPhone = useCallback(() => {
+    resetState();
+    onResetOtp?.();
+  }, [onResetOtp, resetState]);
+
   const handleResend = useCallback(async () => {
     if (secondsRemaining > 0 || sendingCode || !smsState?.phoneNumber) return;
     setOtpCodeError(undefined);
@@ -190,15 +203,28 @@ export function SmsOtpDrawer({
                 inputId="sms-phone"
                 value={phoneInput}
                 setValue={setPhoneInput}
-                disabled={sendingCode}
+                disabled={sendingCode || isResolvingPhoneNumber}
                 error={phoneInputError}
+                placeholder={
+                  isResolvingPhoneNumber ? smsState?.phoneNumber : undefined
+                }
               />
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               <label htmlFor="sms-otp" className="text-xs text-foreground-300">
                 Please check {formatPhoneNumber(smsState?.phoneNumber ?? "")}{" "}
-                for a message from Cartridge and enter your code below.
+                for a message from Cartridge and enter your code below.{" "}
+                {isLogin && onResetOtp && (
+                  <button
+                    type="button"
+                    onClick={handleUseDifferentPhone}
+                    disabled={sendingCode}
+                    className="text-primary-100 hover:underline disabled:opacity-50"
+                  >
+                    Use a different phone
+                  </button>
+                )}
               </label>
               <PinInput
                 type="numeric"
@@ -240,7 +266,7 @@ export function SmsOtpDrawer({
                 sendingCode ||
                 (step === "phone" ? !isPhoneInputValid : !isOtpCodeValid)
               }
-              isLoading={sendingCode}
+              isLoading={sendingCode || isResolvingPhoneNumber}
               className="flex-1"
             >
               {step === "phone" ? "Continue" : "Sign Up"}

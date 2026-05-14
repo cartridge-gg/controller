@@ -134,8 +134,9 @@ export function AddSignerDrawer({
   const handleInitOtp = useCallback(
     async (phoneNumber: string) => {
       setSmsState({ phoneNumber, otpId: "", otpEncryptionTargetBundle: "" });
-      const { otpId, otpEncryptionTargetBundle } =
-        await smsAuth.initSms(phoneNumber);
+      const { otpId, otpEncryptionTargetBundle } = await smsAuth.initSms({
+        phoneNumber,
+      });
       setSmsState({ phoneNumber, otpId, otpEncryptionTargetBundle });
     },
     [smsAuth],
@@ -168,9 +169,16 @@ export function AddSignerDrawer({
           { eip191: { address } },
           {
             type: "eip191",
+            // otp_id rides inside the opaque credential JSON so the server
+            // can prove this signer's phone was just OTP-verified. The
+            // GraphQL schema and the controller-wasm bindings don't need
+            // to know the field exists; the resolver pulls it out of the
+            // raw map, claims the post-verify Redis entry atomically, and
+            // strips otp_id before persisting Signer.metadata.
             credential: JSON.stringify({
               provider: "sms",
               eth_address: address,
+              otp_id: otpId,
             }),
           },
           null,
@@ -250,6 +258,7 @@ export function AddSignerDrawer({
 
       <SignerPendingDrawer
         isOpen={isPendingOpen}
+        isLogin={false}
         isLoading={signerPending?.inProgress ?? false}
         error={
           signerPending?.error ? new Error(signerPending.error) : undefined

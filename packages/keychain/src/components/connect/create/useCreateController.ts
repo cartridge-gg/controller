@@ -30,7 +30,7 @@ import {
 } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { usePasswordAuthentication } from "./password";
-import { useSmsAuthentication } from "./sms";
+import { SmsUsernameNotFoundError, useSmsAuthentication } from "./sms";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
@@ -340,12 +340,54 @@ export function useCreateController({
       try {
         setError(undefined);
         setSmsState({ phoneNumber, otpId: "", otpEncryptionTargetBundle: "" });
-        const { otpId, otpEncryptionTargetBundle } =
-          await smsAuth.initSms(phoneNumber);
+        const { otpId, otpEncryptionTargetBundle } = await smsAuth.initSms({
+          phoneNumber,
+        });
         setSmsState({ phoneNumber, otpId, otpEncryptionTargetBundle });
       } catch (e: unknown) {
         setError(e as Error);
       }
+    },
+    [smsAuth],
+  );
+
+  // For returning SMS users we try to skip the phone-entry step by deriving
+  // the OTP session from the username. On success we pre-fill smsState with a
+  // masked display string (using phoneLast4) so the existing otpId-driven
+  // form lands directly on the OTP step. On a 404 (no SMS signer, decrypt
+  // failed, etc.) the spec says to silently fall back to phone entry.
+  const handleInitOtpWithUsername = useCallback(
+    async (username: string): Promise<void> => {
+      setError(undefined);
+      try {
+        setSmsState({
+          phoneNumber: "*** *** ****",
+          otpId: "",
+          otpEncryptionTargetBundle: "",
+        });
+        const { otpId, otpEncryptionTargetBundle, phoneLast4 } =
+          await smsAuth.initSms({ username });
+        if (phoneLast4) {
+          setSmsState({
+            phoneNumber: `*** *** ${phoneLast4}`,
+            otpId,
+            otpEncryptionTargetBundle,
+          });
+        } else {
+          // Defensive: backend should always return phoneLast4 on the
+          // username path. If it doesn't, fall back to phone entry rather
+          // than landing on an OTP step with no destination shown.
+          setSmsState(null);
+        }
+      } catch (e: unknown) {
+        if (e instanceof SmsUsernameNotFoundError) {
+          setSmsState(null);
+        } else {
+          setError(e as Error);
+          return;
+        }
+      }
+      setAuthenticationStep(AuthenticationStep.SmsForm);
     },
     [smsAuth],
   );
@@ -604,9 +646,16 @@ export function useCreateController({
           );
           signer = {
             type: SignerType.Eip191,
+            // otp_id rides inside the opaque credential JSON so the server
+            // can prove this signer's phone was just OTP-verified. The
+            // GraphQL schema and the controller-wasm bindings don't need
+            // to know the field exists; the resolver pulls it out of the
+            // raw map, claims the post-verify Redis entry atomically, and
+            // strips otp_id before persisting Signer.metadata.
             credential: JSON.stringify({
               provider: "sms",
               eth_address: signupResponse.address,
+              otp_id: smsState.otpId,
             }),
           };
           break;
@@ -1240,7 +1289,9 @@ export function useCreateController({
     setError,
     handleSubmit,
     handleInitOtp,
+    handleInitOtpWithUsername,
     smsState,
+    setSmsState,
     changeWallet,
     setChangeWallet,
     signupOptions,

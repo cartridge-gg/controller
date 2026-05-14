@@ -13,6 +13,7 @@ import { useMemo } from "react";
 
 interface SignerPendingDrawerProps {
   isOpen: boolean;
+  isLogin: boolean;
   isLoading: boolean;
   error?: Error | undefined;
   authenticationMode: AuthOption | undefined;
@@ -23,7 +24,8 @@ interface SignerPendingDrawerProps {
 
 export function SignerPendingDrawer({
   isOpen = true,
-  isLoading,
+  isLogin = false,
+  isLoading = false,
   error,
   authenticationMode,
   onClose,
@@ -37,7 +39,7 @@ export function SignerPendingDrawer({
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>
       <DrawerContent
-        title={`Sign Up with ${authName}`}
+        title={`${isLogin ? "Log In" : "Sign Up"} with ${authName}`}
         icon={isLoading ? <Spinner /> : error ? <WarningIcon /> : <CheckIcon />}
       >
         {authenticationMode && (
