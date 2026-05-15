@@ -1,7 +1,16 @@
 import { useConnection } from "@/hooks/connection";
+import { useDevice } from "@/hooks/device";
 import { useVersion } from "@/hooks/version";
+import { isSafari } from "@/hooks/viewport";
 import { PostHogContext, PostHogWrapper } from "@cartridge/controller-ui/utils";
-import { PropsWithChildren, useContext, useEffect, useState } from "react";
+import InAppSpy from "inapp-spy";
+import {
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useLocation } from "react-router-dom";
 
 export const posthog = new PostHogWrapper(
@@ -30,6 +39,20 @@ export function PostHogProvider({ children }: PropsWithChildren) {
       setRegistered(true);
     }
   }, [registered, controllerVersion]);
+
+  const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
+  const { isMobile } = useDevice();
+  const envRegisteredRef = useRef(false);
+  useEffect(() => {
+    if (envRegisteredRef.current) return;
+    envRegisteredRef.current = true;
+    posthog.register({
+      is_in_app_browser: isInApp && !!appKey,
+      in_app_browser_name: appName ?? undefined,
+      is_mobile: isMobile,
+      is_safari: isSafari(navigator.userAgent),
+    });
+  }, [isInApp, appKey, appName, isMobile]);
 
   useEffect(() => {
     if (controller) {
