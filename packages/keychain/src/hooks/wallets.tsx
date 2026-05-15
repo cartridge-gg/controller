@@ -36,6 +36,7 @@ interface WalletsContextValue {
     identifier: ExternalWalletType,
     chainId: string,
   ) => Promise<boolean>;
+  availableWallets: ExternalWalletType[];
 }
 
 declare global {
@@ -203,6 +204,12 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
     [wallets],
   );
 
+  const availableWallets = useMemo<ExternalWalletType[]>(() => {
+    return wallets
+      .filter((wallet) => wallet.available === true)
+      .map((wallet) => wallet.type);
+  }, [wallets]);
+
   const value = useMemo(
     () => ({
       wallets,
@@ -214,6 +221,7 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       isExtensionMissing,
       switchChain,
       supportedWalletsForAuth,
+      availableWallets,
     }),
     [
       wallets,
@@ -225,6 +233,7 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       isExtensionMissing,
       switchChain,
       supportedWalletsForAuth,
+      availableWallets,
     ],
   );
 

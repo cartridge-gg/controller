@@ -1,4 +1,8 @@
-import { AuthOption, EXTERNAL_WALLETS } from "@cartridge/controller";
+import {
+  AuthOption,
+  EXTERNAL_WALLETS,
+  ExternalWalletType,
+} from "@cartridge/controller";
 import {
   AchievementPlayerAvatar,
   cn,
@@ -11,6 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 import { credentialToAuth } from "../types";
 import { useUsernameValidation } from "./useUsernameValidation";
+import { useWallets } from "@/hooks/wallets";
 
 export const INITIAL_OPTIONS: AuthOption[] = ["sms", "webauthn"];
 export const WALLET_OPTIONS: AuthOption[] = [
@@ -37,6 +42,7 @@ export function ChooseSignupMethodForm({
   onClose,
   authOptions,
 }: ChooseSignupMethodProps) {
+  const { availableWallets } = useWallets();
   const [selectedAuth, setSelectedAuth] = useState<AuthOption | undefined>(
     undefined,
   );
@@ -221,8 +227,12 @@ export function ChooseSignupMethodForm({
       <DrawerContent title={title} icon={icon}>
         <div className="flex flex-col gap-3">
           {options.map((option, index) => {
-            const isPrimary = !isLogin && index === 0 && INITIAL_OPTIONS.includes(option);
+            const isPrimary =
+              !isLogin && index === 0 && INITIAL_OPTIONS.includes(option);
             const isHighlighted = highlightedIndex === index;
+            const isAvailable =
+              !EXTERNAL_WALLETS.includes(option as ExternalWalletType) ||
+              availableWallets.includes(option as ExternalWalletType);
 
             return (
               <div
@@ -239,7 +249,9 @@ export function ChooseSignupMethodForm({
                   isPrimary={isPrimary}
                   onClick={(e) => handleSelectedOption(e, option)}
                   onKeyDown={(e) => handleSelectedOption(e, option)}
-                  disabled={isLoading && selectedAuth !== option}
+                  disabled={
+                    (isLoading && selectedAuth !== option) || !isAvailable
+                  }
                   isLoading={isLoading && selectedAuth === option}
                   data-highlighted={isHighlighted}
                 />
