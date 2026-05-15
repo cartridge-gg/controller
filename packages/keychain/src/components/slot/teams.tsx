@@ -24,6 +24,7 @@ export interface Team {
   name: string;
   credits: number;
   strk: number;
+  email?: string | null;
 }
 
 const STRK_ICON =

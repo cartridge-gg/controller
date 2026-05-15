@@ -3273,6 +3273,12 @@ export type Mutation = {
    * Updates the user's phone number and verification timestamp on success.
    */
   verifyPhone: VerifyResponse;
+  /**
+   * Verify an email address against a Twilio code and write it to the named
+   * team. The caller must be a member of the team. Uses the same code sent by
+   * sendEmailVerification.
+   */
+  verifyTeamEmail: VerifyResponse;
 };
 
 export type MutationAccountVerifyArgs = {
@@ -3561,6 +3567,10 @@ export type MutationVerifyEmailArgs = {
 
 export type MutationVerifyPhoneArgs = {
   input: VerifyPhoneInput;
+};
+
+export type MutationVerifyTeamEmailArgs = {
+  input: VerifyTeamEmailInput;
 };
 
 export enum Network {
@@ -7659,6 +7669,18 @@ export type VerifyResponse = {
   success: Scalars["Boolean"];
   /** The verified value (phone number or email) if verification succeeded. */
   verifiedValue?: Maybe<Scalars["String"]>;
+};
+
+export type VerifyTeamEmailInput = {
+  /** The 6-digit verification code received via email. */
+  code: Scalars["String"];
+  /**
+   * The email address that was sent the verification code.
+   * Must match the email used in sendEmailVerification.
+   */
+  email: Scalars["String"];
+  /** The name of the team whose email will be set. */
+  teamName: Scalars["String"];
 };
 
 export type WebauthnCredential = {

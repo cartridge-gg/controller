@@ -27,3 +27,11 @@ mutation VerifyPhone($input: VerifyPhoneInput!) {
     verifiedValue
   }
 }
+
+mutation VerifyTeamEmail($input: VerifyTeamEmailInput!) {
+  verifyTeamEmail(input: $input) {
+    success
+    message
+    verifiedValue
+  }
+}

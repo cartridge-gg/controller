@@ -22,6 +22,7 @@ import { formatBalance } from "@/hooks/tokens";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
 import { SlotCryptoFund, SlotFundingResult } from "./crypto-fund";
+import { TeamEmailVerify } from "./team-email-verify";
 import { waitForCryptoPaymentConfirmation } from "@/hooks/payments/crypto";
 import { ConfirmingTransaction } from "@/components/purchasenew/pending";
 import { getExplorer } from "@/hooks/starterpack/layerswap";
@@ -29,6 +30,7 @@ import { ErrorAlert } from "@/components/ErrorAlert";
 
 enum FundState {
   SELECT_TEAM,
+  COLLECT_EMAIL,
   PURCHASE,
   SUCCESS,
 }
@@ -84,8 +86,25 @@ export function Fund() {
         isLoading={isLoading}
         error={!!error}
         onFundTeam={(team) => {
-          setState(FundState.PURCHASE);
           setSelectedTeam(team);
+          setState(team.email ? FundState.PURCHASE : FundState.COLLECT_EMAIL);
+        }}
+      />
+    );
+  }
+
+  if (state === FundState.COLLECT_EMAIL) {
+    if (!selectedTeam) {
+      return null;
+    }
+
+    return (
+      <TeamEmailVerify
+        team={selectedTeam}
+        onBack={() => setState(FundState.SELECT_TEAM)}
+        onVerified={(email) => {
+          setSelectedTeam((prev) => (prev ? { ...prev, email } : prev));
+          setState(FundState.PURCHASE);
         }}
       />
     );

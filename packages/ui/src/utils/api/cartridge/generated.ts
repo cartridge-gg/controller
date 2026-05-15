@@ -3269,6 +3269,12 @@ export type Mutation = {
    * Updates the user's phone number and verification timestamp on success.
    */
   verifyPhone: VerifyResponse;
+  /**
+   * Verify an email address against a Twilio code and write it to the named
+   * team. The caller must be a member of the team. Uses the same code sent by
+   * sendEmailVerification.
+   */
+  verifyTeamEmail: VerifyResponse;
 };
 
 
@@ -3614,6 +3620,11 @@ export type MutationVerifyEmailArgs = {
 
 export type MutationVerifyPhoneArgs = {
   input: VerifyPhoneInput;
+};
+
+
+export type MutationVerifyTeamEmailArgs = {
+  input: VerifyTeamEmailInput;
 };
 
 export enum Network {
@@ -7789,6 +7800,18 @@ export type VerifyResponse = {
   verifiedValue?: Maybe<Scalars['String']>;
 };
 
+export type VerifyTeamEmailInput = {
+  /** The 6-digit verification code received via email. */
+  code: Scalars['String'];
+  /**
+   * The email address that was sent the verification code.
+   * Must match the email used in sendEmailVerification.
+   */
+  email: Scalars['String'];
+  /** The name of the team whose email will be set. */
+  teamName: Scalars['String'];
+};
+
 export type WebauthnCredential = {
   __typename?: 'WebauthnCredential';
   AAGUID: Scalars['String'];
@@ -8174,7 +8197,7 @@ export type StarterPackQuery = { __typename?: 'Query', starterpack?: { __typenam
 export type TeamsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TeamsQuery = { __typename?: 'Query', me?: { __typename?: 'Account', teams: { __typename?: 'TeamConnection', totalCount: number, edges?: Array<{ __typename?: 'TeamEdge', node?: { __typename?: 'Team', id: string, name: string, credits: number, strk: number } | null } | null> | null } } | null };
+export type TeamsQuery = { __typename?: 'Query', me?: { __typename?: 'Account', teams: { __typename?: 'TeamConnection', totalCount: number, edges?: Array<{ __typename?: 'TeamEdge', node?: { __typename?: 'Team', id: string, name: string, credits: number, strk: number, email?: string | null } | null } | null> | null } } | null };
 
 export type TraceabilitiesQueryVariables = Exact<{
   projects: Array<TraceabilityProject> | TraceabilityProject;
@@ -8217,6 +8240,13 @@ export type VerifyPhoneMutationVariables = Exact<{
 
 
 export type VerifyPhoneMutation = { __typename?: 'Mutation', verifyPhone: { __typename?: 'VerifyResponse', success: boolean, message: string, verifiedValue?: string | null } };
+
+export type VerifyTeamEmailMutationVariables = Exact<{
+  input: VerifyTeamEmailInput;
+}>;
+
+
+export type VerifyTeamEmailMutation = { __typename?: 'Mutation', verifyTeamEmail: { __typename?: 'VerifyResponse', success: boolean, message: string, verifiedValue?: string | null } };
 
 export type TxsHistoryQueryVariables = Exact<{
   username: Scalars['String'];
@@ -9645,6 +9675,7 @@ export const TeamsDocument = `
           name
           credits
           strk
+          email
         }
       }
     }
@@ -9815,6 +9846,24 @@ export const useVerifyPhoneMutation = <
     useMutation<VerifyPhoneMutation, TError, VerifyPhoneMutationVariables, TContext>(
       ['VerifyPhone'],
       useFetchData<VerifyPhoneMutation, VerifyPhoneMutationVariables>(VerifyPhoneDocument),
+      options
+    );
+export const VerifyTeamEmailDocument = `
+    mutation VerifyTeamEmail($input: VerifyTeamEmailInput!) {
+  verifyTeamEmail(input: $input) {
+    success
+    message
+    verifiedValue
+  }
+}
+    `;
+export const useVerifyTeamEmailMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<VerifyTeamEmailMutation, TError, VerifyTeamEmailMutationVariables, TContext>) =>
+    useMutation<VerifyTeamEmailMutation, TError, VerifyTeamEmailMutationVariables, TContext>(
+      ['VerifyTeamEmail'],
+      useFetchData<VerifyTeamEmailMutation, VerifyTeamEmailMutationVariables>(VerifyTeamEmailDocument),
       options
     );
 export const TxsHistoryDocument = `
