@@ -71,17 +71,6 @@ interface SignupFailedProps {
   error_category?: SignupErrorCategory;
 }
 
-interface SignupPageViewedProps {
-  forced_action?: "signup" | "login";
-  forced_auth_method?: AuthOption;
-  prefill_username: boolean;
-  is_in_app_browser: boolean;
-  in_app_browser_name?: string;
-  is_mobile: boolean;
-  is_safari: boolean;
-  theme_verified: boolean;
-  signup_options: AuthOption[];
-}
 interface SignupEnvironmentWarningShownProps {
   warning_type: SignupEnvironmentWarning;
   app_name?: string;
@@ -220,7 +209,6 @@ export interface AnalyticsEventMap {
   signup_method_selected: SignupMethodSelectedProps;
   signup_completed: SignupCompletedProps;
   signup_failed: SignupFailedProps;
-  signup_page_viewed: SignupPageViewedProps;
   signup_environment_warning_shown: SignupEnvironmentWarningShownProps;
   signup_username_validation_failed: SignupUsernameValidationFailedProps;
   signup_account_resolved: SignupAccountResolvedProps;

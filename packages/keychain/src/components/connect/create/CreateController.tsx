@@ -31,7 +31,6 @@ import {
 } from "@/hooks/viewport";
 import { useDevice } from "@/hooks/device";
 import { posthog } from "@/components/provider/posthog";
-import { captureAnalyticsEvent } from "@/types/analytics";
 import { AccountSearchResult } from "@/hooks/account";
 import { PasswordFormDrawer } from "./password/PasswordForm";
 import { SmsOtpDrawer } from "./sms/SmsOtpForm";
@@ -525,43 +524,6 @@ export function CreateController({
     signupSessionIdRef.current = crypto.randomUUID();
     posthog.register({ signup_session_id: signupSessionIdRef.current });
   }, []);
-
-  const [
-    {
-      isInApp: isAnalyticsInApp,
-      appKey: analyticsAppKey,
-      appName: analyticsAppName,
-    },
-  ] = useState(() => InAppSpy());
-  const isAnalyticsInAppBrowser = isAnalyticsInApp && !!analyticsAppKey;
-  const { isMobile: isAnalyticsMobile } = useDevice();
-
-  const pageViewedRef = useRef(false);
-  useEffect(() => {
-    if (pageViewedRef.current) return;
-    if (signupOptions.length === 0) return;
-    pageViewedRef.current = true;
-    captureAnalyticsEvent(posthog, "signup_page_viewed", {
-      forced_action: forcedAction,
-      forced_auth_method: forcedAuthMethod,
-      prefill_username: !!prefillUsername,
-      is_in_app_browser: isAnalyticsInAppBrowser,
-      in_app_browser_name: analyticsAppName ?? undefined,
-      is_mobile: isAnalyticsMobile,
-      is_safari: isSafari(navigator.userAgent),
-      theme_verified: !!theme.verified,
-      signup_options: signupOptions,
-    });
-  }, [
-    signupOptions,
-    forcedAction,
-    forcedAuthMethod,
-    prefillUsername,
-    isAnalyticsInAppBrowser,
-    analyticsAppName,
-    isAnalyticsMobile,
-    theme.verified,
-  ]);
 
   // Combine internal and external loading states
   const isLoading = internalIsLoading || externalIsLoading;
