@@ -221,7 +221,7 @@ export function ChooseSignupMethodForm({
       <DrawerContent title={title} icon={icon}>
         <div className="flex flex-col gap-3">
           {options.map((option, index) => {
-            const isPrimary = index === 0 && INITIAL_OPTIONS.includes(option);
+            const isPrimary = !isLogin && index === 0 && INITIAL_OPTIONS.includes(option);
             const isHighlighted = highlightedIndex === index;
 
             return (
