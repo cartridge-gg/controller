@@ -374,6 +374,7 @@ export const CreateAccount = React.forwardRef<
                 ? undefined
                 : () => {
                     onUsernameClear();
+                    internalRef.current?.focus();
                     if (showAutocomplete) {
                       setIsDropdownOpen(false);
                       setSelectedIndex(undefined);
