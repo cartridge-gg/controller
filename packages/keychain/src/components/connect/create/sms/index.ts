@@ -4,6 +4,9 @@ import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { getIframePublicKey } from "@/wallets/social/turnkey";
 import { WalletAdapter } from "@cartridge/controller";
 import { useCallback } from "react";
+import { encryptOtpCodeToBundle, generateP256KeyPair } from "@turnkey/crypto";
+import { p256 } from "@noble/curves/p256";
+import { sha256 } from "@noble/hashes/sha2";
 import { Turnkey, TurnkeyIframeClient } from "@turnkey/sdk-browser";
 
 type InitSmsResponse = {
@@ -12,7 +15,23 @@ type InitSmsResponse = {
 };
 
 type VerifySmsResponse = {
+  verificationToken: string;
+};
+
+type SmsLoginResponse = {
   credentialBundle: string;
+};
+
+type TurnkeyClientSignature = {
+  publicKey: string;
+  scheme: "CLIENT_SIGNATURE_SCHEME_API_P256";
+  message: string;
+  signature: string;
+};
+
+type VerificationTokenPayload = {
+  id?: string;
+  public_key?: unknown;
 };
 
 let iframeClientPromise: Promise<TurnkeyIframeClient> | null = null;
@@ -61,6 +80,7 @@ export const useSmsAuthentication = () => {
       username: string,
       phoneNumber: string,
       otpId: string,
+      otpEncryptionTargetBundle: string,
       otpCode: string,
     ) => {
       if (!chainId) {
@@ -71,6 +91,22 @@ export const useSmsAuthentication = () => {
 
       // Get iframe public key for the credential bundle
       const targetPublicKey = await getIframePublicKey(iframeClient);
+      const otpVerificationKeyPair = generateP256KeyPair();
+
+      const encryptedOtpBundle = await encryptOtpCodeToBundle(
+        otpCode.trim(),
+        otpEncryptionTargetBundle,
+        otpVerificationKeyPair.publicKey,
+      );
+
+      const verifyResponse = await fetchApi<VerifySmsResponse>("sms/verify", {
+        otpId,
+        encryptedOtpBundle,
+      });
+
+      if (!verifyResponse?.verificationToken) {
+        throw new Error("SMS verification failed: no verification token");
+      }
 
       // Look up or create sub-org by phone number
       const suborgResponse = await fetchApi<{ organizationIds: string[] }>(
@@ -98,21 +134,27 @@ export const useSmsAuthentication = () => {
         subOrgId = suborgResponse.organizationIds[0];
       }
 
-      // Backend does verify OTP + login, returns credential bundle
-      const verifyResponse = await fetchApi<VerifySmsResponse>("sms/verify", {
-        otpId,
-        otpCode,
-        suborgID: subOrgId,
+      const clientSignature = await buildOtpLoginClientSignature(
+        verifyResponse.verificationToken,
+        otpVerificationKeyPair.publicKey,
+        otpVerificationKeyPair.privateKey,
         targetPublicKey,
+      );
+
+      const loginResponse = await fetchApi<SmsLoginResponse>("sms/login", {
+        suborgID: subOrgId,
+        verificationToken: verifyResponse.verificationToken,
+        targetPublicKey,
+        clientSignature,
       });
 
-      if (!verifyResponse?.credentialBundle) {
+      if (!loginResponse?.credentialBundle) {
         throw new Error("SMS verification failed: no credential bundle");
       }
 
       // Inject credential bundle into iframe (same pattern as OAuth)
       const injectResult = await iframeClient.injectCredentialBundle(
-        verifyResponse.credentialBundle,
+        loginResponse.credentialBundle,
       );
       if (!injectResult) {
         throw new Error("Failed to inject credentials into Turnkey");
@@ -154,3 +196,82 @@ export const useSmsAuthentication = () => {
     completeSms,
   };
 };
+
+function decodeVerificationToken(
+  verificationToken: string,
+): VerificationTokenPayload {
+  const parts = verificationToken.trim().split(".");
+  if (parts.length < 2 || !parts[1]) {
+    throw new Error("Invalid verification token: missing payload");
+  }
+
+  try {
+    return JSON.parse(decodeBase64urlToString(parts[1]));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Invalid verification token: invalid payload (${reason})`);
+  }
+}
+
+function decodeBase64urlToString(value: string): string {
+  const base64 = value
+    .trim()
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(Math.ceil(value.trim().length / 4) * 4, "=");
+  const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function getClientSignatureMessageForLogin(
+  verificationToken: string,
+  sessionPublicKey: string,
+) {
+  const decoded = decodeVerificationToken(verificationToken);
+  if (!decoded.id) {
+    throw new Error("Invalid verification token: missing id");
+  }
+  if (!decoded.public_key) {
+    throw new Error("Invalid verification token: missing public key");
+  }
+
+  const verificationPublicKey = String(decoded.public_key);
+  const payload = {
+    login: {
+      publicKey: sessionPublicKey,
+    },
+    tokenId: decoded.id,
+    type: "USAGE_TYPE_LOGIN",
+  };
+
+  return {
+    message: JSON.stringify(payload),
+    publicKey: verificationPublicKey,
+  };
+}
+
+async function buildOtpLoginClientSignature(
+  verificationToken: string,
+  otpVerificationPublicKey: string,
+  otpVerificationPrivateKey: string,
+  sessionPublicKey: string,
+): Promise<TurnkeyClientSignature> {
+  const { message, publicKey } = getClientSignatureMessageForLogin(
+    verificationToken,
+    sessionPublicKey,
+  );
+  if (publicKey !== otpVerificationPublicKey) {
+    throw new Error("OTP verification token public key does not match signer");
+  }
+  const signature = p256.sign(
+    sha256(new TextEncoder().encode(message)),
+    otpVerificationPrivateKey,
+  );
+
+  return {
+    publicKey,
+    scheme: "CLIENT_SIGNATURE_SCHEME_API_P256",
+    message,
+    signature: signature.toCompactHex(),
+  };
+}

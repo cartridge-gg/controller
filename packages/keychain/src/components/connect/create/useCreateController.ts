@@ -254,6 +254,7 @@ export function useCreateController({
   const [smsState, setSmsState] = useState<{
     phoneNumber: string;
     otpId: string;
+    otpEncryptionTargetBundle: string;
   } | null>(null);
 
   const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(
@@ -343,9 +344,10 @@ export function useCreateController({
     async (phoneNumber: string) => {
       try {
         setError(undefined);
-        setSmsState({ phoneNumber, otpId: "" });
-        const { otpId } = await smsAuth.initSms(phoneNumber);
-        setSmsState({ phoneNumber, otpId });
+        setSmsState({ phoneNumber, otpId: "", otpEncryptionTargetBundle: "" });
+        const { otpId, otpEncryptionTargetBundle } =
+          await smsAuth.initSms(phoneNumber);
+        setSmsState({ phoneNumber, otpId, otpEncryptionTargetBundle });
       } catch (e: unknown) {
         setError(e as Error);
       }
@@ -604,6 +606,7 @@ export function useCreateController({
             username,
             smsState.phoneNumber,
             smsState.otpId,
+            smsState.otpEncryptionTargetBundle,
             password,
           );
           signer = {
@@ -955,6 +958,7 @@ export function useCreateController({
             username,
             smsState.phoneNumber,
             smsState.otpId,
+            smsState.otpEncryptionTargetBundle,
             password,
           );
           loginResponse = { signer: smsResult.signer };

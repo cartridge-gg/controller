@@ -19,7 +19,11 @@ export interface SmsOtpDrawerProps {
   /** Called with ("sms", otpCode) to complete authentication. */
   onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
   /** null = phone step; non-null = otp step (phone number confirmed). */
-  smsState: { phoneNumber: string; otpId: string } | null;
+  smsState: {
+    phoneNumber: string;
+    otpId: string;
+    otpEncryptionTargetBundle: string;
+  } | null;
 }
 
 export function SmsOtpDrawer({
