@@ -33,6 +33,8 @@ import { SignersSection } from "./signers/signers-section";
 import { ConnectionsSection } from "./connections/connections-section";
 import { RecoveryAccountSection } from "./recovery/recovery-section";
 import { useFeature } from "@/hooks/features";
+import { useTripleClick } from "@/hooks/tripple-click";
+import { useAccountPrivateQuery } from "@/utils/api";
 
 const registeredAccounts: RegisteredAccount[] = [
   {
@@ -47,6 +49,11 @@ export function Settings() {
   const deleteMe = useDeleteMeMutation();
   const isRegisteredAccountsEnabled = useFeature("registered-accounts");
   const isRecoveryAccountsEnabled = useFeature("recovery-accounts");
+  const isUserDataEnabled = useFeature("user-data");
+
+  const handleIconTripleClick = useTripleClick({
+    featureName: "user-data",
+  });
 
   const handleDeleteAccount = useCallback(async () => {
     const result = await deleteMe.mutateAsync({});
@@ -82,7 +89,7 @@ export function Settings() {
       <HeaderInner
         className="pb-2"
         variant="compressed"
-        title="Settings"
+        title={<span onClick={handleIconTripleClick}>Settings</span>}
         Icon={GearIcon}
       />
       <LayoutContent>
@@ -150,6 +157,8 @@ export function Settings() {
 
         <SessionsSection />
 
+        {isUserDataEnabled && <UserDataSection />}
+
         <DeleteAccountSection onDeleteClick={() => setIsDeleteOpen(true)} />
       </LayoutContent>
 
@@ -211,3 +220,60 @@ export function Settings() {
     </Sheet>
   );
 }
+
+const UserDataSection = () => {
+  const {
+    data: accountPrivateData,
+    refetch: refetchAccountPrivate,
+    isFetching,
+  } = useAccountPrivateQuery();
+  const userData = accountPrivateData?.accountPrivate;
+  const verificationStatus = userData?.verificationStatus;
+  const firstName = userData?.firstName;
+  const lastName = userData?.lastName;
+  const phoneNumber = userData?.phoneNumber;
+  const phoneNumberVerifiedAt = userData?.phoneNumberVerifiedAt;
+  const proveVerifiedAt = userData?.proveVerifiedAt;
+  return (
+    <section className="space-y-4">
+      <SectionHeader
+        title="User data"
+        description="Manage your account and data"
+      />
+
+      <div className="text-sm text-foreground-300">
+        {isFetching ? (
+          <p>Loading...</p>
+        ) : !userData ? (
+          <p>No user data found.</p>
+        ) : (
+          <>
+            {firstName && lastName ? (
+              <p>
+                Name: {firstName} {lastName}
+              </p>
+            ) : (
+              <p>Name not set.</p>
+            )}
+            {phoneNumber && phoneNumberVerifiedAt ? (
+              <p>{`Phone number: ${phoneNumber.slice(0, 3)}***${phoneNumber.slice(-4)} (verified at ${phoneNumberVerifiedAt})`}</p>
+            ) : (
+              <p>Phone number not set.</p>
+            )}
+            <p>Identity verification: {proveVerifiedAt || "None"}</p>
+            <p>Verification status: {verificationStatus || "None"}</p>
+          </>
+        )}
+      </div>
+
+      <Button
+        variant="secondary"
+        onClick={() => refetchAccountPrivate()}
+        className="flex-1"
+        disabled={isFetching}
+      >
+        Refetch
+      </Button>
+    </section>
+  );
+};

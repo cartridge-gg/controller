@@ -5,6 +5,7 @@ import {
   SelectTrigger,
 } from "@/components/primitives/select";
 import { COUNTRIES } from "./countries";
+import { cn } from "@/utils";
 
 export interface PhoneCountryCodeSelectProps {
   /** ISO 3166-1 alpha-2 country code (e.g. "US", "GB"). */
@@ -36,13 +37,19 @@ export function PhoneCountryCodeSelect({
       onValueChange={setValue}
       disabled={disabled}
     >
-      <SelectTrigger className={className} aria-label="Country area code" arrow>
+      <SelectTrigger
+        className={cn(className, "w-[11ch]")}
+        aria-label="Country area code"
+        arrow
+      >
         <span>{selected?.dial_code ?? ""}</span>
       </SelectTrigger>
       <SelectContent>
         {visibleCountries.map((country) => (
           <SelectItem key={country.code} value={country.code}>
-            <span className="font-mono">{country.dial_code}</span>{" "}
+            <span className="font-mono inline-block w-[6ch]">
+              {country.dial_code}
+            </span>
             <span>{country.name}</span>
           </SelectItem>
         ))}

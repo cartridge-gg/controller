@@ -1,15 +1,24 @@
 import { IdToken } from "@auth0/auth0-react";
 import { AuthOption } from "@cartridge/controller";
 import { fetchApiCreator } from "@cartridge/controller-ui/utils";
-import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
+import { decodeBase64urlToString } from "@turnkey/encoding";
+import {
+  TurnkeyBrowserClient,
+  TurnkeyIframeClient,
+} from "@turnkey/sdk-browser";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { getIframePublicKey } from "./turnkey";
+
+// getOrCreateWallet / getWallet only call methods that exist on the shared
+// TurnkeyBrowserClient base — passing either an iframe-backed or api-key-backed
+// client works.
+type WalletReadWriteClient = TurnkeyIframeClient | TurnkeyBrowserClient;
 
 export const OIDC_INVALID_TOKEN_ERROR = "Invalid OIDC token";
 
 export const getWallet = async (
   subOrgId: string,
-  authIframeClient: TurnkeyIframeClient,
+  authIframeClient: WalletReadWriteClient,
 ) => {
   const wallets = await authIframeClient.getWallets({
     organizationId: subOrgId,
@@ -34,7 +43,7 @@ export const getWallet = async (
 export const getOrCreateWallet = async (
   subOrgId: string,
   userName: string,
-  authIframeClient: TurnkeyIframeClient,
+  authIframeClient: WalletReadWriteClient,
 ): Promise<string> => {
   const wallets = await authIframeClient.getWallets({
     organizationId: subOrgId,
@@ -126,7 +135,8 @@ interface DecodedIdToken extends JwtPayload {
   tknonce?: string;
 }
 
-export type SocialProvider = Extract<AuthOption, "discord" | "google">;
+export type SocialProviderType = "google" | "discord";
+export type SocialProvider = Extract<AuthOption, SocialProviderType>;
 
 export const fetchApi = fetchApiCreator(
   `${import.meta.env.VITE_CARTRIDGE_API_URL}/oauth2`,
@@ -229,3 +239,43 @@ type CreateSuborgResponse = {
 type AuthResponse = {
   credentialBundle: string;
 };
+
+export type TurnkeyClientSignature = {
+  publicKey: string;
+  scheme: "CLIENT_SIGNATURE_SCHEME_API_P256";
+  message: string;
+  signature: string;
+};
+
+// Mirror of @turnkey/core's getClientSignatureMessageForLogin: pulls `id` and
+// `public_key` out of the verificationToken JWT payload and serialises the
+// v1TokenUsage envelope the enclave verifies against during OtpLogin. Not
+// exported from any installed Turnkey package, so it stays inline.
+export function buildClientSignatureMessage(verificationToken: string): {
+  message: string;
+  verificationPublicKey: string;
+} {
+  const parts = verificationToken.split(".");
+  if (parts.length < 2) {
+    throw new Error("Invalid verification token: not a JWT");
+  }
+
+  const payload = JSON.parse(decodeBase64urlToString(parts[1])) as {
+    id?: string;
+    public_key?: string;
+  };
+
+  if (!payload.id || !payload.public_key) {
+    throw new Error(
+      "Invalid verification token: missing id or public_key in payload",
+    );
+  }
+
+  const message = JSON.stringify({
+    login: { publicKey: payload.public_key },
+    tokenId: payload.id,
+    type: "USAGE_TYPE_LOGIN",
+  });
+
+  return { message, verificationPublicKey: payload.public_key };
+}

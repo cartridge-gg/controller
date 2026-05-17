@@ -1,14 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AuthOption } from "@cartridge/controller";
 import {
   Button,
   Drawer,
   DrawerContent,
-  Input,
   MobileIcon,
   PhoneNumberInput,
+  PinInput,
+  formatPhoneNumber,
   isValidPhoneNumber,
 } from "@cartridge/controller-ui";
+
+export interface SmsOtpState {
+  phoneNumber: string;
+  otpId: string;
+  otpEncryptionTargetBundle: string;
+}
 
 export interface SmsOtpDrawerProps {
   isOpen: boolean;
@@ -17,9 +23,9 @@ export interface SmsOtpDrawerProps {
   /** Sends the SMS. On success the hook sets smsState (null → otp step). */
   onInitOtp: (phoneNumber: string) => Promise<void>;
   /** Called with ("sms", otpCode) to complete authentication. */
-  onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
+  onSubmitCode: (otpCode: string) => void;
   /** null = phone step; non-null = otp step (phone number confirmed). */
-  smsState: { phoneNumber: string; otpId: string } | null;
+  smsState: SmsOtpState | null;
 }
 
 export function SmsOtpDrawer({
@@ -27,7 +33,7 @@ export function SmsOtpDrawer({
   isLogin,
   onClose,
   onInitOtp,
-  onSubmit,
+  onSubmitCode,
   smsState,
 }: SmsOtpDrawerProps) {
   const step = smsState?.otpId ? "otp" : "phone";
@@ -39,6 +45,8 @@ export function SmsOtpDrawer({
   const [sendingCode, setSendingCode] = useState(false);
   const [phoneInputError, setPhoneInputError] = useState<string | undefined>();
   const [otpCodeError, setOtpCodeError] = useState<string | undefined>();
+  const [otpSentAt, setOtpSentAt] = useState<number | null>(null);
+  const [secondsRemaining, setSecondsRemaining] = useState(0);
   const phoneRef = useRef<HTMLInputElement>(null);
   const otpRef = useRef<HTMLInputElement>(null);
 
@@ -53,8 +61,31 @@ export function SmsOtpDrawer({
       setSendingCode(false);
       setPhoneInputError(undefined);
       setOtpCodeError(undefined);
+      setOtpSentAt(null);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (smsState?.otpId) {
+      setOtpSentAt(Date.now());
+    }
+  }, [smsState?.otpId]);
+
+  useEffect(() => {
+    if (otpSentAt === null) {
+      setSecondsRemaining(0);
+      return;
+    }
+    const compute = () =>
+      Math.max(0, 60 - Math.floor((Date.now() - otpSentAt) / 1000));
+    setSecondsRemaining(compute());
+    const id = setInterval(() => {
+      const remaining = compute();
+      setSecondsRemaining(remaining);
+      if (remaining === 0) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [otpSentAt]);
 
   useEffect(() => {
     if (step === "phone") {
@@ -70,10 +101,7 @@ export function SmsOtpDrawer({
   );
 
   // Alphanumeric, 6 to 9 characters long
-  const isOtpCodeValid = useMemo(
-    () => !!otpCode && /^[a-zA-Z0-9]{6,9}$/.test(otpCode),
-    [otpCode],
-  );
+  const isOtpCodeValid = useMemo(() => otpCode.length == 6, [otpCode]);
 
   useEffect(() => {
     if (phoneInputError && isPhoneInputValid) {
@@ -109,7 +137,7 @@ export function SmsOtpDrawer({
           setOtpCodeError("Invalid code");
           return;
         }
-        onSubmit("sms", otpCode);
+        onSubmitCode(otpCode);
       }
     },
     [
@@ -119,9 +147,22 @@ export function SmsOtpDrawer({
       otpCode,
       isOtpCodeValid,
       onInitOtp,
-      onSubmit,
+      onSubmitCode,
     ],
   );
+
+  const handleResend = useCallback(async () => {
+    if (secondsRemaining > 0 || sendingCode || !smsState?.phoneNumber) return;
+    setOtpCodeError(undefined);
+    setSendingCode(true);
+    try {
+      await onInitOtp(smsState.phoneNumber);
+    } catch (err) {
+      setOtpCodeError((err as Error).message ?? "Failed to resend code");
+    } finally {
+      setSendingCode(false);
+    }
+  }, [secondsRemaining, sendingCode, smsState?.phoneNumber, onInitOtp]);
 
   const handleClose = (event?: Event) => {
     if (!isOpen) return; // avoid closing if another drawer is opening
@@ -132,63 +173,77 @@ export function SmsOtpDrawer({
   return (
     <Drawer isOpen={isOpen} onClose={handleClose}>
       <DrawerContent
-        title={`${isLogin ? "Login" : "Sign Up"} with SMS`}
+        title={`${isLogin ? "Log In" : "Sign Up"} with SMS`}
         icon={<MobileIcon variant="solid" />}
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="sms-phone"
-              className="text-xs font-medium text-foreground-400"
-            >
-              Phone Number
-            </label>
-            <PhoneNumberInput
-              ref={phoneRef}
-              inputId="sms-phone"
-              value={
-                step === "phone" ? phoneInput : (smsState?.phoneNumber ?? "")
-              }
-              setValue={setPhoneInput}
-              disabled={sendingCode || step === "otp"}
-              error={phoneInputError}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="sms-otp"
-              className="text-xs font-medium text-foreground-400"
-            >
-              Verification Code
-            </label>
-            <Input
-              ref={otpRef}
-              id="sms-otp"
-              type="text"
-              inputMode="numeric"
-              placeholder="Enter code"
-              value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value.trim().toUpperCase())}
-              disabled={sendingCode || step === "phone"}
-              autoComplete="one-time-code"
-            />
-          </div>
-
-          {otpCodeError && (
-            <p className="text-sm text-destructive">{otpCodeError}</p>
+          {step === "phone" ? (
+            <div className="flex flex-col gap-3">
+              <label
+                htmlFor="sms-phone"
+                className="text-xs font-medium text-foreground-400"
+              >
+                Phone
+              </label>
+              <PhoneNumberInput
+                ref={phoneRef}
+                inputId="sms-phone"
+                value={phoneInput}
+                setValue={setPhoneInput}
+                disabled={sendingCode}
+                error={phoneInputError}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <label htmlFor="sms-otp" className="text-xs text-foreground-300">
+                Please check {formatPhoneNumber(smsState?.phoneNumber ?? "")}{" "}
+                for a message from Cartridge and enter your code below.
+              </label>
+              <PinInput
+                type="numeric"
+                length={6}
+                ref={otpRef}
+                value={otpCode}
+                onChange={setOtpCode}
+                disabled={sendingCode}
+                variant={otpCodeError ? "destructive" : "default"}
+                className="py-4"
+              />
+              {otpSentAt !== null && (
+                <p className="text-xs text-foreground-300">
+                  Didn't get a message?{" "}
+                  {secondsRemaining > 0 ? (
+                    <>Resend in {secondsRemaining}...</>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={sendingCode}
+                      className="text-primary-100 hover:underline disabled:opacity-50"
+                    >
+                      Resend Code
+                    </button>
+                  )}
+                </p>
+              )}
+              {otpCodeError && (
+                <p className="text-sm text-destructive">{otpCodeError}</p>
+              )}
+            </div>
           )}
 
           <div className="flex gap-2">
             <Button
               type="submit"
               disabled={
-                sendingCode || (step === "phone" ? !phoneInput : !otpCode)
+                sendingCode ||
+                (step === "phone" ? !isPhoneInputValid : !isOtpCodeValid)
               }
               isLoading={sendingCode}
               className="flex-1"
             >
-              {step === "phone" ? "Send Code" : "Sign Up"}
+              {step === "phone" ? "Continue" : "Sign Up"}
             </Button>
           </div>
         </form>

@@ -19,7 +19,8 @@ import {
   OnchainStarterpackDetails,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { useFeature, useFeatures } from "@/hooks/features";
+import { useFeature } from "@/hooks/features";
+import { useTripleClick } from "@/hooks/tripple-click";
 import {
   exceedsLimit,
   useTokenBalance,
@@ -103,7 +104,6 @@ export function OnchainCheckout() {
     !!accountPrivateData?.accountPrivate?.phoneNumber &&
     !!accountPrivateData?.accountPrivate?.phoneNumberVerifiedAt;
   const isCoinflowEnabled = useFeature("coinflow-support");
-  const { enableFeature } = useFeatures();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -122,23 +122,10 @@ export function OnchainCheckout() {
       .finally(() => setCountryCodeLoaded(true));
   }, []);
 
-  // Triple-click on the header icon unlocks the hidden Coinflow credit card
-  // option and selects it.
-  const clickCountRef = useRef(0);
-  const clickTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const handleIconTripleClick = useCallback(() => {
-    clickCountRef.current += 1;
-    clearTimeout(clickTimerRef.current);
-    if (clickCountRef.current === 3) {
-      clickCountRef.current = 0;
-      enableFeature("coinflow-support");
-      onCoinflowSelect();
-    } else {
-      clickTimerRef.current = setTimeout(() => {
-        clickCountRef.current = 0;
-      }, 500);
-    }
-  }, [enableFeature, onCoinflowSelect]);
+  const handleIconTripleClick = useTripleClick({
+    featureName: "coinflow-support",
+    callback: onCoinflowSelect,
+  });
 
   const totalUsdAmount = useMemo(() => {
     return usdAmount * quantity;
