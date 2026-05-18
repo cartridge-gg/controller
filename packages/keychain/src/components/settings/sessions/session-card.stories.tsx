@@ -1,3 +1,4 @@
+import { DesktopIcon } from "@cartridge/controller-ui";
 import type { Meta, StoryObj } from "@storybook/react";
 import { SessionCard } from "./session-card";
 
@@ -9,9 +10,9 @@ const meta = {
     layout: "centered",
   },
   args: {
-    sessionName: "Session 1",
-    expiresAt: 1630000000000n,
-    sessionOs: "macOS",
+    icon: <DesktopIcon variant="solid" size="sm" />,
+    name: "example.cartridge.gg",
+    rightText: "5d",
     onDelete: async () => {
       console.log("Delete session");
     },
