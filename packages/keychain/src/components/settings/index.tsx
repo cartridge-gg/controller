@@ -10,6 +10,7 @@ import {
   LayoutContent,
   LayoutFooter,
   PlusIcon,
+  SectionHeader,
   Sheet,
   SheetClose,
   SheetContent,
@@ -27,7 +28,6 @@ import {
   RegisteredAccount,
   RegisteredAccountCard,
 } from "./registered-account-card";
-import { SectionHeader } from "./section-header";
 import { SessionsSection } from "./sessions/sessions-section";
 import { SignersSection } from "./signers/signers-section";
 import { ConnectionsSection } from "./connections/connections-section";

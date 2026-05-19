@@ -11,6 +11,7 @@ export * from "./leaderboard";
 export * from "./progress-bar";
 export * from "./recipient";
 export * from "./signer-method";
+export * from "./settings";
 export * from "./signer-pending-card";
 export * from "./thumbnails";
 export * from "./tokens";

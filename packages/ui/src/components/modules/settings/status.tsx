@@ -1,5 +1,5 @@
-import { cn } from "@cartridge/controller-ui/utils";
 import React from "react";
+import { cn } from "@/utils";
 
 export const Status = React.forwardRef<
   HTMLDivElement,
@@ -31,3 +31,5 @@ export const Status = React.forwardRef<
     </div>
   );
 });
+
+Status.displayName = "Status";

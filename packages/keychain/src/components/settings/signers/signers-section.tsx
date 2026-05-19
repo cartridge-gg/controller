@@ -6,11 +6,15 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { isCurrentSigner } from "@/utils/signers";
 import { JsRemoveSignerInput } from "@cartridge/controller-wasm";
-import { Button, PlusIcon, Skeleton } from "@cartridge/controller-ui";
+import {
+  Button,
+  PlusIcon,
+  SectionHeader,
+  Skeleton,
+} from "@cartridge/controller-ui";
 import { useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
-import { SectionHeader } from "../section-header";
 import { AddSignerDrawer } from "./add-signer/add-signer";
 import { SignerCard } from "./signer-card";
 

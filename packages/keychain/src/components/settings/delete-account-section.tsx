@@ -1,5 +1,4 @@
-import { Button, TrashIcon } from "@cartridge/controller-ui";
-import { SectionHeader } from "./section-header";
+import { Button, SectionHeader, TrashIcon } from "@cartridge/controller-ui";
 
 interface DeleteAccountSectionProps {
   onDeleteClick: () => void;

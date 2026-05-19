@@ -2,9 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Status } from "./status";
 
 const meta = {
-  title: "components/settings/Status",
+  title: "Modules/Settings/Status",
   component: Status,
-  tags: ["autodocs"],
   parameters: {
     layout: "centered",
   },

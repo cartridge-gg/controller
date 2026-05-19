@@ -1,5 +1,4 @@
-import { Button, PlusIcon } from "@cartridge/controller-ui";
-import { SectionHeader } from "../section-header";
+import { Button, PlusIcon, SectionHeader } from "@cartridge/controller-ui";
 import { RecoveryAccountCard } from "./recovery-account-card";
 import { useNavigation } from "@/context/navigation";
 // import { useExternalOwners } from "@/hooks/external";

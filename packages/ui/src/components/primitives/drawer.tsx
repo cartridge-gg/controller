@@ -38,20 +38,26 @@ export const Drawer = ({
 export interface DrawerContentProps
   extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
+  subTitle?: string;
   icon: React.ReactNode;
   className?: string;
+  titleClassName?: string;
   children: React.ReactNode;
 }
 
 export const DrawerContent = ({
   title,
+  subTitle,
   icon,
   className,
+  titleClassName,
   children,
 }: DrawerContentProps) => {
   return (
     <>
-      <SheetTitle className="text-lg text-start font-semibold">
+      <SheetTitle
+        className={cn("text-lg text-start font-semibold", titleClassName)}
+      >
         <div className="flex flex-row gap-3 items-center">
           <Thumbnail
             icon={React.cloneElement(icon as React.ReactElement, {
@@ -60,7 +66,16 @@ export const DrawerContent = ({
             size="lg"
             className="bg-background-100"
           />
-          <div className="flex-grow truncate">{title}</div>
+          <div className="flex flex-col gap-0 max-w-[75%]">
+            <div className="flex-grow truncate text-foreground-100">
+              {title}
+            </div>
+            {subTitle && (
+              <div className="flex-grow truncate text-xs font-normal text-foreground-300">
+                {subTitle}
+              </div>
+            )}
+          </div>
         </div>
       </SheetTitle>
       <div className={cn("flex flex-col gap-4", className)}>{children}</div>

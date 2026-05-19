@@ -1,5 +1,5 @@
-import { cn } from "@cartridge/controller-ui/utils";
 import React from "react";
+import { cn } from "@cartridge/controller-ui/utils";
 import { Status } from "./status";
 
 export interface SectionHeaderProps {

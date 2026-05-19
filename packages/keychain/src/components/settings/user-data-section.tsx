@@ -1,12 +1,12 @@
+import { useMemo } from "react";
 import {
   formatPhoneNumber,
   MobileIcon,
+  SectionHeader,
+  SettingsCard,
   UserIcon,
 } from "@cartridge/controller-ui";
-import { useMemo } from "react";
 import { useAccountPrivateQuery } from "@/utils/api";
-import { SectionHeader } from "./section-header";
-import { SessionCard } from "./sessions/session-card";
 
 type VerifiedField = {
   label: string;
@@ -57,17 +57,17 @@ export const UserDataSection = () => {
       />
       <div className="space-y-3">
         {verifiedIdentity && (
-          <SessionCard
+          <SettingsCard
             icon={<UserIcon variant="solid" size="sm" />}
-            name={verifiedIdentity.label}
+            label={verifiedIdentity.label}
             rightText={formatVerifiedAt(verifiedIdentity.verifiedAt)}
             // onDelete={async () => {}}
           />
         )}
         {verifiedPhone && (
-          <SessionCard
+          <SettingsCard
             icon={<MobileIcon variant="solid" size="sm" />}
-            name={verifiedPhone.label}
+            label={verifiedPhone.label}
             rightText={formatVerifiedAt(verifiedPhone.verifiedAt)}
             // onDelete={async () => {}}
           />

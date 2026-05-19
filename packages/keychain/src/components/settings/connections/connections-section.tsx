@@ -1,6 +1,10 @@
-import { Button, PlusIcon, Skeleton } from "@cartridge/controller-ui";
+import {
+  Button,
+  PlusIcon,
+  SectionHeader,
+  Skeleton,
+} from "@cartridge/controller-ui";
 import { useQueryClient, useMutation } from "react-query";
-import { SectionHeader } from "../section-header";
 import { ConnectionCard } from "./connection-card";
 import { useNavigation } from "@/context/navigation";
 import { useFetchData } from "@/utils/api/fetcher";
