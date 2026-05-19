@@ -6,6 +6,8 @@ export type Country = {
   flag: string;
   code: string;
   dial_code: string;
+  mask?: string;
+  maxLength?: number;
 };
 
 export const COUNTRIES: Country[] = [
@@ -194,6 +196,8 @@ export const COUNTRIES: Country[] = [
     flag: "🇧🇷",
     code: "BR",
     dial_code: "+55",
+    mask: "(XX)XXXXX-XXXX",
+    maxLength: 11,
   },
   {
     name: "British Indian Ocean Territory",
@@ -242,6 +246,8 @@ export const COUNTRIES: Country[] = [
     flag: "🇨🇦",
     code: "CA",
     dial_code: "+1",
+    mask: "(XXX)XXX-XXXX",
+    maxLength: 10,
   },
   {
     name: "Cape Verde",
@@ -1418,6 +1424,8 @@ export const COUNTRIES: Country[] = [
     flag: "🇺🇸",
     code: "US",
     dial_code: "+1",
+    mask: "(XXX)XXX-XXXX",
+    maxLength: 10,
   },
   {
     name: "Uruguay",

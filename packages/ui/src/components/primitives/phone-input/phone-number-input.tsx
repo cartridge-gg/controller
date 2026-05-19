@@ -2,48 +2,32 @@ import { forwardRef, useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/primitives/input";
 import { ErrorAlertIcon } from "@/components/icons/error-alert-icon";
 import { PhoneCountryCodeSelect } from "./phone-country-code-select";
-import { COUNTRIES } from "./countries";
+import { COUNTRIES, type Country } from "./countries";
 
 const DEFAULT_COUNTRY = "US";
 
-function countryDialCodeOf(code: string): string {
-  return COUNTRIES.find((c) => c.code === code)?.dial_code ?? "";
+function countryOf(code: string): Country | undefined {
+  return COUNTRIES.find((c) => c.code === code);
 }
 
 // Display-only mask. `setValue` always receives a plain "+digits" string.
-function formatPhoneDigits(countryDialCode: string, digits: string): string {
-  let mask: string;
-  if (countryDialCode === "+1") mask = "(XXX)XXX-XXXX";
-  else if (countryDialCode === "+55") mask = "(XX)XXXXX-XXXX";
-  else return digits;
+function formatPhoneDigits(
+  country: Country | undefined,
+  digits: string,
+): string {
+  if (!country?.mask || !country.maxLength) return digits;
 
-  const maxDigits = (mask.match(/X/g) ?? []).length;
-  const d = digits.slice(0, maxDigits);
+  const d = digits.slice(0, country.maxLength);
   if (!d) return "";
 
   let out = "";
   let di = 0;
-  for (let i = 0; i < mask.length; i++) {
+  for (let i = 0; i < country.mask.length; i++) {
     if (di >= d.length) break;
-    if (mask[i] === "X") out += d[di++];
-    else out += mask[i];
+    if (country.mask[i] === "X") out += d[di++];
+    else out += country.mask[i];
   }
   return out;
-}
-
-// only numbers, with dial code, +###########
-export function formatPhoneNumber(phoneNumber: string): string {
-  let codeLength: number = 0;
-  if (phoneNumber.startsWith("+1") && phoneNumber.length === 12) {
-    codeLength = 2;
-  } else if (phoneNumber.startsWith("+55") && phoneNumber.length === 14) {
-    codeLength = 3;
-  }
-  if (codeLength > 0) {
-    const countryDialCode = phoneNumber.slice(0, codeLength);
-    return `${countryDialCode}${formatPhoneDigits(countryDialCode, phoneNumber.slice(codeLength))}`;
-  }
-  return phoneNumber;
 }
 
 // Find the country whose dial_code is the longest prefix of `value`.
@@ -107,7 +91,8 @@ export const PhoneNumberInput = forwardRef<
   });
 
   const effectiveCountry = lockedCountry ?? country;
-  const dialCode = countryDialCodeOf(effectiveCountry);
+  const countryData = countryOf(effectiveCountry);
+  const dialCode = countryData?.dial_code ?? "";
 
   // Sync country if the value was set externally to a different dial code.
   useEffect(() => {
@@ -127,19 +112,19 @@ export const PhoneNumberInput = forwardRef<
   }, [value, dialCode]);
 
   const displayValue = useMemo(
-    () => formatPhoneDigits(dialCode, digits),
-    [dialCode, digits],
+    () => formatPhoneDigits(countryData, digits),
+    [countryData, digits],
   );
 
   const handleCountryChange = (newCountry: string) => {
     setCountry(newCountry);
-    setValue(`${countryDialCodeOf(newCountry)}${digits}`);
+    setValue(`${countryOf(newCountry)?.dial_code ?? ""}${digits}`);
   };
 
   const handleDigitsChange = (raw: string) => {
     const sanitized = raw.replace(/\D/g, "");
     // Re-format to apply the format's digit cap, then strip back to digits.
-    const capped = formatPhoneDigits(dialCode, sanitized).replace(/\D/g, "");
+    const capped = formatPhoneDigits(countryData, sanitized).replace(/\D/g, "");
     setValue(`${dialCode}${capped}`);
   };
 
@@ -176,7 +161,20 @@ export const PhoneNumberInput = forwardRef<
   );
 });
 
-/** E.164 international phone number format. */
+// exports
+
+// E.164 international phone number format
 export function isValidPhoneNumber(value: string): boolean {
   return /^\+[1-9]\d{6,14}$/.test(value);
+}
+
+// only numbers, with dial code, +###########
+export function formatPhoneNumber(phoneNumber: string): string {
+  const code = detectCountry(phoneNumber);
+  const country = code ? countryOf(code) : undefined;
+  if (!country?.mask || !country.maxLength) return phoneNumber;
+  if (phoneNumber.length !== country.dial_code.length + country.maxLength) {
+    return phoneNumber;
+  }
+  return `${country.dial_code}${formatPhoneDigits(country, phoneNumber.slice(country.dial_code.length))}`;
 }

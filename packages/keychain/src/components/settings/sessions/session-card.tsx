@@ -1,4 +1,4 @@
-import { Button, Card, UnlinkIcon } from "@cartridge/controller-ui";
+import { Button, Card, TrashIcon, UnlinkIcon } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
 import React, { useState } from "react";
 
@@ -6,13 +6,14 @@ export interface SessionCardProps {
   icon: React.ReactNode;
   name: string;
   rightText?: string;
-  onDelete: () => Promise<void>;
+  onDelete?: () => Promise<void>;
+  onUnlink?: () => Promise<void>;
 }
 
 export const SessionCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SessionCardProps
->(({ className, icon, name, rightText, onDelete, ...props }, ref) => {
+>(({ className, icon, name, rightText, onDelete, onUnlink, ...props }, ref) => {
   const [loading, setLoading] = useState(false);
 
   return (
@@ -30,22 +31,29 @@ export const SessionCard = React.forwardRef<
           </div>
         )}
       </Card>
-      <Button
-        variant="icon"
-        size="icon"
-        type="button"
-        isLoading={loading}
-        onClick={async () => {
-          try {
-            setLoading(true);
-            await onDelete();
-          } finally {
-            setLoading(false);
-          }
-        }}
-      >
-        <UnlinkIcon size="default" className="text-foreground-300" />
-      </Button>
+      {(onDelete || onUnlink) && (
+        <Button
+          variant="icon"
+          size="icon"
+          type="button"
+          isLoading={loading}
+          onClick={async () => {
+            try {
+              setLoading(true);
+              await (onDelete ?? onUnlink)?.();
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          {onUnlink && (
+            <UnlinkIcon size="default" className="text-foreground-300" />
+          )}
+          {onDelete && (
+            <TrashIcon size="default" className="text-foreground-300" />
+          )}
+        </Button>
+      )}
     </div>
   );
 });

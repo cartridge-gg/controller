@@ -1,4 +1,8 @@
-import { MobileIcon, UserIcon } from "@cartridge/controller-ui";
+import {
+  formatPhoneNumber,
+  MobileIcon,
+  UserIcon,
+} from "@cartridge/controller-ui";
 import { useMemo } from "react";
 import { useAccountPrivateQuery } from "@/utils/api";
 import { SectionHeader } from "./section-header";
@@ -38,7 +42,8 @@ export const UserDataSection = () => {
       return null;
     }
     return {
-      label: `${userData.phoneNumber.slice(0, 3)}***${userData.phoneNumber.slice(-4)}`,
+      // label: `${userData.phoneNumber.slice(0, 3)}***${userData.phoneNumber.slice(-4)}`,
+      label: formatPhoneNumber(userData.phoneNumber),
       verifiedAt: userData.phoneNumberVerifiedAt,
     };
   }, [userData?.phoneNumber, userData?.phoneNumberVerifiedAt]);
@@ -47,7 +52,7 @@ export const UserDataSection = () => {
     <section className="space-y-4">
       <SectionHeader
         title="User Data"
-        description="Verified user data"
+        description="Used to verify your player identity for banking and compliance purposes. This information is stored securely and is never shared."
         showStatus={false}
       />
       <div className="space-y-3">
@@ -56,7 +61,7 @@ export const UserDataSection = () => {
             icon={<UserIcon variant="solid" size="sm" />}
             name={verifiedIdentity.label}
             rightText={formatVerifiedAt(verifiedIdentity.verifiedAt)}
-            onDelete={async () => {}}
+            // onDelete={async () => {}}
           />
         )}
         {verifiedPhone && (
@@ -64,7 +69,7 @@ export const UserDataSection = () => {
             icon={<MobileIcon variant="solid" size="sm" />}
             name={verifiedPhone.label}
             rightText={formatVerifiedAt(verifiedPhone.verifiedAt)}
-            onDelete={async () => {}}
+            // onDelete={async () => {}}
           />
         )}
       </div>
