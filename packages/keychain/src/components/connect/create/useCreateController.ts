@@ -346,6 +346,8 @@ export function useCreateController({
         setSmsState({ phoneNumber, otpId, otpEncryptionTargetBundle });
       } catch (e: unknown) {
         setError(e as Error);
+        setAuthMethod("sms"); // still not set, needed to open error screen
+        setAuthenticationStep(AuthenticationStep.Error);
       }
     },
     [smsAuth],
@@ -382,10 +384,14 @@ export function useCreateController({
           setSmsState(null);
         }
       } catch (e: unknown) {
-        if (e instanceof SmsUsernameNotFoundError) {
+        // if username not found, ask user for phone number
+        const usernameNotFound = e instanceof SmsUsernameNotFoundError;
+        if (usernameNotFound) {
           setSmsState(null);
         } else {
           setError(e as Error);
+          setAuthMethod("sms"); // still not set, needed to open error screen
+          setAuthenticationStep(AuthenticationStep.Error);
           return;
         }
       }

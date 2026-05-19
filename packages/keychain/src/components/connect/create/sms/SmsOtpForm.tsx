@@ -116,7 +116,6 @@ export function SmsOtpDrawer({
     [phoneInput],
   );
 
-  // Alphanumeric, 6 to 9 characters long
   const isOtpCodeValid = useMemo(() => otpCode.length == 6, [otpCode]);
 
   useEffect(() => {
