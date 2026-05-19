@@ -11,6 +11,7 @@ import {
 } from "@cartridge/controller-ui";
 
 export interface SmsOtpState {
+  username?: string;
   phoneNumber: string;
   otpId: string;
   otpEncryptionTargetBundle: string;
@@ -22,6 +23,7 @@ export interface SmsOtpDrawerProps {
   onClose: () => void;
   // Sends the SMS. On success the hook sets smsState
   onInitOtp: (phoneNumber: string) => Promise<void>;
+  onResendOtp: () => void;
   // Called to complete authentication.
   onSubmitCode: (otpCode: string) => void;
   // null = phone step; non-null = otp step (phone number confirmed).
@@ -30,11 +32,14 @@ export interface SmsOtpDrawerProps {
   onResetOtp?: () => void;
 }
 
+const RESEND_WAIT_SECONDS = 30;
+
 export function SmsOtpDrawer({
   isOpen,
   isLogin,
   onClose,
   onInitOtp,
+  onResendOtp,
   onResetOtp,
   onSubmitCode,
   smsState,
@@ -85,7 +90,10 @@ export function SmsOtpDrawer({
       return;
     }
     const compute = () =>
-      Math.max(0, 60 - Math.floor((Date.now() - otpSentAt) / 1000));
+      Math.max(
+        0,
+        RESEND_WAIT_SECONDS - Math.floor((Date.now() - otpSentAt) / 1000),
+      );
     setSecondsRemaining(compute());
     const id = setInterval(() => {
       const remaining = compute();
@@ -165,17 +173,17 @@ export function SmsOtpDrawer({
   }, [onResetOtp, resetState]);
 
   const handleResend = useCallback(async () => {
-    if (secondsRemaining > 0 || sendingCode || !smsState?.phoneNumber) return;
+    if (secondsRemaining > 0 || sendingCode || !smsState) return;
     setOtpCodeError(undefined);
     setSendingCode(true);
     try {
-      await onInitOtp(smsState.phoneNumber);
+      await onResendOtp();
     } catch (err) {
       setOtpCodeError((err as Error).message ?? "Failed to resend code");
     } finally {
       setSendingCode(false);
     }
-  }, [secondsRemaining, sendingCode, smsState?.phoneNumber, onInitOtp]);
+  }, [secondsRemaining, sendingCode, smsState, onResendOtp]);
 
   const handleClose = (event?: Event) => {
     if (!isOpen) return; // avoid closing if another drawer is opening

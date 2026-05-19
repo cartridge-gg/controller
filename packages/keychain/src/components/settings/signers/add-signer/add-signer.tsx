@@ -142,6 +142,12 @@ export function AddSignerDrawer({
     [smsAuth],
   );
 
+  const handleResendOtp = useCallback(async () => {
+    if (smsState?.phoneNumber) {
+      await handleInitOtp(smsState.phoneNumber);
+    }
+  }, [handleInitOtp, smsState?.phoneNumber]);
+
   const handleSubmitSms = useCallback(
     async (otpCode: string) => {
       if (!otpCode || !smsState?.otpId) return;
@@ -252,6 +258,7 @@ export function AddSignerDrawer({
         isLogin={false}
         onClose={handleClose}
         onInitOtp={handleInitOtp}
+        onResendOtp={handleResendOtp}
         onSubmitCode={handleSubmitSms}
         smsState={smsState}
       />

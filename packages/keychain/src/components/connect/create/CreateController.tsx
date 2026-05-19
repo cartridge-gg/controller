@@ -53,6 +53,7 @@ interface CreateControllerViewProps {
   onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onInitOtp: (phoneNumber: string) => Promise<void>;
+  onResendOtp: () => void;
   onResetOtp: () => void;
   smsState: SmsOtpState | null;
   isSlot?: boolean;
@@ -76,6 +77,7 @@ type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
   | "setAuthenticationStep"
   | "onInitOtp"
+  | "onResendOtp"
   | "onResetOtp"
   | "smsState"
   | "changeWallet"
@@ -302,6 +304,7 @@ export function CreateControllerView({
   onSubmit,
   onKeyDown,
   onInitOtp,
+  onResendOtp,
   onResetOtp,
   smsState,
   authenticationStep,
@@ -440,6 +443,7 @@ export function CreateControllerView({
         isLogin={isLogin}
         onClose={onClose}
         onInitOtp={onInitOtp}
+        onResendOtp={onResendOtp}
         onResetOtp={onResetOtp}
         onSubmitCode={(otpCode: string) => onSubmit("sms", otpCode)}
         smsState={smsState}
@@ -665,6 +669,14 @@ export function CreateController({
     ],
   );
 
+  const handleResendOtp = useCallback(async () => {
+    if (smsState?.username) {
+      await handleInitOtpWithUsername(smsState.username);
+    } else if (smsState?.phoneNumber && smsState.phoneNumber.startsWith("+")) {
+      await handleInitOtp(smsState.phoneNumber);
+    }
+  }, [smsState, handleInitOtp, handleInitOtpWithUsername]);
+
   useEffect(() => {
     if (
       pendingSubmitRef.current &&
@@ -779,6 +791,7 @@ export function CreateController({
         onSubmit={handleFormSubmit}
         onKeyDown={handleKeyDown}
         onInitOtp={handleInitOtp}
+        onResendOtp={handleResendOtp}
         onResetOtp={() => setSmsState(null)}
         smsState={smsState}
         authenticationStep={authenticationStep}

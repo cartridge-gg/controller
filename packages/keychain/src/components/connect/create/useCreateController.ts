@@ -361,6 +361,7 @@ export function useCreateController({
       setError(undefined);
       try {
         setSmsState({
+          username,
           phoneNumber: "*** *** ****",
           otpId: "",
           otpEncryptionTargetBundle: "",
@@ -369,6 +370,7 @@ export function useCreateController({
           await smsAuth.initSms({ username });
         if (phoneLast4) {
           setSmsState({
+            username,
             phoneNumber: `*** *** ${phoneLast4}`,
             otpId,
             otpEncryptionTargetBundle,
