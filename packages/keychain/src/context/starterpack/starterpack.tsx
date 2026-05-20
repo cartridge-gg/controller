@@ -7,6 +7,8 @@ import {
   ReactNode,
 } from "react";
 import {
+  MerkleDropDisplayOptions,
+  useClaimMerkleDrops,
   useClaimStarterpack,
   useOnchainStarterpack,
 } from "@/hooks/starterpack";
@@ -37,6 +39,10 @@ export interface StarterpackContextType {
   // Starterpack identification
   starterpackId: string | number | undefined;
   setStarterpack: (id: string | number, registryAddress: string) => void;
+
+  // Merkle drop identification
+  merkleDropKeys: string[] | undefined;
+  setMerkleDrops: (keys: string[], options?: MerkleDropDisplayOptions) => void;
 
   // Starterpack details (loaded from backend or onchain)
   starterpackDetails: StarterpackDetails | undefined;
@@ -72,6 +78,10 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   const [registryAddress, setRegistryAddress] = useState<string | undefined>();
   const [bundleId, setBundleId] = useState<number | undefined>();
   const [starterpackId, setStarterpackId] = useState<string | number>();
+  const [merkleDropKeys, setMerkleDropKeys] = useState<string[] | undefined>();
+  const [merkleDropOptions, setMerkleDropOptions] = useState<
+    MerkleDropDisplayOptions | undefined
+  >();
   const [starterpackDetails, setStarterpackDetails] = useState<
     StarterpackDetails | undefined
   >();
@@ -82,7 +92,9 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   // Detect which source (claimed or onchain) based on starterpack ID
   const type = detectStarterpackType(starterpackId ?? bundleId);
 
-  const isClaimed = type === "claimed" && starterpackId !== undefined;
+  const isMerkleDrops = merkleDropKeys !== undefined;
+  const isClaimed =
+    !isMerkleDrops && type === "claimed" && starterpackId !== undefined;
   const isStarterPack = type === "onchain" && starterpackId !== undefined;
   const isBundle = type === "onchain" && bundleId !== undefined;
 
@@ -103,6 +115,15 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     error: claimError,
   } = useClaimStarterpack(claimId);
 
+  const {
+    name: merkleDropName,
+    description: merkleDropDescription,
+    items: merkleDropItems,
+    merkleDrops: claimMerkleDrops,
+    isLoading: isMerkleDropLoading,
+    error: merkleDropError,
+  } = useClaimMerkleDrops(merkleDropKeys, merkleDropOptions);
+
   // Onchain hook (Smart contract) - only run if onchain source
   const {
     metadata: onchainMetadata,
@@ -117,13 +138,29 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   });
 
   // Unified loading and error state
-  const isStarterpackLoading =
-    type === "claimed" ? isClaimLoading : isOnchainLoading;
-  const starterpackError = type === "claimed" ? claimError : onchainError;
+  const isStarterpackLoading = isMerkleDrops
+    ? isMerkleDropLoading
+    : type === "claimed"
+      ? isClaimLoading
+      : isOnchainLoading;
+  const starterpackError = isMerkleDrops
+    ? merkleDropError
+    : type === "claimed"
+      ? claimError
+      : onchainError;
 
   // Transform data based on source (claimed vs onchain)
   useEffect(() => {
-    if (claimId !== undefined) {
+    if (isMerkleDrops) {
+      setStarterpackDetails({
+        type: "claimed",
+        id: merkleDropKeys!.join(";"),
+        name: merkleDropName,
+        description: merkleDropDescription,
+        items: merkleDropItems,
+        merkleDrops: claimMerkleDrops,
+      });
+    } else if (claimId !== undefined) {
       setStarterpackDetails({
         type: "claimed",
         id: claimId,
@@ -156,6 +193,12 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     }
   }, [
     // Claim dependencies
+    isMerkleDrops,
+    merkleDropKeys,
+    merkleDropName,
+    merkleDropDescription,
+    merkleDropItems,
+    claimMerkleDrops,
     claimId,
     claimName,
     claimHookItems,
@@ -183,6 +226,8 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
       setRegistryAddress(registryAddress);
       setSocialClaimOptions(socialClaimOptions);
       setStarterpackId(undefined);
+      setMerkleDropKeys(undefined);
+      setMerkleDropOptions(undefined);
     },
     [],
   );
@@ -192,6 +237,20 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
       setStarterpackId(id);
       setRegistryAddress(registryAddress);
       setBundleId(undefined);
+      setSocialClaimOptions(undefined);
+      setMerkleDropKeys(undefined);
+      setMerkleDropOptions(undefined);
+    },
+    [],
+  );
+
+  const setMerkleDrops = useCallback(
+    (keys: string[], options?: MerkleDropDisplayOptions) => {
+      setMerkleDropKeys(keys);
+      setMerkleDropOptions(options);
+      setStarterpackId(undefined);
+      setBundleId(undefined);
+      setRegistryAddress(undefined);
       setSocialClaimOptions(undefined);
     },
     [],
@@ -224,6 +283,8 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     registryAddress,
     bundleId,
     starterpackId,
+    merkleDropKeys,
+    setMerkleDrops,
     starterpackDetails,
     isStarterpackLoading,
     claimItems,

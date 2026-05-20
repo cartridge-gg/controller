@@ -11,6 +11,20 @@ query MerkleDropByKey($key: String!) {
   }
 }
 
+query MerkleDropsByKeys($keys: [String!]!) {
+  merkleDropsByKeys(keys: $keys) {
+    key
+    salt
+    network
+    contract
+    entrypoint
+    merkleRoot
+    description
+    matchStarterpackItem
+    metadata
+  }
+}
+
 query MerkleClaimsForAddress($keys: [String!]!, $address: String!) {
   merkleClaimsForAddress(keys: $keys, address: $address) {
     index

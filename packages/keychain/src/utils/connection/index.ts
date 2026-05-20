@@ -31,6 +31,41 @@ import { PRESERVE_URL_PARAMS_FLAG } from "@/hooks/connection";
 
 export type { ControllerError } from "./execute";
 
+type MerkleDropsRouteOptions = {
+  title?: string;
+  description?: string;
+  preimage?: string;
+};
+
+const LEGACY_STARTERPACK_MERKLE_DROPS: Record<
+  string,
+  { keys: string[]; title: string; description?: string }
+> = {
+  "pirate-nation-claim-mainnet": {
+    keys: ["priate-nation"],
+    title: "Pirate Nation",
+    description: "Claim games and tokens Pirate Nation holders",
+  },
+};
+
+function merkleDropsPath(keys: string[], options?: MerkleDropsRouteOptions) {
+  const searchParams = new URLSearchParams();
+
+  if (options?.title) {
+    searchParams.set("title", options.title);
+  }
+  if (options?.description) {
+    searchParams.set("description", options.description);
+  }
+  if (options?.preimage) {
+    searchParams.set("preimage", options.preimage);
+  }
+
+  const query = searchParams.toString();
+  const encodedKeys = keys.map((key) => encodeURIComponent(key)).join(";");
+  return `/purchase/merkle-drops/${encodedKeys}${query ? `?${query}` : ""}`;
+}
+
 export function connectToController<
   ParentMethods extends HeadlessConnectParent,
 >({
@@ -157,6 +192,19 @@ export function connectToController<
         },
       openStarterPack:
         () => (id: string | number, options?: StarterpackOptions) => {
+          const legacyMerkleDrops = LEGACY_STARTERPACK_MERKLE_DROPS[String(id)];
+          if (legacyMerkleDrops) {
+            navigate(
+              merkleDropsPath(legacyMerkleDrops.keys, {
+                title: legacyMerkleDrops.title,
+                description: legacyMerkleDrops.description,
+                preimage: options?.preimage,
+              }),
+              { replace: true },
+            );
+            return;
+          }
+
           const searchParams: string[] = [];
           if (options?.preimage) {
             searchParams.push(`preimage=${options.preimage}`);
@@ -165,6 +213,10 @@ export function connectToController<
             `/purchase/starterpack/${id}${searchParams.length > 0 ? `?${searchParams.join("&")}` : ""}`,
             { replace: true },
           );
+        },
+      openMerkleDrops:
+        () => (keys: string[], options?: MerkleDropsRouteOptions) => {
+          navigate(merkleDropsPath(keys, options), { replace: true });
         },
       openLocationPrompt: () => locationPromptFactory({ navigate }),
       switchChain: () => switchChain({ setController, setRpcUrl }),

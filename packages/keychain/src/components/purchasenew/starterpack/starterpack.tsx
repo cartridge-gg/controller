@@ -36,9 +36,19 @@ import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent } from "@/types/analytics";
 
 export function PurchaseStarterpack() {
-  const { starterpackId, bundleId } = useParams();
+  const { starterpackId, bundleId, merkleDropKeys } = useParams();
   const [searchParams] = useSearchParams();
   const preimage = searchParams.get("preimage");
+  const title = searchParams.get("title") ?? undefined;
+  const description = searchParams.get("description") ?? undefined;
+  const parsedMerkleDropKeys = useMemo(
+    () => merkleDropKeys?.split(";").filter(Boolean),
+    [merkleDropKeys],
+  );
+  const merkleDropOptions = useMemo(
+    () => (title || description ? { title, description } : undefined),
+    [title, description],
+  );
   const { navigate } = useNavigation();
 
   const {
@@ -46,12 +56,17 @@ export function PurchaseStarterpack() {
     starterpackDetails: details,
     displayError,
     setBundle,
+    setMerkleDrops,
     setStarterpack,
   } = useStarterpackContext();
 
   useEffect(() => {
     captureAnalyticsEvent(posthog, "purchase_started", {
-      type: bundleId ? "bundle" : "starterpack",
+      type: bundleId
+        ? "bundle"
+        : merkleDropKeys
+          ? "merkle_drop"
+          : "starterpack",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -59,7 +74,9 @@ export function PurchaseStarterpack() {
   useEffect(() => {
     if (isStarterpackLoading) return;
 
-    if (bundleId) {
+    if (parsedMerkleDropKeys) {
+      setMerkleDrops(parsedMerkleDropKeys, merkleDropOptions);
+    } else if (bundleId) {
       // store bundle info into provider before navigating to checkout
       const registryAddress = searchParams.get("registryAddress");
       const shareMessage = searchParams.get("shareMessage");
@@ -77,6 +94,9 @@ export function PurchaseStarterpack() {
     }
   }, [
     isStarterpackLoading,
+    parsedMerkleDropKeys,
+    merkleDropOptions,
+    setMerkleDrops,
     bundleId,
     setBundle,
     starterpackId,
@@ -84,23 +104,24 @@ export function PurchaseStarterpack() {
     searchParams,
   ]);
 
+  // Preimage claims only apply to ETHEREUM drops; resolve eligible keys once so
+  // the redirect and the loading guard can't disagree (otherwise a preimage
+  // claim with no ETHEREUM drop hangs on the loading screen forever).
+  const ethereumPreimageClaimKeys = useMemo(() => {
+    if (!preimage || !isClaimStarterpack(details)) return undefined;
+    const keys = details.merkleDrops
+      ?.filter((drop) => drop.network === "ETHEREUM")
+      .map((drop) => drop.key);
+    return keys && keys.length > 0 ? keys.join(";") : undefined;
+  }, [preimage, details]);
+
   // Auto-redirect to claim page if preimage is available
   useEffect(() => {
-    if (
-      !isStarterpackLoading &&
-      isClaimStarterpack(details) &&
-      preimage &&
-      details.merkleDrops?.some((drop) => drop.network === "ETHEREUM") &&
-      !displayError
-    ) {
-      const keys = details.merkleDrops
-        .filter((drop) => drop.network === "ETHEREUM")
-        .map((drop) => drop.key)
-        .join(";");
-
-      navigate(`/purchase/claim/${keys}/${preimage}/preimage`, {
-        reset: true,
-      });
+    if (!isStarterpackLoading && ethereumPreimageClaimKeys && !displayError) {
+      navigate(
+        `/purchase/claim/${ethereumPreimageClaimKeys}/${preimage}/preimage`,
+        { reset: true },
+      );
     }
 
     // TEMP: Short circuit to checkout if onchain starterpack
@@ -111,10 +132,19 @@ export function PurchaseStarterpack() {
     ) {
       navigate(`/purchase/checkout/onchain`, { reset: true });
     }
-  }, [isStarterpackLoading, details, preimage, displayError, navigate]);
+  }, [
+    isStarterpackLoading,
+    details,
+    ethereumPreimageClaimKeys,
+    preimage,
+    displayError,
+    navigate,
+  ]);
 
   if (
-    (isStarterpackLoading || isOnchainStarterpack(details) || preimage) &&
+    (isStarterpackLoading ||
+      isOnchainStarterpack(details) ||
+      !!ethereumPreimageClaimKeys) &&
     !displayError
   ) {
     return <LoadingState />;
@@ -124,10 +154,12 @@ export function PurchaseStarterpack() {
     return (
       <>
         <HeaderInner
-          title="Starterpack Error"
+          title={merkleDropKeys ? "Claim Error" : "Starterpack Error"}
           description={
             <span className="text-foreground-200 text-xs font-normal">
-              Unable to load starterpack
+              {merkleDropKeys
+                ? "Unable to load claim"
+                : "Unable to load starterpack"}
             </span>
           }
           hideIcon
@@ -144,6 +176,7 @@ export function PurchaseStarterpack() {
     return (
       <ClaimStarterPackInner
         name={details.name}
+        edition={details.description}
         starterpackItems={details.items}
         error={displayError}
       />

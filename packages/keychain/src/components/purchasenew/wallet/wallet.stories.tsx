@@ -16,6 +16,8 @@ const mockStarterpackValue = {
   setBundle: () => {},
   starterpackId: undefined,
   setStarterpack: () => {},
+  merkleDropKeys: undefined,
+  setMerkleDrops: () => {},
   starterpackDetails: undefined,
   isStarterpackLoading: false,
   claimItems: [],

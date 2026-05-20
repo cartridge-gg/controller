@@ -4891,6 +4891,7 @@ export type Query = {
   merkleClaimsForAddress: Array<MerkleClaim>;
   merkleDropByKey?: Maybe<MerkleDrop>;
   merkleDrops: MerkleDropConnection;
+  merkleDropsByKeys: Array<MerkleDrop>;
   metrics: MetricsResult;
   /** Fetches an object given its ID. */
   node?: Maybe<Node>;
@@ -5100,6 +5101,10 @@ export type QueryMerkleDropsArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<MerkleDropOrder>;
   where?: InputMaybe<MerkleDropWhereInput>;
+};
+
+export type QueryMerkleDropsByKeysArgs = {
+  keys: Array<Scalars["String"]>;
 };
 
 export type QueryMetricsArgs = {

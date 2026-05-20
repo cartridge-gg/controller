@@ -36,7 +36,7 @@ export type StarterpackType = "claimed" | "onchain";
  */
 export interface BackendStarterpackDetails {
   type: "claimed";
-  id: string; // UUID from backend
+  id: string; // Backend starterpack ID or grouped merkle-drop keys
   name: string;
   description?: string;
   items: Item[];
