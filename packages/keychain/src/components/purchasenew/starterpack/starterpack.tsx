@@ -104,23 +104,24 @@ export function PurchaseStarterpack() {
     searchParams,
   ]);
 
+  // Preimage claims only apply to ETHEREUM drops; resolve eligible keys once so
+  // the redirect and the loading guard can't disagree (otherwise a preimage
+  // claim with no ETHEREUM drop hangs on the loading screen forever).
+  const ethereumPreimageClaimKeys = useMemo(() => {
+    if (!preimage || !isClaimStarterpack(details)) return undefined;
+    const keys = details.merkleDrops
+      ?.filter((drop) => drop.network === "ETHEREUM")
+      .map((drop) => drop.key);
+    return keys && keys.length > 0 ? keys.join(";") : undefined;
+  }, [preimage, details]);
+
   // Auto-redirect to claim page if preimage is available
   useEffect(() => {
-    if (
-      !isStarterpackLoading &&
-      isClaimStarterpack(details) &&
-      preimage &&
-      details.merkleDrops?.some((drop) => drop.network === "ETHEREUM") &&
-      !displayError
-    ) {
-      const keys = details.merkleDrops
-        .filter((drop) => drop.network === "ETHEREUM")
-        .map((drop) => drop.key)
-        .join(";");
-
-      navigate(`/purchase/claim/${keys}/${preimage}/preimage`, {
-        reset: true,
-      });
+    if (!isStarterpackLoading && ethereumPreimageClaimKeys && !displayError) {
+      navigate(
+        `/purchase/claim/${ethereumPreimageClaimKeys}/${preimage}/preimage`,
+        { reset: true },
+      );
     }
 
     // TEMP: Short circuit to checkout if onchain starterpack
@@ -131,10 +132,19 @@ export function PurchaseStarterpack() {
     ) {
       navigate(`/purchase/checkout/onchain`, { reset: true });
     }
-  }, [isStarterpackLoading, details, preimage, displayError, navigate]);
+  }, [
+    isStarterpackLoading,
+    details,
+    ethereumPreimageClaimKeys,
+    preimage,
+    displayError,
+    navigate,
+  ]);
 
   if (
-    (isStarterpackLoading || isOnchainStarterpack(details) || preimage) &&
+    (isStarterpackLoading ||
+      isOnchainStarterpack(details) ||
+      !!ethereumPreimageClaimKeys) &&
     !displayError
   ) {
     return <LoadingState />;
