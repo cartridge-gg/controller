@@ -35,6 +35,7 @@ import {
   LocationPromptOptions,
   HeadlessUsernameLookupResult,
   StarterpackOptions,
+  MerkleDropsOptions,
   UpdateSessionOptions,
   BundleOptions,
 } from "./types";
@@ -693,6 +694,35 @@ export default class ControllerProvider extends BaseProvider {
         : undefined;
 
     await this.keychain.openStarterPack(id, sanitizedOptions);
+    this.iframes.keychain?.open();
+  }
+
+  async openMerkleDrops(
+    keys: string[],
+    options?: MerkleDropsOptions,
+  ): Promise<void> {
+    if (!this.iframes) {
+      return;
+    }
+
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    const sanitizedKeys = keys.map((key) => key.trim()).filter(Boolean);
+    if (sanitizedKeys.length === 0) {
+      throw new Error("At least one merkle drop key is required");
+    }
+
+    const { onClaimComplete, ...merkleDropsOptions } = options ?? {};
+    this.iframes.keychain.setOnStarterpackPlay(onClaimComplete);
+    const sanitizedOptions =
+      Object.keys(merkleDropsOptions).length > 0
+        ? (merkleDropsOptions as Omit<MerkleDropsOptions, "onClaimComplete">)
+        : undefined;
+
+    await this.keychain.openMerkleDrops(sanitizedKeys, sanitizedOptions);
     this.iframes.keychain?.open();
   }
 

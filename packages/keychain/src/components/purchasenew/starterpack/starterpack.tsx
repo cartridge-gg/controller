@@ -36,9 +36,19 @@ import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent } from "@/types/analytics";
 
 export function PurchaseStarterpack() {
-  const { starterpackId, bundleId } = useParams();
+  const { starterpackId, bundleId, merkleDropKeys } = useParams();
   const [searchParams] = useSearchParams();
   const preimage = searchParams.get("preimage");
+  const title = searchParams.get("title") ?? undefined;
+  const description = searchParams.get("description") ?? undefined;
+  const parsedMerkleDropKeys = useMemo(
+    () => merkleDropKeys?.split(";").filter(Boolean),
+    [merkleDropKeys],
+  );
+  const merkleDropOptions = useMemo(
+    () => (title || description ? { title, description } : undefined),
+    [title, description],
+  );
   const { navigate } = useNavigation();
 
   const {
@@ -46,12 +56,17 @@ export function PurchaseStarterpack() {
     starterpackDetails: details,
     displayError,
     setBundle,
+    setMerkleDrops,
     setStarterpack,
   } = useStarterpackContext();
 
   useEffect(() => {
     captureAnalyticsEvent(posthog, "purchase_started", {
-      type: bundleId ? "bundle" : "starterpack",
+      type: bundleId
+        ? "bundle"
+        : merkleDropKeys
+          ? "merkle_drop"
+          : "starterpack",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -59,7 +74,9 @@ export function PurchaseStarterpack() {
   useEffect(() => {
     if (isStarterpackLoading) return;
 
-    if (bundleId) {
+    if (parsedMerkleDropKeys) {
+      setMerkleDrops(parsedMerkleDropKeys, merkleDropOptions);
+    } else if (bundleId) {
       // store bundle info into provider before navigating to checkout
       const registryAddress = searchParams.get("registryAddress");
       const shareMessage = searchParams.get("shareMessage");
@@ -77,6 +94,9 @@ export function PurchaseStarterpack() {
     }
   }, [
     isStarterpackLoading,
+    parsedMerkleDropKeys,
+    merkleDropOptions,
+    setMerkleDrops,
     bundleId,
     setBundle,
     starterpackId,
@@ -124,10 +144,12 @@ export function PurchaseStarterpack() {
     return (
       <>
         <HeaderInner
-          title="Starterpack Error"
+          title={merkleDropKeys ? "Claim Error" : "Starterpack Error"}
           description={
             <span className="text-foreground-200 text-xs font-normal">
-              Unable to load starterpack
+              {merkleDropKeys
+                ? "Unable to load claim"
+                : "Unable to load starterpack"}
             </span>
           }
           hideIcon
@@ -144,6 +166,7 @@ export function PurchaseStarterpack() {
     return (
       <ClaimStarterPackInner
         name={details.name}
+        edition={details.description}
         starterpackItems={details.items}
         error={displayError}
       />

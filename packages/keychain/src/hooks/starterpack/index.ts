@@ -1,6 +1,6 @@
 // Data fetching hooks
-export { useClaimStarterpack } from "./claim";
-export type { MerkleDrop } from "./claim";
+export { useClaimMerkleDrops, useClaimStarterpack } from "./claim";
+export type { MerkleDrop, MerkleDropDisplayOptions } from "./claim";
 
 export { useOnchainStarterpack } from "./onchain";
 

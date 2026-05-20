@@ -4950,6 +4950,7 @@ export type Query = {
   merkleClaimsForAddress: Array<MerkleClaim>;
   merkleDropByKey?: Maybe<MerkleDrop>;
   merkleDrops: MerkleDropConnection;
+  merkleDropsByKeys: Array<MerkleDrop>;
   metrics: MetricsResult;
   /** Fetches an object given its ID. */
   node?: Maybe<Node>;
@@ -5189,6 +5190,11 @@ export type QueryMerkleDropsArgs = {
   last?: InputMaybe<Scalars['Int']>;
   orderBy?: InputMaybe<MerkleDropOrder>;
   where?: InputMaybe<MerkleDropWhereInput>;
+};
+
+
+export type QueryMerkleDropsByKeysArgs = {
+  keys: Array<Scalars['String']>;
 };
 
 
@@ -8019,6 +8025,13 @@ export type MerkleDropByKeyQueryVariables = Exact<{
 
 export type MerkleDropByKeyQuery = { __typename?: 'Query', merkleDropByKey?: { __typename?: 'MerkleDrop', key: string, salt: string, network: MerkleDropNetwork, contract: string, entrypoint: string, merkleRoot: string, description?: string | null, matchStarterpackItem: boolean } | null };
 
+export type MerkleDropsByKeysQueryVariables = Exact<{
+  keys: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type MerkleDropsByKeysQuery = { __typename?: 'Query', merkleDropsByKeys: Array<{ __typename?: 'MerkleDrop', key: string, salt: string, network: MerkleDropNetwork, contract: string, entrypoint: string, merkleRoot: string, description?: string | null, matchStarterpackItem: boolean, metadata?: any | null }> };
+
 export type MerkleClaimsForAddressQueryVariables = Exact<{
   keys: Array<Scalars['String']> | Scalars['String'];
   address: Scalars['String'];
@@ -9019,6 +9032,33 @@ export const useMerkleDropByKeyQuery = <
     useQuery<MerkleDropByKeyQuery, TError, TData>(
       ['MerkleDropByKey', variables],
       useFetchData<MerkleDropByKeyQuery, MerkleDropByKeyQueryVariables>(MerkleDropByKeyDocument).bind(null, variables),
+      options
+    );
+export const MerkleDropsByKeysDocument = `
+    query MerkleDropsByKeys($keys: [String!]!) {
+  merkleDropsByKeys(keys: $keys) {
+    key
+    salt
+    network
+    contract
+    entrypoint
+    merkleRoot
+    description
+    matchStarterpackItem
+    metadata
+  }
+}
+    `;
+export const useMerkleDropsByKeysQuery = <
+      TData = MerkleDropsByKeysQuery,
+      TError = unknown
+    >(
+      variables: MerkleDropsByKeysQueryVariables,
+      options?: UseQueryOptions<MerkleDropsByKeysQuery, TError, TData>
+    ) =>
+    useQuery<MerkleDropsByKeysQuery, TError, TData>(
+      ['MerkleDropsByKeys', variables],
+      useFetchData<MerkleDropsByKeysQuery, MerkleDropsByKeysQueryVariables>(MerkleDropsByKeysDocument).bind(null, variables),
       options
     );
 export const MerkleClaimsForAddressDocument = `

@@ -267,6 +267,10 @@ export function App() {
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}
           />
+          <Route
+            path="merkle-drops/:merkleDropKeys"
+            element={<PurchaseStarterpack />}
+          />
           <Route path="starterpack/collections" element={<Collections />} />
           <Route path="claim/:keys/:address/:type" element={<Claim />} />
           <Route path="method/:platforms" element={<PaymentMethod />} />

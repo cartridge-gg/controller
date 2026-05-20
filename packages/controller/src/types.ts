@@ -208,6 +208,7 @@ export interface Keychain {
     id: string | number,
     options?: StarterpackOptions,
   ): Promise<void>;
+  openMerkleDrops(keys: string[], options?: MerkleDropsOptions): Promise<void>;
   navigate(path: string): Promise<void>;
 
   // External wallet methods
@@ -336,6 +337,17 @@ export type StarterpackOptions = {
   preimage?: string;
   /** Callback fired after the Play button closes the starterpack modal */
   onPurchaseComplete?: () => void;
+};
+
+export type MerkleDropsOptions = {
+  /** Optional title to show for the grouped merkle-drop claim */
+  title?: string;
+  /** Optional description to show for the grouped merkle-drop claim */
+  description?: string;
+  /** The preimage to use */
+  preimage?: string;
+  /** Callback fired after the Play button closes the claim modal */
+  onClaimComplete?: () => void;
 };
 
 // Connect options (used by controller.connect)
