@@ -19,7 +19,6 @@ export const Starterpack = () => {
         bundleId: 1,
         socialBundleId: 0,
         starterpackId: 0,
-        claim: "claim-dopewars-mainnet",
         registryAddress: BUNDLE_REGISTRY_MAINNET,
       };
     }
@@ -27,7 +26,6 @@ export const Starterpack = () => {
       bundleId: 1,
       socialBundleId: 0,
       starterpackId: 0,
-      claim: "claim-dopewars-sepolia",
       registryAddress: BUNDLE_REGISTRY_SEPOLIA,
     };
   }, [chain]);
@@ -36,7 +34,11 @@ export const Starterpack = () => {
     () => getDefaultStarterpackIds(),
     [getDefaultStarterpackIds],
   );
-  const [claimSpId, setClaimSpId] = useState<string>(defaultIds.claim);
+  const [claimKeys, setClaimKeys] = useState<string>("priate-nation");
+  const [claimTitle, setClaimTitle] = useState<string>("Pirate Nation");
+  const [claimDescription, setClaimDescription] = useState<string>(
+    "Claim games and tokens Pirate Nation holders",
+  );
   const [claimPreimage, setClaimPreimage] = useState<string>("");
   const [purchaseOnchainSpId, setPurchaseOnchainSpId] = useState<number>(
     defaultIds.starterpackId,
@@ -61,12 +63,6 @@ export const Starterpack = () => {
     const currentExpected = expectedDefaultsRef.current;
 
     // Only update if the values haven't been manually modified by the user
-    setClaimSpId((currentClaimSpId) => {
-      return currentClaimSpId === currentExpected.claim
-        ? newDefaults.claim
-        : currentClaimSpId;
-    });
-
     setPurchaseOnchainSpId((currentPurchaseOnchainSpId) => {
       return currentPurchaseOnchainSpId === currentExpected.starterpackId
         ? newDefaults.starterpackId
@@ -222,31 +218,52 @@ export const Starterpack = () => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <h3>Claim Starterpack</h3>
+          <h3>Claim Merkle Drop</h3>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <Input
                 className="max-w-80"
                 type="text"
-                value={claimSpId}
-                onChange={(e) => setClaimSpId(e.target.value)}
-                placeholder="Enter starterpack ID"
+                value={claimKeys}
+                onChange={(e) => setClaimKeys(e.target.value)}
+                placeholder="Enter merkle drop keys (comma-separated)"
               />
               <Button
                 onClick={() => {
-                  if (claimSpId.trim()) {
-                    controllerConnector.controller.openStarterPack(
-                      claimSpId.trim(),
-                      {
-                        preimage: claimPreimage.trim(),
-                      },
-                    );
+                  const keys = claimKeys
+                    .split(",")
+                    .map((key) => key.trim())
+                    .filter(Boolean);
+                  if (keys.length === 0) {
+                    return;
                   }
+                  controllerConnector.controller.openMerkleDrops(keys, {
+                    title: claimTitle.trim() || undefined,
+                    description: claimDescription.trim() || undefined,
+                    preimage: claimPreimage.trim() || undefined,
+                    onClaimComplete: () => {
+                      console.log("Merkle drop claim callback fired.");
+                    },
+                  });
                 }}
               >
-                Claim Starterpack with preimage
+                Claim Merkle Drop with preimage
               </Button>
             </div>
+            <Input
+              className="max-w-80"
+              type="text"
+              value={claimTitle}
+              onChange={(e) => setClaimTitle(e.target.value)}
+              placeholder="Optional: Enter title"
+            />
+            <Input
+              className="max-w-80"
+              type="text"
+              value={claimDescription}
+              onChange={(e) => setClaimDescription(e.target.value)}
+              placeholder="Optional: Enter description"
+            />
             <Input
               className="max-w-80"
               type="text"
