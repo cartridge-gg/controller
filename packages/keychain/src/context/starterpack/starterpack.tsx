@@ -9,7 +9,6 @@ import {
 import {
   MerkleDropDisplayOptions,
   useClaimMerkleDrops,
-  useClaimStarterpack,
   useOnchainStarterpack,
 } from "@/hooks/starterpack";
 import {
@@ -93,27 +92,14 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   const type = detectStarterpackType(starterpackId ?? bundleId);
 
   const isMerkleDrops = merkleDropKeys !== undefined;
-  const isClaimed =
-    !isMerkleDrops && type === "claimed" && starterpackId !== undefined;
   const isStarterPack = type === "onchain" && starterpackId !== undefined;
   const isBundle = type === "onchain" && bundleId !== undefined;
-
-  const claimId = isClaimed ? String(starterpackId) : undefined;
 
   const onchainId = isStarterPack
     ? Number(starterpackId)
     : isBundle
       ? Number(bundleId)
       : undefined;
-
-  // Claim hook (GraphQL) - only run if claimed source
-  const {
-    name: claimName,
-    items: claimHookItems,
-    merkleDrops,
-    isLoading: isClaimLoading,
-    error: claimError,
-  } = useClaimStarterpack(claimId);
 
   const {
     name: merkleDropName,
@@ -140,14 +126,8 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   // Unified loading and error state
   const isStarterpackLoading = isMerkleDrops
     ? isMerkleDropLoading
-    : type === "claimed"
-      ? isClaimLoading
-      : isOnchainLoading;
-  const starterpackError = isMerkleDrops
-    ? merkleDropError
-    : type === "claimed"
-      ? claimError
-      : onchainError;
+    : isOnchainLoading;
+  const starterpackError = isMerkleDrops ? merkleDropError : onchainError;
 
   // Transform data based on source (claimed vs onchain)
   useEffect(() => {
@@ -159,14 +139,6 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
         description: merkleDropDescription,
         items: merkleDropItems,
         merkleDrops: claimMerkleDrops,
-      });
-    } else if (claimId !== undefined) {
-      setStarterpackDetails({
-        type: "claimed",
-        id: claimId,
-        name: claimName,
-        items: claimHookItems,
-        merkleDrops,
       });
     } else if (onchainId !== undefined && onchainMetadata) {
       // Onchain flow - show metadata as soon as it's available
@@ -192,17 +164,13 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
       });
     }
   }, [
-    // Claim dependencies
+    // Merkle drop dependencies
     isMerkleDrops,
     merkleDropKeys,
     merkleDropName,
     merkleDropDescription,
     merkleDropItems,
     claimMerkleDrops,
-    claimId,
-    claimName,
-    claimHookItems,
-    merkleDrops,
     // Onchain dependencies
     onchainId,
     onchainMetadata,

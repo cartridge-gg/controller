@@ -87,91 +87,19 @@ export function Claim() {
     return getWallet(type as ClaimWalletTypes);
   }, [type]);
 
-  // Filter starterpack items based on matchStarterpackItem flag
-  const filteredStarterpackItems = useMemo(() => {
-    if (!starterpackDetails?.items) {
-      return undefined;
-    }
+  const filteredStarterpackItems = useMemo(
+    () => starterpackDetails?.items,
+    [starterpackDetails],
+  );
 
-    // Check if ANY claim requires filtering
-    const shouldFilterItems = claimsData.some(
-      (claim) => claim.matchStarterpackItem === true,
-    );
-
-    if (!shouldFilterItems) {
-      return starterpackDetails.items;
-    }
-
-    // Get eligible claim names from unclaimed claims
-    const eligibleNames = claimsData
-      .filter((claim) => !claim.claimed)
-      .map((claim) => claim.description ?? claim.key)
-      .filter((name): name is string => name !== null);
-
-    // Filter items by name match
-    const filteredItems = starterpackDetails.items.filter((item) =>
-      eligibleNames.some(
-        (name) =>
-          item.title.toLowerCase().includes(name.toLowerCase()) ||
-          name.toLowerCase().includes(item.title.toLowerCase()),
-      ),
-    );
-
-    // Fallback to all items if no matches found
-    return filteredItems.length > 0 ? filteredItems : starterpackDetails.items;
-  }, [claimsData, starterpackDetails]);
-
-  // Helper function to enrich claim items with quantities
+  // Populate claim items for the success screen
   const enrichClaimItems = useCallback(() => {
     if (!filteredStarterpackItems || filteredStarterpackItems.length === 0) {
       return;
     }
 
-    // Check if we should prepend amounts (when matchStarterpackItem is enabled)
-    const shouldPrependAmount = claimsData.some(
-      (claim) => claim.matchStarterpackItem === true,
-    );
-
-    const enrichedItems = filteredStarterpackItems.map((item) => {
-      // Strip any existing prepended amount (e.g., "(5) " from "(5) Village")
-      const originalTitle = item.title.replace(/^\(\d+\)\s+/, "");
-      let title = originalTitle;
-
-      // Prepend claim amount to item name if matching is enabled
-      if (shouldPrependAmount) {
-        // Find matching claim(s) for this item - use originalTitle for matching
-        const matchingClaims = claimsData.filter(
-          (claim) =>
-            !claim.claimed &&
-            (claim.description
-              ?.toLowerCase()
-              .includes(originalTitle.toLowerCase()) ||
-              originalTitle
-                .toLowerCase()
-                .includes(claim.description?.toLowerCase() ?? "") ||
-              claim.key.toLowerCase().includes(originalTitle.toLowerCase()) ||
-              originalTitle.toLowerCase().includes(claim.key.toLowerCase())),
-        );
-
-        // Calculate total amount from matching claims
-        const totalAmount = matchingClaims.reduce(
-          (acc, claim) => acc + Number(claim.data[0] || 0),
-          0,
-        );
-
-        if (totalAmount > 0) {
-          title = `(${totalAmount}) ${originalTitle}`;
-        }
-      }
-
-      return {
-        ...item,
-        title,
-      };
-    });
-
-    setClaimItems(enrichedItems);
-  }, [filteredStarterpackItems, claimsData, setClaimItems]);
+    setClaimItems(filteredStarterpackItems);
+  }, [filteredStarterpackItems, setClaimItems]);
 
   const onSubmit = useCallback(async () => {
     try {

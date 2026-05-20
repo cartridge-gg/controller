@@ -7,7 +7,6 @@ query MerkleDropByKey($key: String!) {
     entrypoint
     merkleRoot
     description
-    matchStarterpackItem
   }
 }
 
@@ -20,7 +19,6 @@ query MerkleDropsByKeys($keys: [String!]!) {
     entrypoint
     merkleRoot
     description
-    matchStarterpackItem
     metadata
   }
 }
@@ -38,7 +36,6 @@ query MerkleClaimsForAddress($keys: [String!]!, $address: String!) {
       entrypoint
       merkleRoot
       description
-      matchStarterpackItem
     }
   }
 }
