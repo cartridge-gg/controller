@@ -34,7 +34,6 @@ export interface MerkleClaim {
   contract: string;
   entrypoint: string;
   description?: string | null;
-  matchStarterpackItem?: boolean | null;
 }
 
 export const useMerkleClaim = ({
@@ -79,7 +78,6 @@ export const useMerkleClaim = ({
             contract: claim.merkleDrop.contract,
             entrypoint: claim.merkleDrop.entrypoint,
             description: claim.merkleDrop.description,
-            matchStarterpackItem: claim.merkleDrop.matchStarterpackItem,
             claimed: false,
             loading: true,
           }),

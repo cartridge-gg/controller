@@ -49,7 +49,6 @@ export type Account = Node & {
   oauthConnections?: Maybe<Array<OAuthConnection>>;
   /** If true, the account is billed for paid slot deployments */
   slotBilling: Scalars["Boolean"];
-  starterpackMint: StarterpackMintConnection;
   teams: TeamConnection;
   updatedAt: Scalars["Time"];
   username: Scalars["String"];
@@ -97,15 +96,6 @@ export type AccountNotificationDevicesArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<NotificationDeviceOrder>;
   where?: InputMaybe<NotificationDeviceWhereInput>;
-};
-
-export type AccountStarterpackMintArgs = {
-  after?: InputMaybe<Scalars["Cursor"]>;
-  before?: InputMaybe<Scalars["Cursor"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<StarterpackMintOrder>;
-  where?: InputMaybe<StarterpackMintWhereInput>;
 };
 
 export type AccountTeamsArgs = {
@@ -268,9 +258,6 @@ export type AccountWhereInput = {
   /** oauth_connections edge predicates */
   hasOauthConnections?: InputMaybe<Scalars["Boolean"]>;
   hasOauthConnectionsWith?: InputMaybe<Array<OAuthConnectionWhereInput>>;
-  /** starterpack_mint edge predicates */
-  hasStarterpackMint?: InputMaybe<Scalars["Boolean"]>;
-  hasStarterpackMintWith?: InputMaybe<Array<StarterpackMintWhereInput>>;
   /** teams edge predicates */
   hasTeams?: InputMaybe<Scalars["Boolean"]>;
   hasTeamsWith?: InputMaybe<Array<TeamWhereInput>>;
@@ -413,7 +400,6 @@ export type Activity = Node & {
   paymasterID?: Maybe<Scalars["ID"]>;
   session?: Maybe<Session>;
   sessionID?: Maybe<Scalars["ID"]>;
-  starterpackMint: StarterpackMintConnection;
   /** Status of the activity */
   status: ActivityStatus;
   /** Transaction hash if this is a blockchain transaction */
@@ -423,15 +409,6 @@ export type Activity = Node & {
   /** Type of activity */
   type: ActivityType;
   updatedAt: Scalars["Time"];
-};
-
-export type ActivityStarterpackMintArgs = {
-  after?: InputMaybe<Scalars["Cursor"]>;
-  before?: InputMaybe<Scalars["Cursor"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<StarterpackMintOrder>;
-  where?: InputMaybe<StarterpackMintWhereInput>;
 };
 
 /** A connection to a list of items. */
@@ -619,9 +596,6 @@ export type ActivityWhereInput = {
   /** session edge predicates */
   hasSession?: InputMaybe<Scalars["Boolean"]>;
   hasSessionWith?: InputMaybe<Array<SessionWhereInput>>;
-  /** starterpack_mint edge predicates */
-  hasStarterpackMint?: InputMaybe<Scalars["Boolean"]>;
-  hasStarterpackMintWith?: InputMaybe<Array<StarterpackMintWhereInput>>;
   /** id field predicates */
   id?: InputMaybe<Scalars["ID"]>;
   idContainsFold?: InputMaybe<Scalars["ID"]>;
@@ -1656,13 +1630,11 @@ export type CreateMerkleDropInput = {
   description?: InputMaybe<Scalars["String"]>;
   entrypoint: Scalars["String"];
   key: Scalars["String"];
-  matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
   merkleRoot: Scalars["String"];
   /** Additional metadata for the merkle drop */
   metadata?: InputMaybe<Scalars["JSON"]>;
   network: MerkleDropNetwork;
   salt: Scalars["String"];
-  starterpackID?: InputMaybe<Scalars["ID"]>;
   updatedAt?: InputMaybe<Scalars["Time"]>;
 };
 
@@ -2937,13 +2909,11 @@ export type MerkleDrop = Node & {
   entrypoint: Scalars["String"];
   id: Scalars["ID"];
   key: Scalars["String"];
-  matchStarterpackItem: Scalars["Boolean"];
   merkleRoot: Scalars["String"];
   /** Additional metadata for the merkle drop */
   metadata?: Maybe<Scalars["JSON"]>;
   network: MerkleDropNetwork;
   salt: Scalars["String"];
-  starterpack?: Maybe<Starterpack>;
   updatedAt: Scalars["Time"];
 };
 
@@ -3061,9 +3031,6 @@ export type MerkleDropWhereInput = {
   /** claims edge predicates */
   hasClaims?: InputMaybe<Scalars["Boolean"]>;
   hasClaimsWith?: InputMaybe<Array<MerkleClaimWhereInput>>;
-  /** starterpack edge predicates */
-  hasStarterpack?: InputMaybe<Scalars["Boolean"]>;
-  hasStarterpackWith?: InputMaybe<Array<StarterpackWhereInput>>;
   /** id field predicates */
   id?: InputMaybe<Scalars["ID"]>;
   idContainsFold?: InputMaybe<Scalars["ID"]>;
@@ -3089,9 +3056,6 @@ export type MerkleDropWhereInput = {
   keyLTE?: InputMaybe<Scalars["String"]>;
   keyNEQ?: InputMaybe<Scalars["String"]>;
   keyNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  /** match_starterpack_item field predicates */
-  matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
-  matchStarterpackItemNEQ?: InputMaybe<Scalars["Boolean"]>;
   /** merkle_root field predicates */
   merkleRoot?: InputMaybe<Scalars["String"]>;
   merkleRootContains?: InputMaybe<Scalars["String"]>;
@@ -3167,12 +3131,6 @@ export type MetricsResult = {
   items: Array<MetricsItem>;
 };
 
-export type MintAllowance = {
-  __typename?: "MintAllowance";
-  count: Scalars["Int"];
-  limit: Scalars["Int"];
-};
-
 export type Mutation = {
   __typename?: "Mutation";
   accountVerify: Scalars["Boolean"];
@@ -3182,7 +3140,6 @@ export type Mutation = {
   beginLogin: Scalars["JSON"];
   beginRegistration: Scalars["JSON"];
   broadcastNotification: NotificationSendResult;
-  claimFreeStarterpack: Scalars["String"];
   /**
    * Process a card checkout using a tokenized card from the frontend.
    * The coinflowPaymentId must reference an existing intent created via
@@ -3320,10 +3277,6 @@ export type MutationBeginRegistrationArgs = {
 
 export type MutationBroadcastNotificationArgs = {
   input: BroadcastNotificationInput;
-};
-
-export type MutationClaimFreeStarterpackArgs = {
-  input: StarterpackInput;
 };
 
 export type MutationCoinflowCardCheckoutArgs = {
@@ -4045,7 +3998,6 @@ export type Paymaster = Node & {
   revertedTransactions: Scalars["Int"];
   /** Per-transaction sponsor cap in basis points (0-10000) */
   sponsorCapBps?: Maybe<Scalars["Int"]>;
-  starterpacks: StarterpackConnection;
   /** Accumulated STRK fees in 6 decimal precision */
   strkFees: Scalars["Int"];
   /** Number of successful transactions */
@@ -4079,15 +4031,6 @@ export type PaymasterPoliciesArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaymasterPolicyOrder>;
   where?: InputMaybe<PaymasterPolicyWhereInput>;
-};
-
-export type PaymasterStarterpacksArgs = {
-  after?: InputMaybe<Scalars["Cursor"]>;
-  before?: InputMaybe<Scalars["Cursor"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<StarterpackOrder>;
-  where?: InputMaybe<StarterpackWhereInput>;
 };
 
 /** PaymasterBudgetFeeUnit is enum for the field budget_fee_unit */
@@ -4580,9 +4523,6 @@ export type PaymasterWhereInput = {
   /** policies edge predicates */
   hasPolicies?: InputMaybe<Scalars["Boolean"]>;
   hasPoliciesWith?: InputMaybe<Array<PaymasterPolicyWhereInput>>;
-  /** starterpacks edge predicates */
-  hasStarterpacks?: InputMaybe<Scalars["Boolean"]>;
-  hasStarterpacksWith?: InputMaybe<Array<StarterpackWhereInput>>;
   /** team edge predicates */
   hasTeam?: InputMaybe<Scalars["Boolean"]>;
   hasTeamWith?: InputMaybe<Array<TeamWhereInput>>;
@@ -4914,7 +4854,6 @@ export type Query = {
   searchAccounts: Array<Account>;
   session?: Maybe<Session>;
   sessions?: Maybe<SessionConnection>;
-  starterpack?: Maybe<StarterpackDetails>;
   streaks: StreakResult;
   stripePayment: StripePayment;
   stripeStarterpackQuote: StripeStarterpackQuote;
@@ -5218,10 +5157,6 @@ export type QuerySessionsArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<SessionOrder>;
   where?: InputMaybe<SessionWhereInput>;
-};
-
-export type QueryStarterpackArgs = {
-  input: StarterpackInput;
 };
 
 export type QueryStreaksArgs = {
@@ -6268,600 +6203,6 @@ export type StarknetCredentials = {
   starknet?: Maybe<Array<StarknetCredential>>;
 };
 
-export type Starterpack = Node & {
-  __typename?: "Starterpack";
-  /** Type of acquisition for the starterpack */
-  acquisitionType: StarterpackAcquisitionType;
-  active: Scalars["Boolean"];
-  chainID: Scalars["String"];
-  createdAt: Scalars["Time"];
-  description?: Maybe<Scalars["String"]>;
-  id: Scalars["ID"];
-  issuance: Scalars["Int"];
-  maxIssuance?: Maybe<Scalars["Int"]>;
-  /** Maximum number of issuances per account */
-  maxPerAccount?: Maybe<Scalars["Int"]>;
-  merkleDrops: MerkleDropConnection;
-  name: Scalars["String"];
-  paymaster?: Maybe<Paymaster>;
-  paymasterID?: Maybe<Scalars["ID"]>;
-  starterpackContract: StarterpackContractConnection;
-  starterpackMint: StarterpackMintConnection;
-  team?: Maybe<Team>;
-  updatedAt: Scalars["Time"];
-};
-
-export type StarterpackMerkleDropsArgs = {
-  after?: InputMaybe<Scalars["Cursor"]>;
-  before?: InputMaybe<Scalars["Cursor"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<MerkleDropOrder>;
-  where?: InputMaybe<MerkleDropWhereInput>;
-};
-
-export type StarterpackStarterpackContractArgs = {
-  after?: InputMaybe<Scalars["Cursor"]>;
-  before?: InputMaybe<Scalars["Cursor"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<StarterpackContractOrder>;
-  where?: InputMaybe<StarterpackContractWhereInput>;
-};
-
-export type StarterpackStarterpackMintArgs = {
-  after?: InputMaybe<Scalars["Cursor"]>;
-  before?: InputMaybe<Scalars["Cursor"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<StarterpackMintOrder>;
-  where?: InputMaybe<StarterpackMintWhereInput>;
-};
-
-/** StarterpackAcquisitionType is enum for the field acquisition_type */
-export enum StarterpackAcquisitionType {
-  Claimed = "CLAIMED",
-  Paid = "PAID",
-}
-
-/** A connection to a list of items. */
-export type StarterpackConnection = {
-  __typename?: "StarterpackConnection";
-  /** A list of edges. */
-  edges?: Maybe<Array<Maybe<StarterpackEdge>>>;
-  /** Information to aid in pagination. */
-  pageInfo: PageInfo;
-  /** Identifies the total count of items in the connection. */
-  totalCount: Scalars["Int"];
-};
-
-export type StarterpackContract = Node & {
-  __typename?: "StarterpackContract";
-  /** Calldata for the execution entrypoint */
-  calldata: Array<Scalars["String"]>;
-  contractAddress: Scalars["String"];
-  createdAt: Scalars["Time"];
-  description?: Maybe<Scalars["String"]>;
-  /** Entrypoint to execute on the contract */
-  entryPoint: Scalars["String"];
-  iconURL?: Maybe<Scalars["String"]>;
-  id: Scalars["ID"];
-  name: Scalars["String"];
-  starterpack: Starterpack;
-  starterpackID: Scalars["ID"];
-  /** Calldata for the supply check entrypoint */
-  supplyCalldata?: Maybe<Array<Scalars["String"]>>;
-  /** Entrypoint to check available supply on the contract */
-  supplyEntryPoint?: Maybe<Scalars["String"]>;
-  updatedAt: Scalars["Time"];
-};
-
-/** A connection to a list of items. */
-export type StarterpackContractConnection = {
-  __typename?: "StarterpackContractConnection";
-  /** A list of edges. */
-  edges?: Maybe<Array<Maybe<StarterpackContractEdge>>>;
-  /** Information to aid in pagination. */
-  pageInfo: PageInfo;
-  /** Identifies the total count of items in the connection. */
-  totalCount: Scalars["Int"];
-};
-
-/** An edge in a connection. */
-export type StarterpackContractEdge = {
-  __typename?: "StarterpackContractEdge";
-  /** A cursor for use in pagination. */
-  cursor: Scalars["Cursor"];
-  /** The item at the end of the edge. */
-  node?: Maybe<StarterpackContract>;
-};
-
-/** Ordering options for StarterpackContract connections */
-export type StarterpackContractOrder = {
-  /** The ordering direction. */
-  direction?: OrderDirection;
-  /** The field by which to order StarterpackContracts. */
-  field: StarterpackContractOrderField;
-};
-
-/** Properties by which StarterpackContract connections can be ordered. */
-export enum StarterpackContractOrderField {
-  CreatedAt = "CREATED_AT",
-}
-
-/**
- * StarterpackContractWhereInput is used for filtering StarterpackContract objects.
- * Input was generated by ent.
- */
-export type StarterpackContractWhereInput = {
-  and?: InputMaybe<Array<StarterpackContractWhereInput>>;
-  /** contract_address field predicates */
-  contractAddress?: InputMaybe<Scalars["String"]>;
-  contractAddressContains?: InputMaybe<Scalars["String"]>;
-  contractAddressContainsFold?: InputMaybe<Scalars["String"]>;
-  contractAddressEqualFold?: InputMaybe<Scalars["String"]>;
-  contractAddressGT?: InputMaybe<Scalars["String"]>;
-  contractAddressGTE?: InputMaybe<Scalars["String"]>;
-  contractAddressHasPrefix?: InputMaybe<Scalars["String"]>;
-  contractAddressHasSuffix?: InputMaybe<Scalars["String"]>;
-  contractAddressIn?: InputMaybe<Array<Scalars["String"]>>;
-  contractAddressLT?: InputMaybe<Scalars["String"]>;
-  contractAddressLTE?: InputMaybe<Scalars["String"]>;
-  contractAddressNEQ?: InputMaybe<Scalars["String"]>;
-  contractAddressNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  /** created_at field predicates */
-  createdAt?: InputMaybe<Scalars["Time"]>;
-  createdAtGT?: InputMaybe<Scalars["Time"]>;
-  createdAtGTE?: InputMaybe<Scalars["Time"]>;
-  createdAtIn?: InputMaybe<Array<Scalars["Time"]>>;
-  createdAtLT?: InputMaybe<Scalars["Time"]>;
-  createdAtLTE?: InputMaybe<Scalars["Time"]>;
-  createdAtNEQ?: InputMaybe<Scalars["Time"]>;
-  createdAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
-  /** description field predicates */
-  description?: InputMaybe<Scalars["String"]>;
-  descriptionContains?: InputMaybe<Scalars["String"]>;
-  descriptionContainsFold?: InputMaybe<Scalars["String"]>;
-  descriptionEqualFold?: InputMaybe<Scalars["String"]>;
-  descriptionGT?: InputMaybe<Scalars["String"]>;
-  descriptionGTE?: InputMaybe<Scalars["String"]>;
-  descriptionHasPrefix?: InputMaybe<Scalars["String"]>;
-  descriptionHasSuffix?: InputMaybe<Scalars["String"]>;
-  descriptionIn?: InputMaybe<Array<Scalars["String"]>>;
-  descriptionIsNil?: InputMaybe<Scalars["Boolean"]>;
-  descriptionLT?: InputMaybe<Scalars["String"]>;
-  descriptionLTE?: InputMaybe<Scalars["String"]>;
-  descriptionNEQ?: InputMaybe<Scalars["String"]>;
-  descriptionNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  descriptionNotNil?: InputMaybe<Scalars["Boolean"]>;
-  /** entry_point field predicates */
-  entryPoint?: InputMaybe<Scalars["String"]>;
-  entryPointContains?: InputMaybe<Scalars["String"]>;
-  entryPointContainsFold?: InputMaybe<Scalars["String"]>;
-  entryPointEqualFold?: InputMaybe<Scalars["String"]>;
-  entryPointGT?: InputMaybe<Scalars["String"]>;
-  entryPointGTE?: InputMaybe<Scalars["String"]>;
-  entryPointHasPrefix?: InputMaybe<Scalars["String"]>;
-  entryPointHasSuffix?: InputMaybe<Scalars["String"]>;
-  entryPointIn?: InputMaybe<Array<Scalars["String"]>>;
-  entryPointLT?: InputMaybe<Scalars["String"]>;
-  entryPointLTE?: InputMaybe<Scalars["String"]>;
-  entryPointNEQ?: InputMaybe<Scalars["String"]>;
-  entryPointNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  /** starterpack edge predicates */
-  hasStarterpack?: InputMaybe<Scalars["Boolean"]>;
-  hasStarterpackWith?: InputMaybe<Array<StarterpackWhereInput>>;
-  /** icon_url field predicates */
-  iconURL?: InputMaybe<Scalars["String"]>;
-  iconURLContains?: InputMaybe<Scalars["String"]>;
-  iconURLContainsFold?: InputMaybe<Scalars["String"]>;
-  iconURLEqualFold?: InputMaybe<Scalars["String"]>;
-  iconURLGT?: InputMaybe<Scalars["String"]>;
-  iconURLGTE?: InputMaybe<Scalars["String"]>;
-  iconURLHasPrefix?: InputMaybe<Scalars["String"]>;
-  iconURLHasSuffix?: InputMaybe<Scalars["String"]>;
-  iconURLIn?: InputMaybe<Array<Scalars["String"]>>;
-  iconURLIsNil?: InputMaybe<Scalars["Boolean"]>;
-  iconURLLT?: InputMaybe<Scalars["String"]>;
-  iconURLLTE?: InputMaybe<Scalars["String"]>;
-  iconURLNEQ?: InputMaybe<Scalars["String"]>;
-  iconURLNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  iconURLNotNil?: InputMaybe<Scalars["Boolean"]>;
-  /** id field predicates */
-  id?: InputMaybe<Scalars["ID"]>;
-  idContainsFold?: InputMaybe<Scalars["ID"]>;
-  idEqualFold?: InputMaybe<Scalars["ID"]>;
-  idGT?: InputMaybe<Scalars["ID"]>;
-  idGTE?: InputMaybe<Scalars["ID"]>;
-  idIn?: InputMaybe<Array<Scalars["ID"]>>;
-  idLT?: InputMaybe<Scalars["ID"]>;
-  idLTE?: InputMaybe<Scalars["ID"]>;
-  idNEQ?: InputMaybe<Scalars["ID"]>;
-  idNotIn?: InputMaybe<Array<Scalars["ID"]>>;
-  /** name field predicates */
-  name?: InputMaybe<Scalars["String"]>;
-  nameContains?: InputMaybe<Scalars["String"]>;
-  nameContainsFold?: InputMaybe<Scalars["String"]>;
-  nameEqualFold?: InputMaybe<Scalars["String"]>;
-  nameGT?: InputMaybe<Scalars["String"]>;
-  nameGTE?: InputMaybe<Scalars["String"]>;
-  nameHasPrefix?: InputMaybe<Scalars["String"]>;
-  nameHasSuffix?: InputMaybe<Scalars["String"]>;
-  nameIn?: InputMaybe<Array<Scalars["String"]>>;
-  nameLT?: InputMaybe<Scalars["String"]>;
-  nameLTE?: InputMaybe<Scalars["String"]>;
-  nameNEQ?: InputMaybe<Scalars["String"]>;
-  nameNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  not?: InputMaybe<StarterpackContractWhereInput>;
-  or?: InputMaybe<Array<StarterpackContractWhereInput>>;
-  /** starterpack_id field predicates */
-  starterpackID?: InputMaybe<Scalars["ID"]>;
-  starterpackIDContains?: InputMaybe<Scalars["ID"]>;
-  starterpackIDContainsFold?: InputMaybe<Scalars["ID"]>;
-  starterpackIDEqualFold?: InputMaybe<Scalars["ID"]>;
-  starterpackIDGT?: InputMaybe<Scalars["ID"]>;
-  starterpackIDGTE?: InputMaybe<Scalars["ID"]>;
-  starterpackIDHasPrefix?: InputMaybe<Scalars["ID"]>;
-  starterpackIDHasSuffix?: InputMaybe<Scalars["ID"]>;
-  starterpackIDIn?: InputMaybe<Array<Scalars["ID"]>>;
-  starterpackIDLT?: InputMaybe<Scalars["ID"]>;
-  starterpackIDLTE?: InputMaybe<Scalars["ID"]>;
-  starterpackIDNEQ?: InputMaybe<Scalars["ID"]>;
-  starterpackIDNotIn?: InputMaybe<Array<Scalars["ID"]>>;
-  /** supply_entry_point field predicates */
-  supplyEntryPoint?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointContains?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointContainsFold?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointEqualFold?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointGT?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointGTE?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointHasPrefix?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointHasSuffix?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointIn?: InputMaybe<Array<Scalars["String"]>>;
-  supplyEntryPointIsNil?: InputMaybe<Scalars["Boolean"]>;
-  supplyEntryPointLT?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointLTE?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointNEQ?: InputMaybe<Scalars["String"]>;
-  supplyEntryPointNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  supplyEntryPointNotNil?: InputMaybe<Scalars["Boolean"]>;
-  /** updated_at field predicates */
-  updatedAt?: InputMaybe<Scalars["Time"]>;
-  updatedAtGT?: InputMaybe<Scalars["Time"]>;
-  updatedAtGTE?: InputMaybe<Scalars["Time"]>;
-  updatedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
-  updatedAtLT?: InputMaybe<Scalars["Time"]>;
-  updatedAtLTE?: InputMaybe<Scalars["Time"]>;
-  updatedAtNEQ?: InputMaybe<Scalars["Time"]>;
-  updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
-};
-
-export type StarterpackDetails = {
-  __typename?: "StarterpackDetails";
-  acquisitionType: StarterpackAcquisitionType;
-  bonusCredits: Credits;
-  mintAllowance?: Maybe<MintAllowance>;
-  price: Credits;
-  starterpack: Starterpack;
-};
-
-/** An edge in a connection. */
-export type StarterpackEdge = {
-  __typename?: "StarterpackEdge";
-  /** A cursor for use in pagination. */
-  cursor: Scalars["Cursor"];
-  /** The item at the end of the edge. */
-  node?: Maybe<Starterpack>;
-};
-
-export type StarterpackInput = {
-  accountId: Scalars["ID"];
-  starterpackId: Scalars["ID"];
-};
-
-export type StarterpackMint = Node & {
-  __typename?: "StarterpackMint";
-  account: Account;
-  accountID: Scalars["ID"];
-  activity?: Maybe<Activity>;
-  activityID?: Maybe<Scalars["ID"]>;
-  createdAt: Scalars["Time"];
-  id: Scalars["ID"];
-  starterpack: Starterpack;
-  starterpackID: Scalars["ID"];
-  updatedAt: Scalars["Time"];
-};
-
-/** A connection to a list of items. */
-export type StarterpackMintConnection = {
-  __typename?: "StarterpackMintConnection";
-  /** A list of edges. */
-  edges?: Maybe<Array<Maybe<StarterpackMintEdge>>>;
-  /** Information to aid in pagination. */
-  pageInfo: PageInfo;
-  /** Identifies the total count of items in the connection. */
-  totalCount: Scalars["Int"];
-};
-
-/** An edge in a connection. */
-export type StarterpackMintEdge = {
-  __typename?: "StarterpackMintEdge";
-  /** A cursor for use in pagination. */
-  cursor: Scalars["Cursor"];
-  /** The item at the end of the edge. */
-  node?: Maybe<StarterpackMint>;
-};
-
-/** Ordering options for StarterpackMint connections */
-export type StarterpackMintOrder = {
-  /** The ordering direction. */
-  direction?: OrderDirection;
-  /** The field by which to order StarterpackMints. */
-  field: StarterpackMintOrderField;
-};
-
-/** Properties by which StarterpackMint connections can be ordered. */
-export enum StarterpackMintOrderField {
-  CreatedAt = "CREATED_AT",
-}
-
-/**
- * StarterpackMintWhereInput is used for filtering StarterpackMint objects.
- * Input was generated by ent.
- */
-export type StarterpackMintWhereInput = {
-  /** account_id field predicates */
-  accountID?: InputMaybe<Scalars["ID"]>;
-  accountIDContains?: InputMaybe<Scalars["ID"]>;
-  accountIDContainsFold?: InputMaybe<Scalars["ID"]>;
-  accountIDEqualFold?: InputMaybe<Scalars["ID"]>;
-  accountIDGT?: InputMaybe<Scalars["ID"]>;
-  accountIDGTE?: InputMaybe<Scalars["ID"]>;
-  accountIDHasPrefix?: InputMaybe<Scalars["ID"]>;
-  accountIDHasSuffix?: InputMaybe<Scalars["ID"]>;
-  accountIDIn?: InputMaybe<Array<Scalars["ID"]>>;
-  accountIDLT?: InputMaybe<Scalars["ID"]>;
-  accountIDLTE?: InputMaybe<Scalars["ID"]>;
-  accountIDNEQ?: InputMaybe<Scalars["ID"]>;
-  accountIDNotIn?: InputMaybe<Array<Scalars["ID"]>>;
-  /** activity_id field predicates */
-  activityID?: InputMaybe<Scalars["ID"]>;
-  activityIDContains?: InputMaybe<Scalars["ID"]>;
-  activityIDContainsFold?: InputMaybe<Scalars["ID"]>;
-  activityIDEqualFold?: InputMaybe<Scalars["ID"]>;
-  activityIDGT?: InputMaybe<Scalars["ID"]>;
-  activityIDGTE?: InputMaybe<Scalars["ID"]>;
-  activityIDHasPrefix?: InputMaybe<Scalars["ID"]>;
-  activityIDHasSuffix?: InputMaybe<Scalars["ID"]>;
-  activityIDIn?: InputMaybe<Array<Scalars["ID"]>>;
-  activityIDIsNil?: InputMaybe<Scalars["Boolean"]>;
-  activityIDLT?: InputMaybe<Scalars["ID"]>;
-  activityIDLTE?: InputMaybe<Scalars["ID"]>;
-  activityIDNEQ?: InputMaybe<Scalars["ID"]>;
-  activityIDNotIn?: InputMaybe<Array<Scalars["ID"]>>;
-  activityIDNotNil?: InputMaybe<Scalars["Boolean"]>;
-  and?: InputMaybe<Array<StarterpackMintWhereInput>>;
-  /** created_at field predicates */
-  createdAt?: InputMaybe<Scalars["Time"]>;
-  createdAtGT?: InputMaybe<Scalars["Time"]>;
-  createdAtGTE?: InputMaybe<Scalars["Time"]>;
-  createdAtIn?: InputMaybe<Array<Scalars["Time"]>>;
-  createdAtLT?: InputMaybe<Scalars["Time"]>;
-  createdAtLTE?: InputMaybe<Scalars["Time"]>;
-  createdAtNEQ?: InputMaybe<Scalars["Time"]>;
-  createdAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
-  /** account edge predicates */
-  hasAccount?: InputMaybe<Scalars["Boolean"]>;
-  hasAccountWith?: InputMaybe<Array<AccountWhereInput>>;
-  /** activity edge predicates */
-  hasActivity?: InputMaybe<Scalars["Boolean"]>;
-  hasActivityWith?: InputMaybe<Array<ActivityWhereInput>>;
-  /** starterpack edge predicates */
-  hasStarterpack?: InputMaybe<Scalars["Boolean"]>;
-  hasStarterpackWith?: InputMaybe<Array<StarterpackWhereInput>>;
-  /** id field predicates */
-  id?: InputMaybe<Scalars["ID"]>;
-  idContainsFold?: InputMaybe<Scalars["ID"]>;
-  idEqualFold?: InputMaybe<Scalars["ID"]>;
-  idGT?: InputMaybe<Scalars["ID"]>;
-  idGTE?: InputMaybe<Scalars["ID"]>;
-  idIn?: InputMaybe<Array<Scalars["ID"]>>;
-  idLT?: InputMaybe<Scalars["ID"]>;
-  idLTE?: InputMaybe<Scalars["ID"]>;
-  idNEQ?: InputMaybe<Scalars["ID"]>;
-  idNotIn?: InputMaybe<Array<Scalars["ID"]>>;
-  not?: InputMaybe<StarterpackMintWhereInput>;
-  or?: InputMaybe<Array<StarterpackMintWhereInput>>;
-  /** starterpack_id field predicates */
-  starterpackID?: InputMaybe<Scalars["ID"]>;
-  starterpackIDContains?: InputMaybe<Scalars["ID"]>;
-  starterpackIDContainsFold?: InputMaybe<Scalars["ID"]>;
-  starterpackIDEqualFold?: InputMaybe<Scalars["ID"]>;
-  starterpackIDGT?: InputMaybe<Scalars["ID"]>;
-  starterpackIDGTE?: InputMaybe<Scalars["ID"]>;
-  starterpackIDHasPrefix?: InputMaybe<Scalars["ID"]>;
-  starterpackIDHasSuffix?: InputMaybe<Scalars["ID"]>;
-  starterpackIDIn?: InputMaybe<Array<Scalars["ID"]>>;
-  starterpackIDLT?: InputMaybe<Scalars["ID"]>;
-  starterpackIDLTE?: InputMaybe<Scalars["ID"]>;
-  starterpackIDNEQ?: InputMaybe<Scalars["ID"]>;
-  starterpackIDNotIn?: InputMaybe<Array<Scalars["ID"]>>;
-  /** updated_at field predicates */
-  updatedAt?: InputMaybe<Scalars["Time"]>;
-  updatedAtGT?: InputMaybe<Scalars["Time"]>;
-  updatedAtGTE?: InputMaybe<Scalars["Time"]>;
-  updatedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
-  updatedAtLT?: InputMaybe<Scalars["Time"]>;
-  updatedAtLTE?: InputMaybe<Scalars["Time"]>;
-  updatedAtNEQ?: InputMaybe<Scalars["Time"]>;
-  updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
-};
-
-/** Ordering options for Starterpack connections */
-export type StarterpackOrder = {
-  /** The ordering direction. */
-  direction?: OrderDirection;
-  /** The field by which to order Starterpacks. */
-  field: StarterpackOrderField;
-};
-
-/** Properties by which Starterpack connections can be ordered. */
-export enum StarterpackOrderField {
-  CreatedAt = "CREATED_AT",
-}
-
-/**
- * StarterpackWhereInput is used for filtering Starterpack objects.
- * Input was generated by ent.
- */
-export type StarterpackWhereInput = {
-  /** acquisition_type field predicates */
-  acquisitionType?: InputMaybe<StarterpackAcquisitionType>;
-  acquisitionTypeIn?: InputMaybe<Array<StarterpackAcquisitionType>>;
-  acquisitionTypeNEQ?: InputMaybe<StarterpackAcquisitionType>;
-  acquisitionTypeNotIn?: InputMaybe<Array<StarterpackAcquisitionType>>;
-  /** active field predicates */
-  active?: InputMaybe<Scalars["Boolean"]>;
-  activeNEQ?: InputMaybe<Scalars["Boolean"]>;
-  and?: InputMaybe<Array<StarterpackWhereInput>>;
-  /** chain_id field predicates */
-  chainID?: InputMaybe<Scalars["String"]>;
-  chainIDContains?: InputMaybe<Scalars["String"]>;
-  chainIDContainsFold?: InputMaybe<Scalars["String"]>;
-  chainIDEqualFold?: InputMaybe<Scalars["String"]>;
-  chainIDGT?: InputMaybe<Scalars["String"]>;
-  chainIDGTE?: InputMaybe<Scalars["String"]>;
-  chainIDHasPrefix?: InputMaybe<Scalars["String"]>;
-  chainIDHasSuffix?: InputMaybe<Scalars["String"]>;
-  chainIDIn?: InputMaybe<Array<Scalars["String"]>>;
-  chainIDLT?: InputMaybe<Scalars["String"]>;
-  chainIDLTE?: InputMaybe<Scalars["String"]>;
-  chainIDNEQ?: InputMaybe<Scalars["String"]>;
-  chainIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  /** created_at field predicates */
-  createdAt?: InputMaybe<Scalars["Time"]>;
-  createdAtGT?: InputMaybe<Scalars["Time"]>;
-  createdAtGTE?: InputMaybe<Scalars["Time"]>;
-  createdAtIn?: InputMaybe<Array<Scalars["Time"]>>;
-  createdAtLT?: InputMaybe<Scalars["Time"]>;
-  createdAtLTE?: InputMaybe<Scalars["Time"]>;
-  createdAtNEQ?: InputMaybe<Scalars["Time"]>;
-  createdAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
-  /** description field predicates */
-  description?: InputMaybe<Scalars["String"]>;
-  descriptionContains?: InputMaybe<Scalars["String"]>;
-  descriptionContainsFold?: InputMaybe<Scalars["String"]>;
-  descriptionEqualFold?: InputMaybe<Scalars["String"]>;
-  descriptionGT?: InputMaybe<Scalars["String"]>;
-  descriptionGTE?: InputMaybe<Scalars["String"]>;
-  descriptionHasPrefix?: InputMaybe<Scalars["String"]>;
-  descriptionHasSuffix?: InputMaybe<Scalars["String"]>;
-  descriptionIn?: InputMaybe<Array<Scalars["String"]>>;
-  descriptionIsNil?: InputMaybe<Scalars["Boolean"]>;
-  descriptionLT?: InputMaybe<Scalars["String"]>;
-  descriptionLTE?: InputMaybe<Scalars["String"]>;
-  descriptionNEQ?: InputMaybe<Scalars["String"]>;
-  descriptionNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  descriptionNotNil?: InputMaybe<Scalars["Boolean"]>;
-  /** merkle_drops edge predicates */
-  hasMerkleDrops?: InputMaybe<Scalars["Boolean"]>;
-  hasMerkleDropsWith?: InputMaybe<Array<MerkleDropWhereInput>>;
-  /** paymaster edge predicates */
-  hasPaymaster?: InputMaybe<Scalars["Boolean"]>;
-  hasPaymasterWith?: InputMaybe<Array<PaymasterWhereInput>>;
-  /** starterpack_contract edge predicates */
-  hasStarterpackContract?: InputMaybe<Scalars["Boolean"]>;
-  hasStarterpackContractWith?: InputMaybe<Array<StarterpackContractWhereInput>>;
-  /** starterpack_mint edge predicates */
-  hasStarterpackMint?: InputMaybe<Scalars["Boolean"]>;
-  hasStarterpackMintWith?: InputMaybe<Array<StarterpackMintWhereInput>>;
-  /** team edge predicates */
-  hasTeam?: InputMaybe<Scalars["Boolean"]>;
-  hasTeamWith?: InputMaybe<Array<TeamWhereInput>>;
-  /** id field predicates */
-  id?: InputMaybe<Scalars["ID"]>;
-  idContainsFold?: InputMaybe<Scalars["ID"]>;
-  idEqualFold?: InputMaybe<Scalars["ID"]>;
-  idGT?: InputMaybe<Scalars["ID"]>;
-  idGTE?: InputMaybe<Scalars["ID"]>;
-  idIn?: InputMaybe<Array<Scalars["ID"]>>;
-  idLT?: InputMaybe<Scalars["ID"]>;
-  idLTE?: InputMaybe<Scalars["ID"]>;
-  idNEQ?: InputMaybe<Scalars["ID"]>;
-  idNotIn?: InputMaybe<Array<Scalars["ID"]>>;
-  /** issuance field predicates */
-  issuance?: InputMaybe<Scalars["Int"]>;
-  issuanceGT?: InputMaybe<Scalars["Int"]>;
-  issuanceGTE?: InputMaybe<Scalars["Int"]>;
-  issuanceIn?: InputMaybe<Array<Scalars["Int"]>>;
-  issuanceLT?: InputMaybe<Scalars["Int"]>;
-  issuanceLTE?: InputMaybe<Scalars["Int"]>;
-  issuanceNEQ?: InputMaybe<Scalars["Int"]>;
-  issuanceNotIn?: InputMaybe<Array<Scalars["Int"]>>;
-  /** max_issuance field predicates */
-  maxIssuance?: InputMaybe<Scalars["Int"]>;
-  maxIssuanceGT?: InputMaybe<Scalars["Int"]>;
-  maxIssuanceGTE?: InputMaybe<Scalars["Int"]>;
-  maxIssuanceIn?: InputMaybe<Array<Scalars["Int"]>>;
-  maxIssuanceIsNil?: InputMaybe<Scalars["Boolean"]>;
-  maxIssuanceLT?: InputMaybe<Scalars["Int"]>;
-  maxIssuanceLTE?: InputMaybe<Scalars["Int"]>;
-  maxIssuanceNEQ?: InputMaybe<Scalars["Int"]>;
-  maxIssuanceNotIn?: InputMaybe<Array<Scalars["Int"]>>;
-  maxIssuanceNotNil?: InputMaybe<Scalars["Boolean"]>;
-  /** max_per_account field predicates */
-  maxPerAccount?: InputMaybe<Scalars["Int"]>;
-  maxPerAccountGT?: InputMaybe<Scalars["Int"]>;
-  maxPerAccountGTE?: InputMaybe<Scalars["Int"]>;
-  maxPerAccountIn?: InputMaybe<Array<Scalars["Int"]>>;
-  maxPerAccountIsNil?: InputMaybe<Scalars["Boolean"]>;
-  maxPerAccountLT?: InputMaybe<Scalars["Int"]>;
-  maxPerAccountLTE?: InputMaybe<Scalars["Int"]>;
-  maxPerAccountNEQ?: InputMaybe<Scalars["Int"]>;
-  maxPerAccountNotIn?: InputMaybe<Array<Scalars["Int"]>>;
-  maxPerAccountNotNil?: InputMaybe<Scalars["Boolean"]>;
-  /** name field predicates */
-  name?: InputMaybe<Scalars["String"]>;
-  nameContains?: InputMaybe<Scalars["String"]>;
-  nameContainsFold?: InputMaybe<Scalars["String"]>;
-  nameEqualFold?: InputMaybe<Scalars["String"]>;
-  nameGT?: InputMaybe<Scalars["String"]>;
-  nameGTE?: InputMaybe<Scalars["String"]>;
-  nameHasPrefix?: InputMaybe<Scalars["String"]>;
-  nameHasSuffix?: InputMaybe<Scalars["String"]>;
-  nameIn?: InputMaybe<Array<Scalars["String"]>>;
-  nameLT?: InputMaybe<Scalars["String"]>;
-  nameLTE?: InputMaybe<Scalars["String"]>;
-  nameNEQ?: InputMaybe<Scalars["String"]>;
-  nameNotIn?: InputMaybe<Array<Scalars["String"]>>;
-  not?: InputMaybe<StarterpackWhereInput>;
-  or?: InputMaybe<Array<StarterpackWhereInput>>;
-  /** paymaster_id field predicates */
-  paymasterID?: InputMaybe<Scalars["ID"]>;
-  paymasterIDContains?: InputMaybe<Scalars["ID"]>;
-  paymasterIDContainsFold?: InputMaybe<Scalars["ID"]>;
-  paymasterIDEqualFold?: InputMaybe<Scalars["ID"]>;
-  paymasterIDGT?: InputMaybe<Scalars["ID"]>;
-  paymasterIDGTE?: InputMaybe<Scalars["ID"]>;
-  paymasterIDHasPrefix?: InputMaybe<Scalars["ID"]>;
-  paymasterIDHasSuffix?: InputMaybe<Scalars["ID"]>;
-  paymasterIDIn?: InputMaybe<Array<Scalars["ID"]>>;
-  paymasterIDIsNil?: InputMaybe<Scalars["Boolean"]>;
-  paymasterIDLT?: InputMaybe<Scalars["ID"]>;
-  paymasterIDLTE?: InputMaybe<Scalars["ID"]>;
-  paymasterIDNEQ?: InputMaybe<Scalars["ID"]>;
-  paymasterIDNotIn?: InputMaybe<Array<Scalars["ID"]>>;
-  paymasterIDNotNil?: InputMaybe<Scalars["Boolean"]>;
-  /** updated_at field predicates */
-  updatedAt?: InputMaybe<Scalars["Time"]>;
-  updatedAtGT?: InputMaybe<Scalars["Time"]>;
-  updatedAtGTE?: InputMaybe<Scalars["Time"]>;
-  updatedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
-  updatedAtLT?: InputMaybe<Scalars["Time"]>;
-  updatedAtLTE?: InputMaybe<Scalars["Time"]>;
-  updatedAtNEQ?: InputMaybe<Scalars["Time"]>;
-  updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
-};
-
 export type Streak = {
   __typename?: "Streak";
   currentStreak: Scalars["Int"];
@@ -6968,7 +6309,6 @@ export type Team = Node & {
   paymasters: PaymasterConnection;
   rpcAPIKeys: RpcApiKeyConnection;
   rpcCorsDomains: RpcCorsDomainConnection;
-  starterpacks: StarterpackConnection;
   /** STRK pool for funding STRK-denominated paymaster budgets. Stored as microSTRK (6-dec). */
   strk: Scalars["Int"];
   taxID?: Maybe<Scalars["String"]>;
@@ -7034,15 +6374,6 @@ export type TeamRpcCorsDomainsArgs = {
   first?: InputMaybe<Scalars["Int"]>;
   last?: InputMaybe<Scalars["Int"]>;
   where?: InputMaybe<RpcCorsDomainWhereInput>;
-};
-
-export type TeamStarterpacksArgs = {
-  after?: InputMaybe<Scalars["Cursor"]>;
-  before?: InputMaybe<Scalars["Cursor"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<StarterpackOrder>;
-  where?: InputMaybe<StarterpackWhereInput>;
 };
 
 /** A connection to a list of items. */
@@ -7397,9 +6728,6 @@ export type TeamWhereInput = {
   /** rpc_cors_domains edge predicates */
   hasRPCCorsDomains?: InputMaybe<Scalars["Boolean"]>;
   hasRPCCorsDomainsWith?: InputMaybe<Array<RpcCorsDomainWhereInput>>;
-  /** starterpacks edge predicates */
-  hasStarterpacks?: InputMaybe<Scalars["Boolean"]>;
-  hasStarterpacksWith?: InputMaybe<Array<StarterpackWhereInput>>;
   /** id field predicates */
   id?: InputMaybe<Scalars["ID"]>;
   idContainsFold?: InputMaybe<Scalars["ID"]>;
@@ -7634,20 +6962,17 @@ export type UpdateMerkleDropInput = {
   clearClaims?: InputMaybe<Scalars["Boolean"]>;
   clearDescription?: InputMaybe<Scalars["Boolean"]>;
   clearMetadata?: InputMaybe<Scalars["Boolean"]>;
-  clearStarterpack?: InputMaybe<Scalars["Boolean"]>;
   contract?: InputMaybe<Scalars["String"]>;
   createdAt?: InputMaybe<Scalars["Time"]>;
   description?: InputMaybe<Scalars["String"]>;
   entrypoint?: InputMaybe<Scalars["String"]>;
   key?: InputMaybe<Scalars["String"]>;
-  matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
   merkleRoot?: InputMaybe<Scalars["String"]>;
   /** Additional metadata for the merkle drop */
   metadata?: InputMaybe<Scalars["JSON"]>;
   network?: InputMaybe<MerkleDropNetwork>;
   removeClaimIDs?: InputMaybe<Array<Scalars["ID"]>>;
   salt?: InputMaybe<Scalars["String"]>;
-  starterpackID?: InputMaybe<Scalars["ID"]>;
   updatedAt?: InputMaybe<Scalars["Time"]>;
 };
 
