@@ -3177,7 +3177,10 @@ export type Mutation = {
   createTeam: Team;
   decreaseBudget: Paymaster;
   deleteDeployment: Scalars['Boolean'];
+  deleteEmailAddress: Scalars['Boolean'];
   deleteMe: Scalars['Boolean'];
+  deletePhoneNumber: Scalars['Boolean'];
+  deleteProveIdentity: Scalars['Boolean'];
   deleteRpcApiKey: Scalars['Boolean'];
   deleteRpcCorsDomain: Scalars['Boolean'];
   deleteTeam: Scalars['Boolean'];

@@ -3183,7 +3183,10 @@ export type Mutation = {
   createTeam: Team;
   decreaseBudget: Paymaster;
   deleteDeployment: Scalars["Boolean"];
+  deleteEmailAddress: Scalars["Boolean"];
   deleteMe: Scalars["Boolean"];
+  deletePhoneNumber: Scalars["Boolean"];
+  deleteProveIdentity: Scalars["Boolean"];
   deleteRpcApiKey: Scalars["Boolean"];
   deleteRpcCorsDomain: Scalars["Boolean"];
   deleteTeam: Scalars["Boolean"];
@@ -7183,6 +7186,33 @@ export type DeleteMeMutationVariables = Exact<{ [key: string]: never }>;
 
 export type DeleteMeMutation = { __typename?: "Mutation"; deleteMe: boolean };
 
+export type DeleteEmailAddressMutationVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type DeleteEmailAddressMutation = {
+  __typename?: "Mutation";
+  deleteEmailAddress: boolean;
+};
+
+export type DeletePhoneNumberMutationVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type DeletePhoneNumberMutation = {
+  __typename?: "Mutation";
+  deletePhoneNumber: boolean;
+};
+
+export type DeleteProveIdentityMutationVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type DeleteProveIdentityMutation = {
+  __typename?: "Mutation";
+  deleteProveIdentity: boolean;
+};
+
 export type CryptoPaymentQueryVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -8005,6 +8035,92 @@ export const useDeleteMeMutation = <TError = unknown, TContext = unknown>(
   useMutation<DeleteMeMutation, TError, DeleteMeMutationVariables, TContext>(
     ["DeleteMe"],
     useFetchData<DeleteMeMutation, DeleteMeMutationVariables>(DeleteMeDocument),
+    options,
+  );
+export const DeleteEmailAddressDocument = `
+    mutation DeleteEmailAddress {
+  deleteEmailAddress
+}
+    `;
+export const useDeleteEmailAddressMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    DeleteEmailAddressMutation,
+    TError,
+    DeleteEmailAddressMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    DeleteEmailAddressMutation,
+    TError,
+    DeleteEmailAddressMutationVariables,
+    TContext
+  >(
+    ["DeleteEmailAddress"],
+    useFetchData<
+      DeleteEmailAddressMutation,
+      DeleteEmailAddressMutationVariables
+    >(DeleteEmailAddressDocument),
+    options,
+  );
+export const DeletePhoneNumberDocument = `
+    mutation DeletePhoneNumber {
+  deletePhoneNumber
+}
+    `;
+export const useDeletePhoneNumberMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    DeletePhoneNumberMutation,
+    TError,
+    DeletePhoneNumberMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    DeletePhoneNumberMutation,
+    TError,
+    DeletePhoneNumberMutationVariables,
+    TContext
+  >(
+    ["DeletePhoneNumber"],
+    useFetchData<DeletePhoneNumberMutation, DeletePhoneNumberMutationVariables>(
+      DeletePhoneNumberDocument,
+    ),
+    options,
+  );
+export const DeleteProveIdentityDocument = `
+    mutation DeleteProveIdentity {
+  deleteProveIdentity
+}
+    `;
+export const useDeleteProveIdentityMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    DeleteProveIdentityMutation,
+    TError,
+    DeleteProveIdentityMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    DeleteProveIdentityMutation,
+    TError,
+    DeleteProveIdentityMutationVariables,
+    TContext
+  >(
+    ["DeleteProveIdentity"],
+    useFetchData<
+      DeleteProveIdentityMutation,
+      DeleteProveIdentityMutationVariables
+    >(DeleteProveIdentityDocument),
     options,
   );
 export const CryptoPaymentDocument = `

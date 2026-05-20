@@ -21,16 +21,23 @@ export const Default: Story = {};
 function DeleteConfirmationStory() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openUnlink, setOpenUnlink] = useState(false);
+  const [openError, setOpenError] = useState(false);
 
   const handleConfirm = async (message: string) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast.success(message);
   };
 
+  const handleError = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    throw new Error("Something went wrong");
+  };
+
   return (
     <ControllerContainer>
       <Button onClick={() => setOpenDelete(true)}>Open Delete</Button>
       <Button onClick={() => setOpenUnlink(true)}>Open Unlink</Button>
+      <Button onClick={() => setOpenError(true)}>Error Handling</Button>
 
       <DeleteConfirmation
         isOpen={openDelete}
@@ -47,6 +54,13 @@ function DeleteConfirmationStory() {
         label="User Data"
         subTitle="You can always re-link again"
         unlink
+      />
+      <DeleteConfirmation
+        isOpen={openError}
+        onClose={() => setOpenError(false)}
+        onConfirm={handleError}
+        icon={<DesktopIcon variant="solid" size="sm" />}
+        label="Error Test"
       />
     </ControllerContainer>
   );

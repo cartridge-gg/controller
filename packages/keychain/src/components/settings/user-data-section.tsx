@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import {
   EnvelopeIcon,
   formatPhoneNumber,
@@ -7,7 +7,12 @@ import {
   SettingsCard,
   UserIcon,
 } from "@cartridge/controller-ui";
-import { useAccountPrivateQuery } from "@/utils/api";
+import {
+  useAccountPrivateQuery,
+  useDeleteEmailAddressMutation,
+  useDeletePhoneNumberMutation,
+  useDeleteProveIdentityMutation,
+} from "@/utils/api";
 import { useMeQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 
 type VerifiedData = {
@@ -21,12 +26,12 @@ export const UserDataSection = () => {
   const {
     data: meData,
     isLoading: isMeLoading,
-    // refetch: refetchMe,
+    refetch: refetchMe,
   } = useMeQuery();
   const {
     data: privateData,
     isLoading: isPrivateLoading,
-    // refetch: refetchPrivate,
+    refetch: refetchPrivate,
   } = useAccountPrivateQuery();
 
   const userData = useMemo(
@@ -87,6 +92,32 @@ export const UserDataSection = () => {
     return null;
   }, [userData, isMeLoading]);
 
+  // mutation
+  const deletePhoneNumberMutation = useDeletePhoneNumberMutation();
+  const deleteEmailAddressMutation = useDeleteEmailAddressMutation();
+  const deleteProveIdentityMutation = useDeleteProveIdentityMutation();
+
+  const handleDeletePhoneNumber = useCallback(async () => {
+    const result = await deletePhoneNumberMutation.mutateAsync({});
+    if (!result.deletePhoneNumber) {
+      throw new Error("Phone number deletion failed");
+    }
+  }, [deletePhoneNumberMutation]);
+
+  const handleDeleteEmailAddress = useCallback(async () => {
+    const result = await deleteEmailAddressMutation.mutateAsync({});
+    if (!result.deleteEmailAddress) {
+      throw new Error("Email address deletion failed");
+    }
+  }, [deleteEmailAddressMutation]);
+
+  const handleDeleteProveIdentity = useCallback(async () => {
+    const result = await deleteProveIdentityMutation.mutateAsync({});
+    if (!result.deleteProveIdentity) {
+      throw new Error("Prove identity deletion failed");
+    }
+  }, [deleteProveIdentityMutation]);
+
   return (
     <section className="space-y-4">
       <SectionHeader
@@ -98,10 +129,15 @@ export const UserDataSection = () => {
         {verifiedIdentity && (
           <SettingsCard
             icon={<UserIcon variant="solid" size="sm" />}
-            label={verifiedIdentity.label}
+            label="Identity Proof"
             rightText={formatVerifiedAt(verifiedIdentity.verifiedAt)}
             isLoading={verifiedIdentity.isLoading}
-            onDelete={async () => {}}
+            onDelete={async () => {
+              await handleDeleteProveIdentity();
+              await refetchPrivate();
+            }}
+            confirmDelete
+            deleteLabel="Identity Proof"
           />
         )}
         {verifiedPhone && (
@@ -110,7 +146,13 @@ export const UserDataSection = () => {
             label={verifiedPhone.label}
             rightText={formatVerifiedAt(verifiedPhone.verifiedAt)}
             isLoading={verifiedPhone.isLoading}
-            onDelete={async () => {}}
+            onDelete={async () => {
+              await handleDeletePhoneNumber();
+              await refetchPrivate();
+            }}
+            confirmDelete
+            deleteLabel="Phone Number"
+            deleteSubTitle={verifiedPhone.label}
           />
         )}
         {verifiedEmail && (
@@ -118,7 +160,13 @@ export const UserDataSection = () => {
             icon={<EnvelopeIcon size="sm" />}
             label={verifiedEmail.label}
             isLoading={verifiedEmail.isLoading}
-            onDelete={async () => {}}
+            onDelete={async () => {
+              await handleDeleteEmailAddress();
+              await refetchMe();
+            }}
+            confirmDelete
+            deleteLabel="Email Address"
+            deleteSubTitle={verifiedEmail.label}
           />
         )}
       </div>

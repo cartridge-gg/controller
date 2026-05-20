@@ -29,6 +29,12 @@ function SettingsCardStory() {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast.success(message);
   };
+
+  const handleError = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    throw new Error("Something went wrong");
+  };
+
   return (
     <ControllerContainer>
       <SettingsCard
@@ -41,7 +47,7 @@ function SettingsCardStory() {
       />
       <SettingsCard
         icon={<DesktopIcon variant="solid" size="sm" />}
-        label="With Delete & Confirm"
+        label="With Delete + Confirm"
         rightText="5d"
         onDelete={async () => {
           await handleDelete("Deleted");
@@ -58,9 +64,10 @@ function SettingsCardStory() {
         }}
         unlink
       />
+
       <SettingsCard
         icon={<UserIcon variant="solid" size="sm" />}
-        label="With Unlink & Confirm"
+        label="With Unlink + Confirm"
         rightText="5d"
         onDelete={async () => {
           await handleDelete("Unlinked");
@@ -70,10 +77,26 @@ function SettingsCardStory() {
         deleteLabel="User Data"
         deleteSubTitle="You can always re-link again"
       />
+
       <SettingsCard
         icon={<InfoIcon size="sm" />}
         label="info only"
         rightText="0d"
+      />
+
+      <SettingsCard
+        icon={<DesktopIcon variant="solid" size="sm" />}
+        label="With Error (custom handler)"
+        rightText="5d"
+        onDelete={handleError}
+      />
+      <SettingsCard
+        icon={<DesktopIcon variant="solid" size="sm" />}
+        label="With Error + Confirm"
+        rightText="5d"
+        onDelete={handleError}
+        confirmDelete
+        deleteLabel="Session"
       />
     </ControllerContainer>
   );
