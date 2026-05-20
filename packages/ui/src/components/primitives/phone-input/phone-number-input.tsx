@@ -2,12 +2,32 @@ import { forwardRef, useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/primitives/input";
 import { ErrorAlertIcon } from "@/components/icons/error-alert-icon";
 import { PhoneCountryCodeSelect } from "./phone-country-code-select";
-import { COUNTRIES } from "./countries";
+import { COUNTRIES, type Country } from "./countries";
 
 const DEFAULT_COUNTRY = "US";
 
-function dialCodeOf(code: string): string {
-  return COUNTRIES.find((c) => c.code === code)?.dial_code ?? "";
+function countryOf(code: string): Country | undefined {
+  return COUNTRIES.find((c) => c.code === code);
+}
+
+// Display-only mask. `setValue` always receives a plain "+digits" string.
+function formatPhoneDigits(
+  country: Country | undefined,
+  digits: string,
+): string {
+  if (!country?.mask || !country.maxLength) return digits;
+
+  const d = digits.slice(0, country.maxLength);
+  if (!d) return "";
+
+  let out = "";
+  let di = 0;
+  for (let i = 0; i < country.mask.length; i++) {
+    if (di >= d.length) break;
+    if (country.mask[i] === "X") out += d[di++];
+    else out += country.mask[i];
+  }
+  return out;
 }
 
 // Find the country whose dial_code is the longest prefix of `value`.
@@ -53,7 +73,7 @@ export const PhoneNumberInput = forwardRef<
     disabled,
     allowedCountries,
     inputId,
-    placeholder = "234 567 8900",
+    placeholder = "(234)567-8900",
   },
   ref,
 ) {
@@ -71,7 +91,8 @@ export const PhoneNumberInput = forwardRef<
   });
 
   const effectiveCountry = lockedCountry ?? country;
-  const dialCode = dialCodeOf(effectiveCountry);
+  const countryData = countryOf(effectiveCountry);
+  const dialCode = countryData?.dial_code ?? "";
 
   // Sync country if the value was set externally to a different dial code.
   useEffect(() => {
@@ -90,14 +111,21 @@ export const PhoneNumberInput = forwardRef<
     return "";
   }, [value, dialCode]);
 
+  const displayValue = useMemo(
+    () => formatPhoneDigits(countryData, digits),
+    [countryData, digits],
+  );
+
   const handleCountryChange = (newCountry: string) => {
     setCountry(newCountry);
-    setValue(`${dialCodeOf(newCountry)}${digits}`);
+    setValue(`${countryOf(newCountry)?.dial_code ?? ""}${digits}`);
   };
 
   const handleDigitsChange = (raw: string) => {
     const sanitized = raw.replace(/\D/g, "");
-    setValue(`${dialCode}${sanitized}`);
+    // Re-format to apply the format's digit cap, then strip back to digits.
+    const capped = formatPhoneDigits(countryData, sanitized).replace(/\D/g, "");
+    setValue(`${dialCode}${capped}`);
   };
 
   return (
@@ -118,7 +146,7 @@ export const PhoneNumberInput = forwardRef<
           autoComplete="tel-national"
           placeholder={placeholder}
           containerClassName="min-w-0 flex-1"
-          value={digits}
+          value={displayValue}
           onChange={(e) => handleDigitsChange(e.target.value)}
           disabled={disabled}
         />
@@ -133,7 +161,20 @@ export const PhoneNumberInput = forwardRef<
   );
 });
 
-/** E.164 international phone number format. */
+// exports
+
+// E.164 international phone number format
 export function isValidPhoneNumber(value: string): boolean {
   return /^\+[1-9]\d{6,14}$/.test(value);
+}
+
+// only numbers, with dial code, +###########
+export function formatPhoneNumber(phoneNumber: string): string {
+  const code = detectCountry(phoneNumber);
+  const country = code ? countryOf(code) : undefined;
+  if (!country?.mask || !country.maxLength) return phoneNumber;
+  if (phoneNumber.length !== country.dial_code.length + country.maxLength) {
+    return phoneNumber;
+  }
+  return `${country.dial_code}${formatPhoneDigits(country, phoneNumber.slice(country.dial_code.length))}`;
 }

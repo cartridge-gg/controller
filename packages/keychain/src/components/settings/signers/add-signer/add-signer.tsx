@@ -1,8 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
 import { credentialToAddress } from "@/components/connect/types";
 import { SignerPendingDrawer } from "@/components/connect/create/SignerPendingDrawer";
+import { useSmsAuthentication } from "@/components/connect/create/sms";
+import {
+  SmsOtpDrawer,
+  SmsOtpState,
+} from "@/components/connect/create/sms/SmsOtpForm";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -27,6 +32,7 @@ import {
 import { QueryObserverResult } from "react-query";
 import { ExternalWalletError } from "@/utils/errors";
 import { SignerAlert } from "../signer-alert";
+import { SocialProviderType } from "@/wallets/social/turnkey_utils";
 
 type SignerPending = {
   kind: SignerMethodKind;
@@ -63,9 +69,20 @@ export function AddSignerDrawer({
   onClose,
   controllerQuery,
 }: AddSignerDrawerProps) {
+  const { controller } = useController();
+  const smsAuth = useSmsAuthentication();
   const [wallets, setWallets] = useState<boolean>(false);
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
     null,
+  );
+  const [smsState, setSmsState] = useState<SmsOtpState | null>(null);
+
+  const currentSigners = useMemo(
+    () =>
+      controllerQuery.data?.controller?.signers?.map(
+        (signer) => signer.metadata as CredentialMetadata,
+      ),
+    [controllerQuery.data],
   );
 
   const handleClick = useCallback(
@@ -109,9 +126,73 @@ export function AddSignerDrawer({
 
   const handleClose = useCallback(() => {
     setSignerPending(null);
+    setSmsState(null);
     setWallets(false);
     onClose();
-  }, [setSignerPending, setWallets, onClose]);
+  }, [setSignerPending, setSmsState, setWallets, onClose]);
+
+  const handleInitOtp = useCallback(
+    async (phoneNumber: string) => {
+      setSmsState({ phoneNumber, otpId: "", otpEncryptionTargetBundle: "" });
+      const { otpId, otpEncryptionTargetBundle } = await smsAuth.initSms({
+        phoneNumber,
+      });
+      setSmsState({ phoneNumber, otpId, otpEncryptionTargetBundle });
+    },
+    [smsAuth],
+  );
+
+  const handleResendOtp = useCallback(async () => {
+    if (smsState?.phoneNumber) {
+      await handleInitOtp(smsState.phoneNumber);
+    }
+  }, [handleInitOtp, smsState?.phoneNumber]);
+
+  const handleSubmitSms = useCallback(
+    async (otpCode: string) => {
+      if (!otpCode || !smsState?.otpId) return;
+      const { phoneNumber, otpId, otpEncryptionTargetBundle } = smsState;
+      await handleClick("sms", async () => {
+        const username = controller?.username();
+        if (!controller || !username) {
+          throw new Error("No username");
+        }
+        const { address } = await smsAuth.completeSms(
+          username,
+          phoneNumber,
+          otpId,
+          otpEncryptionTargetBundle,
+          otpCode,
+        );
+        if (
+          currentSigners?.find(
+            (signer) => credentialToAddress(signer) === address,
+          )
+        ) {
+          return address;
+        }
+        await controller.addOwner(
+          { eip191: { address } },
+          {
+            type: "eip191",
+            // otp_id rides inside the opaque credential JSON so the server
+            // can prove this signer's phone was just OTP-verified. The
+            // GraphQL schema and the controller-wasm bindings don't need
+            // to know the field exists; the resolver pulls it out of the
+            // raw map, claims the post-verify Redis entry atomically, and
+            // strips otp_id before persisting Signer.metadata.
+            credential: JSON.stringify({
+              provider: "sms",
+              eth_address: address,
+              otp_id: otpId,
+            }),
+          },
+          null,
+        );
+      });
+    },
+    [smsAuth, smsState, controller, currentSigners, handleClick],
+  );
 
   useEffect(() => {
     if (
@@ -128,7 +209,8 @@ export function AddSignerDrawer({
     }
   }, [signerPending, controllerQuery, handleClose]);
 
-  const isChooseOpen = isOpen && signerPending === null;
+  const isChooseOpen = isOpen && signerPending === null && smsState === null;
+  const isSmsOpen = isOpen && signerPending === null && smsState !== null;
   const isPendingOpen = isOpen && signerPending !== null;
 
   return (
@@ -136,7 +218,7 @@ export function AddSignerDrawer({
       <Drawer
         isOpen={isChooseOpen}
         onClose={() => {
-          if (signerPending) return;
+          if (signerPending || !isChooseOpen) return;
           handleClose();
         }}
       >
@@ -146,9 +228,7 @@ export function AddSignerDrawer({
             {wallets ? (
               <>
                 <WalletAuths
-                  currentSigners={controllerQuery.data?.controller?.signers?.map(
-                    (signer) => signer.metadata as CredentialMetadata,
-                  )}
+                  currentSigners={currentSigners}
                   handleClick={handleClick}
                 />
                 <Button variant="secondary" onClick={() => setWallets(false)}>
@@ -158,18 +238,34 @@ export function AddSignerDrawer({
             ) : (
               <RegularAuths
                 setWallets={setWallets}
-                currentSigners={controllerQuery.data?.controller?.signers?.map(
-                  (signer) => signer.metadata as CredentialMetadata,
-                )}
+                currentSigners={currentSigners}
                 handleClick={handleClick}
+                onClickSms={() =>
+                  setSmsState({
+                    phoneNumber: "",
+                    otpId: "",
+                    otpEncryptionTargetBundle: "",
+                  })
+                }
               />
             )}
           </div>
         </DrawerContent>
       </Drawer>
 
+      <SmsOtpDrawer
+        isOpen={isSmsOpen}
+        isLogin={false}
+        onClose={handleClose}
+        onInitOtp={handleInitOtp}
+        onResendOtp={handleResendOtp}
+        onSubmitCode={handleSubmitSms}
+        smsState={smsState}
+      />
+
       <SignerPendingDrawer
         isOpen={isPendingOpen}
+        isLogin={false}
         isLoading={signerPending?.inProgress ?? false}
         error={
           signerPending?.error ? new Error(signerPending.error) : undefined
@@ -189,7 +285,7 @@ const WalletAuths = ({
   handleClick: (
     auth: SignerMethodKind,
     authFn: (auth: SignerMethodKind) => Promise<string | undefined>,
-  ) => void;
+  ) => Promise<void>;
 }) => {
   const { supportedWalletsForAuth, connectWallet } = useWallets();
   const { controller } = useController();
@@ -283,18 +379,69 @@ const RegularAuths = ({
   setWallets,
   currentSigners,
   handleClick,
+  onClickSms,
 }: {
   setWallets: (wallets: boolean) => void;
   currentSigners: CredentialMetadata[] | undefined;
   handleClick: (
     auth: SignerMethodKind,
     authFn: (auth: SignerMethodKind) => Promise<string | undefined>,
-  ) => void;
+  ) => Promise<void>;
+  onClickSms: () => void;
 }) => {
   const { controller } = useController();
 
+  const handleTurnkeyOAuth = useCallback(
+    async (provider: SocialProviderType) => {
+      await handleClick(provider, async () => {
+        if (!controller?.username()) {
+          throw new Error("No username");
+        }
+
+        const turnkeyWallet = new TurnkeyWallet(
+          controller.username(),
+          controller.chainId(),
+          controller.rpcUrl(),
+          provider,
+        );
+        const response = await turnkeyWallet.connect(false);
+        if (!response || !response.success || !response.account) {
+          throw new Error(response?.error || "Wallet auth: unknown error");
+        }
+        if (response.error?.includes("Account mismatch")) {
+          throw new Error("Account mismatch");
+        }
+        window.keychain_wallets?.addEmbeddedWallet(
+          response.account,
+          turnkeyWallet as unknown as WalletAdapter,
+        );
+        if (
+          currentSigners?.find(
+            (signer) => credentialToAddress(signer) === response.account,
+          )
+        ) {
+          return response.account;
+        }
+
+        await controller?.addOwner(
+          { eip191: { address: response.account } },
+          {
+            type: "eip191",
+            credential: JSON.stringify({
+              provider,
+              eth_address: response.account,
+            }),
+          },
+          null,
+        );
+      });
+    },
+    [controller, currentSigners, handleClick],
+  );
+
   return (
     <>
+      <SignerMethod kind="sms" onClick={onClickSms} />
       <SignerMethod
         kind="passkey"
         onClick={async () => {
@@ -314,100 +461,15 @@ const RegularAuths = ({
       <SignerMethod
         kind="google"
         onClick={async () => {
-          await handleClick("google", async () => {
-            if (!controller?.username()) {
-              throw new Error("No username");
-            }
-
-            const turnkeyWallet = new TurnkeyWallet(
-              controller.username(),
-              controller.chainId(),
-              controller.rpcUrl(),
-              "google",
-            );
-            const response = await turnkeyWallet.connect(false);
-            if (!response || !response.success || !response.account) {
-              throw new Error(response?.error || "Wallet auth: unknown error");
-            }
-            if (response.error?.includes("Account mismatch")) {
-              throw new Error("Account mismatch");
-            }
-            window.keychain_wallets?.addEmbeddedWallet(
-              response.account,
-              turnkeyWallet as unknown as WalletAdapter,
-            );
-            if (
-              currentSigners?.find(
-                (signer) => credentialToAddress(signer) === response.account,
-              )
-            ) {
-              return response.account;
-            }
-
-            await controller?.addOwner(
-              { eip191: { address: response.account } },
-              {
-                type: "eip191",
-                credential: JSON.stringify({
-                  provider: "google",
-                  eth_address: response.account,
-                }),
-              },
-              null,
-            );
-          });
+          await handleTurnkeyOAuth("google");
         }}
       />
       <SignerMethod
         kind="discord"
         onClick={async () => {
-          await handleClick("discord", async () => {
-            if (!controller?.username()) {
-              throw new Error("No username");
-            }
-
-            const turnkeyWallet = new TurnkeyWallet(
-              controller.username(),
-              controller.chainId(),
-              controller.rpcUrl(),
-              "discord",
-            );
-            const response = await turnkeyWallet.connect(false);
-            if (!response || !response.success || !response.account) {
-              throw new Error(response?.error || "Wallet auth: unknown error");
-            }
-            if (response.error?.includes("Account mismatch")) {
-              throw new Error("Account mismatch");
-            }
-            window.keychain_wallets?.addEmbeddedWallet(
-              response.account,
-              turnkeyWallet as unknown as WalletAdapter,
-            );
-            if (
-              currentSigners?.find(
-                (signer) => credentialToAddress(signer) === response.account,
-              )
-            ) {
-              return response.account;
-            }
-            await controller?.addOwner(
-              { eip191: { address: response.account } },
-              {
-                type: "eip191",
-                credential: JSON.stringify({
-                  provider: "discord",
-                  eth_address: response.account,
-                }),
-              },
-              null,
-            );
-          });
+          await handleTurnkeyOAuth("discord");
         }}
       />
-      {/* <SignerMethod
-        kind="SMS"
-        onClick={() => {}}
-      /> */}
       <SignerMethod
         kind="wallet"
         onClick={() => {

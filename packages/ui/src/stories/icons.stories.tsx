@@ -135,25 +135,27 @@ function Icons({
             className,
           )}
         >
-          {(() => {
-            switch (category) {
-              case "directional": {
-                const DirectionalIcon =
-                  icon as ComponentType<DirectionalIconProps>;
-                return (
-                  <DirectionalIcon size={size} variant={directionalVariant} />
-                );
+          <div className="border border-dotted border-foreground-400">
+            {(() => {
+              switch (category) {
+                case "directional": {
+                  const DirectionalIcon =
+                    icon as ComponentType<DirectionalIconProps>;
+                  return (
+                    <DirectionalIcon size={size} variant={directionalVariant} />
+                  );
+                }
+                case "state": {
+                  const StateIcon = icon as ComponentType<StateIconProps>;
+                  return <StateIcon size={size} variant={stateVariant} />;
+                }
+                default: {
+                  const Icon = icon as ComponentType<IconProps>;
+                  return <Icon size={size} />;
+                }
               }
-              case "state": {
-                const StateIcon = icon as ComponentType<StateIconProps>;
-                return <StateIcon size={size} variant={stateVariant} />;
-              }
-              default: {
-                const Icon = icon as ComponentType<IconProps>;
-                return <Icon size={size} />;
-              }
-            }
-          })()}
+            })()}
+          </div>
           <p className="text-[10px] md:text-xs text-foreground-400">
             {icon.displayName}
           </p>

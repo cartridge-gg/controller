@@ -33,6 +33,7 @@ import { SignersSection } from "./signers/signers-section";
 import { ConnectionsSection } from "./connections/connections-section";
 import { RecoveryAccountSection } from "./recovery/recovery-section";
 import { useFeature } from "@/hooks/features";
+import { UserDataSection } from "./user-data-section";
 
 const registeredAccounts: RegisteredAccount[] = [
   {
@@ -149,6 +150,8 @@ export function Settings() {
         </section>
 
         <SessionsSection />
+
+        <UserDataSection />
 
         <DeleteAccountSection onDeleteClick={() => setIsDeleteOpen(true)} />
       </LayoutContent>

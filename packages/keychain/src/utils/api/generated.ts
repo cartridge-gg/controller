@@ -1050,6 +1050,13 @@ export type BalanceEdge = {
   node: Balance;
 };
 
+export type BroadcastNotificationInput = {
+  appId: Scalars["String"];
+  body: Scalars["String"];
+  data?: InputMaybe<Array<NotificationDataInput>>;
+  title: Scalars["String"];
+};
+
 export type CoinbaseAmount = {
   __typename?: "CoinbaseAmount";
   /** The amount value as a string. */
@@ -3174,6 +3181,7 @@ export type Mutation = {
   addToTeam: Scalars["Boolean"];
   beginLogin: Scalars["JSON"];
   beginRegistration: Scalars["JSON"];
+  broadcastNotification: NotificationSendResult;
   claimFreeStarterpack: Scalars["String"];
   /**
    * Process a card checkout using a tokenized card from the frontend.
@@ -3308,6 +3316,10 @@ export type MutationBeginLoginArgs = {
 
 export type MutationBeginRegistrationArgs = {
   username: Scalars["String"];
+};
+
+export type MutationBroadcastNotificationArgs = {
+  input: BroadcastNotificationInput;
 };
 
 export type MutationClaimFreeStarterpackArgs = {

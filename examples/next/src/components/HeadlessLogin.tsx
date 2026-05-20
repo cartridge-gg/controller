@@ -171,7 +171,9 @@ export function HeadlessLogin({
             disabled={loading !== null || !username}
             className="flex-1 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-500 dark:hover:bg-purple-600"
           >
-            {loading === "passkey" ? "Authenticating..." : "Login with Passkey"}
+            {loading === "passkey"
+              ? "Authenticating..."
+              : "Log In with Passkey"}
           </button>
 
           <button
@@ -181,7 +183,7 @@ export function HeadlessLogin({
           >
             {loading === "metamask"
               ? "Authenticating..."
-              : "Login with MetaMask"}
+              : "Log In with MetaMask"}
           </button>
         </div>
       </div>

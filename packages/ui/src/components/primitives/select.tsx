@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { cva, VariantProps } from "class-variance-authority";
-import { CaratIcon, CircleCheckIcon, WedgeIcon } from "@/components/icons";
+import { CaratIcon, CircleCheckIcon } from "@/components/icons";
 import { cn } from "@/utils";
 
 export const selectVariants = cva("", {
@@ -28,7 +28,8 @@ export const selectTriggerVariants = cva(
     variants: {
       variant: {
         default: "h-9 font-bold",
-        input: "h-10",
+        input:
+          "h-10 border border-background-300 hover:bg-background-200 hover:border-background-400 focus:border-primary focus:bg-background-300 data-[state=open]:border-primary data-[state=open]:bg-background-300",
       },
     },
     defaultVariants: {
@@ -123,7 +124,7 @@ const SelectTrigger = React.forwardRef<
       )}
       {arrow && (
         <SelectPrimitive.Icon asChild>
-          <WedgeIcon
+          <CaratIcon
             variant="down"
             className="absolute right-3 top-1/2 -translate-y-1/2 shrink-0 text-foreground-300 pointer-events-none"
           />
@@ -146,7 +147,7 @@ const SelectScrollUpButton = React.forwardRef<
     )}
     {...props}
   >
-    <WedgeIcon variant="up" />
+    <CaratIcon variant="up" />
   </SelectPrimitive.ScrollUpButton>
 ));
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
@@ -163,7 +164,7 @@ const SelectScrollDownButton = React.forwardRef<
     )}
     {...props}
   >
-    <WedgeIcon variant="down" />
+    <CaratIcon variant="down" />
   </SelectPrimitive.ScrollDownButton>
 ));
 SelectScrollDownButton.displayName =
