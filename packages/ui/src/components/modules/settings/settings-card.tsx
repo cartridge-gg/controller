@@ -20,6 +20,7 @@ export interface SettingsCardProps {
   deleteLabel?: string;
   deleteSubTitle?: string;
   unlink?: boolean; // delete button is Unlink
+  isLoading?: boolean;
 }
 
 export const SettingsCard = React.forwardRef<
@@ -37,20 +38,21 @@ export const SettingsCard = React.forwardRef<
       deleteLabel,
       deleteSubTitle,
       unlink,
+      isLoading,
       ...props
     },
     ref,
   ) => {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     const handleDeleteUnlink = useCallback(async () => {
       if (!onDelete) return;
-      setIsLoading(true);
+      setIsDeleting(true);
       try {
         await onDelete();
       } finally {
-        setIsLoading(false);
+        setIsDeleting(false);
       }
     }, [onDelete]);
 
@@ -74,7 +76,7 @@ export const SettingsCard = React.forwardRef<
             variant="icon"
             size="icon"
             type="button"
-            isLoading={isLoading}
+            isLoading={isLoading || isDeleting}
             onClick={async () => {
               if (confirmDelete) {
                 setIsConfirmOpen(true);
@@ -106,7 +108,7 @@ export const SettingsCard = React.forwardRef<
               <Button
                 variant="secondary"
                 className="flex-1"
-                disabled={isLoading}
+                disabled={isDeleting}
                 onClick={() => setIsConfirmOpen(false)}
               >
                 Cancel
@@ -118,9 +120,9 @@ export const SettingsCard = React.forwardRef<
                   await handleDeleteUnlink();
                   setIsConfirmOpen(false);
                 }}
-                disabled={isLoading}
+                disabled={isDeleting}
               >
-                {isLoading ? (
+                {isDeleting ? (
                   <Spinner size="sm" />
                 ) : (
                   <CoinsIcon variant="solid" size="sm" />

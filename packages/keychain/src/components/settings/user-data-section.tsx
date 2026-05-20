@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import {
+  EnvelopeIcon,
   formatPhoneNumber,
   MobileIcon,
   SectionHeader,
@@ -7,46 +8,84 @@ import {
   UserIcon,
 } from "@cartridge/controller-ui";
 import { useAccountPrivateQuery } from "@/utils/api";
+import { useMeQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 
-type VerifiedField = {
+type VerifiedData = {
   label: string;
   verifiedAt: string;
+  isLoading: boolean;
+  canDelete: boolean;
 };
 
 export const UserDataSection = () => {
-  const { data } = useAccountPrivateQuery();
-  const userData = data?.accountPrivate;
+  const {
+    data: meData,
+    isLoading: isMeLoading,
+    // refetch: refetchMe,
+  } = useMeQuery();
+  const {
+    data: privateData,
+    isLoading: isPrivateLoading,
+    // refetch: refetchPrivate,
+  } = useAccountPrivateQuery();
 
-  const verifiedIdentity = useMemo<VerifiedField | null>(() => {
+  const userData = useMemo(
+    () => ({
+      firstName: privateData?.accountPrivate?.firstName,
+      lastName: privateData?.accountPrivate?.lastName,
+      dob: privateData?.accountPrivate?.dob,
+      proveVerifiedAt: privateData?.accountPrivate?.proveVerifiedAt,
+      phoneNumber: privateData?.accountPrivate?.phoneNumber,
+      phoneNumberVerifiedAt: privateData?.accountPrivate?.phoneNumberVerifiedAt,
+      email: meData?.me?.email,
+    }),
+    [privateData, meData],
+  );
+
+  const verifiedIdentity = useMemo<VerifiedData | null>(() => {
     if (
-      !userData?.firstName ||
-      !userData?.lastName ||
-      !userData?.dob ||
-      !userData?.proveVerifiedAt
+      userData.firstName &&
+      userData.lastName &&
+      userData.dob &&
+      userData.proveVerifiedAt
     ) {
-      return null;
+      return {
+        label: `${userData.firstName} ${userData.lastName}, ${formatAge(userData.dob)}`,
+        verifiedAt: userData.proveVerifiedAt,
+        isLoading: isPrivateLoading,
+        canDelete: true,
+      };
     }
-    return {
-      label: `${userData.firstName} ${userData.lastName}, ${formatAge(userData.dob)}`,
-      verifiedAt: userData.proveVerifiedAt,
-    };
-  }, [
-    userData?.firstName,
-    userData?.lastName,
-    userData?.dob,
-    userData?.proveVerifiedAt,
-  ]);
+    return null;
+  }, [userData, isPrivateLoading]);
 
-  const verifiedPhone = useMemo<VerifiedField | null>(() => {
-    if (!userData?.phoneNumber || !userData?.phoneNumberVerifiedAt) {
-      return null;
+  const verifiedPhone = useMemo<VerifiedData | null>(() => {
+    if (
+      userData.phoneNumber &&
+      (userData.phoneNumberVerifiedAt || userData.proveVerifiedAt)
+    ) {
+      return {
+        label: formatPhoneNumber(userData.phoneNumber),
+        verifiedAt:
+          userData.phoneNumberVerifiedAt || userData.proveVerifiedAt || "",
+        isLoading: isPrivateLoading,
+        canDelete: !!userData.phoneNumberVerifiedAt,
+      };
     }
-    return {
-      // label: `${userData.phoneNumber.slice(0, 3)}***${userData.phoneNumber.slice(-4)}`,
-      label: formatPhoneNumber(userData.phoneNumber),
-      verifiedAt: userData.phoneNumberVerifiedAt,
-    };
-  }, [userData?.phoneNumber, userData?.phoneNumberVerifiedAt]);
+    return null;
+  }, [userData, isPrivateLoading]);
+
+  const verifiedEmail = useMemo<VerifiedData | null>(() => {
+    if (userData.email) {
+      return {
+        label: userData.email,
+        verifiedAt: "",
+        isLoading: isMeLoading,
+        canDelete: true,
+      };
+    }
+    return null;
+  }, [userData, isMeLoading]);
 
   return (
     <section className="space-y-4">
@@ -61,7 +100,8 @@ export const UserDataSection = () => {
             icon={<UserIcon variant="solid" size="sm" />}
             label={verifiedIdentity.label}
             rightText={formatVerifiedAt(verifiedIdentity.verifiedAt)}
-            // onDelete={async () => {}}
+            isLoading={verifiedIdentity.isLoading}
+            onDelete={async () => {}}
           />
         )}
         {verifiedPhone && (
@@ -69,7 +109,16 @@ export const UserDataSection = () => {
             icon={<MobileIcon variant="solid" size="sm" />}
             label={verifiedPhone.label}
             rightText={formatVerifiedAt(verifiedPhone.verifiedAt)}
-            // onDelete={async () => {}}
+            isLoading={verifiedPhone.isLoading}
+            onDelete={async () => {}}
+          />
+        )}
+        {verifiedEmail && (
+          <SettingsCard
+            icon={<EnvelopeIcon size="sm" />}
+            label={verifiedEmail.label}
+            isLoading={verifiedEmail.isLoading}
+            onDelete={async () => {}}
           />
         )}
       </div>

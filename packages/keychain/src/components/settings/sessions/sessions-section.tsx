@@ -8,7 +8,6 @@ import {
   ShapesIcon,
   Skeleton,
   ClockIcon,
-  TimesIcon,
 } from "@cartridge/controller-ui";
 import { useSessionsQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { constants, shortString } from "starknet";
@@ -76,11 +75,11 @@ export const SessionsSection = () => {
                 icon={<DeviceIcon os={session?.metadata?.os ?? "Unknown"} />}
                 label={label}
                 rightText={
-                <div className="flex gap-1">
-                  <ClockIcon size="xs" variant="line" />
-                  <span>{formatDuration(expiresAt)}</span>
-                </div>
-              }
+                  <div className="flex gap-1">
+                    <ClockIcon size="xs" variant="line" />
+                    <span>{formatDuration(expiresAt)}</span>
+                  </div>
+                }
                 confirmDelete
                 deleteLabel={`${label} Session`}
                 onDelete={async () => {

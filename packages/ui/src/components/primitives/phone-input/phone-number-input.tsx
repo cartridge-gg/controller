@@ -199,6 +199,7 @@ export function isValidPhoneNumber(value: string): boolean {
 
 // only numbers, with dial code, +###########
 export function formatPhoneNumber(phoneNumber: string): string {
+  if (!phoneNumber) return "";
   const code = detectCountry(phoneNumber);
   const country = code ? countryOf(code) : undefined;
   if (!country?.mask || !country.maxLength) return phoneNumber;
