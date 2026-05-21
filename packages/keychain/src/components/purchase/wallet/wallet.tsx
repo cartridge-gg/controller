@@ -89,6 +89,13 @@ export function SelectWallet() {
           (chain) => chain.isMainnet === isMainnet,
         )?.chainId;
 
+        console.log("[chain-debug] wallet.tsx resolve chainId", {
+          isMainnet,
+          platform: network.platform,
+          chains: network.chains,
+          resolvedChainId: chainId,
+        });
+
         if (chainId) {
           newChainIds.set(network.platform, chainId);
         }

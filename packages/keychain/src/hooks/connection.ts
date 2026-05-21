@@ -664,6 +664,13 @@ export function useConnectionValue() {
     // changes, so it can go stale (e.g. after an in-place network switch),
     // leaving isMainnet wrong regardless of the actual connected network.
     const currentChainId = chainId ?? controller?.chainId();
+    console.log("[chain-debug] isMainnet effect", {
+      chainIdState: chainId,
+      controllerChainId: controller?.chainId(),
+      currentChainId,
+      SN_MAIN: constants.StarknetChainId.SN_MAIN,
+      isMainnet: currentChainId === constants.StarknetChainId.SN_MAIN,
+    });
     setIsMainnet(currentChainId === constants.StarknetChainId.SN_MAIN);
   }, [chainId, controller]);
 

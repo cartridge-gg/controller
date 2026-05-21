@@ -131,6 +131,13 @@ export function WalletSelectionDrawer({
           (chain) => chain.isMainnet === isMainnet,
         )?.chainId;
 
+        console.log("[chain-debug] wallet-drawer resolve chainId", {
+          isMainnet,
+          platform: selectedNetwork.platform,
+          chains: selectedNetwork.chains,
+          resolvedChainId: chainId,
+        });
+
         if (chainId) {
           newChainIds.set(selectedNetwork.platform, chainId);
         }

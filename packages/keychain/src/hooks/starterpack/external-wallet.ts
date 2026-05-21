@@ -95,6 +95,16 @@ export function useExternalWallet({
               ? normalizeChainId(wallet.chainId)
               : undefined;
 
+            console.log("[chain-debug] onExternalConnect switch decision", {
+              walletType: wallet.type,
+              walletChainIdRaw: wallet.chainId,
+              targetChainIdRaw: chainId,
+              normalizedCurrent: current,
+              normalizedTarget: target,
+              controllerChainId: controller?.chainId(),
+              willSwitch: current !== target,
+            });
+
             if (current !== target) {
               const res = await switchChain(wallet.type, chainId.toString());
               if (!res) {
