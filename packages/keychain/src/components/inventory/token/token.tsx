@@ -80,10 +80,10 @@ function Credits() {
       <LayoutFooter className="gap-4">
         <Button
           onClick={() => {
-            navigate("/funding/credits");
+            navigate("/funding/deposit");
           }}
         >
-          Purchase
+          Deposit
         </Button>
       </LayoutFooter>
     </>

@@ -1,36 +1,42 @@
-import { StarterpackDetails } from "@/context";
-import { ExternalWallet } from "@cartridge/controller";
+import { Item } from "@/context";
+import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 
-export enum PurchaseType {
-  Credits = "CREDITS",
-  Starterpack = "STARTERPACK",
+export interface Wallet {
+  name: string;
+  type: ExternalWalletType | "controller";
+  icon: React.ReactNode;
+  subIcon?: React.ReactNode;
+  color?: string;
 }
 
-export enum PurchaseState {
-  SELECTION = 0,
-  STRIPE_CHECKOUT = 1,
-  CRYPTO_CHECKOUT = 2,
-  SUCCESS = 3,
+export interface Network {
+  name: string;
+  platform: ExternalPlatform;
+  chains?: {
+    chainId: string;
+    isMainnet: boolean;
+  }[];
+  icon: React.ReactNode;
+  subIcon?: React.ReactNode;
+  wallets: Map<string, Wallet>;
 }
 
-export type PurchaseCreditsProps = {
-  title?: string;
-  teamId?: string;
-  isSlot?: boolean;
-  wallets?: ExternalWallet[];
-  type: PurchaseType;
-  starterpackDetails?: StarterpackDetails;
-  initState?: PurchaseState;
-  onComplete?: () => void;
-};
+export interface NetworkWalletData {
+  networks: Network[];
+}
 
-export type PricingDetails = {
+export type CostDetails = {
   baseCostInCents: number;
   processingFeeInCents: number;
   totalInCents: number;
 };
 
-export type StripeResponse = {
-  clientSecret: string;
-  pricing: PricingDetails;
+export type ReceivingProps = {
+  title?: string;
+  items: Item[];
+  isLoading?: boolean;
+  showTotal?: boolean;
+  showPrice?: boolean;
+  isFree?: boolean;
+  description?: string;
 };

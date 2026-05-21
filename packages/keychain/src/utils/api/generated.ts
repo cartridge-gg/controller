@@ -7245,26 +7245,6 @@ export type CreateCryptoPaymentMutation = {
   };
 };
 
-export type CreateStripePaymentIntentMutationVariables = Exact<{
-  input: CreateStripePaymentIntentInput;
-}>;
-
-export type CreateStripePaymentIntentMutation = {
-  __typename?: "Mutation";
-  createStripePaymentIntent: {
-    __typename?: "StripePaymentIntent";
-    id: string;
-    clientSecret: string;
-    customerSessionClientSecret?: string | null;
-    pricing: {
-      __typename?: "StripePricingDetails";
-      baseCostInCents: number;
-      processingFeeInCents: number;
-      totalInCents: number;
-    };
-  };
-};
-
 export type CreateCoinflowStarterpackIntentMutationVariables = Exact<{
   input: CreateCoinflowStarterpackIntentInput;
 }>;
@@ -8110,44 +8090,6 @@ export const useCreateCryptoPaymentMutation = <
       CreateCryptoPaymentMutation,
       CreateCryptoPaymentMutationVariables
     >(CreateCryptoPaymentDocument),
-    options,
-  );
-export const CreateStripePaymentIntentDocument = `
-    mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
-  createStripePaymentIntent(input: $input) {
-    id
-    clientSecret
-    customerSessionClientSecret
-    pricing {
-      baseCostInCents
-      processingFeeInCents
-      totalInCents
-    }
-  }
-}
-    `;
-export const useCreateStripePaymentIntentMutation = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: UseMutationOptions<
-    CreateStripePaymentIntentMutation,
-    TError,
-    CreateStripePaymentIntentMutationVariables,
-    TContext
-  >,
-) =>
-  useMutation<
-    CreateStripePaymentIntentMutation,
-    TError,
-    CreateStripePaymentIntentMutationVariables,
-    TContext
-  >(
-    ["CreateStripePaymentIntent"],
-    useFetchData<
-      CreateStripePaymentIntentMutation,
-      CreateStripePaymentIntentMutationVariables
-    >(CreateStripePaymentIntentDocument),
     options,
   );
 export const CreateCoinflowStarterpackIntentDocument = `

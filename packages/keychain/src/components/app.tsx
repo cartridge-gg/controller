@@ -28,12 +28,12 @@ import { Settings } from "./settings";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddConnectionRoute } from "./settings/AddConnectionRoute";
-import { PaymentMethod } from "./purchasenew/method";
-import { Verification } from "./purchasenew/verification";
-import { CoinflowCheckout } from "./purchasenew/checkout/coinflow";
-import { Success as PurchaseSuccess } from "./purchasenew/success";
-import { Pending as PurchasePending } from "./purchasenew/pending";
-import { SelectWallet } from "./purchasenew/wallet/wallet";
+import { PaymentMethod } from "./purchase/method";
+import { Verification } from "./purchase/verification";
+import { CoinflowCheckout } from "./purchase/checkout/coinflow";
+import { Success as PurchaseSuccess } from "./purchase/success";
+import { Pending as PurchasePending } from "./purchase/pending";
+import { SelectWallet } from "./purchase/wallet/wallet";
 import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
 import { Execute } from "./Execute";
@@ -45,10 +45,9 @@ import { UpdateSessionRoute } from "./UpdateSessionRoute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
 import { useNavigation } from "@/context";
-import { Purchase, PurchaseType } from "./purchase";
-import { ChooseNetwork } from "./purchasenew/wallet/network";
-import { Claim } from "./purchasenew/claim/claim";
-import { Collections } from "./purchasenew/starterpack/collections";
+import { ChooseNetwork } from "./purchase/wallet/network";
+import { Claim } from "./purchase/claim/claim";
+import { Collections } from "./purchase/starterpack/collections";
 import { DeployController } from "./DeployController";
 import { useConnection } from "@/hooks/connection";
 import { CreateController, Upgrade } from "./connect";
@@ -56,15 +55,15 @@ import { HeadlessApprovalRoute } from "./connect/HeadlessApprovalRoute";
 import { useUpgrade } from "./provider/upgrade";
 import { Layout } from "@/components/layout";
 import { Disconnect } from "./disconnect";
-import { OnchainCheckout } from "./purchasenew/checkout/onchain";
-import { CoinbaseCheckout } from "./purchasenew/checkout/coinbase";
+import { OnchainCheckout } from "./purchase/checkout/onchain";
+import { CoinbaseCheckout } from "./purchase/checkout/coinbase";
 import { useAccount } from "@/hooks/account";
 import { BoosterPack } from "./booster-pack";
 import { useEffect } from "react";
 import { StandaloneSessionCreation } from "./connect/StandaloneSessionCreation";
 import { StandaloneConnect } from "./connect/StandaloneConnect";
 import { hasApprovalPolicies } from "@/hooks/session";
-import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
+import { PurchaseStarterpack } from "./purchase/starterpack/starterpack";
 import { CoinbasePopup } from "./coinbase-popup";
 import { PopupAuth } from "./PopupAuth";
 import { Welcome } from "./connect/create/Welcome";
@@ -258,10 +257,6 @@ export function App() {
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />
         <Route path="/purchase" element={<Outlet />}>
-          <Route
-            path="credits"
-            element={<Purchase type={PurchaseType.Credits} />}
-          />
           <Route path="bundle/:bundleId" element={<PurchaseStarterpack />} />
           <Route
             path="starterpack/:starterpackId"
@@ -309,27 +304,6 @@ export function App() {
                   navigate("/funding");
                 }
               }}
-            />
-          }
-        />
-        <Route
-          path="/funding/credits"
-          element={
-            <Purchase
-              type={PurchaseType.Credits}
-              // onBack={() => {
-              //   const searchParams = new URLSearchParams(
-              //     window.location.search,
-              //   );
-              //   const returnTo = searchParams.get("returnTo");
-              //   if (returnTo) {
-              //     // returnTo is already decoded by URLSearchParams.get()
-              //     // Use replace navigation for execute URLs to ensure proper navigation stack handling
-              //     navigate(returnTo, { replace: true });
-              //   } else {
-              //     navigate("/funding");
-              //   }
-              // }}
             />
           }
         />

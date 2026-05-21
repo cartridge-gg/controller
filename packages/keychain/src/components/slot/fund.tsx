@@ -24,7 +24,7 @@ import { useNavigation } from "@/context/navigation";
 import { SlotCryptoFund, SlotFundingResult } from "./crypto-fund";
 import { TeamEmailVerify } from "./team-email-verify";
 import { waitForCryptoPaymentConfirmation } from "@/hooks/payments/crypto";
-import { ConfirmingTransaction } from "@/components/purchasenew/pending";
+import { ConfirmingTransaction } from "@/components/purchase/pending";
 import { getExplorer } from "@/hooks/starterpack/layerswap";
 import { ErrorAlert } from "@/components/ErrorAlert";
 

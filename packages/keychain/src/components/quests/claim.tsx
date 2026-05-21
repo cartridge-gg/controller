@@ -21,7 +21,7 @@ import {
 } from "starknet";
 import { ExecutionContainer } from "../ExecutionContainer";
 import { useParams } from "react-router-dom";
-import { Receiving } from "../purchasenew/receiving";
+import { Receiving } from "../purchase/receiving";
 
 export function QuestClaim() {
   const { quests, status } = useQuestContext();

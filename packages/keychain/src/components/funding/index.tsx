@@ -7,7 +7,7 @@ import {
   ControllerIcon,
   HeaderInner,
 } from "@cartridge/controller-ui";
-import { Balance, BalanceType } from "../purchase/Balance";
+import { Balance, BalanceType } from "./Balance";
 
 export type FundingProps = {
   title?: React.ReactElement | string;
@@ -21,9 +21,6 @@ export function Funding({ title, isSlot }: FundingProps) {
   const balances: BalanceType[] = isSlot
     ? [BalanceType.CREDITS]
     : [BalanceType.CREDITS, BalanceType.FEE_TOKEN];
-  const showCredits =
-    (typeof document !== "undefined" && document.cookie.includes("credits=")) ||
-    isSlot;
 
   return (
     <>
@@ -42,18 +39,8 @@ export function Funding({ title, isSlot }: FundingProps) {
         <Balance types={balances} />
       </LayoutContent>
       <LayoutFooter>
-        {showCredits && (
-          <Button onClick={() => navigate("/funding/credits")}>
-            Purchase Credits
-          </Button>
-        )}
         {!isSlot && (
-          <Button
-            onClick={() => navigate("/funding/deposit")}
-            variant="secondary"
-          >
-            Deposit
-          </Button>
+          <Button onClick={() => navigate("/funding/deposit")}>Deposit</Button>
         )}
       </LayoutFooter>
     </>
