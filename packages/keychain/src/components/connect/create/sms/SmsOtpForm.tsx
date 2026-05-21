@@ -7,8 +7,8 @@ import {
   PhoneNumberInput,
   PinInput,
   formatPhoneNumber,
-  isValidPhoneNumber,
 } from "@cartridge/controller-ui";
+import { isValidPhoneNumber } from "@/utils/input";
 import { getIpLocation } from "@/utils";
 import { IpLocation } from "@/utils/ip";
 

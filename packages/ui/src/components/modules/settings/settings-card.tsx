@@ -56,7 +56,9 @@ export const SettingsCard = React.forwardRef<
       >
         <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-center bg-background-200">
           {icon}
-          <h1 className="flex-1 text-sm font-normal">{label}</h1>
+          <h1 className="flex-1 text-sm font-normal overflow-hidden text-ellipsis">
+            {label}
+          </h1>
           {rightText && (
             <div className="text-xs font-normal text-foreground-300">
               {rightText}

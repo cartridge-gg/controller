@@ -1,5 +1,6 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
+  Button,
   EnvelopeIcon,
   formatPhoneNumber,
   MobileIcon,
@@ -14,6 +15,7 @@ import {
   useDeleteProveIdentityMutation,
 } from "@/utils/api";
 import { useMeQuery } from "@cartridge/controller-ui/utils/api/cartridge";
+import { VerifyIdentityDrawer } from "../identity/VerifyIdentityDrawer";
 
 type VerifiedData = {
   label: string;
@@ -33,6 +35,7 @@ export const UserDataSection = () => {
     isLoading: isPrivateLoading,
     refetch: refetchPrivate,
   } = useAccountPrivateQuery();
+  const [isVerifyOpen, setIsVerifyOpen] = useState(false);
 
   const userData = useMemo(
     () => ({
@@ -124,18 +127,23 @@ export const UserDataSection = () => {
         title="User Data"
         description="Used to verify your player identity for banking and compliance purposes. This information is stored securely and is never shared."
         showStatus={false}
+        isLoading={isMeLoading || isPrivateLoading}
       />
       <div className="space-y-3">
         {verifiedIdentity && (
           <SettingsCard
             icon={<UserIcon variant="solid" size="sm" />}
-            label="Identity Proof"
+            label={verifiedIdentity.label}
             rightText={formatVerifiedAt(verifiedIdentity.verifiedAt)}
             isLoading={verifiedIdentity.isLoading}
-            onDelete={async () => {
-              await handleDeleteProveIdentity();
-              await refetchPrivate();
-            }}
+            onDelete={
+              verifiedIdentity.canDelete
+                ? async () => {
+                    await handleDeleteProveIdentity();
+                    await refetchPrivate();
+                  }
+                : undefined
+            }
             confirmDelete
             deleteLabel="Identity Proof"
           />
@@ -146,10 +154,14 @@ export const UserDataSection = () => {
             label={verifiedPhone.label}
             rightText={formatVerifiedAt(verifiedPhone.verifiedAt)}
             isLoading={verifiedPhone.isLoading}
-            onDelete={async () => {
-              await handleDeletePhoneNumber();
-              await refetchPrivate();
-            }}
+            onDelete={
+              verifiedPhone.canDelete
+                ? async () => {
+                    await handleDeletePhoneNumber();
+                    await refetchPrivate();
+                  }
+                : undefined
+            }
             confirmDelete
             deleteLabel="Phone Number"
             deleteSubTitle={verifiedPhone.label}
@@ -160,14 +172,38 @@ export const UserDataSection = () => {
             icon={<EnvelopeIcon size="sm" />}
             label={verifiedEmail.label}
             isLoading={verifiedEmail.isLoading}
-            onDelete={async () => {
-              await handleDeleteEmailAddress();
-              await refetchMe();
-            }}
+            onDelete={
+              verifiedEmail.canDelete
+                ? async () => {
+                    await handleDeleteEmailAddress();
+                    await refetchMe();
+                  }
+                : undefined
+            }
             confirmDelete
             deleteLabel="Email Address"
             deleteSubTitle={verifiedEmail.label}
           />
+        )}
+        {!verifiedIdentity && (
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setIsVerifyOpen(true)}
+              disabled={!!verifiedIdentity}
+            >
+              <span className="normal-case font-normal font-sans text-sm">
+                Verify Identity
+              </span>
+            </Button>
+            <VerifyIdentityDrawer
+              isOpen={isVerifyOpen}
+              onClose={() => setIsVerifyOpen(false)}
+              onVerified={async () => {
+                await refetchPrivate();
+              }}
+            />
+          </>
         )}
       </div>
     </section>
@@ -193,5 +229,5 @@ function formatAge(dob: string): string {
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
     years--;
   }
-  return `${years}y`;
+  return `${years}yo`;
 }

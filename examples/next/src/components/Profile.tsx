@@ -140,6 +140,11 @@ export function Profile() {
             Welcome
           </Button>
           <Button
+            onClick={() => ctrlConnector.controller.openProfileAt(`/settings`)}
+          >
+            Settings
+          </Button>
+          <Button
             onClick={() => ctrlConnector.controller.openProfileAt("/age-gate")}
           >
             Age Gate

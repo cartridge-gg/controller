@@ -23,8 +23,8 @@ import {
   HeaderInner,
   PhoneNumberInput,
   PinInput,
-  isValidPhoneNumber,
 } from "@cartridge/controller-ui";
+import { isValidPhoneNumber } from "@/utils/input";
 import { useNavigation } from "@/context";
 import { useLocation } from "react-router-dom";
 import { ErrorAlert } from "@/components/ErrorAlert";

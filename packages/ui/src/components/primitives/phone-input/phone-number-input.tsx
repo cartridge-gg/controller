@@ -192,11 +192,6 @@ export const PhoneNumberInput = forwardRef<
 
 // exports
 
-// E.164 international phone number format
-export function isValidPhoneNumber(value: string): boolean {
-  return /^\+[1-9]\d{6,14}$/.test(value);
-}
-
 // only numbers, with dial code, +###########
 export function formatPhoneNumber(phoneNumber: string): string {
   if (!phoneNumber) return "";

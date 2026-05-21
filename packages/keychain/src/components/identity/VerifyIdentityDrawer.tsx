@@ -1,16 +1,18 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Button,
   DateSelect,
   Drawer,
   DrawerContent,
+  ErrorMessage,
   Input,
   PhoneNumberInput,
   UserIcon,
   isValidCalendarDate,
-  isValidPhoneNumber,
   type DateValue,
 } from "@cartridge/controller-ui";
+import { isValidPhoneNumber } from "@/utils/input";
+import { useAccountVerifyMutation } from "@/utils/api";
 
 interface VerifyIdentityDrawerProps {
   isOpen: boolean;
@@ -26,11 +28,44 @@ export function VerifyIdentityDrawer({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dob, setDob] = useState<DateValue>({ year: "", month: "", day: "" });
-  const [phone, setPhone] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const dobValid = isValidCalendarDate(dob);
-  const phoneValid = useMemo(() => isValidPhoneNumber(phone), [phone]);
+  const phoneValid = useMemo(
+    () => isValidPhoneNumber(phoneNumber),
+    [phoneNumber],
+  );
   const canSubmit = !!firstName && !!lastName && dobValid && phoneValid;
+
+  // mutation
+  const {
+    mutateAsync: verifyAsync,
+    isLoading: isVerifyLoading,
+    isError: isVerifyError,
+    error: verifyError,
+  } = useAccountVerifyMutation();
+  const [error, setError] = useState<string>();
+
+  const handleVerifyIdentity = useCallback(async () => {
+    setError(undefined);
+    const result = await verifyAsync({
+      input: {
+        firstName,
+        lastName,
+        dob: `${dob.year}-${("0" + dob.month).slice(-2)}-${("0" + dob.day).slice(-2)}`, // YYYY-MM-DD
+        phoneNumber,
+        // emailAddress, // not stored, do proper verification
+        // sandbox: true, //returns true, but do not store
+      },
+    });
+    if (!result.accountVerify) {
+      console.error("Account verification failed");
+      setError("Account verification failed");
+      return;
+    }
+    onVerified(true);
+    onClose();
+  }, [verifyAsync, firstName, lastName, dob, phoneNumber, onVerified, onClose]);
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>
@@ -85,18 +120,19 @@ export function VerifyIdentityDrawer({
           </label>
           <PhoneNumberInput
             inputId="verify-identity-phone"
-            value={phone}
-            setValue={setPhone}
+            value={phoneNumber}
+            setValue={setPhoneNumber}
           />
+          {(isVerifyError || error) && (
+            <ErrorMessage label={(verifyError as string) || error} />
+          )}
         </div>
 
         <Button
           className="w-full"
-          onClick={() => {
-            onVerified(true);
-            onClose();
-          }}
+          onClick={handleVerifyIdentity}
           disabled={!canSubmit}
+          isLoading={isVerifyLoading}
         >
           Continue
         </Button>
