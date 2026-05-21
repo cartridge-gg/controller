@@ -18,7 +18,7 @@ import {
 import { useConnection } from "./connection";
 import { parseSignature } from "viem";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
-import { evmNetworks } from "@/components/purchasenew/wallet/config";
+import { evmNetworks } from "@/components/purchase/wallet/config";
 import { signMessageWithPrivateKey } from "@/utils/eth-signing";
 
 export interface MerkleClaim {

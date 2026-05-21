@@ -32,7 +32,7 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
-import { Balance, BalanceType } from "../purchase/Balance";
+import { Balance, BalanceType } from "./Balance";
 import { convertUSDToTokenAmount, useFeeToken } from "@/hooks/tokens";
 import { useToast } from "@/context/toast";
 

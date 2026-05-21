@@ -343,7 +343,7 @@ const FundingButton = () => {
     <Button
       onClick={() => {
         navigate(
-          `/purchase/credits?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+          `/funding/deposit?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
         );
       }}
     >
