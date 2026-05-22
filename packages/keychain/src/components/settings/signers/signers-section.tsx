@@ -30,10 +30,7 @@ export const SignersSection = ({
 
   return (
     <section className="space-y-4">
-      <SectionHeader
-        title="Signer(s)"
-        description="Add authorized signers to your Controller. Each signer provides a secure alternative authentication method."
-      />
+      <SectionHeader kind="signers" />
       <div className="space-y-3">
         {controllerQuery.isLoading ? (
           <LoadingState />

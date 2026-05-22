@@ -1,22 +1,40 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { SectionHeader } from "./section-header";
+import { SectionHeader, type SectionHeaderKind } from "./section-header";
+import { ControllerContainer } from "@/utils/mock/controller-container";
 
 const meta = {
   title: "Modules/Settings/SectionHeader",
-  component: SectionHeader,
+  component: SectionHeaderStory,
   tags: ["autodocs"],
-  parameters: {
-    layout: "centered",
-  },
-  args: {
-    title: "Session Key(s)",
-    description:
-      "Sessions grant permission to your Controller to perform certain game actions on your behalf",
-  },
-} satisfies Meta<typeof SectionHeader>;
+} satisfies Meta<typeof SectionHeaderStory>;
 
 export default meta;
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof SectionHeaderStory>;
 
 export const Default: Story = {};
+
+function SectionHeaderStory({ kind }: { kind?: SectionHeaderKind }) {
+  const kinds: SectionHeaderKind[] = [
+    "sessions",
+    "signers",
+    "connections",
+    "recovery",
+    "delegate",
+    "registered-account",
+    "bank-account",
+    "user-data",
+    "currency",
+    "delete-account",
+  ];
+
+  return (
+    <ControllerContainer>
+      {kind ? (
+        <SectionHeader kind={kind} />
+      ) : (
+        kinds.map((k) => <SectionHeader key={k} kind={k} />)
+      )}
+    </ControllerContainer>
+  );
+}

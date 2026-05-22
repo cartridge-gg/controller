@@ -125,8 +125,7 @@ export const UserDataSection = () => {
   return (
     <section className="space-y-4">
       <SectionHeader
-        title="User Data"
-        description="Used to verify your player identity for banking and compliance purposes. This information is stored securely and is never shared."
+        kind="user-data"
         showStatus={false}
         isLoading={isMeLoading || isPrivateLoading}
       />
@@ -145,8 +144,8 @@ export const UserDataSection = () => {
                   }
                 : undefined
             }
-            confirmDelete
-            deleteLabel="Identity Proof"
+            confirm="delete"
+            confirmLabel="Identity Proof"
           />
         )}
         {verifiedPhone && (
@@ -163,9 +162,9 @@ export const UserDataSection = () => {
                   }
                 : undefined
             }
-            confirmDelete
-            deleteLabel="Phone Number"
-            deleteSubTitle={verifiedPhone.label}
+            confirm="delete"
+            confirmLabel="Phone Number"
+            confirmSubTitle={verifiedPhone.label}
           />
         )}
         {verifiedEmail && (
@@ -181,9 +180,9 @@ export const UserDataSection = () => {
                   }
                 : undefined
             }
-            confirmDelete
-            deleteLabel="Email Address"
-            deleteSubTitle={verifiedEmail.label}
+            confirm="delete"
+            confirmLabel="Email Address"
+            confirmSubTitle={verifiedEmail.label}
           />
         )}
         {!verifiedIdentity && (

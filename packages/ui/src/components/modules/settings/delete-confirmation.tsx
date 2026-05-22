@@ -5,30 +5,62 @@ import {
   Drawer,
   DrawerContent,
   ErrorMessage,
+  SignOutIcon,
   Spinner,
+  TrashIcon,
+  UnlinkIcon,
 } from "@/index";
+
+export type DeleteConfirmationKind = "delete" | "unlink" | "logout";
+
+const variants: Record<
+  DeleteConfirmationKind,
+  {
+    action: string;
+    icon: React.ReactNode;
+    buttonIcon: React.ReactNode;
+  }
+> = {
+  delete: {
+    action: "Delete",
+    icon: <TrashIcon size="sm" />,
+    buttonIcon: <CoinsIcon variant="solid" size="sm" />,
+  },
+  unlink: {
+    action: "Unlink",
+    icon: <UnlinkIcon size="sm" />,
+    buttonIcon: <CoinsIcon variant="solid" size="sm" />,
+  },
+  logout: {
+    action: "Log out",
+    icon: <SignOutIcon size="sm" />,
+    buttonIcon: null,
+  },
+};
 
 export interface DeleteConfirmationProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void>;
-  icon: React.ReactNode;
   label: string;
+  kind?: DeleteConfirmationKind;
+  icon?: React.ReactNode;
   subTitle?: string;
-  unlink?: boolean;
 }
 
 export const DeleteConfirmation = ({
   isOpen,
   onClose,
   onConfirm,
-  icon,
   label,
+  kind = "delete",
+  icon,
   subTitle,
-  unlink,
 }: DeleteConfirmationProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | undefined>();
+
+  const { action, icon: defaultIcon, buttonIcon } = variants[kind];
 
   const handleClose = useCallback(() => {
     setError(undefined);
@@ -53,9 +85,9 @@ export const DeleteConfirmation = ({
     <Drawer isOpen={isOpen} onClose={handleClose}>
       <DrawerContent
         titleClassName="font-medium"
-        title={`${unlink ? "Unlink" : "Delete"} ${label}`}
+        title={`${action} ${label}`}
         subTitle={subTitle}
-        icon={icon}
+        icon={icon ?? defaultIcon}
       >
         {!error && (
           <div className="flex flex-row items-center gap-2">
@@ -73,12 +105,8 @@ export const DeleteConfirmation = ({
               onClick={handleConfirm}
               disabled={isDeleting}
             >
-              {isDeleting ? (
-                <Spinner size="sm" />
-              ) : (
-                <CoinsIcon variant="solid" size="sm" />
-              )}
-              {unlink ? "Unlink" : "Delete"}
+              {isDeleting ? <Spinner size="sm" /> : buttonIcon}
+              {action}
             </Button>
           </div>
         )}

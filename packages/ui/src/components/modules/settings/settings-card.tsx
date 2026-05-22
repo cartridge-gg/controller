@@ -1,17 +1,19 @@
 import React, { useCallback, useState } from "react";
 import { cn } from "@/utils";
 import { Button, Card, TrashIcon, UnlinkIcon } from "@/index";
-import { DeleteConfirmation } from "./delete-confirmation";
+import {
+  DeleteConfirmation,
+  type DeleteConfirmationKind,
+} from "./delete-confirmation";
 
 export interface SettingsCardProps {
   icon: React.ReactNode;
   label: string;
   rightText?: string | React.ReactNode;
   onDelete?: () => Promise<void>;
-  confirmDelete?: boolean;
-  deleteLabel?: string;
-  deleteSubTitle?: string;
-  unlink?: boolean; // delete button is Unlink
+  confirm?: DeleteConfirmationKind;
+  confirmLabel?: string;
+  confirmSubTitle?: string;
   isLoading?: boolean;
 }
 
@@ -26,10 +28,9 @@ export const SettingsCard = React.forwardRef<
       label,
       rightText,
       onDelete,
-      confirmDelete,
-      deleteLabel,
-      deleteSubTitle,
-      unlink,
+      confirm,
+      confirmLabel,
+      confirmSubTitle,
       isLoading,
       ...props
     },
@@ -72,14 +73,14 @@ export const SettingsCard = React.forwardRef<
             type="button"
             isLoading={isLoading || isDeleting}
             onClick={async () => {
-              if (confirmDelete) {
+              if (confirm) {
                 setIsConfirmOpen(true);
               } else {
                 await handleDeleteUnlink();
               }
             }}
           >
-            {unlink ? (
+            {confirm === "unlink" ? (
               <UnlinkIcon size="default" className="text-foreground-300" />
             ) : (
               <TrashIcon size="default" className="text-foreground-300" />
@@ -87,15 +88,15 @@ export const SettingsCard = React.forwardRef<
           </Button>
         )}
 
-        {confirmDelete && (
+        {confirm && (
           <DeleteConfirmation
             isOpen={isConfirmOpen}
             onClose={() => setIsConfirmOpen(false)}
             onConfirm={handleDeleteUnlink}
             icon={icon}
-            label={deleteLabel || label}
-            subTitle={deleteSubTitle}
-            unlink={unlink}
+            label={confirmLabel || label}
+            subTitle={confirmSubTitle}
+            kind={confirm}
           />
         )}
       </div>

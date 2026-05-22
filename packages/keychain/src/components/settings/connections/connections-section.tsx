@@ -45,10 +45,7 @@ export const ConnectionsSection = () => {
 
   return (
     <section className="space-y-4">
-      <SectionHeader
-        title="Connected Accounts"
-        description="Connect your social accounts to enable content publishing features."
-      />
+      <SectionHeader kind="connections" />
       <div className="space-y-3">
         {isLoading ? (
           <LoadingState />

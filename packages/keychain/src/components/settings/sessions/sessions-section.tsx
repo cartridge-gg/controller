@@ -37,8 +37,7 @@ export const SessionsSection = () => {
   return (
     <section className="space-y-4">
       <SectionHeader
-        title="Session Keys"
-        description="Session keys grant permission to your Controller to perform certain game actions on your behalf"
+        kind="sessions"
         showStatus={false}
         extraContent={
           sessionsQuery.data &&
@@ -80,8 +79,8 @@ export const SessionsSection = () => {
                     <span>{formatDuration(expiresAt)}</span>
                   </div>
                 }
-                confirmDelete
-                deleteLabel={`${label} Session`}
+                confirm="delete"
+                confirmLabel={`${label} Session`}
                 onDelete={async () => {
                   await controller?.revokeSession({
                     app_id: session?.appID,

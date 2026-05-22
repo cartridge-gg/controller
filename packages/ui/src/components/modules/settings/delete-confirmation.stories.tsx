@@ -1,4 +1,4 @@
-import { DesktopIcon, UserIcon } from "@cartridge/controller-ui";
+import { DesktopIcon } from "@cartridge/controller-ui";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { DeleteConfirmation } from "./delete-confirmation";
@@ -21,6 +21,7 @@ export const Default: Story = {};
 function DeleteConfirmationStory() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openUnlink, setOpenUnlink] = useState(false);
+  const [openLogout, setOpenLogout] = useState(false);
   const [openError, setOpenError] = useState(false);
 
   const handleConfirm = async (message: string) => {
@@ -37,6 +38,7 @@ function DeleteConfirmationStory() {
     <ControllerContainer>
       <Button onClick={() => setOpenDelete(true)}>Open Delete</Button>
       <Button onClick={() => setOpenUnlink(true)}>Open Unlink</Button>
+      <Button onClick={() => setOpenLogout(true)}>Open Logout</Button>
       <Button onClick={() => setOpenError(true)}>Error Handling</Button>
 
       <DeleteConfirmation
@@ -50,10 +52,16 @@ function DeleteConfirmationStory() {
         isOpen={openUnlink}
         onClose={() => setOpenUnlink(false)}
         onConfirm={() => handleConfirm("Unlinked")}
-        icon={<UserIcon variant="solid" size="sm" />}
         label="User Data"
         subTitle="You can always re-link again"
-        unlink
+        kind="unlink"
+      />
+      <DeleteConfirmation
+        isOpen={openLogout}
+        onClose={() => setOpenLogout(false)}
+        onConfirm={() => handleConfirm("Logged out")}
+        label="shinobi"
+        kind="logout"
       />
       <DeleteConfirmation
         isOpen={openError}

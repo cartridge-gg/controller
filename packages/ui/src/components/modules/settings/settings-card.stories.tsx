@@ -52,19 +52,9 @@ function SettingsCardStory() {
         onDelete={async () => {
           await handleDelete("Deleted");
         }}
-        confirmDelete
-        deleteLabel="Session"
+        confirm="delete"
+        confirmLabel="Session"
       />
-      <SettingsCard
-        icon={<UserIcon variant="solid" size="sm" />}
-        label="With Unlink"
-        rightText="5d"
-        onDelete={async () => {
-          await handleDelete("Unlinked");
-        }}
-        unlink
-      />
-
       <SettingsCard
         icon={<UserIcon variant="solid" size="sm" />}
         label="With Unlink + Confirm"
@@ -72,10 +62,9 @@ function SettingsCardStory() {
         onDelete={async () => {
           await handleDelete("Unlinked");
         }}
-        unlink
-        confirmDelete
-        deleteLabel="User Data"
-        deleteSubTitle="You can always re-link again"
+        confirm="unlink"
+        confirmLabel="User Data"
+        confirmSubTitle="You can always re-link again"
       />
 
       <SettingsCard
@@ -95,8 +84,8 @@ function SettingsCardStory() {
         label="With Error + Confirm"
         rightText="5d"
         onDelete={handleError}
-        confirmDelete
-        deleteLabel="Session"
+        confirm="delete"
+        confirmLabel="Session"
       />
     </ControllerContainer>
   );

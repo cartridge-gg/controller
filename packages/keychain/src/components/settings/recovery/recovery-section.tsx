@@ -10,10 +10,7 @@ export const RecoveryAccountSection = () => {
 
   return (
     <section className="space-y-4">
-      <SectionHeader
-        title="Recovery Accounts"
-        description="Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
-      />
+      <SectionHeader kind="recovery" />
       {externalOwners.length > 0 && (
         <div className="space-y-3">
           {externalOwners.map((address) => (
