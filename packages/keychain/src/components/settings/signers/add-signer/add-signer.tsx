@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
-import { credentialToAddress } from "@/components/connect/types";
+import {
+  credentialToAddress,
+  credentialToAuth,
+} from "@/components/connect/types";
 import { SignerPendingDrawer } from "@/components/connect/create/SignerPendingDrawer";
 import { useSmsAuthentication } from "@/components/connect/create/sms";
 import {
@@ -57,6 +60,15 @@ function getErrorMessage(error: unknown): string {
 
   return "Unknown error";
 }
+
+const isExistingSigner = (
+  currentSigners: CredentialMetadata[] | undefined,
+  type: AuthOption,
+) => {
+  return (
+    currentSigners?.some((signer) => credentialToAuth(signer) === type) ?? false
+  );
+};
 
 interface AddSignerDrawerProps {
   isOpen: boolean;
@@ -366,6 +378,7 @@ const WalletAuths = ({
         <SignerMethod
           key={wallet as string}
           kind={wallet as SignerMethodKind}
+          // existing={isExistingSigner(currentSigners, wallet as AuthOption)} // allow multiple
           onClick={() =>
             handleClick(wallet as SignerMethodKind, handleClickInner)
           }
@@ -441,9 +454,14 @@ const RegularAuths = ({
 
   return (
     <>
-      <SignerMethod kind="sms" onClick={onClickSms} />
+      <SignerMethod
+        kind="sms"
+        existing={isExistingSigner(currentSigners, "sms")}
+        onClick={onClickSms}
+      />
       <SignerMethod
         kind="passkey"
+        // existing={isExistingSigner(currentSigners, "webauthn")} // allow multiple
         onClick={async () => {
           await handleClick("passkey", async () => {
             if (!controller || !controller?.username()) {
@@ -460,12 +478,14 @@ const RegularAuths = ({
       />
       <SignerMethod
         kind="google"
+        // existing={isExistingSigner(currentSigners, "google")} // allow multiple
         onClick={async () => {
           await handleTurnkeyOAuth("google");
         }}
       />
       <SignerMethod
         kind="discord"
+        // existing={isExistingSigner(currentSigners, "discord")} // allow multiple
         onClick={async () => {
           await handleTurnkeyOAuth("discord");
         }}

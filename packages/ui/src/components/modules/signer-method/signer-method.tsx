@@ -1,4 +1,5 @@
 import {
+  CheckIcon,
   LockIcon,
   MobileIcon,
   WalletIcon,
@@ -38,6 +39,7 @@ export type SignerMethodKind =
 interface SignerMethodProps {
   className?: string;
   kind: SignerMethodKind;
+  existing?: boolean;
   onClick: () => void;
 }
 
@@ -99,7 +101,12 @@ const signers: Record<
   },
 } as const;
 
-export function SignerMethod({ className, kind, onClick }: SignerMethodProps) {
+export function SignerMethod({
+  className,
+  kind,
+  existing,
+  onClick,
+}: SignerMethodProps) {
   const signerExist = kind in signers;
   const { icon, label } = signerExist
     ? signers[kind]
@@ -117,12 +124,15 @@ export function SignerMethod({ className, kind, onClick }: SignerMethodProps) {
         "bg-background-200 hover:bg-background-300",
         "text-foreground-100 font-ld text-sm text-normal uppercase tracking-[2.1px]",
         "cursor-pointer transition-colors ease-in-out",
+        !!existing && "opacity-50 cursor-not-allowed hover:bg-background-200",
         className,
       )}
-      onClick={signerExist ? onClick : undefined}
+      onClick={signerExist && !existing ? onClick : undefined}
     >
       {icon && <div className={cn("w-fit h-fit")}>{icon}</div>}
       {label || kind.charAt(0).toUpperCase() + kind.slice(1)}
+      <div className="flex-grow" />
+      {!!existing && <CheckIcon />}
     </div>
   );
 }
