@@ -22,15 +22,12 @@ export const RecoveryAccountSection = () => {
         </div>
       )}
       <Button
-        type="button"
-        variant="outline"
-        className="py-2.5 px-3 text-foreground-300 gap-1"
+        variant="sans"
+        className="px-3"
         onClick={() => navigate("/settings/recovery")}
       >
         <PlusIcon size="sm" variant="line" />
-        <span className="normal-case font-normal font-sans text-sm">
-          Add Recovery Account
-        </span>
+        Add Recovery Account
       </Button>
     </section>
   );

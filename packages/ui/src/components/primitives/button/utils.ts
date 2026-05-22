@@ -19,6 +19,7 @@ export const buttonVariants = cva(
         outline:
           "border border-input bg-background shadow-sm hover:bg-background-500 hover:text-foreground-200",
         ghost: "hover:bg-background-500 hover:text-foreground-200",
+        sans: "normal-case tracking-normal font-sans font-normal gap-1 w-fit py-2.5 px-3 bg-background-100 text-foreground-300 border border-background-200 hover:bg-background-200 hover:text-foreground-100 hover:border-background-200",
       },
       size: {
         default: "h-10 px-6 py-2.5 text-sm/[20px] tracking-[2.1px]",

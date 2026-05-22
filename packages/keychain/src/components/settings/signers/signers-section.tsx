@@ -112,18 +112,15 @@ export const SignersSection = ({
       </div>
 
       <Button
-        type="button"
-        variant="outline"
-        className="bg-background-100 text-foreground-300 gap-1 w-fit px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200 hover:border-background-200"
+        variant="sans"
+        className="px-3"
         disabled={chainId !== constants.StarknetChainId.SN_MAIN}
         onClick={() => setIsAddSignerOpen(true)}
       >
         <PlusIcon size="sm" variant="line" />
-        <span className="normal-case font-normal font-sans text-sm">
-          {chainId === constants.StarknetChainId.SN_MAIN
-            ? "Add Signer"
-            : "Must be on Mainnet"}
-        </span>
+        {chainId === constants.StarknetChainId.SN_MAIN
+          ? "Add Signer"
+          : "Must be on Mainnet"}
       </Button>
 
       <AddSignerDrawer

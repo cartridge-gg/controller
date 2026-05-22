@@ -72,15 +72,12 @@ export const ConnectionsSection = () => {
       </div>
       {!hasAllConnections && (
         <Button
-          type="button"
-          variant="outline"
-          className="bg-background-100 text-foreground-300 gap-1 w-fit px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200 hover:border-background-200"
+          variant="sans"
+          className="px-3"
           onClick={() => navigate("/settings/add-connection")}
         >
           <PlusIcon size="sm" variant="line" />
-          <span className="normal-case font-normal font-sans text-sm">
-            Connect Socials
-          </span>
+          Connect Socials
         </Button>
       )}
     </section>

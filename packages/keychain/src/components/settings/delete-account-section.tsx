@@ -14,15 +14,12 @@ export function DeleteAccountSection({
         description="Permanently delete your account and all associated data. This action cannot be undone."
       />
       <Button
-        type="button"
-        variant="outline"
-        className="py-2.5 px-3 text-destructive-100 gap-1"
+        variant="sans"
+        className="px-3 text-destructive-100"
         onClick={onDeleteClick}
       >
         <TrashIcon size="sm" />
-        <span className="normal-case font-normal font-sans text-sm">
-          Delete Account
-        </span>
+        Delete Account
       </Button>
     </section>
   );

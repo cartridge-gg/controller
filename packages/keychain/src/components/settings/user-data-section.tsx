@@ -4,6 +4,7 @@ import {
   EnvelopeIcon,
   formatPhoneNumber,
   MobileIcon,
+  PlusIcon,
   SectionHeader,
   SettingsCard,
   UserIcon,
@@ -188,13 +189,13 @@ export const UserDataSection = () => {
         {!verifiedIdentity && (
           <>
             <Button
-              variant="outline"
+              variant="sans"
+              className="px-3"
               onClick={() => setIsVerifyOpen(true)}
               disabled={!!verifiedIdentity}
             >
-              <span className="normal-case font-normal font-sans text-sm">
-                Verify Identity
-              </span>
+              <PlusIcon size="sm" variant="line" />
+              Verify Identity
             </Button>
             <VerifyIdentityDrawer
               isOpen={isVerifyOpen}
