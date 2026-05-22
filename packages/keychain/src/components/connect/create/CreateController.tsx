@@ -396,6 +396,13 @@ export function CreateControllerView({
     };
   }, [isMobile, authenticationStep]);
 
+  const smsSignerCount = useMemo(() => {
+    if (!validation.signers) return 0;
+    return validation.signers.filter(
+      (signer) => credentialToAuth(signer) === "sms",
+    ).length;
+  }, [validation.signers]);
+
   return (
     <>
       <LayoutContainer>
@@ -441,6 +448,7 @@ export function CreateControllerView({
       <SmsOtpDrawer
         isOpen={authenticationStep === AuthenticationStep.SmsForm}
         isLogin={isLogin}
+        allowSwitchPhoneNumber={smsSignerCount > 1}
         onClose={onClose}
         onInitOtp={onInitOtp}
         onResendOtp={onResendOtp}

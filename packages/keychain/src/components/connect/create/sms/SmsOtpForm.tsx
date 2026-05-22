@@ -22,6 +22,7 @@ export interface SmsOtpState {
 export interface SmsOtpDrawerProps {
   isOpen: boolean;
   isLogin: boolean;
+  allowSwitchPhoneNumber?: boolean;
   onClose: () => void;
   // Sends the SMS. On success the hook sets smsState
   onInitOtp: (phoneNumber: string) => Promise<void>;
@@ -39,6 +40,7 @@ const RESEND_WAIT_SECONDS = 30;
 export function SmsOtpDrawer({
   isOpen,
   isLogin,
+  allowSwitchPhoneNumber = true,
   onClose,
   onInitOtp,
   onResendOtp,
@@ -245,7 +247,7 @@ export function SmsOtpDrawer({
               <label htmlFor="sms-otp" className="text-xs text-foreground-300">
                 Please check {formatPhoneNumber(smsState?.phoneNumber ?? "")}{" "}
                 for a message from Cartridge and enter your code below.{" "}
-                {isLogin && onResetOtp && (
+                {isLogin && allowSwitchPhoneNumber && onResetOtp && (
                   <button
                     type="button"
                     onClick={handleUseDifferentPhone}
