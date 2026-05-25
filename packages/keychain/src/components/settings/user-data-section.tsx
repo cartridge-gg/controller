@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import {
   Button,
   EnvelopeIcon,
@@ -10,46 +10,21 @@ import {
   UserIcon,
 } from "@cartridge/controller-ui";
 import {
-  useAccountPrivateQuery,
   useDeleteEmailAddressMutation,
   useDeletePhoneNumberMutation,
   useDeleteProveIdentityMutation,
 } from "@/utils/api";
-import { useMeQuery } from "@cartridge/controller-ui/utils/api/cartridge";
-import { VerifyIdentityDrawer } from "../identity/VerifyIdentityDrawer";
+import { useIdentityContext } from "@/components/identity/provider";
 
 type VerifiedData = {
   label: string;
   verifiedAt: string;
-  isLoading: boolean;
   canDelete: boolean;
 };
 
 export const UserDataSection = () => {
-  const {
-    data: meData,
-    isLoading: isMeLoading,
-    refetch: refetchMe,
-  } = useMeQuery();
-  const {
-    data: privateData,
-    isLoading: isPrivateLoading,
-    refetch: refetchPrivate,
-  } = useAccountPrivateQuery();
-  const [isVerifyOpen, setIsVerifyOpen] = useState(false);
-
-  const userData = useMemo(
-    () => ({
-      firstName: privateData?.accountPrivate?.firstName,
-      lastName: privateData?.accountPrivate?.lastName,
-      dob: privateData?.accountPrivate?.dob,
-      proveVerifiedAt: privateData?.accountPrivate?.proveVerifiedAt,
-      phoneNumber: privateData?.accountPrivate?.phoneNumber,
-      phoneNumberVerifiedAt: privateData?.accountPrivate?.phoneNumberVerifiedAt,
-      email: meData?.me?.email,
-    }),
-    [privateData, meData],
-  );
+  const { userData, isLoading, refetchUserData, initiateIdentityVerification } =
+    useIdentityContext();
 
   const verifiedIdentity = useMemo<VerifiedData | null>(() => {
     if (
@@ -59,14 +34,13 @@ export const UserDataSection = () => {
       userData.proveVerifiedAt
     ) {
       return {
-        label: `${userData.firstName} ${userData.lastName}, ${formatAge(userData.dob)}`,
+        label: `${userData.firstName} ${userData.lastName}, ${userData.age}yo`,
         verifiedAt: userData.proveVerifiedAt,
-        isLoading: isPrivateLoading,
         canDelete: true,
       };
     }
     return null;
-  }, [userData, isPrivateLoading]);
+  }, [userData]);
 
   const verifiedPhone = useMemo<VerifiedData | null>(() => {
     if (
@@ -77,24 +51,22 @@ export const UserDataSection = () => {
         label: formatPhoneNumber(userData.phoneNumber),
         verifiedAt:
           userData.phoneNumberVerifiedAt || userData.proveVerifiedAt || "",
-        isLoading: isPrivateLoading,
         canDelete: !!userData.phoneNumberVerifiedAt,
       };
     }
     return null;
-  }, [userData, isPrivateLoading]);
+  }, [userData]);
 
   const verifiedEmail = useMemo<VerifiedData | null>(() => {
     if (userData.email) {
       return {
         label: userData.email,
         verifiedAt: "",
-        isLoading: isMeLoading,
         canDelete: true,
       };
     }
     return null;
-  }, [userData, isMeLoading]);
+  }, [userData]);
 
   // mutation
   const deletePhoneNumberMutation = useDeletePhoneNumberMutation();
@@ -127,7 +99,7 @@ export const UserDataSection = () => {
       <SectionHeader
         kind="user-data"
         showStatus={false}
-        isLoading={isMeLoading || isPrivateLoading}
+        isLoading={isLoading}
       />
       <div className="space-y-3">
         {verifiedIdentity && (
@@ -135,12 +107,12 @@ export const UserDataSection = () => {
             icon={<UserIcon variant="solid" size="sm" />}
             label={verifiedIdentity.label}
             rightText={formatVerifiedAt(verifiedIdentity.verifiedAt)}
-            isLoading={verifiedIdentity.isLoading}
+            isLoading={isLoading}
             onDelete={
               verifiedIdentity.canDelete
                 ? async () => {
                     await handleDeleteProveIdentity();
-                    await refetchPrivate();
+                    await refetchUserData();
                   }
                 : undefined
             }
@@ -153,12 +125,12 @@ export const UserDataSection = () => {
             icon={<MobileIcon variant="solid" size="sm" />}
             label={verifiedPhone.label}
             rightText={formatVerifiedAt(verifiedPhone.verifiedAt)}
-            isLoading={verifiedPhone.isLoading}
+            isLoading={isLoading}
             onDelete={
               verifiedPhone.canDelete
                 ? async () => {
                     await handleDeletePhoneNumber();
-                    await refetchPrivate();
+                    await refetchUserData();
                   }
                 : undefined
             }
@@ -171,12 +143,12 @@ export const UserDataSection = () => {
           <SettingsCard
             icon={<EnvelopeIcon size="sm" />}
             label={verifiedEmail.label}
-            isLoading={verifiedEmail.isLoading}
+            isLoading={isLoading}
             onDelete={
               verifiedEmail.canDelete
                 ? async () => {
                     await handleDeleteEmailAddress();
-                    await refetchMe();
+                    await refetchUserData();
                   }
                 : undefined
             }
@@ -190,19 +162,12 @@ export const UserDataSection = () => {
             <Button
               variant="sans"
               className="px-3"
-              onClick={() => setIsVerifyOpen(true)}
+              onClick={() => initiateIdentityVerification()}
               disabled={!!verifiedIdentity}
             >
               <PlusIcon size="sm" variant="line" />
               Verify Identity
             </Button>
-            <VerifyIdentityDrawer
-              isOpen={isVerifyOpen}
-              onClose={() => setIsVerifyOpen(false)}
-              onVerified={async () => {
-                await refetchPrivate();
-              }}
-            />
           </>
         )}
       </div>
@@ -218,16 +183,4 @@ function formatVerifiedAt(verifiedAt: string): string {
     month: "short",
     day: "numeric",
   });
-}
-
-function formatAge(dob: string): string {
-  const birth = new Date(dob);
-  if (Number.isNaN(birth.getTime())) return "";
-  const today = new Date();
-  let years = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    years--;
-  }
-  return `${years}yo`;
 }
