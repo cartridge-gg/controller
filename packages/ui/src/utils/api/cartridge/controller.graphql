@@ -31,6 +31,7 @@ query Controller($username: String!, $chainId: String!) {
           eip191 {
             provider
             ethAddress
+            phoneLast4
           }
         }
         ... on SIWSCredentials {

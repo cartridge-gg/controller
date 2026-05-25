@@ -143,6 +143,11 @@ const getSignerIdentifyingInfo = async (
         case "google":
           // return await getOauthProvider(controllerUsername, "google");
           return undefined;
+        case "sms":
+          if (signer.eip191?.[0]?.phoneLast4) {
+            return `*** **** ${signer.eip191?.[0]?.phoneLast4}`;
+          }
+          return formatAddress(credentialToAddress(signer)!, { size: "xs" });
         default:
           return formatAddress(credentialToAddress(signer)!, { size: "xs" });
       }

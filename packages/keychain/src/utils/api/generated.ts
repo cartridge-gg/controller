@@ -2376,6 +2376,7 @@ export type Erc1155Metadata = {
 export type Eip191Credential = {
   __typename?: "Eip191Credential";
   ethAddress: Scalars["String"];
+  phoneLast4?: Maybe<Scalars["String"]>;
   provider: Scalars["String"];
 };
 

@@ -2369,6 +2369,7 @@ export type Erc1155Metadata = {
 export type Eip191Credential = {
   __typename?: 'Eip191Credential';
   ethAddress: Scalars['String'];
+  phoneLast4?: Maybe<Scalars['String']>;
   provider: Scalars['String'];
 };
 
@@ -7301,7 +7302,7 @@ export type ControllerQueryVariables = Exact<{
 }>;
 
 
-export type ControllerQuery = { __typename?: 'Query', controller?: { __typename?: 'Controller', id: string, accountID: string, address: string, network: string, constructorCalldata: Array<string>, createdAt: string, updatedAt: string, signers?: Array<{ __typename?: 'Signer', createdAt: string, isRevoked: boolean, isOriginal: boolean, metadata: { __typename: 'Eip191Credentials', eip191?: Array<{ __typename?: 'Eip191Credential', provider: string, ethAddress: string }> | null } | { __typename: 'PasswordCredentials', password?: Array<{ __typename?: 'PasswordCredential', publicKey: string, encryptedPrivateKey: string }> | null } | { __typename: 'SIWSCredentials', siws?: Array<{ __typename?: 'SIWSCredential', publicKey: string }> | null } | { __typename: 'StarknetCredentials', starknet?: Array<{ __typename?: 'StarknetCredential', publicKey: string }> | null } | { __typename: 'WebauthnCredentials', webauthn?: Array<{ __typename?: 'WebauthnCredential', id: string, publicKey: string, AAGUID: string }> | null } }> | null } | null };
+export type ControllerQuery = { __typename?: 'Query', controller?: { __typename?: 'Controller', id: string, accountID: string, address: string, network: string, constructorCalldata: Array<string>, createdAt: string, updatedAt: string, signers?: Array<{ __typename?: 'Signer', createdAt: string, isRevoked: boolean, isOriginal: boolean, metadata: { __typename: 'Eip191Credentials', eip191?: Array<{ __typename?: 'Eip191Credential', provider: string, ethAddress: string, phoneLast4?: string | null }> | null } | { __typename: 'PasswordCredentials', password?: Array<{ __typename?: 'PasswordCredential', publicKey: string, encryptedPrivateKey: string }> | null } | { __typename: 'SIWSCredentials', siws?: Array<{ __typename?: 'SIWSCredential', publicKey: string }> | null } | { __typename: 'StarknetCredentials', starknet?: Array<{ __typename?: 'StarknetCredential', publicKey: string }> | null } | { __typename: 'WebauthnCredentials', webauthn?: Array<{ __typename?: 'WebauthnCredential', id: string, publicKey: string, AAGUID: string }> | null } }> | null } | null };
 
 export type BeginRegistrationMutationVariables = Exact<{
   username: Scalars['String'];
@@ -8186,6 +8187,7 @@ export const ControllerDocument = `
           eip191 {
             provider
             ethAddress
+            phoneLast4
           }
         }
         ... on SIWSCredentials {
