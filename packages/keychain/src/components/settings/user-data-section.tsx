@@ -30,6 +30,7 @@ export const UserDataSection = () => {
     refetchUserData,
     initiateIdentityVerification,
     initiatePhoneNumberVerification,
+    initiateEmailVerification,
   } = useIdentityContext();
 
   const verifiedIdentity = useMemo<VerifiedData | null>(() => {
@@ -109,7 +110,7 @@ export const UserDataSection = () => {
         showStatus={false}
         isLoading={isLoading}
       />
-      <div className="space-y-3">
+      <div className="space-y-3 flex flex-col">
         {verifiedIdentity && (
           <SettingsCard
             icon={<UserIcon variant="solid" size="sm" />}
@@ -185,6 +186,17 @@ export const UserDataSection = () => {
           >
             <PlusIcon size="sm" variant="line" />
             Verify Phone Number
+          </Button>
+        )}
+        {!verifiedEmail && (
+          <Button
+            variant="sans"
+            className="px-3"
+            onClick={() => initiateEmailVerification()}
+            disabled={!!verifiedEmail}
+          >
+            <PlusIcon size="sm" variant="line" />
+            Verify Email
           </Button>
         )}
       </div>

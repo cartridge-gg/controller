@@ -9,7 +9,9 @@ import {
 } from "react";
 import {
   useMeQuery,
+  useSendEmailVerificationMutation,
   useSendPhoneVerificationMutation,
+  useVerifyEmailMutation,
   useVerifyPhoneMutation,
 } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useAccountPrivateQuery } from "@/utils/api";
@@ -19,6 +21,7 @@ import {
   SmsOtpState,
   InvalidVerificationCodeError,
 } from "./VerifyPhoneNumberDrawer";
+import { VerifyEmailDrawer, EmailOtpState } from "./VerifyEmailDrawer";
 import { useConnection } from "@/hooks/connection";
 
 export type IdentityContextValue = {
@@ -37,8 +40,10 @@ export type IdentityContextValue = {
   refetchUserData: () => Promise<void>;
   initiateIdentityVerification: (cb?: () => Promise<void>) => void;
   initiatePhoneNumberVerification: (cb?: () => Promise<void>) => void;
+  initiateEmailVerification: (cb?: () => Promise<void>) => void;
   isIdentityVerified: boolean;
   isPhoneNumberVerified: boolean;
+  isEmailVerified: boolean;
 };
 
 export const IdentityContext = createContext<IdentityContextValue>({
@@ -48,11 +53,13 @@ export const IdentityContext = createContext<IdentityContextValue>({
   refetchUserData: async () => {},
   initiateIdentityVerification: () => {},
   initiatePhoneNumberVerification: () => {},
+  initiateEmailVerification: () => {},
   isIdentityVerified: false,
   isPhoneNumberVerified: false,
+  isEmailVerified: false,
 });
 
-type IdentityDrawerName = "identity" | "phoneNumber";
+type IdentityDrawerName = "identity" | "phoneNumber" | "email";
 
 const usePhoneNumberVerification = () => {
   const sendPhoneMutation = useSendPhoneVerificationMutation();
@@ -110,6 +117,58 @@ const usePhoneNumberVerification = () => {
   };
 };
 
+const useEmailVerification = () => {
+  const sendEmailMutation = useSendEmailVerificationMutation();
+  const verifyEmailMutation = useVerifyEmailMutation();
+  const [emailState, setEmailState] = useState<EmailOtpState | null>(null);
+
+  const handleInitOtp = useCallback(
+    async (email: string) => {
+      setEmailState({ email, otpId: "" });
+      const res = await sendEmailMutation.mutateAsync({
+        input: { email },
+      });
+      if (!res.sendEmailVerification.success) {
+        throw new Error(res.sendEmailVerification.message);
+      }
+      setEmailState({ email, otpId: "sent" });
+    },
+    [sendEmailMutation],
+  );
+
+  const handleResendOtp = useCallback(async () => {
+    if (emailState?.email) {
+      await handleInitOtp(emailState.email);
+    }
+  }, [handleInitOtp, emailState?.email]);
+
+  const handleSubmitCode = useCallback(
+    async (code: string) => {
+      if (!code || !emailState || !emailState.email || !emailState.otpId)
+        return undefined;
+      const res = await verifyEmailMutation.mutateAsync({
+        input: { email: emailState.email, code },
+      });
+      if (!res.verifyEmail.success) {
+        const msg = res.verifyEmail.message;
+        if (msg === "Invalid or expired verification code") {
+          throw new InvalidVerificationCodeError(msg);
+        }
+        throw new Error(msg);
+      }
+    },
+    [emailState, verifyEmailMutation],
+  );
+
+  return {
+    emailState,
+    setEmailState,
+    handleInitOtp,
+    handleResendOtp,
+    handleSubmitCode,
+  };
+};
+
 export function IdentityProvider({ children }: PropsWithChildren) {
   const { controller } = useConnection();
   const {
@@ -157,6 +216,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
     () => !!userData.proveVerifiedAt || !!userData.phoneNumberVerifiedAt,
     [userData.proveVerifiedAt, userData.phoneNumberVerifiedAt],
   );
+  const isEmailVerified = useMemo(() => !!userData.email, [userData.email]);
 
   const [currentDrawerName, setCurrentDrawerName] = useState<
     IdentityDrawerName | undefined
@@ -200,6 +260,28 @@ export function IdentityProvider({ children }: PropsWithChildren) {
     [setSmsState],
   );
 
+  // email verification (Twilio)
+  const {
+    emailState,
+    setEmailState,
+    handleInitOtp: handleInitEmailOtp,
+    handleResendOtp: handleResendEmailOtp,
+    handleSubmitCode: handleSubmitEmailCode,
+  } = useEmailVerification();
+
+  const [emailVerifiedCallback, setEmailVerifiedCallback] = useState<
+    (() => Promise<void>) | undefined
+  >(undefined);
+
+  const initiateEmailVerification = useCallback(
+    (cb?: () => Promise<void>) => {
+      setEmailVerifiedCallback(() => cb);
+      setCurrentDrawerName("email");
+      setEmailState(null);
+    },
+    [setEmailState],
+  );
+
   return (
     <IdentityContext.Provider
       value={{
@@ -209,8 +291,10 @@ export function IdentityProvider({ children }: PropsWithChildren) {
         refetchUserData,
         initiateIdentityVerification,
         initiatePhoneNumberVerification,
+        initiateEmailVerification,
         isIdentityVerified,
         isPhoneNumberVerified,
+        isEmailVerified,
       }}
     >
       {children}
@@ -223,6 +307,20 @@ export function IdentityProvider({ children }: PropsWithChildren) {
           await identityVerifiedCallback?.();
           closeCurrentDrawer();
         }}
+      />
+
+      <VerifyEmailDrawer
+        isOpen={currentDrawerName === "email"}
+        onClose={closeCurrentDrawer}
+        onInitOtp={handleInitEmailOtp}
+        onResendOtp={handleResendEmailOtp}
+        onSubmitCode={async (otpCode) => {
+          await handleSubmitEmailCode(otpCode);
+          await refetchUserData();
+          await emailVerifiedCallback?.();
+          closeCurrentDrawer();
+        }}
+        emailState={emailState}
       />
 
       <VerifyPhoneNumberDrawer
