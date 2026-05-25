@@ -21,6 +21,16 @@ export interface SmsOtpState {
 
 export type VerificationPurpose = "signup" | "login" | "identity";
 
+// Thrown when the backend rejects an OTP code as invalid or expired. The
+// drawer treats this as recoverable (let the user re-enter the code); any
+// other error is treated as fatal and replaces the submit button with Close.
+export class InvalidVerificationCodeError extends Error {
+  constructor(message = "Invalid or expired verification code") {
+    super(message);
+    this.name = "InvalidVerificationCodeError";
+  }
+}
+
 interface VerifyPhoneNumberDrawerProps {
   isOpen: boolean;
   purpose: VerificationPurpose;
@@ -58,6 +68,7 @@ export function VerifyPhoneNumberDrawer({
   const [phoneInput, setPhoneInput] = useState(smsState?.phoneNumber ?? "");
   const [otpCode, setOtpCode] = useState("");
   const [error, setError] = useState<string | undefined>();
+  const [isFatalCodeError, setIsFatalCodeError] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [otpSentAt, setOtpSentAt] = useState<number | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(0);
@@ -71,6 +82,7 @@ export function VerifyPhoneNumberDrawer({
     setPhoneInput("");
     setOtpCode("");
     setError(undefined);
+    setIsFatalCodeError(false);
     setIsPending(false);
     setOtpSentAt(null);
   }, []);
@@ -153,11 +165,11 @@ export function VerifyPhoneNumberDrawer({
   const handleSubmitPhone = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      setError(undefined);
       if (!isPhoneInputValid) {
         setError("Invalid phone format");
         return;
       }
+      setError(undefined);
       setIsPending(true);
       try {
         await onInitOtp(phoneInput);
@@ -174,17 +186,20 @@ export function VerifyPhoneNumberDrawer({
   const handleSubmitCode = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      setError(undefined);
       if (!isOtpCodeValid) {
         setError("Invalid code");
         return;
       }
+      setError(undefined);
       setIsPending(true);
       try {
         await onSubmitCode(otpCode);
       } catch (err) {
         console.error("onSubmitCode Error:", err);
         setError((err as Error).message ?? "Failed to verify code");
+        if (!(err instanceof InvalidVerificationCodeError)) {
+          setIsFatalCodeError(true);
+        }
       } finally {
         setIsPending(false);
       }
@@ -290,7 +305,7 @@ export function VerifyPhoneNumberDrawer({
                 ref={otpRef}
                 value={otpCode}
                 onChange={setOtpCode}
-                disabled={isPending}
+                disabled={isPending || isFatalCodeError}
                 variant={error ? "destructive" : "default"}
                 className="py-4"
               />
@@ -316,14 +331,24 @@ export function VerifyPhoneNumberDrawer({
             {error && <p className="text-sm text-destructive">{error}</p>}
 
             <div className="flex gap-2">
-              <Button
-                type="submit"
-                disabled={isPending || !isOtpCodeValid}
-                isLoading={isPending || isResolvingPhoneNumber}
-                className="flex-1"
-              >
-                {purpose === "signup" ? "Sign Up" : "Continue"}
-              </Button>
+              {isFatalCodeError ? (
+                <Button
+                  type="button"
+                  onClick={() => onClose()}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={isPending || !isOtpCodeValid}
+                  isLoading={isPending || isResolvingPhoneNumber}
+                  className="flex-1"
+                >
+                  {purpose === "signup" ? "Sign Up" : "Continue"}
+                </Button>
+              )}
             </div>
           </form>
         )}

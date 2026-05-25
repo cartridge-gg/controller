@@ -17,6 +17,7 @@ import { VerifyIdentityDrawer } from "./VerifyIdentityDrawer";
 import {
   VerifyPhoneNumberDrawer,
   SmsOtpState,
+  InvalidVerificationCodeError,
 } from "./VerifyPhoneNumberDrawer";
 import { useConnection } from "@/hooks/connection";
 
@@ -90,7 +91,11 @@ const usePhoneNumberVerification = () => {
         input: { phoneNumber: smsState.phoneNumber, code },
       });
       if (!res.verifyPhone.success) {
-        throw new Error(res.verifyPhone.message);
+        const msg = res.verifyPhone.message;
+        if (msg === "Invalid or expired verification code") {
+          throw new InvalidVerificationCodeError(msg);
+        }
+        throw new Error(msg);
       }
     },
     [smsState, verifyPhoneMutation],

@@ -11,6 +11,7 @@ import {
 import { WalletAdapter } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
+import { InvalidVerificationCodeError } from "@/components/identity/VerifyPhoneNumberDrawer";
 
 type InitSmsInput = { phoneNumber: string } | { username: string };
 
@@ -110,10 +111,25 @@ export const useSmsAuthentication = () => {
           keyPair.publicKey,
         );
 
-        const verifyResponse = await fetchApi<VerifySmsResponse>("sms/verify", {
-          otpId,
-          encryptedOtpBundle,
-        });
+        let verifyResponse: VerifySmsResponse;
+        try {
+          verifyResponse = await fetchApi<VerifySmsResponse>("sms/verify", {
+            otpId,
+            encryptedOtpBundle,
+          });
+        } catch (err) {
+          // doFetch surfaces HTTP errors as `HTTP error <status>: <body>`. The
+          // backend returns "Invalid or expired verification code" in the body
+          // when the OTP doesn't match — treat as recoverable so the user can
+          // re-enter the code instead of restarting the flow.
+          if (
+            err instanceof Error &&
+            err.message.includes("Invalid or expired verification code")
+          ) {
+            throw new InvalidVerificationCodeError();
+          }
+          throw err;
+        }
 
         if (!verifyResponse?.verificationToken) {
           throw new Error("SMS verification failed: no verification token");
