@@ -23,8 +23,14 @@ type VerifiedData = {
 };
 
 export const UserDataSection = () => {
-  const { userData, isLoading, refetchUserData, initiateIdentityVerification } =
-    useIdentityContext();
+  const {
+    userData,
+    isLoadingUserData,
+    isVerifying,
+    refetchUserData,
+    initiateIdentityVerification,
+    initiatePhoneNumberVerification,
+  } = useIdentityContext();
 
   const verifiedIdentity = useMemo<VerifiedData | null>(() => {
     if (
@@ -42,7 +48,7 @@ export const UserDataSection = () => {
     return null;
   }, [userData]);
 
-  const verifiedPhone = useMemo<VerifiedData | null>(() => {
+  const verifiedPhoneNumber = useMemo<VerifiedData | null>(() => {
     if (
       userData.phoneNumber &&
       (userData.phoneNumberVerifiedAt || userData.proveVerifiedAt)
@@ -94,6 +100,8 @@ export const UserDataSection = () => {
     }
   }, [deleteProveIdentityMutation]);
 
+  const isLoading = isLoadingUserData || isVerifying;
+
   return (
     <section className="space-y-4">
       <SectionHeader
@@ -120,14 +128,14 @@ export const UserDataSection = () => {
             confirmLabel="Identity Proof"
           />
         )}
-        {verifiedPhone && (
+        {verifiedPhoneNumber && (
           <SettingsCard
             icon={<MobileIcon variant="solid" size="sm" />}
-            label={verifiedPhone.label}
-            rightText={formatVerifiedAt(verifiedPhone.verifiedAt)}
+            label={verifiedPhoneNumber.label}
+            rightText={formatVerifiedAt(verifiedPhoneNumber.verifiedAt)}
             isLoading={isLoading}
             onDelete={
-              verifiedPhone.canDelete
+              verifiedPhoneNumber.canDelete
                 ? async () => {
                     await handleDeletePhoneNumber();
                     await refetchUserData();
@@ -136,7 +144,7 @@ export const UserDataSection = () => {
             }
             confirm="delete"
             confirmLabel="Phone Number"
-            confirmSubTitle={verifiedPhone.label}
+            confirmSubTitle={verifiedPhoneNumber.label}
           />
         )}
         {verifiedEmail && (
@@ -158,17 +166,26 @@ export const UserDataSection = () => {
           />
         )}
         {!verifiedIdentity && (
-          <>
-            <Button
-              variant="sans"
-              className="px-3"
-              onClick={() => initiateIdentityVerification()}
-              disabled={!!verifiedIdentity}
-            >
-              <PlusIcon size="sm" variant="line" />
-              Verify Identity
-            </Button>
-          </>
+          <Button
+            variant="sans"
+            className="px-3"
+            onClick={() => initiateIdentityVerification()}
+            disabled={!!verifiedIdentity}
+          >
+            <PlusIcon size="sm" variant="line" />
+            Verify Identity
+          </Button>
+        )}
+        {!verifiedPhoneNumber && (
+          <Button
+            variant="sans"
+            className="px-3"
+            onClick={() => initiatePhoneNumberVerification()}
+            disabled={!!verifiedPhoneNumber}
+          >
+            <PlusIcon size="sm" variant="line" />
+            Verify Phone Number
+          </Button>
         )}
       </div>
     </section>

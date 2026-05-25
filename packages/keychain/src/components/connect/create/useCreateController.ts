@@ -46,6 +46,7 @@ import {
 } from "@/utils/connection/session-creation";
 import { hasConfiguredLocationGate } from "@/utils/location-gate";
 import { posthog } from "@/components/provider/posthog";
+import { SmsOtpState } from "@/components/identity/VerifyPhoneNumberDrawer";
 import {
   captureAnalyticsEvent,
   categorizeError,
@@ -53,7 +54,6 @@ import {
   type SignupAuthStep,
   type SignupErrorCategory,
 } from "@/types/analytics";
-import { SmsOtpState } from "./sms/SmsOtpForm";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,

@@ -3,12 +3,22 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
-import { useMeQuery } from "@cartridge/controller-ui/utils/api/cartridge";
+import {
+  useMeQuery,
+  useSendPhoneVerificationMutation,
+  useVerifyPhoneMutation,
+} from "@cartridge/controller-ui/utils/api/cartridge";
 import { useAccountPrivateQuery } from "@/utils/api";
 import { VerifyIdentityDrawer } from "./VerifyIdentityDrawer";
+import {
+  VerifyPhoneNumberDrawer,
+  SmsOtpState,
+} from "./VerifyPhoneNumberDrawer";
+import { useConnection } from "@/hooks/connection";
 
 export type IdentityContextValue = {
   userData: {
@@ -21,21 +31,82 @@ export type IdentityContextValue = {
     phoneNumberVerifiedAt?: string | null;
     email?: string | null;
   };
-  isLoading: boolean;
+  isLoadingUserData: boolean;
+  isVerifying: boolean;
   refetchUserData: () => Promise<void>;
   initiateIdentityVerification: (cb?: () => Promise<void>) => void;
+  initiatePhoneNumberVerification: (cb?: () => Promise<void>) => void;
+  isIdentityVerified: boolean;
+  isPhoneNumberVerified: boolean;
 };
 
 export const IdentityContext = createContext<IdentityContextValue>({
   userData: {},
-  isLoading: false,
+  isLoadingUserData: false,
+  isVerifying: false,
   refetchUserData: async () => {},
   initiateIdentityVerification: () => {},
+  initiatePhoneNumberVerification: () => {},
+  isIdentityVerified: false,
+  isPhoneNumberVerified: false,
 });
 
-export type IdentityDrawerName = "identity";
+type IdentityDrawerName = "identity" | "phoneNumber";
+
+const usePhoneNumberVerification = () => {
+  const sendPhoneMutation = useSendPhoneVerificationMutation();
+  const verifyPhoneMutation = useVerifyPhoneMutation();
+  const [smsState, setSmsState] = useState<SmsOtpState | null>(null);
+
+  const handleInitOtp = useCallback(
+    async (phoneNumber: string) => {
+      setSmsState({ phoneNumber, otpId: "", otpEncryptionTargetBundle: "" });
+      const res = await sendPhoneMutation.mutateAsync({
+        input: { phoneNumber },
+      });
+      if (!res.sendPhoneVerification.success) {
+        throw new Error(res.sendPhoneVerification.message);
+      }
+      setSmsState({
+        phoneNumber,
+        otpId: "sent",
+        otpEncryptionTargetBundle: "",
+      });
+    },
+    [sendPhoneMutation],
+  );
+
+  const handleResendOtp = useCallback(async () => {
+    if (smsState?.phoneNumber) {
+      await handleInitOtp(smsState.phoneNumber);
+    }
+  }, [handleInitOtp, smsState?.phoneNumber]);
+
+  const handleSubmitCode = useCallback(
+    async (code: string) => {
+      if (!code || !smsState || !smsState.phoneNumber || !smsState.otpId)
+        return undefined;
+      const res = await verifyPhoneMutation.mutateAsync({
+        input: { phoneNumber: smsState.phoneNumber, code },
+      });
+      if (!res.verifyPhone.success) {
+        throw new Error(res.verifyPhone.message);
+      }
+    },
+    [smsState, verifyPhoneMutation],
+  );
+
+  return {
+    smsState,
+    setSmsState,
+    handleInitOtp,
+    handleResendOtp,
+    handleSubmitCode,
+  };
+};
 
 export function IdentityProvider({ children }: PropsWithChildren) {
+  const { controller } = useConnection();
   const {
     data: meData,
     isLoading: isMeLoading,
@@ -51,18 +122,35 @@ export function IdentityProvider({ children }: PropsWithChildren) {
     await Promise.all([refetchMe(), refetchPrivate()]);
   }, [refetchMe, refetchPrivate]);
 
+  useEffect(() => {
+    if (controller?.username()) refetchUserData();
+  }, [controller, refetchUserData]);
+
   const userData = useMemo(
-    () => ({
-      firstName: privateData?.accountPrivate?.firstName,
-      lastName: privateData?.accountPrivate?.lastName,
-      dob: privateData?.accountPrivate?.dob,
-      age: getAgeFromDOB(privateData?.accountPrivate?.dob),
-      proveVerifiedAt: privateData?.accountPrivate?.proveVerifiedAt,
-      phoneNumber: privateData?.accountPrivate?.phoneNumber,
-      phoneNumberVerifiedAt: privateData?.accountPrivate?.phoneNumberVerifiedAt,
-      email: meData?.me?.email,
-    }),
-    [privateData, meData],
+    () =>
+      !controller
+        ? {}
+        : {
+            firstName: privateData?.accountPrivate?.firstName,
+            lastName: privateData?.accountPrivate?.lastName,
+            dob: privateData?.accountPrivate?.dob,
+            age: getAgeFromDOB(privateData?.accountPrivate?.dob),
+            proveVerifiedAt: privateData?.accountPrivate?.proveVerifiedAt,
+            phoneNumber: privateData?.accountPrivate?.phoneNumber,
+            phoneNumberVerifiedAt:
+              privateData?.accountPrivate?.phoneNumberVerifiedAt,
+            email: meData?.me?.email,
+          },
+    [privateData, meData, controller],
+  );
+
+  const isIdentityVerified = useMemo(
+    () => !!userData.proveVerifiedAt,
+    [userData.proveVerifiedAt],
+  );
+  const isPhoneNumberVerified = useMemo(
+    () => !!userData.proveVerifiedAt || !!userData.phoneNumberVerifiedAt,
+    [userData.proveVerifiedAt, userData.phoneNumberVerifiedAt],
   );
 
   const [currentDrawerName, setCurrentDrawerName] = useState<
@@ -73,7 +161,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
     setCurrentDrawerName(undefined);
   }, []);
 
-  // prove.com identity/age verification
+  // identity/age verification (prove.com)
   const [identityVerifiedCallback, setIdentityVerifiedCallback] = useState<
     (() => Promise<void>) | undefined
   >(undefined);
@@ -85,13 +173,39 @@ export function IdentityProvider({ children }: PropsWithChildren) {
     [],
   );
 
+  // phone number verifiction (Twilio)
+  const {
+    smsState,
+    setSmsState,
+    handleInitOtp,
+    handleResendOtp,
+    handleSubmitCode,
+  } = usePhoneNumberVerification();
+
+  const [phoneVerifiedCallback, setPhoneVerifiedCallback] = useState<
+    (() => Promise<void>) | undefined
+  >(undefined);
+
+  const initiatePhoneNumberVerification = useCallback(
+    (cb?: () => Promise<void>) => {
+      setPhoneVerifiedCallback(() => cb);
+      setCurrentDrawerName("phoneNumber");
+      setSmsState(null);
+    },
+    [setSmsState],
+  );
+
   return (
     <IdentityContext.Provider
       value={{
         userData,
-        isLoading: isMeLoading || isPrivateLoading,
+        isLoadingUserData: isMeLoading || isPrivateLoading,
+        isVerifying: !!currentDrawerName,
         refetchUserData,
         initiateIdentityVerification,
+        initiatePhoneNumberVerification,
+        isIdentityVerified,
+        isPhoneNumberVerified,
       }}
     >
       {children}
@@ -100,9 +214,25 @@ export function IdentityProvider({ children }: PropsWithChildren) {
         isOpen={currentDrawerName === "identity"}
         onClose={() => closeCurrentDrawer()}
         onVerified={async () => {
-          await refetchPrivate();
+          await refetchUserData();
           await identityVerifiedCallback?.();
+          closeCurrentDrawer();
         }}
+      />
+
+      <VerifyPhoneNumberDrawer
+        isOpen={currentDrawerName === "phoneNumber"}
+        purpose="identity"
+        onClose={closeCurrentDrawer}
+        onInitOtp={handleInitOtp}
+        onResendOtp={handleResendOtp}
+        onSubmitCode={async (otpCode) => {
+          await handleSubmitCode(otpCode);
+          await refetchUserData();
+          await phoneVerifiedCallback?.();
+          closeCurrentDrawer();
+        }}
+        smsState={smsState}
       />
     </IdentityContext.Provider>
   );

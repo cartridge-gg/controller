@@ -19,16 +19,18 @@ export interface SmsOtpState {
   otpEncryptionTargetBundle: string;
 }
 
-export interface SmsOtpDrawerProps {
+export type VerificationPurpose = "signup" | "login" | "identity";
+
+interface VerifyPhoneNumberDrawerProps {
   isOpen: boolean;
-  isLogin: boolean;
+  purpose: VerificationPurpose;
   allowSwitchPhoneNumber?: boolean;
   onClose: () => void;
   // Sends the SMS. On success the hook sets smsState
   onInitOtp: (phoneNumber: string) => Promise<void>;
-  onResendOtp: () => void;
+  onResendOtp: () => Promise<void>;
   // Called to complete authentication.
-  onSubmitCode: (otpCode: string) => void;
+  onSubmitCode: (otpCode: string) => Promise<void>;
   // null = phone step; non-null = otp step (phone number confirmed).
   smsState: SmsOtpState | null;
   // When provided and isLogin, renders a "Use a different phone" link in the OTP step
@@ -37,9 +39,9 @@ export interface SmsOtpDrawerProps {
 
 const RESEND_WAIT_SECONDS = 30;
 
-export function SmsOtpDrawer({
+export function VerifyPhoneNumberDrawer({
   isOpen,
-  isLogin,
+  purpose,
   allowSwitchPhoneNumber = true,
   onClose,
   onInitOtp,
@@ -47,7 +49,7 @@ export function SmsOtpDrawer({
   onResetOtp,
   onSubmitCode,
   smsState,
-}: SmsOtpDrawerProps) {
+}: VerifyPhoneNumberDrawerProps) {
   const step = smsState?.otpId ? "otp" : "phone";
   const isResolvingPhoneNumber = !!smsState?.phoneNumber.endsWith("*");
 
@@ -55,9 +57,8 @@ export function SmsOtpDrawer({
   // Re-synced from the confirmed phone number each time the drawer opens.
   const [phoneInput, setPhoneInput] = useState(smsState?.phoneNumber ?? "");
   const [otpCode, setOtpCode] = useState("");
-  const [sendingCode, setSendingCode] = useState(false);
-  const [phoneInputError, setPhoneInputError] = useState<string | undefined>();
-  const [otpCodeError, setOtpCodeError] = useState<string | undefined>();
+  const [error, setError] = useState<string | undefined>();
+  const [isPending, setIsPending] = useState(false);
   const [otpSentAt, setOtpSentAt] = useState<number | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(0);
   const phoneRef = useRef<HTMLInputElement>(null);
@@ -69,7 +70,8 @@ export function SmsOtpDrawer({
   const resetState = useCallback(() => {
     setPhoneInput("");
     setOtpCode("");
-    setOtpCodeError(undefined);
+    setError(undefined);
+    setIsPending(false);
     setOtpSentAt(null);
   }, []);
 
@@ -143,51 +145,51 @@ export function SmsOtpDrawer({
   const isOtpCodeValid = useMemo(() => otpCode.length == 6, [otpCode]);
 
   useEffect(() => {
-    if (phoneInputError && isPhoneInputValid) {
-      setPhoneInputError(undefined);
+    if (isPhoneInputValid && isOtpCodeValid) {
+      setError(undefined);
     }
-  }, [phoneInputError, isPhoneInputValid, setPhoneInputError]);
+  }, [isPhoneInputValid, isOtpCodeValid, setError]);
 
-  useEffect(() => {
-    if (otpCodeError && isOtpCodeValid) {
-      setOtpCodeError(undefined);
-    }
-  }, [otpCodeError, isOtpCodeValid, setOtpCodeError]);
-
-  const handleSubmit = useCallback(
+  const handleSubmitPhone = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (step === "phone") {
-        if (!isPhoneInputValid) {
-          setPhoneInputError("Invalid phone format");
-          return;
-        }
-        setPhoneInputError(undefined);
-        setSendingCode(true);
-        try {
-          await onInitOtp(phoneInput);
-        } catch (err) {
-          setPhoneInputError((err as Error).message ?? "Failed to send code");
-        } finally {
-          setSendingCode(false);
-        }
-      } else {
-        if (!isOtpCodeValid) {
-          setOtpCodeError("Invalid code");
-          return;
-        }
-        onSubmitCode(otpCode);
+      setError(undefined);
+      if (!isPhoneInputValid) {
+        setError("Invalid phone format");
+        return;
+      }
+      setIsPending(true);
+      try {
+        await onInitOtp(phoneInput);
+      } catch (err) {
+        console.error("onInitOtp error:", err);
+        setError((err as Error).message ?? "Failed to send code");
+      } finally {
+        setIsPending(false);
       }
     },
-    [
-      step,
-      phoneInput,
-      isPhoneInputValid,
-      otpCode,
-      isOtpCodeValid,
-      onInitOtp,
-      onSubmitCode,
-    ],
+    [phoneInput, isPhoneInputValid, onInitOtp],
+  );
+
+  const handleSubmitCode = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(undefined);
+      if (!isOtpCodeValid) {
+        setError("Invalid code");
+        return;
+      }
+      setIsPending(true);
+      try {
+        await onSubmitCode(otpCode);
+      } catch (err) {
+        console.error("onSubmitCode Error:", err);
+        setError((err as Error).message ?? "Failed to verify code");
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [otpCode, isOtpCodeValid, onSubmitCode],
   );
 
   const handleUseDifferentPhone = useCallback(() => {
@@ -196,17 +198,18 @@ export function SmsOtpDrawer({
   }, [onResetOtp, resetState]);
 
   const handleResend = useCallback(async () => {
-    if (secondsRemaining > 0 || sendingCode || !smsState) return;
-    setOtpCodeError(undefined);
-    setSendingCode(true);
+    if (secondsRemaining > 0 || isPending || !smsState) return;
+    setError(undefined);
+    setIsPending(true);
     try {
       await onResendOtp();
     } catch (err) {
-      setOtpCodeError((err as Error).message ?? "Failed to resend code");
+      console.error("onResendOtp Error:", err);
+      setError((err as Error).message ?? "Failed to resend code");
     } finally {
-      setSendingCode(false);
+      setIsPending(false);
     }
-  }, [secondsRemaining, sendingCode, smsState, onResendOtp]);
+  }, [secondsRemaining, isPending, smsState, onResendOtp]);
 
   const handleClose = (event?: Event) => {
     if (!isOpen) return; // avoid closing if another drawer is opening
@@ -217,11 +220,17 @@ export function SmsOtpDrawer({
   return (
     <Drawer isOpen={isOpen} onClose={handleClose}>
       <DrawerContent
-        title={`${isLogin ? "Log In" : "Sign Up"} with SMS`}
+        title={
+          purpose === "signup"
+            ? "Sign Up with SMS"
+            : purpose === "login"
+              ? "Log In with SMS"
+              : "Phone Verification"
+        }
         icon={<MobileIcon variant="solid" />}
       >
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {step === "phone" ? (
+        {step === "phone" ? (
+          <form onSubmit={handleSubmitPhone} className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
               <label
                 htmlFor="sms-phone"
@@ -234,29 +243,46 @@ export function SmsOtpDrawer({
                 inputId="sms-phone"
                 value={phoneInput}
                 setValue={setPhoneInput}
-                disabled={sendingCode || isResolvingPhoneNumber}
-                error={phoneInputError}
+                disabled={isPending || isResolvingPhoneNumber}
+                error={error}
                 placeholder={
                   isResolvingPhoneNumber ? smsState?.phoneNumber : undefined
                 }
                 userCountryCode={geoLocation?.countryCode}
               />
             </div>
-          ) : (
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
+
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                disabled={isPending || !isPhoneInputValid}
+                isLoading={isPending || isResolvingPhoneNumber}
+                className="flex-1"
+              >
+                Continue
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmitCode} className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
               <label htmlFor="sms-otp" className="text-xs text-foreground-300">
                 Please check {formatPhoneNumber(smsState?.phoneNumber ?? "")}{" "}
                 for a message from Cartridge and enter your code below.{" "}
-                {isLogin && allowSwitchPhoneNumber && onResetOtp && (
-                  <button
-                    type="button"
-                    onClick={handleUseDifferentPhone}
-                    disabled={sendingCode}
-                    className="text-primary-100 hover:underline disabled:opacity-50"
-                  >
-                    Use a different phone
-                  </button>
-                )}
+                {purpose === "login" &&
+                  allowSwitchPhoneNumber &&
+                  onResetOtp && (
+                    <button
+                      type="button"
+                      onClick={handleUseDifferentPhone}
+                      disabled={isPending}
+                      className="text-primary-100 hover:underline disabled:opacity-50"
+                    >
+                      Use a different phone
+                    </button>
+                  )}
               </label>
               <PinInput
                 type="numeric"
@@ -264,8 +290,8 @@ export function SmsOtpDrawer({
                 ref={otpRef}
                 value={otpCode}
                 onChange={setOtpCode}
-                disabled={sendingCode}
-                variant={otpCodeError ? "destructive" : "default"}
+                disabled={isPending}
+                variant={error ? "destructive" : "default"}
                 className="py-4"
               />
               {otpSentAt !== null && (
@@ -277,7 +303,7 @@ export function SmsOtpDrawer({
                     <button
                       type="button"
                       onClick={handleResend}
-                      disabled={sendingCode}
+                      disabled={isPending}
                       className="text-primary-100 hover:underline disabled:opacity-50"
                     >
                       Resend Code
@@ -285,26 +311,22 @@ export function SmsOtpDrawer({
                   )}
                 </p>
               )}
-              {otpCodeError && (
-                <p className="text-sm text-destructive">{otpCodeError}</p>
-              )}
             </div>
-          )}
 
-          <div className="flex gap-2">
-            <Button
-              type="submit"
-              disabled={
-                sendingCode ||
-                (step === "phone" ? !isPhoneInputValid : !isOtpCodeValid)
-              }
-              isLoading={sendingCode || isResolvingPhoneNumber}
-              className="flex-1"
-            >
-              {step === "phone" ? "Continue" : "Sign Up"}
-            </Button>
-          </div>
-        </form>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                disabled={isPending || !isOtpCodeValid}
+                isLoading={isPending || isResolvingPhoneNumber}
+                className="flex-1"
+              >
+                {purpose === "signup" ? "Sign Up" : "Continue"}
+              </Button>
+            </div>
+          </form>
+        )}
       </DrawerContent>
     </Drawer>
   );

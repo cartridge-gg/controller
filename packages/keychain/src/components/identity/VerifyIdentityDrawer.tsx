@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Button,
   DateSelect,
@@ -29,6 +29,17 @@ export function VerifyIdentityDrawer({
   const [lastName, setLastName] = useState("");
   const [dob, setDob] = useState<DateValue>({ year: "", month: "", day: "" });
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [error, setError] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (isOpen) {
+      setFirstName("");
+      setLastName("");
+      setDob({ year: "", month: "", day: "" });
+      setPhoneNumber("");
+      setError(undefined);
+    }
+  }, [isOpen]);
 
   const dobValid = isValidCalendarDate(dob);
   const phoneValid = useMemo(
@@ -44,27 +55,35 @@ export function VerifyIdentityDrawer({
     isError: isVerifyError,
     error: verifyError,
   } = useAccountVerifyMutation();
-  const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    if (isVerifyError && verifyError) {
+      setError(verifyError.toString());
+    }
+  }, [isVerifyError, verifyError]);
 
   const handleVerifyIdentity = useCallback(async () => {
-    setError(undefined);
-    const result = await verifyAsync({
-      input: {
-        firstName,
-        lastName,
-        dob: `${dob.year}-${("0" + dob.month).slice(-2)}-${("0" + dob.day).slice(-2)}`, // YYYY-MM-DD
-        phoneNumber,
-        // emailAddress, // not stored, do proper verification
-        // sandbox: true, //returns true, but do not store
-      },
-    });
-    if (!result.accountVerify) {
-      console.error("Account verification failed");
-      setError("Account verification failed");
-      return;
+    try {
+      setError(undefined);
+      const result = await verifyAsync({
+        input: {
+          firstName,
+          lastName,
+          dob: `${dob.year}-${("0" + dob.month).slice(-2)}-${("0" + dob.day).slice(-2)}`, // YYYY-MM-DD
+          phoneNumber,
+          // emailAddress, // not stored, do proper verification
+          // sandbox: true, //returns true, but do not store
+        },
+      });
+      if (!result.accountVerify) {
+        setError("Account verification failed");
+        return;
+      }
+      onVerified(true);
+      onClose();
+    } catch (err) {
+      console.error("verifyAsync error:", (err as Error).message);
     }
-    onVerified(true);
-    onClose();
   }, [verifyAsync, firstName, lastName, dob, phoneNumber, onVerified, onClose]);
 
   return (
@@ -123,9 +142,7 @@ export function VerifyIdentityDrawer({
             value={phoneNumber}
             setValue={setPhoneNumber}
           />
-          {(isVerifyError || error) && (
-            <ErrorMessage label={(verifyError as string) || error} />
-          )}
+          {error && <ErrorMessage label={error} />}
         </div>
 
         <Button

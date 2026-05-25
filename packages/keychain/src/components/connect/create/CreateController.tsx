@@ -33,8 +33,11 @@ import { useDevice } from "@/hooks/device";
 import { posthog } from "@/components/provider/posthog";
 import { AccountSearchResult } from "@/hooks/account";
 import { PasswordFormDrawer } from "./password/PasswordForm";
-import { SmsOtpDrawer, SmsOtpState } from "./sms/SmsOtpForm";
 import { SignerPendingDrawer } from "./SignerPendingDrawer";
+import {
+  VerifyPhoneNumberDrawer,
+  SmsOtpState,
+} from "@/components/identity/VerifyPhoneNumberDrawer";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -53,7 +56,7 @@ interface CreateControllerViewProps {
   onSubmit: (authenticationMode?: AuthOption, otpCode?: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onInitOtp: (phoneNumber: string) => Promise<void>;
-  onResendOtp: () => void;
+  onResendOtp: () => Promise<void>;
   onResetOtp: () => void;
   smsState: SmsOtpState | null;
   isSlot?: boolean;
@@ -445,15 +448,15 @@ export function CreateControllerView({
         onClose={onClose}
         onSubmit={onSubmit}
       />
-      <SmsOtpDrawer
+      <VerifyPhoneNumberDrawer
         isOpen={authenticationStep === AuthenticationStep.SmsForm}
-        isLogin={isLogin}
+        purpose={isLogin ? "login" : "signup"}
         allowSwitchPhoneNumber={smsSignerCount > 1}
         onClose={onClose}
         onInitOtp={onInitOtp}
         onResendOtp={onResendOtp}
         onResetOtp={onResetOtp}
-        onSubmitCode={(otpCode: string) => onSubmit("sms", otpCode)}
+        onSubmitCode={async (otpCode: string) => onSubmit("sms", otpCode)}
         smsState={smsState}
       />
       <SignerPendingDrawer

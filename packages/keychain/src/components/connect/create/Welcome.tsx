@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useController } from "@/hooks/controller";
 import { useRouteCompletion } from "@/hooks/route";
@@ -10,7 +10,7 @@ import {
   Button,
 } from "@cartridge/controller-ui";
 import Confetti from "react-confetti";
-import { VerifyIdentityDrawer } from "@/components/identity/VerifyIdentityDrawer";
+import { useIdentityContext } from "@/components/identity/provider";
 
 export function Welcome() {
   const { setOnModalClose } = useConnection();
@@ -18,11 +18,11 @@ export function Welcome() {
   const { controller } = useController();
   const username = controller?.username() ?? "";
   const primaryColor = useCSSCustomProperty("--primary-100").trim();
-  const [isVerifyOpen, setIsVerifyOpen] = useState(false);
+  const { initiateIdentityVerification } = useIdentityContext();
 
   useEffect(() => {
     setOnModalClose?.(handleCompletion);
-  }, [handleCompletion, setOnModalClose]);
+  }, [setOnModalClose, handleCompletion]);
 
   return (
     <>
@@ -48,7 +48,10 @@ export function Welcome() {
       </LayoutContent>
 
       <LayoutFooter className="py-4">
-        <Button className="w-full" onClick={() => setIsVerifyOpen(true)}>
+        <Button
+          className="w-full"
+          onClick={() => initiateIdentityVerification()}
+        >
           Verify Identity
         </Button>
         <Button
@@ -59,12 +62,6 @@ export function Welcome() {
           Skip
         </Button>
       </LayoutFooter>
-
-      <VerifyIdentityDrawer
-        isOpen={isVerifyOpen}
-        onClose={() => setIsVerifyOpen(false)}
-        onVerified={() => {}}
-      />
     </>
   );
 }

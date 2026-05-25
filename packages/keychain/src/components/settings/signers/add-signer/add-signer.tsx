@@ -8,9 +8,9 @@ import {
 import { SignerPendingDrawer } from "@/components/connect/create/SignerPendingDrawer";
 import { useSmsAuthentication } from "@/components/connect/create/sms";
 import {
-  SmsOtpDrawer,
+  VerifyPhoneNumberDrawer,
   SmsOtpState,
-} from "@/components/connect/create/sms/SmsOtpForm";
+} from "@/components/identity/VerifyPhoneNumberDrawer";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -155,9 +155,10 @@ export function AddSignerDrawer({
   );
 
   const handleResendOtp = useCallback(async () => {
-    if (smsState?.phoneNumber) {
-      await handleInitOtp(smsState.phoneNumber);
+    if (!smsState?.phoneNumber) {
+      throw new Error("No phone number");
     }
+    await handleInitOtp(smsState.phoneNumber);
   }, [handleInitOtp, smsState?.phoneNumber]);
 
   const handleSubmitSms = useCallback(
@@ -265,9 +266,9 @@ export function AddSignerDrawer({
         </DrawerContent>
       </Drawer>
 
-      <SmsOtpDrawer
+      <VerifyPhoneNumberDrawer
         isOpen={isSmsOpen}
-        isLogin={false}
+        purpose="signup"
         onClose={handleClose}
         onInitOtp={handleInitOtp}
         onResendOtp={handleResendOtp}

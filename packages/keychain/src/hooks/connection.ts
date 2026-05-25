@@ -391,9 +391,12 @@ export function useConnectionValue() {
 
   // Using ref because create controller is async and state will not update before it resolves
   const isNewControllerRef = useRef(false);
-  const setIsNewController = (value: boolean) => {
-    isNewControllerRef.current = value;
-  };
+  const setIsNewController = useCallback(
+    (value: boolean) => {
+      isNewControllerRef.current = value;
+    },
+    [isNewControllerRef],
+  );
 
   // Decide which WebAuthn ceremonies need to escape the iframe.
   // `create` covers passkey registration, `get` covers passkey login/session auth.

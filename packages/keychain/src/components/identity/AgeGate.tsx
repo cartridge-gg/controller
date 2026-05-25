@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Button,
   HeaderInner,
@@ -10,32 +10,28 @@ import { defaultTheme } from "@cartridge/presets";
 import { useConnection } from "@/hooks/connection";
 import { useRequireAgeVerification } from "@/utils/age-gate";
 import { useRouteCompletion } from "@/hooks/route";
-import { VerifyIdentityDrawer } from "./VerifyIdentityDrawer";
+import { useIdentityContext } from "./provider";
 
 export function AgeGate() {
   const { theme } = useConnection();
   const handleCompletion = useRouteCompletion();
-  const [isVerifyOpen, setIsVerifyOpen] = useState(false);
+  const { initiateIdentityVerification, isIdentityVerified, isVerifying } =
+    useIdentityContext();
 
   const gameName =
     theme.name && theme.name !== defaultTheme.name ? theme.name : "This game";
 
   const { requiresAgeVerification, minimumAge } = useRequireAgeVerification();
 
-  const [verified, setVerified] = useState<boolean | undefined>(undefined);
-
   const passsed: boolean | undefined = useMemo(() => {
-    if (requiresAgeVerification === false) {
-      return true;
-    }
-    return verified;
-  }, [requiresAgeVerification, verified]);
+    return !requiresAgeVerification || isIdentityVerified;
+  }, [requiresAgeVerification, isIdentityVerified]);
 
   return (
     <>
       <HeaderInner title="Age Restricted" icon={<WarningIcon size="lg" />} />
       <LayoutContent className="p-4 text-sm">
-        {isVerifyOpen ? (
+        {isVerifying ? (
           <p className="text-foreground-300">Verifying your identity...</p>
         ) : passsed === true ? (
           <p className="text-foreground-300">You can play {gameName}.</p>
@@ -58,21 +54,12 @@ export function AgeGate() {
       </LayoutContent>
       <LayoutFooter>
         {passsed === undefined ? (
-          <>
-            <Button
-              className="w-full"
-              onClick={() => setIsVerifyOpen(true)}
-              disabled={isVerifyOpen}
-            >
-              Verify Identity
-            </Button>
-
-            <VerifyIdentityDrawer
-              isOpen={isVerifyOpen}
-              onClose={() => setIsVerifyOpen(false)}
-              onVerified={setVerified}
-            />
-          </>
+          <Button
+            className="w-full"
+            onClick={() => initiateIdentityVerification()}
+          >
+            Verify Identity
+          </Button>
         ) : (
           <Button
             className="w-full"
