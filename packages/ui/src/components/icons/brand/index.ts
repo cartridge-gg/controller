@@ -9,6 +9,7 @@ export * from "./cartridge-face";
 export * from "./chrome";
 export * from "./controller";
 export * from "./controller-account";
+export * from "./coinbase";
 export * from "./coinbase-wallet";
 export * from "./credit";
 export * from "./discord";

@@ -5,7 +5,7 @@ import {
   LayoutFooter,
   SpinnerIcon,
   Button,
-  CoinbaseWalletColorIcon,
+  CoinbaseIcon,
   ExternalIcon,
   cn,
 } from "@cartridge/controller-ui";
@@ -308,13 +308,12 @@ export function CoinbaseCheckout({
       >
         {!hideHeader && (
           <HeaderInner
-            title="Coinbase"
-            description="Policies"
-            icon={<CoinbaseWalletColorIcon size="lg" />}
+            title="Coinbase Policies"
+            icon={<CoinbaseIcon size="lg" />}
           />
         )}
-        <LayoutContent className="p-4 flex flex-col gap-4">
-          <div className="bg-[#181C19] border border-background-200 p-4 rounded-[4px] text-xs text-foreground-300">
+        <LayoutContent className="p-3 flex flex-col gap-4">
+          <div className="bg-[#181C19] border border-background-200 p-3 rounded-[4px] text-xs text-foreground-300">
             By clicking 'Continue' you are agreeing to the following Coinbase
             policies.
           </div>
@@ -430,7 +429,7 @@ function PolicyLink({ label, href }: { label: string; href: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center w-full justify-between p-3 border border-background-200 rounded-[4px] text-sm text-foreground-100">
-        <span className="text-[#DEB06B]">{label}</span>
+        {label}
       </div>
       <a
         href={href}
