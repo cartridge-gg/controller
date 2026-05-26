@@ -1,12 +1,29 @@
 import { useMemo } from "react";
 import {
+  getCountries,
+  getCountryCallingCode,
+  type CountryCode,
+} from "libphonenumber-js/min";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
 } from "@/components/primitives/select";
-import { COUNTRIES, DEFAULT_COUNTRY } from "./countries";
 import { cn } from "@/utils";
+
+const REGION_NAMES =
+  typeof Intl !== "undefined" && "DisplayNames" in Intl
+    ? new Intl.DisplayNames(["en"], { type: "region" })
+    : undefined;
+
+function countryDisplayName(code: CountryCode): string {
+  return REGION_NAMES?.of(code) ?? code;
+}
+
+function dialFor(code: CountryCode): string {
+  return `+${getCountryCallingCode(code)}`;
+}
 
 export interface PhoneCountryCodeSelectProps {
   /** ISO 3166-1 alpha-2 country code (e.g. "US", "GB"). */
@@ -30,22 +47,17 @@ export function PhoneCountryCodeSelect({
   allowedCountries,
   userCountryCode,
 }: PhoneCountryCodeSelectProps) {
-  const selected = useMemo(
-    () =>
-      COUNTRIES.find((c) => c.code === value) ??
-      (userCountryCode
-        ? COUNTRIES.find((c) => c.code === userCountryCode)
-        : undefined) ??
-      COUNTRIES.find((c) => c.code === DEFAULT_COUNTRY),
-    [value, userCountryCode],
-  );
-  const visibleCountries = useMemo(
-    () =>
-      allowedCountries?.length
-        ? COUNTRIES.filter((c) => allowedCountries.includes(c.code))
-        : COUNTRIES,
-    [allowedCountries],
-  );
+  const options = useMemo(() => {
+    const all = getCountries();
+    const filtered = allowedCountries?.length
+      ? all.filter((c) => allowedCountries.includes(c))
+      : all;
+    return filtered
+      .map((c) => ({ code: c, name: countryDisplayName(c), dial: dialFor(c) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [allowedCountries]);
+
+  const selected = options.find((o) => o.code === value);
 
   return (
     <Select
@@ -59,13 +71,13 @@ export function PhoneCountryCodeSelect({
         aria-label="Country area code"
         arrow
       >
-        <span>{selected?.dial_code ?? ""}</span>
+        <span>{selected?.dial ?? ""}</span>
       </SelectTrigger>
       <SelectContent>
-        {visibleCountries.map((country) => (
+        {options.map((country) => (
           <SelectItem key={country.code} value={country.code}>
             <span className="font-mono inline-block w-[6ch]">
-              {country.dial_code}
+              {country.dial}
             </span>
             <span>{country.name}</span>
           </SelectItem>
