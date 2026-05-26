@@ -110,7 +110,6 @@ export const SignersSection = ({
 
       <Button
         variant="sans"
-        className="px-3"
         disabled={chainId !== constants.StarknetChainId.SN_MAIN}
         onClick={() => setIsAddSignerOpen(true)}
       >

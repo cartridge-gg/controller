@@ -169,7 +169,6 @@ export const UserDataSection = () => {
         {!verifiedIdentity && (
           <Button
             variant="sans"
-            className="px-3"
             onClick={() => initiateIdentityVerification()}
             disabled={!!verifiedIdentity}
           >
@@ -180,7 +179,6 @@ export const UserDataSection = () => {
         {!verifiedPhoneNumber && (
           <Button
             variant="sans"
-            className="px-3"
             onClick={() => initiatePhoneNumberVerification()}
             disabled={!!verifiedPhoneNumber}
           >
@@ -191,7 +189,6 @@ export const UserDataSection = () => {
         {!verifiedEmail && (
           <Button
             variant="sans"
-            className="px-3"
             onClick={() => initiateEmailVerification()}
             disabled={!!verifiedEmail}
           >

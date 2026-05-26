@@ -70,7 +70,6 @@ export const ConnectionsSection = () => {
       {!hasAllConnections && (
         <Button
           variant="sans"
-          className="px-3"
           onClick={() => navigate("/settings/add-connection")}
         >
           <PlusIcon size="sm" variant="line" />

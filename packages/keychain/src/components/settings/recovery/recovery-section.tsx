@@ -18,11 +18,7 @@ export const RecoveryAccountSection = () => {
           ))}
         </div>
       )}
-      <Button
-        variant="sans"
-        className="px-3"
-        onClick={() => navigate("/settings/recovery")}
-      >
+      <Button variant="sans" onClick={() => navigate("/settings/recovery")}>
         <PlusIcon size="sm" variant="line" />
         Add Recovery Account
       </Button>

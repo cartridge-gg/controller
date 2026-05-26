@@ -38,7 +38,7 @@ export function RegisteredAccountSection() {
           />
         ))}
       </div>
-      <Button variant="sans" className="px-3">
+      <Button variant="sans">
         <PlusIcon size="sm" variant="line" />
         Add Account
       </Button>

@@ -7,11 +7,7 @@ export function DelegateAccountSection() {
   return (
     <section className="space-y-4">
       <SectionHeader kind="delegate" />
-      <Button
-        variant="sans"
-        className="px-3"
-        onClick={() => navigate("/settings/delegate")}
-      >
+      <Button variant="sans" onClick={() => navigate("/settings/delegate")}>
         <PlusIcon size="sm" variant="line" />
         Set Delegate Account
       </Button>
