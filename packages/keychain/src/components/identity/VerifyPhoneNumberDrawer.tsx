@@ -9,6 +9,7 @@ import {
   formatPhoneNumber,
 } from "@cartridge/controller-ui";
 import { isValidPhoneNumber } from "@/utils/input";
+import { InvalidVerificationCodeError, VerifyErrorAlert } from "./error";
 import { getIpLocation } from "@/utils";
 import { IpLocation } from "@/utils/ip";
 
@@ -20,16 +21,6 @@ export interface SmsOtpState {
 }
 
 export type VerificationPurpose = "signup" | "login" | "identity";
-
-// Thrown when the backend rejects an OTP code as invalid or expired. The
-// drawer treats this as recoverable (let the user re-enter the code); any
-// other error is treated as fatal and replaces the submit button with Close.
-export class InvalidVerificationCodeError extends Error {
-  constructor(message = "Invalid or expired verification code") {
-    super(message);
-    this.name = "InvalidVerificationCodeError";
-  }
-}
 
 interface VerifyPhoneNumberDrawerProps {
   isOpen: boolean;
@@ -174,7 +165,6 @@ export function VerifyPhoneNumberDrawer({
       try {
         await onInitOtp(phoneInput);
       } catch (err) {
-        console.error("onInitOtp error:", err);
         setError((err as Error).message ?? "Failed to send code");
       } finally {
         setIsPending(false);
@@ -195,9 +185,8 @@ export function VerifyPhoneNumberDrawer({
       try {
         await onSubmitCode(otpCode);
       } catch (err) {
-        console.error("onSubmitCode Error:", err);
-        setError((err as Error).message ?? "Failed to verify code");
         if (!(err instanceof InvalidVerificationCodeError)) {
+          setError((err as Error).message ?? "Failed to verify code");
           setIsFatalCodeError(true);
         }
       } finally {
@@ -267,7 +256,7 @@ export function VerifyPhoneNumberDrawer({
               />
             </div>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <VerifyErrorAlert error={error} />}
 
             <div className="flex gap-2">
               <Button
@@ -328,7 +317,7 @@ export function VerifyPhoneNumberDrawer({
               )}
             </div>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <VerifyErrorAlert error={error} />}
 
             <div className="flex gap-2">
               {isFatalCodeError ? (

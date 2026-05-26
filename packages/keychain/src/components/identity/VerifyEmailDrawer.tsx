@@ -8,7 +8,7 @@ import {
   PinInput,
 } from "@cartridge/controller-ui";
 import { isValidEmailAddress } from "@/utils/input";
-import { InvalidVerificationCodeError } from "./VerifyPhoneNumberDrawer";
+import { InvalidVerificationCodeError, VerifyErrorAlert } from "./error";
 
 export interface EmailOtpState {
   email: string;
@@ -124,7 +124,6 @@ export function VerifyEmailDrawer({
       try {
         await onInitOtp(emailInput);
       } catch (err) {
-        console.error("onInitOtp error:", err);
         setError((err as Error).message ?? "Failed to send code");
       } finally {
         setIsPending(false);
@@ -145,7 +144,6 @@ export function VerifyEmailDrawer({
       try {
         await onSubmitCode(otpCode);
       } catch (err) {
-        console.error("onSubmitCode Error:", err);
         setError((err as Error).message ?? "Failed to verify code");
         if (!(err instanceof InvalidVerificationCodeError)) {
           setIsFatalCodeError(true);
@@ -202,7 +200,7 @@ export function VerifyEmailDrawer({
               />
             </div>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <VerifyErrorAlert error={error} />}
 
             <div className="flex gap-2">
               <Button
@@ -254,7 +252,7 @@ export function VerifyEmailDrawer({
               )}
             </div>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <VerifyErrorAlert error={error} />}
 
             <div className="flex gap-2">
               {isFatalCodeError ? (

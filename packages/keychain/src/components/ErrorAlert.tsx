@@ -79,12 +79,15 @@ export function ErrorAlert({
     }
   }, [variant]);
 
+  const noContents = !description;
+
   return (
     <Accordion
       type="single"
       collapsible={collapsible}
       defaultValue={isExpanded ? "item-1" : undefined}
       className={className}
+      disabled={noContents}
     >
       <AccordionItem
         value="item-1"
@@ -95,7 +98,7 @@ export function ErrorAlert({
         )}
       >
         <AccordionTrigger
-          hideIcon={!collapsible}
+          hideIcon={!collapsible || noContents}
           color={"text-destructive-100"}
           tabIndex={collapsible ? undefined : -1}
           className={`px-3 pt-2.5 pb-2 items-start gap-2`}

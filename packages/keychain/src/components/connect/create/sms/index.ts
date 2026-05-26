@@ -11,7 +11,7 @@ import {
 import { WalletAdapter } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
-import { InvalidVerificationCodeError } from "@/components/identity/VerifyPhoneNumberDrawer";
+import { InvalidVerificationCodeError } from "@/components/identity/error";
 
 type InitSmsInput = { phoneNumber: string } | { username: string };
 

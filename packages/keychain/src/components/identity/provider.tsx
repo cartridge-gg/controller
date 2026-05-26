@@ -19,8 +19,8 @@ import { VerifyIdentityDrawer } from "./VerifyIdentityDrawer";
 import {
   VerifyPhoneNumberDrawer,
   SmsOtpState,
-  InvalidVerificationCodeError,
 } from "./VerifyPhoneNumberDrawer";
+import { InvalidVerificationCodeError } from "./error";
 import { VerifyEmailDrawer, EmailOtpState } from "./VerifyEmailDrawer";
 import { useConnection } from "@/hooks/connection";
 
