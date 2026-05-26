@@ -4,9 +4,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Provider } from "./index";
 
 const mockUseConnectionValue = vi.fn();
+const mockController = {
+  username: vi.fn().mockReturnValue("testuser"),
+  address: vi.fn().mockReturnValue("0x123456789abcdef"),
+  chainId: vi.fn().mockReturnValue(0n),
+};
+const mockUseConnection = {
+  controller: mockController,
+};
 
 vi.mock("@/hooks/connection", () => ({
   useConnectionValue: () => mockUseConnectionValue(),
+  useConnection: () => mockUseConnection,
 }));
 
 vi.mock("@/components/provider/upgrade", () => ({
@@ -45,6 +54,8 @@ vi.mock("@turnkey/sdk-react", () => ({
 vi.mock("react-query", () => ({
   QueryClient: class {},
   QueryClientProvider: ({ children }: PropsWithChildren) => <>{children}</>,
+  useQuery: vi.fn(),
+  useMutation: vi.fn(),
 }));
 
 vi.mock("starknet", () => ({
@@ -57,6 +68,7 @@ vi.mock("starknet", () => ({
   num: {
     toBigInt: () => 0n,
   },
+  getChecksumAddress: vi.fn((addr: string) => addr),
 }));
 
 vi.mock("./posthog", () => ({
@@ -98,10 +110,29 @@ vi.mock("@cartridge/controller-ui/utils/api/indexer", () => ({
 
 vi.mock("@cartridge/controller-ui/utils/api/cartridge", () => ({
   CartridgeAPIProvider: ({ children }: PropsWithChildren) => <>{children}</>,
+  CartridgeAPIContext: vi.fn(() => ({ url: "" })),
+  useMeQuery: vi.fn(() => ({ data: {} })),
+  useSendEmailVerificationMutation: vi.fn(() => ({})),
+  useSendPhoneVerificationMutation: vi.fn(() => ({})),
+  useVerifyEmailMutation: vi.fn(() => ({})),
+  useVerifyPhoneMutation: vi.fn(() => ({})),
+}));
+
+vi.mock("@cartridge/controller-ui/utils", () => ({
+  useCartridgeAPI: vi.fn(() => ({})),
+}));
+
+vi.mock("@/utils/api", () => ({
+  useAccountPrivateQuery: vi.fn(() => ({})),
+  useAccountVerifyMutation: vi.fn(() => ({})),
 }));
 
 vi.mock("../ErrorBoundary", () => ({
   ErrorBoundary: ({ children }: PropsWithChildren) => <>{children}</>,
+}));
+
+vi.mock("@/components/identity/provider", () => ({
+  IdentityProvider: ({ children }: PropsWithChildren) => <>{children}</>,
 }));
 
 vi.mock("@cartridge/arcade/marketplace/react", () => ({
@@ -112,6 +143,7 @@ vi.mock("@cartridge/arcade/marketplace/react", () => ({
 
 vi.mock("@cartridge/controller-ui", () => ({
   SpinnerIcon: () => <div data-testid="loading-spinner" />,
+  isValidCalendarDate: () => true,
 }));
 
 const baseConnection = {
