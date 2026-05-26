@@ -17,10 +17,12 @@ type Story = StoryObj<typeof UIPhoneNumberInput>;
 
 function PhoneNumberInput({
   initialValue = "",
+  sourceValue,
   allowedCountries,
   userCountryCode,
 }: {
   initialValue?: string;
+  sourceValue?: string;
   allowedCountries?: string[];
   userCountryCode?: string;
 }) {
@@ -30,6 +32,7 @@ function PhoneNumberInput({
       <UIPhoneNumberInput
         value={value}
         setValue={setValue}
+        sourceValue={sourceValue}
         allowedCountries={allowedCountries}
         userCountryCode={userCountryCode}
       />
@@ -74,4 +77,16 @@ export const UserCountryCodeAsync: Story = {
 
 export const UserCountryCodeInvalid: Story = {
   render: () => <PhoneNumberInput userCountryCode={"UK"} />,
+};
+
+export const PrefilledFromSource: Story = {
+  render: () => (
+    <div className="flex flex-col gap-2">
+      <PhoneNumberInput sourceValue="+1612345678" />
+      <PhoneNumberInput sourceValue="+5511954377882" />
+      <PhoneNumberInput sourceValue="+2650909302932" />
+      <PhoneNumberInput sourceValue="+306123456789" />
+      <PhoneNumberInput sourceValue="+330612345678" />
+    </div>
+  ),
 };

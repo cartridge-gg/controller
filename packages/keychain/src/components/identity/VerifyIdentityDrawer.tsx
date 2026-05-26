@@ -18,12 +18,15 @@ interface VerifyIdentityDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onVerified: (result: boolean) => void;
+  /** Existing E.164 phone number to prefill into the form, if any. */
+  initialPhoneNumber?: string | null;
 }
 
 export function VerifyIdentityDrawer({
   isOpen,
   onClose,
   onVerified,
+  initialPhoneNumber,
 }: VerifyIdentityDrawerProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -141,6 +144,7 @@ export function VerifyIdentityDrawer({
             inputId="verify-identity-phone"
             value={phoneNumber}
             setValue={setPhoneNumber}
+            sourceValue={initialPhoneNumber}
           />
           {error && <ErrorMessage label={error} />}
         </div>

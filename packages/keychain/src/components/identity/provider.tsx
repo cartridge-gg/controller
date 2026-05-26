@@ -307,6 +307,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
           await identityVerifiedCallback?.();
           closeCurrentDrawer();
         }}
+        initialPhoneNumber={userData.phoneNumber}
       />
 
       <VerifyEmailDrawer

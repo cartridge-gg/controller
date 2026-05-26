@@ -52,6 +52,11 @@ export interface PhoneNumberInputProps {
   /** Full E.164 phone number (e.g. "+12345678900"). */
   value: string;
   setValue: (value: string) => void;
+  /** Seed value parsed once to prefill country + digits whenever `value`
+   * is empty. Lets the parent hand off an existing number (e.g. from a
+   * profile) without managing country detection. After seeding, the
+   * component is fully controlled by `value`/`setValue`. */
+  sourceValue?: string | null;
   /** External error message (e.g. API failure). */
   error?: string;
   disabled?: boolean;
@@ -71,7 +76,16 @@ export const PhoneNumberInput = forwardRef<
   HTMLInputElement,
   PhoneNumberInputProps
 >(function PhoneNumberInput(
-  { value, setValue, error, disabled, allowedCountries, inputId, placeholder },
+  {
+    value,
+    setValue,
+    sourceValue,
+    error,
+    disabled,
+    allowedCountries,
+    inputId,
+    placeholder,
+  },
   ref,
 ) {
   const lockedCountry =
@@ -83,7 +97,8 @@ export const PhoneNumberInput = forwardRef<
 
   const [country, setCountry] = useState<CountryCode>(() => {
     if (lockedCountry) return lockedCountry;
-    const detected = detectCountry(value);
+    const seed = value || sourceValue || "";
+    const detected = detectCountry(seed);
     if (detected && isAllowed(detected)) return detected;
     const fallback = allowedCountries?.find(isCountryCode);
     return fallback ?? DEFAULT_COUNTRY;
@@ -105,6 +120,32 @@ export const PhoneNumberInput = forwardRef<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, dialCode, lockedCountry, allowedCountries]);
+
+  // Seed `value` from `sourceValue` while the field is empty. Re-fires if
+  // the parent resets `value` to "" (e.g. reopening a form), so a fresh
+  // prefill flows in without remounting.
+  //
+  // We slice the calling code off the raw digits rather than using the
+  // parsed E.164 number — libphonenumber strips national trunk prefixes
+  // (e.g. the leading 0 in "+2650909302932") during normalization, and
+  // we want to preserve the source verbatim for editing.
+  useEffect(() => {
+    if (!sourceValue || value) return;
+    const ayt = new AsYouType();
+    ayt.input(sourceValue);
+    const detected = ayt.getCountry();
+    const digits = sourceValue.replace(/\D/g, "");
+    if (!digits) return;
+    if (detected) {
+      const callingCode = getCountryCallingCode(detected);
+      const nationalDigits = digits.startsWith(callingCode)
+        ? digits.slice(callingCode.length)
+        : digits;
+      setValue(`+${callingCode}${nationalDigits}`);
+    } else {
+      setValue(`${dialCode}${digits}`);
+    }
+  }, [sourceValue, value, setValue, dialCode]);
 
   const digits = useMemo(
     () => nationalDigitsOf(value, effectiveCountry),
