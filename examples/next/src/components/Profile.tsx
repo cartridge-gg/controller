@@ -147,7 +147,16 @@ export function Profile() {
           <Button
             onClick={() => ctrlConnector.controller.openProfileAt("/age-gate")}
           >
-            Age Gate
+            Age Gate (WIP)
+          </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                "/purchase/verification?method=apple-pay",
+              )
+            }
+          >
+            Apple Pay / Coinbase
           </Button>
           <Button
             onClick={() =>
@@ -157,15 +166,6 @@ export function Profile() {
             }
           >
             Coinflow
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileAt(
-                "/purchase/verification?method=apple-pay",
-              )
-            }
-          >
-            Coinbase / Apple Pay
           </Button>
         </div>
       </div>

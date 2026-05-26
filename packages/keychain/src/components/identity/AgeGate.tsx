@@ -23,8 +23,11 @@ export function AgeGate() {
 
   const { requiresAgeVerification, minimumAge } = useRequireAgeVerification();
 
-  const passsed: boolean | undefined = useMemo(() => {
-    return !requiresAgeVerification || isIdentityVerified;
+  const passsed = useMemo<boolean | undefined>(() => {
+    if (requiresAgeVerification === false) {
+      return true;
+    }
+    return isIdentityVerified;
   }, [requiresAgeVerification, isIdentityVerified]);
 
   return (
@@ -53,19 +56,16 @@ export function AgeGate() {
         )}
       </LayoutContent>
       <LayoutFooter>
-        {passsed === undefined ? (
+        {passsed !== true ? (
           <Button
             className="w-full"
+            isLoading={isVerifying}
             onClick={() => initiateIdentityVerification()}
           >
             Verify Identity
           </Button>
         ) : (
-          <Button
-            className="w-full"
-            disabled={!passsed}
-            onClick={handleCompletion}
-          >
+          <Button className="w-full" onClick={handleCompletion}>
             Continue
           </Button>
         )}
