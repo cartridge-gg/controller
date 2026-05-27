@@ -18,7 +18,7 @@ import { ConnectionsSection } from "./connections/connections-section";
 import { RecoveryAccountSection } from "./recovery/recovery-section";
 // import { DelegateAccountSection } from "./delegate-account-section";
 import { RegisteredAccountSection } from "./registered-account-section";
-import { CurrencySection } from "./currency-section";
+// import { CurrencySection } from "./currency-section";
 import { UserDataSection } from "./user-data-section";
 import { DeleteAccountSection } from "./delete-account-section";
 import { useFeature } from "@/hooks/features";
@@ -69,7 +69,7 @@ export function Settings() {
 
         <UserDataSection />
 
-        <CurrencySection />
+        {/* <CurrencySection /> */}
 
         <DeleteAccountSection />
       </LayoutContent>
