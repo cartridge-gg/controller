@@ -7,7 +7,6 @@ import {
   LayoutFooter,
   MobileIcon,
   SocialCard,
-  SpinnerIcon,
   UserIcon,
 } from "@cartridge/controller-ui";
 import { useNavigation } from "@/context";
@@ -23,11 +22,18 @@ interface VerificationProps {
   /** Called when verification completes. When provided, suppresses the
    * default navigation to /purchase/checkout/{method}. */
   onSuccess?: () => void;
+  // headless mode
+  // do not display page, only trigger drawers
+  // call onClose when done
+  headless?: boolean;
+  onClose?: () => void;
 }
 
 export function Verification({
   method: methodProp,
   onSuccess,
+  headless,
+  onClose,
 }: VerificationProps = {}) {
   const { navigate } = useNavigation();
   const location = useLocation();
@@ -42,6 +48,7 @@ export function Verification({
     isPhoneNumberVerified,
     initiateEmailVerification,
     initiatePhoneNumberVerification,
+    isCanceled,
   } = useIdentityContext();
 
   const steps = useMemo(
@@ -51,7 +58,7 @@ export function Verification({
         text: "Email Address",
         icon: <EnvelopeIcon />,
         onClick: initiateEmailVerification,
-        required: method === "apple-pay" || method === "coinflow",
+        required: !method || method === "apple-pay" || method === "coinflow",
         completed: isEmailVerified,
       },
       {
@@ -59,7 +66,7 @@ export function Verification({
         text: "Phone Number",
         icon: <MobileIcon variant="solid" />,
         onClick: initiatePhoneNumberVerification,
-        required: method === "apple-pay",
+        required: !method || method === "apple-pay",
         completed: isPhoneNumberVerified,
       },
     ],
@@ -78,26 +85,35 @@ export function Verification({
     const stepIndex = index === -1 ? steps.length : index;
     return {
       currentStep: steps[stepIndex],
-      allVerified: stepIndex >= steps.length,
+      allVerified: !!method && stepIndex >= steps.length,
     };
-  }, [steps]);
+  }, [steps, method]);
 
   const startCurrentStep = useCallback(() => {
     currentStep?.onClick();
   }, [currentStep]);
 
   // auto open steps
+  const autoOpen = !!method && headless !== false;
   useEffect(() => {
-    if (!isLoadingUserData && currentStep?.key) {
+    if (!isLoadingUserData && currentStep?.key && autoOpen) {
       startCurrentStep();
     }
-  }, [isLoadingUserData, currentStep?.key, startCurrentStep]);
+  }, [isLoadingUserData, currentStep?.key, startCurrentStep, autoOpen]);
+
+  // close headless on cancel
+  useEffect(() => {
+    if (headless && isCanceled) {
+      onClose?.();
+    }
+  }, [headless, isCanceled, onClose]);
 
   // Hand off to the caller once every required step is complete.
   useEffect(() => {
     if (isLoadingUserData || !allVerified) return;
     if (onSuccess) {
       onSuccess();
+      onClose?.();
       return;
     }
     if (method) {
@@ -111,14 +127,10 @@ export function Verification({
         });
       }
     }
-  }, [allVerified, method, onSuccess, navigate, isLoadingUserData]);
+  }, [isLoadingUserData, allVerified, method, onSuccess, onClose, navigate]);
 
-  if (isLoadingUserData) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <SpinnerIcon className="animate-spin" />
-      </div>
-    );
+  if (headless !== undefined) {
+    return <></>;
   }
 
   return (
@@ -133,15 +145,17 @@ export function Verification({
           Complete these steps to verify your identity.
         </p>
         <div className="flex flex-col gap-[1px]">
-          {steps.map((step) => (
-            <SocialCard
-              key={step.key}
-              text={step.text}
-              icon={step.icon}
-              isCompleted={step.completed}
-              onClick={step.completed ? undefined : step.onClick}
-            />
-          ))}
+          {steps
+            .sort((a, b) => (a.completed ? -1 : b.completed ? 1 : 0))
+            .map((step) => (
+              <SocialCard
+                key={step.key}
+                text={step.text}
+                icon={step.icon}
+                isCompleted={step.completed}
+                onClick={step.completed ? undefined : step.onClick}
+              />
+            ))}
         </div>
       </LayoutContent>
       <LayoutFooter>
@@ -149,7 +163,7 @@ export function Verification({
           variant="primary"
           className="w-full"
           onClick={startCurrentStep}
-          isLoading={isVerifying}
+          isLoading={isLoadingUserData || isVerifying}
         >
           START VERIFICATION
         </Button>

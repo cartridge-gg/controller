@@ -27,6 +27,9 @@ export const UserDataSection = () => {
     userData,
     isLoadingUserData,
     isVerifying,
+    isIdentityVerified,
+    isEmailVerified,
+    isPhoneNumberVerified,
     refetchUserData,
     initiateIdentityVerification,
     initiatePhoneNumberVerification,
@@ -34,46 +37,38 @@ export const UserDataSection = () => {
   } = useIdentityContext();
 
   const verifiedIdentity = useMemo<VerifiedData | null>(() => {
-    if (
-      userData.firstName &&
-      userData.lastName &&
-      userData.dob &&
-      userData.proveVerifiedAt
-    ) {
+    if (isIdentityVerified) {
       return {
         label: `${userData.firstName} ${userData.lastName}, ${userData.age}yo`,
-        verifiedAt: userData.proveVerifiedAt,
+        verifiedAt: userData.proveVerifiedAt!,
         canDelete: true,
       };
     }
     return null;
-  }, [userData]);
+  }, [userData, isIdentityVerified]);
 
   const verifiedPhoneNumber = useMemo<VerifiedData | null>(() => {
-    if (
-      userData.phoneNumber &&
-      (userData.phoneNumberVerifiedAt || userData.proveVerifiedAt)
-    ) {
+    if (isPhoneNumberVerified) {
       return {
-        label: formatPhoneNumber(userData.phoneNumber),
+        label: formatPhoneNumber(userData.phoneNumber!),
         verifiedAt:
           userData.phoneNumberVerifiedAt || userData.proveVerifiedAt || "",
         canDelete: !!userData.phoneNumberVerifiedAt,
       };
     }
     return null;
-  }, [userData]);
+  }, [userData, isPhoneNumberVerified]);
 
   const verifiedEmail = useMemo<VerifiedData | null>(() => {
-    if (userData.email) {
+    if (isEmailVerified) {
       return {
-        label: userData.email,
+        label: userData.email!,
         verifiedAt: "",
         canDelete: true,
       };
     }
     return null;
-  }, [userData]);
+  }, [userData, isEmailVerified]);
 
   // mutation
   const deletePhoneNumberMutation = useDeletePhoneNumberMutation();

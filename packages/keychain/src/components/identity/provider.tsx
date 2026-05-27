@@ -24,6 +24,8 @@ import { InvalidVerificationCodeError } from "./error";
 import { VerifyEmailDrawer, EmailOtpState } from "./VerifyEmailDrawer";
 import { useConnection } from "@/hooks/connection";
 
+export type VerificationStepName = "identity" | "phoneNumber" | "email";
+
 export type IdentityContextValue = {
   userData: {
     firstName?: string | null;
@@ -37,6 +39,7 @@ export type IdentityContextValue = {
   };
   isLoadingUserData: boolean;
   isVerifying: boolean;
+  currentVerificationStep: VerificationStepName | null;
   refetchUserData: () => Promise<void>;
   initiateIdentityVerification: (cb?: () => Promise<void>) => void;
   initiatePhoneNumberVerification: (cb?: () => Promise<void>) => void;
@@ -44,12 +47,14 @@ export type IdentityContextValue = {
   isIdentityVerified: boolean;
   isPhoneNumberVerified: boolean;
   isEmailVerified: boolean;
+  isCanceled: boolean;
 };
 
 export const IdentityContext = createContext<IdentityContextValue>({
   userData: {},
   isLoadingUserData: false,
   isVerifying: false,
+  currentVerificationStep: null,
   refetchUserData: async () => {},
   initiateIdentityVerification: () => {},
   initiatePhoneNumberVerification: () => {},
@@ -57,9 +62,8 @@ export const IdentityContext = createContext<IdentityContextValue>({
   isIdentityVerified: false,
   isPhoneNumberVerified: false,
   isEmailVerified: false,
+  isCanceled: false,
 });
-
-type IdentityDrawerName = "identity" | "phoneNumber" | "email";
 
 const usePhoneNumberVerification = () => {
   const sendPhoneMutation = useSendPhoneVerificationMutation();
@@ -218,13 +222,20 @@ export function IdentityProvider({ children }: PropsWithChildren) {
   );
   const isEmailVerified = useMemo(() => !!userData.email, [userData.email]);
 
-  const [currentDrawerName, setCurrentDrawerName] = useState<
-    IdentityDrawerName | undefined
-  >(undefined);
+  const [currentVerificationStep, setCurrentVerificationStep] =
+    useState<VerificationStepName | null>(null);
 
+  // handle user canceling
+  const [isCanceled, setIsCanceled] = useState(false);
   const closeCurrentDrawer = useCallback(() => {
-    setCurrentDrawerName(undefined);
+    setCurrentVerificationStep(null);
+    setIsCanceled(true);
   }, []);
+  useEffect(() => {
+    if (isCanceled) {
+      setIsCanceled(false);
+    }
+  }, [isCanceled, setIsCanceled]);
 
   // identity/age verification (prove.com)
   const [identityVerifiedCallback, setIdentityVerifiedCallback] = useState<
@@ -233,7 +244,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
   const initiateIdentityVerification = useCallback(
     (cb?: () => Promise<void>) => {
       setIdentityVerifiedCallback(() => cb);
-      setCurrentDrawerName("identity");
+      setCurrentVerificationStep("identity");
     },
     [],
   );
@@ -254,7 +265,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
   const initiatePhoneNumberVerification = useCallback(
     (cb?: () => Promise<void>) => {
       setPhoneVerifiedCallback(() => cb);
-      setCurrentDrawerName("phoneNumber");
+      setCurrentVerificationStep("phoneNumber");
       setSmsState(null);
     },
     [setSmsState],
@@ -276,7 +287,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
   const initiateEmailVerification = useCallback(
     (cb?: () => Promise<void>) => {
       setEmailVerifiedCallback(() => cb);
-      setCurrentDrawerName("email");
+      setCurrentVerificationStep("email");
       setEmailState(null);
     },
     [setEmailState],
@@ -287,7 +298,9 @@ export function IdentityProvider({ children }: PropsWithChildren) {
       value={{
         userData,
         isLoadingUserData: isMeLoading || isPrivateLoading,
-        isVerifying: !!currentDrawerName,
+        isVerifying: !!currentVerificationStep,
+        isCanceled,
+        currentVerificationStep,
         refetchUserData,
         initiateIdentityVerification,
         initiatePhoneNumberVerification,
@@ -300,18 +313,18 @@ export function IdentityProvider({ children }: PropsWithChildren) {
       {children}
 
       <VerifyIdentityDrawer
-        isOpen={currentDrawerName === "identity"}
-        onClose={() => closeCurrentDrawer()}
+        isOpen={currentVerificationStep === "identity"}
+        onClose={closeCurrentDrawer}
         onVerified={async () => {
           await refetchUserData();
           await identityVerifiedCallback?.();
-          closeCurrentDrawer();
+          setCurrentVerificationStep(null);
         }}
         initialPhoneNumber={userData.phoneNumber}
       />
 
       <VerifyEmailDrawer
-        isOpen={currentDrawerName === "email"}
+        isOpen={currentVerificationStep === "email"}
         onClose={closeCurrentDrawer}
         onInitOtp={handleInitEmailOtp}
         onResendOtp={handleResendEmailOtp}
@@ -319,13 +332,13 @@ export function IdentityProvider({ children }: PropsWithChildren) {
           await handleSubmitEmailCode(otpCode);
           await refetchUserData();
           await emailVerifiedCallback?.();
-          closeCurrentDrawer();
+          setCurrentVerificationStep(null);
         }}
         emailState={emailState}
       />
 
       <VerifyPhoneNumberDrawer
-        isOpen={currentDrawerName === "phoneNumber"}
+        isOpen={currentVerificationStep === "phoneNumber"}
         purpose="identity"
         onClose={closeCurrentDrawer}
         onInitOtp={handleInitOtp}
@@ -334,7 +347,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
           await handleSubmitCode(otpCode);
           await refetchUserData();
           await phoneVerifiedCallback?.();
-          closeCurrentDrawer();
+          setCurrentVerificationStep(null);
         }}
         smsState={smsState}
       />
