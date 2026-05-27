@@ -56,9 +56,7 @@ export function WalletSelectionDrawer({
   >(new Map());
 
   const selectedNetworks = useMemo(() => {
-    const platforms = isMainnet
-      ? ["starknet", "ethereum", "base", "arbitrum", "optimism"]
-      : ["starknet"];
+    const platforms = ["starknet"];
 
     let networks = platforms
       .map((platform) =>

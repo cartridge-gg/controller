@@ -59,7 +59,7 @@ export interface BridgePendingProps {
 }
 
 /**
- * Pending state for crypto bridging purchases via Layerswap.
+ * Pending state for bridged purchases via Layerswap.
  * Currently disabled but preserved for future use.
  */
 export function BridgePending({
@@ -204,7 +204,7 @@ export function BridgePending({
       </LayoutContent>
       <LayoutFooter>
         {error && <ControllerErrorAlert error={error} />}
-        {(paymentMethod === "crypto" || paymentMethod === "apple-pay") &&
+        {(paymentMethod === "bridge" || paymentMethod === "apple-pay") &&
           !error && (
             <div className="relative space-y-2">
               <div

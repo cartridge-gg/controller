@@ -65,7 +65,7 @@ export function Pending() {
         items={purchaseItems}
         swapId={swapId}
         transactionHash={transactionHash}
-        paymentMethod="crypto"
+        paymentMethod="bridge"
         explorer={explorer}
         wallet={selectedWallet}
         selectedPlatform={selectedPlatform}

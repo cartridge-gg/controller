@@ -29,8 +29,8 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// Stories for BridgePending (Crypto bridging payments)
-export const CryptoPurchaseWithCredits: Story = {
+// Stories for BridgePending (bridged payments)
+export const BridgePurchaseWithCredits: Story = {
   render: () => (
     <BridgePending
       name="Village Kit"
@@ -49,7 +49,7 @@ export const CryptoPurchaseWithCredits: Story = {
           type: ItemType.ERC20,
         },
       ]}
-      paymentMethod="crypto"
+      paymentMethod="bridge"
       swapId="payment_123"
       transactionHash="0x1234567890abcdef"
       selectedPlatform="ethereum"
@@ -69,7 +69,7 @@ export const CryptoPurchaseWithCredits: Story = {
   ),
 };
 
-export const CryptoPurchaseWithNFT: Story = {
+export const BridgePurchaseWithNFT: Story = {
   render: () => (
     <BridgePending
       name="Adventure Pack"
@@ -93,7 +93,7 @@ export const CryptoPurchaseWithNFT: Story = {
           type: ItemType.ERC20,
         },
       ]}
-      paymentMethod="crypto"
+      paymentMethod="bridge"
       swapId="payment_456"
       transactionHash="0xabcdef1234567890"
       selectedPlatform="solana"
@@ -113,7 +113,7 @@ export const CryptoPurchaseWithNFT: Story = {
   ),
 };
 
-export const CryptoPurchaseWithoutWallet: Story = {
+export const BridgePurchaseWithoutWallet: Story = {
   render: () => (
     <BridgePending
       name="Starter Pack"
@@ -132,7 +132,7 @@ export const CryptoPurchaseWithoutWallet: Story = {
           type: ItemType.ERC20,
         },
       ]}
-      paymentMethod="crypto"
+      paymentMethod="bridge"
       swapId="payment_789"
       selectedPlatform="starknet"
       waitForDeposit={async () => true}
@@ -220,7 +220,7 @@ export const OnchainPurchaseWithMultipleItems: Story = {
         },
         {
           title: "USDC",
-          subtitle: "750 USDC stablecoin",
+          subtitle: "750 in-app credits",
           icon: TOKEN_ICONS.USDC,
           value: 750,
           type: ItemType.ERC20,
@@ -288,7 +288,7 @@ export const ClaimFreeNFT: Story = {
 };
 
 // Loading states
-export const CryptoPurchaseLoading: Story = {
+export const BridgePurchaseLoading: Story = {
   render: () => (
     <BridgePending
       name="Loading Pack"
@@ -300,7 +300,7 @@ export const CryptoPurchaseLoading: Story = {
           type: ItemType.CREDIT,
         },
       ]}
-      paymentMethod="crypto"
+      paymentMethod="bridge"
       swapId="payment_loading"
       transactionHash="0x0000000000000000"
       selectedPlatform="starknet"
@@ -341,7 +341,7 @@ export const TokenPurchaseSmallAmount: Story = {
           type: ItemType.ERC20,
         },
       ]}
-      paymentMethod="crypto"
+      paymentMethod="bridge"
       swapId="payment_small_tokens"
       transactionHash="0xabc123def456"
       selectedPlatform="ethereum"
@@ -388,7 +388,7 @@ export const TokenPurchaseLargeAmount: Story = {
           type: ItemType.ERC20,
         },
       ]}
-      paymentMethod="crypto"
+      paymentMethod="bridge"
       swapId="payment_large_tokens"
       transactionHash="0xdef789abc012"
       selectedPlatform="ethereum"
