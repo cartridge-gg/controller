@@ -7,17 +7,11 @@ import {
 } from "@/components/primitives/select";
 import { Meta, StoryObj } from "@storybook/react";
 
-type SelectVariant = "default" | "input";
-
 const meta: Meta<typeof Select> = {
   title: "Primitives/Select",
   component: Select,
   tags: ["autodocs"],
   argTypes: {
-    variant: {
-      control: "radio",
-      options: ["default", "input"],
-    },
     items: {
       control: false,
     },
@@ -32,10 +26,9 @@ const meta: Meta<typeof Select> = {
     },
   },
   args: {
-    variant: "default",
     placeholder: "Theme",
     items: ["Light", "Dark", "System"],
-    arrow: false,
+    arrow: true,
     disabled: false,
   },
 };
@@ -69,58 +62,34 @@ const LONG_ITEMS = [
   "United States",
 ];
 
-export const DefaultShort: Story = {
+export const Short: Story = {
   args: {
-    variant: "default",
     placeholder: "Theme",
     items: SHORT_ITEMS,
   },
 };
 
-export const DefaultLong: Story = {
+export const Long: Story = {
   args: {
-    variant: "default",
     placeholder: "Country",
     items: LONG_ITEMS,
   },
 };
 
-export const InputShort: Story = {
+export const Disabled: Story = {
   args: {
-    variant: "input",
-    placeholder: "Theme",
-    items: SHORT_ITEMS,
-    arrow: true,
-  },
-};
-
-export const InputLong: Story = {
-  args: {
-    variant: "input",
     placeholder: "Country",
     items: LONG_ITEMS,
-    arrow: true,
-  },
-};
-
-export const InputLongDisabled: Story = {
-  args: {
-    variant: "input",
-    placeholder: "Country",
-    items: LONG_ITEMS,
-    arrow: true,
     disabled: true,
   },
 };
 
 function Select({
-  variant,
   placeholder,
   items,
   arrow,
   disabled,
 }: {
-  variant?: SelectVariant;
   placeholder?: string;
   items?: string[];
   arrow?: boolean;
@@ -128,7 +97,6 @@ function Select({
 }) {
   return (
     <UISelect
-      variant={variant}
       disabled={disabled}
       defaultValue={disabled ? items?.[0]?.toLowerCase() : undefined}
     >

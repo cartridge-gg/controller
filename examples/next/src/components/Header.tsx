@@ -316,7 +316,7 @@ const Header = () => {
               }}
               disabled={!isControllerReady}
             >
-              <SelectTrigger simplified>
+              <SelectTrigger>
                 <SelectValue placeholder="Preset:" />
               </SelectTrigger>
               <SelectContent>

@@ -221,16 +221,10 @@ export function OnchainCostBreakdown({
           onValueChange={handleTokenChange}
           disabled={availableTokens.length <= 1 || isTokenSelectionLocked}
         >
-          <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2" />
-          <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
+          <TokenSelectHeader />
+          <SelectContent>
             {availableTokens.map((token) => (
-              <SelectItem
-                key={token.address}
-                simplified
-                value={token.address}
-                data-active={token.address === displayToken?.address}
-                className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:hover:bg-background-300 data-[active=true]:text-foreground-100 rounded-none"
-              >
+              <SelectItem key={token.address} value={token.address}>
                 <div className="flex items-center gap-2">
                   {token.icon ? (
                     <Thumbnail
@@ -238,7 +232,6 @@ export function OnchainCostBreakdown({
                       rounded
                       size="sm"
                       variant="light"
-                      className="group-hover:bg-background-400"
                     />
                   ) : (
                     <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />

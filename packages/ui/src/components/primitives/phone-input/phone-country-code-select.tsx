@@ -60,12 +60,7 @@ export function PhoneCountryCodeSelect({
   const selected = options.find((o) => o.code === value);
 
   return (
-    <Select
-      variant="input"
-      value={value}
-      onValueChange={setValue}
-      disabled={disabled}
-    >
+    <Select value={value} onValueChange={setValue} disabled={disabled}>
       <SelectTrigger
         className={cn(className, "w-[11ch]")}
         aria-label="Country area code"
