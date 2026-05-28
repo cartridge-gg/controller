@@ -161,7 +161,7 @@ export type ParentMethods = AsyncMethodReturns<{
  */
 export function parseUrlPolicies(
   policiesStr: string | null,
-): ParsedSessionPolicies | undefined {
+): ParsedSessionPolicies | undefined | Error {
   if (!policiesStr) {
     return undefined;
   }
@@ -175,7 +175,7 @@ export function parseUrlPolicies(
     });
   } catch (e) {
     console.error("Failed to parse URL policies:", e);
-    return undefined;
+    return new Error("Failed to parse URL policies");
   }
 }
 
@@ -190,7 +190,7 @@ function getConfigChainPolicies(
   configData: Record<string, unknown> | null,
   chainId: string | undefined,
   verified: boolean,
-): ParsedSessionPolicies | undefined {
+): ParsedSessionPolicies | undefined | Error {
   if (!configData || !chainId) {
     return undefined;
   }
@@ -201,8 +201,8 @@ function getConfigChainPolicies(
     return parseSessionPolicies({ verified, policies: sessionPolicies });
   } catch (e) {
     console.error("Failed to process chain policies from config:", e);
+    return new Error("Failed to process chain policies from config");
   }
-  return undefined;
 }
 
 export function resolvePolicies({
@@ -224,8 +224,13 @@ export function resolvePolicies({
 }): {
   policies: ParsedSessionPolicies | undefined;
   isPoliciesResolved: boolean;
+  error?: boolean;
 } {
   const urlPolicies = parseUrlPolicies(policiesStr);
+
+  if (urlPolicies instanceof Error) {
+    return { policies: undefined, isPoliciesResolved: true, error: true };
+  }
 
   if (shouldOverridePresetPolicies && urlPolicies) {
     return { policies: urlPolicies, isPoliciesResolved: true };
@@ -241,6 +246,9 @@ export function resolvePolicies({
       chainId,
       verified,
     );
+    if (configPolicies instanceof Error) {
+      return { policies: undefined, isPoliciesResolved: true, error: true };
+    }
     if (configPolicies) {
       return { policies: configPolicies, isPoliciesResolved: true };
     }
@@ -333,6 +341,7 @@ export function useConnectionValue() {
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [isPoliciesResolved, setIsPoliciesResolved] = useState<boolean>(false);
+  const [isPoliciesError, setIsPoliciesError] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
   const initialPreset =
     typeof window !== "undefined"
@@ -805,19 +814,23 @@ export function useConnectionValue() {
       preset,
       shouldOverridePresetPolicies,
     } = urlParams;
-    const { policies: resolvedPolicies, isPoliciesResolved: resolved } =
-      resolvePolicies({
-        policiesStr: policyStr,
-        preset,
-        shouldOverridePresetPolicies,
-        configData,
-        chainId,
-        verified,
-        isConfigLoading,
-      });
+    const {
+      policies: resolvedPolicies,
+      isPoliciesResolved: resolved,
+      error,
+    } = resolvePolicies({
+      policiesStr: policyStr,
+      preset,
+      shouldOverridePresetPolicies,
+      configData,
+      chainId,
+      verified,
+      isConfigLoading,
+    });
 
-    setPolicies(resolvedPolicies);
+    setPolicies(resolvedPolicies || { verified: false });
     setIsPoliciesResolved(resolved);
+    setIsPoliciesError(error ?? false);
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
   useThemeEffect({ theme, assetUrl: "" });
@@ -1050,6 +1063,7 @@ export function useConnectionValue() {
     policiesStr: urlParams.policies,
     isConfigLoading,
     isPoliciesResolved,
+    isPoliciesError,
     isMainnet,
     verified,
     chainId,

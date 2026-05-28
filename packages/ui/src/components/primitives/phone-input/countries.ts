@@ -10,6 +10,9 @@ export type Country = {
   maxLength?: number;
 };
 
+/** Fallback ISO 3166-1 alpha-2 country code when no user/locale hint is given. */
+export const DEFAULT_COUNTRY = "US";
+
 export const COUNTRIES: Country[] = [
   {
     name: "Afghanistan",

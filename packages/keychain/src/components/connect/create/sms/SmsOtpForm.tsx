@@ -9,6 +9,8 @@ import {
   formatPhoneNumber,
   isValidPhoneNumber,
 } from "@cartridge/controller-ui";
+import { getIpLocation } from "@/utils";
+import { IpLocation } from "@/utils/ip";
 
 export interface SmsOtpState {
   username?: string;
@@ -68,6 +70,26 @@ export function SmsOtpDrawer({
     setOtpCodeError(undefined);
     setOtpSentAt(null);
   }, []);
+
+  const [geoLocation, setGeoLocation] = useState<IpLocation | null>(null);
+  useEffect(() => {
+    if (!isOpen || geoLocation) return;
+    let mounted = true;
+    (async () => {
+      try {
+        const geo = await getIpLocation();
+        if (mounted) {
+          setGeoLocation(geo);
+        }
+      } catch (err) {
+        console.error("getIpLocation failed:", err);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isOpen, geoLocation]);
 
   useEffect(() => {
     if (isOpen) {
@@ -215,6 +237,7 @@ export function SmsOtpDrawer({
                 placeholder={
                   isResolvingPhoneNumber ? smsState?.phoneNumber : undefined
                 }
+                userCountryCode={geoLocation?.countryCode}
               />
             </div>
           ) : (
