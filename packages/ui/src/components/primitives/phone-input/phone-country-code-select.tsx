@@ -12,6 +12,8 @@ import {
 } from "@/components/primitives/select";
 import { cn } from "@/utils";
 
+const DEFAULT_COUNTRY: CountryCode = "US";
+
 const REGION_NAMES =
   typeof Intl !== "undefined" && "DisplayNames" in Intl
     ? new Intl.DisplayNames(["en"], { type: "region" })
@@ -57,7 +59,14 @@ export function PhoneCountryCodeSelect({
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [allowedCountries]);
 
-  const selected = options.find((o) => o.code === value);
+  const selected = useMemo(
+    () =>
+      options.find((o) => o.code === value) ??
+      options.find((o) => o.code === userCountryCode) ??
+      options.find((o) => o.code === DEFAULT_COUNTRY) ??
+      options[0],
+    [options, value, userCountryCode],
+  );
 
   return (
     <Select value={value} onValueChange={setValue} disabled={disabled}>

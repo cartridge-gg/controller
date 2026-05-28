@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import {
   AsYouType,
   getCountries,
@@ -18,7 +18,7 @@ const MAX_NATIONAL_DIGITS = 15;
 
 const SUPPORTED_COUNTRIES = new Set<string>(getCountries());
 
-function isCountryCode(code: string | undefined): code is CountryCode {
+function isCountryCode(code: string | null | undefined): code is CountryCode {
   return !!code && SUPPORTED_COUNTRIES.has(code);
 }
 
@@ -83,6 +83,7 @@ export const PhoneNumberInput = forwardRef<
     error,
     disabled,
     allowedCountries,
+    userCountryCode,
     inputId,
     placeholder,
   },
@@ -100,6 +101,9 @@ export const PhoneNumberInput = forwardRef<
     const seed = value || sourceValue || "";
     const detected = detectCountry(seed);
     if (detected && isAllowed(detected)) return detected;
+    if (isCountryCode(userCountryCode) && isAllowed(userCountryCode)) {
+      return userCountryCode;
+    }
     const fallback = allowedCountries?.find(isCountryCode);
     return fallback ?? DEFAULT_COUNTRY;
   });
@@ -120,6 +124,20 @@ export const PhoneNumberInput = forwardRef<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, dialCode, lockedCountry, allowedCountries]);
+
+  // Adopt a late-arriving `userCountryCode` (e.g. async geolocation) as the
+  // default selection, but only while the user hasn't touched the field and
+  // the current `value`/`sourceValue` doesn't already determine a country.
+  useEffect(() => {
+    if (lockedCountry) return;
+    if (hasUserInteractedRef.current) return;
+    if (!isCountryCode(userCountryCode) || !isAllowed(userCountryCode)) return;
+    const seed = value || sourceValue || "";
+    const detected = detectCountry(seed);
+    if (detected && isAllowed(detected)) return;
+    setCountry(userCountryCode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userCountryCode]);
 
   // Seed `value` from `sourceValue` while the field is empty. Re-fires if
   // the parent resets `value` to "" (e.g. reopening a form), so a fresh
@@ -164,11 +182,13 @@ export const PhoneNumberInput = forwardRef<
 
   const handleCountryChange = (next: string) => {
     if (!isCountryCode(next)) return;
+    hasUserInteractedRef.current = true;
     setCountry(next);
     setValue(`${dialPrefix(next)}${digits}`);
   };
 
   const handleDigitsChange = (raw: string) => {
+    hasUserInteractedRef.current = true;
     let sanitized = raw.replace(/\D/g, "").slice(0, MAX_NATIONAL_DIGITS);
     // If the user deleted a formatting character (e.g. ')' in "(123)"),
     // the digit count is unchanged but `raw` is shorter than what we last
