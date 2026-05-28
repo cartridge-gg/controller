@@ -1,10 +1,8 @@
-import { forwardRef, useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/primitives/input";
 import { ErrorAlertIcon } from "@/components/icons/error-alert-icon";
 import { PhoneCountryCodeSelect } from "./phone-country-code-select";
-import { COUNTRIES, type Country } from "./countries";
-
-const DEFAULT_COUNTRY = "US";
+import { COUNTRIES, DEFAULT_COUNTRY, type Country } from "./countries";
 
 function countryOf(code: string): Country | undefined {
   return COUNTRIES.find((c) => c.code === code);
@@ -58,6 +56,10 @@ export interface PhoneNumberInputProps {
    * undefined or empty, all countries are listed. When a single code is
    * passed, it is pre-selected and the select is disabled. */
   allowedCountries?: string[];
+  /** ISO 3166-1 alpha-2 country code used as the initial selection when no
+   * country can be detected from `value` and no `allowedCountries` apply.
+   * Falls back to {@link DEFAULT_COUNTRY} when undefined. */
+  userCountryCode?: string | null;
   inputId?: string;
   placeholder?: string;
 }
@@ -72,6 +74,7 @@ export const PhoneNumberInput = forwardRef<
     error,
     disabled,
     allowedCountries,
+    userCountryCode,
     inputId,
     placeholder = "(234)567-8900",
   },
@@ -87,8 +90,19 @@ export const PhoneNumberInput = forwardRef<
     const detected = detectCountry(value);
     if (detected && isAllowed(detected)) return detected;
     if (allowedCountries?.length) return allowedCountries[0];
+    if (
+      userCountryCode &&
+      countryOf(userCountryCode) &&
+      isAllowed(userCountryCode)
+    ) {
+      return userCountryCode;
+    }
     return DEFAULT_COUNTRY;
   });
+
+  // `userCountryCode` may arrive after mount (async geolocation). Apply it
+  // only while the user hasn't explicitly picked a country or typed digits.
+  const hasUserInteractedRef = useRef(false);
 
   const effectiveCountry = lockedCountry ?? country;
   const countryData = countryOf(effectiveCountry);
@@ -104,6 +118,18 @@ export const PhoneNumberInput = forwardRef<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, dialCode, lockedCountry, allowedCountries]);
 
+  // Adopt a late-arriving `userCountryCode` as the default selection.
+  useEffect(() => {
+    if (lockedCountry) return;
+    if (hasUserInteractedRef.current) return;
+    if (!userCountryCode || !countryOf(userCountryCode)) return;
+    if (!isAllowed(userCountryCode)) return;
+    const detected = detectCountry(value);
+    if (detected && isAllowed(detected)) return;
+    setCountry(userCountryCode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userCountryCode]);
+
   const digits = useMemo(() => {
     if (value.startsWith(dialCode)) {
       return value.slice(dialCode.length).replace(/\D/g, "");
@@ -117,11 +143,13 @@ export const PhoneNumberInput = forwardRef<
   );
 
   const handleCountryChange = (newCountry: string) => {
+    hasUserInteractedRef.current = true;
     setCountry(newCountry);
     setValue(`${countryOf(newCountry)?.dial_code ?? ""}${digits}`);
   };
 
   const handleDigitsChange = (raw: string) => {
+    hasUserInteractedRef.current = true;
     const sanitized = raw.replace(/\D/g, "");
     // Re-format to apply the format's digit cap, then strip back to digits.
     const capped = formatPhoneDigits(countryData, sanitized).replace(/\D/g, "");
@@ -136,6 +164,7 @@ export const PhoneNumberInput = forwardRef<
           setValue={handleCountryChange}
           disabled={disabled || !!lockedCountry}
           allowedCountries={allowedCountries}
+          userCountryCode={userCountryCode}
           className="w-20 shrink-0"
         />
         <Input

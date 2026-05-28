@@ -1,4 +1,4 @@
-type IpLocation = {
+export type IpLocation = {
   countryCode: string | null;
   regionCode: string | null;
 };
