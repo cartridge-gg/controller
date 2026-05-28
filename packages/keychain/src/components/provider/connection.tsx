@@ -34,6 +34,7 @@ export type ConnectionContextValue = {
   theme: VerifiableControllerTheme;
   isConfigLoading: boolean;
   isPoliciesResolved: boolean;
+  isPoliciesError: boolean;
   isMainnet: boolean;
   verified: boolean;
   chainId?: string;

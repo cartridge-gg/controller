@@ -85,6 +85,7 @@ describe("Session", () => {
       },
       isConfigLoading: false,
       isPoliciesResolved: true,
+      isPoliciesError: false,
       isMainnet: false,
       verified: true,
       chainId: "SN_MAIN",

@@ -134,6 +134,7 @@ const baseConnection = {
   },
   isConfigLoading: false,
   isPoliciesResolved: true,
+  isPoliciesError: false,
   isMainnet: false,
   verified: true,
   chainId: undefined,

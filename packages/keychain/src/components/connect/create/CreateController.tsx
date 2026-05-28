@@ -450,8 +450,9 @@ export function CreateControllerView({
       />
       <SignerPendingDrawer
         isOpen={
-          authenticationStep === AuthenticationStep.Pending ||
-          authenticationStep === AuthenticationStep.Error
+          !!authMethod &&
+          (authenticationStep === AuthenticationStep.Pending ||
+            authenticationStep === AuthenticationStep.Error)
         }
         isLogin={isLogin}
         isLoading={isLoading}
