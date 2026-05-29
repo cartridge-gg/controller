@@ -136,6 +136,7 @@ export function VerifyPhoneNumberDrawer({
     if (step === "phone") {
       phoneRef.current?.focus();
     } else {
+      setOtpCode("");
       otpRef.current?.focus();
     }
   }, [step]);
@@ -248,7 +249,7 @@ export function VerifyPhoneNumberDrawer({
                 value={phoneInput}
                 setValue={setPhoneInput}
                 disabled={isPending || isResolvingPhoneNumber}
-                error={error}
+                // error={error}
                 placeholder={
                   isResolvingPhoneNumber ? smsState?.phoneNumber : undefined
                 }

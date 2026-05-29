@@ -95,6 +95,7 @@ export function VerifyEmailDrawer({
     if (step === "email") {
       emailRef.current?.focus();
     } else {
+      setOtpCode("");
       otpRef.current?.focus();
     }
   }, [step]);

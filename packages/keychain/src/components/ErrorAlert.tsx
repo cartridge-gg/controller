@@ -122,8 +122,8 @@ export function ErrorAlert({
           {copyText && (
             <Button
               size="icon"
-              variant="icon"
-              className="absolute right-8 w-8 h-8"
+              variant="ghost"
+              className="absolute right-1 top-0 w-8 h-8"
               onClick={() => {
                 setCopied(true);
                 navigator.clipboard.writeText(copyText);
@@ -192,6 +192,22 @@ export function ControllerErrorAlert({
         }
       } else {
         description = "";
+      }
+
+      // rpcError contaisn the actual reason for failure
+      const rpcError = graphqlError.details?.rpcError ?? "";
+      if (rpcError.startsWith("InvalidArgument:")) {
+        description = (
+          <>
+            {rpcError}
+            {description ? (
+              <>
+                <br />
+                {description}
+              </>
+            ) : null}
+          </>
+        );
       }
 
       copyText = graphqlError.raw;
