@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Button,
   HeaderInner,
@@ -11,12 +11,13 @@ import { useConnection } from "@/hooks/connection";
 import { useRequireAgeVerification } from "@/utils/age-gate";
 import { useRouteCompletion } from "@/hooks/route";
 import { useIdentityContext } from "./provider";
+import { Verification } from "../purchase/verification";
 
 export function AgeGate() {
   const { theme } = useConnection();
   const handleCompletion = useRouteCompletion();
-  const { initiateIdentityVerification, isIdentityVerified, isVerifying } =
-    useIdentityContext();
+  const { isIdentityVerified } = useIdentityContext();
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const gameName =
     theme.name && theme.name !== defaultTheme.name ? theme.name : "This game";
@@ -60,7 +61,7 @@ export function AgeGate() {
           <Button
             className="w-full"
             isLoading={isVerifying}
-            onClick={() => initiateIdentityVerification()}
+            onClick={() => setIsVerifying(true)}
           >
             Verify Identity
           </Button>
@@ -70,6 +71,13 @@ export function AgeGate() {
           </Button>
         )}
       </LayoutFooter>
+
+      <Verification
+        method={isVerifying ? "identity" : null}
+        onSuccess={() => {}}
+        headless
+        onClose={() => setIsVerifying(false)}
+      />
     </>
   );
 }

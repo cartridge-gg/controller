@@ -161,7 +161,15 @@ export const PhoneNumberInput = forwardRef<
         : digits;
       setValue(`+${callingCode}${nationalDigits}`);
     } else {
-      setValue(`${dialCode}${digits}`);
+      // Country couldn't be detected (e.g. a shared calling code like +1
+      // with an unassigned area code). Strip the fallback country's calling
+      // code off the source digits before re-prepending it, otherwise the
+      // calling code gets doubled (e.g. "+19999999999" -> "+119999999999").
+      const callingCode = getCountryCallingCode(effectiveCountry);
+      const nationalDigits = digits.startsWith(callingCode)
+        ? digits.slice(callingCode.length)
+        : digits;
+      setValue(`${dialCode}${nationalDigits}`);
     }
   }, [sourceValue, value, setValue, dialCode]);
 

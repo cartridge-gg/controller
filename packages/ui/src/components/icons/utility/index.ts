@@ -4,6 +4,8 @@ export * from "./add-user";
 export * from "./arrow-turn-down";
 export * from "./award";
 export * from "./award-simple";
+export * from "./bank";
+export * from "./birthday";
 export * from "./branch";
 export * from "./check";
 export * from "./checkbox-checked";

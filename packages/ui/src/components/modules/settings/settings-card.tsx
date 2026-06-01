@@ -8,7 +8,7 @@ import {
 
 export interface SettingsCardProps {
   icon: React.ReactNode;
-  label: string;
+  label: string | React.ReactNode;
   rightText?: string | React.ReactNode;
   onDelete?: () => Promise<void>;
   confirm?: DeleteConfirmationKind;
@@ -52,10 +52,10 @@ export const SettingsCard = React.forwardRef<
     return (
       <div
         ref={ref}
-        className={cn("flex items-center gap-3", className)}
+        className={cn("flex items-start gap-3", className)}
         {...props}
       >
-        <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-center bg-background-200">
+        <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-start bg-background-200">
           {icon}
           <h1 className="flex-1 text-sm font-normal overflow-hidden text-ellipsis">
             {label}
@@ -94,7 +94,7 @@ export const SettingsCard = React.forwardRef<
             onClose={() => setIsConfirmOpen(false)}
             onConfirm={handleDeleteUnlink}
             icon={icon}
-            label={confirmLabel || label}
+            label={confirmLabel || "Data"}
             subTitle={confirmSubTitle}
             kind={confirm}
           />

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useController } from "@/hooks/controller";
 import { useRouteCompletion } from "@/hooks/route";
@@ -10,6 +10,7 @@ import {
   Button,
 } from "@cartridge/controller-ui";
 import Confetti from "react-confetti";
+import { Verification } from "@/components/purchase/verification";
 import { useIdentityContext } from "@/components/identity/provider";
 
 export function Welcome() {
@@ -18,7 +19,8 @@ export function Welcome() {
   const { controller } = useController();
   const username = controller?.username() ?? "";
   const primaryColor = useCSSCustomProperty("--primary-100").trim();
-  const { initiateIdentityVerification } = useIdentityContext();
+  const [isVerifying, setIsVerifying] = useState(false);
+  const { isIdentityVerified } = useIdentityContext();
 
   useEffect(() => {
     setOnModalClose?.(handleCompletion);
@@ -50,18 +52,26 @@ export function Welcome() {
       <LayoutFooter className="py-4">
         <Button
           className="w-full"
-          onClick={() => initiateIdentityVerification()}
+          onClick={() => setIsVerifying(true)}
+          disabled={isIdentityVerified}
         >
-          Verify Identity
+          {isIdentityVerified ? "Identity Verified" : "Verify Identity"}
         </Button>
         <Button
           className="w-full"
           variant="secondary"
           onClick={handleCompletion}
         >
-          Skip
+          {isIdentityVerified ? "Continue" : "Skip Identity"}
         </Button>
       </LayoutFooter>
+
+      <Verification
+        method={isVerifying ? "identity" : null}
+        onSuccess={() => {}}
+        headless
+        onClose={() => setIsVerifying(false)}
+      />
     </>
   );
 }

@@ -23,6 +23,7 @@ import {
 import { InvalidVerificationCodeError } from "./error";
 import { VerifyEmailDrawer, EmailOtpState } from "./VerifyEmailDrawer";
 import { useConnection } from "@/hooks/connection";
+import { humanizeString } from "@cartridge/controller";
 
 export type VerificationStepName = "identity" | "phoneNumber" | "email";
 
@@ -32,6 +33,7 @@ export type IdentityContextValue = {
     lastName?: string | null;
     dob?: string | null;
     age?: number | null;
+    verificationStatus?: string | null;
     proveVerifiedAt?: string | null;
     phoneNumber?: string | null;
     phoneNumberVerifiedAt?: string | null;
@@ -203,6 +205,9 @@ export function IdentityProvider({ children }: PropsWithChildren) {
             lastName: privateData?.accountPrivate?.lastName,
             dob: privateData?.accountPrivate?.dob,
             age: getAgeFromDOB(privateData?.accountPrivate?.dob),
+            verificationStatus: privateData?.accountPrivate?.verificationStatus
+              ? humanizeString(privateData.accountPrivate.verificationStatus)
+              : undefined,
             proveVerifiedAt: privateData?.accountPrivate?.proveVerifiedAt,
             phoneNumber: privateData?.accountPrivate?.phoneNumber,
             phoneNumberVerifiedAt:
@@ -321,6 +326,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
           setCurrentVerificationStep(null);
         }}
         initialPhoneNumber={userData.phoneNumber}
+        lockPhoneNumber={true}
       />
 
       <VerifyEmailDrawer
@@ -340,6 +346,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
       <VerifyPhoneNumberDrawer
         isOpen={currentVerificationStep === "phoneNumber"}
         purpose="identity"
+        allowedCountries={["US"]}
         onClose={closeCurrentDrawer}
         onInitOtp={handleInitOtp}
         onResendOtp={handleResendOtp}

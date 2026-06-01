@@ -64,7 +64,7 @@ export const StarterpackDetails = React.forwardRef<
 
 StarterpackDetails.displayName = "StarterPackDetails";
 
-const formatDate = (date: Date): string => {
+export const formatDate = (date: Date): string => {
   const months = [
     "Jan",
     "Feb",

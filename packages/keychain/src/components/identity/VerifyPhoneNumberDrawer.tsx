@@ -25,6 +25,7 @@ export type VerificationPurpose = "signup" | "login" | "identity";
 interface VerifyPhoneNumberDrawerProps {
   isOpen: boolean;
   purpose: VerificationPurpose;
+  allowedCountries?: string[];
   allowSwitchPhoneNumber?: boolean;
   onClose: () => void;
   // Sends the SMS. On success the hook sets smsState
@@ -43,6 +44,7 @@ const RESEND_WAIT_SECONDS = 30;
 export function VerifyPhoneNumberDrawer({
   isOpen,
   purpose,
+  allowedCountries,
   allowSwitchPhoneNumber = true,
   onClose,
   onInitOtp,
@@ -253,6 +255,7 @@ export function VerifyPhoneNumberDrawer({
                 placeholder={
                   isResolvingPhoneNumber ? smsState?.phoneNumber : undefined
                 }
+                allowedCountries={allowedCountries}
                 userCountryCode={geoLocation?.countryCode}
               />
             </div>

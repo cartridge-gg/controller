@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import {
   Button,
   EnvelopeIcon,
@@ -16,59 +16,16 @@ import {
 } from "@/utils/api";
 import { useIdentityContext } from "@/components/identity/provider";
 
-type VerifiedData = {
-  label: string;
-  verifiedAt: string;
-  canDelete: boolean;
-};
-
 export const UserDataSection = () => {
   const {
     userData,
     isLoadingUserData,
     isVerifying,
-    isIdentityVerified,
-    isEmailVerified,
-    isPhoneNumberVerified,
     refetchUserData,
     initiateIdentityVerification,
     initiatePhoneNumberVerification,
     initiateEmailVerification,
   } = useIdentityContext();
-
-  const verifiedIdentity = useMemo<VerifiedData | null>(() => {
-    if (isIdentityVerified) {
-      return {
-        label: `${userData.firstName} ${userData.lastName}, ${userData.age}yo`,
-        verifiedAt: userData.proveVerifiedAt!,
-        canDelete: true,
-      };
-    }
-    return null;
-  }, [userData, isIdentityVerified]);
-
-  const verifiedPhoneNumber = useMemo<VerifiedData | null>(() => {
-    if (isPhoneNumberVerified) {
-      return {
-        label: formatPhoneNumber(userData.phoneNumber!),
-        verifiedAt:
-          userData.phoneNumberVerifiedAt || userData.proveVerifiedAt || "",
-        canDelete: !!userData.phoneNumberVerifiedAt,
-      };
-    }
-    return null;
-  }, [userData, isPhoneNumberVerified]);
-
-  const verifiedEmail = useMemo<VerifiedData | null>(() => {
-    if (isEmailVerified) {
-      return {
-        label: userData.email!,
-        verifiedAt: "",
-        canDelete: true,
-      };
-    }
-    return null;
-  }, [userData, isEmailVerified]);
 
   // mutation
   const deletePhoneNumberMutation = useDeletePhoneNumberMutation();
@@ -106,87 +63,87 @@ export const UserDataSection = () => {
         isLoading={isLoading}
       />
       <div className="space-y-3 flex flex-col">
-        {verifiedIdentity && (
+        {userData.firstName && (
           <SettingsCard
             icon={<UserIcon variant="solid" size="sm" />}
-            label={verifiedIdentity.label}
-            rightText={formatVerifiedAt(verifiedIdentity.verifiedAt)}
-            isLoading={isLoading}
-            onDelete={
-              verifiedIdentity.canDelete
-                ? async () => {
-                    await handleDeleteProveIdentity();
-                    await refetchUserData();
-                  }
-                : undefined
+            label={
+              <div className="flex flex-col gap-1">
+                <span>{`${userData.firstName} ${userData.lastName}`}</span>
+                <span>{formatVerifiedAt(userData.dob!, false)}</span>
+                {userData.phoneNumber && (
+                  <span>{formatPhoneNumber(userData.phoneNumber!)}</span>
+                )}
+              </div>
             }
+            rightText={
+              userData.proveVerifiedAt ? (
+                formatVerifiedAt(userData.proveVerifiedAt)
+              ) : (
+                <span className="text-destructive-100">
+                  {userData.verificationStatus}
+                </span>
+              )
+            }
+            isLoading={isLoading}
+            onDelete={async () => {
+              await handleDeleteProveIdentity();
+              await refetchUserData();
+            }}
             confirm="delete"
             confirmLabel="Identity Proof"
           />
         )}
-        {verifiedPhoneNumber && (
+        {userData.phoneNumber && (
           <SettingsCard
             icon={<MobileIcon variant="solid" size="sm" />}
-            label={verifiedPhoneNumber.label}
-            rightText={formatVerifiedAt(verifiedPhoneNumber.verifiedAt)}
+            label={<>{formatPhoneNumber(userData.phoneNumber)}</>}
+            rightText={formatVerifiedAt(userData.phoneNumberVerifiedAt!)}
             isLoading={isLoading}
-            onDelete={
-              verifiedPhoneNumber.canDelete
-                ? async () => {
-                    await handleDeletePhoneNumber();
-                    await refetchUserData();
-                  }
-                : undefined
-            }
+            onDelete={async () => {
+              await handleDeletePhoneNumber();
+              await refetchUserData();
+            }}
             confirm="delete"
             confirmLabel="Phone Number"
-            confirmSubTitle={verifiedPhoneNumber.label}
+            confirmSubTitle={formatPhoneNumber(userData.phoneNumber)}
           />
         )}
-        {verifiedEmail && (
+        {userData.email && (
           <SettingsCard
             icon={<EnvelopeIcon size="sm" />}
-            label={verifiedEmail.label}
+            label={userData.email}
             isLoading={isLoading}
-            onDelete={
-              verifiedEmail.canDelete
-                ? async () => {
-                    await handleDeleteEmailAddress();
-                    await refetchUserData();
-                  }
-                : undefined
-            }
+            onDelete={async () => {
+              await handleDeleteEmailAddress();
+              await refetchUserData();
+            }}
             confirm="delete"
             confirmLabel="Email Address"
-            confirmSubTitle={verifiedEmail.label}
+            confirmSubTitle={userData.email}
           />
         )}
-        {!verifiedIdentity && (
+        {!userData.proveVerifiedAt && (
           <Button
             variant="sans"
             onClick={() => initiateIdentityVerification()}
-            disabled={!!verifiedIdentity}
+            disabled={!userData.phoneNumberVerifiedAt}
           >
             <PlusIcon size="sm" variant="line" />
             Verify Identity
           </Button>
         )}
-        {!verifiedPhoneNumber && (
+        {!userData.phoneNumberVerifiedAt && (
           <Button
             variant="sans"
             onClick={() => initiatePhoneNumberVerification()}
-            disabled={!!verifiedPhoneNumber}
+            // disabled={!!userData.phoneNumberVerifiedAt}
           >
             <PlusIcon size="sm" variant="line" />
             Verify Phone Number
           </Button>
         )}
-        {!verifiedEmail && (
-          <Button
-            variant="sans"
-            onClick={() => initiateEmailVerification()}
-            disabled={!!verifiedEmail}
-          >
+        {!userData.email && (
+          <Button variant="sans" onClick={() => initiateEmailVerification()}>
             <PlusIcon size="sm" variant="line" />
             Verify Email
           </Button>
@@ -196,12 +153,12 @@ export const UserDataSection = () => {
   );
 };
 
-function formatVerifiedAt(verifiedAt: string): string {
+function formatVerifiedAt(verifiedAt: string, short = true): string {
   const date = new Date(verifiedAt);
   if (Number.isNaN(date.getTime())) return "verified";
   return date.toLocaleDateString(undefined, {
     year: "numeric",
-    month: "short",
+    month: short ? "short" : "long",
     day: "numeric",
   });
 }

@@ -65,6 +65,7 @@ export const useSmsAuthentication = () => {
     try {
       response = await fetchApi<InitSmsResponse>("sms", body);
     } catch (err) {
+      console.error(`InitSmsResponse:`, typeof err, err);
       // doFetch surfaces HTTP errors as `HTTP error <status>: ...`. A 404 on
       // the username path means no SMS signer is registered for that username
       // — callers should silently fall back to manual phone entry. The

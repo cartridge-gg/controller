@@ -16,6 +16,7 @@ import {
 } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
 import { useState, useEffect } from "react";
+import { humanizeString } from "@cartridge/controller";
 
 type MethodWithEnabled = Method & { authorized?: boolean; id?: string };
 
@@ -120,17 +121,5 @@ export function ContractCard({
         </AccordionContent>
       </AccordionItem>
     </Accordion>
-  );
-}
-
-function humanizeString(str: string): string {
-  return (
-    str
-      // Convert from camelCase or snake_case
-      .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase to spaces
-      .replace(/_/g, " ") // snake_case to spaces
-      .toLowerCase()
-      // Capitalize first letter
-      .replace(/^\w/, (c) => c.toUpperCase())
   );
 }

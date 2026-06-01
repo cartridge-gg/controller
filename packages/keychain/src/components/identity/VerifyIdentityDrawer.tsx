@@ -20,6 +20,7 @@ interface VerifyIdentityDrawerProps {
   onVerified: (result: boolean) => void;
   /** Existing E.164 phone number to prefill into the form, if any. */
   initialPhoneNumber?: string | null;
+  lockPhoneNumber?: boolean;
 }
 
 export function VerifyIdentityDrawer({
@@ -27,6 +28,7 @@ export function VerifyIdentityDrawer({
   onClose,
   onVerified,
   initialPhoneNumber,
+  lockPhoneNumber,
 }: VerifyIdentityDrawerProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -73,8 +75,6 @@ export function VerifyIdentityDrawer({
           firstName,
           lastName,
           dob: `${dob.year}-${("0" + dob.month).slice(-2)}-${("0" + dob.day).slice(-2)}`, // YYYY-MM-DD
-          phoneNumber,
-          // emailAddress, // not stored, do proper verification
           // sandbox: true, //returns true, but do not store
         },
       });
@@ -87,7 +87,7 @@ export function VerifyIdentityDrawer({
     } catch (err) {
       console.error("verifyAsync error:", (err as Error).message);
     }
-  }, [verifyAsync, firstName, lastName, dob, phoneNumber, onVerified, onClose]);
+  }, [verifyAsync, firstName, lastName, dob, onVerified, onClose]);
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>
@@ -145,6 +145,7 @@ export function VerifyIdentityDrawer({
             value={phoneNumber}
             setValue={setPhoneNumber}
             sourceValue={initialPhoneNumber}
+            disabled={lockPhoneNumber}
           />
           {error && <ErrorMessage label={error} />}
         </div>

@@ -13,7 +13,7 @@ import { useNavigation } from "@/context";
 import { useLocation } from "react-router-dom";
 import { useIdentityContext } from "@/components/identity/provider";
 
-type VerificationMethod = "coinflow" | "apple-pay";
+type VerificationMethod = "coinflow" | "apple-pay" | "identity";
 
 interface VerificationProps {
   /** Overrides the `method` URL search param. Host this in a drawer by
@@ -22,8 +22,7 @@ interface VerificationProps {
   /** Called when verification completes. When provided, suppresses the
    * default navigation to /purchase/checkout/{method}. */
   onSuccess?: () => void;
-  // headless mode
-  // do not display page, only trigger drawers
+  // headless mode do not display as a page, only trigger drawers
   // call onClose when done
   headless?: boolean;
   onClose?: () => void;
@@ -46,8 +45,10 @@ export function Verification({
     isVerifying,
     isEmailVerified,
     isPhoneNumberVerified,
+    isIdentityVerified,
     initiateEmailVerification,
     initiatePhoneNumberVerification,
+    initiateIdentityVerification,
     isCanceled,
   } = useIdentityContext();
 
@@ -66,16 +67,26 @@ export function Verification({
         text: "Phone Number",
         icon: <MobileIcon variant="solid" />,
         onClick: initiatePhoneNumberVerification,
-        required: !method || method === "apple-pay",
+        required: !method || method === "apple-pay" || method === "identity",
         completed: isPhoneNumberVerified,
+      },
+      {
+        key: "identity" as const,
+        text: "Identity",
+        icon: <UserIcon variant="solid" />,
+        onClick: initiateIdentityVerification,
+        required: !method || method === "apple-pay" || method === "identity",
+        completed: isIdentityVerified,
       },
     ],
     [
       method,
       isEmailVerified,
       isPhoneNumberVerified,
+      isIdentityVerified,
       initiateEmailVerification,
       initiatePhoneNumberVerification,
+      initiateIdentityVerification,
     ],
   );
 
