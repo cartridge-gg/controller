@@ -61,7 +61,7 @@ export function ChooseSignupMethodForm({
     }
   }, [isOpen, setMode]);
 
-  const options = useMemo(() => {
+  const { options, hasOther, hasCrypto } = useMemo(() => {
     let opts: AuthOption[];
     if (validation.signers?.length) {
       opts = Array.from(
@@ -74,6 +74,9 @@ export function ChooseSignupMethodForm({
     } else {
       opts = authOptions;
     }
+
+    const hasOther = opts.some((opt) => !INITIAL_OPTIONS.includes(opt));
+    const hasCrypto = opts.some((opt) => WALLET_OPTIONS.includes(opt));
 
     if (!isLogin) {
       switch (mode) {
@@ -91,7 +94,7 @@ export function ChooseSignupMethodForm({
     }
 
     // Sort to ensure webauthn is first if it exists
-    return opts.sort((a, b) => {
+    const options = opts.sort((a, b) => {
       const aIndex = INITIAL_OPTIONS.indexOf(a);
       const bIndex = INITIAL_OPTIONS.indexOf(b);
       if (aIndex === bIndex) return 0;
@@ -99,6 +102,12 @@ export function ChooseSignupMethodForm({
       if (bIndex === -1) return -1;
       return aIndex - bIndex;
     });
+
+    return {
+      options,
+      hasOther,
+      hasCrypto,
+    };
   }, [validation.signers, authOptions, mode, isLogin]);
 
   // Initialize button refs array
@@ -258,13 +267,13 @@ export function ChooseSignupMethodForm({
               </div>
             );
           })}
-          {!isLogin && mode === "initial" && (
+          {!isLogin && mode === "initial" && hasOther && (
             <SignupButton
               authMethod="other"
               onClick={() => setMode("expanded")}
             />
           )}
-          {!isLogin && mode === "expanded" && (
+          {!isLogin && mode === "expanded" && hasCrypto && (
             <SignupButton
               authMethod="crypto"
               onClick={() => setMode("crypto")}
