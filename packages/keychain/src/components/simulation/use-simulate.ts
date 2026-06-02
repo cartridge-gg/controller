@@ -55,7 +55,20 @@ export const useSimulateBalanceChanges = (
           setSimulationEvents(events);
           setIsError(false);
         })
-        .catch((error) => {
+        .catch(async (error) => {
+          // The preview simulates a tx FROM the controller. If the controller
+          // isn't deployed on this chain yet — it deploys on first execute, e.g.
+          // on an appchain — its sender account doesn't exist and the sim rejects
+          // with "Contract not found". That's a transient not-yet-deployed state,
+          // not a real failure: skip the preview rather than show a misleading
+          // "Simulation Error" (the actual execute deploys the controller first).
+          try {
+            await controller!.provider.getClassHashAt(controller!.address());
+          } catch {
+            setSimulationEvents([]);
+            setIsError(false);
+            return;
+          }
           console.error("simulateTransactions error:", error);
           setIsError(true);
         })
