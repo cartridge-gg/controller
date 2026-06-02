@@ -25,7 +25,7 @@ export const Disconnect = () => {
 
   return (
     <Layout>
-      <HeaderInner variant="expanded" title="Logout" />
+      <HeaderInner variant="expanded" title="Log Out" />
       <LayoutContent className="gap-6">
         {isDone ? (
           <div>
