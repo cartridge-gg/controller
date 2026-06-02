@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context";
@@ -58,16 +58,19 @@ export function useRouteCompletion() {
     useConnection();
   const navigate = useNavigate();
   const { navigate: navigateWithStack } = useNavigation();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo");
 
   const handleCompletion = useCallback(() => {
-    if (isNewControllerRef.current) {
+    if (isNewControllerRef.current && location.pathname !== "/session") {
+      // ignore on SessionProvider
       setIsNewController(false);
       navigateWithStack(`/welcome?${searchParams.toString()}`, { reset: true });
     } else if (returnTo) {
       navigate(returnTo, { replace: true });
     } else {
+      // has no effect in SessionProvider
       closeModal?.();
     }
   }, [
@@ -78,6 +81,7 @@ export function useRouteCompletion() {
     searchParams,
     isNewControllerRef,
     setIsNewController,
+    location.pathname,
   ]);
 
   return handleCompletion;
