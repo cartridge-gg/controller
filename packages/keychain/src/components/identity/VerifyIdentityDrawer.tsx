@@ -1,39 +1,31 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Button,
   DateSelect,
   Drawer,
   DrawerContent,
-  ErrorMessage,
   Input,
-  PhoneNumberInput,
   UserIcon,
   isValidCalendarDate,
   type DateValue,
 } from "@cartridge/controller-ui";
-import { isValidPhoneNumber } from "@/utils/input";
 import { useAccountVerifyMutation } from "@/utils/api";
+import { VerifyErrorAlert } from "./error";
 
 interface VerifyIdentityDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onVerified: (result: boolean) => void;
-  /** Existing E.164 phone number to prefill into the form, if any. */
-  initialPhoneNumber?: string | null;
-  lockPhoneNumber?: boolean;
 }
 
 export function VerifyIdentityDrawer({
   isOpen,
   onClose,
   onVerified,
-  initialPhoneNumber,
-  lockPhoneNumber,
 }: VerifyIdentityDrawerProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dob, setDob] = useState<DateValue>({ year: "", month: "", day: "" });
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState<string | undefined>();
 
   useEffect(() => {
@@ -41,17 +33,12 @@ export function VerifyIdentityDrawer({
       setFirstName("");
       setLastName("");
       setDob({ year: "", month: "", day: "" });
-      setPhoneNumber("");
       setError(undefined);
     }
   }, [isOpen]);
 
   const dobValid = isValidCalendarDate(dob);
-  const phoneValid = useMemo(
-    () => isValidPhoneNumber(phoneNumber),
-    [phoneNumber],
-  );
-  const canSubmit = !!firstName && !!lastName && dobValid && phoneValid;
+  const canSubmit = !!firstName && !!lastName && dobValid;
 
   // mutation
   const {
@@ -133,22 +120,7 @@ export function VerifyIdentityDrawer({
           <DateSelect value={dob} setValue={setDob} />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label
-            htmlFor="verify-identity-phone"
-            className="text-xs text-foreground-300 font-medium"
-          >
-            Phone Number
-          </label>
-          <PhoneNumberInput
-            inputId="verify-identity-phone"
-            value={phoneNumber}
-            setValue={setPhoneNumber}
-            sourceValue={initialPhoneNumber}
-            disabled={lockPhoneNumber}
-          />
-          {error && <ErrorMessage label={error} />}
-        </div>
+        {error && <VerifyErrorAlert error={error} />}
 
         <Button
           className="w-full"

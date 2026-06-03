@@ -23,6 +23,7 @@ import {
 import { InvalidVerificationCodeError } from "./error";
 import { VerifyEmailDrawer, EmailOtpState } from "./VerifyEmailDrawer";
 import { useConnection } from "@/hooks/connection";
+import { useRequireAgeVerification } from "@/utils/age-gate";
 import { humanizeString } from "@cartridge/controller";
 
 export type VerificationStepName = "identity" | "phoneNumber" | "email";
@@ -50,6 +51,12 @@ export type IdentityContextValue = {
   isPhoneNumberVerified: boolean;
   isEmailVerified: boolean;
   isCanceled: boolean;
+  // Status of the active age gate. if no gate, isAllowed is true
+  ageGateStatus: {
+    isPending: boolean;
+    isBlocked: boolean;
+    isAllowed: boolean;
+  };
 };
 
 export const IdentityContext = createContext<IdentityContextValue>({
@@ -65,6 +72,7 @@ export const IdentityContext = createContext<IdentityContextValue>({
   isPhoneNumberVerified: false,
   isEmailVerified: false,
   isCanceled: false,
+  ageGateStatus: { isPending: false, isBlocked: false, isAllowed: true },
 });
 
 const usePhoneNumberVerification = () => {
@@ -227,6 +235,27 @@ export function IdentityProvider({ children }: PropsWithChildren) {
   );
   const isEmailVerified = useMemo(() => !!userData.email, [userData.email]);
 
+  const { requiresAgeVerification, minimumAge } = useRequireAgeVerification();
+  const ageGateStatus = useMemo(() => {
+    let passed: boolean | undefined;
+    if (requiresAgeVerification === false) {
+      // No age gate configured.
+      passed = true;
+    } else if (!isIdentityVerified) {
+      // Age gate applies but the user has not verified yet.
+      passed = undefined;
+    } else {
+      // Identity is verified: compare the user's actual age (derived from their
+      // verified date of birth) against the preset's minimum age requirement.
+      passed = (userData.age ?? 0) >= minimumAge;
+    }
+    return {
+      isPending: passed === undefined,
+      isBlocked: passed === false,
+      isAllowed: passed === true,
+    };
+  }, [requiresAgeVerification, minimumAge, isIdentityVerified, userData.age]);
+
   const [currentVerificationStep, setCurrentVerificationStep] =
     useState<VerificationStepName | null>(null);
 
@@ -313,6 +342,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
         isIdentityVerified,
         isPhoneNumberVerified,
         isEmailVerified,
+        ageGateStatus,
       }}
     >
       {children}
@@ -325,8 +355,6 @@ export function IdentityProvider({ children }: PropsWithChildren) {
           await identityVerifiedCallback?.();
           setCurrentVerificationStep(null);
         }}
-        initialPhoneNumber={userData.phoneNumber}
-        lockPhoneNumber={true}
       />
 
       <VerifyEmailDrawer

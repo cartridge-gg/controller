@@ -14,6 +14,7 @@ import {
   ExternalWalletResponse,
   ExternalWalletType,
   LocationGateOptions,
+  AgeGateOptions,
   toArray,
   Token,
   getPresetSessionPolicies,
@@ -364,6 +365,7 @@ export function useConnectionValue() {
     null,
   );
   const locationGateRef = useRef<LocationGateOptions | undefined>();
+  const ageGateRef = useRef<AgeGateOptions | undefined>();
   const [locationGateVerified, setLocationGateVerified] =
     useState<boolean>(false);
   const [theme, setTheme] = useState<VerifiableControllerTheme>({
@@ -729,6 +731,9 @@ export function useConnectionValue() {
         locationGateRef.current = configObj?.locationGate as
           | LocationGateOptions
           | undefined;
+
+        // Extract ageGate from preset config to require identity verification
+        ageGateRef.current = configObj?.ageGate as AgeGateOptions | undefined;
 
         if (configObj) {
           const computedVerified = computeVerifiedState(
@@ -1125,6 +1130,7 @@ export function useConnectionValue() {
     externalGetBalance,
     externalWaitForTransaction,
     locationGate: locationGateRef.current,
+    ageGate: ageGateRef.current,
     locationGateVerified,
     setLocationGateVerified,
     isNewControllerRef,

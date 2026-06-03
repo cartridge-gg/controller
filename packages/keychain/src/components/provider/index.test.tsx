@@ -184,6 +184,7 @@ const baseConnection = {
   externalGetBalance: vi.fn(),
   externalWaitForTransaction: vi.fn(),
   locationGate: undefined,
+  ageGate: undefined,
   locationGateVerified: false,
   setLocationGateVerified: vi.fn(),
 };

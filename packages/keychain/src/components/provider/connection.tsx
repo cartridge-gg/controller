@@ -7,6 +7,7 @@ import {
   ExternalWalletResponse,
   ExternalWalletType,
   LocationGateOptions,
+  AgeGateOptions,
 } from "@cartridge/controller";
 import { ControllerTheme } from "@cartridge/controller-ui";
 import { createContext } from "react";
@@ -79,6 +80,7 @@ export type ConnectionContextValue = {
     timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
   locationGate?: LocationGateOptions;
+  ageGate?: AgeGateOptions;
   locationGateVerified: boolean;
   setLocationGateVerified: (verified: boolean) => void;
   isNewControllerRef: React.RefObject<boolean>;

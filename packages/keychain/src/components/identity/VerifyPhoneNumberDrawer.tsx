@@ -188,8 +188,9 @@ export function VerifyPhoneNumberDrawer({
       try {
         await onSubmitCode(otpCode);
       } catch (err) {
+        console.error(`phone verification error:`, err);
+        setError((err as Error).message ?? "Failed to verify code");
         if (!(err instanceof InvalidVerificationCodeError)) {
-          setError((err as Error).message ?? "Failed to verify code");
           setIsFatalCodeError(true);
         }
       } finally {

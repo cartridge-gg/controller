@@ -43,6 +43,7 @@ const defaultConnection = {
     verified: true,
   },
   locationGate: undefined,
+  ageGate: undefined,
   locationGateVerified: false,
   isNewControllerRef: { current: false },
 };

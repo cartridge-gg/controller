@@ -215,10 +215,8 @@ export type AccountUpdateInput = {
 export type AccountVerifyInput = {
   /** Date of birth in YYYY-MM-DD format. */
   dob?: InputMaybe<Scalars['String']>;
-  emailAddress?: InputMaybe<Scalars['String']>;
   firstName?: InputMaybe<Scalars['String']>;
   lastName?: InputMaybe<Scalars['String']>;
-  phoneNumber?: InputMaybe<Scalars['String']>;
   /** Use the UAT sandbox environment instead of production. */
   sandbox?: InputMaybe<Scalars['Boolean']>;
 };
