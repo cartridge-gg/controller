@@ -21,6 +21,8 @@ export const UserDataSection = () => {
     userData,
     isLoadingUserData,
     isVerifying,
+    isPhoneNumberVerified,
+    isIdentityVerified,
     refetchUserData,
     initiateIdentityVerification,
     initiatePhoneNumberVerification,
@@ -57,11 +59,7 @@ export const UserDataSection = () => {
 
   return (
     <section className="space-y-4">
-      <SectionHeader
-        kind="user-data"
-        showStatus={false}
-        isLoading={isLoading}
-      />
+      <SectionHeader kind="user-data" showStatus={false} />
       <div className="space-y-3 flex flex-col">
         {userData.firstName && (
           <SettingsCard
@@ -70,14 +68,14 @@ export const UserDataSection = () => {
               <div className="flex flex-col gap-1">
                 <span>{`${userData.firstName} ${userData.lastName}`}</span>
                 <span>{formatVerifiedAt(userData.dob!, false)}</span>
-                {userData.phoneNumber && (
+                {/* {userData.phoneNumber && (
                   <span>{formatPhoneNumber(userData.phoneNumber!)}</span>
-                )}
+                )} */}
               </div>
             }
             rightText={
-              userData.proveVerifiedAt ? (
-                formatVerifiedAt(userData.proveVerifiedAt)
+              isIdentityVerified ? (
+                formatVerifiedAt(userData.proveVerifiedAt!)
               ) : (
                 <span className="text-destructive-100">
                   {userData.verificationStatus}
@@ -85,19 +83,29 @@ export const UserDataSection = () => {
               )
             }
             isLoading={isLoading}
-            onDelete={async () => {
-              await handleDeleteProveIdentity();
-              await refetchUserData();
-            }}
+            onDelete={
+              isIdentityVerified
+                ? async () => {
+                    await handleDeleteProveIdentity();
+                    await refetchUserData();
+                  }
+                : undefined
+            }
             confirm="delete"
             confirmLabel="Identity Proof"
           />
         )}
-        {userData.phoneNumber && (
+        {isPhoneNumberVerified && (
           <SettingsCard
             icon={<MobileIcon variant="solid" size="sm" />}
-            label={<>{formatPhoneNumber(userData.phoneNumber)}</>}
-            rightText={formatVerifiedAt(userData.phoneNumberVerifiedAt!)}
+            label={<>{formatPhoneNumber(userData.phoneNumber!)}</>}
+            rightText={
+              isPhoneNumberVerified ? (
+                formatVerifiedAt(userData.phoneNumberVerifiedAt!)
+              ) : (
+                <span className="text-destructive-100">Invalidated</span>
+              )
+            }
             isLoading={isLoading}
             onDelete={async () => {
               await handleDeletePhoneNumber();
@@ -105,7 +113,7 @@ export const UserDataSection = () => {
             }}
             confirm="delete"
             confirmLabel="Phone Number"
-            confirmSubTitle={formatPhoneNumber(userData.phoneNumber)}
+            confirmSubTitle={formatPhoneNumber(userData.phoneNumber!)}
           />
         )}
         {userData.email && (
@@ -122,21 +130,20 @@ export const UserDataSection = () => {
             confirmSubTitle={userData.email}
           />
         )}
-        {!userData.proveVerifiedAt && (
+        {!isIdentityVerified && (
           <Button
             variant="sans"
             onClick={() => initiateIdentityVerification()}
-            disabled={!userData.phoneNumberVerifiedAt}
+            disabled={!isPhoneNumberVerified}
           >
             <PlusIcon size="sm" variant="line" />
             Verify Identity
           </Button>
         )}
-        {!userData.phoneNumberVerifiedAt && (
+        {!isPhoneNumberVerified && (
           <Button
             variant="sans"
             onClick={() => initiatePhoneNumberVerification()}
-            // disabled={!!userData.phoneNumberVerifiedAt}
           >
             <PlusIcon size="sm" variant="line" />
             Verify Phone Number

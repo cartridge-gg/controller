@@ -66,7 +66,7 @@ export const SignerCard = React.forwardRef<
       <SettingsCard
         ref={ref}
         className={className}
-        icon={<SignerIcon signerType={signerType} />}
+        icon={<SignerIcon size="sm" signerType={signerType} />}
         label={label}
         rightText={signerIdentifyingInfo}
         isLoading={signerIdentifyingInfo === "pending"}

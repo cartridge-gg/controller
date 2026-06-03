@@ -226,23 +226,13 @@ export function IdentityProvider({ children }: PropsWithChildren) {
     [privateData, meData, controller],
   );
 
-  const isIdentityVerified = useMemo(
-    () => !!userData.proveVerifiedAt,
-    [userData.proveVerifiedAt],
-  );
-  const isPhoneNumberVerified = useMemo(
-    () => !!userData.proveVerifiedAt || !!userData.phoneNumberVerifiedAt,
-    [userData.proveVerifiedAt, userData.phoneNumberVerifiedAt],
-  );
-  const isEmailVerified = useMemo(() => !!userData.email, [userData.email]);
-
   const { requiresAgeVerification, minimumAge } = useRequireAgeVerification();
   const ageGateStatus = useMemo(() => {
     let passed: boolean | undefined;
     if (requiresAgeVerification === false) {
       // No age gate configured.
       passed = true;
-    } else if (!isIdentityVerified) {
+    } else if (!userData.proveVerifiedAt) {
       // Age gate applies but the user has not verified yet.
       passed = undefined;
     } else {
@@ -255,7 +245,12 @@ export function IdentityProvider({ children }: PropsWithChildren) {
       isBlocked: passed === false,
       isAllowed: passed === true,
     };
-  }, [requiresAgeVerification, minimumAge, isIdentityVerified, userData.age]);
+  }, [
+    requiresAgeVerification,
+    minimumAge,
+    userData.proveVerifiedAt,
+    userData.age,
+  ]);
 
   // Mirror the age-gate status to a non-React store so the headless execute
   // path can read it synchronously. See utils/age-gate-store.
@@ -346,9 +341,9 @@ export function IdentityProvider({ children }: PropsWithChildren) {
         initiateIdentityVerification,
         initiatePhoneNumberVerification,
         initiateEmailVerification,
-        isIdentityVerified,
-        isPhoneNumberVerified,
-        isEmailVerified,
+        isIdentityVerified: !!userData.proveVerifiedAt,
+        isPhoneNumberVerified: !!userData.phoneNumberVerifiedAt,
+        isEmailVerified: !!userData.email,
         ageGateStatus,
       }}
     >

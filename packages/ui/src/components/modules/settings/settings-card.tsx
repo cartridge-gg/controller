@@ -55,7 +55,7 @@ export const SettingsCard = React.forwardRef<
         className={cn("flex items-start gap-3", className)}
         {...props}
       >
-        <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-start bg-background-200">
+        <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-center bg-background-200">
           {icon}
           <h1 className="flex-1 text-sm font-normal overflow-hidden text-ellipsis">
             {label}
