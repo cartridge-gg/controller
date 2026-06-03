@@ -58,13 +58,20 @@ export function ExecutionContainer({
   const [isEstimating, setIsEstimating] = useState(true);
   const [ctaState, setCTAState] = useState<"deploy" | "execute">("execute");
 
-  // Prevent unnecessary estimate fee calls.
+  // Prevent unnecessary estimate fee calls. Track the controller too: on a chain
+  // switch a *new* Controller instance is created (bound to the new RPC), and the
+  // React context updates a render after the synchronous window.controller swap.
+  // Without re-estimating on that change, the modal keeps a stale fee error from
+  // the previous chain (e.g. "Contract not found" when the prior chain lacks the
+  // target contract).
   const prevTransactionsRef = useRef<{
     transactions: Call[] | undefined;
     feeEstimate: FeeEstimate | undefined;
+    controller: typeof controller;
   }>({
     transactions: undefined,
     feeEstimate: undefined,
+    controller: undefined,
   });
 
   const estimateFees = useCallback(
@@ -108,20 +115,27 @@ export function ExecutionContainer({
       return;
     }
 
-    // Only estimate if transactions have changed
-    if (isEqual(prevTransactionsRef.current.transactions, transactions)) {
+    // Re-estimate when transactions change OR the controller (chain) changes.
+    if (
+      isEqual(prevTransactionsRef.current.transactions, transactions) &&
+      prevTransactionsRef.current.controller === controller
+    ) {
       return;
     }
 
     // Update ref with current values
-    prevTransactionsRef.current = { transactions, feeEstimate: maxFee };
+    prevTransactionsRef.current = {
+      transactions,
+      feeEstimate: maxFee,
+      controller,
+    };
 
     const estimateFeesAsync = async () => {
       await estimateFees(transactions);
     };
 
     estimateFeesAsync();
-  }, [transactions, estimateFees, maxFee]);
+  }, [transactions, estimateFees, maxFee, controller]);
 
   useEffect(() => {
     setCtrlError(executionError);
