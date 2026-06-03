@@ -24,6 +24,7 @@ import { InvalidVerificationCodeError } from "./error";
 import { VerifyEmailDrawer, EmailOtpState } from "./VerifyEmailDrawer";
 import { useConnection } from "@/hooks/connection";
 import { useRequireAgeVerification } from "@/utils/age-gate";
+import { setAgeGateStatus } from "@/utils/age-gate-store";
 import { humanizeString } from "@cartridge/controller";
 
 export type VerificationStepName = "identity" | "phoneNumber" | "email";
@@ -255,6 +256,12 @@ export function IdentityProvider({ children }: PropsWithChildren) {
       isAllowed: passed === true,
     };
   }, [requiresAgeVerification, minimumAge, isIdentityVerified, userData.age]);
+
+  // Mirror the age-gate status to a non-React store so the headless execute
+  // path can read it synchronously. See utils/age-gate-store.
+  useEffect(() => {
+    setAgeGateStatus(ageGateStatus);
+  }, [ageGateStatus]);
 
   const [currentVerificationStep, setCurrentVerificationStep] =
     useState<VerificationStepName | null>(null);
