@@ -9,9 +9,18 @@ import {
 } from "@cartridge/controller-ui";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { CoinflowForm, type CoinflowFormHandle } from "./form";
+import { useIdentityContext } from "@/components/identity/provider";
+import { AgeGate } from "@/components/identity/AgeGate";
 
 export function CoinflowCheckout() {
   const [handle, setHandle] = useState<CoinflowFormHandle | null>(null);
+
+  const {
+    ageGateStatus: { isAllowed },
+  } = useIdentityContext();
+  if (!isAllowed) {
+    return <AgeGate />;
+  }
 
   return (
     <>

@@ -24,6 +24,8 @@ import {
   VerifyTimeoutPanel,
 } from "./limits-verify-panels";
 import { CoinbasePopupStatus } from "./popup-status";
+import { useIdentityContext } from "@/components/identity/provider";
+import { AgeGate } from "@/components/identity/AgeGate";
 
 /** How often to refresh limits while waiting for a terminal status. */
 const VERIFY_POLL_INTERVAL_MS = 5_000;
@@ -286,6 +288,13 @@ export function CoinbaseCheckout({
   }, [fetchCoinbaseLimits]);
 
   const waitingForLimits = !hasLimitsLoaded && isFetchingCoinbaseLimits;
+
+  const {
+    ageGateStatus: { isAllowed },
+  } = useIdentityContext();
+  if (!isAllowed) {
+    return <AgeGate />;
+  }
 
   return (
     <>

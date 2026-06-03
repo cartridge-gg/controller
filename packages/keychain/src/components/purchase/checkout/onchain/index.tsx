@@ -46,6 +46,7 @@ import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { getIpLocation } from "@/utils/ip";
 import { num } from "starknet";
 import { useIdentityContext } from "@/components/identity/provider";
+import { AgeGate } from "@/components/identity/AgeGate";
 
 export function OnchainCheckout() {
   const { navigate } = useNavigation();
@@ -95,8 +96,12 @@ export function OnchainCheckout() {
   const { onCreditCardPurchase, isCoinflowLoading } =
     useCreditPurchaseContext();
 
-  const { isEmailVerified, isPhoneNumberVerified, refetchUserData } =
-    useIdentityContext();
+  const {
+    isEmailVerified,
+    isPhoneNumberVerified,
+    refetchUserData,
+    ageGateStatus: { isAllowed },
+  } = useIdentityContext();
   const { loginViaPopup: loginWithWebauthnPopup } = useWebauthnAuthentication();
   const isCoinflowEnabled = useFeature("coinflow-support");
 
@@ -471,6 +476,10 @@ export function OnchainCheckout() {
     clearError();
     return () => clearError();
   }, [clearError]);
+
+  if (!isAllowed) {
+    return <AgeGate />;
+  }
 
   if (isStarterpackLoading || !quote || !countryCodeLoaded) {
     return <LoadingState />;

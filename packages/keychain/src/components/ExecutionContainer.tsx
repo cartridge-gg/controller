@@ -18,7 +18,7 @@ import { createDeployUrl } from "@/utils/connection/deploy";
 import { Fees, FeesData } from "@/components/Fees";
 import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
-import { useAgeGateStatus } from "@/utils/age-gate";
+import { useIdentityContext } from "@/components/identity/provider";
 import { AgeGate } from "@/components/identity/AgeGate";
 
 interface ExecutionContainerProps {
@@ -188,7 +188,9 @@ export function ExecutionContainer({
     [policies, description],
   );
 
-  const { isAllowed } = useAgeGateStatus();
+  const {
+    ageGateStatus: { isAllowed },
+  } = useIdentityContext();
   if (!isAllowed) {
     return <AgeGate />;
   }
