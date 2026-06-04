@@ -75,7 +75,7 @@ export function UnverifiedSessionSummary({
         messages={messages}
         className="rounded"
       />
-      <TokenConsent />
+      <TokenConsent policies={approvePolicies} />
       <SpendingLimitCard policies={approvePolicies} />
     </div>
   );
