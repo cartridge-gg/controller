@@ -56,25 +56,35 @@ export function AggregateCard({
     }
   }, [isEditable]);
 
+  const noPolicies =
+    Object.keys(contracts || {}).length == 0 && (messages ?? []).length == 0;
+
   return (
     <Accordion
       type="single"
       collapsible
-      className={cn("bg-background-200 rounded", className)}
+      className={cn(
+        "rounded",
+        isOpened ? "bg-background-200" : "bg-background-150",
+        className,
+      )}
       value={isOpened ? "item" : ""}
       onValueChange={(value) => setisOpened(value === "item")}
+      disabled={noPolicies}
     >
       <AccordionItem value="item">
         <AccordionTrigger
           parentClassName="h-11 p-3"
           className="flex items-center text-sm font-medium text-foreground-100 gap-1.5"
           color={cn(isOpened ? "text-foreground-100" : "text-foreground-400")}
+          hideIcon={noPolicies}
         >
           <Thumbnail
-            variant={isOpened ? "light" : "ghost"}
+            variant={"light"}
             size="sm"
             icon={icon ?? <CodeIcon variant="solid" />}
             centered={true}
+            className={cn(isOpened ? "bg-background-300" : "bg-background-200")}
           />
           <p>{`Authorize ${title}`}</p>
         </AccordionTrigger>
