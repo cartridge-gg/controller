@@ -147,9 +147,9 @@ export function Profile() {
           <Button
             onClick={() => ctrlConnector.controller.openProfileAt("/age-gate")}
           >
-            Age Gate (WIP)
+            Age Gate
           </Button>
-          <Button
+          {/* <Button
             onClick={() =>
               ctrlConnector.controller.openProfileAt(
                 "/purchase/verification?method=apple-pay",
@@ -157,8 +157,8 @@ export function Profile() {
             }
           >
             Apple Pay / Coinbase
-          </Button>
-          <Button
+          </Button> */}
+          {/* <Button
             onClick={() =>
               ctrlConnector.controller.openProfileAt(
                 "/purchase/verification?method=coinflow",
@@ -166,7 +166,7 @@ export function Profile() {
             }
           >
             Coinflow
-          </Button>
+          </Button> */}
         </div>
       </div>
 

@@ -68,10 +68,25 @@ export function PhoneCountryCodeSelect({
     [options, value, userCountryCode],
   );
 
+  if (options.length === 1) {
+    return (
+      <div
+        className={cn(
+          "flex h-10 w-fit items-center px-3 py-2 whitespace-nowrap select-none",
+          "rounded-md bg-background-200 text-sm/[18px] text-foreground-100",
+          className,
+        )}
+        aria-label="Country area code"
+      >
+        <span className="px-0.5">{selected?.dial ?? ""}</span>
+      </div>
+    );
+  }
+
   return (
     <Select value={value} onValueChange={setValue} disabled={disabled}>
       <SelectTrigger
-        className={cn(className, "w-[11ch]")}
+        className={cn(className, "w-[10ch]")}
         aria-label="Country area code"
         arrow
       >

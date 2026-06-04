@@ -229,7 +229,7 @@ export const PhoneNumberInput = forwardRef<
           disabled={disabled || !!lockedCountry}
           allowedCountries={allowedCountries}
           userCountryCode={userCountryCode}
-          className="w-20 shrink-0"
+          className="shrink-0"
         />
         <Input
           ref={ref}
