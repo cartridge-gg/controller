@@ -460,9 +460,22 @@ export function useConnectionValue() {
   // When URL provides an rpc_url that differs from the controller's, log the user
   // out so they re-authenticate on the correct chain. The account may not be deployed
   // on the target chain, so we can't simply recreate the controller.
+  //
+  // Only reconcile the INITIAL controller (e.g. a persisted controller loaded on a
+  // different chain than the URL asks for). An in-session `switchStarknetChain`
+  // legitimately moves the controller to another *configured* chain — a multichain
+  // dapp switches between chains per call — and reverting it here would pin every call
+  // back to the URL's chain, silently defeating the switch. Once we've seen a
+  // controller whose rpcUrl matches the URL, stop reconciling so switches stick.
+  const urlRpcReconciledRef = useRef(false);
   useEffect(() => {
     if (!controller || !urlRpcUrl) return;
-    if (controller.rpcUrl() === urlRpcUrl) return;
+    if (controller.rpcUrl() === urlRpcUrl) {
+      urlRpcReconciledRef.current = true;
+      return;
+    }
+    if (urlRpcReconciledRef.current) return;
+    urlRpcReconciledRef.current = true;
 
     setRpcUrl(urlRpcUrl);
 
