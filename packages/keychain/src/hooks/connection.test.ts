@@ -549,6 +549,54 @@ describe("URL rpc_url priority over stored controller rpcUrl", () => {
       expect(shouldDisconnect).toBe(false);
     });
 
+    it("should NOT disconnect on an in-session switchStarknetChain once the initial controller reconciled", () => {
+      // Models the reconcile-once guard: only the INITIAL controller is reconciled
+      // against the URL's rpc_url; a later in-session switch must stick.
+      const urlRpcUrl = "https://rpc.sepolia.example.com"; // the iframe default chain
+      let reconciled = false;
+
+      const reconcile = (controllerRpcUrl: string): boolean => {
+        if (controllerRpcUrl === urlRpcUrl) {
+          reconciled = true;
+          return false; // matches -> no disconnect
+        }
+        if (reconciled) return false; // already reconciled -> don't revert the switch
+        reconciled = true;
+        return true; // initial mismatch -> disconnect/reauth
+      };
+
+      // 1. initial controller is on the URL's chain -> matches -> marks reconciled.
+      expect(reconcile(urlRpcUrl)).toBe(false);
+      expect(reconciled).toBe(true);
+
+      // 2. dapp switchStarknetChain -> controller on a DIFFERENT, configured chain.
+      const switchedRpcUrl = "https://api.cartridge.gg/x/my-appchain";
+      expect(switchedRpcUrl).not.toBe(urlRpcUrl);
+      // Must NOT disconnect, otherwise the switch is silently reverted.
+      expect(reconcile(switchedRpcUrl)).toBe(false);
+    });
+
+    it("should still disconnect when the INITIAL controller is on a different chain than the URL", () => {
+      // Reconcile-once still handles the original case: a persisted controller loaded
+      // on the wrong chain at start triggers re-auth on the URL's chain.
+      const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
+      let reconciled = false;
+
+      const reconcile = (controllerRpcUrl: string): boolean => {
+        if (controllerRpcUrl === urlRpcUrl) {
+          reconciled = true;
+          return false;
+        }
+        if (reconciled) return false;
+        reconciled = true;
+        return true;
+      };
+
+      const persistedRpcUrl = "https://rpc.sepolia.example.com";
+      expect(persistedRpcUrl).not.toBe(urlRpcUrl);
+      expect(reconcile(persistedRpcUrl)).toBe(true); // initial mismatch -> disconnect
+    });
+
     it("should NOT disconnect controller when controller is not set", () => {
       const controller = undefined;
       const urlRpcUrl = "https://api.cartridge.gg/x/starknet/mainnet";
