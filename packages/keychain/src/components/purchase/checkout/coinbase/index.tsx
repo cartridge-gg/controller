@@ -321,7 +321,7 @@ export function CoinbaseCheckout({
             icon={<CoinbaseIcon size="lg" />}
           />
         )}
-        <LayoutContent className="p-3 flex flex-col gap-4">
+        <LayoutContent className="p-0 pb-3 flex flex-col gap-4">
           <div className="bg-[#181C19] border border-background-200 p-3 rounded-[4px] text-xs text-foreground-300">
             By clicking 'Continue' you are agreeing to the following Coinbase
             policies.
@@ -342,7 +342,7 @@ export function CoinbaseCheckout({
             />
           </div>
         </LayoutContent>
-        <LayoutFooter>
+        <LayoutFooter className="p-0 pt-3">
           <Button
             className="w-full"
             onClick={handleContinue}
