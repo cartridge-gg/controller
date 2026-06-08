@@ -21,6 +21,7 @@ import {
   WalletAdapter,
   WalletBridge,
 } from "@cartridge/controller";
+import { createRateLimitedFetch } from "@/utils/rate-limit";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import {
   ControllerTheme,
@@ -51,6 +52,8 @@ import {
 import { useSearchParams } from "react-router-dom";
 import { SemVer } from "semver";
 import { constants, RpcProvider } from "starknet";
+
+const rateLimitedFetch = createRateLimitedFetch();
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import {
   storeReferral,
@@ -566,7 +569,10 @@ export function useConnectionValue() {
   useEffect(() => {
     const fetchChainId = async () => {
       try {
-        const provider = new RpcProvider({ nodeUrl: rpcUrl });
+        const provider = new RpcProvider({
+          nodeUrl: rpcUrl,
+          baseFetch: rateLimitedFetch,
+        });
         const id = await provider.getChainId();
         setChainId(id);
       } catch (e) {

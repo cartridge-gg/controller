@@ -3,11 +3,12 @@ import {
   type RequestDocument,
   type Variables,
 } from "graphql-request";
-import { fetchDataCreator } from "@cartridge/controller-ui/utils";
 import { parseClientError, type ErrorWithGraphQL } from "./errors";
 import { getBearerToken } from "./bearer-token";
+import { createRateLimitedFetch } from "@/utils/rate-limit";
 
 export const ENDPOINT = `${import.meta.env.VITE_CARTRIDGE_API_URL}/query`;
+const rateLimitedFetch = createRateLimitedFetch();
 
 // Read fresh per request — bearer token can appear/change after popup login
 // without anything calling fetchDataCreator/GraphQLClient again.
@@ -16,8 +17,42 @@ function authHeader(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function fetchDataCreator(
+  url: string,
+  options?: { headers?: RequestInit["headers"] },
+) {
+  return async <TData, TVariables>(
+    query: string,
+    variables?: TVariables,
+    signal?: AbortSignal,
+  ): Promise<TData> => {
+    const res = await rateLimitedFetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+      },
+      body: JSON.stringify({ query, variables }),
+      signal,
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const json = await res.json();
+    if (json.errors) {
+      throw new Error(json.errors[0].message);
+    }
+
+    return json.data;
+  };
+}
+
 export const client = new GraphQLClient(ENDPOINT, {
   credentials: "include",
+  fetch: rateLimitedFetch,
   requestMiddleware: (req) => ({
     ...req,
     headers: { ...req.headers, ...authHeader() },

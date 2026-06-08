@@ -26,6 +26,9 @@ import { CartridgeAPIProvider } from "@cartridge/controller-ui/utils/api/cartrid
 import { ErrorBoundary } from "../ErrorBoundary";
 import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
 import { SpinnerIcon } from "@cartridge/controller-ui";
+import { createRateLimitedFetch } from "@/utils/rate-limit";
+
+const rateLimitedFetch = createRateLimitedFetch();
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -42,7 +45,7 @@ export function Provider({ children }: PropsWithChildren) {
       default:
         nodeUrl = connection.rpcUrl;
     }
-    return { nodeUrl };
+    return { nodeUrl, baseFetch: rateLimitedFetch };
   }, [connection.rpcUrl, connection.controller]);
 
   const defaultChainId = useMemo(() => {
