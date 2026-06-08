@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import {
   storeCallbacks,
   getCallbacks,
@@ -14,19 +14,69 @@ describe("callbacks", () => {
   });
 
   describe("generateCallbackId", () => {
-    it("should generate incremental IDs", () => {
-      const id1 = generateCallbackId();
-      const id2 = generateCallbackId();
-      const id3 = generateCallbackId();
-
-      expect(parseInt(id1)).toBeLessThan(parseInt(id2));
-      expect(parseInt(id2)).toBeLessThan(parseInt(id3));
-    });
-
-    it("should generate string IDs", () => {
+    it("should generate non-empty string IDs", () => {
       const id = generateCallbackId();
       expect(typeof id).toBe("string");
-      expect(id).toMatch(/^\d+$/);
+      expect(id.length).toBeGreaterThan(0);
+    });
+
+    it("should generate unique IDs", () => {
+      const ids = new Set<string>();
+      for (let i = 0; i < 1000; i++) {
+        ids.add(generateCallbackId());
+      }
+      // Every generated id must be distinct.
+      expect(ids.size).toBe(1000);
+    });
+
+    // Regression guard for the connect bug: callback ids are stored in the
+    // keychain `window`, which reloads on disconnect/logout. A plain counter
+    // reset back to "1" on reload, so a subsequent connect reused an old id,
+    // navigated to the same `/connect?id=1` URL, and the stale callback state
+    // left the parent's `keychain.connect()` unresolved. Ids must stay unique
+    // even when the counter base is wiped (i.e. across an iframe reload).
+    it("should not reuse IDs after the id counter is reset (iframe reload)", () => {
+      const before = generateCallbackId();
+
+      // Simulate the iframe reload clearing the counter on `window`.
+      delete (
+        window as typeof window & {
+          __cartridge_controller_callback_counter?: number;
+        }
+      ).__cartridge_controller_callback_counter;
+
+      const after = generateCallbackId();
+      expect(after).not.toBe(before);
+    });
+
+    // Same guarantee on the fallback path used when crypto.randomUUID is
+    // unavailable: the counter+random suffix must stay unique even when the
+    // counter base resets (as it does on iframe reload).
+    it("stays unique on the fallback path when crypto.randomUUID is unavailable", () => {
+      vi.stubGlobal("crypto", {});
+      try {
+        const before = generateCallbackId();
+
+        // Simulate the iframe reload clearing the counter on `window`.
+        delete (
+          window as typeof window & {
+            __cartridge_controller_callback_counter?: number;
+          }
+        ).__cartridge_controller_callback_counter;
+
+        const after = generateCallbackId();
+        // Confirms the fallback branch ran (counter+suffix, not a UUID).
+        expect(before).toMatch(/^\d+-[a-z0-9]+$/);
+        expect(after).not.toBe(before);
+
+        const ids = new Set<string>([before, after]);
+        for (let i = 0; i < 100; i++) {
+          ids.add(generateCallbackId());
+        }
+        expect(ids.size).toBe(102);
+      } finally {
+        vi.unstubAllGlobals();
+      }
     });
   });
 
