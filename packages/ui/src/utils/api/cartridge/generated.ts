@@ -215,10 +215,8 @@ export type AccountUpdateInput = {
 export type AccountVerifyInput = {
   /** Date of birth in YYYY-MM-DD format. */
   dob?: InputMaybe<Scalars['String']>;
-  emailAddress?: InputMaybe<Scalars['String']>;
   firstName?: InputMaybe<Scalars['String']>;
   lastName?: InputMaybe<Scalars['String']>;
-  phoneNumber?: InputMaybe<Scalars['String']>;
   /** Use the UAT sandbox environment instead of production. */
   sandbox?: InputMaybe<Scalars['Boolean']>;
 };
@@ -2369,6 +2367,7 @@ export type Erc1155Metadata = {
 export type Eip191Credential = {
   __typename?: 'Eip191Credential';
   ethAddress: Scalars['String'];
+  phoneLast4?: Maybe<Scalars['String']>;
   provider: Scalars['String'];
 };
 
@@ -3177,7 +3176,10 @@ export type Mutation = {
   createTeam: Team;
   decreaseBudget: Paymaster;
   deleteDeployment: Scalars['Boolean'];
+  deleteEmailAddress: Scalars['Boolean'];
   deleteMe: Scalars['Boolean'];
+  deletePhoneNumber: Scalars['Boolean'];
+  deleteProveIdentity: Scalars['Boolean'];
   deleteRpcApiKey: Scalars['Boolean'];
   deleteRpcCorsDomain: Scalars['Boolean'];
   deleteTeam: Scalars['Boolean'];
