@@ -46,6 +46,7 @@ export const defaultMockConnection: ConnectionContextValue = {
     create: false,
     get: false,
   },
+  configuredChains: [],
   preset: null,
   policiesStr: null,
   setController: vi.fn(),
