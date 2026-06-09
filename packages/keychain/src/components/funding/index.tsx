@@ -1,4 +1,4 @@
-import { useNavigation } from "@/context/navigation";
+// import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 import {
   LayoutContent,
@@ -8,6 +8,8 @@ import {
   HeaderInner,
 } from "@cartridge/controller-ui";
 import { Balance, BalanceType } from "./Balance";
+import { DepositCredits } from "./DepositCredits";
+import { useState } from "react";
 
 export type FundingProps = {
   title?: React.ReactElement | string;
@@ -16,7 +18,8 @@ export type FundingProps = {
 
 export function Funding({ title, isSlot }: FundingProps) {
   const { controller } = useConnection();
-  const { navigate } = useNavigation();
+  // const { navigate } = useNavigation();
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
 
   const balances: BalanceType[] = isSlot
     ? [BalanceType.CREDITS]
@@ -40,9 +43,20 @@ export function Funding({ title, isSlot }: FundingProps) {
       </LayoutContent>
       <LayoutFooter>
         {!isSlot && (
-          <Button onClick={() => navigate("/funding/deposit")}>Deposit</Button>
+          <Button
+            onClick={() => {
+              setIsDepositOpen(true);
+              // navigate("/funding/deposit")
+            }}
+          >
+            Deposit
+          </Button>
         )}
       </LayoutFooter>
+      <DepositCredits
+        isOpen={isDepositOpen}
+        onClose={() => setIsDepositOpen(false)}
+      />
     </>
   );
 }

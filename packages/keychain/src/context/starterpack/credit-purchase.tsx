@@ -12,7 +12,7 @@ import useCoinflowPayment, {
   CoinflowStarterpackQuote,
   useCoinflowStarterpackQuote,
 } from "@/hooks/payments/coinflow";
-import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
+import { CREDIT_AMOUNTS } from "@/components/funding/AmountSelection";
 import { useStarterpackContext } from "./starterpack";
 import { useOnchainPurchaseContext } from "./onchain-purchase";
 import { getCurrentReferral } from "@/utils/referral";
@@ -55,7 +55,7 @@ export const CreditPurchaseProvider = ({
   } = useStarterpackContext();
   const { quantity } = useOnchainPurchaseContext();
 
-  const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
+  const [usdAmount, setUsdAmount] = useState<number>(CREDIT_AMOUNTS[0]);
   const [coinflowIntent, setCoinflowIntent] = useState<
     CoinflowStarterpackIntent | undefined
   >();
