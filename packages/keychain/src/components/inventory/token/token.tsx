@@ -7,7 +7,6 @@ import {
   ERC20Detail,
   ERC20Header,
   PaperPlaneIcon,
-  InfoIcon,
   Skeleton,
   Thumbnail,
   useDisclosure,
@@ -19,16 +18,17 @@ import {
   isPublicChain,
   useCreditBalance,
 } from "@cartridge/controller-ui/utils";
+// import { useNavigation } from "@/context/navigation";
 import { useExplorer } from "@starknet-react/core";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
-import { useNavigation } from "@/context/navigation";
 import { EmptyState, LoadingState } from "@/components/activity";
 import { SendTokenDrawer } from "./send/send-drawer";
+import { DepositCredits } from "@/components/funding/DepositCredits";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -43,13 +43,14 @@ export function Token() {
 
 function Credits() {
   // TODO: Get parent from keychain connection if needed
-  const { navigate } = useNavigation();
+  // const { navigate } = useNavigation();
   const account = useAccount();
   const username = account?.username || "";
   const credit = useCreditBalance({
     username,
     interval: 30000,
   });
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
 
   // Show loading state while credits are being fetched
   if (credit.balance.value === undefined) {
@@ -68,24 +69,26 @@ function Credits() {
           <p className="text-foreground-100 text-lg/6 font-semibold">{`${Number(credit.balance.value) / 10 ** 6} CREDITS`}</p>
         </div>
 
-        <div className="flex gap-1 bg-background-125 border border-background-200 px-3 py-2.5 rounded text-foreground-300">
-          <InfoIcon size="sm" className="min-w-5" />
-          <p className="px-1 text-xs">
-            Credits are used to pay for network activity. They are not tokens
-            and cannot be transferred or refunded.
-          </p>
+        <div className="p-3 text-xs bg-background-200 text-foreground-300 rounded">
+          Credits are an account balance that can be used to pay for games and
+          network activity. They are not refundable.
         </div>
       </LayoutContent>
 
       <LayoutFooter className="gap-4">
         <Button
           onClick={() => {
-            navigate("/funding/deposit");
+            setIsDepositOpen(true);
+            // navigate("/funding/deposit");
           }}
         >
           Deposit
         </Button>
       </LayoutFooter>
+      <DepositCredits
+        isOpen={isDepositOpen}
+        onClose={() => setIsDepositOpen(false)}
+      />
     </>
   );
 }
