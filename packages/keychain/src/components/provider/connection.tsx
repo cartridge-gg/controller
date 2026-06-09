@@ -2,6 +2,7 @@ import { ParentMethods } from "@/hooks/connection";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import Controller from "@/utils/controller";
 import {
+  type Chain,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -27,6 +28,8 @@ export type ConnectionContextValue = {
     create: boolean;
     get: boolean;
   };
+  /** Chains the dapp explicitly configured (SDK `chains` param). */
+  configuredChains: Chain[];
   preset: string | null;
   policiesStr: string | null;
   tokens?: string[];

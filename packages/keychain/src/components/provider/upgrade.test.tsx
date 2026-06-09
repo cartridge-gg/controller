@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
+import { RpcProvider } from "starknet";
 import {
   BETA_CONTROLLER,
   CONTROLLER_VERSIONS,
@@ -25,6 +26,12 @@ vi.mock("./posthog", () => ({
     }),
   }),
 }));
+
+// Override only RpcProvider (used to probe non-active chains); keep the rest of starknet.
+vi.mock("starknet", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("starknet")>();
+  return { ...actual, RpcProvider: vi.fn() };
+});
 
 describe("determineUpgradePath", () => {
   it("should return available=false when currentVersion is undefined", () => {
@@ -82,6 +89,9 @@ describe("UpgradeProvider", () => {
   const mockController = {
     address: vi.fn().mockReturnValue("0xmockAddress"),
     classHash: vi.fn().mockReturnValue(CONTROLLER_VERSIONS[3].hash),
+    rpcUrl: vi.fn().mockReturnValue("https://mock.rpc/active"),
+    username: vi.fn().mockReturnValue("mockuser"),
+    owner: vi.fn().mockReturnValue("0xmockOwner"),
     provider: {
       getClassHashAt: vi.fn(),
       waitForTransaction: vi.fn().mockResolvedValue({}),
@@ -330,5 +340,137 @@ describe("UpgradeProvider", () => {
     });
 
     expect(result.current.error).toBe(testError);
+  });
+});
+
+describe("UpgradeProvider (multi-chain)", () => {
+  const ACTIVE_RPC = "https://mock.rpc/active";
+  const APPCHAIN_RPC = "https://mock.rpc/appchain";
+
+  const mockPosthogInstance = {
+    onFeatureFlag: vi.fn((key, callback) => {
+      if (key === "controller-beta") callback(false);
+    }),
+  };
+
+  const mockController = {
+    address: vi.fn().mockReturnValue("0xmockAddress"),
+    classHash: vi.fn().mockReturnValue(STABLE_CONTROLLER.hash),
+    rpcUrl: vi.fn().mockReturnValue(ACTIVE_RPC),
+    username: vi.fn().mockReturnValue("mockuser"),
+    owner: vi.fn().mockReturnValue("0xmockOwner"),
+    provider: {
+      getClassHashAt: vi.fn(),
+      waitForTransaction: vi.fn().mockResolvedValue({}),
+    },
+    upgrade: vi.fn().mockResolvedValue({
+      contractAddress: "0xmockAddress",
+      entrypoint: "upgrade",
+      calldata: [],
+    }),
+    executeFromOutsideV2: vi
+      .fn()
+      .mockResolvedValue({ transaction_hash: "0xactiveTx" }),
+    executeFromOutsideV3: vi
+      .fn()
+      .mockResolvedValue({ transaction_hash: "0xactiveTx" }),
+  };
+
+  // The controller the provider pins to the appchain for its upgrade.
+  const appchainController = {
+    upgrade: vi.fn().mockResolvedValue({
+      contractAddress: "0xmockAddress",
+      entrypoint: "upgrade",
+      calldata: [],
+    }),
+    executeFromOutsideV2: vi.fn(),
+    executeFromOutsideV3: vi
+      .fn()
+      .mockResolvedValue({ transaction_hash: "0xappchainTx" }),
+    provider: { waitForTransaction: vi.fn().mockResolvedValue({}) },
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Active chain: up to date. Appchain: pre-wildcard (v1.0.8).
+    mockController.provider.getClassHashAt.mockResolvedValue(
+      STABLE_CONTROLLER.hash,
+    );
+    (RpcProvider as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => ({
+        getClassHashAt: vi.fn().mockResolvedValue(CONTROLLER_VERSIONS[4].hash),
+      }),
+    );
+    vi.spyOn(Controller, "create").mockResolvedValue(
+      appchainController as unknown as Controller,
+    );
+  });
+
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <PostHogContext.Provider
+      value={{ posthog: mockPosthogInstance as unknown as PostHogWrapper }}
+    >
+      <UpgradeProvider
+        controller={mockController as unknown as Controller}
+        chains={[{ rpcUrl: ACTIVE_RPC }, { rpcUrl: APPCHAIN_RPC }]}
+      >
+        {children}
+      </UpgradeProvider>
+    </PostHogContext.Provider>
+  );
+
+  const renderAndSync = async () => {
+    const { result } = renderHook(() => useUpgrade(), { wrapper });
+    await act(async () => {
+      await vi.waitFor(() => result.current.isSynced === true, {
+        timeout: 5000,
+      });
+    });
+    return result;
+  };
+
+  it("surfaces an upgrade when only a non-active (appchain) account is behind", async () => {
+    const result = await renderAndSync();
+
+    // Active chain is up to date, yet an upgrade is offered (for the appchain).
+    expect(result.current.current).toBe(STABLE_CONTROLLER);
+    expect(result.current.available).toBe(true);
+  });
+
+  it("runs the upgrade against the chain that is behind", async () => {
+    const result = await renderAndSync();
+
+    await act(async () => {
+      await result.current.onUpgrade();
+    });
+
+    // Executed on a controller pinned to the appchain rpc, not the active one.
+    expect(Controller.create).toHaveBeenCalledWith(
+      expect.objectContaining({ rpcUrl: APPCHAIN_RPC }),
+    );
+    expect(appchainController.executeFromOutsideV3).toHaveBeenCalled();
+    expect(mockController.executeFromOutsideV3).not.toHaveBeenCalled();
+    expect(result.current.available).toBe(false);
+    expect(result.current.error).toBeUndefined();
+  });
+
+  it("upgrades every behind chain in a single onUpgrade", async () => {
+    // Both chains behind: active at v1.0.7, appchain at v1.0.8.
+    mockController.provider.getClassHashAt.mockResolvedValue(
+      CONTROLLER_VERSIONS[3].hash,
+    );
+
+    const result = await renderAndSync();
+    expect(result.current.available).toBe(true);
+
+    await act(async () => {
+      await result.current.onUpgrade();
+    });
+
+    // Active chain upgraded via the active controller, appchain via a pinned one.
+    expect(mockController.executeFromOutsideV3).toHaveBeenCalled();
+    expect(appchainController.executeFromOutsideV3).toHaveBeenCalled();
+    expect(result.current.available).toBe(false);
+    expect(result.current.error).toBeUndefined();
   });
 });

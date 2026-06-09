@@ -85,7 +85,10 @@ export function Provider({ children }: PropsWithChildren) {
                   <WalletsProvider>
                     <PostHogProvider>
                       <ErrorBoundary>
-                        <UpgradeProvider controller={connection.controller}>
+                        <UpgradeProvider
+                          controller={connection.controller}
+                          chains={connection.configuredChains}
+                        >
                           <UIProvider>
                             <StarknetConfig
                               explorer={cartridge}

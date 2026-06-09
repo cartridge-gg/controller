@@ -48,6 +48,10 @@ export default class ControllerProvider extends BaseProvider {
   private iframes?: IFrames;
   private selectedChain: ChainId;
   private chains: Map<ChainId, Chain>;
+  // Chains the DAPP explicitly configured (not the always-on Cartridge defaults).
+  // Forwarded to the keychain so its upgrade gate can check every chain the dapp
+  // actually uses — e.g. an appchain where the account is still a pre-wildcard class.
+  private userChains: Chain[];
   private referral: { ref?: string; refGroup?: string };
   private encryptedBlob?: string;
 
@@ -67,6 +71,7 @@ export default class ControllerProvider extends BaseProvider {
     // Merge user chains with default chains
     // User chains take precedence if they specify the same network
     const chains = [...cartridgeChains, ...(options.chains || [])];
+    this.userChains = options.chains || [];
     const defaultChainId =
       options.defaultChainId || constants.StarknetChainId.SN_MAIN;
 
@@ -919,6 +924,7 @@ export default class ControllerProvider extends BaseProvider {
     const iframe = new KeychainIFrame({
       ...this.options,
       rpcUrl: this.rpcUrl(),
+      userChains: this.userChains,
       onClose: () => {
         this.keychain?.reset?.();
       },
