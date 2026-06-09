@@ -1,5 +1,5 @@
 import { KEYCHAIN_URL } from "../constants";
-import { Keychain, KeychainOptions } from "../types";
+import { Chain, Keychain, KeychainOptions } from "../types";
 import { WalletBridge } from "../wallets/bridge";
 import { IFrame, IFrameOptions } from "./base";
 
@@ -13,6 +13,8 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     onSessionCreated?: () => void;
     onStarterpackPlay?: () => void;
     encryptedBlob?: string;
+    /** Chains the dapp explicitly configured (see Controller.userChains). */
+    userChains?: Chain[];
   };
 
 const STARTERPACK_PLAY_CALLBACK_DELAY_MS = 200;
@@ -41,6 +43,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     propagateSessionErrors,
     errorDisplayMode,
     webauthnPopup,
+    userChains,
     ...iframeOptions
   }: KeychainIframeOptions) {
     let onStarterpackPlayHandler: (() => Promise<void>) | undefined;
@@ -76,6 +79,16 @@ export class KeychainIFrame extends IFrame<Keychain> {
 
     if (rpcUrl) {
       _url.searchParams.set("rpc_url", encodeURIComponent(rpcUrl));
+    }
+
+    // The dapp's own chains, so the keychain's upgrade gate can check every chain it
+    // uses (not just the active one) — e.g. surface an appchain upgrade for a
+    // pre-wildcard account while the controller currently sits on the settlement chain.
+    if (userChains && userChains.length > 0) {
+      _url.searchParams.set(
+        "chains",
+        encodeURIComponent(JSON.stringify(userChains)),
+      );
     }
 
     if (ref) {

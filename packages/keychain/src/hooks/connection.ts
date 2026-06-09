@@ -20,6 +20,7 @@ import {
   toSessionPolicies,
   WalletAdapter,
   WalletBridge,
+  type Chain,
 } from "@cartridge/controller";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import {
@@ -79,10 +80,16 @@ type ResolvedUrlParams = {
   refGroup: string | null;
   propagateError: boolean;
   errorDisplayMode?: "modal" | "notification" | "silent";
+  /** Chains the dapp explicitly configured (SDK `chains` param). Optional so
+   *  url-param snapshots persisted before this field existed stay valid. */
+  chains?: Chain[];
 };
 
 export const URL_PARAMS_STORAGE_KEY = "keychain.urlParams";
 export const PRESERVE_URL_PARAMS_FLAG = "keychain.preserveOnReload";
+
+// Stable fallback so consumers keyed on `configuredChains` identity don't re-run.
+const NO_CONFIGURED_CHAINS: Chain[] = [];
 
 // Runs once per iframe load. If the previous unload set the preserve flag
 // (e.g. disconnect's window.location.reload), keep the stored params so the
@@ -511,6 +518,24 @@ export function useConnectionValue() {
       | "silent"
       | null;
 
+    // JSON array of the dapp's Chain objects, encoded by the SDK the same way
+    // as `policies`.
+    const chains = (() => {
+      const raw = urlParams.get("chains");
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(decodeURIComponent(raw));
+        return Array.isArray(parsed)
+          ? parsed.filter(
+              (c): c is Chain =>
+                !!c && typeof c === "object" && typeof c.rpcUrl === "string",
+            )
+          : null;
+      } catch {
+        return null;
+      }
+    })();
+
     const erc20Param = urlParams.get("erc20");
     const tokens = erc20Param
       ? decodeURIComponent(erc20Param)
@@ -548,6 +573,7 @@ export function useConnectionValue() {
         propagateError || urlParamsRef.current?.propagateError || false,
       errorDisplayMode:
         errorDisplayMode || urlParamsRef.current?.errorDisplayMode || undefined,
+      chains: chains ?? urlParamsRef.current?.chains ?? [],
     };
 
     // Store the new params for future reference
@@ -1072,6 +1098,7 @@ export function useConnectionValue() {
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
     webauthnPopup,
+    configuredChains: urlParams.chains ?? NO_CONFIGURED_CHAINS,
     preset: urlParams.preset,
     policiesStr: urlParams.policies,
     isConfigLoading,

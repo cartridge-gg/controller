@@ -69,6 +69,7 @@ describe("Session", () => {
         create: false,
         get: false,
       },
+      configuredChains: [],
       preset: null,
       policiesStr: null,
       tokens: [],

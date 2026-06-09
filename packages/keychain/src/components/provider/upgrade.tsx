@@ -7,7 +7,8 @@ import React, {
   useCallback,
 } from "react";
 import { JsCall } from "@cartridge/controller-wasm";
-import { addAddressPadding, Call } from "starknet";
+import { addAddressPadding, Call, RpcProvider } from "starknet";
+import type { Chain } from "@cartridge/controller";
 import { ControllerError } from "@/utils/connection";
 import Controller from "@/utils/controller";
 import { usePostHog } from "./posthog";
@@ -70,6 +71,31 @@ export const CONTROLLER_VERSIONS: ControllerVersionInfo[] = [
 export const STABLE_CONTROLLER = CONTROLLER_VERSIONS[5];
 export const BETA_CONTROLLER = CONTROLLER_VERSIONS[5];
 
+const findVersion = (classHash: string): ControllerVersionInfo | undefined =>
+  CONTROLLER_VERSIONS.find(
+    (v) => addAddressPadding(v.hash) === addAddressPadding(classHash),
+  );
+
+/** The controller version deployed at `address` on a chain — or, when not deployed
+ *  there yet, the version it would counterfactually deploy as (its creation class). */
+async function deployedVersion(
+  provider: Pick<RpcProvider, "getClassHashAt">,
+  address: string,
+  creationClassHash: string,
+): Promise<ControllerVersionInfo | undefined> {
+  try {
+    return findVersion(await provider.getClassHashAt(address));
+  } catch (e) {
+    if ((e as Error).message?.includes("Contract not found")) {
+      return findVersion(creationClassHash);
+    }
+    throw e;
+  }
+}
+
+/** A chain whose account is behind the target version. */
+type OutdatedChain = { rpcUrl: string; version: ControllerVersionInfo };
+
 /**
  * Determines if an upgrade is available and returns the appropriate controller version
  * @param currentVersion The current controller version
@@ -116,11 +142,18 @@ export const UpgradeContext = createContext<UpgradeInterface | undefined>(
 
 export interface UpgradeProviderProps {
   controller?: Controller;
+  /** Chains the dapp explicitly configured (see
+   *  `ConnectionContextValue.configuredChains`). The account's class is checked on
+   *  each of them — not just the controller's active chain — so an upgrade is offered
+   *  for e.g. an appchain still on a pre-wildcard class while the account is already
+   *  up to date on the settlement chain. */
+  chains?: Chain[];
   children: React.ReactNode;
 }
 
 export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
   controller,
+  chains,
   children,
 }) => {
   const [available, setAvailable] = useState<boolean>(false);
@@ -130,14 +163,11 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
   const [current, setCurrent] = useState<ControllerVersionInfo | undefined>(
     undefined,
   );
+  const [outdated, setOutdated] = useState<OutdatedChain[]>([]);
   const [calls, setCalls] = useState<JsCall[]>([]);
-  const [syncedControllerAddress, setSyncedControllerAddress] = useState<
-    string | undefined
-  >(undefined);
   const posthog = usePostHog();
   const [isBeta, setIsBeta] = useState<boolean>(false);
   const [featureFlagLoaded, setFeatureFlagLoaded] = useState<boolean>(false);
-  const [controllerSynced, setControllerSynced] = useState<boolean>(false);
 
   // Pick controller based on feature flag
   const effectiveController = useMemo(
@@ -155,55 +185,73 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
     });
   }, [posthog, controller, featureFlagLoaded]);
 
-  // Sync controller class hash
+  // Resolve the account's version on every configured chain (the active one first —
+  // its version is what the UI reports as `current`) and collect the ones that are
+  // behind. An upgrade is offered if ANY chain is outdated.
   useEffect(() => {
-    if (!controller) {
-      return;
-    }
+    if (!controller) return;
+    let cancelled = false;
 
-    if (syncedControllerAddress === controller.address()) {
-      return;
-    }
+    (async () => {
+      try {
+        const address = controller.address();
+        const creationClassHash = controller.classHash();
+        const activeRpcUrl = controller.rpcUrl();
 
-    setControllerSynced(false);
-
-    controller.provider
-      .getClassHashAt(controller.address())
-      .then((classHash) => {
-        const found = CONTROLLER_VERSIONS.find(
-          (v) => addAddressPadding(v.hash) === addAddressPadding(classHash),
+        const active = await deployedVersion(
+          controller.provider,
+          address,
+          creationClassHash,
         );
 
-        setCurrent(found);
-      })
-      .catch((e) => {
-        // We set the class hash to the controllers initial class hash
-        if (e.message.includes("Contract not found")) {
-          const found = CONTROLLER_VERSIONS.find(
-            (v) =>
-              addAddressPadding(v.hash) ===
-              addAddressPadding(controller.classHash()),
-          );
+        const others = await Promise.all(
+          (chains ?? [])
+            .map((chain) => chain.rpcUrl)
+            .filter((rpcUrl) => rpcUrl !== activeRpcUrl)
+            .map(async (rpcUrl) => {
+              try {
+                const provider = new RpcProvider({ nodeUrl: rpcUrl });
+                return {
+                  rpcUrl,
+                  version: await deployedVersion(
+                    provider,
+                    address,
+                    creationClassHash,
+                  ),
+                };
+              } catch {
+                // A single unreachable chain must not block the upgrade gate.
+                return { rpcUrl, version: undefined };
+              }
+            }),
+        );
 
-          setCurrent(found);
-        } else {
-          setError(e);
+        if (cancelled) return;
+
+        const outdated = [
+          { rpcUrl: activeRpcUrl, version: active },
+          ...others,
+        ].filter(
+          (c): c is OutdatedChain =>
+            !!c.version && determineUpgradePath(c.version, isBeta).available,
+        );
+
+        setCurrent(active);
+        setOutdated(outdated);
+        setAvailable(outdated.length > 0);
+        setIsSynced(true);
+      } catch (e) {
+        if (!cancelled) {
+          setError(e as ControllerError);
+          setIsSynced(true);
         }
-      })
-      .finally(() => {
-        setSyncedControllerAddress(controller.address());
-        setControllerSynced(true);
-      });
-  }, [controller, syncedControllerAddress]);
+      }
+    })();
 
-  // Recalculate upgrade availability when effective controller changes
-  useEffect(() => {
-    if (current && controllerSynced) {
-      const { available: newAvailable } = determineUpgradePath(current, isBeta);
-      setAvailable(newAvailable);
-      setIsSynced(true);
-    }
-  }, [current, controllerSynced, isBeta]);
+    return () => {
+      cancelled = true;
+    };
+  }, [controller, chains, isBeta]);
 
   useEffect(() => {
     if (!controller || !effectiveController) {
@@ -217,25 +265,43 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
   }, [controller, effectiveController]);
 
   const onUpgrade = useCallback(async () => {
-    if (!controller || !effectiveController) return;
+    if (!controller || !effectiveController || outdated.length === 0) return;
     try {
       setIsUpgrading(true);
-      let transaction_hash: string;
-      if (current?.outsideExecutionVersion === OutsideExecutionVersion.V2) {
-        transaction_hash = (await controller.executeFromOutsideV2(calls))
-          .transaction_hash;
-      } else {
-        transaction_hash = (await controller.executeFromOutsideV3(calls))
-          .transaction_hash;
+
+      // Upgrade every chain that's behind. An outside execution is signed for a
+      // specific chain, so each one runs on a controller pinned to that chain.
+      for (const { rpcUrl, version } of outdated) {
+        const target =
+          rpcUrl === controller.rpcUrl()
+            ? controller
+            : await Controller.create({
+                classHash: controller.classHash(),
+                rpcUrl,
+                address: controller.address(),
+                username: controller.username(),
+                owner: controller.owner(),
+              });
+
+        const calls = [await target.upgrade(effectiveController.hash)];
+        const { transaction_hash } =
+          version.outsideExecutionVersion === OutsideExecutionVersion.V2
+            ? await target.executeFromOutsideV2(calls)
+            : await target.executeFromOutsideV3(calls);
+
+        await target.provider.waitForTransaction(transaction_hash, {
+          retryInterval: 1000,
+        });
       }
-      await controller.provider.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-      });
+
+      setOutdated([]);
       setAvailable(false);
     } catch (e) {
       setError(e as ControllerError);
+    } finally {
+      setIsUpgrading(false);
     }
-  }, [controller, current, calls, effectiveController]);
+  }, [controller, outdated, effectiveController]);
 
   const value = useMemo<UpgradeInterface>(
     () => ({
