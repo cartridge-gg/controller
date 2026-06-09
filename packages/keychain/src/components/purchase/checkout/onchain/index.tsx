@@ -37,7 +37,10 @@ import { getWallet } from "../../wallet/config";
 import { ErrorCard } from "./error";
 import { WalletSelector } from "./selector";
 import { QuantityControls } from "./quantity";
-import { WalletSelectionDrawer } from "./wallet-drawer";
+import {
+  WalletSelectionDrawer,
+  type PaymentMethodSelection,
+} from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
 import { CoinflowDrawer } from "../coinflow/drawer";
 import { CoinbaseDrawer } from "../coinbase/drawer";
@@ -84,6 +87,9 @@ export function OnchainCheckout() {
     isApplePaySelected,
     isCoinflowSelected,
     onCoinflowSelect,
+    onApplePaySelect,
+    onExternalConnect,
+    clearSelectedWallet,
     onCreateCoinbaseOrder,
     resetCoinbasePurchase,
     isCreatingOrder,
@@ -310,6 +316,36 @@ export function OnchainCheckout() {
   const handleWalletSelect = useCallback(() => {
     setIsDrawerOpen(true);
   }, []);
+
+  const handlePaymentMethodSelect = useCallback(
+    async (method: PaymentMethodSelection) => {
+      switch (method.type) {
+        case "apple-pay":
+          onApplePaySelect();
+          break;
+        case "coinflow":
+          onCoinflowSelect();
+          break;
+        case "controller":
+          clearSelectedWallet();
+          break;
+        case "external":
+          await onExternalConnect(
+            method.wallet,
+            method.network.platform,
+            method.chainId,
+          );
+          break;
+      }
+      setIsDrawerOpen(false);
+    },
+    [
+      onApplePaySelect,
+      onCoinflowSelect,
+      clearSelectedWallet,
+      onExternalConnect,
+    ],
+  );
 
   // Bearer-token expiry on the iframe surfaces here as an Authentication
   // Required error. Re-mint via the popup-backed login (cookie session is
@@ -675,6 +711,7 @@ export function OnchainCheckout() {
       <WalletSelectionDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
+        setSelected={handlePaymentMethodSelect}
         showFiatOptions={countryCode === "US"}
       />
 
