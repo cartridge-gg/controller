@@ -7391,6 +7391,37 @@ export type CreateCryptoPaymentMutation = {
   };
 };
 
+export type BundleCreditsQuoteQueryVariables = Exact<{
+  input: PurchaseBundleWithCreditsInput;
+}>;
+
+export type BundleCreditsQuoteQuery = {
+  __typename?: "Query";
+  bundleCreditsQuote: {
+    __typename?: "BundleCreditsQuote";
+    requiredCredits: string;
+    costInUsdc: string;
+    paymentToken: string;
+    paymentTokenAmount: string;
+    needsSwap: boolean;
+  };
+};
+
+export type PurchaseBundleWithCreditsMutationVariables = Exact<{
+  input: PurchaseBundleWithCreditsInput;
+}>;
+
+export type PurchaseBundleWithCreditsMutation = {
+  __typename?: "Mutation";
+  purchaseBundleWithCredits: {
+    __typename?: "PurchaseFulfillment";
+    id: string;
+    status: PurchaseFulfillmentStatus;
+    transactionHash?: string | null;
+    lastError?: string | null;
+  };
+};
+
 export type CreateCoinflowStarterpackIntentMutationVariables = Exact<{
   input: CreateCoinflowStarterpackIntentInput;
 }>;
@@ -8322,6 +8353,65 @@ export const useCreateCryptoPaymentMutation = <
       CreateCryptoPaymentMutation,
       CreateCryptoPaymentMutationVariables
     >(CreateCryptoPaymentDocument),
+    options,
+  );
+export const BundleCreditsQuoteDocument = `
+    query BundleCreditsQuote($input: PurchaseBundleWithCreditsInput!) {
+  bundleCreditsQuote(input: $input) {
+    requiredCredits
+    costInUsdc
+    paymentToken
+    paymentTokenAmount
+    needsSwap
+  }
+}
+    `;
+export const useBundleCreditsQuoteQuery = <
+  TData = BundleCreditsQuoteQuery,
+  TError = unknown,
+>(
+  variables: BundleCreditsQuoteQueryVariables,
+  options?: UseQueryOptions<BundleCreditsQuoteQuery, TError, TData>,
+) =>
+  useQuery<BundleCreditsQuoteQuery, TError, TData>(
+    ["BundleCreditsQuote", variables],
+    useFetchData<BundleCreditsQuoteQuery, BundleCreditsQuoteQueryVariables>(
+      BundleCreditsQuoteDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const PurchaseBundleWithCreditsDocument = `
+    mutation PurchaseBundleWithCredits($input: PurchaseBundleWithCreditsInput!) {
+  purchaseBundleWithCredits(input: $input) {
+    id
+    status
+    transactionHash
+    lastError
+  }
+}
+    `;
+export const usePurchaseBundleWithCreditsMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    PurchaseBundleWithCreditsMutation,
+    TError,
+    PurchaseBundleWithCreditsMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    PurchaseBundleWithCreditsMutation,
+    TError,
+    PurchaseBundleWithCreditsMutationVariables,
+    TContext
+  >(
+    ["PurchaseBundleWithCredits"],
+    useFetchData<
+      PurchaseBundleWithCreditsMutation,
+      PurchaseBundleWithCreditsMutationVariables
+    >(PurchaseBundleWithCreditsDocument),
     options,
   );
 export const CreateCoinflowStarterpackIntentDocument = `
