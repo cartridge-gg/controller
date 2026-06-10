@@ -1,9 +1,6 @@
 import React from "react";
 import { ListIcon } from "@cartridge/controller-ui";
-import {
-  getPaymentMethodDisplay,
-  type PaymentMethod,
-} from "./wallet-drawer";
+import { getPaymentMethodDisplay, type PaymentMethod } from "./wallet-drawer";
 
 interface WalletSelectorProps {
   method: PaymentMethod | null;
