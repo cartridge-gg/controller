@@ -19,7 +19,7 @@ export function AmountSelection({
   enableCustom = true,
   onChange,
 }: AmountSelectionProps) {
-  const [selectedAmount, setSelectedAmount] = useState<number>(
+  const [selectedAmount, setSelectedAmount] = useState<number | undefined>(
     creditAmounts[0],
   );
   const [custom, setCustom] = useState<boolean>(false);
@@ -95,13 +95,11 @@ export function AmountSelection({
             disabled={lockSelection}
             onChange={(e) => {
               const clean = e.target.value.replace(/^0+/, "");
-              const amount = Number.parseInt(clean, 10);
+              const amount = clean ? Number.parseInt(clean, 10) : undefined;
               setSelectedAmount(amount);
-              if (!e || isNaN(amount)) {
-                setError(`Invalid amount`);
-              } else if (amount < MIN_AMOUNT) {
+              if (amount && amount < MIN_AMOUNT) {
                 setError(`$${MIN_AMOUNT} minimum for purchases`);
-              } else if (amount > MAX_AMOUNT) {
+              } else if (amount && amount > MAX_AMOUNT) {
                 setError(`$${MAX_AMOUNT} maximum for purchases`);
               } else {
                 setError(null);
@@ -109,7 +107,8 @@ export function AmountSelection({
             }}
             onFocus={() => setCustom(true)}
             onClear={() => {
-              setSelectedAmount(CREDIT_AMOUNTS[0]);
+              setSelectedAmount(undefined);
+              setError(null);
             }}
           />
           <DollarIcon size="xs" className="absolute top-3 left-3" />

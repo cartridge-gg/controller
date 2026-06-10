@@ -9,6 +9,7 @@ import {
 import {
   fetchSwapQuote,
   USDC_ADDRESSES,
+  USDC_ICON,
   USDCE_ADDRESSES,
   isQuoteChain,
   type SwapQuote,
