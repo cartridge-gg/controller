@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   WalletSelectionDrawer,
   type PaymentMethodSelection,
 } from "../purchase/checkout/onchain/wallet-drawer";
 import { AmountSelectionDrawer } from "./AmountSelectionDrawer";
+import { CheckoutDrawer } from "./CheckoutDrawer";
 
 interface DepositCreditsProps {
   isOpen: boolean;
@@ -13,29 +14,26 @@ interface DepositCreditsProps {
 export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethodSelection | null>(null);
-  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [amount, setAmount] = useState(0);
 
   // initialize on open and close
   useEffect(() => {
     setPaymentMethod(null);
-    setIsPurchasing(false);
+    setAmount(0);
   }, [isOpen]);
 
-  const handlePurchase = useCallback(
-    async (amount: number) => {
-      console.log(`>>> payment`, paymentMethod);
-      console.log(`>>> amount`, amount, paymentMethod);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    },
-    [paymentMethod],
-  );
+  const step = useMemo(() => {
+    if (!paymentMethod) return "method";
+    if (!amount) return "amount";
+    return "checkout";
+  }, [paymentMethod, amount]);
 
   return (
     <>
       <WalletSelectionDrawer
-        isOpen={isOpen && !paymentMethod}
+        isOpen={isOpen && step == "method"}
         onClose={() => {
-          if (!paymentMethod) {
+          if (step == "method") {
             onClose();
           }
         }}
@@ -47,18 +45,30 @@ export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
         showController={true}
         showCrypto={false}
       />
+
       <AmountSelectionDrawer
-        isOpen={isOpen && !!paymentMethod}
+        isOpen={isOpen && step == "amount"}
         onClose={() => {
-          onClose();
+          if (step == "amount") {
+            onClose();
+          }
         }}
-        isLoading={isPurchasing}
         onContinue={async (amount: number) => {
-          setIsPurchasing(true);
-          await handlePurchase(amount);
-          setIsPurchasing(false);
-          onClose();
+          setAmount(amount);
         }}
+      />
+
+      <CheckoutDrawer
+        isOpen={isOpen && step == "checkout"}
+        onClose={() => {
+          if (step == "checkout") {
+            onClose();
+          }
+        }}
+        paymentMethod={paymentMethod}
+        amount={amount}
+        onChangeMethod={() => setPaymentMethod(null)}
+        onChangeAmount={() => setAmount(0)}
       />
     </>
   );

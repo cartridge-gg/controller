@@ -21,16 +21,46 @@ import { Network } from "../../types";
 
 type DrawerStep = "method" | "network" | "wallet";
 
-export type PaymentMethodSelection =
+// Display-oriented description of a chosen payment method. This is the shape
+// both the onchain checkout and the credits checkout share to render a
+// WalletSelector — see getPaymentMethodDisplay below.
+export type PaymentMethod =
   | { type: "apple-pay" }
   | { type: "coinflow" }
   | { type: "controller" }
-  | {
-      type: "external";
-      wallet: ExternalWallet;
+  | { type: "external"; wallet: ExternalWallet };
+
+// What the selection drawer returns: a PaymentMethod plus the extra routing
+// info the onchain flow needs to connect an external wallet. A
+// PaymentMethodSelection is always assignable to PaymentMethod.
+export type PaymentMethodSelection =
+  | Exclude<PaymentMethod, { type: "external" }>
+  | (Extract<PaymentMethod, { type: "external" }> & {
       network: Network;
       chainId?: string;
-    };
+    });
+
+// Single source of truth for the name + icon shown for a payment method.
+export function getPaymentMethodDisplay(method: PaymentMethod | null): {
+  name: string;
+  icon: React.ReactNode;
+} {
+  switch (method?.type) {
+    case "coinflow":
+      return { name: "Credit Card", icon: <CreditCardIcon variant="solid" /> };
+    case "apple-pay":
+      return { name: "Apple Pay", icon: <AppleIcon /> };
+    case "external": {
+      const wallet = getWallet(method.wallet.type);
+      return { name: wallet.name, icon: wallet.subIcon };
+    }
+    case "controller":
+    default: {
+      const wallet = getWallet("controller");
+      return { name: wallet.name, icon: wallet.subIcon };
+    }
+  }
+}
 
 interface WalletSelectionDrawerProps {
   isOpen: boolean;
