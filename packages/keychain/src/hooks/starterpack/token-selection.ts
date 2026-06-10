@@ -12,6 +12,7 @@ import {
 import {
   fetchSwapQuote,
   USDC_ADDRESSES,
+  USDC_ICON,
   USDCE_ADDRESSES,
   type SwapQuote,
 } from "@/utils/ekubo";
@@ -189,14 +190,14 @@ export function useTokenSelection({
         name: "USD Coin",
         symbol: "USDC",
         decimals: 6,
-        icon: "https://static.cartridge.gg/tokens/usdc.svg",
+        icon: USDC_ICON,
       },
       {
         address: usdceAddress,
         name: "Bridged USDC",
         symbol: "USDC.e",
         decimals: 6,
-        icon: "https://static.cartridge.gg/tokens/usdc.svg",
+        icon: USDC_ICON,
       },
       ...DEFAULT_TOKENS,
     ];

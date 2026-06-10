@@ -265,7 +265,9 @@ export function OnchainCostBreakdown({
       tokens={availableTokens}
       selectedToken={displayToken}
       onSelectToken={handleTokenChange}
-      tokenSelectDisabled={availableTokens.length <= 1 || isTokenSelectionLocked}
+      tokenSelectDisabled={
+        availableTokens.length <= 1 || isTokenSelectionLocked
+      }
       isLoading={isFetchingConversion || isFetchingCoinbaseQuote}
       value={value}
       feesTooltip={
