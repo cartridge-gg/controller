@@ -246,6 +246,11 @@ export const presets = {
     namespace: "pistols",
     preset: "pistols",
   },
+  cagecalls: {
+    // slot: "cagecalls-mainnet",
+    // namespace: "cagecalls",
+    preset: "cage-calls",
+  },
 };
 
 export const controllerConnector = new ControllerConnector({
