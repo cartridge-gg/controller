@@ -2,7 +2,9 @@ import {
   AchievementPlayerBadge,
   Button,
   CopyIcon,
+  GearIcon,
   GlobeIcon,
+  SignOutIcon,
   SlotIcon,
   StarknetColorIcon,
   StarknetIcon,
@@ -204,20 +206,20 @@ export const ConnectionTooltipContent = ({
       {onOpenSettings && (
         <Button
           variant="secondary"
-          className="w-full h-9 normal-case font-sans px-1.5 py-2"
+          className="w-full h-9 normal-case font-sans text-sm font-medium tracking-normal px-1.5 py-2"
           onClick={handleOpenSettings}
         >
-          <span className="text-sm font-medium text-foreground-100">
-            Settings
-          </span>
+          <GearIcon size="sm" />
+          <span>Settings</span>
         </Button>
       )}
       <Button
         variant="secondary"
-        className="w-full h-9 normal-case font-sans px-1.5 py-2"
+        className="w-full h-9 normal-case font-sans text-sm font-medium tracking-normal px-1.5 py-2"
         onClick={handleLogout}
       >
-        <span className="text-sm font-medium text-foreground-100">Log Out</span>
+        <SignOutIcon size="sm" />
+        <span>Log Out</span>
       </Button>
     </div>
   );

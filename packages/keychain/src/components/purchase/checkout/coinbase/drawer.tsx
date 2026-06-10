@@ -1,13 +1,5 @@
 import { useCallback, useState } from "react";
-import {
-  Button,
-  CoinbaseWalletColorIcon,
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  Thumbnail,
-  TimesIcon,
-} from "@cartridge/controller-ui";
+import { CoinbaseIcon, Drawer, DrawerContent } from "@cartridge/controller-ui";
 import { useOnchainPurchaseContext } from "@/context";
 import { CoinbaseCheckout, type PanelMode } from "./index";
 
@@ -61,56 +53,24 @@ export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
   const header = HEADER_BY_MODE[mode];
 
   return (
-    <Sheet
-      open={isOpen}
-      onOpenChange={(open) => {
+    <Drawer
+      isOpen={isOpen}
+      onClose={(open) => {
         if (!open && !isCommitting) handleClose();
       }}
     >
-      <SheetContent
-        side="bottom"
-        className="flex flex-col bg-[#0F1410] w-full h-[85vh] justify-start p-0 gap-0 border-t-0 rounded-tl-[16px] rounded-tr-[16px] overflow-hidden"
-        showClose={false}
+      <DrawerContent
+        title={header.title}
+        subTitle={header.description}
+        icon={<CoinbaseIcon />}
       >
-        <div className="flex items-center justify-between p-4">
-          <SheetTitle asChild>
-            <div className="flex items-center gap-3 text-start">
-              <Thumbnail
-                icon={<CoinbaseWalletColorIcon />}
-                size="lg"
-                className="bg-background-100"
-              />
-              <div className="flex flex-col">
-                <span className="text-lg font-semibold">{header.title}</span>
-                {header.description && (
-                  <span className="text-xs text-foreground-300">
-                    {header.description}
-                  </span>
-                )}
-              </div>
-            </div>
-          </SheetTitle>
-          <Button
-            variant="icon"
-            size="icon"
-            onClick={handleClose}
-            disabled={isCommitting}
-            tabIndex={-1}
-            className="rounded-full bg-background-100 hover:bg-background-200"
-          >
-            <TimesIcon size="sm" />
-          </Button>
-        </div>
-
-        <div className="flex flex-col flex-1 min-h-0">
-          <CoinbaseCheckout
-            hideHeader
-            onBack={handleClose}
-            onLoadingChange={setIsCommitting}
-            onModeChange={setMode}
-          />
-        </div>
-      </SheetContent>
-    </Sheet>
+        <CoinbaseCheckout
+          hideHeader
+          onBack={handleClose}
+          onLoadingChange={setIsCommitting}
+          onModeChange={setMode}
+        />
+      </DrawerContent>
+    </Drawer>
   );
 }

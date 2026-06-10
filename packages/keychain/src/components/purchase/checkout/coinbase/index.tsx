@@ -5,7 +5,7 @@ import {
   LayoutFooter,
   SpinnerIcon,
   Button,
-  CoinbaseWalletColorIcon,
+  CoinbaseIcon,
   ExternalIcon,
   cn,
 } from "@cartridge/controller-ui";
@@ -24,6 +24,8 @@ import {
   VerifyTimeoutPanel,
 } from "./limits-verify-panels";
 import { CoinbasePopupStatus } from "./popup-status";
+import { useIdentityContext } from "@/components/identity/provider";
+import { AgeGate } from "@/components/identity/AgeGate";
 
 /** How often to refresh limits while waiting for a terminal status. */
 const VERIFY_POLL_INTERVAL_MS = 5_000;
@@ -287,6 +289,13 @@ export function CoinbaseCheckout({
 
   const waitingForLimits = !hasLimitsLoaded && isFetchingCoinbaseLimits;
 
+  const {
+    ageGateStatus: { isAllowed },
+  } = useIdentityContext();
+  if (!isAllowed) {
+    return <AgeGate />;
+  }
+
   return (
     <>
       {/* Limits check in flight: brief spinner before we know what to show. */}
@@ -308,13 +317,12 @@ export function CoinbaseCheckout({
       >
         {!hideHeader && (
           <HeaderInner
-            title="Coinbase"
-            description="Policies"
-            icon={<CoinbaseWalletColorIcon size="lg" />}
+            title="Coinbase Policies"
+            icon={<CoinbaseIcon size="lg" />}
           />
         )}
-        <LayoutContent className="p-4 flex flex-col gap-4">
-          <div className="bg-[#181C19] border border-background-200 p-4 rounded-[4px] text-xs text-foreground-300">
+        <LayoutContent className="p-0 pb-3 flex flex-col gap-4">
+          <div className="bg-[#181C19] border border-background-200 p-3 rounded-[4px] text-xs text-foreground-300">
             By clicking 'Continue' you are agreeing to the following Coinbase
             policies.
           </div>
@@ -334,7 +342,7 @@ export function CoinbaseCheckout({
             />
           </div>
         </LayoutContent>
-        <LayoutFooter>
+        <LayoutFooter className="p-0 pt-3">
           <Button
             className="w-full"
             onClick={handleContinue}
@@ -430,7 +438,7 @@ function PolicyLink({ label, href }: { label: string; href: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center w-full justify-between p-3 border border-background-200 rounded-[4px] text-sm text-foreground-100">
-        <span className="text-[#DEB06B]">{label}</span>
+        {label}
       </div>
       <a
         href={href}

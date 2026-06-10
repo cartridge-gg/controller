@@ -23,8 +23,9 @@ import { DataProvider as ProfileDataProvider } from "@/components/provider/data"
 import { ToastProvider, StarterpackProviders } from "@/context";
 import { IndexerAPIProvider } from "@cartridge/controller-ui/utils/api/indexer";
 import { CartridgeAPIProvider } from "@cartridge/controller-ui/utils/api/cartridge";
-import { ErrorBoundary } from "../ErrorBoundary";
 import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
+import { IdentityProvider } from "@/components/identity/provider";
+import { ErrorBoundary } from "../ErrorBoundary";
 import { SpinnerIcon } from "@cartridge/controller-ui";
 
 export function Provider({ children }: PropsWithChildren) {
@@ -104,7 +105,9 @@ export function Provider({ children }: PropsWithChildren) {
                                     >
                                       <ProfileDataProvider>
                                         <StarterpackProviders>
-                                          {body}
+                                          <IdentityProvider>
+                                            {body}
+                                          </IdentityProvider>
                                         </StarterpackProviders>
                                       </ProfileDataProvider>
                                     </MarketplaceClientProvider>

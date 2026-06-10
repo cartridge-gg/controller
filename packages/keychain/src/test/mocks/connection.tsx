@@ -62,6 +62,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   externalWaitForTransaction: vi.fn(),
   controllerVersion: new SemVer("1.0.0"),
   locationGate: undefined,
+  ageGate: undefined,
   locationGateVerified: false,
   setLocationGateVerified: vi.fn(),
   isNewControllerRef: { current: false },

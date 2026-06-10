@@ -1,54 +1,62 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import {
+  AsYouType,
+  getCountries,
+  getCountryCallingCode,
+  getExampleNumber,
+  parsePhoneNumberFromString,
+  validatePhoneNumberLength,
+  type CountryCode,
+} from "libphonenumber-js/min";
+import examples from "libphonenumber-js/examples.mobile.json";
 import { Input } from "@/components/primitives/input";
 import { ErrorAlertIcon } from "@/components/icons/error-alert-icon";
 import { PhoneCountryCodeSelect } from "./phone-country-code-select";
-import { COUNTRIES, DEFAULT_COUNTRY, type Country } from "./countries";
 
-function countryOf(code: string): Country | undefined {
-  return COUNTRIES.find((c) => c.code === code);
+const DEFAULT_COUNTRY: CountryCode = "US";
+const MAX_NATIONAL_DIGITS = 15;
+
+const SUPPORTED_COUNTRIES = new Set<string>(getCountries());
+
+function isCountryCode(code: string | null | undefined): code is CountryCode {
+  return !!code && SUPPORTED_COUNTRIES.has(code);
 }
 
-// Display-only mask. `setValue` always receives a plain "+digits" string.
-function formatPhoneDigits(
-  country: Country | undefined,
-  digits: string,
-): string {
-  if (!country?.mask || !country.maxLength) return digits;
-
-  const d = digits.slice(0, country.maxLength);
-  if (!d) return "";
-
-  let out = "";
-  let di = 0;
-  for (let i = 0; i < country.mask.length; i++) {
-    if (di >= d.length) break;
-    if (country.mask[i] === "X") out += d[di++];
-    else out += country.mask[i];
-  }
-  return out;
+function dialPrefix(country: CountryCode): string {
+  return `+${getCountryCallingCode(country)}`;
 }
 
-// Find the country whose dial_code is the longest prefix of `value`.
-// Multiple countries can share a dial_code (e.g. US/CA both "+1"); the
-// caller's last explicit selection wins via internal state.
-function detectCountry(value: string): string | null {
-  if (!value.startsWith("+")) return null;
-  let best: { dial_code: string; code: string } | null = null;
-  for (const c of COUNTRIES) {
-    if (
-      value.startsWith(c.dial_code) &&
-      (!best || c.dial_code.length > best.dial_code.length)
-    ) {
-      best = c;
-    }
-  }
-  return best?.code ?? null;
+function detectCountry(value: string): CountryCode | undefined {
+  if (!value) return undefined;
+  const ayt = new AsYouType();
+  ayt.input(value);
+  return ayt.getCountry();
+}
+
+function nationalDigitsOf(value: string, country: CountryCode): string {
+  const prefix = dialPrefix(country);
+  const after = value.startsWith(prefix) ? value.slice(prefix.length) : "";
+  return after.replace(/\D/g, "").slice(0, MAX_NATIONAL_DIGITS);
+}
+
+function formatNationalDigits(country: CountryCode, digits: string): string {
+  if (!digits) return "";
+  return new AsYouType(country).input(digits);
+}
+
+function examplePlaceholder(country: CountryCode): string {
+  return getExampleNumber(country, examples)?.formatNational() ?? "";
 }
 
 export interface PhoneNumberInputProps {
   /** Full E.164 phone number (e.g. "+12345678900"). */
   value: string;
   setValue: (value: string) => void;
+  /** Seed value parsed once to prefill country + digits whenever `value`
+   * is empty. Lets the parent hand off an existing number (e.g. from a
+   * profile) without managing country detection. After seeding, the
+   * component is fully controlled by `value`/`setValue`. */
+  sourceValue?: string | null;
   /** External error message (e.g. API failure). */
   error?: string;
   disabled?: boolean;
@@ -71,33 +79,33 @@ export const PhoneNumberInput = forwardRef<
   {
     value,
     setValue,
+    sourceValue,
     error,
     disabled,
     allowedCountries,
     userCountryCode,
     inputId,
-    placeholder = "(234)567-8900",
+    placeholder,
   },
   ref,
 ) {
   const lockedCountry =
-    allowedCountries?.length === 1 ? allowedCountries[0] : undefined;
-  const isAllowed = (code: string) =>
+    allowedCountries?.length === 1 && isCountryCode(allowedCountries[0])
+      ? (allowedCountries[0] as CountryCode)
+      : undefined;
+  const isAllowed = (code: CountryCode) =>
     !allowedCountries?.length || allowedCountries.includes(code);
 
-  const [country, setCountry] = useState<string>(() => {
+  const [country, setCountry] = useState<CountryCode>(() => {
     if (lockedCountry) return lockedCountry;
-    const detected = detectCountry(value);
+    const seed = value || sourceValue || "";
+    const detected = detectCountry(seed);
     if (detected && isAllowed(detected)) return detected;
-    if (allowedCountries?.length) return allowedCountries[0];
-    if (
-      userCountryCode &&
-      countryOf(userCountryCode) &&
-      isAllowed(userCountryCode)
-    ) {
+    if (isCountryCode(userCountryCode) && isAllowed(userCountryCode)) {
       return userCountryCode;
     }
-    return DEFAULT_COUNTRY;
+    const fallback = allowedCountries?.find(isCountryCode);
+    return fallback ?? DEFAULT_COUNTRY;
   });
 
   // `userCountryCode` may arrive after mount (async geolocation). Apply it
@@ -105,10 +113,9 @@ export const PhoneNumberInput = forwardRef<
   const hasUserInteractedRef = useRef(false);
 
   const effectiveCountry = lockedCountry ?? country;
-  const countryData = countryOf(effectiveCountry);
-  const dialCode = countryData?.dial_code ?? "";
+  const dialCode = dialPrefix(effectiveCountry);
 
-  // Sync country if the value was set externally to a different dial code.
+  // Sync country if `value` was set externally to a different dial code.
   useEffect(() => {
     if (lockedCountry) return;
     if (value && !value.startsWith(dialCode)) {
@@ -118,42 +125,99 @@ export const PhoneNumberInput = forwardRef<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, dialCode, lockedCountry, allowedCountries]);
 
-  // Adopt a late-arriving `userCountryCode` as the default selection.
+  // Adopt a late-arriving `userCountryCode` (e.g. async geolocation) as the
+  // default selection, but only while the user hasn't touched the field and
+  // the current `value`/`sourceValue` doesn't already determine a country.
   useEffect(() => {
     if (lockedCountry) return;
     if (hasUserInteractedRef.current) return;
-    if (!userCountryCode || !countryOf(userCountryCode)) return;
-    if (!isAllowed(userCountryCode)) return;
-    const detected = detectCountry(value);
+    if (!isCountryCode(userCountryCode) || !isAllowed(userCountryCode)) return;
+    const seed = value || sourceValue || "";
+    const detected = detectCountry(seed);
     if (detected && isAllowed(detected)) return;
     setCountry(userCountryCode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userCountryCode]);
 
-  const digits = useMemo(() => {
-    if (value.startsWith(dialCode)) {
-      return value.slice(dialCode.length).replace(/\D/g, "");
+  // Seed `value` from `sourceValue` while the field is empty. Re-fires if
+  // the parent resets `value` to "" (e.g. reopening a form), so a fresh
+  // prefill flows in without remounting.
+  //
+  // We slice the calling code off the raw digits rather than using the
+  // parsed E.164 number — libphonenumber strips national trunk prefixes
+  // (e.g. the leading 0 in "+2650909302932") during normalization, and
+  // we want to preserve the source verbatim for editing.
+  useEffect(() => {
+    if (!sourceValue || value) return;
+    const ayt = new AsYouType();
+    ayt.input(sourceValue);
+    const detected = ayt.getCountry();
+    const digits = sourceValue.replace(/\D/g, "");
+    if (!digits) return;
+    if (detected) {
+      const callingCode = getCountryCallingCode(detected);
+      const nationalDigits = digits.startsWith(callingCode)
+        ? digits.slice(callingCode.length)
+        : digits;
+      setValue(`+${callingCode}${nationalDigits}`);
+    } else {
+      // Country couldn't be detected (e.g. a shared calling code like +1
+      // with an unassigned area code). Strip the fallback country's calling
+      // code off the source digits before re-prepending it, otherwise the
+      // calling code gets doubled (e.g. "+19999999999" -> "+119999999999").
+      const callingCode = getCountryCallingCode(effectiveCountry);
+      const nationalDigits = digits.startsWith(callingCode)
+        ? digits.slice(callingCode.length)
+        : digits;
+      setValue(`${dialCode}${nationalDigits}`);
     }
-    return "";
-  }, [value, dialCode]);
+  }, [sourceValue, value, setValue, dialCode]);
 
-  const displayValue = useMemo(
-    () => formatPhoneDigits(countryData, digits),
-    [countryData, digits],
+  const digits = useMemo(
+    () => nationalDigitsOf(value, effectiveCountry),
+    [value, effectiveCountry],
   );
 
-  const handleCountryChange = (newCountry: string) => {
+  const displayValue = useMemo(
+    () => formatNationalDigits(effectiveCountry, digits),
+    [effectiveCountry, digits],
+  );
+
+  const effectivePlaceholder = useMemo(
+    () => placeholder ?? examplePlaceholder(effectiveCountry),
+    [placeholder, effectiveCountry],
+  );
+
+  const handleCountryChange = (next: string) => {
+    if (!isCountryCode(next)) return;
     hasUserInteractedRef.current = true;
-    setCountry(newCountry);
-    setValue(`${countryOf(newCountry)?.dial_code ?? ""}${digits}`);
+    setCountry(next);
+    setValue(`${dialPrefix(next)}${digits}`);
   };
 
   const handleDigitsChange = (raw: string) => {
     hasUserInteractedRef.current = true;
-    const sanitized = raw.replace(/\D/g, "");
-    // Re-format to apply the format's digit cap, then strip back to digits.
-    const capped = formatPhoneDigits(countryData, sanitized).replace(/\D/g, "");
-    setValue(`${dialCode}${capped}`);
+    let sanitized = raw.replace(/\D/g, "").slice(0, MAX_NATIONAL_DIGITS);
+    // If the user deleted a formatting character (e.g. ')' in "(123)"),
+    // the digit count is unchanged but `raw` is shorter than what we last
+    // rendered. Treat that as a request to remove the preceding digit so
+    // the deletion isn't masked by re-formatting.
+    if (
+      sanitized.length === digits.length &&
+      raw.length < displayValue.length
+    ) {
+      sanitized = sanitized.slice(0, -1);
+    }
+    // Cap to the selected country's max national length. Trims overflow
+    // from a paste; blocks the keystroke once the country max is reached.
+    while (
+      sanitized.length > 0 &&
+      validatePhoneNumberLength(`${dialCode}${sanitized}`, effectiveCountry) ===
+        "TOO_LONG"
+    ) {
+      sanitized = sanitized.slice(0, -1);
+    }
+    setValue(`${dialCode}${sanitized}`);
   };
 
   return (
@@ -165,7 +229,7 @@ export const PhoneNumberInput = forwardRef<
           disabled={disabled || !!lockedCountry}
           allowedCountries={allowedCountries}
           userCountryCode={userCountryCode}
-          className="w-20 shrink-0"
+          className="shrink-0"
         />
         <Input
           ref={ref}
@@ -173,7 +237,7 @@ export const PhoneNumberInput = forwardRef<
           type="tel"
           inputMode="tel"
           autoComplete="tel-national"
-          placeholder={placeholder}
+          placeholder={effectivePlaceholder}
           containerClassName="min-w-0 flex-1"
           value={displayValue}
           onChange={(e) => handleDigitsChange(e.target.value)}
@@ -190,20 +254,10 @@ export const PhoneNumberInput = forwardRef<
   );
 });
 
-// exports
-
-// E.164 international phone number format
-export function isValidPhoneNumber(value: string): boolean {
-  return /^\+[1-9]\d{6,14}$/.test(value);
-}
-
-// only numbers, with dial code, +###########
+// Display-format a stored E.164 phone number (e.g. "+1 234 567 8900").
+// Falls back to the raw input if parsing fails.
 export function formatPhoneNumber(phoneNumber: string): string {
-  const code = detectCountry(phoneNumber);
-  const country = code ? countryOf(code) : undefined;
-  if (!country?.mask || !country.maxLength) return phoneNumber;
-  if (phoneNumber.length !== country.dial_code.length + country.maxLength) {
-    return phoneNumber;
-  }
-  return `${country.dial_code}${formatPhoneDigits(country, phoneNumber.slice(country.dial_code.length))}`;
+  if (!phoneNumber) return "";
+  const parsed = parsePhoneNumberFromString(phoneNumber);
+  return parsed?.formatInternational() ?? phoneNumber;
 }

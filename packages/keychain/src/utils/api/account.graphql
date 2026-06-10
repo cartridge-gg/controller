@@ -99,3 +99,15 @@ mutation AccountVerify($input: AccountVerifyInput!) {
 mutation DeleteMe {
   deleteMe
 }
+
+mutation DeleteEmailAddress {
+  deleteEmailAddress
+}
+
+mutation DeletePhoneNumber {
+  deletePhoneNumber
+}
+
+mutation DeleteProveIdentity {
+  deleteProveIdentity
+}

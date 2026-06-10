@@ -3,6 +3,7 @@ export * from "./arbitrum";
 export * from "./braavos";
 export * from "./cartridge";
 export * from "./controller";
+export * from "./coinbase";
 export * from "./coinbase-wallet";
 export * from "./discord";
 export * from "./google";

@@ -126,6 +126,11 @@ export type LocationGateOptions = {
   blocked?: string[];
 };
 
+export type AgeGateOptions = {
+  /** Minimum age required to play. Identity verification enforces legal age. @default 18 */
+  minimumAge: number;
+};
+
 export type IFrames = {
   keychain?: KeychainIFrame;
   version?: number;

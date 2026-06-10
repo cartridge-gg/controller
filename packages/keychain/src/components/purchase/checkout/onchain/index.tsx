@@ -8,8 +8,6 @@ import {
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/controller-ui";
-import { useMeQuery } from "@cartridge/controller-ui/utils/api/cartridge";
-import { useAccountPrivateQuery } from "@/utils/api";
 import {
   useNavigation,
   useStarterpackContext,
@@ -47,6 +45,8 @@ import { VerificationDrawer } from "../../verification/drawer";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { getIpLocation } from "@/utils/ip";
 import { num } from "starknet";
+import { useIdentityContext } from "@/components/identity/provider";
+import { AgeGate } from "@/components/identity/AgeGate";
 
 export function OnchainCheckout() {
   const { navigate } = useNavigation();
@@ -96,13 +96,13 @@ export function OnchainCheckout() {
   const { onCreditCardPurchase, isCoinflowLoading } =
     useCreditPurchaseContext();
 
-  const { refetch: refetchMe } = useMeQuery(undefined, { enabled: false });
-  const { data: accountPrivateData, refetch: refetchAccountPrivate } =
-    useAccountPrivateQuery();
+  const {
+    isEmailVerified,
+    isPhoneNumberVerified,
+    refetchUserData,
+    ageGateStatus: { isAllowed },
+  } = useIdentityContext();
   const { loginViaPopup: loginWithWebauthnPopup } = useWebauthnAuthentication();
-  const hasVerifiedPhone =
-    !!accountPrivateData?.accountPrivate?.phoneNumber &&
-    !!accountPrivateData?.accountPrivate?.phoneNumberVerifiedAt;
   const isCoinflowEnabled = useFeature("coinflow-support");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -162,10 +162,10 @@ export function OnchainCheckout() {
   // Skip when the user lacks a verified phone — the limits query requires one
   // and would error; handlePurchase will route those users to verification.
   useEffect(() => {
-    if (isApplePaySelected && hasVerifiedPhone) {
+    if (isApplePaySelected && isPhoneNumberVerified) {
       fetchCoinbaseLimits();
     }
-  }, [isApplePaySelected, hasVerifiedPhone, fetchCoinbaseLimits]);
+  }, [isApplePaySelected, isPhoneNumberVerified, fetchCoinbaseLimits]);
 
   const applePayLimitsLoading = useMemo(
     () => isApplePaySelected && !coinbaseLimits && isFetchingCoinbaseLimits,
@@ -326,19 +326,13 @@ export function OnchainCheckout() {
     try {
       await loginWithWebauthnPopup(controller.username());
       clearError();
-      await Promise.all([refetchMe(), refetchAccountPrivate()]);
+      await refetchUserData();
     } catch (e) {
       console.error("Re-auth popup failed:", e);
     } finally {
       setIsSigningIn(false);
     }
-  }, [
-    controller,
-    loginWithWebauthnPopup,
-    clearError,
-    refetchMe,
-    refetchAccountPrivate,
-  ]);
+  }, [controller, loginWithWebauthnPopup, clearError, refetchUserData]);
 
   const purchaseInFlightRef = useRef(false);
   const handlePurchase = useCallback(async () => {
@@ -365,8 +359,7 @@ export function OnchainCheckout() {
 
     try {
       if (isCoinflowSelected) {
-        const { data: meData } = await refetchMe();
-        if (!meData?.me?.email) {
+        if (!isEmailVerified) {
           setVerificationMethod("coinflow");
           return;
         }
@@ -375,16 +368,8 @@ export function OnchainCheckout() {
         setIsCoinflowDrawerOpen(true);
       } else if (isApplePaySelected) {
         resetCoinbasePurchase();
-        const [{ data: meData }, { data: accountPrivateData }] =
-          await Promise.all([refetchMe(), refetchAccountPrivate()]);
-        const me = meData?.me;
-        const accountPrivate = accountPrivateData?.accountPrivate;
-        const needsVerification =
-          !me?.email ||
-          !accountPrivate?.phoneNumber ||
-          !accountPrivate?.phoneNumberVerifiedAt;
 
-        if (needsVerification) {
+        if (!isEmailVerified || !isPhoneNumberVerified) {
           setVerificationMethod("apple-pay");
           return;
         }
@@ -438,8 +423,8 @@ export function OnchainCheckout() {
     fetchCoinbaseLimits,
     resetCoinbasePurchase,
     onCreditCardPurchase,
-    refetchMe,
-    refetchAccountPrivate,
+    isPhoneNumberVerified,
+    isEmailVerified,
     onCreateCoinbaseOrder,
     onOnchainPurchase,
     navigate,
@@ -491,6 +476,10 @@ export function OnchainCheckout() {
     clearError();
     return () => clearError();
   }, [clearError]);
+
+  if (!isAllowed) {
+    return <AgeGate />;
+  }
 
   if (isStarterpackLoading || !quote || !countryCodeLoaded) {
     return <LoadingState />;

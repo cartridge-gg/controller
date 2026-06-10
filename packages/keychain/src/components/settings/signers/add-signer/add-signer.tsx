@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
-import { credentialToAddress } from "@/components/connect/types";
+import {
+  credentialToAddress,
+  credentialToAuth,
+} from "@/components/connect/types";
 import { SignerPendingDrawer } from "@/components/connect/create/SignerPendingDrawer";
 import { useSmsAuthentication } from "@/components/connect/create/sms";
 import {
-  SmsOtpDrawer,
+  VerifyPhoneNumberDrawer,
   SmsOtpState,
-} from "@/components/connect/create/sms/SmsOtpForm";
+} from "@/components/identity/VerifyPhoneNumberDrawer";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -57,6 +60,15 @@ function getErrorMessage(error: unknown): string {
 
   return "Unknown error";
 }
+
+const isExistingSigner = (
+  currentSigners: CredentialMetadata[] | undefined,
+  type: AuthOption,
+) => {
+  return (
+    currentSigners?.some((signer) => credentialToAuth(signer) === type) ?? false
+  );
+};
 
 interface AddSignerDrawerProps {
   isOpen: boolean;
@@ -143,9 +155,10 @@ export function AddSignerDrawer({
   );
 
   const handleResendOtp = useCallback(async () => {
-    if (smsState?.phoneNumber) {
-      await handleInitOtp(smsState.phoneNumber);
+    if (!smsState?.phoneNumber) {
+      throw new Error("No phone number");
     }
+    await handleInitOtp(smsState.phoneNumber);
   }, [handleInitOtp, smsState?.phoneNumber]);
 
   const handleSubmitSms = useCallback(
@@ -253,9 +266,9 @@ export function AddSignerDrawer({
         </DrawerContent>
       </Drawer>
 
-      <SmsOtpDrawer
+      <VerifyPhoneNumberDrawer
         isOpen={isSmsOpen}
-        isLogin={false}
+        purpose="signup"
         onClose={handleClose}
         onInitOtp={handleInitOtp}
         onResendOtp={handleResendOtp}
@@ -366,6 +379,7 @@ const WalletAuths = ({
         <SignerMethod
           key={wallet as string}
           kind={wallet as SignerMethodKind}
+          // existing={isExistingSigner(currentSigners, wallet as AuthOption)} // allow multiple
           onClick={() =>
             handleClick(wallet as SignerMethodKind, handleClickInner)
           }
@@ -441,9 +455,14 @@ const RegularAuths = ({
 
   return (
     <>
-      <SignerMethod kind="sms" onClick={onClickSms} />
+      <SignerMethod
+        kind="sms"
+        existing={isExistingSigner(currentSigners, "sms")}
+        onClick={onClickSms}
+      />
       <SignerMethod
         kind="passkey"
+        // existing={isExistingSigner(currentSigners, "webauthn")} // allow multiple
         onClick={async () => {
           await handleClick("passkey", async () => {
             if (!controller || !controller?.username()) {
@@ -460,12 +479,14 @@ const RegularAuths = ({
       />
       <SignerMethod
         kind="google"
+        // existing={isExistingSigner(currentSigners, "google")} // allow multiple
         onClick={async () => {
           await handleTurnkeyOAuth("google");
         }}
       />
       <SignerMethod
         kind="discord"
+        // existing={isExistingSigner(currentSigners, "discord")} // allow multiple
         onClick={async () => {
           await handleTurnkeyOAuth("discord");
         }}

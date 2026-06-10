@@ -624,17 +624,12 @@ const Price = ({
           defaultValue={selected?.metadata.address}
           disabled={tokens.length <= 1}
         >
-          <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2" />
-          <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
+          <TokenSelectHeader />
+          <SelectContent>
             {tokens.map((token) => (
               <SelectItem
                 key={token.metadata.address}
-                simplified
                 value={token.metadata.address}
-                data-active={
-                  token.metadata.address === selected?.metadata.address
-                }
-                className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:hover:bg-background-300 data-[active=true]:text-foreground-100 rounded-none"
               >
                 <div className="flex items-center gap-2">
                   {token.metadata.image ? (
@@ -643,7 +638,6 @@ const Price = ({
                       rounded
                       size="sm"
                       variant="light"
-                      className="group-hover:bg-background-400"
                     />
                   ) : (
                     <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />

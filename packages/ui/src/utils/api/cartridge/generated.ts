@@ -215,10 +215,8 @@ export type AccountUpdateInput = {
 export type AccountVerifyInput = {
   /** Date of birth in YYYY-MM-DD format. */
   dob?: InputMaybe<Scalars['String']>;
-  emailAddress?: InputMaybe<Scalars['String']>;
   firstName?: InputMaybe<Scalars['String']>;
   lastName?: InputMaybe<Scalars['String']>;
-  phoneNumber?: InputMaybe<Scalars['String']>;
   /** Use the UAT sandbox environment instead of production. */
   sandbox?: InputMaybe<Scalars['Boolean']>;
 };
@@ -2369,6 +2367,7 @@ export type Erc1155Metadata = {
 export type Eip191Credential = {
   __typename?: 'Eip191Credential';
   ethAddress: Scalars['String'];
+  phoneLast4?: Maybe<Scalars['String']>;
   provider: Scalars['String'];
 };
 
@@ -3177,7 +3176,10 @@ export type Mutation = {
   createTeam: Team;
   decreaseBudget: Paymaster;
   deleteDeployment: Scalars['Boolean'];
+  deleteEmailAddress: Scalars['Boolean'];
   deleteMe: Scalars['Boolean'];
+  deletePhoneNumber: Scalars['Boolean'];
+  deleteProveIdentity: Scalars['Boolean'];
   deleteRpcApiKey: Scalars['Boolean'];
   deleteRpcCorsDomain: Scalars['Boolean'];
   deleteTeam: Scalars['Boolean'];
@@ -7298,7 +7300,7 @@ export type ControllerQueryVariables = Exact<{
 }>;
 
 
-export type ControllerQuery = { __typename?: 'Query', controller?: { __typename?: 'Controller', id: string, accountID: string, address: string, network: string, constructorCalldata: Array<string>, createdAt: string, updatedAt: string, signers?: Array<{ __typename?: 'Signer', createdAt: string, isRevoked: boolean, isOriginal: boolean, metadata: { __typename: 'Eip191Credentials', eip191?: Array<{ __typename?: 'Eip191Credential', provider: string, ethAddress: string }> | null } | { __typename: 'PasswordCredentials', password?: Array<{ __typename?: 'PasswordCredential', publicKey: string, encryptedPrivateKey: string }> | null } | { __typename: 'SIWSCredentials', siws?: Array<{ __typename?: 'SIWSCredential', publicKey: string }> | null } | { __typename: 'StarknetCredentials', starknet?: Array<{ __typename?: 'StarknetCredential', publicKey: string }> | null } | { __typename: 'WebauthnCredentials', webauthn?: Array<{ __typename?: 'WebauthnCredential', id: string, publicKey: string, AAGUID: string }> | null } }> | null } | null };
+export type ControllerQuery = { __typename?: 'Query', controller?: { __typename?: 'Controller', id: string, accountID: string, address: string, network: string, constructorCalldata: Array<string>, createdAt: string, updatedAt: string, signers?: Array<{ __typename?: 'Signer', createdAt: string, isRevoked: boolean, isOriginal: boolean, metadata: { __typename: 'Eip191Credentials', eip191?: Array<{ __typename?: 'Eip191Credential', provider: string, ethAddress: string, phoneLast4?: string | null }> | null } | { __typename: 'PasswordCredentials', password?: Array<{ __typename?: 'PasswordCredential', publicKey: string, encryptedPrivateKey: string }> | null } | { __typename: 'SIWSCredentials', siws?: Array<{ __typename?: 'SIWSCredential', publicKey: string }> | null } | { __typename: 'StarknetCredentials', starknet?: Array<{ __typename?: 'StarknetCredential', publicKey: string }> | null } | { __typename: 'WebauthnCredentials', webauthn?: Array<{ __typename?: 'WebauthnCredential', id: string, publicKey: string, AAGUID: string }> | null } }> | null } | null };
 
 export type BeginRegistrationMutationVariables = Exact<{
   username: Scalars['String'];
@@ -8183,6 +8185,7 @@ export const ControllerDocument = `
           eip191 {
             provider
             ethAddress
+            phoneLast4
           }
         }
         ... on SIWSCredentials {

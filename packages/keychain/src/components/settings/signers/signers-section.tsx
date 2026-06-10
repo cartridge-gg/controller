@@ -6,11 +6,15 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { isCurrentSigner } from "@/utils/signers";
 import { JsRemoveSignerInput } from "@cartridge/controller-wasm";
-import { Button, PlusIcon, Skeleton } from "@cartridge/controller-ui";
+import {
+  Button,
+  PlusIcon,
+  SectionHeader,
+  Skeleton,
+} from "@cartridge/controller-ui";
 import { useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
-import { SectionHeader } from "../section-header";
 import { AddSignerDrawer } from "./add-signer/add-signer";
 import { SignerCard } from "./signer-card";
 
@@ -26,10 +30,7 @@ export const SignersSection = ({
 
   return (
     <section className="space-y-4">
-      <SectionHeader
-        title="Signer(s)"
-        description="Add authorized signers to your Controller. Each signer provides a secure alternative authentication method."
-      />
+      <SectionHeader kind="signers" />
       <div className="space-y-3">
         {controllerQuery.isLoading ? (
           <LoadingState />
@@ -108,18 +109,14 @@ export const SignersSection = ({
       </div>
 
       <Button
-        type="button"
-        variant="outline"
-        className="bg-background-100 text-foreground-300 gap-1 w-fit px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200 hover:border-background-200"
+        variant="sans"
         disabled={chainId !== constants.StarknetChainId.SN_MAIN}
         onClick={() => setIsAddSignerOpen(true)}
       >
         <PlusIcon size="sm" variant="line" />
-        <span className="normal-case font-normal font-sans text-sm">
-          {chainId === constants.StarknetChainId.SN_MAIN
-            ? "Add Signer"
-            : "Must be on Mainnet"}
-        </span>
+        {chainId === constants.StarknetChainId.SN_MAIN
+          ? "Add Signer"
+          : "Must be on Mainnet"}
       </Button>
 
       <AddSignerDrawer

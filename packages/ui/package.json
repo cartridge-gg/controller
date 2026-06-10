@@ -96,6 +96,7 @@
     "class-variance-authority": "catalog:",
     "clsx": "^1.2.1",
     "cmdk": "^1.0.3",
+    "libphonenumber-js": "^1.13.3",
     "posthog-js-lite": "catalog:",
     "react": "catalog:",
     "react-query": "catalog:",

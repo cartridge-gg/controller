@@ -37,7 +37,11 @@ function DrawerSwitchStory() {
           }
         }}
       >
-        <DrawerContent title="Drawer 1" icon={<GlobeIcon variant="solid" />}>
+        <DrawerContent
+          title="Drawer 1"
+          subTitle="0x1234...cdef"
+          icon={<GlobeIcon variant="solid" />}
+        >
           <div className="bg-background-300 h-[200px]">
             <img src={PLACEHOLDER} className="m-auto" />
           </div>

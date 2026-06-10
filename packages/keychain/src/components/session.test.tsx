@@ -104,6 +104,7 @@ describe("Session", () => {
       externalGetBalance: vi.fn().mockResolvedValue({} as never),
       externalWaitForTransaction: vi.fn().mockResolvedValue({} as never),
       locationGate: undefined,
+      ageGate: undefined,
       locationGateVerified: false,
       setLocationGateVerified: vi.fn(),
       isNewControllerRef: { current: false },

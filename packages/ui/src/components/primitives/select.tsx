@@ -2,96 +2,10 @@
 
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { cva, VariantProps } from "class-variance-authority";
-import { CaratIcon, CircleCheckIcon } from "@/components/icons";
+import { CaratIcon } from "@/components/icons";
 import { cn } from "@/utils";
 
-export const selectVariants = cva("", {
-  variants: {
-    variant: {
-      default: "text-xs",
-      input: "text-sm/[18px] font-mono",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
-
-type SelectVariant = NonNullable<
-  VariantProps<typeof selectVariants>["variant"]
->;
-
-export const selectTriggerVariants = cva(
-  "flex w-full items-center justify-between whitespace-nowrap rounded-md bg-background-200 hover:bg-background-300 px-3 py-2 text-foreground placeholder:text-foreground-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
-  {
-    variants: {
-      variant: {
-        default: "h-9 font-bold",
-        input:
-          "h-10 border border-background-300 hover:bg-background-200 hover:border-background-400 focus:border-primary focus:bg-background-300 data-[state=open]:border-primary data-[state=open]:bg-background-300",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
-
-export const selectViewportVariants = cva("flex flex-col", {
-  variants: {
-    variant: {
-      default: "gap-px font-bold",
-      input: "divide-y divide-spacer-100",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
-
-export const selectItemVariants = cva(
-  "relative flex w-full cursor-default select-none items-center outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-  {
-    variants: {
-      variant: {
-        default: "rounded-sm py-1.5 pl-2 pr-8 text-foreground-400",
-        input:
-          "px-4 py-3 focus:bg-background-300 text-foreground-300 focus:text-foreground-100 data-[state=checked]:text-foreground-100",
-      },
-      simplified: {
-        true: "",
-        false: "",
-      },
-    },
-    compoundVariants: [
-      {
-        variant: "default",
-        simplified: false,
-        className: "focus:bg-background-500 focus:text-foreground-200",
-      },
-    ],
-    defaultVariants: {
-      variant: "default",
-      simplified: false,
-    },
-  },
-);
-
-const SelectVariantContext = React.createContext<SelectVariant>("default");
-
-type SelectProps = React.ComponentPropsWithoutRef<
-  typeof SelectPrimitive.Root
-> & {
-  variant?: SelectVariant;
-};
-
-const Select = ({ variant, ...props }: SelectProps) => (
-  <SelectVariantContext.Provider value={variant ?? "default"}>
-    <SelectPrimitive.Root {...props} />
-  </SelectVariantContext.Provider>
-);
-Select.displayName = "Select";
+const Select = SelectPrimitive.Root;
 
 const SelectGroup = SelectPrimitive.Group;
 
@@ -100,28 +14,25 @@ const SelectValue = SelectPrimitive.Value;
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
-    simplified?: boolean;
     arrow?: boolean;
   }
->(({ className, children, simplified, arrow, ...props }, ref) => {
-  const variant = React.useContext(SelectVariantContext);
+>(({ className, children, arrow, ...props }, ref) => {
   return (
     <SelectPrimitive.Trigger
       ref={ref}
       className={cn(
-        selectTriggerVariants({ variant }),
-        selectVariants({ variant }),
+        "flex h-10 w-full items-center justify-between px-3 py-2 whitespace-nowrap [&>span]:line-clamp-1",
+        "rounded-md bg-background-200 text-sm/[18px] text-foreground-100 placeholder:text-foreground-400",
+        "hover:bg-background-300",
+        "focus:bg-background-300 focus:outline-none",
+        "data-[state=open]:bg-background-300",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         arrow && "relative",
         className,
       )}
       {...props}
     >
       {children}
-      {simplified && (
-        <SelectPrimitive.Icon asChild>
-          <CaratIcon variant="down" className="text-foreground-400" />
-        </SelectPrimitive.Icon>
-      )}
       {arrow && (
         <SelectPrimitive.Icon asChild>
           <CaratIcon
@@ -180,13 +91,12 @@ const SelectContent = React.forwardRef<
     { className, viewPortClassName, children, position = "popper", ...props },
     ref,
   ) => {
-    const variant = React.useContext(SelectVariantContext);
     return (
       <SelectPrimitive.Portal>
         <SelectPrimitive.Content
           ref={ref}
           className={cn(
-            "relative z-50 max-h-96 min-w-[8rem] w-full shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] overflow-hidden rounded-md bg-background-200 text-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+            "relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[8rem] w-full shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] overflow-hidden rounded-md bg-background-100 text-foreground-100 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
             position === "popper" &&
               "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
             className,
@@ -197,7 +107,7 @@ const SelectContent = React.forwardRef<
           <SelectScrollUpButton />
           <SelectPrimitive.Viewport
             className={cn(
-              selectViewportVariants({ variant }),
+              "flex flex-col gap-px",
               position === "popper" &&
                 "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
               viewPortClassName,
@@ -227,29 +137,20 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName;
 
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & {
-    simplified?: boolean;
-  }
->(({ className, children, simplified, ...props }, ref) => {
-  const variant = React.useContext(SelectVariantContext);
-  const showIndicator = !simplified && variant !== "input";
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => {
   return (
     <SelectPrimitive.Item
       ref={ref}
       className={cn(
-        selectItemVariants({ variant, simplified: !!simplified }),
-        selectVariants({ variant }),
+        "relative flex h-10 w-full shrink-0 items-center px-4",
+        "bg-background-200 text-sm/[18px] text-foreground-100 cursor-default select-none outline-none",
+        "hover:bg-background-300 focus:bg-background-300",
+        "data-[highlighted]:bg-background-300 data-[state=checked]:bg-background-300 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className,
       )}
       {...props}
     >
-      {showIndicator && (
-        <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
-          <SelectPrimitive.ItemIndicator>
-            <CircleCheckIcon size="sm" />
-          </SelectPrimitive.ItemIndicator>
-        </span>
-      )}
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   );

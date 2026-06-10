@@ -79,7 +79,6 @@ export function DateSelect({
   return (
     <div className={cn("flex w-full gap-2", className)}>
       <Select
-        variant="input"
         value={month}
         onValueChange={handleMonthChange}
         disabled={disabled}
@@ -96,12 +95,7 @@ export function DateSelect({
         </SelectContent>
       </Select>
 
-      <Select
-        variant="input"
-        value={day}
-        onValueChange={handleDayChange}
-        disabled={disabled}
-      >
+      <Select value={day} onValueChange={handleDayChange} disabled={disabled}>
         <SelectTrigger arrow>
           <SelectValue placeholder="Day" />
         </SelectTrigger>
@@ -116,12 +110,7 @@ export function DateSelect({
         </SelectContent>
       </Select>
 
-      <Select
-        variant="input"
-        value={year}
-        onValueChange={handleYearChange}
-        disabled={disabled}
-      >
+      <Select value={year} onValueChange={handleYearChange} disabled={disabled}>
         <SelectTrigger arrow>
           <SelectValue placeholder="Year" />
         </SelectTrigger>

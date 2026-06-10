@@ -79,12 +79,15 @@ export function ErrorAlert({
     }
   }, [variant]);
 
+  const noContents = !description;
+
   return (
     <Accordion
       type="single"
       collapsible={collapsible}
       defaultValue={isExpanded ? "item-1" : undefined}
       className={className}
+      disabled={noContents}
     >
       <AccordionItem
         value="item-1"
@@ -95,7 +98,7 @@ export function ErrorAlert({
         )}
       >
         <AccordionTrigger
-          hideIcon={!collapsible}
+          hideIcon={!collapsible || noContents}
           color={"text-destructive-100"}
           tabIndex={collapsible ? undefined : -1}
           className={`px-3 pt-2.5 pb-2 items-start gap-2`}
@@ -119,8 +122,8 @@ export function ErrorAlert({
           {copyText && (
             <Button
               size="icon"
-              variant="icon"
-              className="absolute right-8 w-8 h-8"
+              variant="ghost"
+              className="absolute right-1 top-0 w-8 h-8"
               onClick={() => {
                 setCopied(true);
                 navigator.clipboard.writeText(copyText);
@@ -189,6 +192,22 @@ export function ControllerErrorAlert({
         }
       } else {
         description = "";
+      }
+
+      // rpcError contaisn the actual reason for failure
+      const rpcError = graphqlError.details?.rpcError ?? "";
+      if (rpcError.startsWith("InvalidArgument:")) {
+        description = (
+          <>
+            {rpcError}
+            {description ? (
+              <>
+                <br />
+                {description}
+              </>
+            ) : null}
+          </>
+        );
       }
 
       copyText = graphqlError.raw;

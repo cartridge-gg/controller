@@ -1,6 +1,10 @@
-import { Button, PlusIcon, Skeleton } from "@cartridge/controller-ui";
+import {
+  Button,
+  PlusIcon,
+  SectionHeader,
+  Skeleton,
+} from "@cartridge/controller-ui";
 import { useQueryClient, useMutation } from "react-query";
-import { SectionHeader } from "../section-header";
 import { ConnectionCard } from "./connection-card";
 import { useNavigation } from "@/context/navigation";
 import { useFetchData } from "@/utils/api/fetcher";
@@ -41,10 +45,7 @@ export const ConnectionsSection = () => {
 
   return (
     <section className="space-y-4">
-      <SectionHeader
-        title="Connected Accounts"
-        description="Connect your social accounts to enable content publishing features."
-      />
+      <SectionHeader kind="connections" />
       <div className="space-y-3">
         {isLoading ? (
           <LoadingState />
@@ -68,15 +69,11 @@ export const ConnectionsSection = () => {
       </div>
       {!hasAllConnections && (
         <Button
-          type="button"
-          variant="outline"
-          className="bg-background-100 text-foreground-300 gap-1 w-fit px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200 hover:border-background-200"
+          variant="sans"
           onClick={() => navigate("/settings/add-connection")}
         >
           <PlusIcon size="sm" variant="line" />
-          <span className="normal-case font-normal font-sans text-sm">
-            Connect Socials
-          </span>
+          Connect Socials
         </Button>
       )}
     </section>

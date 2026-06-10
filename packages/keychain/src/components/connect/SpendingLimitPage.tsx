@@ -40,7 +40,7 @@ export function SpendingLimitPage({
       />
       <LayoutContent className="pb-0">
         <div className="flex flex-col gap-4">
-          <TokenConsent />
+          <TokenConsent policies={policies} />
           <SpendingLimitCard policies={policies} />
         </div>
       </LayoutContent>

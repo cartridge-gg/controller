@@ -1,16 +1,17 @@
 import { now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import {
+  SectionHeader,
+  SettingsCard,
   DesktopIcon,
   MobileIcon,
   ShapesIcon,
   Skeleton,
+  ClockIcon,
 } from "@cartridge/controller-ui";
 import { useSessionsQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import { constants, shortString } from "starknet";
-import { SectionHeader } from "../section-header";
 import { RevokeAllSessionsButton } from "./revoke-all-sessions";
-import { SessionCard } from "./session-card";
 
 export const SessionsSection = () => {
   const { controller } = useConnection();
@@ -36,8 +37,7 @@ export const SessionsSection = () => {
   return (
     <section className="space-y-4">
       <SectionHeader
-        title="Session Keys"
-        description="Session keys grant permission to your Controller to perform certain game actions on your behalf"
+        kind="sessions"
         showStatus={false}
         extraContent={
           sessionsQuery.data &&
@@ -67,12 +67,20 @@ export const SessionsSection = () => {
             const expiresAt = BigInt(session?.expiresAt ?? 0);
             const isExpired = !session?.expiresAt || expiresAt < now();
             if (isExpired) return;
+            const label = truncateSessionName(session?.appID ?? "");
             return (
-              <SessionCard
+              <SettingsCard
                 key={index}
                 icon={<DeviceIcon os={session?.metadata?.os ?? "Unknown"} />}
-                name={truncateSessionName(session?.appID ?? "")}
-                rightText={formatDuration(expiresAt)}
+                label={label}
+                rightText={
+                  <div className="flex gap-1">
+                    <ClockIcon size="xs" variant="line" />
+                    <span>{formatDuration(expiresAt)}</span>
+                  </div>
+                }
+                confirm="delete"
+                confirmLabel={`${label} Session`}
                 onDelete={async () => {
                   await controller?.revokeSession({
                     app_id: session?.appID,
