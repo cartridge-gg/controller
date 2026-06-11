@@ -8,8 +8,7 @@ import {
   HeaderInner,
 } from "@cartridge/controller-ui";
 import { Balance, BalanceType } from "./Balance";
-import { DepositCredits } from "./DepositCredits";
-import { useState } from "react";
+import { useCreditsContext } from "@/components/credits/provider";
 
 export type FundingProps = {
   title?: React.ReactElement | string;
@@ -19,7 +18,7 @@ export type FundingProps = {
 export function Funding({ title, isSlot }: FundingProps) {
   const { controller } = useConnection();
   // const { navigate } = useNavigation();
-  const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const { initiateCreditsDeposit } = useCreditsContext();
 
   const balances: BalanceType[] = isSlot
     ? [BalanceType.CREDITS]
@@ -45,7 +44,7 @@ export function Funding({ title, isSlot }: FundingProps) {
         {!isSlot && (
           <Button
             onClick={() => {
-              setIsDepositOpen(true);
+              initiateCreditsDeposit();
               // navigate("/funding/deposit")
             }}
           >
@@ -53,10 +52,6 @@ export function Funding({ title, isSlot }: FundingProps) {
           </Button>
         )}
       </LayoutFooter>
-      <DepositCredits
-        isOpen={isDepositOpen}
-        onClose={() => setIsDepositOpen(false)}
-      />
     </>
   );
 }

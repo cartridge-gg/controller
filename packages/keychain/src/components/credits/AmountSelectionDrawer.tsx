@@ -5,7 +5,7 @@ import {
   DepositIcon,
   Button,
 } from "@cartridge/controller-ui";
-import { AmountSelection } from "./AmountSelection";
+import { AmountSelection } from "../funding/AmountSelection";
 
 interface AmountSelectionDrawerProps {
   isOpen: boolean;
