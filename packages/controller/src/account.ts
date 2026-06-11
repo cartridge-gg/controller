@@ -15,6 +15,7 @@ import {
 } from "./types";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import BaseProvider from "./provider";
+import { createRateLimitedFetch } from "./rate-limit";
 import { toArray } from "./utils";
 import { SIGNATURE } from "@starknet-io/types-js";
 
@@ -31,8 +32,16 @@ class ControllerAccount extends WalletAccount {
     options: KeychainOptions,
     modal: Modal,
   ) {
+    const providerOptions =
+      options?.rpcRetry === false
+        ? { nodeUrl: rpcUrl }
+        : {
+            nodeUrl: rpcUrl,
+            baseFetch: createRateLimitedFetch(options?.rpcRetry),
+          };
+
     super({
-      provider: { nodeUrl: rpcUrl },
+      provider: providerOptions,
       walletProvider: provider,
       address,
     });

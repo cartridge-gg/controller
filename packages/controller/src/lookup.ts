@@ -7,9 +7,11 @@ import {
 } from "./types";
 import { constants, num } from "starknet";
 import { API_URL } from "./constants";
+import { createRateLimitedFetch } from "./rate-limit";
 
 const cache = new Map<string, string>();
 const QUERY_URL = `${API_URL}/query`;
+const rateLimitedFetch = createRateLimitedFetch();
 
 type LookupSigner = {
   isOriginal: boolean;
@@ -44,7 +46,7 @@ async function lookup(request: LookupRequest): Promise<LookupResponse> {
     return { results: [] };
   }
 
-  const response = await fetch(`${API_URL}/lookup`, {
+  const response = await rateLimitedFetch(`${API_URL}/lookup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -62,7 +64,7 @@ async function lookup(request: LookupRequest): Promise<LookupResponse> {
 async function queryLookupSigners(
   username: string,
 ): Promise<LookupSignersQueryResponse> {
-  const response = await fetch(QUERY_URL, {
+  const response = await rateLimitedFetch(QUERY_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

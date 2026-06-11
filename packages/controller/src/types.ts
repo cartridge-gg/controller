@@ -13,6 +13,7 @@ import {
   InvocationsDetails,
 } from "starknet";
 import { KeychainIFrame } from "./iframe";
+import type { RateLimitRetryOptions } from "./rate-limit";
 import {
   AUTH_EXTERNAL_WALLETS,
   EXTERNAL_WALLETS,
@@ -270,6 +271,8 @@ export type Chain = {
 export type ProviderOptions = {
   defaultChainId?: ChainId;
   chains?: Chain[];
+  /** Retry RPC/API requests when providers explicitly return rate-limit errors. */
+  rpcRetry?: false | RateLimitRetryOptions;
 };
 
 export type KeychainOptions = IFrameOptions & {
@@ -300,6 +303,8 @@ export type KeychainOptions = IFrameOptions & {
   lazyload?: boolean;
   /** When true, force WebAuthn operations to run in a popup window instead of the iframe. Useful for development and testing. */
   webauthnPopup?: boolean;
+  /** Retry RPC/API requests when providers explicitly return rate-limit errors. */
+  rpcRetry?: false | RateLimitRetryOptions;
 };
 
 export type ProfileContextTypeVariant =
