@@ -5,6 +5,7 @@ import {
   CardListContent,
   CardTitle,
   cn,
+  CreditIcon,
   Spinner,
   Thumbnail,
 } from "@cartridge/controller-ui";
@@ -46,11 +47,7 @@ export function Receiving({
           .filter((item) => item.type === ItemType.CREDIT)
           .map((item, index) => {
             const Logo = (
-              <Thumbnail
-                icon="https://static.cartridge.gg/presets/credit/icon.svg"
-                size="lg"
-                rounded
-              />
+              <Thumbnail icon={<CreditIcon size="auto" />} size="lg" rounded />
             );
             return (
               <ActivityCard

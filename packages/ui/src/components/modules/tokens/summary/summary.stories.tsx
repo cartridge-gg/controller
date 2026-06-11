@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { TokenSummary } from ".";
-import { TokenCard } from "@/index";
+import { CreditIcon, TokenCard } from "@/index";
 
 const meta: Meta<typeof TokenSummary> = {
   title: "Modules/Tokens/Summary",
@@ -18,7 +18,7 @@ export const Default: Story = {
   render: () => (
     <TokenSummary title="Tokens">
       <TokenCard
-        image={"https://static.cartridge.gg/presets/credit/icon.svg"}
+        image={<CreditIcon />}
         title={"Credits"}
         amount={"200 Credits"}
         value={"$20.00"}
