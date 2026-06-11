@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   LayoutContent,
@@ -23,12 +24,11 @@ import { useExplorer } from "@starknet-react/core";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
-import { useCallback, useMemo, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
 import { EmptyState, LoadingState } from "@/components/activity";
 import { SendTokenDrawer } from "./send/send-drawer";
-import { DepositCredits } from "@/components/funding/DepositCredits";
+import { useCreditsContext } from "@/components/credits/provider";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -46,11 +46,11 @@ function Credits() {
   // const { navigate } = useNavigation();
   const account = useAccount();
   const username = account?.username || "";
+  const { initiateCreditsDeposit } = useCreditsContext();
   const credit = useCreditBalance({
     username,
     interval: 30000,
   });
-  const [isDepositOpen, setIsDepositOpen] = useState(false);
 
   // Show loading state while credits are being fetched
   if (credit.balance.value === undefined) {
@@ -78,17 +78,13 @@ function Credits() {
       <LayoutFooter className="gap-4">
         <Button
           onClick={() => {
-            setIsDepositOpen(true);
+            initiateCreditsDeposit();
             // navigate("/funding/deposit");
           }}
         >
           Deposit
         </Button>
       </LayoutFooter>
-      <DepositCredits
-        isOpen={isDepositOpen}
-        onClose={() => setIsDepositOpen(false)}
-      />
     </>
   );
 }
