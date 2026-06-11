@@ -337,10 +337,10 @@ export function CreateControllerView({
   );
 
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading && !!authMethod) {
       setAuthenticationStep(AuthenticationStep.Pending);
     }
-  }, [isLoading, setAuthenticationStep]);
+  }, [isLoading, authMethod, setAuthenticationStep]);
 
   useEffect(() => {
     if (error && !!authMethod) {
