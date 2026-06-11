@@ -3,13 +3,16 @@ import { Button, DollarIcon, Input, Error } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
 
 export const CREDIT_AMOUNTS = [10, 20, 50];
-const MIN_AMOUNT = 2;
-const MAX_AMOUNT = 1000;
+
+const DEFAULT_MIN_AMOUNT = 2;
+const DEFAULT_MAX_AMOUNT = 1000;
 
 type AmountSelectionProps = {
   creditAmounts?: number[];
   lockSelection?: boolean;
   enableCustom?: boolean;
+  minAmount?: number;
+  maxAmount?: number;
   onChange: (creditAmount: number) => void;
 };
 
@@ -17,6 +20,8 @@ export function AmountSelection({
   creditAmounts = CREDIT_AMOUNTS,
   lockSelection = false,
   enableCustom = true,
+  minAmount,
+  maxAmount,
   onChange,
 }: AmountSelectionProps) {
   const [selectedAmount, setSelectedAmount] = useState<number | undefined>(
@@ -97,10 +102,12 @@ export function AmountSelection({
               const clean = e.target.value.replace(/^0+/, "");
               const amount = clean ? Number.parseInt(clean, 10) : undefined;
               setSelectedAmount(amount);
-              if (amount && amount < MIN_AMOUNT) {
-                setError(`$${MIN_AMOUNT} minimum for purchases`);
-              } else if (amount && amount > MAX_AMOUNT) {
-                setError(`$${MAX_AMOUNT} maximum for purchases`);
+              const min = minAmount ?? DEFAULT_MIN_AMOUNT;
+              const max = maxAmount ?? DEFAULT_MAX_AMOUNT;
+              if (amount && amount < min) {
+                setError(`$${min} minimum for purchases`);
+              } else if (amount && amount > max) {
+                setError(`$${max} maximum for purchases`);
               } else {
                 setError(null);
               }

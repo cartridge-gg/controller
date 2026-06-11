@@ -29,6 +29,7 @@ import { useVersion } from "@/hooks/version";
 import { EmptyState, LoadingState } from "@/components/activity";
 import { SendTokenDrawer } from "./send/send-drawer";
 import { useCreditsContext } from "@/components/credits/provider";
+import { formatCredits } from "@/utils/credits";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -57,6 +58,8 @@ function Credits() {
     return <CreditsLoadingState />;
   }
 
+  const format = formatCredits(credit.balance.value);
+
   return (
     <>
       <LayoutContent>
@@ -66,7 +69,10 @@ function Credits() {
             size="lg"
             rounded
           />
-          <p className="text-foreground-100 text-lg/6 font-semibold">{`${Number(credit.balance.value) / 10 ** 6} CREDITS`}</p>
+          <div className="flex flex-col gap-0">
+            <p className="text-foreground-100 text-lg/6 font-semibold">{`${format.formatted} CREDITS`}</p>
+            <p className="text-foreground-300 text-xs">{`$${format.usd.toFixed(2)}`}</p>
+          </div>
         </div>
 
         <div className="p-3 text-xs bg-background-200 text-foreground-300 rounded">
