@@ -10,6 +10,8 @@ import { AmountSelection } from "../funding/AmountSelection";
 interface AmountSelectionDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  minAmount?: number;
+  maxAmount?: number;
   isLoading?: boolean;
   onContinue: (amount: number) => void;
 }
@@ -17,6 +19,8 @@ interface AmountSelectionDrawerProps {
 export function AmountSelectionDrawer({
   isOpen,
   onClose,
+  minAmount,
+  maxAmount,
   isLoading,
   onContinue,
 }: AmountSelectionDrawerProps) {
@@ -27,6 +31,8 @@ export function AmountSelectionDrawer({
         <AmountSelection
           lockSelection={isLoading}
           enableCustom={true}
+          minAmount={minAmount}
+          maxAmount={maxAmount}
           onChange={setAmount}
         />
 

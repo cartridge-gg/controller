@@ -18,7 +18,7 @@ export interface FormattedCredits {
   usd: number;
   /** Whole "plain" credits (100 = $1). */
   credits: number;
-  /** USD-style display string with two decimals, e.g. "12.34". */
+  /** USD-style display string with two decimals, e.g. "1234.56". */
   formatted: string;
 }
 
@@ -31,10 +31,11 @@ export function formatCredits(
       ? rawUnits
       : BigInt(Math.trunc(Number(rawUnits)));
   const usd = Number(units) / 1e8;
+  const credits = Number(units) / 1e6;
   return {
     usd,
-    credits: Number(units) / 1e6,
-    formatted: usd.toFixed(2),
+    credits,
+    formatted: credits.toFixed(2),
   };
 }
 
