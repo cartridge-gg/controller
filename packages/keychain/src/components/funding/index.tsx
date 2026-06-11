@@ -1,4 +1,4 @@
-// import { useNavigation } from "@/context/navigation";
+import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 import {
   LayoutContent,
@@ -8,7 +8,6 @@ import {
   HeaderInner,
 } from "@cartridge/controller-ui";
 import { Balance, BalanceType } from "./Balance";
-import { useCreditsContext } from "@/components/credits/provider";
 
 export type FundingProps = {
   title?: React.ReactElement | string;
@@ -17,8 +16,7 @@ export type FundingProps = {
 
 export function Funding({ title, isSlot }: FundingProps) {
   const { controller } = useConnection();
-  // const { navigate } = useNavigation();
-  const { initiateCreditsDeposit } = useCreditsContext();
+  const { navigate } = useNavigation();
 
   const balances: BalanceType[] = isSlot
     ? [BalanceType.CREDITS]
@@ -44,8 +42,7 @@ export function Funding({ title, isSlot }: FundingProps) {
         {!isSlot && (
           <Button
             onClick={() => {
-              initiateCreditsDeposit();
-              // navigate("/funding/deposit")
+              navigate("/funding/deposit");
             }}
           >
             Deposit
