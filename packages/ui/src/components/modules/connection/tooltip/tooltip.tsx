@@ -51,6 +51,8 @@ export interface ConnectionTooltipProps
   onFollowersClick?: () => void;
   onFollowingsClick?: () => void;
   onOpenSettings?: () => void;
+  onDeposit?: () => void;
+  onWithdraw?: () => void;
   onLogout?: () => void;
 }
 
@@ -65,6 +67,8 @@ export const ConnectionTooltip = ({
   onFollowersClick,
   onFollowingsClick,
   onOpenSettings,
+  onDeposit,
+  onWithdraw,
   onLogout,
   variant,
   className,
@@ -122,6 +126,18 @@ export const ConnectionTooltip = ({
     setWithBackground(false);
   }, [onOpenSettings, setOpen, setWithBackground]);
 
+  const handleDeposit = useCallback(() => {
+    onDeposit?.();
+    setOpen(false);
+    setWithBackground(false);
+  }, [onDeposit, setOpen, setWithBackground]);
+
+  const handleWithdraw = useCallback(() => {
+    onWithdraw?.();
+    setOpen(false);
+    setWithBackground(false);
+  }, [onWithdraw, setOpen, setWithBackground]);
+
   return (
     <TooltipProvider>
       <Tooltip open={open} onOpenChange={() => {}}>
@@ -159,6 +175,8 @@ export const ConnectionTooltip = ({
               onFollowingsClick={
                 onFollowingsClick ? handleFollowingsClick : undefined
               }
+              onDeposit={onDeposit ? handleDeposit : undefined}
+              onWithdraw={onWithdraw ? handleWithdraw : undefined}
               onOpenSettings={onOpenSettings ? handleOpenSettings : undefined}
               onLogout={onLogout ? handleLogout : undefined}
             />

@@ -1,5 +1,7 @@
 import {
   AchievementPlayerBadge,
+  ArrowFromLineIcon,
+  ArrowToLineIcon,
   Button,
   CopyIcon,
   GearIcon,
@@ -47,6 +49,8 @@ export interface ConnectionTooltipContentProps
   onFollowersClick?: () => void;
   onFollowingsClick?: () => void;
   onOpenSettings?: () => void;
+  onDeposit?: () => void;
+  onWithdraw?: () => void;
   onLogout?: () => void;
 }
 
@@ -62,6 +66,8 @@ export const ConnectionTooltipContent = ({
   onFollowersClick,
   onFollowingsClick,
   onOpenSettings,
+  onDeposit,
+  onWithdraw,
   onLogout,
   variant,
   className,
@@ -203,6 +209,26 @@ export const ConnectionTooltipContent = ({
           </span>
         </Button>
       </div>
+      {onDeposit && (
+        <Button
+          variant="secondary"
+          className="w-full h-9 normal-case font-sans text-sm font-medium tracking-normal px-1.5 py-2"
+          onClick={onDeposit}
+        >
+          <ArrowToLineIcon variant="down" size="sm" />
+          <span>Deposit</span>
+        </Button>
+      )}
+      {onWithdraw && (
+        <Button
+          variant="secondary"
+          className="w-full h-9 normal-case font-sans text-sm font-medium tracking-normal px-1.5 py-2"
+          onClick={onWithdraw}
+        >
+          <ArrowFromLineIcon variant="up" size="sm" />
+          <span>Withdraw</span>
+        </Button>
+      )}
       {onOpenSettings && (
         <Button
           variant="secondary"
