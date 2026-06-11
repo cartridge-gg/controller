@@ -15,6 +15,9 @@ catalogs:
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
+    '@cartridge/presets':
+      specifier: github:cartridge-gg/presets#c8c761f
+      version: 0.0.1
     '@eslint/js':
       specifier: ^9.18.0
       version: 9.25.1
@@ -189,8 +192,8 @@ importers:
         specifier: workspace:*
         version: link:packages/ui
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#e94909f
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/e94909f
+        specifier: 'catalog:'
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f
       '@graphql-codegen/cli':
         specifier: ^2.6.2
         version: 2.16.5(@babel/core@7.27.1)(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(bufferutil@4.0.9)(encoding@0.1.13)(graphql@16.12.0)(typescript@5.8.3)(utf-8-validate@5.0.10)
@@ -521,7 +524,7 @@ importers:
         version: 5.14.0(rollup@4.40.2)
       ts-jest:
         specifier: ^29.2.5
-        version: 29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(esbuild@0.25.4)(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3)
+        version: 29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3)
       tsup:
         specifier: 'catalog:'
         version: 8.4.0(@microsoft/api-extractor@7.52.6(@types/node@18.19.87))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@1.21.7)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.7.1)
@@ -849,8 +852,8 @@ importers:
   packages/ui:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#90a5fe0
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0
+        specifier: 'catalog:'
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f
       '@radix-ui/react-accordion':
         specifier: 1.2.1
         version: 1.2.1(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1595,12 +1598,8 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0}
-    version: 0.0.1
-
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/e94909f':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/e94909f}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f}
     version: 0.0.1
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
@@ -11856,11 +11855,7 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0':
-    dependencies:
-      '@starknet-io/types-js': 0.8.4
-
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/e94909f':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f':
     dependencies:
       '@starknet-io/types-js': 0.8.4
 
@@ -18692,7 +18687,7 @@ snapshots:
       '@typescript-eslint/parser': 8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3)
       eslint: 9.25.1(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint@9.25.1(jiti@1.21.7)))(eslint@9.25.1(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0)(eslint@9.25.1(jiti@1.21.7))
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.25.1(jiti@1.21.7))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.25.1(jiti@1.21.7))
       eslint-plugin-react: 7.37.5(eslint@9.25.1(jiti@1.21.7))
@@ -18716,7 +18711,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint@9.25.1(jiti@1.21.7)))(eslint@9.25.1(jiti@1.21.7)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0)(eslint@9.25.1(jiti@1.21.7)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3(supports-color@5.5.0)
@@ -18731,14 +18726,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint@9.25.1(jiti@1.21.7)))(eslint@9.25.1(jiti@1.21.7)))(eslint@9.25.1(jiti@1.21.7)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.25.1(jiti@1.21.7)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3)
       eslint: 9.25.1(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint@9.25.1(jiti@1.21.7)))(eslint@9.25.1(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0)(eslint@9.25.1(jiti@1.21.7))
     transitivePeerDependencies:
       - supports-color
 
@@ -18753,7 +18748,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.25.1(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint@9.25.1(jiti@1.21.7)))(eslint@9.25.1(jiti@1.21.7)))(eslint@9.25.1(jiti@1.21.7))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.25.1(jiti@1.21.7))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -23181,7 +23176,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  ts-jest@29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(esbuild@0.25.4)(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3):
+  ts-jest@29.3.2(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(jest@29.7.0(@types/node@18.19.87)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(typescript@5.8.3):
     dependencies:
       bs-logger: 0.2.6
       ejs: 3.1.10
@@ -23200,7 +23195,6 @@ snapshots:
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
       babel-jest: 29.7.0(@babel/core@7.27.1)
-      esbuild: 0.25.4
 
   ts-log@2.2.7: {}
 
