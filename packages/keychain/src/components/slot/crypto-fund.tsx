@@ -352,7 +352,7 @@ function SlotCryptoFundInner({
               }}
               disabled={isSubmitting}
             >
-              <TokenSelectHeader />
+              <TokenSelectHeader singleToken={tokens.length <= 1} />
               <SelectContent>
                 {tokens.map((token) => (
                   <SelectItem key={token.address} value={token.address}>

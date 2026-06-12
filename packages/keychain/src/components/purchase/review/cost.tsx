@@ -80,9 +80,9 @@ export function CostBreakdown({
         <Select
           value={selectedToken?.address ?? ""}
           onValueChange={onSelectToken}
-          disabled={tokenSelectDisabled}
+          disabled={tokenSelectDisabled && tokens.length > 1}
         >
-          <TokenSelectHeader />
+          <TokenSelectHeader singleToken={tokens.length <= 1} />
           <SelectContent>
             {tokens.map((token) => (
               <SelectItem key={token.address} value={token.address}>

@@ -132,3 +132,9 @@ export default meta;
 type Story = StoryObj<typeof TokenSelect>;
 
 export const Default: Story = {};
+
+export const SingleToken: Story = {
+  args: {
+    tokens: [mockTokens[0]],
+  },
+};
