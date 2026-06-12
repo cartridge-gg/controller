@@ -494,9 +494,8 @@ const Price = ({
           value={selected?.metadata.address}
           onValueChange={onChangeToken}
           defaultValue={selected?.metadata.address}
-          disabled={tokens.length <= 1}
         >
-          <TokenSelectHeader />
+          <TokenSelectHeader singleToken={tokens.length <= 1} />
           <SelectContent>
             {tokens.map((token) => (
               <SelectItem
