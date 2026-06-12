@@ -5,7 +5,8 @@ import {
   DepositIcon,
   Button,
 } from "@cartridge/controller-ui";
-import { AmountSelection } from "../funding/AmountSelection";
+import { CREDITS_DESCRIPTION } from "@/components/inventory/token";
+import { AmountSelection } from "@/components/funding/AmountSelection";
 
 interface AmountSelectionDrawerProps {
   isOpen: boolean;
@@ -37,8 +38,7 @@ export function AmountSelectionDrawer({
         />
 
         <div className="p-3 text-xs border border-background-200 rounded text-foreground-300">
-          Credits are an account balance that can be used to pay for games and
-          network activity. They are not refundable.
+          {CREDITS_DESCRIPTION}
         </div>
 
         <Button

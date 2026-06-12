@@ -42,6 +42,9 @@ export function Token() {
   }
 }
 
+export const CREDITS_DESCRIPTION =
+  "Credits are an account balance that can be used to pay for games and network activity.";
+
 function Credits() {
   // TODO: Get parent from keychain connection if needed
   // const { navigate } = useNavigation();
@@ -76,8 +79,7 @@ function Credits() {
         </div>
 
         <div className="p-3 text-xs bg-background-200 text-foreground-300 rounded">
-          Credits are an account balance that can be used to pay for games and
-          network activity. They are not refundable.
+          {CREDITS_DESCRIPTION}
         </div>
       </LayoutContent>
 
