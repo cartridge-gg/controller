@@ -19,7 +19,7 @@ export function WalletSelector({
   return (
     <div
       className={cn(
-        "flex h-[40px] justify-between border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2 transition-colors cursor-pointer hover:bg-background-200",
+        "flex h-[40px] items-center justify-between border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-300 p-2 transition-colors cursor-pointer hover:bg-background-200",
         disabled && "pointer-events-none",
       )}
       onClick={onClick}

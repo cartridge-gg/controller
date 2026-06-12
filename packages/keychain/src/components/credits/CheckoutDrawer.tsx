@@ -139,6 +139,7 @@ export function CheckoutDrawer({
           amount={`${formatCredits(usdToCreditUnits(amount)).formatted} Credits`}
           onClick={onChangeAmount}
           clickable={!isSuccess}
+          className="rounded"
         />
 
         <WalletSelector

@@ -11,7 +11,7 @@ export const TokenSelectHeader = ({
       className={cn(
         "w-fit border-0 flex gap-2 items-center p-2",
         singleToken && "pointer-events-none cursor-not-allowed",
-        className
+        className,
       )}
       {...props}
     >

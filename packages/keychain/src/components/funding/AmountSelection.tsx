@@ -54,7 +54,7 @@ export function AmountSelection({
             key={value}
             variant="secondary"
             className={cn(
-              "font-sans font-medium w-full",
+              "font-sans font-medium w-full tracking-normal",
               value === selectedAmount && !custom
                 ? "bg-background-300 text-foreground-100 hover:bg-background-400 hover:text-foreground-100 "
                 : "bg-background-100 text-foreground-300 hover:bg-background-300 hover:text-foreground-100 ",
@@ -72,7 +72,7 @@ export function AmountSelection({
           <Button
             variant="secondary"
             className={cn(
-              "font-sans font-medium normal-case w-full",
+              "font-sans font-medium normal-case w-full tracking-normal",
               custom
                 ? "bg-background-300 text-foreground-100 hover:bg-background-400 hover:text-foreground-100 "
                 : "bg-background-100 text-foreground-300 hover:bg-background-300 hover:text-foreground-100 ",
