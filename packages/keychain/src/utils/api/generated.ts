@@ -7422,6 +7422,21 @@ export type PurchaseBundleWithCreditsMutation = {
   };
 };
 
+export type PurchaseFulfillmentQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type PurchaseFulfillmentQuery = {
+  __typename?: "Query";
+  purchaseFulfillment: {
+    __typename?: "PurchaseFulfillment";
+    id: string;
+    status: PurchaseFulfillmentStatus;
+    transactionHash?: string | null;
+    lastError?: string | null;
+  };
+};
+
 export type CreateCoinflowStarterpackIntentMutationVariables = Exact<{
   input: CreateCoinflowStarterpackIntentInput;
 }>;
@@ -8412,6 +8427,30 @@ export const usePurchaseBundleWithCreditsMutation = <
       PurchaseBundleWithCreditsMutation,
       PurchaseBundleWithCreditsMutationVariables
     >(PurchaseBundleWithCreditsDocument),
+    options,
+  );
+export const PurchaseFulfillmentDocument = `
+    query PurchaseFulfillment($id: ID!) {
+  purchaseFulfillment(id: $id) {
+    id
+    status
+    transactionHash
+    lastError
+  }
+}
+    `;
+export const usePurchaseFulfillmentQuery = <
+  TData = PurchaseFulfillmentQuery,
+  TError = unknown,
+>(
+  variables: PurchaseFulfillmentQueryVariables,
+  options?: UseQueryOptions<PurchaseFulfillmentQuery, TError, TData>,
+) =>
+  useQuery<PurchaseFulfillmentQuery, TError, TData>(
+    ["PurchaseFulfillment", variables],
+    useFetchData<PurchaseFulfillmentQuery, PurchaseFulfillmentQueryVariables>(
+      PurchaseFulfillmentDocument,
+    ).bind(null, variables),
     options,
   );
 export const CreateCoinflowStarterpackIntentDocument = `

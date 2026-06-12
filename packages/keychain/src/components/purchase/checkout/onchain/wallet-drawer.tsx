@@ -3,6 +3,7 @@ import {
   Drawer,
   DrawerContent,
   AppleIcon,
+  CoinsIcon,
   CreditCardIcon,
   DepositIcon,
   PurchaseCard,
@@ -27,6 +28,7 @@ type DrawerStep = "method" | "network" | "wallet";
 export type PaymentMethod =
   | { type: "apple-pay" }
   | { type: "coinflow" }
+  | { type: "credits" }
   | { type: "controller" }
   | { type: "external"; wallet: ExternalWallet };
 
@@ -50,6 +52,8 @@ export function getPaymentMethodDisplay(method: PaymentMethod | null): {
       return { name: "Credit Card", icon: <CreditCardIcon variant="solid" /> };
     case "apple-pay":
       return { name: "Apple Pay", icon: <AppleIcon /> };
+    case "credits":
+      return { name: "Credits", icon: <CoinsIcon variant="solid" /> };
     case "external": {
       const wallet = getWallet(method.wallet.type);
       return { name: wallet.name, icon: wallet.subIcon };
@@ -69,6 +73,7 @@ interface WalletSelectionDrawerProps {
   showFiatOptions?: boolean;
   showController?: boolean;
   showCrypto?: boolean;
+  showCredits?: boolean;
 }
 
 export function WalletSelectionDrawer({
@@ -78,6 +83,7 @@ export function WalletSelectionDrawer({
   showFiatOptions = true,
   showController = false,
   showCrypto = true,
+  showCredits = false,
 }: WalletSelectionDrawerProps) {
   const isCoinflowEnabled = useFeature("coinflow-support");
 
@@ -205,11 +211,12 @@ export function WalletSelectionDrawer({
       step === "method" &&
       showCrypto &&
       !showFiatOptions &&
-      !showController
+      !showController &&
+      !showCredits
     ) {
       setStep("network");
     }
-  }, [step, showCrypto, showFiatOptions, showController, setStep]);
+  }, [step, showCrypto, showFiatOptions, showController, showCredits, setStep]);
 
   // payment method selection
 
@@ -226,6 +233,14 @@ export function WalletSelectionDrawer({
       method: "coinflow",
     });
     await setSelected({ type: "coinflow" });
+    onClose();
+  }, [setSelected, onClose]);
+
+  const handleCreditsSelect = useCallback(async () => {
+    captureAnalyticsEvent(posthog, "purchase_method_selected", {
+      method: "credits",
+    });
+    await setSelected({ type: "credits" });
     onClose();
   }, [setSelected, onClose]);
 
@@ -348,6 +363,18 @@ export function WalletSelectionDrawer({
       <DrawerContent title={title} icon={icon}>
         {step === "method" ? (
           <>
+            {showCredits && (
+              <PurchaseCard
+                key="credits"
+                text="Credits"
+                icon={<CoinsIcon variant="solid" />}
+                onClick={handleCreditsSelect}
+                className={cn(
+                  "rounded-lg",
+                  isApplePayLoading && "opacity-50 pointer-events-none",
+                )}
+              />
+            )}
             {showFiatOptions && isCoinflowEnabled && (
               <PurchaseCard
                 key="coinflow-checkout"
