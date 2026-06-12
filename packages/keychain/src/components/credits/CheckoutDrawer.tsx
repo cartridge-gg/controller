@@ -112,6 +112,13 @@ export function CheckoutDrawer({
   const isProcessing = depositInProgress?.status === "processing";
   const isSuccess = depositInProgress?.status === "success";
 
+  // auto close on success
+  useEffect(() => {
+    if (isSuccess && isOpen) {
+      onClose();
+    }
+  }, [isSuccess, isOpen, onClose]);
+
   const canPurchase = useMemo(() => {
     if (!amount || !paymentMethod || isProcessing) {
       return false;
@@ -132,66 +139,54 @@ export function CheckoutDrawer({
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
       <DrawerContent title="Buy Credits" icon={<DepositIcon variant="solid" />}>
-        <TokenCard
-          image={credits.metadata.image}
-          title={credits.metadata.name}
-          value={`$${amount.toFixed(2)}`}
-          amount={`${formatCredits(usdToCreditUnits(amount)).formatted} Credits`}
-          onClick={onChangeAmount}
-          clickable={!isSuccess}
-          className="rounded"
-        />
+        {isProcessing || isSuccess ? (
+          <>
+            <ConfirmingTransaction title="Purchasing..." status="loading" />
 
-        <WalletSelector
-          method={paymentMethod}
-          onClick={onChangeMethod}
-          disabled={isSuccess}
-        />
-
-        {hasInsufficientBalance && (
-          <ErrorCard
-            variant="warning"
-            title="Insufficient Balance"
-            message="You need more USDC to complete this purchase."
-          />
-        )}
-
-        {error && <ErrorAlert title="Purchase Failed" description={error} />}
-
-        {isProcessing && (
-          <ConfirmingTransaction
-            title="Processing transaction..."
-            status="loading"
-          />
-        )}
-
-        {isSuccess && (
-          <ConfirmingTransaction
-            title="Transaction successful"
-            status="success"
-          />
-        )}
-
-        <CostBreakdown
-          tokens={[usdcToken]}
-          selectedToken={usdcToken}
-          onSelectToken={() => {}}
-          tokenSelectDisabled
-          value={
-            <span className="text-foreground-100">{amount.toFixed(2)}</span>
-          }
-        />
-
-        {isSuccess ? (
-          <Button onClick={onClose}>CLOSE</Button>
+            <Button disabled={isProcessing} onClick={onClose}>
+              CONTINUE
+            </Button>
+          </>
         ) : (
-          <Button
-            disabled={!canPurchase}
-            isLoading={isProcessing}
-            onClick={handlePurchase}
-          >
-            BUY CREDITS
-          </Button>
+          <>
+            <TokenCard
+              image={credits.metadata.image}
+              title={credits.metadata.name}
+              value={`$${amount.toFixed(2)}`}
+              amount={`${formatCredits(usdToCreditUnits(amount)).formatted} Credits`}
+              onClick={onChangeAmount}
+              clickable
+              className="rounded"
+            />
+
+            <WalletSelector method={paymentMethod} onClick={onChangeMethod} />
+
+            {hasInsufficientBalance && (
+              <ErrorCard
+                variant="warning"
+                title="Insufficient Balance"
+                message="You need more USDC to complete this purchase."
+              />
+            )}
+
+            {error && (
+              <ErrorAlert title="Purchase Failed" description={error} />
+            )}
+
+            <CostBreakdown
+              tokens={[usdcToken]}
+              selectedToken={usdcToken}
+              onSelectToken={() => {}}
+              tokenSelectDisabled
+              value={
+                <span className="text-foreground-100">{amount.toFixed(2)}</span>
+              }
+            />
+
+            <Button disabled={!canPurchase} onClick={handlePurchase}>
+              BUY CREDITS
+            </Button>
+          </>
         )}
       </DrawerContent>
     </Drawer>
