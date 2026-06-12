@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  AppleIcon,
   Button,
-  CreditCardIcon,
   GiftIcon,
   HeaderInner,
   LayoutContent,
@@ -33,11 +31,14 @@ import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 import { Receiving } from "../../receiving";
 import { OnchainCostBreakdown } from "../../review/cost";
 import { LoadingState } from "../../loading";
-import { getWallet } from "../../wallet/config";
 import { ErrorCard } from "./error";
 import { WalletSelector } from "./selector";
 import { QuantityControls } from "./quantity";
-import { WalletSelectionDrawer } from "./wallet-drawer";
+import {
+  WalletSelectionDrawer,
+  type PaymentMethod,
+  type PaymentMethodSelection,
+} from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
 import { CoinflowDrawer } from "../coinflow/drawer";
 import { CoinbaseDrawer } from "../coinbase/drawer";
@@ -84,6 +85,9 @@ export function OnchainCheckout() {
     isApplePaySelected,
     isCoinflowSelected,
     onCoinflowSelect,
+    onApplePaySelect,
+    onExternalConnect,
+    clearSelectedWallet,
     onCreateCoinbaseOrder,
     resetCoinbasePurchase,
     isCreatingOrder,
@@ -194,7 +198,15 @@ export function OnchainCheckout() {
     [starterpackDetails, socialClaimConditions],
   );
 
-  const wallet = getWallet(selectedWallet?.type || "controller");
+  // Reconstruct the shared PaymentMethod from context flags so WalletSelector
+  // and the rest of the UI can render it without re-deriving name/icon. Covers
+  // restored methods (e.g. coinflow from localStorage) as well as drawer picks.
+  const selectedMethod = useMemo<PaymentMethod>(() => {
+    if (isCoinflowSelected) return { type: "coinflow" };
+    if (isApplePaySelected) return { type: "apple-pay" };
+    if (selectedWallet) return { type: "external", wallet: selectedWallet };
+    return { type: "controller" };
+  }, [isCoinflowSelected, isApplePaySelected, selectedWallet]);
 
   const isFree = useMemo(() => {
     return quote ? quote.totalCost === BigInt(0) : undefined;
@@ -310,6 +322,36 @@ export function OnchainCheckout() {
   const handleWalletSelect = useCallback(() => {
     setIsDrawerOpen(true);
   }, []);
+
+  const handlePaymentMethodSelect = useCallback(
+    async (method: PaymentMethodSelection) => {
+      switch (method.type) {
+        case "apple-pay":
+          onApplePaySelect();
+          break;
+        case "coinflow":
+          onCoinflowSelect();
+          break;
+        case "controller":
+          clearSelectedWallet();
+          break;
+        case "external":
+          await onExternalConnect(
+            method.wallet,
+            method.network.platform,
+            method.chainId,
+          );
+          break;
+      }
+      setIsDrawerOpen(false);
+    },
+    [
+      onApplePaySelect,
+      onCoinflowSelect,
+      clearSelectedWallet,
+      onExternalConnect,
+    ],
+  );
 
   // Bearer-token expiry on the iframe surfaces here as an Authentication
   // Required error. Re-mint via the popup-backed login (cookie session is
@@ -613,22 +655,7 @@ export function OnchainCheckout() {
                 )}
 
                 <WalletSelector
-                  walletName={
-                    isCoinflowSelected
-                      ? "Credit Card"
-                      : isApplePaySelected
-                        ? "Apple Pay"
-                        : wallet.name
-                  }
-                  walletIcon={
-                    isCoinflowSelected ? (
-                      <CreditCardIcon size="xs" variant="solid" />
-                    ) : isApplePaySelected ? (
-                      <AppleIcon size="xs" />
-                    ) : (
-                      wallet.subIcon
-                    )
-                  }
+                  method={selectedMethod}
                   bridgeFrom={bridgeFrom}
                   onClick={handleWalletSelect}
                 />
@@ -675,6 +702,7 @@ export function OnchainCheckout() {
       <WalletSelectionDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
+        setSelected={handlePaymentMethodSelect}
         showFiatOptions={countryCode === "US"}
       />
 

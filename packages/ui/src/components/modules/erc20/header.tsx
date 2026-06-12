@@ -15,7 +15,10 @@ export const ERC20Header = ({ token }: { token: ERC20Token }) => {
         )}
         {!!token.balance.value && (
           <p className="text-foreground-300 text-xs">
-            {`$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+            {`$${token.balance.value.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`}
           </p>
         )}
       </div>

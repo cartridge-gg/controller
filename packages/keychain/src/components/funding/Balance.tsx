@@ -8,6 +8,7 @@ import {
   Card,
   CardHeader,
   CardTitle,
+  CreditIcon,
   TokenCard,
   TokenSummary,
 } from "@cartridge/controller-ui";
@@ -47,7 +48,7 @@ export function Balance({ types, title, amount }: BalanceProps) {
       <TokenSummary className="rounded-tl-none rounded-tr-none">
         {types.includes(BalanceType.CREDITS) && (
           <TokenCard
-            image={"https://static.cartridge.gg/presets/credit/icon.svg"}
+            image={<CreditIcon size="auto" />}
             title={"Credits"}
             amount={
               amount

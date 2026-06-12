@@ -25,6 +25,7 @@ import { IndexerAPIProvider } from "@cartridge/controller-ui/utils/api/indexer";
 import { CartridgeAPIProvider } from "@cartridge/controller-ui/utils/api/cartridge";
 import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
 import { IdentityProvider } from "@/components/identity/provider";
+import { CreditsProvider } from "@/components/credits/provider";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { SpinnerIcon } from "@cartridge/controller-ui";
 
@@ -106,7 +107,9 @@ export function Provider({ children }: PropsWithChildren) {
                                       <ProfileDataProvider>
                                         <StarterpackProviders>
                                           <IdentityProvider>
-                                            {body}
+                                            <CreditsProvider>
+                                              {body}
+                                            </CreditsProvider>
                                           </IdentityProvider>
                                         </StarterpackProviders>
                                       </ProfileDataProvider>

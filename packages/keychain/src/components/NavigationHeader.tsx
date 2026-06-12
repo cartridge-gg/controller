@@ -1,7 +1,8 @@
+import { useCallback } from "react";
 import { LayoutHeader, HeaderProps } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
-import { useCallback } from "react";
+import { useCreditsContext } from "@/components/credits/provider";
 
 export type NavigationHeaderProps = {
   // Navigation props
@@ -48,11 +49,14 @@ export function NavigationHeader({
     navigateToRoot();
   }, [onClose, closeModal, navigateToRoot]);
 
+  const { initiateCreditsDeposit } = useCreditsContext();
+
   return (
     <LayoutHeader
       {...props}
       onBack={shouldShowBack ? handleBack : undefined}
       onClose={shouldShowClose ? handleCloseAction : undefined}
+      onDeposit={initiateCreditsDeposit}
       hideSettings
     />
   );

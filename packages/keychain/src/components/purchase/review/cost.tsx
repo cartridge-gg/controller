@@ -1,3 +1,4 @@
+import { ReactNode, useCallback, useMemo, useEffect } from "react";
 import {
   ArbitrumIcon,
   BaseIcon,
@@ -17,14 +18,95 @@ import {
 } from "@cartridge/controller-ui";
 import { ExternalPlatform, humanizeString } from "@cartridge/controller";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
-import type { Quote } from "@/context";
-import { useCallback, useMemo, useEffect } from "react";
+import type { Quote, TokenOption } from "@/context";
 import { useOnchainPurchaseContext, useCreditPurchaseContext } from "@/context";
 import { num } from "starknet";
 
 export const convertCentsToDollars = (cents: number): string => {
   return `$${(cents / 100).toFixed(2)}`;
 };
+
+/**
+ * Presentational cost breakdown: an optional "Purchase on <network>" banner, a
+ * Total row (label + optional fees tooltip + value), and a payment-token
+ * selector. It is intentionally data-source agnostic — every rail (onchain
+ * token, credits/USDC, and later Coinflow/Apple Pay) computes its own `value`,
+ * `feesTooltip`, and token list and feeds them in. See OnchainCostBreakdown for
+ * the onchain-purchase adapter.
+ */
+export function CostBreakdown({
+  platform,
+  tokens,
+  selectedToken,
+  onSelectToken,
+  tokenSelectDisabled,
+  feesTooltip,
+  isLoading,
+  value,
+}: {
+  platform?: ExternalPlatform;
+  tokens: TokenOption[];
+  selectedToken?: TokenOption;
+  onSelectToken: (address: string) => void;
+  tokenSelectDisabled?: boolean;
+  feesTooltip?: ReactNode;
+  isLoading?: boolean;
+  value: ReactNode;
+}) {
+  return (
+    <Card className="gap-3">
+      {platform && (
+        <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
+          <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
+            Purchase on <Network platform={platform} />
+          </div>
+        </CardContent>
+      )}
+
+      <div className="flex flex-row gap-3 h-[40px] text-foreground-300">
+        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs w-full">
+          <div className="flex justify-between text-sm font-medium w-full">
+            <div className="flex flex-row items-center gap-1">
+              <span>Total</span>
+              {feesTooltip}
+            </div>
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              <div className="flex items-center gap-1.5">{value}</div>
+            )}
+          </div>
+        </CardContent>
+        <Select
+          value={selectedToken?.address ?? ""}
+          onValueChange={onSelectToken}
+          disabled={tokenSelectDisabled && tokens.length > 1}
+        >
+          <TokenSelectHeader singleToken={tokens.length <= 1} />
+          <SelectContent>
+            {tokens.map((token) => (
+              <SelectItem key={token.address} value={token.address}>
+                <div className="flex items-center gap-2">
+                  {token.icon ? (
+                    <Thumbnail
+                      icon={token.icon}
+                      rounded
+                      size="sm"
+                      variant="light"
+                    />
+                  ) : (
+                    <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />
+                  )}
+                  <span className="font-medium text-sm">{token.symbol}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </Card>
+  );
+}
 
 /**
  * Onchain Cost Breakdown - for token-based payments directly to smart contracts
@@ -138,112 +220,73 @@ export function OnchainCostBreakdown({
     [availableTokens, setSelectedToken],
   );
 
-  return (
-    <Card className="gap-3">
-      {platform && (
-        <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
-          <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
-            Purchase on <Network platform={platform} />
-          </div>
-        </CardContent>
-      )}
+  const value = isCoinflowSelected ? (
+    isCoinflowQuoteLoading ? (
+      <Spinner />
+    ) : coinflowCostDetails ? (
+      <span className="text-foreground-100">
+        {formatAmount(coinflowCostDetails.totalInCents / 100)}
+      </span>
+    ) : (
+      <span className="text-foreground-400">—</span>
+    )
+  ) : isApplePaySelected ? (
+    coinbaseQuote ? (
+      <span className="text-foreground-100">
+        {`$${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)}`}
+      </span>
+    ) : (
+      <span className="text-foreground-400">—</span>
+    )
+  ) : isUsingLayerswap ? (
+    feeEstimationError ? (
+      <span className="text-foreground-400">—</span>
+    ) : layerswapTotal !== null && displayToken ? (
+      <span className="text-foreground-100">
+        {formatAmount(layerswapTotal)}
+      </span>
+    ) : (
+      <Spinner />
+    )
+  ) : isPaymentTokenSameAsSelected ? (
+    <span className="text-foreground-300">{formatAmount(paymentAmount)}</span>
+  ) : (
+    convertedEquivalent !== null &&
+    displayToken && (
+      <span className="text-foreground-100">
+        {formatAmount(convertedEquivalent)}
+      </span>
+    )
+  );
 
-      <div className="flex flex-row gap-3 h-[40px] text-foreground-300">
-        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs w-full">
-          <div className="flex justify-between text-sm font-medium w-full">
-            <div className="flex flex-row items-center gap-1">
-              <span>Total</span>
-              <OnchainFeesTooltip
-                trigger={<InfoIcon size="xs" />}
-                defaultOpen={openFeesTooltip}
-                quote={quote}
-                quantity={quantity}
-                layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
-                coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
-                creditCardFeeInCents={
-                  coinflowCostDetails
-                    ? coinflowCostDetails.cardFeeInCents +
-                      coinflowCostDetails.gasFeeInCents
-                    : undefined
-                }
-              />
-            </div>
-            {isFetchingConversion || isFetchingCoinbaseQuote ? (
-              <Spinner />
-            ) : (
-              <div className="flex items-center gap-1.5">
-                {isCoinflowSelected ? (
-                  isCoinflowQuoteLoading ? (
-                    <Spinner />
-                  ) : coinflowCostDetails ? (
-                    <span className="text-foreground-100">
-                      {formatAmount(coinflowCostDetails.totalInCents / 100)}
-                    </span>
-                  ) : (
-                    <span className="text-foreground-400">—</span>
-                  )
-                ) : isApplePaySelected ? (
-                  coinbaseQuote ? (
-                    <span className="text-foreground-100">
-                      {`$${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)}`}
-                    </span>
-                  ) : (
-                    <span className="text-foreground-400">—</span>
-                  )
-                ) : isUsingLayerswap ? (
-                  feeEstimationError ? (
-                    <span className="text-foreground-400">—</span>
-                  ) : layerswapTotal !== null && displayToken ? (
-                    <span className="text-foreground-100">
-                      {formatAmount(layerswapTotal)}
-                    </span>
-                  ) : (
-                    <Spinner />
-                  )
-                ) : isPaymentTokenSameAsSelected ? (
-                  <span className="text-foreground-300">
-                    {formatAmount(paymentAmount)}
-                  </span>
-                ) : (
-                  convertedEquivalent !== null &&
-                  displayToken && (
-                    <span className="text-foreground-100">
-                      {formatAmount(convertedEquivalent)}
-                    </span>
-                  )
-                )}
-              </div>
-            )}
-          </div>
-        </CardContent>
-        <Select
-          value={displayToken?.address ?? ""}
-          onValueChange={handleTokenChange}
-          disabled={availableTokens.length <= 1 || isTokenSelectionLocked}
-        >
-          <TokenSelectHeader />
-          <SelectContent>
-            {availableTokens.map((token) => (
-              <SelectItem key={token.address} value={token.address}>
-                <div className="flex items-center gap-2">
-                  {token.icon ? (
-                    <Thumbnail
-                      icon={token.icon}
-                      rounded
-                      size="sm"
-                      variant="light"
-                    />
-                  ) : (
-                    <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />
-                  )}
-                  <span className="font-medium text-sm">{token.symbol}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </Card>
+  return (
+    <CostBreakdown
+      platform={platform}
+      tokens={availableTokens}
+      selectedToken={displayToken}
+      onSelectToken={handleTokenChange}
+      tokenSelectDisabled={
+        availableTokens.length <= 1 || isTokenSelectionLocked
+      }
+      isLoading={isFetchingConversion || isFetchingCoinbaseQuote}
+      value={value}
+      feesTooltip={
+        <OnchainFeesTooltip
+          trigger={<InfoIcon size="xs" />}
+          defaultOpen={openFeesTooltip}
+          quote={quote}
+          quantity={quantity}
+          layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
+          coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
+          creditCardFeeInCents={
+            coinflowCostDetails
+              ? coinflowCostDetails.cardFeeInCents +
+                coinflowCostDetails.gasFeeInCents
+              : undefined
+          }
+        />
+      }
+    />
   );
 }
 

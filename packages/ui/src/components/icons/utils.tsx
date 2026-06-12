@@ -13,6 +13,7 @@ export const size = {
   "3xl": "h-[72px] w-[72px]",
   "4xl": "h-[96px] w-[96px]",
   collectible: "h-[24px] w-[24px]",
+  auto: "h-full w-full aspect-square",
 };
 
 export const iconVariants = cva(base, {

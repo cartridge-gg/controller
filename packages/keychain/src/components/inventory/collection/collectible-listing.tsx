@@ -26,7 +26,7 @@ import {
   STRK_CONTRACT_ADDRESS,
   USDC_CONTRACT_ADDRESS,
 } from "@cartridge/controller-ui/utils";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
@@ -34,7 +34,7 @@ import { useTokens } from "@/hooks/token";
 import { useConnection } from "@/hooks/connection";
 import { AllowArray, cairo, Call, CallData, FeeEstimate } from "starknet";
 import { useToast } from "@/context/toast";
-import { ArcadeContext } from "@/context/arcade";
+import { useArcadeContext } from "@/context/arcade";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
 import { useCollection } from "@/hooks/collection";
@@ -64,8 +64,7 @@ const EXPIRATIONS = [
 ];
 
 export function CollectibleListing() {
-  const arcadeContext = useContext(ArcadeContext);
-  const provider = arcadeContext?.provider;
+  const { marketplaceAddress } = useArcadeContext();
   const { controller } = useConnection();
   const { goBack } = useNavigation();
   const { address: contractAddress, tokenId } = useParams();
@@ -192,13 +191,6 @@ export function CollectibleListing() {
     },
     [setSelected],
   );
-
-  // Memoize marketplace address
-  const marketplaceAddress = useMemo(() => {
-    return provider?.manifest.contracts.find((c: { tag: string }) =>
-      c.tag?.includes("Marketplace"),
-    )?.address;
-  }, [provider?.manifest.contracts]);
 
   // Build transactions when validation is complete
   const buildTransactions = useMemo(() => {
@@ -622,9 +614,8 @@ const Price = ({
           value={selected?.metadata.address}
           onValueChange={onChangeToken}
           defaultValue={selected?.metadata.address}
-          disabled={tokens.length <= 1}
         >
-          <TokenSelectHeader />
+          <TokenSelectHeader singleToken={tokens.length <= 1} />
           <SelectContent>
             {tokens.map((token) => (
               <SelectItem

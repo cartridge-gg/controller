@@ -1029,6 +1029,20 @@ export type BroadcastNotificationInput = {
   title: Scalars["String"];
 };
 
+export type BundleCreditsQuote = {
+  __typename?: "BundleCreditsQuote";
+  /** USDC cost in 6-decimal wei (includes swap slippage for non-USDC bundles). */
+  costInUsdc: Scalars["Long"];
+  /** True when the bundle is priced in a non-USDC token; the executor re-quotes the swap at execution time, so the final cost may drift slightly from this quote. */
+  needsSwap: Scalars["Boolean"];
+  /** The registry's payment token address — what the bundle is priced in. */
+  paymentToken: Scalars["String"];
+  /** Bundle price in the registry's payment token units. */
+  paymentTokenAmount: Scalars["Long"];
+  /** Credit units that will be debited (1 credit unit = 1e-8 USD; 100 credits = $1). */
+  requiredCredits: Scalars["Long"];
+};
+
 export type CoinbaseAmount = {
   __typename?: "CoinbaseAmount";
   /** The amount value as a string. */
@@ -3195,6 +3209,16 @@ export type Mutation = {
   finalizeLogin: Scalars["String"];
   finalizeRegistration: Account;
   increaseBudget: Paymaster;
+  /**
+   * Spend the authenticated account's off-chain credit balance to purchase a
+   * starterpack bundle. Mirrors createCoinflowStarterpackIntent's pricing and
+   * fulfillment creation, but replaces the external card payment with a synchronous,
+   * in-transaction credit debit: the bundle is created directly at QUEUED and issued
+   * by the same operator-paid on-chain flow as the card rails. The credits are debited
+   * upfront and refunded automatically if fulfillment terminally fails. Returns the
+   * PurchaseFulfillment for status polling.
+   */
+  purchaseBundleWithCredits: PurchaseFulfillment;
   register: Account;
   registerNotificationDevice: NotificationDevice;
   removeAllPolicies: Scalars["Boolean"];
@@ -3421,6 +3445,10 @@ export type MutationIncreaseBudgetArgs = {
   paymasterName: Scalars["ID"];
   reason?: InputMaybe<AdminBudgetReason>;
   unit: FeeUnit;
+};
+
+export type MutationPurchaseBundleWithCreditsArgs = {
+  input: PurchaseBundleWithCreditsInput;
 };
 
 export type MutationRegisterArgs = {
@@ -4750,6 +4778,16 @@ export type Project = {
   project: Scalars["String"];
 };
 
+export type PurchaseBundleWithCreditsInput = {
+  clientPercentage?: InputMaybe<Scalars["Int"]>;
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  quantity: Scalars["Int"];
+  referral?: InputMaybe<Scalars["String"]>;
+  referralGroup?: InputMaybe<Scalars["String"]>;
+  registryAddress: Scalars["String"];
+  starterpackId: Scalars["String"];
+};
+
 export type PurchaseFulfillment = {
   __typename?: "PurchaseFulfillment";
   id: Scalars["ID"];
@@ -4777,6 +4815,13 @@ export type Query = {
   activities: ActivityResult;
   balance: Balance;
   balances: BalanceConnection;
+  /**
+   * Quote a bundle purchase paid from the account's credit balance. Reuses the exact
+   * pricing path as purchaseBundleWithCredits, so the credit cost shown to the user
+   * matches what will be debited. Call this before purchasing to display the price — the
+   * bundle's payment token and amount, plus the credit cost — and to pre-check the balance.
+   */
+  bundleCreditsQuote: BundleCreditsQuote;
   /**
    * Get the authenticated user's current Coinbase onramp spending limits along
    * with any available limits-upgrade option. Clients should only show the
@@ -4902,6 +4947,10 @@ export type QueryBalancesArgs = {
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
   projects?: InputMaybe<Array<Scalars["String"]>>;
+};
+
+export type QueryBundleCreditsQuoteArgs = {
+  input: PurchaseBundleWithCreditsInput;
 };
 
 export type QueryCoinbaseOnrampOrderArgs = {
@@ -7274,6 +7323,37 @@ export type CreateCryptoPaymentMutation = {
   };
 };
 
+export type BundleCreditsQuoteQueryVariables = Exact<{
+  input: PurchaseBundleWithCreditsInput;
+}>;
+
+export type BundleCreditsQuoteQuery = {
+  __typename?: "Query";
+  bundleCreditsQuote: {
+    __typename?: "BundleCreditsQuote";
+    requiredCredits: string;
+    costInUsdc: string;
+    paymentToken: string;
+    paymentTokenAmount: string;
+    needsSwap: boolean;
+  };
+};
+
+export type PurchaseBundleWithCreditsMutationVariables = Exact<{
+  input: PurchaseBundleWithCreditsInput;
+}>;
+
+export type PurchaseBundleWithCreditsMutation = {
+  __typename?: "Mutation";
+  purchaseBundleWithCredits: {
+    __typename?: "PurchaseFulfillment";
+    id: string;
+    status: PurchaseFulfillmentStatus;
+    transactionHash?: string | null;
+    lastError?: string | null;
+  };
+};
+
 export type CreateCoinflowStarterpackIntentMutationVariables = Exact<{
   input: CreateCoinflowStarterpackIntentInput;
 }>;
@@ -8205,6 +8285,65 @@ export const useCreateCryptoPaymentMutation = <
       CreateCryptoPaymentMutation,
       CreateCryptoPaymentMutationVariables
     >(CreateCryptoPaymentDocument),
+    options,
+  );
+export const BundleCreditsQuoteDocument = `
+    query BundleCreditsQuote($input: PurchaseBundleWithCreditsInput!) {
+  bundleCreditsQuote(input: $input) {
+    requiredCredits
+    costInUsdc
+    paymentToken
+    paymentTokenAmount
+    needsSwap
+  }
+}
+    `;
+export const useBundleCreditsQuoteQuery = <
+  TData = BundleCreditsQuoteQuery,
+  TError = unknown,
+>(
+  variables: BundleCreditsQuoteQueryVariables,
+  options?: UseQueryOptions<BundleCreditsQuoteQuery, TError, TData>,
+) =>
+  useQuery<BundleCreditsQuoteQuery, TError, TData>(
+    ["BundleCreditsQuote", variables],
+    useFetchData<BundleCreditsQuoteQuery, BundleCreditsQuoteQueryVariables>(
+      BundleCreditsQuoteDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const PurchaseBundleWithCreditsDocument = `
+    mutation PurchaseBundleWithCredits($input: PurchaseBundleWithCreditsInput!) {
+  purchaseBundleWithCredits(input: $input) {
+    id
+    status
+    transactionHash
+    lastError
+  }
+}
+    `;
+export const usePurchaseBundleWithCreditsMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    PurchaseBundleWithCreditsMutation,
+    TError,
+    PurchaseBundleWithCreditsMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    PurchaseBundleWithCreditsMutation,
+    TError,
+    PurchaseBundleWithCreditsMutationVariables,
+    TContext
+  >(
+    ["PurchaseBundleWithCredits"],
+    useFetchData<
+      PurchaseBundleWithCreditsMutation,
+      PurchaseBundleWithCreditsMutationVariables
+    >(PurchaseBundleWithCreditsDocument),
     options,
   );
 export const CreateCoinflowStarterpackIntentDocument = `

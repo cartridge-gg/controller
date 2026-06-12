@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   LayoutContent,
@@ -7,7 +8,6 @@ import {
   ERC20Detail,
   ERC20Header,
   PaperPlaneIcon,
-  InfoIcon,
   Skeleton,
   Thumbnail,
   useDisclosure,
@@ -19,16 +19,17 @@ import {
   isPublicChain,
   useCreditBalance,
 } from "@cartridge/controller-ui/utils";
+// import { useNavigation } from "@/context/navigation";
 import { useExplorer } from "@starknet-react/core";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
-import { useCallback, useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
-import { useNavigation } from "@/context/navigation";
 import { EmptyState, LoadingState } from "@/components/activity";
 import { SendTokenDrawer } from "./send/send-drawer";
+import { useCreditsContext } from "@/components/credits/provider";
+import { formatCredits } from "@/utils/credits";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -41,11 +42,15 @@ export function Token() {
   }
 }
 
+export const CREDITS_DESCRIPTION =
+  "Credits are an account balance that can be used to pay for games and network activity.";
+
 function Credits() {
   // TODO: Get parent from keychain connection if needed
-  const { navigate } = useNavigation();
+  // const { navigate } = useNavigation();
   const account = useAccount();
   const username = account?.username || "";
+  const { initiateCreditsDeposit } = useCreditsContext();
   const credit = useCreditBalance({
     username,
     interval: 30000,
@@ -56,6 +61,8 @@ function Credits() {
     return <CreditsLoadingState />;
   }
 
+  const format = formatCredits(credit.balance.value);
+
   return (
     <>
       <LayoutContent>
@@ -65,22 +72,22 @@ function Credits() {
             size="lg"
             rounded
           />
-          <p className="text-foreground-100 text-lg/6 font-semibold">{`${Number(credit.balance.value) / 10 ** 6} CREDITS`}</p>
+          <div className="flex flex-col gap-0">
+            <p className="text-foreground-100 text-lg/6 font-semibold">{`${format.formatted} CREDITS`}</p>
+            <p className="text-foreground-300 text-xs">{`$${format.usd.toFixed(2)}`}</p>
+          </div>
         </div>
 
-        <div className="flex gap-1 bg-background-125 border border-background-200 px-3 py-2.5 rounded text-foreground-300">
-          <InfoIcon size="sm" className="min-w-5" />
-          <p className="px-1 text-xs">
-            Credits are used to pay for network activity. They are not tokens
-            and cannot be transferred or refunded.
-          </p>
+        <div className="p-3 text-xs bg-background-200 text-foreground-300 rounded">
+          {CREDITS_DESCRIPTION}
         </div>
       </LayoutContent>
 
       <LayoutFooter className="gap-4">
         <Button
           onClick={() => {
-            navigate("/funding/deposit");
+            initiateCreditsDeposit();
+            // navigate("/funding/deposit");
           }}
         >
           Deposit

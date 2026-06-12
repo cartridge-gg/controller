@@ -166,6 +166,7 @@ export type FetchState = {
   isFetching: boolean;
   isLoading: boolean;
   error: Error | null;
+  refetch: () => Promise<unknown>;
 };
 
 export type UseCreditBalanceReturn = {
@@ -179,7 +180,7 @@ export function useCreditBalance({
   username?: string;
   interval: number | undefined;
 }): UseCreditBalanceReturn {
-  const { data, isFetching, isLoading, error } = useCreditQuery<
+  const { data, isFetching, isLoading, error, refetch } = useCreditQuery<
     CreditQuery,
     Error
   >(
@@ -207,5 +208,6 @@ export function useCreditBalance({
     isFetching,
     isLoading,
     error,
+    refetch,
   };
 }

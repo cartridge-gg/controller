@@ -43,7 +43,7 @@ import {
   formatBalance,
   useFeeToken,
 } from "@/hooks/tokens";
-import { USDC_ADDRESSES } from "@/utils/ekubo";
+import { USDC_ADDRESSES, USDC_ICON } from "@/utils/ekubo";
 import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { createStarknetCryptoPayment } from "@/hooks/payments/crypto";
@@ -128,7 +128,7 @@ function SlotCryptoFundInner({
         name: "USD Coin",
         decimals: 6,
         address: usdcAddress,
-        icon: "https://static.cartridge.gg/tokens/usdc.svg",
+        icon: USDC_ICON,
         defaultAmount: "10",
         min: 1,
         max: 2000,
@@ -352,7 +352,7 @@ function SlotCryptoFundInner({
               }}
               disabled={isSubmitting}
             >
-              <TokenSelectHeader />
+              <TokenSelectHeader singleToken={tokens.length <= 1} />
               <SelectContent>
                 {tokens.map((token) => (
                   <SelectItem key={token.address} value={token.address}>

@@ -6,7 +6,7 @@ import {
   TokenSelectHeader,
 } from "@/index";
 
-const mockTokens = [
+export const mockTokens = [
   {
     balance: {
       amount: 0.000071521921165994,

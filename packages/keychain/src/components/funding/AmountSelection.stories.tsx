@@ -5,7 +5,7 @@ import { AmountSelection } from "./AmountSelection";
 const meta = {
   component: AmountSelection,
   args: {
-    enableCustom: true,
+    onChange: () => {},
   },
 } satisfies Meta<typeof AmountSelection>;
 

@@ -1,5 +1,5 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { ArcadeContext } from "@/context/arcade";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useArcadeContext } from "@/context/arcade";
 import { useParams } from "react-router-dom";
 import { cairo, getChecksumAddress } from "starknet";
 import { OrderModel, StatusType } from "@cartridge/arcade";
@@ -21,14 +21,6 @@ const FEE_ENTRYPOINT = "royalty_info";
  * @throws {Error} If used outside of a MarketplaceProvider context
  */
 export const useMarketplace = () => {
-  const context = useContext(ArcadeContext);
-
-  if (!context) {
-    throw new Error(
-      "The `useMarketplace` hook must be used within a `MarketplaceProvider`",
-    );
-  }
-
   const account = useAccount();
   const address = account?.address || "";
   const { address: contractAddress, tokenId } = useParams();
@@ -43,7 +35,7 @@ export const useMarketplace = () => {
     sales,
     book,
     setInitializable,
-  } = context;
+  } = useArcadeContext();
   const [amount, setAmount] = useState<number>(0);
 
   useEffect(() => {

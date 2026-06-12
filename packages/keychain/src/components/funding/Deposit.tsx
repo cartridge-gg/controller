@@ -167,6 +167,9 @@ function DepositInner({ onComplete }: DepositProps) {
       </LayoutContent>
 
       <LayoutFooter>
+        <div className="text-xs font-semibold text-foreground-400 tracking-wide select-none">
+          Amount
+        </div>
         <AmountSelection lockSelection={isLoading} onChange={onAmountChanged} />
         <Separator className="bg-spacer m-1" />
         {error && (

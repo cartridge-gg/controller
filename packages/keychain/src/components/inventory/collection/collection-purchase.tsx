@@ -19,7 +19,7 @@ import {
   FeeEstimate,
 } from "starknet";
 import { useConnection } from "@/hooks/connection";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToriiCollection } from "@/hooks/collection";
 import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
@@ -37,7 +37,7 @@ import {
   useMarketplaceRoyaltyFee,
 } from "@cartridge/arcade/marketplace/react";
 import { StatusType } from "@cartridge/arcade";
-import { ArcadeContext } from "@/context/arcade";
+import { useArcadeContext } from "@/context/arcade";
 import { usePurchaseFeesData } from "./footer";
 import { formatUsdValue } from "@/utils/format-value";
 
@@ -48,8 +48,7 @@ export function CollectionPurchase() {
   const { tokens } = useTokens();
   const [royalties, setRoyalties] = useState<{ [orderId: number]: bigint }>({});
   const [amount, setAmount] = useState<number>(0);
-  const arcadeContext = useContext(ArcadeContext);
-  const provider = arcadeContext?.provider;
+  const { marketplaceAddress } = useArcadeContext();
   const { toast } = useToast();
 
   const [searchParams] = useSearchParams();
@@ -230,13 +229,6 @@ export function CollectionPurchase() {
     },
     [setRoyalties],
   );
-
-  // Memoize marketplace address
-  const marketplaceAddress = useMemo(() => {
-    return provider?.manifest.contracts.find((c: { tag: string }) =>
-      c.tag?.includes("Marketplace"),
-    )?.address;
-  }, [provider?.manifest.contracts]);
 
   // Build transactions
   const buildTransactions = useMemo(() => {

@@ -46,6 +46,8 @@ export const USDCE_ADDRESSES: Record<string, string> = {
     "0x053b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080",
 };
 
+export const USDC_ICON = "https://static.cartridge.gg/tokens/usdc.svg";
+
 /**
  * Slippage buffer percentage for swap amounts
  */

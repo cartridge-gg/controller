@@ -59,6 +59,7 @@ export type Metadata = {
 export type Token = {
   balance: Balance;
   metadata: Metadata;
+  refetch?: () => Promise<unknown>;
 };
 
 export type UseBalanceResponse = {
@@ -231,7 +232,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     return {
       balance: {
         amount: Number(creditBalance.balance.value) / 10 ** 6,
-        value: 0,
+        value: Number(creditBalance.balance.value) / 10 ** 8,
         change: 0,
       },
       metadata: {
@@ -241,6 +242,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
         address: "credit",
         image: "https://static.cartridge.gg/presets/credit/icon.svg",
       },
+      refetch: creditBalance.refetch,
     };
   }, [creditBalance]);
 

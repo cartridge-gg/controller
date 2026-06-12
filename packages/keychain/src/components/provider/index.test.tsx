@@ -85,6 +85,7 @@ vi.mock("./ui", () => ({
 
 vi.mock("@/hooks/features", () => ({
   FeatureProvider: ({ children }: PropsWithChildren) => <>{children}</>,
+  useFeature: vi.fn(() => false),
 }));
 
 vi.mock("@/components/provider/arcade", () => ({
@@ -98,6 +99,7 @@ vi.mock("@/components/provider/data", () => ({
 vi.mock("@/context", () => ({
   ToastProvider: ({ children }: PropsWithChildren) => <>{children}</>,
   StarterpackProviders: ({ children }: PropsWithChildren) => <>{children}</>,
+  useStarterpackContext: vi.fn(() => ({ starterpackDetails: undefined })),
 }));
 
 vi.mock("@/context/quest", () => ({
@@ -118,7 +120,8 @@ vi.mock("@cartridge/controller-ui/utils/api/cartridge", () => ({
   useVerifyPhoneMutation: vi.fn(() => ({})),
 }));
 
-vi.mock("@cartridge/controller-ui/utils", () => ({
+vi.mock("@cartridge/controller-ui/utils", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@cartridge/controller-ui/utils")>()),
   useCartridgeAPI: vi.fn(() => ({})),
 }));
 
@@ -135,13 +138,18 @@ vi.mock("@/components/identity/provider", () => ({
   IdentityProvider: ({ children }: PropsWithChildren) => <>{children}</>,
 }));
 
+vi.mock("@/components/credits/provider", () => ({
+  CreditsProvider: ({ children }: PropsWithChildren) => <>{children}</>,
+}));
+
 vi.mock("@cartridge/arcade/marketplace/react", () => ({
   MarketplaceClientProvider: ({ children }: PropsWithChildren) => (
     <>{children}</>
   ),
 }));
 
-vi.mock("@cartridge/controller-ui", () => ({
+vi.mock("@cartridge/controller-ui", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@cartridge/controller-ui")>()),
   SpinnerIcon: () => <div data-testid="loading-spinner" />,
   isValidCalendarDate: () => true,
 }));

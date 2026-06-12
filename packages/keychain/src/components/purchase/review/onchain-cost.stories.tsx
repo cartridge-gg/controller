@@ -6,6 +6,7 @@ import {
   TokenOption,
 } from "@/context/starterpack/onchain-purchase";
 import { ReactNode } from "react";
+import { USDC_ICON } from "@/utils/ekubo";
 
 // USDC address with leading zeros (tests normalization)
 const USDC_ADDRESS =
@@ -17,7 +18,7 @@ const mockUsdcToken = {
   name: "USD Coin",
   symbol: "USDC",
   decimals: 6,
-  icon: "https://static.cartridge.gg/tokens/usdc.svg",
+  icon: USDC_ICON,
   contract: {} as TokenOption["contract"],
 } satisfies TokenOption;
 
