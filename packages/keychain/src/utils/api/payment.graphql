@@ -47,6 +47,15 @@ mutation PurchaseBundleWithCredits($input: PurchaseBundleWithCreditsInput!) {
   }
 }
 
+query PurchaseFulfillment($id: ID!) {
+  purchaseFulfillment(id: $id) {
+    id
+    status
+    transactionHash
+    lastError
+  }
+}
+
 mutation CreateCoinflowStarterpackIntent(
   $input: CreateCoinflowStarterpackIntentInput!
 ) {

@@ -20,7 +20,18 @@ import { ExternalPlatform, humanizeString } from "@cartridge/controller";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
 import type { Quote, TokenOption } from "@/context";
 import { useOnchainPurchaseContext, useCreditPurchaseContext } from "@/context";
+import { formatCredits } from "@/utils/credits";
 import { num } from "starknet";
+
+// Pseudo-token rendered in the token selector when paying with credits.
+const CREDITS_TOKEN: TokenOption = {
+  name: "Credits",
+  symbol: "Credits",
+  decimals: 6,
+  address: "credits",
+  icon: "https://static.cartridge.gg/presets/credit/icon.svg",
+  contract: {} as TokenOption["contract"],
+};
 
 export const convertCentsToDollars = (cents: number): string => {
   return `$${(cents / 100).toFixed(2)}`;
@@ -134,10 +145,16 @@ export function OnchainCostBreakdown({
     quantity,
     isApplePaySelected,
     isCoinflowSelected,
+    isCreditsSelected,
     coinbaseQuote,
     isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
-  const { coinflowQuote, isCoinflowQuoteLoading } = useCreditPurchaseContext();
+  const {
+    coinflowQuote,
+    isCoinflowQuoteLoading,
+    creditsQuote,
+    isCreditsQuoteLoading,
+  } = useCreditPurchaseContext();
   const { decimals } = quote.paymentTokenMetadata;
   // When credit card is selected, use the Coinflow backend quote so that
   // pricing is correct even for non-USDC starterpacks (handles Ekubo swap).
@@ -220,7 +237,17 @@ export function OnchainCostBreakdown({
     [availableTokens, setSelectedToken],
   );
 
-  const value = isCoinflowSelected ? (
+  const value = isCreditsSelected ? (
+    isCreditsQuoteLoading ? (
+      <Spinner />
+    ) : creditsQuote ? (
+      <span className="text-foreground-100">
+        {formatCredits(creditsQuote.requiredCredits).formatted}
+      </span>
+    ) : (
+      <span className="text-foreground-400">—</span>
+    )
+  ) : isCoinflowSelected ? (
     isCoinflowQuoteLoading ? (
       <Spinner />
     ) : coinflowCostDetails ? (
@@ -262,8 +289,8 @@ export function OnchainCostBreakdown({
   return (
     <CostBreakdown
       platform={platform}
-      tokens={availableTokens}
-      selectedToken={displayToken}
+      tokens={isCreditsSelected ? [CREDITS_TOKEN] : availableTokens}
+      selectedToken={isCreditsSelected ? CREDITS_TOKEN : displayToken}
       onSelectToken={handleTokenChange}
       tokenSelectDisabled={
         availableTokens.length <= 1 || isTokenSelectionLocked
