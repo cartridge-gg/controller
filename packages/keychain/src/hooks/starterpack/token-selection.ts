@@ -420,6 +420,16 @@ export function useTokenSelection({
       return;
     }
 
+    // No swap/price source on this chain (e.g. Katana): a non-payment token
+    // can't be converted, so don't call Ekubo. availableTokens already restricts
+    // the choice to the payment token here, so this is a belt-and-suspenders bail.
+    if (!isQuoteChain(controller.chainId())) {
+      setConvertedPrice(null);
+      setSwapQuote(null);
+      setIsFetchingConversion(false);
+      return;
+    }
+
     // 2. Otherwise, fetch from Ekubo (if not already valid)
     if (
       convertedPrice &&

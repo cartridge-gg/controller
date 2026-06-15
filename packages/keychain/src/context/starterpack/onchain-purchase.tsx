@@ -17,6 +17,7 @@ import { getCurrentReferral } from "@/utils/referral";
 import {
   prepareSwapCalls,
   fetchSwapQuote,
+  isQuoteChain,
   type SwapQuote,
 } from "@/utils/ekubo";
 import { Item } from "./types";
@@ -538,7 +539,11 @@ export const OnchainPurchaseProvider = ({
           ? selectedWallet.type
           : "controller";
 
+      // A swap goes through Ekubo (quote API + on-chain router), so it can only
+      // run on chains with a price source. Elsewhere (e.g. Katana) the bundle
+      // settles directly in its payment token — no swap, no Ekubo.
       const needsSwap =
+        isQuoteChain(controller.chainId()) &&
         selectedToken &&
         num.toHex(selectedToken.address) !== num.toHex(quote.paymentToken);
 
