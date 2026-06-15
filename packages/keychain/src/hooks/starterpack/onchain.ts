@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useMemo } from "react";
 import { useController } from "@/hooks/controller";
 import { useConnection } from "@/hooks/connection";
 import { CairoByteArray, Call, getChecksumAddress, uint256 } from "starknet";
-import { fetchSwapQuote, USDC_ADDRESSES } from "@/utils/ekubo";
+import { fetchSwapQuote, USDC_ADDRESSES, isQuoteChain } from "@/utils/ekubo";
 import { getCurrentReferral } from "@/utils/referral";
 import { Quote } from "@/context";
 import {
@@ -227,10 +227,14 @@ export const useOnchainStarterpack = ({
           paymentTokenMetadata,
         };
 
-        // Convert price to target token if specified and different from payment token
+        // Convert price to target token if specified and different from payment
+        // token. Only attempt this on chains with a swap/price source (Ekubo
+        // liquidity); chains without one (e.g. a Katana dev chain) settle in the
+        // bundle's on-chain payment_token directly, so skip the conversion.
         const chainId = controller.chainId();
         const targetTokenAddress = targetToken || USDC_ADDRESSES[chainId];
         if (
+          isQuoteChain(chainId) &&
           targetTokenAddress &&
           paymentToken.toLowerCase() !== targetTokenAddress.toLowerCase() &&
           totalCost > 0n
@@ -265,9 +269,12 @@ export const useOnchainStarterpack = ({
 
         setQuote(quote);
       } catch (error) {
+        // A quote failure must NOT block the starterpack: metadata-driven
+        // rendering already populates the details, and a bundle can still be
+        // settled directly in its on-chain payment_token (e.g. on chains with
+        // no swap/fiat quote source). Surface for debugging only — do not set
+        // the blocking error state, matching the intent below.
         console.error("Failed to fetch quote:", error);
-        // Don't set error state for quote failures to allow metadata to still be shown
-        setError(new Error("Failed to fetch quote"));
       } finally {
         setIsQuoteLoading(false);
       }

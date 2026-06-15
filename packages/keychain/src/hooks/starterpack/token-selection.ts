@@ -1,10 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { erc20Metadata, ExternalPlatform } from "@cartridge/controller";
-import { num, getChecksumAddress, constants } from "starknet";
-import {
-  ERC20Contract,
-  USDC_CONTRACT_ADDRESS,
-} from "@cartridge/controller-ui/utils";
+import { num, getChecksumAddress } from "starknet";
+import { ERC20Contract } from "@cartridge/controller-ui/utils";
 import {
   DEFAULT_TOKENS,
   type ERC20Metadata,
@@ -13,6 +10,7 @@ import {
   fetchSwapQuote,
   USDC_ADDRESSES,
   USDCE_ADDRESSES,
+  isQuoteChain,
   type SwapQuote,
 } from "@/utils/ekubo";
 import {
@@ -175,46 +173,55 @@ export function useTokenSelection({
   const availableTokens = useMemo(() => {
     if (!controller) return [];
 
-    // Start with default tokens (ETH, STRK, USDC, USDC.e)
-    const usdcAddress =
-      USDC_ADDRESSES[controller.chainId()] ||
-      USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN];
+    // On chains WITH a swap/price source (Ekubo liquidity), offer the usual set
+    // — the stablecoins where they exist, plus ETH/STRK — since the keychain can
+    // swap any of them to the bundle's payment token. On chains WITHOUT one
+    // (e.g. a Katana dev chain), a swap can never execute, so only the bundle's
+    // own payment_token (added below) is payable; offering ETH/USDC/etc. there
+    // would just dead-end at purchase. Note a mainnet-USDC fallback is avoided.
+    const hasQuoteSource = isQuoteChain(controller.chainId());
 
-    const usdceAddress =
-      USDCE_ADDRESSES[controller.chainId()] || USDC_CONTRACT_ADDRESS;
-
-    const tokens: ERC20Metadata[] = [
-      {
-        address: usdcAddress,
-        name: "USD Coin",
-        symbol: "USDC",
-        decimals: 6,
-        icon: "https://static.cartridge.gg/tokens/usdc.svg",
-      },
-      {
-        address: usdceAddress,
-        name: "Bridged USDC",
-        symbol: "USDC.e",
-        decimals: 6,
-        icon: "https://static.cartridge.gg/tokens/usdc.svg",
-      },
-      ...DEFAULT_TOKENS,
-    ];
+    const tokens: ERC20Metadata[] = [];
+    if (hasQuoteSource) {
+      const usdcAddress = USDC_ADDRESSES[controller.chainId()];
+      const usdceAddress = USDCE_ADDRESSES[controller.chainId()];
+      if (usdcAddress) {
+        tokens.push({
+          address: usdcAddress,
+          name: "USD Coin",
+          symbol: "USDC",
+          decimals: 6,
+          icon: "https://static.cartridge.gg/tokens/usdc.svg",
+        });
+      }
+      if (usdceAddress) {
+        tokens.push({
+          address: usdceAddress,
+          name: "Bridged USDC",
+          symbol: "USDC.e",
+          decimals: 6,
+          icon: "https://static.cartridge.gg/tokens/usdc.svg",
+        });
+      }
+      tokens.push(...DEFAULT_TOKENS);
+    }
 
     const isIncluded = (address: string) =>
       tokens.some(
         (t) => getChecksumAddress(t.address) === getChecksumAddress(address),
       );
 
-    // Add additional payment tokens from starterpack metadata
-    if (starterpackDetails?.additionalPaymentTokens?.length) {
+    // Add additional payment tokens from starterpack metadata. These need a
+    // swap to the payment token, so only offer them where swaps work.
+    if (hasQuoteSource && starterpackDetails?.additionalPaymentTokens?.length) {
       for (const address of starterpackDetails.additionalPaymentTokens) {
         if (!isIncluded(address)) {
           tokens.push(buildTokenMetadata(address));
         }
       }
     }
-    // Or add quote's payment token if no additional tokens specified
+    // Otherwise offer the bundle's on-chain payment token — the only entry on
+    // no-quote chains, and the no-swap default elsewhere.
     else if (
       starterpackDetails &&
       isOnchainStarterpack(starterpackDetails) &&
@@ -410,6 +417,16 @@ export function useTokenSelection({
       setSwapQuote(null);
       setIsFetchingConversion(false);
       setConversionError(null);
+      return;
+    }
+
+    // No swap/price source on this chain (e.g. Katana): a non-payment token
+    // can't be converted, so don't call Ekubo. availableTokens already restricts
+    // the choice to the payment token here, so this is a belt-and-suspenders bail.
+    if (!isQuoteChain(controller.chainId())) {
+      setConvertedPrice(null);
+      setSwapQuote(null);
+      setIsFetchingConversion(false);
       return;
     }
 

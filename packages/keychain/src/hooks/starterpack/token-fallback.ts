@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { num, uint256 } from "starknet";
-import { fetchSwapQuote, USDC_ADDRESSES, USDCE_ADDRESSES } from "@/utils/ekubo";
+import {
+  fetchSwapQuote,
+  USDC_ADDRESSES,
+  USDCE_ADDRESSES,
+  isQuoteChain,
+} from "@/utils/ekubo";
 import { isOnchainStarterpack } from "@/context/starterpack/types";
 import type { OnchainStarterpackDetails } from "@/context/starterpack/types";
 import type { TokenOption } from "./token-selection";
@@ -144,6 +149,11 @@ export function useTokenFallback({
             ) {
               // Same token or USDC ↔ USDC.e (1:1 pegged); no Ekubo quote needed.
               requiredAmount = totalCost;
+            } else if (!isQuoteChain(chainId)) {
+              // No swap/price source on this chain (e.g. Katana): a non-payment
+              // candidate can't be priced or swapped to, so it can't be a
+              // fallback. Skip it rather than calling Ekubo.
+              continue;
             } else {
               const swapResult = await fetchSwapQuote(
                 totalCost,

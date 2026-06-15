@@ -18,6 +18,7 @@ import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
 import {
   fetchSwapQuoteInUsdc,
+  isQuoteChain,
   type ExtendedError,
   USDC_ADDRESSES,
   USDCE_ADDRESSES,
@@ -260,6 +261,13 @@ export function TokensProvider({
                   decimals: USDC_DECIMALS,
                   quote: "USDC",
                 };
+              }
+
+              // No USDC market on this chain (e.g. Katana): there is no USD
+              // price to fetch and fetchSwapQuoteInUsdc would just throw, so
+              // skip the Ekubo call and report no price for this token.
+              if (!isQuoteChain(chainId)) {
+                return null;
               }
 
               // Fetch quote from Ekubo: how many token base units = 1 USDC
