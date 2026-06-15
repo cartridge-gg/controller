@@ -1,10 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { erc20Metadata, ExternalPlatform } from "@cartridge/controller";
-import { num, getChecksumAddress, constants } from "starknet";
-import {
-  ERC20Contract,
-  USDC_CONTRACT_ADDRESS,
-} from "@cartridge/controller-ui/utils";
+import { num, getChecksumAddress } from "starknet";
+import { ERC20Contract } from "@cartridge/controller-ui/utils";
 import {
   DEFAULT_TOKENS,
   type ERC20Metadata,
@@ -175,31 +172,34 @@ export function useTokenSelection({
   const availableTokens = useMemo(() => {
     if (!controller) return [];
 
-    // Start with default tokens (ETH, STRK, USDC, USDC.e)
-    const usdcAddress =
-      USDC_ADDRESSES[controller.chainId()] ||
-      USDC_ADDRESSES[constants.StarknetChainId.SN_MAIN];
+    // Start with default tokens (ETH, STRK). Add the stablecoins only on
+    // chains that actually have them — falling back to a mainnet USDC address
+    // on a chain without one (e.g. a Katana dev chain) would offer a token the
+    // user can never hold or swap to, breaking the purchase. On such chains the
+    // bundle's on-chain payment_token (added below) is the payable option.
+    const usdcAddress = USDC_ADDRESSES[controller.chainId()];
+    const usdceAddress = USDCE_ADDRESSES[controller.chainId()];
 
-    const usdceAddress =
-      USDCE_ADDRESSES[controller.chainId()] || USDC_CONTRACT_ADDRESS;
-
-    const tokens: ERC20Metadata[] = [
-      {
+    const tokens: ERC20Metadata[] = [];
+    if (usdcAddress) {
+      tokens.push({
         address: usdcAddress,
         name: "USD Coin",
         symbol: "USDC",
         decimals: 6,
         icon: "https://static.cartridge.gg/tokens/usdc.svg",
-      },
-      {
+      });
+    }
+    if (usdceAddress) {
+      tokens.push({
         address: usdceAddress,
         name: "Bridged USDC",
         symbol: "USDC.e",
         decimals: 6,
         icon: "https://static.cartridge.gg/tokens/usdc.svg",
-      },
-      ...DEFAULT_TOKENS,
-    ];
+      });
+    }
+    tokens.push(...DEFAULT_TOKENS);
 
     const isIncluded = (address: string) =>
       tokens.some(

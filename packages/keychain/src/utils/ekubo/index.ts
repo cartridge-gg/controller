@@ -47,6 +47,19 @@ export const USDCE_ADDRESSES: Record<string, string> = {
 };
 
 /**
+ * Whether the chain has a stablecoin price source (a known USDC market with
+ * Ekubo liquidity) that fiat/USD quoting and token swaps can rely on.
+ *
+ * Chains without one — e.g. a local/Slot Katana dev chain — cannot produce a
+ * swap or fiat quote. Callers should skip the Ekubo/USD conversion path on
+ * these and settle the starterpack directly in the bundle's on-chain
+ * payment_token instead of hard-failing with "Failed to fetch quote".
+ */
+export function isQuoteChain(chainId: string): boolean {
+  return !!USDC_ADDRESSES[chainId];
+}
+
+/**
  * Slippage buffer percentage for swap amounts
  */
 const SLIPPAGE_PERCENTAGE = 5n;
