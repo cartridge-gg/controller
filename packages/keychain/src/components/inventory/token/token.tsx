@@ -23,6 +23,11 @@ import {
 import { useExplorer } from "@starknet-react/core";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount, useUsernames } from "@/hooks/account";
+import { useCreditsHistory } from "@/hooks/credits-history";
+import {
+  CreditsHistoryTransactionType,
+  CreditsPaymentMethod,
+} from "@/utils/api";
 import { useToken } from "@/hooks/token";
 import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
@@ -45,16 +50,48 @@ export function Token() {
 export const CREDITS_DESCRIPTION =
   "Credits are an account balance that can be used to pay for games and network activity.";
 
+const CREDITS_ICON = "https://static.cartridge.gg/presets/credit/icon.svg";
+
+const PAYMENT_METHOD_LABELS: Record<CreditsPaymentMethod, string> = {
+  [CreditsPaymentMethod.Card]: "Card",
+  [CreditsPaymentMethod.Crypto]: "Crypto",
+  [CreditsPaymentMethod.Free]: "Free",
+  [CreditsPaymentMethod.Credits]: "Credits",
+};
+
 function Credits() {
   // TODO: Get parent from keychain connection if needed
   // const { navigate } = useNavigation();
   const account = useAccount();
   const username = account?.username || "";
   const { initiateCreditsDeposit } = useCreditsContext();
+  const explorer = useExplorer();
   const credit = useCreditBalance({
     username,
     interval: 30000,
   });
+  const { items: history, status: historyStatus } = useCreditsHistory();
+
+  const entries = useMemo(() => {
+    return history.map((item) => {
+      const timestamp = new Date(item.createdAt).getTime();
+      const amount = formatCredits(item.amount);
+      const isDeposit =
+        item.transactionType === CreditsHistoryTransactionType.Credit;
+      return {
+        id: item.id,
+        transactionHash: item.transactionHash,
+        amount: `${amount.formatted} CREDITS`,
+        value: `$${amount.usd.toFixed(2)}`,
+        action: (isDeposit ? "receive" : "send") as "receive" | "send",
+        subject: isDeposit
+          ? PAYMENT_METHOD_LABELS[item.paymentMethod]
+          : item.comment || "Network Fee",
+        date: getDate(timestamp),
+        timestamp,
+      };
+    });
+  }, [history]);
 
   // Show loading state while credits are being fetched
   if (credit.balance.value === undefined) {
@@ -67,11 +104,7 @@ function Credits() {
     <>
       <LayoutContent>
         <div className="flex gap-4 items-center">
-          <Thumbnail
-            icon="https://static.cartridge.gg/presets/credit/icon.svg"
-            size="lg"
-            rounded
-          />
+          <Thumbnail icon={CREDITS_ICON} size="lg" rounded />
           <div className="flex flex-col gap-0">
             <p className="text-foreground-100 text-lg/6 font-semibold">{`${format.formatted} CREDITS`}</p>
             <p className="text-foreground-300 text-xs">{`$${format.usd.toFixed(2)}`}</p>
@@ -81,6 +114,57 @@ function Credits() {
         <div className="p-3 text-xs bg-background-200 text-foreground-300 rounded">
           {CREDITS_DESCRIPTION}
         </div>
+
+        {historyStatus === "loading" ? (
+          <LoadingState rowCount={2} />
+        ) : historyStatus === "error" || !entries.length ? (
+          <EmptyState />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {Object.entries(
+              entries.reduce(
+                (acc, entry) => {
+                  if (!acc[entry.date]) {
+                    acc[entry.date] = [];
+                  }
+                  acc[entry.date].push(entry);
+                  return acc;
+                },
+                {} as Record<string, typeof entries>,
+              ),
+            ).map(([date, items]) => (
+              <div key={date} className="flex flex-col gap-2">
+                <p className="text-foreground-400 text-xs font-bold uppercase py-2">
+                  {date}
+                </p>
+                {items.map((item) => {
+                  const card = (
+                    <ActivityTokenCard
+                      amount={item.amount}
+                      value={item.value}
+                      address={account?.address ?? "0x1"}
+                      username={item.subject}
+                      image={CREDITS_ICON}
+                      action={item.action}
+                      timestamp={item.timestamp}
+                    />
+                  );
+                  return item.transactionHash ? (
+                    <Link
+                      key={item.id}
+                      to={explorer.transaction(item.transactionHash)}
+                      target="_blank"
+                    >
+                      {card}
+                    </Link>
+                  ) : (
+                    <div key={item.id}>{card}</div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
       </LayoutContent>
 
       <LayoutFooter className="gap-4">
