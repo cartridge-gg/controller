@@ -7245,6 +7245,41 @@ export type CreditQuery = {
   } | null;
 };
 
+export type CreditsHistoryQueryVariables = Exact<{
+  username: Scalars["String"];
+  first?: InputMaybe<Scalars["Int"]>;
+  after?: InputMaybe<Scalars["Cursor"]>;
+}>;
+
+export type CreditsHistoryQuery = {
+  __typename?: "Query";
+  account?: {
+    __typename?: "Account";
+    creditsHistory: {
+      __typename?: "CreditsHistoryConnection";
+      totalCount: number;
+      pageInfo: {
+        __typename?: "PageInfo";
+        hasNextPage: boolean;
+        endCursor?: string | null;
+      };
+      edges?: Array<{
+        __typename?: "CreditsHistoryEdge";
+        node?: {
+          __typename?: "CreditsHistory";
+          id: string;
+          amount: number;
+          transactionType: CreditsHistoryTransactionType;
+          paymentMethod: CreditsPaymentMethod;
+          transactionHash?: string | null;
+          comment?: string | null;
+          createdAt: string;
+        } | null;
+      } | null> | null;
+    };
+  } | null;
+};
+
 export type AccountNameQueryVariables = Exact<{
   address: Scalars["String"];
 }>;
@@ -8063,6 +8098,48 @@ export const useCreditQuery = <TData = CreditQuery, TError = unknown>(
       null,
       variables,
     ),
+    options,
+  );
+export const CreditsHistoryDocument = `
+    query CreditsHistory($username: String!, $first: Int, $after: Cursor) {
+  account(username: $username) {
+    creditsHistory(
+      first: $first
+      after: $after
+      orderBy: {field: CREATED_AT, direction: DESC}
+    ) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          id
+          amount
+          transactionType
+          paymentMethod
+          transactionHash
+          comment
+          createdAt
+        }
+      }
+    }
+  }
+}
+    `;
+export const useCreditsHistoryQuery = <
+  TData = CreditsHistoryQuery,
+  TError = unknown,
+>(
+  variables: CreditsHistoryQueryVariables,
+  options?: UseQueryOptions<CreditsHistoryQuery, TError, TData>,
+) =>
+  useQuery<CreditsHistoryQuery, TError, TData>(
+    ["CreditsHistory", variables],
+    useFetchData<CreditsHistoryQuery, CreditsHistoryQueryVariables>(
+      CreditsHistoryDocument,
+    ).bind(null, variables),
     options,
   );
 export const AccountNameDocument = `

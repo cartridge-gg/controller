@@ -30,6 +30,33 @@ query Credit($username: String!) {
   }
 }
 
+query CreditsHistory($username: String!, $first: Int, $after: Cursor) {
+  account(username: $username) {
+    creditsHistory(
+      first: $first
+      after: $after
+      orderBy: { field: CREATED_AT, direction: DESC }
+    ) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          id
+          amount
+          transactionType
+          paymentMethod
+          transactionHash
+          comment
+          createdAt
+        }
+      }
+    }
+  }
+}
+
 query AccountName($address: String!) {
   accounts(where: { hasControllersWith: { address: $address } }, first: 1) {
     edges {
