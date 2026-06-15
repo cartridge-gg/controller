@@ -584,7 +584,11 @@ export function useCreateController({
         }
         case "google":
         case "discord":
-          signupResponse = await signupWithSocial(authenticationMode, username);
+          signupResponse = await signupWithSocial(
+            authenticationMode,
+            username,
+            changeWallet,
+          );
           if (!signupResponse) {
             return;
           }
@@ -699,6 +703,7 @@ export function useCreateController({
       params,
       handleCompletion,
       searchParams,
+      changeWallet,
     ],
   );
 
@@ -948,7 +953,11 @@ export function useCreateController({
         case "google":
         case "discord": {
           setWaitingForConfirmation(true);
-          loginResponse = await loginWithSocial(authenticationMethod, username);
+          loginResponse = await loginWithSocial(
+            authenticationMethod,
+            username,
+            changeWallet,
+          );
           if (!loginResponse) {
             return;
           }
@@ -1058,6 +1067,7 @@ export function useCreateController({
       smsAuth,
       smsState,
       setWaitingForConfirmation,
+      changeWallet,
     ],
   );
 

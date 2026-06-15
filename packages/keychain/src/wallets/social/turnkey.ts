@@ -109,7 +109,10 @@ export class TurnkeyWallet {
     };
   }
 
-  async connect(isSignup: boolean): Promise<ExternalWalletResponse> {
+  async connect(
+    isSignup: boolean,
+    forceAccountSelection = false,
+  ): Promise<ExternalWalletResponse> {
     try {
       if (!this.socialProvider) {
         throw new Error("Social provider not set");
@@ -127,8 +130,19 @@ export class TurnkeyWallet {
 
       const auth0Client = await this.getAuth0Client(10_000);
 
+      if (forceAccountSelection) {
+        // Drop any cached Auth0 session so the upstream provider shows its
+        // account chooser and the previously selected account isn't silently
+        // reused (e.g. after a "Wrong Signer" mismatch).
+        await auth0Client.logout({ openUrl: false });
+      }
+
       // For login flows, try to use cached Auth0 session if available
-      if (!isSignup && (await auth0Client.isAuthenticated())) {
+      if (
+        !isSignup &&
+        !forceAccountSelection &&
+        (await auth0Client.isAuthenticated())
+      ) {
         const tokenClaims = await auth0Client.getIdTokenClaims();
         const cachedNonce = tokenClaims?.tknonce as string | undefined;
 
@@ -192,6 +206,7 @@ export class TurnkeyWallet {
             redirect_uri: redirectUri,
             nonce,
             tknonce: nonce,
+            ...(forceAccountSelection ? { prompt: "select_account" } : {}),
           },
           appState: {
             nonce,
@@ -235,6 +250,7 @@ export class TurnkeyWallet {
             nonce,
             display: "touch",
             tknonce: nonce,
+            ...(forceAccountSelection ? { prompt: "select_account" } : {}),
           },
         },
         { popup },
