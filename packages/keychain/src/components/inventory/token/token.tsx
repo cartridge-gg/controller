@@ -12,6 +12,7 @@ import {
   Thumbnail,
   useDisclosure,
   UsdColorIcon,
+  ActivityTokenCardAction,
 } from "@cartridge/controller-ui";
 
 import { useData } from "@/hooks/data";
@@ -64,14 +65,24 @@ function Credits() {
   const account = useAccount();
   const username = account?.username || "";
   const { initiateCreditsDeposit } = useCreditsContext();
-  const explorer = useExplorer();
   const credit = useCreditBalance({
     username,
     interval: 30000,
   });
   const { items: history, status: historyStatus } = useCreditsHistory();
 
-  const entries = useMemo(() => {
+  const entries = useMemo<
+    {
+      id: string;
+      transactionHash?: string | null;
+      amount: string;
+      value: string;
+      action: ActivityTokenCardAction;
+      item: string;
+      date: string;
+      timestamp: number;
+    }[]
+  >(() => {
     return history.map((item) => {
       const timestamp = new Date(item.createdAt).getTime();
       const amount = formatCredits(item.amount, 0);
@@ -82,8 +93,12 @@ function Credits() {
         transactionHash: item.transactionHash,
         amount: `${amount.formatted} USD`,
         value: `$${amount.usd.toFixed(2)}`,
-        action: (isDeposit ? "receive" : "send") as "receive" | "send",
-        subject: isDeposit
+        action: isDeposit
+          ? "deposit"
+          : item.paymentMethod === CreditsPaymentMethod.Free
+            ? "claimed"
+            : "spend",
+        item: isDeposit
           ? PAYMENT_METHOD_LABELS[item.paymentMethod]
           : item.comment || "Network Fee",
         date: getDate(timestamp),
@@ -136,30 +151,18 @@ function Credits() {
                 <p className="text-foreground-400 text-xs font-bold uppercase py-2">
                   {date}
                 </p>
-                {items.map((item) => {
-                  const card = (
-                    <ActivityTokenCard
-                      amount={item.amount}
-                      value={item.value}
-                      address={account?.address ?? "0x1"}
-                      username={item.subject}
-                      image={<UsdColorIcon size="auto" />}
-                      action={item.action}
-                      timestamp={item.timestamp}
-                    />
-                  );
-                  return item.transactionHash ? (
-                    <Link
-                      key={item.id}
-                      to={explorer.transaction(item.transactionHash)}
-                      target="_blank"
-                    >
-                      {card}
-                    </Link>
-                  ) : (
-                    <div key={item.id}>{card}</div>
-                  );
-                })}
+                {items.map((item) => (
+                  <ActivityTokenCard
+                    key={item.id}
+                    amount={item.amount}
+                    value={item.value}
+                    address={account?.address ?? "0x1"}
+                    item={item.item}
+                    image={<UsdColorIcon size="auto" />}
+                    action={item.action}
+                    timestamp={item.timestamp}
+                  />
+                ))}
               </div>
             ))}
           </div>
