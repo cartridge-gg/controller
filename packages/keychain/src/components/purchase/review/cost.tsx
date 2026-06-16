@@ -26,8 +26,8 @@ import { num } from "starknet";
 
 // Pseudo-token rendered in the token selector when paying with credits.
 const CREDITS_TOKEN: TokenOption = {
-  name: "Credits",
-  symbol: "Credits",
+  name: "USD",
+  symbol: "USD",
   decimals: 6,
   address: "credits",
   icon: <UsdColorIcon size="auto" />,

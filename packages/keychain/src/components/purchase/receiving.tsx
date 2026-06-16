@@ -5,7 +5,7 @@ import {
   CardListContent,
   CardTitle,
   cn,
-  CreditIcon,
+  UsdColorIcon,
   Spinner,
   Thumbnail,
 } from "@cartridge/controller-ui";
@@ -47,7 +47,11 @@ export function Receiving({
           .filter((item) => item.type === ItemType.CREDIT)
           .map((item, index) => {
             const Logo = (
-              <Thumbnail icon={<CreditIcon size="auto" />} size="lg" rounded />
+              <Thumbnail
+                icon={<UsdColorIcon size="auto" />}
+                size="lg"
+                rounded
+              />
             );
             return (
               <ActivityCard

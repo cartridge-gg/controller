@@ -216,7 +216,7 @@ export const ConnectionTooltipContent = ({
           onClick={onDeposit}
         >
           <ArrowToLineIcon variant="down" size="sm" />
-          <span>Deposit</span>
+          <span>Deposit USD</span>
         </Button>
       )}
       {onWithdraw && (
@@ -226,7 +226,7 @@ export const ConnectionTooltipContent = ({
           onClick={onWithdraw}
         >
           <ArrowFromLineIcon variant="up" size="sm" />
-          <span>Withdraw</span>
+          <span>Withdraw USD</span>
         </Button>
       )}
       {onOpenSettings && (

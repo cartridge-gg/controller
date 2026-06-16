@@ -28,7 +28,7 @@ export function AmountSelectionDrawer({
   const [amount, setAmount] = useState(0);
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-      <DrawerContent title="Buy Credits" icon={<DepositIcon variant="solid" />}>
+      <DrawerContent title="Deposit USD" icon={<DepositIcon variant="solid" />}>
         <AmountSelection
           lockSelection={isLoading}
           enableCustom={true}

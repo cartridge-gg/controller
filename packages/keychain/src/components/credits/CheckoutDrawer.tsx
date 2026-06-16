@@ -138,7 +138,7 @@ export function CheckoutDrawer({
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-      <DrawerContent title="Buy Credits" icon={<DepositIcon variant="solid" />}>
+      <DrawerContent title="Deposit USD" icon={<DepositIcon variant="solid" />}>
         {isProcessing || isSuccess ? (
           <>
             <ConfirmingTransaction title="Purchasing..." status="loading" />
