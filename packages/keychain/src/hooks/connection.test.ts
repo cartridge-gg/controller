@@ -1,6 +1,7 @@
 import {
   getStandaloneAppOrigin,
   getStandaloneRedirectUrl,
+  getStandaloneVerificationOrigin,
   isNestedIframe,
   isOriginVerified,
   resolvePolicies,
@@ -115,6 +116,61 @@ describe("getStandaloneRedirectUrl", () => {
 
   it("returns null when no standalone redirect target is present", () => {
     expect(getStandaloneRedirectUrl(new URLSearchParams())).toBeNull();
+  });
+});
+
+describe("getStandaloneVerificationOrigin", () => {
+  it("prefers the explicit origin param (popup auth flow)", () => {
+    const searchParams = new URLSearchParams({
+      origin: encodeURIComponent("https://www.deathmountain.gg"),
+      redirect_url: "https://example.com/callback",
+    });
+
+    expect(getStandaloneVerificationOrigin(searchParams)).toBe(
+      "https://www.deathmountain.gg",
+    );
+  });
+
+  it("falls back to the redirect target when no origin param is present", () => {
+    const searchParams = new URLSearchParams({
+      redirect_url: "https://example.com/callback",
+    });
+
+    expect(getStandaloneVerificationOrigin(searchParams)).toBe(
+      "https://example.com/callback",
+    );
+  });
+
+  it("falls back to the current origin when no params are present", () => {
+    expect(
+      getStandaloneVerificationOrigin(
+        new URLSearchParams(),
+        "https://www.deathmountain.gg",
+      ),
+    ).toBe("https://www.deathmountain.gg");
+  });
+
+  it("returns null when nothing is available", () => {
+    expect(getStandaloneVerificationOrigin(new URLSearchParams())).toBeNull();
+  });
+
+  it("resolves an origin the preset wildcard verifies (regression)", () => {
+    // Popup auth (/auth) sends the app origin via `origin`, not `redirect_url`.
+    // The death-mountain preset allows `*.deathmountain.gg`, so the resolved
+    // origin must verify against the wildcard.
+    const searchParams = new URLSearchParams({
+      origin: encodeURIComponent("https://www.deathmountain.gg"),
+    });
+
+    const resolved = getStandaloneVerificationOrigin(searchParams);
+    expect(resolved).toBe("https://www.deathmountain.gg");
+    expect(
+      isOriginVerified(resolved as string, [
+        "*.deathmountain.gg",
+        "deathmountain.gg",
+        "connect.provable.games",
+      ]),
+    ).toBe(true);
   });
 });
 

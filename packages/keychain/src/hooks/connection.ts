@@ -276,19 +276,25 @@ function computeVerifiedState(
 
   if (!isIframe()) {
     const searchParams = new URLSearchParams(window.location.search);
-    const redirectUrl = getStandaloneRedirectUrl(searchParams);
+    const standaloneOrigin = getStandaloneVerificationOrigin(
+      searchParams,
+      currentOrigin,
+    );
 
-    if (redirectUrl) {
+    if (standaloneOrigin) {
       try {
-        const redirectUrlObj = new URL(redirectUrl);
-        const redirectOrigin = redirectUrlObj.origin;
+        const originObj = new URL(standaloneOrigin);
+        const originHost = originObj.origin;
         const isLocalhost =
-          redirectOrigin.includes("localhost") ||
-          redirectOrigin === "capacitor://localhost";
-        const isOriginAllowed = isOriginVerified(redirectUrl, allowedOrigins);
+          originHost.includes("localhost") ||
+          originHost === "capacitor://localhost";
+        const isOriginAllowed = isOriginVerified(
+          standaloneOrigin,
+          allowedOrigins,
+        );
         return isLocalhost || isOriginAllowed;
       } catch (error) {
-        console.error("Failed to parse standalone redirect target:", error);
+        console.error("Failed to parse standalone verification origin:", error);
       }
     }
 
@@ -332,6 +338,30 @@ export function getStandaloneRedirectUrl(
   searchParams: URLSearchParams,
 ): string | null {
   return searchParams.get("redirect_url") || searchParams.get("redirect_uri");
+}
+
+/**
+ * Resolve the application origin to verify against the preset allowlist when
+ * the keychain runs standalone (not in an iframe).
+ *
+ * Different standalone entrypoints carry the app origin differently:
+ * - The popup auth flow (`/auth`) passes it as an explicit `origin` param.
+ * - The redirect flow passes a `redirect_url`/`redirect_uri` to return to.
+ *
+ * We honor the explicit `origin` param first, then the redirect target, and
+ * finally fall back to the already-resolved current origin. Without this, the
+ * popup auth flow (which only sends `origin`) would always read as unverified.
+ */
+export function getStandaloneVerificationOrigin(
+  searchParams: URLSearchParams,
+  currentOrigin?: string,
+): string | null {
+  const originParam = searchParams.get("origin");
+  if (originParam) {
+    return decodeURIComponent(originParam);
+  }
+
+  return getStandaloneRedirectUrl(searchParams) ?? currentOrigin ?? null;
 }
 
 export function getStandaloneAppOrigin(redirectUrl: string): string {
