@@ -363,6 +363,18 @@ export function WalletSelectionDrawer({
       <DrawerContent title={title} icon={icon}>
         {step === "method" ? (
           <>
+            {showController && (
+              <PurchaseCard
+                key={controllerWallet.platform}
+                text={controllerWallet.name}
+                icon={controllerWallet.icon}
+                onClick={onControllerWalletSelect}
+                className={cn(
+                  "rounded-lg",
+                  isApplePayLoading && "opacity-50 pointer-events-none",
+                )}
+              />
+            )}
             {showCredits && (
               <PurchaseCard
                 key="credits"
@@ -394,18 +406,6 @@ export function WalletSelectionDrawer({
                 text="Apple Pay"
                 icon={<AppleIcon />}
                 onClick={handleApplePaySelect}
-                className={cn(
-                  "rounded-lg",
-                  isApplePayLoading && "opacity-50 pointer-events-none",
-                )}
-              />
-            )}
-            {showController && (
-              <PurchaseCard
-                key={controllerWallet.platform}
-                text={controllerWallet.name}
-                icon={controllerWallet.icon}
-                onClick={onControllerWalletSelect}
                 className={cn(
                   "rounded-lg",
                   isApplePayLoading && "opacity-50 pointer-events-none",

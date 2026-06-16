@@ -5,7 +5,11 @@ import { constants, num } from "starknet";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button, Input } from "@cartridge/controller-ui";
-import { BUNDLE_REGISTRY_MAINNET, BUNDLE_REGISTRY_SEPOLIA } from "./Profile";
+import {
+  ABYSS_REGISTRY_MAINNET,
+  NUMS_REGISTRY_MAINNET,
+  NUMS_REGISTRY_SEPOLIA,
+} from "./Profile";
 
 export const Starterpack = () => {
   const { account, connector } = useAccount();
@@ -19,14 +23,14 @@ export const Starterpack = () => {
         bundleId: 1,
         socialBundleId: 0,
         starterpackId: 0,
-        registryAddress: BUNDLE_REGISTRY_MAINNET,
+        registryAddress: NUMS_REGISTRY_MAINNET,
       };
     }
     return {
       bundleId: 1,
       socialBundleId: 0,
       starterpackId: 0,
-      registryAddress: BUNDLE_REGISTRY_SEPOLIA,
+      registryAddress: NUMS_REGISTRY_SEPOLIA,
     };
   }, [chain]);
 
@@ -142,6 +146,16 @@ export const Starterpack = () => {
           }}
         >
           Nums Social Bundle
+        </Button>
+        <Button
+          onClick={() => {
+            controllerConnector.controller.openBundle(
+              2,
+              ABYSS_REGISTRY_MAINNET,
+            );
+          }}
+        >
+          Not With Credits
         </Button>
       </div>
 

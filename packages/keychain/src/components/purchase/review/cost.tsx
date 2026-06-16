@@ -25,13 +25,14 @@ import { formatCredits } from "@/utils/credits";
 import { num } from "starknet";
 
 // Pseudo-token rendered in the token selector when paying with credits.
-const CREDITS_TOKEN: TokenOption = {
+export const CREDITS_TOKEN: TokenOption = {
   name: "USD",
   symbol: "USD",
   decimals: 6,
   address: "credits",
   icon: <UsdColorIcon size="auto" />,
   contract: {} as TokenOption["contract"],
+  isCredits: true,
 };
 
 export const convertCentsToDollars = (cents: number): string => {
@@ -92,9 +93,10 @@ export function CostBreakdown({
         <Select
           value={selectedToken?.address ?? ""}
           onValueChange={onSelectToken}
-          disabled={tokenSelectDisabled && tokens.length > 1}
         >
-          <TokenSelectHeader singleToken={tokens.length <= 1} />
+          <TokenSelectHeader
+            singleToken={tokenSelectDisabled || tokens.length <= 1}
+          />
           <SelectContent>
             {tokens.map((token) => (
               <SelectItem key={token.address} value={token.address}>
@@ -184,7 +186,7 @@ export function OnchainCostBreakdown({
 
   // Check if payment token matches selected token (use selectedToken, not displayToken)
   const isPaymentTokenSameAsSelected = useMemo(() => {
-    if (!selectedToken || !quote) return false;
+    if (!selectedToken || !quote || selectedToken.isCredits) return false;
     return num.toHex(quote.paymentToken) === num.toHex(selectedToken.address);
   }, [selectedToken, quote]);
 
@@ -290,8 +292,8 @@ export function OnchainCostBreakdown({
   return (
     <CostBreakdown
       platform={platform}
-      tokens={isCreditsSelected ? [CREDITS_TOKEN] : availableTokens}
-      selectedToken={isCreditsSelected ? CREDITS_TOKEN : displayToken}
+      tokens={availableTokens}
+      selectedToken={displayToken}
       onSelectToken={handleTokenChange}
       tokenSelectDisabled={
         availableTokens.length <= 1 || isTokenSelectionLocked

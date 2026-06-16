@@ -32,6 +32,7 @@ export interface TokenOption {
   address: string;
   icon: string | React.ReactNode;
   contract: ERC20Contract;
+  isCredits?: boolean;
 }
 
 // Minimal token metadata for price display
@@ -192,7 +193,7 @@ export function useTokenSelection({
           name: "USD Coin",
           symbol: "USDC",
           decimals: 6,
-          icon: "https://static.cartridge.gg/tokens/usdc.svg",
+          icon: USDC_ICON,
         });
       }
       if (usdceAddress) {
@@ -201,7 +202,7 @@ export function useTokenSelection({
           name: "Bridged USDC",
           symbol: "USDC.e",
           decimals: 6,
-          icon: "https://static.cartridge.gg/tokens/usdc.svg",
+          icon: USDC_ICON,
         });
       }
       tokens.push(...DEFAULT_TOKENS);
@@ -389,7 +390,13 @@ export function useTokenSelection({
 
   // Fetch conversion price when selected token or quote changes
   useEffect(() => {
-    if (!controller || !selectedToken || !starterpackDetails) return;
+    if (
+      !controller ||
+      !selectedToken ||
+      !starterpackDetails ||
+      selectedToken.isCredits
+    )
+      return;
 
     if (!isOnchainStarterpack(starterpackDetails)) return;
     const quote = starterpackDetails.quote;
