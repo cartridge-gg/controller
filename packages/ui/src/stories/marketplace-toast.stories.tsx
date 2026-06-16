@@ -109,11 +109,11 @@ export const SentLords: Story = {
   },
 };
 
-export const PurchasedCredits: Story = {
+export const DepositedCredits: Story = {
   args: {
-    title: "Purchased",
-    collectionName: "Credits",
-    itemNames: ["10.00 Credits"],
+    title: "Deposited",
+    collectionName: "USD",
+    itemNames: ["10.00 USD"],
     itemImages: [<UsdColorIcon size="auto" />],
   },
 };

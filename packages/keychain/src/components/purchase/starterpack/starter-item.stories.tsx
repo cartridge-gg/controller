@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { StarterItem } from "./starter-item";
 import { ItemType } from "@/context";
-import { CreditIcon } from "@cartridge/controller-ui";
+import { UsdColorIcon } from "@cartridge/controller-ui";
 
 const meta: Meta<typeof StarterItem> = {
   component: StarterItem,
@@ -47,7 +47,7 @@ export const Credit: Story = {
     type: ItemType.ERC20,
     title: "100 Credits",
     subtitle: "Get 100 credits to use in the marketplace",
-    icon: <CreditIcon />,
+    icon: <UsdColorIcon />,
     value: 100,
   },
 };
@@ -57,7 +57,7 @@ export const FreeCredit: Story = {
     type: ItemType.CREDIT,
     title: "Free Credits",
     subtitle: "Get 50 free credits to start your journey",
-    icon: <CreditIcon />,
+    icon: <UsdColorIcon />,
     value: 50,
   },
 };

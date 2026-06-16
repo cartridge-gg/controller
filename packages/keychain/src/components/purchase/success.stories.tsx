@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { PurchaseSuccessInner } from "./success";
-import { CreditIcon } from "@cartridge/controller-ui";
+import { UsdColorIcon } from "@cartridge/controller-ui";
 import { ItemType } from "@/context";
 
 const meta = {
@@ -24,8 +24,8 @@ export const Credits: Story = {
     type: "onchain",
     items: [
       {
-        title: "Credits",
-        icon: <CreditIcon />,
+        title: "USD",
+        icon: <UsdColorIcon />,
         value: 1000,
         type: ItemType.CREDIT,
       },
@@ -73,8 +73,8 @@ export const MixedPurchase: Story = {
     type: "onchain",
     items: [
       {
-        title: "Credits",
-        icon: <CreditIcon />,
+        title: "USDs",
+        icon: <UsdColorIcon />,
         value: 2000,
         type: ItemType.CREDIT,
       },
@@ -99,8 +99,8 @@ export const ClaimedItems: Story = {
     type: "claimed",
     items: [
       {
-        title: "Credits",
-        icon: <CreditIcon />,
+        title: "USD",
+        icon: <UsdColorIcon />,
         value: 500,
         type: ItemType.CREDIT,
       },

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { BridgePending, PurchasePending, ClaimPending } from "./index";
-import { CreditIcon } from "@cartridge/controller-ui";
+import { UsdColorIcon } from "@cartridge/controller-ui";
 import { ItemType, StarterpackProviders } from "@/context";
 import { ExternalWalletType } from "@cartridge/controller";
 
@@ -37,7 +37,7 @@ export const CryptoPurchaseWithCredits: Story = {
       items={[
         {
           title: "Credits",
-          icon: <CreditIcon />,
+          icon: <UsdColorIcon />,
           value: 1000,
           type: ItemType.CREDIT,
         },
@@ -81,7 +81,7 @@ export const CryptoPurchaseWithNFT: Story = {
         },
         {
           title: "Credits",
-          icon: <CreditIcon />,
+          icon: <UsdColorIcon />,
           value: 500,
           type: ItemType.CREDIT,
         },
@@ -120,7 +120,7 @@ export const CryptoPurchaseWithoutWallet: Story = {
       items={[
         {
           title: "Welcome Credits",
-          icon: <CreditIcon />,
+          icon: <UsdColorIcon />,
           value: 250,
           type: ItemType.CREDIT,
         },
@@ -148,7 +148,7 @@ export const OnchainPurchaseWithCredits: Story = {
       items={[
         {
           title: "Onchain Credits",
-          icon: <CreditIcon />,
+          icon: <UsdColorIcon />,
           value: 1500,
           type: ItemType.CREDIT,
         },
@@ -177,7 +177,7 @@ export const OnchainPurchaseWithMultipleItems: Story = {
         },
         {
           title: "Battle Credits",
-          icon: <CreditIcon />,
+          icon: <UsdColorIcon />,
           value: 3000,
           type: ItemType.CREDIT,
         },
@@ -208,7 +208,7 @@ export const ClaimFreeCredits: Story = {
       items={[
         {
           title: "Welcome Credits",
-          icon: <CreditIcon />,
+          icon: <UsdColorIcon />,
           value: 100,
           type: ItemType.CREDIT,
         },
@@ -238,7 +238,7 @@ export const ClaimFreeNFT: Story = {
         },
         {
           title: "Bonus Credits",
-          icon: <CreditIcon />,
+          icon: <UsdColorIcon />,
           value: 50,
           type: ItemType.CREDIT,
         },
@@ -263,7 +263,7 @@ export const CryptoPurchaseLoading: Story = {
       items={[
         {
           title: "Loading Credits",
-          icon: <CreditIcon />,
+          icon: <UsdColorIcon />,
           value: 1000,
           type: ItemType.CREDIT,
         },
@@ -416,7 +416,7 @@ export const MixedTokensAndCredits: Story = {
       items={[
         {
           title: "Bonus Credits",
-          icon: <CreditIcon />,
+          icon: <UsdColorIcon />,
           value: 1000,
           type: ItemType.CREDIT,
         },

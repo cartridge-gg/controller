@@ -13,10 +13,10 @@ export const credits = {
   },
   metadata: {
     address: "credits",
-    name: "Credits",
-    symbol: "CREDITS",
+    name: "USD",
+    symbol: "USD",
     image: <UsdColorIcon size="auto" />,
-    decimals: 6,
+    decimals: 8,
   },
 };
 

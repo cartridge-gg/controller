@@ -49,11 +49,11 @@ export function Token() {
 }
 
 export const CREDITS_DESCRIPTION =
-  "Credits are an account balance that can be used to pay for games and network activity.";
+  "USD Credits are an account balance that can be used to pay for games and network activity.";
 
 const PAYMENT_METHOD_LABELS: Record<CreditsPaymentMethod, string> = {
   [CreditsPaymentMethod.Card]: "Card",
-  [CreditsPaymentMethod.Crypto]: "Crypto",
+  [CreditsPaymentMethod.Crypto]: "Wallet",
   [CreditsPaymentMethod.Free]: "Free",
   [CreditsPaymentMethod.Credits]: "Credits",
 };
@@ -74,13 +74,13 @@ function Credits() {
   const entries = useMemo(() => {
     return history.map((item) => {
       const timestamp = new Date(item.createdAt).getTime();
-      const amount = formatCredits(item.amount);
+      const amount = formatCredits(item.amount, 0);
       const isDeposit =
         item.transactionType === CreditsHistoryTransactionType.Credit;
       return {
         id: item.id,
         transactionHash: item.transactionHash,
-        amount: `${amount.formatted} CREDITS`,
+        amount: `${amount.formatted} USD`,
         value: `$${amount.usd.toFixed(2)}`,
         action: (isDeposit ? "receive" : "send") as "receive" | "send",
         subject: isDeposit
@@ -105,7 +105,7 @@ function Credits() {
         <div className="flex gap-4 items-center">
           <Thumbnail icon={<UsdColorIcon size="auto" />} size="lg" rounded />
           <div className="flex flex-col gap-0">
-            <p className="text-foreground-100 text-lg/6 font-semibold">{`${format.formatted} CREDITS`}</p>
+            <p className="text-foreground-100 text-lg/6 font-semibold">{`${format.formatted} USD`}</p>
             <p className="text-foreground-300 text-xs">{`$${format.usd.toFixed(2)}`}</p>
           </div>
         </div>

@@ -25,17 +25,27 @@ export interface FormattedCredits {
 /** Format a raw credit amount (`account.credits.amount`) for display. */
 export function formatCredits(
   rawUnits: bigint | number | string,
+  minDecimals: number = 2,
+  maxDecimals: number = 4,
 ): FormattedCredits {
   const units =
     typeof rawUnits === "bigint"
       ? rawUnits
       : BigInt(Math.trunc(Number(rawUnits)));
   const usd = Number(units) / 1e8;
-  const credits = Number(units) / 1e6;
+  // const credits = Number(units) / 1e6; // 1 credit = $0.01
+  const credits = Number(units) / 1e8; // 1 credit = $1.00
+  let formatted = credits.toFixed(maxDecimals);
+  while (formatted.at(-1) === "0" && formatted.split(".")[1].length > minDecimals) {
+    formatted = formatted.slice(0, -1);
+  }
+  if (formatted.at(-1) === ".") {
+    formatted = formatted.slice(0, -1);
+  }
   return {
     usd,
     credits,
-    formatted: credits.toFixed(2),
+    formatted,
   };
 }
 

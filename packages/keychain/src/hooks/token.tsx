@@ -231,14 +231,14 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   const credits: Token = useMemo(() => {
     return {
       balance: {
-        amount: Number(creditBalance.balance.value) / 10 ** 6,
+        amount: Number(creditBalance.balance.value) / 10 ** 8,
         value: Number(creditBalance.balance.value) / 10 ** 8,
         change: 0,
       },
       metadata: {
-        name: "Credits",
-        symbol: "Credits",
-        decimals: 6,
+        name: "USD",
+        symbol: "USD",
+        decimals: 8,
         address: "credit",
         image: <UsdColorIcon size="auto" />,
       },

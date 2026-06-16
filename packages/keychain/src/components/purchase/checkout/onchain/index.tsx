@@ -783,7 +783,7 @@ export function OnchainCheckout() {
                       : applePayLimitExceeded
                         ? "Verify to continue"
                         : showInsufficientCredits
-                          ? "Buy Credits"
+                          ? "Deposit USD"
                           : undefined
                   }
                 />
