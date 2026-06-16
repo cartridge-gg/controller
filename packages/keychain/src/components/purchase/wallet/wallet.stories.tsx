@@ -67,6 +67,7 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   waitForDeposit: async () => "0xmocktxhash",
   isApplePaySelected: false,
   isCoinflowSelected: false,
+  isCreditsRailSelected: false,
   isCreditsSelected: false,
   paymentLink: undefined,
   isCreatingOrder: false,

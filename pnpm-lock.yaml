@@ -16,7 +16,7 @@ catalogs:
       specifier: ^6.2.4
       version: 6.2.4
     '@cartridge/presets':
-      specifier: github:cartridge-gg/presets#c8c761f
+      specifier: github:cartridge-gg/presets#1cb4177
       version: 0.0.1
     '@eslint/js':
       specifier: ^9.18.0
@@ -193,7 +193,7 @@ importers:
         version: link:packages/ui
       '@cartridge/presets':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/1cb4177
       '@graphql-codegen/cli':
         specifier: ^2.6.2
         version: 2.16.5(@babel/core@7.27.1)(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(bufferutil@4.0.9)(encoding@0.1.13)(graphql@16.12.0)(typescript@5.8.3)(utf-8-validate@5.0.10)
@@ -853,7 +853,7 @@ importers:
     dependencies:
       '@cartridge/presets':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/1cb4177
       '@radix-ui/react-accordion':
         specifier: 1.2.1
         version: 1.2.1(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1598,8 +1598,8 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/1cb4177':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/1cb4177}
     version: 0.0.1
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
@@ -11855,7 +11855,7 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/c8c761f':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/1cb4177':
     dependencies:
       '@starknet-io/types-js': 0.8.4
 

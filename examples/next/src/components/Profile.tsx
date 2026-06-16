@@ -10,10 +10,17 @@ import {
   ETH_CONTRACT_ADDRESS,
 } from "@cartridge/controller-ui/utils";
 
-export const BUNDLE_REGISTRY_MAINNET =
+// Nums bundle registries
+export const NUMS_REGISTRY_MAINNET =
   "0x1a8516498b484f209aefbbf5af67765a2b1e3889fd00902811f18576a4616b0";
-export const BUNDLE_REGISTRY_SEPOLIA =
+export const NUMS_REGISTRY_SEPOLIA =
   "0x3110295929fc665972ae2ea4b99d5fa57547aa56d140dc73a7e85ddcaf5eaf1";
+export const ABYSS_REGISTRY_MAINNET =
+  "0x529c074ad9540d56a8d6e7086bb3d7a3d8ebaf60dbbf4abb1aeae336be833fe";
+
+// legacy starterpack registry (deprecated)
+export const STARTERPACK_REGISTRY_MAINNET =
+  "0x3eb03b8f2be0ec2aafd186d72f6d8f3dd320dbc89f2b6802bca7465f6ccaa43";
 
 export function Profile() {
   const { account, connector } = useAccount();

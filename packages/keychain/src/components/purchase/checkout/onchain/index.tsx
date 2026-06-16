@@ -97,6 +97,7 @@ export function OnchainCheckout() {
     isFetchingCoinbaseLimits,
     fetchCoinbaseLimits,
     applePayMinQuantity,
+    isCreditsRailSelected,
     isCreditsSelected,
     onCreditsSelect,
   } = useOnchainPurchaseContext();
@@ -217,13 +218,13 @@ export function OnchainCheckout() {
   const selectedMethod = useMemo<PaymentMethod>(() => {
     if (isCoinflowSelected) return { type: "coinflow" };
     if (isApplePaySelected) return { type: "apple-pay" };
-    if (isCreditsSelected) return { type: "credits" };
+    if (isCreditsRailSelected) return { type: "credits" };
     if (selectedWallet) return { type: "external", wallet: selectedWallet };
     return { type: "controller" };
   }, [
     isCoinflowSelected,
     isApplePaySelected,
-    isCreditsSelected,
+    isCreditsRailSelected,
     selectedWallet,
   ]);
 
@@ -798,7 +799,8 @@ export function OnchainCheckout() {
         onClose={() => setIsDrawerOpen(false)}
         setSelected={handlePaymentMethodSelect}
         showFiatOptions={countryCode === "US"}
-        showCredits
+        showCredits={false} // credits available from controller
+        showController={true}
       />
 
       <CoinflowDrawer

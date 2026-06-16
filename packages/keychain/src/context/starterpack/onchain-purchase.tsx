@@ -42,6 +42,7 @@ import {
 } from "@/hooks/starterpack";
 import { useSocialClaimConnection } from "@/hooks/starterpack/social";
 import { Explorer } from "@/hooks/starterpack/layerswap";
+import { CREDITS_TOKEN } from "@/components/purchase/review/cost";
 
 export type { TokenOption } from "@/hooks/starterpack";
 
@@ -98,7 +99,8 @@ export interface OnchainPurchaseContextType {
   // Coinbase / Apple Pay state
   isApplePaySelected: boolean;
   isCoinflowSelected: boolean;
-  isCreditsSelected: boolean;
+  isCreditsRailSelected: boolean; // credits selected as payment method
+  isCreditsSelected: boolean; // credits is selected as a fake controller token
   paymentLink: string | undefined;
   isCreatingOrder: boolean;
   coinbaseQuote: CoinbaseQuoteResult | undefined;
@@ -300,7 +302,8 @@ export const OnchainPurchaseProvider = ({
   const [selectedRail, setSelectedRail] = useState<PurchaseRail | null>(null);
   const isApplePaySelected = selectedRail === "apple-pay";
   const isCoinflowSelected = selectedRail === "coinflow";
-  const isCreditsSelected = selectedRail === "credits";
+  const isCreditsRailSelected = selectedRail === "credits";
+  const isCreditsSelected = isCreditsRailSelected || !!selectedToken?.isCredits;
   const [coinbaseLsSwapId, setCoinbaseLsSwapId] = useState<
     string | undefined
   >();
@@ -404,7 +407,9 @@ export const OnchainPurchaseProvider = ({
 
   // Auto-select USDC when a card-based flow is selected
   useEffect(() => {
-    if (
+    if (isCreditsSelected) {
+      setSelectedToken(CREDITS_TOKEN);
+    } else if (
       (isApplePaySelected || isCoinflowSelected) &&
       availableTokens.length > 0
     ) {
@@ -416,12 +421,18 @@ export const OnchainPurchaseProvider = ({
       }
     }
   }, [
+    isCreditsSelected,
     isApplePaySelected,
     isCoinflowSelected,
     availableTokens,
     selectedToken,
     setSelectedToken,
   ]);
+
+  const listedTokens = useMemo(() => {
+    if (isApplePaySelected || isCoinflowSelected) return availableTokens;
+    return [...availableTokens, CREDITS_TOKEN];
+  }, [availableTokens, isApplePaySelected, isCoinflowSelected]);
 
   // Wrap onSendDeposit to clear errors before sending
   const onSendDeposit = useCallback(async () => {
@@ -493,7 +504,12 @@ export const OnchainPurchaseProvider = ({
   // When a swap is required we add a 2% buffer so the on-chain swap — which runs
   // minutes later against a fresh quote — has enough USDC after price drift.
   const applePayUsdcAmount = useMemo<string | undefined>(() => {
-    if (!onchainDetails?.quote || !selectedToken || !convertedPrice) {
+    if (
+      !onchainDetails?.quote ||
+      !selectedToken ||
+      !convertedPrice ||
+      selectedToken.isCredits
+    ) {
       return undefined;
     }
     if (convertedPrice.quantity !== quantity) {
@@ -810,7 +826,7 @@ export const OnchainPurchaseProvider = ({
     selectedPlatform,
     walletAddress,
     clearSelectedWallet,
-    availableTokens,
+    availableTokens: listedTokens,
     selectedToken,
     setSelectedToken,
     convertedPrice,
@@ -820,7 +836,7 @@ export const OnchainPurchaseProvider = ({
       isTokenSelectionLocked ||
       isApplePaySelected ||
       isCoinflowSelected ||
-      isCreditsSelected,
+      isCreditsRailSelected,
     conversionError,
     usdAmount,
     layerswapFees,
@@ -834,6 +850,7 @@ export const OnchainPurchaseProvider = ({
     feeEstimationError,
     isApplePaySelected,
     isCoinflowSelected,
+    isCreditsRailSelected,
     isCreditsSelected,
     paymentLink,
     isCreatingOrder,
