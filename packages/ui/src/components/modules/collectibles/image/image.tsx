@@ -7,7 +7,7 @@ import { cn } from "@/utils";
 export interface CollectibleImageProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof collectibleImageVariants> {
-  images: string[];
+  images: (string | React.ReactNode)[];
   loadingSpinner?: boolean;
   loadingSkeleton?: boolean;
   onLoaded?: () => void;
@@ -35,9 +35,9 @@ export const CollectibleImage = ({
   onError,
   ...props
 }: CollectibleImageProps) => {
-  const [displayImage, setDisplayImage] = useState<string | undefined>(
-    undefined,
-  );
+  const [displayImage, setDisplayImage] = useState<
+    string | React.ReactNode | undefined
+  >(undefined);
   useEffect(() => {
     if (onLoaded && displayImage !== undefined) {
       onLoaded();
@@ -80,6 +80,12 @@ export const CollectibleImage = ({
         loadNextImage();
         return;
       }
+      // it's a component
+      if (typeof image !== "string") {
+        setDisplayImage(image);
+        return;
+      }
+      // image is a url
       if (image.startsWith("ipfs://")) {
         image = image.replace("ipfs://", "https://ipfs.io/ipfs/");
       }
@@ -91,7 +97,7 @@ export const CollectibleImage = ({
       };
       loader.onerror = () => {
         // console.warn('CollectibleImage: Error loading image', image);
-        fixBeastDataUri(image)
+        fixBeastDataUri(image as string)
           .then((data) => {
             if (isMounted) {
               setDisplayImage(data);
@@ -102,7 +108,7 @@ export const CollectibleImage = ({
           });
       };
       // start loader
-      loader.src = image;
+      loader.src = image as string;
     };
 
     loadNextImage();
@@ -126,13 +132,15 @@ export const CollectibleImage = ({
       {displayImage === undefined && loadingSkeleton && (
         <Skeleton className="absolute inset-0 full-w full-h" />
       )}
-      {displayImage !== undefined && (
+      {typeof displayImage === "string" ? (
         <img
           className="absolute inset-0 object-contain h-full w-full"
           style={{ imageRendering: "pixelated" }}
           draggable={false}
           src={displayImage}
         />
+      ) : (
+        displayImage
       )}
     </div>
   );

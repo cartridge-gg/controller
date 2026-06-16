@@ -23,7 +23,7 @@ export interface ActivityTokenCardProps
   username?: string; // token owner username
   amount: string; // token amount
   value?: string; // usd value
-  image?: string; // token image
+  image?: string | React.ReactNode; // token image
   symbol?: string; // token symbol (used if no image)
   swappedAmount?: string;
   swappedImage?: string;

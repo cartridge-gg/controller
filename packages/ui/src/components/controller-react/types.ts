@@ -77,7 +77,7 @@ export interface QuestToastOptions extends BaseToastOptions {
 export interface MarketplaceToastOptions extends BaseToastOptions {
   variant: "marketplace";
   itemNames: string[];
-  itemImages: string[];
+  itemImages: (string | React.ReactNode)[];
   collectionName: string;
   action: "purchased" | "sold" | "sent" | "listed" | "unlisted";
 }

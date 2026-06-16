@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { TokenSelect } from "./token-select";
+import { UsdColorIcon } from "@/components/icons";
 
 const mockTokens = [
   {
@@ -114,6 +115,20 @@ const mockTokens = [
         "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/811f019a-0461-4cff-6c1e-442102863f00/logo",
     },
   },
+  {
+    balance: {
+      amount: 1234567890,
+      value: 0,
+      change: 0,
+    },
+    metadata: {
+      name: "USD",
+      symbol: "USD",
+      decimals: 8,
+      address: "credits",
+      image: <UsdColorIcon size="auto" />,
+    },
+  },
 ];
 
 const meta: Meta<typeof TokenSelect> = {
@@ -136,5 +151,11 @@ export const Default: Story = {};
 export const SingleToken: Story = {
   args: {
     tokens: [mockTokens[0]],
+  },
+};
+
+export const SingleTokenIcon: Story = {
+  args: {
+    tokens: [mockTokens.at(-1)!],
   },
 };

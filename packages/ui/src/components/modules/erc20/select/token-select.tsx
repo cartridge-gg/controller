@@ -15,7 +15,7 @@ export type ERC20Metadata = {
   symbol: string;
   decimals: number;
   address: string;
-  image: string | undefined;
+  image: string | React.ReactNode | undefined;
 };
 
 export type Token = {
