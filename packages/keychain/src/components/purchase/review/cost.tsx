@@ -15,6 +15,7 @@ import {
   StarknetIcon,
   Thumbnail,
   TokenSelectHeader,
+  UsdColorIcon,
 } from "@cartridge/controller-ui";
 import { ExternalPlatform, humanizeString } from "@cartridge/controller";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
@@ -29,7 +30,7 @@ const CREDITS_TOKEN: TokenOption = {
   symbol: "Credits",
   decimals: 6,
   address: "credits",
-  icon: "https://static.cartridge.gg/presets/credit/icon.svg",
+  icon: <UsdColorIcon size="auto" />,
   contract: {} as TokenOption["contract"],
 };
 

@@ -415,7 +415,7 @@ export function WalletSelectionDrawer({
             {showCrypto && (
               <PurchaseCard
                 key="wallet"
-                text="Crypto"
+                text="Wallet"
                 icon={<WalletIcon variant="solid" />}
                 onClick={handleWalletStepSelect}
                 className={cn(

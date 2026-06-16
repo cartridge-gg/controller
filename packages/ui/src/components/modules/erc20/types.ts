@@ -9,7 +9,7 @@ export interface ERC20Metadata {
   symbol: string;
   decimals: number;
   address: string;
-  image: string | undefined;
+  image: string | React.ReactNode | undefined;
 }
 
 export interface ERC20Token {

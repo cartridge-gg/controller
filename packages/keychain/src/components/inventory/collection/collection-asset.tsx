@@ -365,7 +365,13 @@ export function CollectionAsset() {
   );
 }
 
-const Price = ({ amount, image }: { amount?: number; image?: string }) => {
+const Price = ({
+  amount,
+  image,
+}: {
+  amount?: number;
+  image?: string | React.ReactNode;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
 

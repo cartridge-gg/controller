@@ -396,7 +396,7 @@ const ListingConfirmation = ({
   }[];
   currency: {
     name: string;
-    image: string;
+    image: string | React.ReactNode;
     price: number;
     value: string;
   };

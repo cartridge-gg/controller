@@ -1,6 +1,7 @@
 import { tokens } from "@cartridge/controller-ui/utils/mock/data";
 import { fn, Mock } from "@storybook/test";
 import { UseTokensResponse, UseTokenResponse, Token } from "./token";
+import { UsdColorIcon } from "@cartridge/controller-ui";
 
 export * from "./token";
 
@@ -14,7 +15,7 @@ export const credits = {
     address: "credits",
     name: "Credits",
     symbol: "CREDITS",
-    image: "https://static.cartridge.gg/presets/credit/icon.svg",
+    image: <UsdColorIcon size="auto" />,
     decimals: 6,
   },
 };

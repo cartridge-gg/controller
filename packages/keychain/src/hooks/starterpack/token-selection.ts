@@ -30,7 +30,7 @@ export interface TokenOption {
   symbol: string;
   decimals: number;
   address: string;
-  icon: string;
+  icon: string | React.ReactNode;
   contract: ERC20Contract;
 }
 

@@ -11,6 +11,7 @@ import {
   Skeleton,
   Thumbnail,
   useDisclosure,
+  UsdColorIcon,
 } from "@cartridge/controller-ui";
 
 import { useData } from "@/hooks/data";
@@ -49,8 +50,6 @@ export function Token() {
 
 export const CREDITS_DESCRIPTION =
   "Credits are an account balance that can be used to pay for games and network activity.";
-
-const CREDITS_ICON = "https://static.cartridge.gg/presets/credit/icon.svg";
 
 const PAYMENT_METHOD_LABELS: Record<CreditsPaymentMethod, string> = {
   [CreditsPaymentMethod.Card]: "Card",
@@ -104,7 +103,7 @@ function Credits() {
     <>
       <LayoutContent>
         <div className="flex gap-4 items-center">
-          <Thumbnail icon={CREDITS_ICON} size="lg" rounded />
+          <Thumbnail icon={<UsdColorIcon size="auto" />} size="lg" rounded />
           <div className="flex flex-col gap-0">
             <p className="text-foreground-100 text-lg/6 font-semibold">{`${format.formatted} CREDITS`}</p>
             <p className="text-foreground-300 text-xs">{`$${format.usd.toFixed(2)}`}</p>
@@ -144,7 +143,7 @@ function Credits() {
                       value={item.value}
                       address={account?.address ?? "0x1"}
                       username={item.subject}
-                      image={CREDITS_ICON}
+                      image={<UsdColorIcon size="auto" />}
                       action={item.action}
                       timestamp={item.timestamp}
                     />
