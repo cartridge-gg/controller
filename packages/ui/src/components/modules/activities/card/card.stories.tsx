@@ -7,6 +7,7 @@ import {
   ActivityCollectibleCard,
 } from "./";
 import { ControllerStack } from "@/utils/mock/controller-stack";
+import { UsdColorIcon } from "@/components/icons";
 
 const meta: Meta<typeof ActivityCardRow> = {
   title: "Modules/Activities/Card",
@@ -286,6 +287,53 @@ export const Token: Story = {
         action="send"
         timestamp={seconds_away}
         loading
+      />
+      <ActivityTokenCard
+        address="credits"
+        amount="10"
+        value="$10.00"
+        symbol="USD"
+        image={<UsdColorIcon size="auto" />}
+        action="deposit"
+        timestamp={seconds_away}
+      />
+      <ActivityTokenCard
+        address="credits"
+        amount="2"
+        value="$12.00"
+        symbol="USD"
+        image={<UsdColorIcon size="auto" />}
+        action="claimed"
+        timestamp={seconds_away}
+      />
+      <ActivityTokenCard
+        address="credits"
+        amount="0.0034"
+        value="$0.00"
+        symbol="USD"
+        image={<UsdColorIcon size="auto" />}
+        action="spend"
+        item="Network Fees"
+        timestamp={seconds_away}
+      />
+      <ActivityTokenCard
+        address="credits"
+        amount="2.1234"
+        value="$2.12"
+        symbol="USD"
+        image={<UsdColorIcon size="auto" />}
+        action="spend"
+        item="Bundle"
+        timestamp={seconds_away}
+      />
+      <ActivityTokenCard
+        address="credits"
+        amount="5.5"
+        value="$5.50"
+        symbol="USD"
+        image={<UsdColorIcon size="auto" />}
+        action="withdraw"
+        timestamp={seconds_away}
       />
     </ControllerStack>
   ),

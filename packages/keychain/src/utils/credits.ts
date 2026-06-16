@@ -36,7 +36,10 @@ export function formatCredits(
   // const credits = Number(units) / 1e6; // 1 credit = $0.01
   const credits = Number(units) / 1e8; // 1 credit = $1.00
   let formatted = credits.toFixed(maxDecimals);
-  while (formatted.at(-1) === "0" && formatted.split(".")[1].length > minDecimals) {
+  while (
+    formatted.at(-1) === "0" &&
+    formatted.split(".")[1].length > minDecimals
+  ) {
     formatted = formatted.slice(0, -1);
   }
   if (formatted.at(-1) === ".") {
