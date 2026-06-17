@@ -1,10 +1,10 @@
 import {
   getStandaloneAppOrigin,
   getStandaloneRedirectUrl,
-  getStandaloneVerificationOrigin,
   isNestedIframe,
   isOriginVerified,
   resolvePolicies,
+  verifyStandaloneOrigin,
 } from "./connection";
 import { vi } from "vitest";
 
@@ -119,58 +119,54 @@ describe("getStandaloneRedirectUrl", () => {
   });
 });
 
-describe("getStandaloneVerificationOrigin", () => {
-  it("prefers the explicit origin param (popup auth flow)", () => {
-    const searchParams = new URLSearchParams({
-      origin: encodeURIComponent("https://www.deathmountain.gg"),
-      redirect_url: "https://example.com/callback",
-    });
+describe("verifyStandaloneOrigin", () => {
+  const allowed = ["*.deathmountain.gg", "deathmountain.gg"];
 
-    expect(getStandaloneVerificationOrigin(searchParams)).toBe(
-      "https://www.deathmountain.gg",
-    );
-  });
-
-  it("falls back to the redirect target when no origin param is present", () => {
-    const searchParams = new URLSearchParams({
-      redirect_url: "https://example.com/callback",
-    });
-
-    expect(getStandaloneVerificationOrigin(searchParams)).toBe(
-      "https://example.com/callback",
-    );
-  });
-
-  it("falls back to the current origin when no params are present", () => {
+  it("verifies the redirect target in the redirect flow", () => {
     expect(
-      getStandaloneVerificationOrigin(
-        new URLSearchParams(),
-        "https://www.deathmountain.gg",
+      verifyStandaloneOrigin(
+        undefined,
+        "https://www.deathmountain.gg/callback",
+        allowed,
       ),
-    ).toBe("https://www.deathmountain.gg");
-  });
-
-  it("returns null when nothing is available", () => {
-    expect(getStandaloneVerificationOrigin(new URLSearchParams())).toBeNull();
-  });
-
-  it("resolves an origin the preset wildcard verifies (regression)", () => {
-    // Popup auth (/auth) sends the app origin via `origin`, not `redirect_url`.
-    // The death-mountain preset allows `*.deathmountain.gg`, so the resolved
-    // origin must verify against the wildcard.
-    const searchParams = new URLSearchParams({
-      origin: encodeURIComponent("https://www.deathmountain.gg"),
-    });
-
-    const resolved = getStandaloneVerificationOrigin(searchParams);
-    expect(resolved).toBe("https://www.deathmountain.gg");
-    expect(
-      isOriginVerified(resolved as string, [
-        "*.deathmountain.gg",
-        "deathmountain.gg",
-        "connect.provable.games",
-      ]),
     ).toBe(true);
+  });
+
+  it("verifies the handshake origin in the popup flow (no redirect target)", () => {
+    // Popup auth has no redirect_url; the trusted origin arrives via the opener
+    // handshake and is passed as currentOrigin.
+    expect(
+      verifyStandaloneOrigin("https://www.deathmountain.gg", null, allowed),
+    ).toBe(true);
+  });
+
+  it("binds trust to the redirect target, not a spoofable claim (regression)", () => {
+    // An attacker cannot pass verification by claiming a trusted origin while
+    // the session is actually delivered elsewhere: trust follows redirect_url
+    // (the delivery target), so a mismatched currentOrigin is ignored.
+    expect(
+      verifyStandaloneOrigin(
+        "https://www.deathmountain.gg", // spoofed claim
+        "https://evil.com/callback", // real delivery target
+        allowed,
+      ),
+    ).toBe(false);
+  });
+
+  it("returns false for a non-allowlisted origin", () => {
+    expect(verifyStandaloneOrigin("https://evil.com", null, allowed)).toBe(
+      false,
+    );
+  });
+
+  it("returns false when no origin is available", () => {
+    expect(verifyStandaloneOrigin(undefined, null, allowed)).toBe(false);
+  });
+
+  it("treats localhost as verified", () => {
+    expect(verifyStandaloneOrigin("http://localhost:3000", null, allowed)).toBe(
+      true,
+    );
   });
 });
 

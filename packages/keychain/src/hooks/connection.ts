@@ -7,6 +7,7 @@ import {
 import { useNavigation } from "@/context/navigation";
 import { connectToController } from "@/utils/connection";
 import type { HeadlessConnectionState } from "@/utils/connection/headless";
+import { requestPopupAuthOrigin } from "@/utils/connection/popup";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -276,29 +277,11 @@ function computeVerifiedState(
 
   if (!isIframe()) {
     const searchParams = new URLSearchParams(window.location.search);
-    const standaloneOrigin = getStandaloneVerificationOrigin(
-      searchParams,
+    return verifyStandaloneOrigin(
       currentOrigin,
+      getStandaloneRedirectUrl(searchParams),
+      allowedOrigins,
     );
-
-    if (standaloneOrigin) {
-      try {
-        const originObj = new URL(standaloneOrigin);
-        const originHost = originObj.origin;
-        const isLocalhost =
-          originHost.includes("localhost") ||
-          originHost === "capacitor://localhost";
-        const isOriginAllowed = isOriginVerified(
-          standaloneOrigin,
-          allowedOrigins,
-        );
-        return isLocalhost || isOriginAllowed;
-      } catch (error) {
-        console.error("Failed to parse standalone verification origin:", error);
-      }
-    }
-
-    return false;
   }
 
   if (!configData.origin) {
@@ -341,27 +324,42 @@ export function getStandaloneRedirectUrl(
 }
 
 /**
- * Resolve the application origin to verify against the preset allowlist when
- * the keychain runs standalone (not in an iframe).
+ * Decide whether a standalone (non-iframe) keychain context is verified against
+ * the preset's allowed origins.
  *
- * Different standalone entrypoints carry the app origin differently:
- * - The popup auth flow (`/auth`) passes it as an explicit `origin` param.
- * - The redirect flow passes a `redirect_url`/`redirect_uri` to return to.
+ * Verification must be rooted in something the caller cannot forge:
+ * - Redirect flow: `redirect_url` IS the delivery target (the keychain navigates
+ *   back to it), so the claimed origin and the recipient are guaranteed the same
+ *   — it cannot be spoofed to point elsewhere.
+ * - Popup auth flow: there is no redirect target; `currentOrigin` is the origin
+ *   established via the opener handshake, rooted in the browser-enforced penpal
+ *   parent origin.
  *
- * We honor the explicit `origin` param first, then the redirect target, and
- * finally fall back to the already-resolved current origin. Without this, the
- * popup auth flow (which only sends `origin`) would always read as unverified.
+ * The caller-supplied `origin` query param is deliberately NOT consulted here:
+ * it can be set to any value by whoever opens the page, so trusting it would let
+ * an attacker suppress the unverified warning and auto-approve policies (e.g.
+ * `origin=<trusted game>` while delivering the session to an attacker URL).
  */
-export function getStandaloneVerificationOrigin(
-  searchParams: URLSearchParams,
-  currentOrigin?: string,
-): string | null {
-  const originParam = searchParams.get("origin");
-  if (originParam) {
-    return decodeURIComponent(originParam);
+export function verifyStandaloneOrigin(
+  currentOrigin: string | undefined,
+  redirectUrl: string | null,
+  allowedOrigins: string[],
+): boolean {
+  const candidate = redirectUrl ?? currentOrigin;
+  if (!candidate) {
+    return false;
   }
 
-  return getStandaloneRedirectUrl(searchParams) ?? currentOrigin ?? null;
+  try {
+    const candidateOrigin = new URL(candidate).origin;
+    const isLocalhost =
+      candidateOrigin.includes("localhost") ||
+      candidateOrigin === "capacitor://localhost";
+    return isLocalhost || isOriginVerified(candidate, allowedOrigins);
+  } catch (error) {
+    console.error("Failed to parse standalone verification origin:", error);
+    return false;
+  }
 }
 
 export function getStandaloneAppOrigin(redirectUrl: string): string {
@@ -962,25 +960,42 @@ export function useConnectionValue() {
       const localWalletBridge = new WalletBridge();
       const iframeMethods = localWalletBridge.getIFrameMethods();
 
-      // In standalone mode, use explicit origin param (popup auth), redirect URI's origin,
-      // or fall back to window.location.origin
       const searchParams = new URLSearchParams(window.location.search);
-      const originParam = searchParams.get("origin");
+      const channelId = searchParams.get("channel_id");
       const redirectUrl = getStandaloneRedirectUrl(searchParams);
+
+      // Default to the keychain's own origin, which is never in a preset's
+      // allowlist, so the context reads as unverified until a trusted origin is
+      // established below.
       let appOrigin = window.location.origin;
+      let cleanupOriginHandshake: (() => void) | undefined;
 
-      if (originParam) {
-        appOrigin = decodeURIComponent(originParam);
-      } else if (redirectUrl) {
-        try {
-          appOrigin = getStandaloneAppOrigin(redirectUrl);
-        } catch (error) {
-          console.error("Failed to parse standalone redirect target:", error);
+      if (channelId && window.opener) {
+        // Popup auth (`/auth`): the app origin is NOT read from the URL — the
+        // `origin` param is caller-supplied and spoofable. It is delivered by
+        // the opener (keychain iframe) over a same-origin-validated postMessage
+        // handshake, rooted in the browser-enforced penpal parent origin.
+        cleanupOriginHandshake = requestPopupAuthOrigin(
+          channelId,
+          (trustedOrigin) => {
+            originRef.current = trustedOrigin;
+            setOrigin(trustedOrigin);
+          },
+        );
+      } else {
+        // Redirect flow: trust is bound to the delivery target — the keychain
+        // navigates back to `redirect_url`, so its origin cannot be spoofed to
+        // point somewhere the session is not actually delivered.
+        if (redirectUrl) {
+          try {
+            appOrigin = getStandaloneAppOrigin(redirectUrl);
+          } catch (error) {
+            console.error("Failed to parse standalone redirect target:", error);
+          }
         }
+        originRef.current = appOrigin;
+        setOrigin(appOrigin);
       }
-
-      originRef.current = appOrigin;
-      setOrigin(appOrigin);
 
       setParent({
         open: async () => {},
@@ -997,6 +1012,10 @@ export function useConnectionValue() {
         externalWaitForTransaction:
           iframeMethods.externalWaitForTransaction(appOrigin),
       });
+
+      return () => {
+        cleanupOriginHandshake?.();
+      };
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
