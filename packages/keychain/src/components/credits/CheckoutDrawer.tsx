@@ -90,10 +90,10 @@ export function CheckoutDrawer({
         await handlePurchaseWithController();
       }
       await onDepositFinished();
-      console.log(`Credits purchase successful.`);
+      console.log(`USD deposit successful.`);
       await credits.refetch?.();
     } catch (e) {
-      console.error(`Credits purchase error:`, e);
+      console.error(`USD deposit error:`, e);
       const error = (e instanceof Error ? e : new Error(String(e))).message;
       await onDepositFinished(error);
       setError(error);
@@ -153,7 +153,7 @@ export function CheckoutDrawer({
               image={credits.metadata.image}
               title={credits.metadata.name}
               value={`$${amount.toFixed(2)}`}
-              amount={`${formatCredits(usdToCreditUnits(amount)).formatted} Credits`}
+              amount={`${formatCredits(usdToCreditUnits(amount)).formatted} USD`}
               onClick={onChangeAmount}
               clickable
               className="rounded"
@@ -184,7 +184,7 @@ export function CheckoutDrawer({
             />
 
             <Button disabled={!canPurchase} onClick={handlePurchase}>
-              BUY CREDITS
+              DEPOSIT USD
             </Button>
           </>
         )}
