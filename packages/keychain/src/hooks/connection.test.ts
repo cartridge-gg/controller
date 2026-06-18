@@ -4,6 +4,7 @@ import {
   isNestedIframe,
   isOriginVerified,
   resolvePolicies,
+  verifyStandaloneOrigin,
 } from "./connection";
 import { vi } from "vitest";
 
@@ -115,6 +116,57 @@ describe("getStandaloneRedirectUrl", () => {
 
   it("returns null when no standalone redirect target is present", () => {
     expect(getStandaloneRedirectUrl(new URLSearchParams())).toBeNull();
+  });
+});
+
+describe("verifyStandaloneOrigin", () => {
+  const allowed = ["*.deathmountain.gg", "deathmountain.gg"];
+
+  it("verifies the redirect target in the redirect flow", () => {
+    expect(
+      verifyStandaloneOrigin(
+        undefined,
+        "https://www.deathmountain.gg/callback",
+        allowed,
+      ),
+    ).toBe(true);
+  });
+
+  it("verifies the handshake origin in the popup flow (no redirect target)", () => {
+    // Popup auth has no redirect_url; the trusted origin arrives via the opener
+    // handshake and is passed as currentOrigin.
+    expect(
+      verifyStandaloneOrigin("https://www.deathmountain.gg", null, allowed),
+    ).toBe(true);
+  });
+
+  it("binds trust to the redirect target, not a spoofable claim (regression)", () => {
+    // An attacker cannot pass verification by claiming a trusted origin while
+    // the session is actually delivered elsewhere: trust follows redirect_url
+    // (the delivery target), so a mismatched currentOrigin is ignored.
+    expect(
+      verifyStandaloneOrigin(
+        "https://www.deathmountain.gg", // spoofed claim
+        "https://evil.com/callback", // real delivery target
+        allowed,
+      ),
+    ).toBe(false);
+  });
+
+  it("returns false for a non-allowlisted origin", () => {
+    expect(verifyStandaloneOrigin("https://evil.com", null, allowed)).toBe(
+      false,
+    );
+  });
+
+  it("returns false when no origin is available", () => {
+    expect(verifyStandaloneOrigin(undefined, null, allowed)).toBe(false);
+  });
+
+  it("treats localhost as verified", () => {
+    expect(verifyStandaloneOrigin("http://localhost:3000", null, allowed)).toBe(
+      true,
+    );
   });
 });
 
