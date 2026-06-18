@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
-import { useWallets } from "@/hooks/wallets";
+import { useWallets } from "@/hooks/use-wallets";
 import { useConnection } from "../connection";
 
 export interface UseExternalWalletOptions {

@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  ReactNode,
-} from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   MerkleDropDisplayOptions,
   useClaimMerkleDrops,
@@ -17,61 +10,13 @@ import {
   Item,
   ItemType,
 } from "./types";
-import {
-  useBundleConditions,
-  SocialClaimConditions,
-} from "@/hooks/starterpack/bundle";
+import { useBundleConditions } from "@/hooks/starterpack/bundle";
 import { SocialClaimOptions } from "@cartridge/controller";
-
-export interface StarterpackContextType {
-  // Registry contract address
-  registryAddress: string | undefined;
-
-  // Bundle identification (starterpack V2)
-  bundleId: number | undefined;
-  setBundle: (
-    id: number,
-    registryAddress: string,
-    socialClaimOptions?: SocialClaimOptions,
-  ) => void;
-
-  // Starterpack identification
-  starterpackId: string | number | undefined;
-  setStarterpack: (id: string | number, registryAddress: string) => void;
-
-  // Merkle drop identification
-  merkleDropKeys: string[] | undefined;
-  setMerkleDrops: (keys: string[], options?: MerkleDropDisplayOptions) => void;
-
-  // Starterpack details (loaded from backend or onchain)
-  starterpackDetails: StarterpackDetails | undefined;
-  isStarterpackLoading: boolean;
-
-  // Claim items (can be enriched with quantities for display)
-  claimItems: Item[];
-  setClaimItems: (items: Item[]) => void;
-
-  // Transaction state
-  transactionHash: string | undefined;
-  setTransactionHash: (hash: string) => void;
-
-  // Error handling
-  displayError: Error | undefined;
-  setDisplayError: (error: Error | undefined) => void;
-  clearError: () => void;
-
-  // Conditional bundles info
-  socialClaimOptions: SocialClaimOptions | undefined;
-  socialClaimConditions: SocialClaimConditions | undefined;
-}
-
-export const StarterpackContext = createContext<
-  StarterpackContextType | undefined
->(undefined);
-
-export interface StarterpackProviderProps {
-  children: ReactNode;
-}
+import {
+  StarterpackContext,
+  StarterpackContextType,
+  StarterpackProviderProps,
+} from "./starterpack-context";
 
 export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   const [registryAddress, setRegistryAddress] = useState<string | undefined>();
@@ -271,14 +216,4 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
       {children}
     </StarterpackContext.Provider>
   );
-};
-
-export const useStarterpackContext = () => {
-  const context = useContext(StarterpackContext);
-  if (!context) {
-    throw new Error(
-      "useStarterpackContext must be used within StarterpackProvider",
-    );
-  }
-  return context;
 };

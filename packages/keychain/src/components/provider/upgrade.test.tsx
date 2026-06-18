@@ -8,10 +8,10 @@ import {
   ControllerVersionInfo,
   OutsideExecutionVersion,
   STABLE_CONTROLLER,
-  UpgradeProvider,
   determineUpgradePath,
-  useUpgrade,
-} from "./upgrade";
+} from "./upgrade-context";
+import { UpgradeProvider } from "./upgrade";
+import { useUpgrade } from "./use-upgrade";
 import { ReactNode } from "react";
 import { PostHogContext, PostHogWrapper } from "@cartridge/controller-ui/utils";
 import Controller from "@/utils/controller";

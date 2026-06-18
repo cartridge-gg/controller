@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useController } from "@/hooks/controller";
-import { useWallets } from "@/hooks/wallets";
+import { useWallets } from "@/hooks/use-wallets";
 import {
   credentialToAddress,
   credentialToAuth,

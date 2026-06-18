@@ -1,5 +1,5 @@
 import { useConnection } from "@/hooks/connection";
-import { useWallets } from "@/hooks/wallets";
+import { useWallets } from "@/hooks/use-wallets";
 import {
   AuthOption,
   ExternalWalletResponse,

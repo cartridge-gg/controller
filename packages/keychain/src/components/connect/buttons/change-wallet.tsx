@@ -1,5 +1,5 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { useWallets } from "@/hooks/wallets";
+import { useWallets } from "@/hooks/use-wallets";
 import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
 import { AuthOption } from "@cartridge/controller";
 import { formatAddress } from "@cartridge/controller-ui/utils";

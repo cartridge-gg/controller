@@ -4,7 +4,7 @@ import {
   OnchainPurchaseContext,
   OnchainPurchaseContextType,
   TokenOption,
-} from "@/context/starterpack/onchain-purchase";
+} from "@/context/starterpack/onchain-purchase-context";
 import { ReactNode } from "react";
 
 // USDC address with leading zeros (tests normalization)

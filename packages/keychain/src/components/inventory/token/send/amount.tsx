@@ -8,12 +8,14 @@ export function SendAmount({
   amount,
   submitted,
   setAmount,
+  setAmountInput,
   setError,
 }: {
   token: Token;
   amount: number | undefined;
   submitted: boolean;
   setAmount: (amount: number | undefined) => void;
+  setAmountInput: (amount: string | undefined) => void;
   setError: (error: Error | undefined) => void;
 }) {
   const conversion = useMemo(() => {
@@ -28,17 +30,20 @@ export function SendAmount({
     (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
       e.preventDefault();
       if (!token) return;
-      setAmount(parseFloat(token.balance.amount.toString()));
+      const max = token.balance.amount.toString();
+      setAmount(parseFloat(max));
+      setAmountInput(max);
     },
-    [token, setAmount],
+    [token, setAmount, setAmountInput],
   );
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setAmount(value === "" ? undefined : Number(value));
+      setAmountInput(value === "" ? undefined : value);
     },
-    [setAmount],
+    [setAmount, setAmountInput],
   );
 
   if (!token) {

@@ -15,6 +15,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { SendRecipient } from "@/components/modules/recipient";
 import { SendAmount } from "./amount";
 import { Disclosure } from "@cartridge/controller-ui";
+import { parseTokenAmount } from "@/utils/token-amount";
 
 export function SendTokenDrawer({
   disclosure,
@@ -35,6 +36,7 @@ export function SendTokenDrawer({
 
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState<number | undefined>();
+  const [amountInput, setAmountInput] = useState<string | undefined>();
   const [amountError, setAmountError] = useState<Error | undefined>();
   const [toError, setToError] = useState<Error | undefined>();
   const [selectedToken, setSelectedToken] = useState<Token | undefined>(token);
@@ -52,13 +54,18 @@ export function SendTokenDrawer({
     ) {
       return "";
     } else {
+      const baseUnitAmount = parseTokenAmount(
+        amountInput,
+        selectedToken.metadata.decimals,
+      );
+      if (baseUnitAmount === undefined) {
+        return "";
+      }
+
       const sendParams = new URLSearchParams(searchParams);
       sendParams.set("tokenAddress", tokenAddress);
       sendParams.set("recipient", to);
-      sendParams.set(
-        "amount",
-        BigInt(amount * 10 ** selectedToken.metadata.decimals).toString(),
-      );
+      sendParams.set("amount", baseUnitAmount.toString());
       return `send?${sendParams.toString()}`;
     }
   }, [
@@ -68,6 +75,7 @@ export function SendTokenDrawer({
     toError,
     recipientLoading,
     amount,
+    amountInput,
     to,
     searchParams,
     tokenAddress,
@@ -88,9 +96,10 @@ export function SendTokenDrawer({
     (token: Token) => {
       setSelectedToken(token);
       setAmount(undefined);
+      setAmountInput(undefined);
       userSelectedToken.current = true;
     },
-    [setSelectedToken, setAmount],
+    [setSelectedToken, setAmount, setAmountInput],
   );
 
   if (!token) {
@@ -133,6 +142,7 @@ export function SendTokenDrawer({
             amount={amount}
             submitted={false}
             setAmount={setAmount}
+            setAmountInput={setAmountInput}
             setError={setAmountError}
           />
         )}

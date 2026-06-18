@@ -58,7 +58,7 @@ vi.mock("@/hooks/connection", () => ({
   useControllerTheme: () => mockUseControllerTheme(),
 }));
 
-vi.mock("@/hooks/wallets", () => ({
+vi.mock("@/hooks/use-wallets", () => ({
   useWallets: () => mockUseWallets(),
 }));
 

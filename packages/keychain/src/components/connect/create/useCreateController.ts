@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
+import { STABLE_CONTROLLER } from "@/components/provider/upgrade-context";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
-import { useWallets } from "@/hooks/wallets";
+import { useWallets } from "@/hooks/use-wallets";
 import Controller from "@/utils/controller";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import {

@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { SelectWallet } from "./wallet";
 import { ReactNode, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import { StarterpackContext } from "@/context/starterpack/starterpack";
+import { StarterpackContext } from "@/context/starterpack/starterpack-context";
 import {
   OnchainPurchaseContext,
   OnchainPurchaseContextType,
   TokenOption,
-} from "@/context/starterpack/onchain-purchase";
+} from "@/context/starterpack/onchain-purchase-context";
 
 // Mock starterpack context
 const mockStarterpackValue = {

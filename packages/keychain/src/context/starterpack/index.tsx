@@ -18,25 +18,22 @@ export {
 } from "./types";
 
 // Starterpack context (shared base)
-export { StarterpackProvider, useStarterpackContext } from "./starterpack";
-export type { StarterpackContextType } from "./starterpack";
+export { StarterpackProvider } from "./starterpack";
+export { useStarterpackContext } from "./use-starterpack-context";
+export type { StarterpackContextType } from "./starterpack-context";
 
 // Onchain purchase context
-export {
-  OnchainPurchaseProvider,
-  useOnchainPurchaseContext,
-} from "./onchain-purchase";
+export { OnchainPurchaseProvider } from "./onchain-purchase";
+export { useOnchainPurchaseContext } from "./use-onchain-purchase-context";
 export type {
   OnchainPurchaseContextType,
   TokenOption,
-} from "./onchain-purchase";
+} from "./onchain-purchase-context";
 
 // Credit purchase context
-export {
-  CreditPurchaseProvider,
-  useCreditPurchaseContext,
-} from "./credit-purchase";
-export type { CreditPurchaseContextType } from "./credit-purchase";
+export { CreditPurchaseProvider } from "./credit-purchase";
+export { useCreditPurchaseContext } from "./use-credit-purchase-context";
+export type { CreditPurchaseContextType } from "./credit-purchase-context";
 
 // Composed provider for all starterpack contexts
 import { ReactNode } from "react";

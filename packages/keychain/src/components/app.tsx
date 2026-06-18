@@ -52,7 +52,7 @@ import { DeployController } from "./DeployController";
 import { useConnection } from "@/hooks/connection";
 import { CreateController, Upgrade } from "./connect";
 import { HeadlessApprovalRoute } from "./connect/HeadlessApprovalRoute";
-import { useUpgrade } from "./provider/upgrade";
+import { useUpgrade } from "./provider/use-upgrade";
 import { Layout } from "@/components/layout";
 import { Disconnect } from "./disconnect";
 import { OnchainCheckout } from "./purchase/checkout/onchain";
