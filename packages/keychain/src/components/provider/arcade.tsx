@@ -89,57 +89,123 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [setOrders],
   );
 
+  // TODO: The real fix belongs upstream in the @cartridge/arcade fetcher.
+  // `Marketplace.fetch` fetches and parses ALL entities (~14k) in a single
+  // query and hands them to this callback in one call, so the network/decode/
+  // parse cost is already paid synchronously before we get here — the chunking
+  // below only spreads the React state-update half. Add cursor-based pagination
+  // (withLimit + withCursor) to the arcade fetcher so it streams pages to this
+  // callback; then this handler can drop the manual chunking entirely.
   const handleMarketplaceEntities = useCallback(
-    (entities: MarketplaceModel[]) => {
+    async (entities: MarketplaceModel[]) => {
       const now = Date.now();
-      entities.forEach((entity: MarketplaceModel) => {
-        if (BookModel.isType(entity as BookModel)) {
-          const book = entity as BookModel;
-          if (book.version === 0) return;
-          setBook(book);
-        } else if (OrderModel.isType(entity as OrderModel)) {
-          const order = entity as OrderModel;
-          if (order.expiration * 1000 < now) return;
-          if (order.category.value !== CategoryType.Sell) return;
-          if (order.status.value === StatusType.Placed) {
-            addOrder(order);
-          } else {
-            removeOrder(order);
+      const CHUNK_SIZE = 250;
+
+      // Process the batch in chunks, yielding to the browser between each so a
+      // large initial fetch doesn't lock up the main thread. Within a chunk we
+      // accumulate locally and flush a single state update per type, instead of
+      // one (full-object-spreading) setState per entity.
+      for (let i = 0; i < entities.length; i += CHUNK_SIZE) {
+        const chunk = entities.slice(i, i + CHUNK_SIZE);
+
+        let nextBook: BookModel | null = null;
+        const orderOps: { type: "add" | "remove"; order: OrderModel }[] = [];
+        const saleEvents: SaleEvent[] = [];
+        const listingEvents: ListingEvent[] = [];
+
+        for (const entity of chunk) {
+          if (BookModel.isType(entity as BookModel)) {
+            const book = entity as BookModel;
+            if (book.version === 0) continue;
+            nextBook = book;
+          } else if (OrderModel.isType(entity as OrderModel)) {
+            const order = entity as OrderModel;
+            if (order.expiration * 1000 < now) continue;
+            if (order.category.value !== CategoryType.Sell) continue;
+            orderOps.push({
+              type: order.status.value === StatusType.Placed ? "add" : "remove",
+              order,
+            });
+          } else if (SaleEvent.isType(entity as SaleEvent)) {
+            saleEvents.push(entity as SaleEvent);
+          } else if (ListingEvent.isType(entity as ListingEvent)) {
+            listingEvents.push(entity as ListingEvent);
           }
-        } else if (SaleEvent.isType(entity as SaleEvent)) {
-          const sale = entity as SaleEvent;
-          const order = sale.order;
-          const collection = getChecksumAddress(order.collection);
-          const token = order.tokenId.toString();
-          setSales((prev) => ({
-            ...prev,
-            [collection]: {
-              ...(prev[collection] || {}),
-              [token]: {
-                ...(prev[collection]?.[token] || {}),
-                [order.id]: sale,
-              },
-            },
-          }));
-        } else if (ListingEvent.isType(entity as ListingEvent)) {
-          const listing = entity as ListingEvent;
-          const order = listing.order;
-          const collection = getChecksumAddress(order.collection);
-          const token = order.tokenId.toString();
-          setListings((prev) => ({
-            ...prev,
-            [collection]: {
-              ...(prev[collection] || {}),
-              [token]: {
-                ...(prev[collection]?.[token] || {}),
-                [order.id]: listing,
-              },
-            },
-          }));
         }
-      });
+
+        if (nextBook) setBook(nextBook);
+
+        if (orderOps.length) {
+          setOrders((prev) => {
+            const next = { ...prev };
+            for (const { type, order } of orderOps) {
+              const collection = getChecksumAddress(order.collection);
+              const token = order.tokenId.toString();
+              if (type === "add") {
+                next[collection] = {
+                  ...(next[collection] || {}),
+                  [token]: {
+                    ...(next[collection]?.[token] || {}),
+                    [order.id]: order,
+                  },
+                };
+              } else if (next[collection]?.[token]?.[order.id]) {
+                next[collection] = {
+                  ...next[collection],
+                  [token]: { ...next[collection][token] },
+                };
+                delete next[collection][token][order.id];
+              }
+            }
+            return next;
+          });
+        }
+
+        if (saleEvents.length) {
+          setSales((prev) => {
+            const next = { ...prev };
+            for (const sale of saleEvents) {
+              const order = sale.order;
+              const collection = getChecksumAddress(order.collection);
+              const token = order.tokenId.toString();
+              next[collection] = {
+                ...(next[collection] || {}),
+                [token]: {
+                  ...(next[collection]?.[token] || {}),
+                  [order.id]: sale,
+                },
+              };
+            }
+            return next;
+          });
+        }
+
+        if (listingEvents.length) {
+          setListings((prev) => {
+            const next = { ...prev };
+            for (const listing of listingEvents) {
+              const order = listing.order;
+              const collection = getChecksumAddress(order.collection);
+              const token = order.tokenId.toString();
+              next[collection] = {
+                ...(next[collection] || {}),
+                [token]: {
+                  ...(next[collection]?.[token] || {}),
+                  [order.id]: listing,
+                },
+              };
+            }
+            return next;
+          });
+        }
+
+        // Yield to the event loop between chunks so the UI stays responsive.
+        if (i + CHUNK_SIZE < entities.length) {
+          await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        }
+      }
     },
-    [addOrder, removeOrder, setBook, setListings, setSales],
+    [setBook, setOrders, setListings, setSales],
   );
 
   useEffect(() => {
@@ -166,6 +232,12 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [initialized, handleMarketplaceEntities]);
 
+  const marketplaceAddress = useMemo<string | undefined>(() => {
+    return provider?.manifest.contracts.find((c: { tag: string }) =>
+      c.tag?.includes("Marketplace"),
+    )?.address as string;
+  }, [provider?.manifest.contracts]);
+
   return (
     <ArcadeContext.Provider
       value={{
@@ -179,6 +251,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         removeOrder,
         initializable,
         setInitializable,
+        marketplaceAddress,
       }}
     >
       {children}

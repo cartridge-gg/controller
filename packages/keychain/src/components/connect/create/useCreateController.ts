@@ -267,6 +267,11 @@ export function useCreateController({
   >(undefined);
   const signupStartedRef = useRef(false);
   const signupResolvedRef = useRef(false);
+  // The OAuth (Auth0/Turnkey) redirect callback consumes a single-use
+  // transaction. Guard against StrictMode double-invocation and dependency-
+  // driven re-runs so handleRedirectCallback runs exactly once — otherwise the
+  // second call throws "Invalid state" and the page loops on the login screen.
+  const redirectHandledRef = useRef(false);
   const signupStartTimeRef = useRef(performance.now());
   const authStepRef = useRef<AuthenticationStep>(AuthenticationStep.FillForm);
 
@@ -579,7 +584,11 @@ export function useCreateController({
         }
         case "google":
         case "discord":
-          signupResponse = await signupWithSocial(authenticationMode, username);
+          signupResponse = await signupWithSocial(
+            authenticationMode,
+            username,
+            changeWallet,
+          );
           if (!signupResponse) {
             return;
           }
@@ -694,6 +703,7 @@ export function useCreateController({
       params,
       handleCompletion,
       searchParams,
+      changeWallet,
     ],
   );
 
@@ -943,7 +953,11 @@ export function useCreateController({
         case "google":
         case "discord": {
           setWaitingForConfirmation(true);
-          loginResponse = await loginWithSocial(authenticationMethod, username);
+          loginResponse = await loginWithSocial(
+            authenticationMethod,
+            username,
+            changeWallet,
+          );
           if (!loginResponse) {
             return;
           }
@@ -1053,15 +1067,28 @@ export function useCreateController({
       smsAuth,
       smsState,
       setWaitingForConfirmation,
+      changeWallet,
     ],
   );
 
   useEffect(() => {
     if (!chainId) return;
+    if (redirectHandledRef.current) return;
     if (
       window.location.search.includes("code") &&
       window.location.search.includes("state")
     ) {
+      redirectHandledRef.current = true;
+      const redirectUrl = window.location.href;
+      // Strip the single-use OAuth params from the address bar immediately.
+      // handleRedirect() consumes them from the captured `redirectUrl`, so a
+      // reload (or a remount that resets the guard) can't replay the already-
+      // consumed callback and fail with "Invalid state" — and the user is left
+      // on a clean URL from which a fresh login can be initiated.
+      const cleanUrl = new URL(redirectUrl);
+      cleanUrl.searchParams.delete("code");
+      cleanUrl.searchParams.delete("state");
+      window.history.replaceState({}, "", cleanUrl.toString());
       (async () => {
         setIsLoading(true);
         try {
@@ -1080,14 +1107,8 @@ export function useCreateController({
             searchParams,
             chainId,
             rpcUrl,
-          } = await turnkeyWallet.handleRedirect(
-            window.location.href,
-            setError,
-          );
+          } = await turnkeyWallet.handleRedirect(redirectUrl, setError);
 
-          if (error) {
-            throw error;
-          }
           if (
             !username ||
             isSignup === undefined ||
@@ -1173,7 +1194,6 @@ export function useCreateController({
       })();
     }
   }, [
-    error,
     setIsLoading,
     finishLogin,
     finishSignup,
