@@ -14,6 +14,7 @@ export const useSocialAuthentication = (
       socialProvider: SocialProvider,
       username: string,
       isSignup: boolean,
+      forceAccountSelection = false,
     ) => {
       if (!chainId) {
         throw new Error("No chainId");
@@ -25,7 +26,10 @@ export const useSocialAuthentication = (
         rpcUrl,
         socialProvider,
       );
-      const { account, error, success } = await turnkeyWallet.connect(isSignup);
+      const { account, error, success } = await turnkeyWallet.connect(
+        isSignup,
+        forceAccountSelection,
+      );
       if (error?.includes("Account mismatch")) {
         setChangeWallet?.(true);
         return;
@@ -57,9 +61,15 @@ export const useSocialAuthentication = (
   );
 
   return {
-    signup: (socialProvider: SocialProvider, username: string) =>
-      signup(socialProvider, username, true),
-    login: (socialProvider: SocialProvider, username: string) =>
-      signup(socialProvider, username, false),
+    signup: (
+      socialProvider: SocialProvider,
+      username: string,
+      forceAccountSelection = false,
+    ) => signup(socialProvider, username, true, forceAccountSelection),
+    login: (
+      socialProvider: SocialProvider,
+      username: string,
+      forceAccountSelection = false,
+    ) => signup(socialProvider, username, false, forceAccountSelection),
   };
 };
