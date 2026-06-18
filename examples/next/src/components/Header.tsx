@@ -108,7 +108,7 @@ const Header = () => {
 
   return (
     <>
-      <div className="w-full absolute top-0 left-0 p-5 flex items-center space-x-2">
+      <div className="w-full p-0 flex flex-wrap items-center gap-2">
         <div className="flex-1" />
 
         {status === "connected" && (
@@ -161,7 +161,7 @@ const Header = () => {
           </>
         )}
         {address ? (
-          <div ref={profileRef}>
+          <div className="relative" ref={profileRef}>
             <Button
               onClick={() => {
                 setProfileOpen(!profileOpen);
@@ -202,7 +202,7 @@ const Header = () => {
             )}
           </div>
         ) : (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               onClick={() => {
                 controllerConnector.controller.open({
@@ -280,7 +280,7 @@ const Header = () => {
       </div>
 
       {!address && (
-        <div className="w-full p-5 flex items-center space-x-2">
+        <div className="w-full p-0 flex flex-wrap items-center gap-2">
           <div className="flex-grow" />
           <h1>Connect options:</h1>
           <Button

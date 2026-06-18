@@ -16,6 +16,12 @@ import {
   STRK_CONTRACT_ADDRESS,
 } from "@cartridge/controller-ui/utils";
 
+// enable local katana with NEXT_PUBLIC_LOCAL_ENABLED=1
+const KATANA_ENABLED = Boolean(process.env.NEXT_PUBLIC_LOCAL_ENABLED ?? false);
+const KATANA_RPC = process.env.NEXT_PUBLIC_RPC_LOCAL ?? "http://localhost:5050";
+const KATANA_CHAIN_ID =
+  process.env.NEXT_PUBLIC_LOCAL_CHAIN_ID ?? "KATANA_LOCAL";
+
 export enum ConnectOptions {
   OverridePolicies = "connect-override-policies",
   Preset = "connect-preset",
@@ -113,17 +119,17 @@ const policies: SessionPolicies = {
 };
 
 let localKatanaChain: Chain | undefined = undefined;
-if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
+if (KATANA_ENABLED && KATANA_RPC) {
   localKatanaChain = {
-    id: num.toBigInt(shortString.encodeShortString("WP_SLOT")),
-    network: "Slot",
-    name: "Slot",
+    id: num.toBigInt(shortString.encodeShortString(KATANA_CHAIN_ID)),
+    network: KATANA_CHAIN_ID,
+    name: KATANA_CHAIN_ID,
     rpcUrls: {
       default: {
-        http: [process.env.NEXT_PUBLIC_RPC_LOCAL],
+        http: [KATANA_RPC],
       },
       public: {
-        http: [process.env.NEXT_PUBLIC_RPC_LOCAL],
+        http: [KATANA_RPC],
       },
     },
     nativeCurrency: {
@@ -134,7 +140,10 @@ if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
     },
     paymasterRpcUrls: {
       default: {
-        http: [],
+        http: [KATANA_RPC],
+      },
+      avnu: {
+        http: [KATANA_RPC],
       },
     },
   };
@@ -148,12 +157,8 @@ const provider = jsonRpcProvider({
     if (chain.id === sepolia.id && process.env.NEXT_PUBLIC_RPC_SEPOLIA) {
       return { nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA };
     }
-    if (
-      localKatanaChain &&
-      chain.id === localKatanaChain.id &&
-      process.env.NEXT_PUBLIC_RPC_LOCAL
-    ) {
-      return { nodeUrl: process.env.NEXT_PUBLIC_RPC_LOCAL };
+    if (chain.id === localKatanaChain?.id) {
+      return { nodeUrl: KATANA_RPC };
     }
     return null;
   },
@@ -186,27 +191,28 @@ const getKeychainUrl = () => {
   }
 };
 
-const starknetConfigChains = [mainnet, sepolia].filter(Boolean) as Chain[];
+const starknetConfigChains: Chain[] = [];
+const controllerConnectorChains: { rpcUrl: string }[] = [];
+
 if (localKatanaChain) {
   starknetConfigChains.push(localKatanaChain);
-}
-
-const controllerConnectorChains: { rpcUrl: string }[] = [];
-if (process.env.NEXT_PUBLIC_RPC_SEPOLIA) {
   controllerConnectorChains.push({
-    rpcUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+    rpcUrl: KATANA_RPC,
   });
+} else {
+  starknetConfigChains.push(mainnet);
+  starknetConfigChains.push(sepolia);
+  if (process.env.NEXT_PUBLIC_RPC_SEPOLIA) {
+    controllerConnectorChains.push({
+      rpcUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+    });
+  }
+  if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
+    controllerConnectorChains.push({
+      rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
+    });
+  }
 }
-if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
-  controllerConnectorChains.push({
-    rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
-  });
-}
-// if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
-//   controllerConnectorChains.unshift({
-//     rpcUrl: process.env.NEXT_PUBLIC_RPC_LOCAL,
-//   });
-// }
 
 const signupOptions: AuthOptions = [
   "google",
@@ -228,7 +234,7 @@ export const presets = {
     namespace: "NUMS",
     preset: "nums",
   },
-  lootSurvivor: {
+  "loot-survivor": {
     // Loot Survivor (no achievements, no quests)
     namespace: "ls_0_0_9",
     slot: "pg-mainnet-10",
@@ -250,6 +256,10 @@ export const presets = {
     // slot: "cagecalls-mainnet",
     // namespace: "cagecalls",
     preset: "cage-calls",
+  },
+  "jokers-of-neon": {
+    namespace: "jokers_of_neon_core",
+    preset: "jokers-of-neon",
   },
 };
 
@@ -275,21 +285,31 @@ export const controllerConnector = new ControllerConnector({
 });
 
 const session = new SessionConnector({
+  shouldOverridePresetPolicies: overridePolicies,
   policies: overridePolicies ? policies : {},
   rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
   chainId: constants.StarknetChainId.SN_MAIN,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
-  disconnectRedirectUrl: "whatsapp://",
+  disconnectRedirectUrl: "redirect://",
   keychainUrl: getKeychainUrl(),
   apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
   signupOptions,
+  ...(controllerPreset ? presets[controllerPreset] : {}),
 });
+
+console.log(
+  `[starknet chains]:`,
+  starknetConfigChains
+    .map((c) => shortString.decodeShortString(num.toHex(c.id)))
+    .join(", "),
+  starknetConfigChains,
+);
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={mainnet.id}
+      defaultChainId={starknetConfigChains[0].id}
       chains={starknetConfigChains}
       connectors={[controllerConnector, session]}
       explorer={cartridge}
