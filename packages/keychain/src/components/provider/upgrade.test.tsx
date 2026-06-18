@@ -167,7 +167,11 @@ describe("UpgradeProvider", () => {
     expect(result.current.isBeta).toBe(false);
   });
 
-  it("should handle contract not found error", async () => {
+  it("should not offer an upgrade for an account that isn't deployed on the chain", async () => {
+    // A counterfactual account's address is bound to its creation class, so it can
+    // only deploy as that class and upgrade in place — it can't be upgraded before it
+    // exists on-chain. So a "Contract not found" must NOT be reported as outdated,
+    // even though the mock's creation class (CONTROLLER_VERSIONS[3]) is behind latest.
     mockController.provider.getClassHashAt.mockRejectedValueOnce(
       new Error("Contract not found"),
     );
@@ -191,8 +195,8 @@ describe("UpgradeProvider", () => {
       );
     });
 
-    expect(result.current.available).toBe(true);
-    expect(result.current.current).toBe(CONTROLLER_VERSIONS[3]);
+    expect(result.current.available).toBe(false);
+    expect(result.current.current).toBeUndefined();
     expect(result.current.latest).toBe(STABLE_CONTROLLER);
   });
 
