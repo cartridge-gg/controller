@@ -76,18 +76,25 @@ const findVersion = (classHash: string): ControllerVersionInfo | undefined =>
     (v) => addAddressPadding(v.hash) === addAddressPadding(classHash),
   );
 
-/** The controller version deployed at `address` on a chain — or, when not deployed
- *  there yet, the version it would counterfactually deploy as (its creation class). */
+/** The controller version actually deployed at `address` on a chain, or `undefined`
+ *  when the account isn't deployed there yet.
+ *
+ *  A counterfactual account's address is bound to its creation class, so it can only
+ *  ever deploy *as* that class and then upgrade in place — there's no way to upgrade it
+ *  before it exists on-chain (the upgrade runs via `execute_from_outside`, which needs a
+ *  deployed contract). So we deliberately do NOT report the creation class here: a not-
+ *  yet-deployed account must not be flagged as "outdated", or we'd offer a premature
+ *  upgrade that can't execute. It deploys at its creation class on first use, and the
+ *  upgrade is offered then — once `getClassHashAt` returns a real, deployed class. */
 async function deployedVersion(
   provider: Pick<RpcProvider, "getClassHashAt">,
   address: string,
-  creationClassHash: string,
 ): Promise<ControllerVersionInfo | undefined> {
   try {
     return findVersion(await provider.getClassHashAt(address));
   } catch (e) {
     if ((e as Error).message?.includes("Contract not found")) {
-      return findVersion(creationClassHash);
+      return undefined;
     }
     throw e;
   }
@@ -195,14 +202,10 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
     (async () => {
       try {
         const address = controller.address();
-        const creationClassHash = controller.classHash();
+        // const creationClassHash = controller.classHash();
         const activeRpcUrl = controller.rpcUrl();
 
-        const active = await deployedVersion(
-          controller.provider,
-          address,
-          creationClassHash,
-        );
+        const active = await deployedVersion(controller.provider, address);
 
         const others = await Promise.all(
           (chains ?? [])
@@ -213,11 +216,7 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
                 const provider = new RpcProvider({ nodeUrl: rpcUrl });
                 return {
                   rpcUrl,
-                  version: await deployedVersion(
-                    provider,
-                    address,
-                    creationClassHash,
-                  ),
+                  version: await deployedVersion(provider, address),
                 };
               } catch {
                 // A single unreachable chain must not block the upgrade gate.
