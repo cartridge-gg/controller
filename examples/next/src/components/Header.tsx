@@ -30,6 +30,7 @@ const Header = () => {
   const { disconnect } = useDisconnect();
   const { chain, chains } = useNetwork();
   const { address, status } = useAccount();
+  const [connectChainOpen, setConnectChainOpen] = useState(false);
   const [networkOpen, setNetworkOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [headlessState, setHeadlessState] =
@@ -37,6 +38,12 @@ const Header = () => {
   const [isControllerReady, setIsControllerReady] = useState(false);
   const [overridePolicies, setOverridePolicies] = useState(false);
   const [presetValue, setPresetValue] = useState<string>("none");
+
+  useEffect(() => {
+    setConnectChainOpen(false);
+    setNetworkOpen(false);
+    setProfileOpen(false);
+  }, [address]);
 
   useEffect(() => {
     setOverridePolicies(
@@ -283,7 +290,52 @@ const Header = () => {
         <div className="w-full p-0 flex flex-wrap items-center gap-2">
           <div className="flex-grow" />
           <h1>Connect options:</h1>
+
+          {!address && (
+            <>
+              <div className="relative" ref={networkRef}>
+                <Button
+                  disabled={!isControllerReady}
+                  variant="secondary"
+                  onClick={() => {
+                    setConnectChainOpen(!connectChainOpen);
+                  }}
+                >
+                  {shortString.decodeShortString(num.toHex(chain.id))}
+                  <span
+                    className={`transition-transform duration-200 ${
+                      connectChainOpen ? "rotate-180" : ""
+                    }`}
+                  >
+                    ▼
+                  </span>
+                </Button>
+                {connectChainOpen && (
+                  <div className="absolute right-0 top-full mt-1 bg-background shadow-lg rounded-md min-w-[160px] py-1 z-10 border border-gray-600">
+                    {chains.map((c: Chain) => (
+                      <button
+                        key={c.id}
+                        className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
+                        onClick={() => {
+                          window.localStorage.setItem(
+                            ConnectOptions.DefaultChainId,
+                            num.toHex(c.id),
+                          );
+                          window.location.reload();
+                        }}
+                      >
+                        {shortString.decodeShortString(num.toHex(c.id))}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
           <Button
+            disabled={!isControllerReady}
+            variant="secondary"
             onClick={() => {
               if (
                 window.localStorage.getItem(ConnectOptions.OverridePolicies) ===
@@ -298,8 +350,6 @@ const Header = () => {
               }
               window.location.reload();
             }}
-            disabled={!isControllerReady}
-            variant="secondary"
           >
             {overridePolicies ? "Override Policies" : "Preset Policies"}
           </Button>
