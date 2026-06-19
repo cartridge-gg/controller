@@ -6,7 +6,6 @@ type Properties = Record<string, any>;
 
 export class PostHogWrapper extends PostHog {
   isLocal =
-    false &&
     typeof window !== "undefined" &&
     window.location.hostname.includes("localhost");
 
