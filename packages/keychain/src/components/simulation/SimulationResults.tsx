@@ -11,7 +11,7 @@ interface SimulationResultsProps {
 }
 
 export function SimulationResults({ calls }: SimulationResultsProps) {
-  const { simulationBalances, isSimulating, isSimulationError } =
+  const { simulationBalances, isSimulating, simulationError } =
     useSimulateBalanceChanges(calls, 10);
 
   const { tokenSwapData } = useTokenSwapData(
@@ -43,12 +43,14 @@ export function SimulationResults({ calls }: SimulationResultsProps) {
           <div className="flex items-center gap-1">
             <Spinner size="xs" /> Simulating transactions...
           </div>
-        ) : isSimulationError ? (
-          <span className="text-destructive">Simulation Error</span>
+        ) : simulationError === "error" ? (
+          <span className="text-destructive">Simulation error.</span>
+        ) : simulationError === "controller-not-deployed" ? (
+          <>Controller not deployed yet, unable to simulate.</>
         ) : simulationBalances.length == 0 ? (
-          "No standard token balance changes detected"
+          <>No standard token balance changes detected</>
         ) : (
-          "Simulation Results"
+          <>Simulation Results</>
         )
       }
       className="flex-none"
