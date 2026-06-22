@@ -303,7 +303,7 @@ export const controllerConnector = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  // defaultChainId, // if not mainnet, only the original signer will be shown
+  defaultChainId, // if not mainnet, only the original signer will be shown
   url: getKeychainUrl(),
   signupOptions,
   // By default, preset policies take precedence over manually provided policies

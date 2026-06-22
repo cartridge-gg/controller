@@ -14,6 +14,7 @@ import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
 import { Swap } from "components/Swap";
 import { Starterpack } from "components/Starterpack";
+import { KatanaAppchain } from "components/KatanaAppchain";
 import { UpdateSession } from "components/UpdateSession";
 import { ControllerToaster } from "@cartridge/controller-ui";
 import { Features } from "components/Features";
@@ -30,6 +31,7 @@ const Home: FC = () => {
       <Header />
       <PlayButton />
       <Features />
+      <KatanaAppchain />
       <Profile />
       <Transfer />
       <Swap />
