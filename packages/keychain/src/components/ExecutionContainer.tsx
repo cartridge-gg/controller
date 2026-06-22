@@ -99,7 +99,33 @@ export function ExecutionContainer({
         setMaxFee(maxFee);
         setIsEstimating(false);
       } catch (e) {
-        const error = parseControllerError(e as unknown as ControllerError);
+        let error = parseControllerError(e as unknown as ControllerError);
+
+        // Estimating an invoke for a controller that isn't deployed yet (e.g. on
+        // an appchain like Katana, which deploys on first execute) can fail at the
+        // provider layer instead of with CartridgeControllerNotDeployed: the sender
+        // account doesn't exist, so the node returns no fee estimate and starknet-rs
+        // surfaces ProviderArrayLengthMismatch ("Array length mismatch"). Detect the
+        // not-yet-deployed state explicitly — mirroring the simulation preview in
+        // use-simulate.ts — and normalize to CartridgeControllerNotDeployed so the
+        // deploy flow is offered rather than a misleading raw provider error.
+        if (
+          error.code !== ErrorCode.CartridgeControllerNotDeployed &&
+          controller
+        ) {
+          const isDeployed = await controller.provider
+            .getClassHashAt(controller.address())
+            .then(() => true)
+            .catch(() => false);
+          if (!isDeployed) {
+            error = {
+              code: ErrorCode.CartridgeControllerNotDeployed,
+              message: "Controller not deployed",
+              data: error.data,
+            };
+          }
+        }
+
         captureAnalyticsEvent(posthog, "tx_failed", {
           error_code: sanitizeErrorCode(e),
           stage: "estimation",
