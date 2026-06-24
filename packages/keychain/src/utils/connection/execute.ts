@@ -114,7 +114,7 @@ export function execute({
 }: {
   navigate: (
     to: string | number,
-    options?: { replace?: boolean; state?: unknown },
+    options?: { replace?: boolean; state?: unknown; reset?: boolean },
   ) => void;
   propagateError?: boolean;
   errorDisplayMode?: "modal" | "notification" | "silent"; // Available for potential future use
@@ -140,7 +140,7 @@ export function execute({
             reject,
           });
 
-          navigate(url, { replace: true });
+          navigate(url, { replace: true, reset: true });
         });
       }
 
@@ -207,7 +207,7 @@ export function execute({
               resolve,
               reject,
             });
-            navigate(url, { replace: true });
+            navigate(url, { replace: true, reset: true });
 
             return resolve({
               code: ResponseCodes.USER_INTERACTION_REQUIRED,
