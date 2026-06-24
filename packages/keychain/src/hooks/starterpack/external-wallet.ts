@@ -1,7 +1,17 @@
 import { useState, useCallback } from "react";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
+import { shortString } from "starknet";
 import { useWallets } from "@/hooks/wallets";
 import { useConnection } from "../connection";
+
+function normalizeChainId(chainId: string | number): string {
+  if (typeof chainId === "number") {
+    return `0x${chainId.toString(16)}`.toLowerCase();
+  }
+  return (
+    chainId.startsWith("0x") ? chainId : shortString.encodeShortString(chainId)
+  ).toLowerCase();
+}
 
 export interface UseExternalWalletOptions {
   onError?: (error: Error) => void;
@@ -77,12 +87,32 @@ export function useExternalWallet({
               "Braavos does not support `wallet_switchStarknetChain`",
             );
           } else {
-            const res = await switchChain(wallet.type, chainId.toString());
-            if (!res) {
-              const error = new Error(
-                `${wallet.name} failed to switch chain (${chainId})`,
-              );
-              throw error;
+            // Only request a chain switch when the wallet isn't already on the
+            // target chain. Switching unconditionally makes wallets (e.g. Ready)
+            // prompt every time, even when no change is needed.
+            const target = normalizeChainId(chainId);
+            const current = wallet.chainId
+              ? normalizeChainId(wallet.chainId)
+              : undefined;
+
+            console.log("[chain-debug] onExternalConnect switch decision", {
+              walletType: wallet.type,
+              walletChainIdRaw: wallet.chainId,
+              targetChainIdRaw: chainId,
+              normalizedCurrent: current,
+              normalizedTarget: target,
+              controllerChainId: controller?.chainId(),
+              willSwitch: current !== target,
+            });
+
+            if (current !== target) {
+              const res = await switchChain(wallet.type, chainId.toString());
+              if (!res) {
+                const error = new Error(
+                  `${wallet.name} failed to switch chain (${chainId})`,
+                );
+                throw error;
+              }
             }
           }
         }
