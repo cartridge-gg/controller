@@ -10,8 +10,7 @@ import {
 } from "@cartridge/controller-ui";
 import { isValidPhoneNumber } from "@/utils/input";
 import { InvalidVerificationCodeError, VerifyErrorAlert } from "./error";
-import { getIpLocation } from "@/utils";
-import { IpLocation } from "@/utils/ip";
+import { useGeoLocation } from "@/hooks/geo";
 
 export interface SmsOtpState {
   username?: string;
@@ -80,25 +79,7 @@ export function VerifyPhoneNumberDrawer({
     setOtpSentAt(null);
   }, []);
 
-  const [geoLocation, setGeoLocation] = useState<IpLocation | null>(null);
-  useEffect(() => {
-    if (!isOpen || geoLocation) return;
-    let mounted = true;
-    (async () => {
-      try {
-        const geo = await getIpLocation();
-        if (mounted) {
-          setGeoLocation(geo);
-        }
-      } catch (err) {
-        console.error("getIpLocation failed:", err);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [isOpen, geoLocation]);
+  const { countryCode } = useGeoLocation();
 
   useEffect(() => {
     if (isOpen) {
@@ -257,7 +238,7 @@ export function VerifyPhoneNumberDrawer({
                   isResolvingPhoneNumber ? smsState?.phoneNumber : undefined
                 }
                 allowedCountries={allowedCountries}
-                userCountryCode={geoLocation?.countryCode}
+                userCountryCode={countryCode}
               />
             </div>
 
