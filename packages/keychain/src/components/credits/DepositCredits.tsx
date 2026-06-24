@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { useGeoLocation } from "@/hooks/geo";
 import {
   WalletSelectionDrawer,
   type PaymentMethodSelection,
-} from "../purchase/checkout/onchain/wallet-drawer";
+} from "@/components/purchase/checkout/onchain/wallet-drawer";
 import { AmountSelectionDrawer } from "./AmountSelectionDrawer";
-import { CheckoutDrawer } from "./CheckoutDrawer";
+import { Checkout } from "./Checkout";
 import { useCreditsContext } from "./provider";
+
+const MIN_CREDITS_PURCHASE_USD = 2;
 
 interface DepositCreditsProps {
   isOpen: boolean;
@@ -17,6 +20,8 @@ export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
     useState<PaymentMethodSelection | null>(null);
   const [amount, setAmount] = useState(0);
   const { depositInProgress } = useCreditsContext();
+
+  const { isUS } = useGeoLocation();
 
   const isController = paymentMethod?.type == "controller";
 
@@ -45,15 +50,14 @@ export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
         setSelected={(selection: PaymentMethodSelection) => {
           setPaymentMethod(selection);
         }}
-        // showFiatOptions={countryCode === "US"}
-        showFiatOptions={false}
+        showFiatOptions={isUS}
         showController={true}
         showCrypto={false}
       />
 
       <AmountSelectionDrawer
         isOpen={isOpen && step == "amount"}
-        minAmount={isController ? 1 : undefined}
+        minAmount={isController ? 1 : MIN_CREDITS_PURCHASE_USD}
         onClose={() => {
           if (step == "amount") {
             onClose();
@@ -64,15 +68,15 @@ export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
         }}
       />
 
-      <CheckoutDrawer
+      <Checkout
         isOpen={isOpen && step == "checkout"}
         onClose={() => {
           if (step == "checkout") {
             onClose();
           }
         }}
-        paymentMethod={depositInProgress?.paymentMethod || paymentMethod}
-        amount={depositInProgress?.amount || amount}
+        paymentMethod={paymentMethod}
+        amount={amount}
         onChangeMethod={() => setPaymentMethod(null)}
         onChangeAmount={() => setAmount(0)}
       />

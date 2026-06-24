@@ -424,7 +424,7 @@ export function OnchainCheckout() {
     if (isCoinflowSelected) {
       if (!isCoinflowStarterpackSupported) return;
     } else if (isCreditsSelected) {
-      // Not enough credits — the CTA reads "Buy Credits": open the top-up
+      // Not enough credits — the CTA reads "Deposit USD": open the top-up
       // drawer and refresh the balance once the deposit lands.
       if (!hasSufficientCredits) {
         initiateCreditsDeposit(async () => {

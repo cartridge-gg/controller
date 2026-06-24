@@ -225,24 +225,21 @@ export function WalletSelectionDrawer({
       method: "apple-pay",
     });
     await setSelected({ type: "apple-pay" });
-    onClose();
-  }, [setSelected, onClose]);
+  }, [setSelected]);
 
   const handleCoinflowSelect = useCallback(async () => {
     captureAnalyticsEvent(posthog, "purchase_method_selected", {
       method: "coinflow",
     });
     await setSelected({ type: "coinflow" });
-    onClose();
-  }, [setSelected, onClose]);
+  }, [setSelected]);
 
   const handleCreditsSelect = useCallback(async () => {
     captureAnalyticsEvent(posthog, "purchase_method_selected", {
       method: "credits",
     });
     await setSelected({ type: "credits" });
-    onClose();
-  }, [setSelected, onClose]);
+  }, [setSelected]);
 
   const onControllerWalletSelect = useCallback(async () => {
     captureAnalyticsEvent(posthog, "purchase_method_selected", {
