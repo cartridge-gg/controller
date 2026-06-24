@@ -8,18 +8,20 @@ import {
   SimulationEvent,
 } from "./event-parser";
 
+export type SimulationError = "error" | "controller-not-deployed" | null;
+
 export const useSimulateBalanceChanges = (
   calls: Call[],
   repeatDelayInSeconds: number,
 ): {
   isSimulating: boolean;
-  isSimulationError: boolean;
+  simulationError: SimulationError;
   simulationBalances: SimulationBalance[];
 } => {
   const { controller } = useConnection();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [simulationError, setSimulationError] = useState<SimulationError>(null);
 
   const [repeatCounter, setRepeatCounter] = useState(0);
   const [simulationEvents, setSimulationEvents] = useState<SimulationEvent[]>(
@@ -42,7 +44,10 @@ export const useSimulateBalanceChanges = (
       });
       const results = await acc.simulateTransaction(
         [{ type: "INVOKE", payload: calls }],
-        { skipValidate: true },
+        {
+          skipValidate: true,
+          tip: 0,
+        },
       );
       return await parseSimulationEvents(results, provider, BigInt(address));
     };
@@ -53,24 +58,32 @@ export const useSimulateBalanceChanges = (
       simulateTransactions()
         .then((events) => {
           setSimulationEvents(events);
-          setIsError(false);
+          setSimulationError(null);
         })
-        .catch(async (error) => {
+        .catch((error) => {
           // The preview simulates a tx FROM the controller. If the controller
           // isn't deployed on this chain yet — it deploys on first execute, e.g.
           // on an appchain — its sender account doesn't exist and the sim rejects
           // with "Contract not found". That's a transient not-yet-deployed state,
           // not a real failure: skip the preview rather than show a misleading
           // "Simulation Error" (the actual execute deploys the controller first).
-          try {
-            await controller!.provider.getClassHashAt(controller!.address());
-          } catch {
-            setSimulationEvents([]);
-            setIsError(false);
-            return;
-          }
-          console.error("simulateTransactions error:", error);
-          setIsError(true);
+          controller.provider
+            .getClassHashAt(controller.address())
+            .then(() => {
+              // controller is deployed, simulated error'd
+              console.warn("simulateTransactions error:", error);
+              setSimulationError("error");
+            })
+            .catch(() => {
+              // controller not deployed
+              console.warn(
+                "simulateTransactions error: Controller not deployed",
+              );
+              setSimulationError("controller-not-deployed");
+            })
+            .finally(() => {
+              setSimulationEvents([]);
+            });
         })
         .finally(() => {
           setIsLoading(false);
@@ -94,7 +107,7 @@ export const useSimulateBalanceChanges = (
     repeatCounter,
     repeatDelayInSeconds,
     setIsLoading,
-    setIsError,
+    setSimulationError,
     setSimulationEvents,
     setRepeatCounter,
   ]);
@@ -111,7 +124,7 @@ export const useSimulateBalanceChanges = (
 
   return {
     isSimulating: isLoading,
-    isSimulationError: isError,
+    simulationError,
     simulationBalances,
   };
 };

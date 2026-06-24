@@ -65,6 +65,11 @@ describe("ConfirmTransaction", () => {
     isRequestedSession: vi.fn().mockResolvedValue(true),
     address: vi.fn().mockImplementation(() => "0x123456789abcdef"),
     username: vi.fn().mockImplementation(() => "testuser"),
+    provider: {
+      getClassHashAt: vi
+        .fn()
+        .mockImplementation(() => Promise.resolve("0x1234")),
+    },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 

@@ -16,13 +16,18 @@ import {
   STRK_CONTRACT_ADDRESS,
 } from "@cartridge/controller-ui/utils";
 
-// enable local katana with NEXT_PUBLIC_LOCAL_ENABLED=1
-const KATANA_ENABLED = Boolean(process.env.NEXT_PUBLIC_LOCAL_ENABLED ?? false);
+const MAINNET_RPC =
+  process.env.NEXT_PUBLIC_RPC_MAINNET ??
+  "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9";
+const SEPOLIA_RPC =
+  process.env.NEXT_PUBLIC_RPC_SEPOLIA ??
+  "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9";
 const KATANA_RPC = process.env.NEXT_PUBLIC_RPC_LOCAL ?? "http://localhost:5050";
 const KATANA_CHAIN_ID =
   process.env.NEXT_PUBLIC_LOCAL_CHAIN_ID ?? "KATANA_LOCAL";
 
 export enum ConnectOptions {
+  DefaultChainId = "default-chain-id",
   OverridePolicies = "connect-override-policies",
   Preset = "connect-preset",
 }
@@ -119,7 +124,7 @@ const policies: SessionPolicies = {
 };
 
 let localKatanaChain: Chain | undefined = undefined;
-if (KATANA_ENABLED && KATANA_RPC) {
+if (KATANA_RPC) {
   localKatanaChain = {
     id: num.toBigInt(shortString.encodeShortString(KATANA_CHAIN_ID)),
     network: KATANA_CHAIN_ID,
@@ -151,11 +156,11 @@ if (KATANA_ENABLED && KATANA_RPC) {
 
 const provider = jsonRpcProvider({
   rpc: (chain: Chain) => {
-    if (chain.id === mainnet.id && process.env.NEXT_PUBLIC_RPC_MAINNET) {
-      return { nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET };
+    if (chain.id === mainnet.id) {
+      return { nodeUrl: MAINNET_RPC };
     }
-    if (chain.id === sepolia.id && process.env.NEXT_PUBLIC_RPC_SEPOLIA) {
-      return { nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA };
+    if (chain.id === sepolia.id) {
+      return { nodeUrl: SEPOLIA_RPC };
     }
     if (chain.id === localKatanaChain?.id) {
       return { nodeUrl: KATANA_RPC };
@@ -191,28 +196,54 @@ const getKeychainUrl = () => {
   }
 };
 
-const starknetConfigChains: Chain[] = [];
-const controllerConnectorChains: { rpcUrl: string }[] = [];
+const starknetConfigChains = [mainnet, sepolia, localKatanaChain].filter(
+  Boolean,
+) as Chain[];
+const controllerConnectorChains = [
+  {
+    chainId: num.toHex(mainnet.id),
+    rpcUrl: MAINNET_RPC,
+  },
+  {
+    chainId: num.toHex(sepolia.id),
+    rpcUrl: SEPOLIA_RPC,
+  },
+  localKatanaChain
+    ? {
+        chainId: num.toHex(localKatanaChain.id),
+        rpcUrl: KATANA_RPC,
+      }
+    : undefined,
+].filter(Boolean) as { chainId: string; rpcUrl: string }[];
 
-if (localKatanaChain) {
-  starknetConfigChains.push(localKatanaChain);
-  controllerConnectorChains.push({
-    rpcUrl: KATANA_RPC,
-  });
-} else {
-  starknetConfigChains.push(mainnet);
-  starknetConfigChains.push(sepolia);
-  if (process.env.NEXT_PUBLIC_RPC_SEPOLIA) {
-    controllerConnectorChains.push({
-      rpcUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-    });
-  }
-  if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
-    controllerConnectorChains.push({
-      rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
-    });
-  }
+// use previously selected chain id
+let defaultChainId: string =
+  (typeof window !== "undefined" &&
+    window.localStorage.getItem(ConnectOptions.DefaultChainId)) ||
+  "";
+// if not available, use first in the list
+if (
+  !defaultChainId ||
+  !controllerConnectorChains.find((c) => c.chainId === defaultChainId)
+) {
+  defaultChainId = controllerConnectorChains[0].chainId;
 }
+const defaultChainRpc = controllerConnectorChains.find(
+  (c) => c.chainId === defaultChainId,
+)?.rpcUrl;
+
+console.log(
+  `[available chains]:`,
+  starknetConfigChains
+    .map((c) => shortString.decodeShortString(num.toHex(c.id)))
+    .join(", "),
+  starknetConfigChains,
+);
+console.log(
+  `[selected chain]:`,
+  shortString.decodeShortString(defaultChainId),
+  defaultChainRpc,
+);
 
 const signupOptions: AuthOptions = [
   "google",
@@ -272,6 +303,7 @@ export const controllerConnector = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
+  defaultChainId, // if not mainnet, only the original signer will be shown
   url: getKeychainUrl(),
   signupOptions,
   // By default, preset policies take precedence over manually provided policies
@@ -287,8 +319,8 @@ export const controllerConnector = new ControllerConnector({
 const session = new SessionConnector({
   shouldOverridePresetPolicies: overridePolicies,
   policies: overridePolicies ? policies : {},
-  rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
-  chainId: constants.StarknetChainId.SN_MAIN,
+  rpc: defaultChainRpc!,
+  chainId: defaultChainId,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   disconnectRedirectUrl: "redirect://",
   keychainUrl: getKeychainUrl(),
@@ -297,19 +329,11 @@ const session = new SessionConnector({
   ...(controllerPreset ? presets[controllerPreset] : {}),
 });
 
-console.log(
-  `[starknet chains]:`,
-  starknetConfigChains
-    .map((c) => shortString.decodeShortString(num.toHex(c.id)))
-    .join(", "),
-  starknetConfigChains,
-);
-
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={starknetConfigChains[0].id}
+      defaultChainId={BigInt(defaultChainId)}
       chains={starknetConfigChains}
       connectors={[controllerConnector, session]}
       explorer={cartridge}

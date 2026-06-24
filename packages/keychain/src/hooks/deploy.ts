@@ -5,7 +5,7 @@ import { FeeEstimate } from "starknet";
 type TransactionHash = string;
 
 interface DeployInterface {
-  deploySelf: (maxFee: FeeEstimate) => Promise<TransactionHash | undefined>;
+  deploySelf: (maxFee?: FeeEstimate) => Promise<TransactionHash | undefined>;
   isDeploying: boolean;
 }
 
@@ -14,7 +14,7 @@ export const useDeploy = (): DeployInterface => {
   const [isDeploying, setIsDeploying] = useState(false);
 
   const deploySelf = useCallback(
-    async (maxFee: FeeEstimate) => {
+    async (maxFee?: FeeEstimate) => {
       if (!controller) return;
 
       try {

@@ -91,12 +91,15 @@ export function DeployControllerView({
   useEffect(() => {
     if (
       !controller ||
-      controller.chainId() === constants.StarknetChainId.SN_MAIN ||
-      !feeEstimate
+      controller.chainId() === constants.StarknetChainId.SN_MAIN
     ) {
       return;
     }
 
+    // Non-mainnet chains (e.g. an appchain like Katana) deploy the controller on
+    // first execute and may not surface a deploy fee estimate up front — the
+    // not-deployed state can arrive without `fee_estimate`. Move straight to the
+    // deploy step regardless; selfDeploy estimates internally when no fee is given.
     setAccountState("deploy");
   }, [controller, feeEstimate]);
 
@@ -129,9 +132,8 @@ export function DeployControllerView({
   }, [feeToken?.balance, feeEstimate, accountState]);
 
   const onDeploy = useCallback(async () => {
-    if (!feeEstimate) return;
-
     try {
+      // feeEstimate may be undefined on appchains; selfDeploy estimates internally.
       const hash = await deploySelf(feeEstimate);
       setDeployHash(hash);
     } catch (e) {
