@@ -24,9 +24,9 @@ EXTERNAL SOURCES:
     :path: "../../../../node_modules/.pnpm/@capacitor+ios@6.2.1_@capacitor+core@6.2.1/node_modules/@capacitor/ios"
 
 SPEC CHECKSUMS:
-  Capacitor: c95400d761e376be9da6be5a05f226c0e865cebf
-  CapacitorApp: a19ccb4f5f32d2534be5c6f524d5a9b614a1e8a7
-  CapacitorBrowser: 825163a1d6adce944ac7b9e3cab101146b5a9df8
+  Capacitor: 1e0d0e7330dea9f983b50da737d8918abcf273f8
+  CapacitorApp: 22c94146dfaae1159ab7059cbd51e76d9f2d45ec
+  CapacitorBrowser: 9e9a268445f9472b04b68320930c59bdc4d360fa
   CapacitorCordova: 8d93e14982f440181be7304aa9559ca631d77fff
 
 PODFILE CHECKSUM: f6877332d3ea075bd6f7d8f89d3ecbc9a0bb06a3

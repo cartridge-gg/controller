@@ -455,9 +455,6 @@ importers:
 
   packages/controller:
     dependencies:
-      '@cartridge/controller-wasm':
-        specifier: 'catalog:'
-        version: 0.10.1
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
