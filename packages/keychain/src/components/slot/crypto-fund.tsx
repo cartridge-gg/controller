@@ -48,6 +48,7 @@ import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { createStarknetCryptoPayment } from "@/hooks/payments/crypto";
 import { Team } from "./teams";
+import { parseTokenAmount } from "@/utils/token-amount";
 
 type SlotFundingToken = {
   key: "USDC" | "STRK";
@@ -491,26 +492,6 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
       {children}
     </StarknetConfig>
   );
-}
-
-export function parseTokenAmount(
-  value: string,
-  decimals: number,
-): bigint | undefined {
-  const trimmed = value.trim();
-  if (!trimmed || !/^\d+(\.\d*)?$/.test(trimmed)) {
-    return undefined;
-  }
-
-  const [whole, fractional = ""] = trimmed.split(".");
-  if (fractional.length > decimals) {
-    return undefined;
-  }
-
-  const base = 10n ** BigInt(decimals);
-  const wholeAmount = BigInt(whole) * base;
-  const fractionalAmount = BigInt(fractional.padEnd(decimals, "0") || "0");
-  return wholeAmount + fractionalAmount;
 }
 
 async function fetchTokenBalance(

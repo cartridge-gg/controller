@@ -24,7 +24,7 @@ vi.mock("@/hooks/tokens", () => ({
 }));
 
 // Mock the upgrade provider hook
-vi.mock("@/components/provider/upgrade", () => ({
+vi.mock("@/components/provider/use-upgrade", () => ({
   useUpgrade: vi.fn(() => ({
     isUpgradeAvailable: false,
     isUpgrading: false,

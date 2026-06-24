@@ -17,7 +17,7 @@ vi.mock("@/components/connect/create/password/crypto", () => ({
   generateStarknetKeypair: () => mockGenerateStarknetKeypair(),
 }));
 
-vi.mock("@/components/provider/upgrade", () => ({
+vi.mock("@/components/provider/upgrade-context", () => ({
   STABLE_CONTROLLER: { hash: "0xclasshash" },
 }));
 

@@ -1,4 +1,4 @@
-import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
+import { STABLE_CONTROLLER } from "@/components/provider/upgrade-context";
 import { doSignup } from "@/hooks/account";
 import { fetchController } from "@/components/connect/create/utils";
 import {

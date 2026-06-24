@@ -1,7 +1,7 @@
 import { LayoutContent, BoltIcon, CircleIcon } from "@cartridge/controller-ui";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useConnection } from "@/hooks/connection";
-import { useUpgrade } from "../provider/upgrade";
+import { useUpgrade } from "../provider/use-upgrade";
 
 export const Upgrade = () => {
   const { controller } = useConnection();

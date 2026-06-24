@@ -1,46 +1,19 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  ReactNode,
-} from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useConnection } from "@/hooks/connection";
 import useCoinflowPayment, {
   CoinflowStarterpackIntent,
-  CoinflowStarterpackQuote,
   useCoinflowStarterpackQuote,
 } from "@/hooks/payments/coinflow";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
-import { useStarterpackContext } from "./starterpack";
-import { useOnchainPurchaseContext } from "./onchain-purchase";
+import { useStarterpackContext } from "./use-starterpack-context";
+import { useOnchainPurchaseContext } from "./use-onchain-purchase-context";
 import { getCurrentReferral } from "@/utils/referral";
 import { isOnchainStarterpack } from "./types";
-
-export interface CreditPurchaseContextType {
-  // USD amount selection
-  usdAmount: number;
-  setUsdAmount: (amount: number) => void;
-
-  // Coinflow state
-  coinflowIntent: CoinflowStarterpackIntent | undefined;
-  coinflowQuote: CoinflowStarterpackQuote | undefined;
-  isCoinflowQuoteLoading: boolean;
-  coinflowEnv: "prod" | "sandbox";
-  isCoinflowLoading: boolean;
-
-  // Actions
-  onCreditCardPurchase: () => Promise<void>;
-}
-
-export const CreditPurchaseContext = createContext<
-  CreditPurchaseContextType | undefined
->(undefined);
-
-export interface CreditPurchaseProviderProps {
-  children: ReactNode;
-}
+import {
+  CreditPurchaseContext,
+  CreditPurchaseContextType,
+  CreditPurchaseProviderProps,
+} from "./credit-purchase-context";
 
 export const CreditPurchaseProvider = ({
   children,
@@ -149,14 +122,4 @@ export const CreditPurchaseProvider = ({
       {children}
     </CreditPurchaseContext.Provider>
   );
-};
-
-export const useCreditPurchaseContext = () => {
-  const context = useContext(CreditPurchaseContext);
-  if (!context) {
-    throw new Error(
-      "useCreditPurchaseContext must be used within CreditPurchaseProvider",
-    );
-  }
-  return context;
 };

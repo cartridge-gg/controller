@@ -10,7 +10,7 @@ import {
   UpgradeContext,
   UpgradeInterface,
   UpgradeProviderProps,
-} from "../src/components/provider/upgrade";
+} from "../src/components/provider/upgrade-context";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { SemVer } from "semver";
 

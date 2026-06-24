@@ -1,4 +1,4 @@
-import { useWallets } from "@/hooks/wallets";
+import { useWallets } from "@/hooks/use-wallets";
 import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
 import { allUseSameAuth } from "@/utils/controller";
 import { AuthOption } from "@cartridge/controller";
