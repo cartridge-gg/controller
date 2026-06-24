@@ -44,7 +44,7 @@ import { CoinflowDrawer } from "../coinflow/drawer";
 import { CoinbaseDrawer } from "../coinbase/drawer";
 import { VerificationDrawer } from "../../verification/drawer";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
-import { getIpLocation } from "@/utils/ip";
+import { useGeoLocation } from "@/hooks/geo";
 import { num } from "starknet";
 import { useIdentityContext } from "@/components/identity/provider";
 import { AgeGate } from "@/components/identity/AgeGate";
@@ -130,15 +130,7 @@ export function OnchainCheckout() {
   const [verificationMethod, setVerificationMethod] = useState<
     "coinflow" | "apple-pay" | null
   >(null);
-  const [countryCodeLoaded, setCountryCodeLoaded] = useState<boolean>(false);
-  const [countryCode, setCountryCode] = useState<string | null>(null);
-
-  useEffect(() => {
-    getIpLocation()
-      .then((geo) => setCountryCode(geo.countryCode))
-      .catch((e) => console.error(`getIpLocation failed`, e))
-      .finally(() => setCountryCodeLoaded(true));
-  }, []);
+  const { isUS, countryCodeLoaded } = useGeoLocation();
 
   const handleIconTripleClick = useTripleClick({
     featureName: "coinflow-support",
@@ -566,7 +558,7 @@ export function OnchainCheckout() {
         lastMethod === "coinflow" &&
         isCoinflowEnabled &&
         isCoinflowStarterpackSupported &&
-        countryCode === "US"
+        isUS
       ) {
         onCoinflowSelect();
       } else if (lastMethod === "credits") {
@@ -584,7 +576,7 @@ export function OnchainCheckout() {
     isCoinflowStarterpackSupported,
     onCoinflowSelect,
     onCreditsSelect,
-    countryCode,
+    isUS,
   ]);
 
   useEffect(() => {
@@ -798,7 +790,7 @@ export function OnchainCheckout() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         setSelected={handlePaymentMethodSelect}
-        showFiatOptions={countryCode === "US"}
+        showFiatOptions={isUS}
         showCredits={false} // credits available from controller
         showController={true}
       />
