@@ -197,6 +197,29 @@ describe("ExecutionContainer", () => {
     expect(screen.getByText("DEPLOY ACCOUNT")).toBeInTheDocument();
   });
 
+  it("submits without a deploy screen when not deployed on an appchain", async () => {
+    await act(async () => {
+      renderWithConnection(
+        <ExecutionContainer
+          {...defaultProps}
+          executionError={{
+            code: 112, // ErrorCode.CartridgeControllerNotDeployed,
+            message: "Controller not deployed",
+          }}
+        />,
+        {
+          // On an appchain the controller deploys itself on first execute, so the
+          // transaction submits directly rather than diverting to the
+          // (double-deploying) deploy screen.
+          isAppchain: true,
+        },
+      );
+    });
+
+    expect(screen.getByText("SUBMIT")).toBeInTheDocument();
+    expect(screen.queryByText("DEPLOY ACCOUNT")).not.toBeInTheDocument();
+  });
+
   it("shows funding view when balance is insufficient", async () => {
     await act(async () => {
       renderWithProviders(

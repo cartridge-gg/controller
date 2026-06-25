@@ -50,7 +50,7 @@ export function ExecutionContainer({
   children,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
-  const { controller, policies } = useConnection();
+  const { controller, policies, isAppchain } = useConnection();
   const { navigate } = useNavigation();
   const [maxFee, setMaxFee] = useState<FeeEstimate | undefined>();
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
@@ -245,6 +245,26 @@ export function ExecutionContainer({
         {(() => {
           switch (ctrlError?.code) {
             case ErrorCode.CartridgeControllerNotDeployed:
+              // On appchains the controller deploys itself on first execute, so
+              // there's no separate deploy step: submitting the transaction deploys
+              // and executes in one shot (the wasm estimates the fee internally when
+              // none is provided up front). Surfacing the deploy screen here instead
+              // double-deploys and fails with "contract already deployed". Only
+              // mainnet keeps the explicit deploy/fund flow.
+              if (isAppchain) {
+                // No fee estimate is shown: the account isn't deployed yet, so the
+                // fee can't be estimated up front. The wasm estimates internally and
+                // deploys + executes when the transaction is submitted.
+                return (
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    disabled={isEstimating || !transactions}
+                  >
+                    {buttonText}
+                  </Button>
+                );
+              }
               return (
                 <>
                   <ControllerErrorAlert error={ctrlError} />

@@ -26,7 +26,7 @@ export function ConfirmTransaction({
   transactions,
   executionError,
 }: ConfirmTransactionProps) {
-  const { controller, origin, policies } = useConnection();
+  const { controller, origin, policies, isAppchain } = useConnection();
   const account = controller;
   const { toast } = useToast();
 
@@ -60,7 +60,11 @@ export function ConfirmTransaction({
   }, [error, executionError]);
 
   const onSubmit = async (maxFee?: FeeEstimate) => {
-    if (maxFee === undefined || !account) {
+    // On appchains the controller deploys on first execute, so the fee can't be
+    // estimated up front and `maxFee` is undefined — `account.execute` estimates
+    // internally and deploys + executes in one shot. On public chains a fee
+    // estimate is required before submitting.
+    if (!account || (maxFee === undefined && !isAppchain)) {
       return;
     }
 
