@@ -8,6 +8,15 @@ const nextConfig = {
     externalDir: true,
   },
   webpack: (config, { isServer, dev }) => {
+    // Disable the persistent filesystem cache in dev. Workspace deps
+    // (@cartridge/controller, @cartridge/connector) are consumed as prebuilt
+    // dist/ files; controller's `vite build --watch` re-empties its dist on
+    // rebuild, so Next can momentarily compile an empty module and cache the
+    // broken result (default === undefined → "is not a constructor"). The cache
+    // otherwise survives dev restarts, forcing a full clean. Disabling it means
+    // a plain restart always recovers.
+    if (dev) config.cache = false;
+
     config.output.environment = {
       ...config.output.environment,
       asyncFunction: true,
