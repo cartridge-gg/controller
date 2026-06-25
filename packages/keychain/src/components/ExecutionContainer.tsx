@@ -59,6 +59,11 @@ export function ExecutionContainer({
   const [isLoading, setIsLoading] = useState(false);
   const [isEstimating, setIsEstimating] = useState(true);
   const [ctaState, setCTAState] = useState<"deploy" | "execute">("execute");
+  // Tracks whether the user has already attempted to submit. On appchains we
+  // attempt the action optimistically and only fall back to the "Add Funds" flow
+  // if that attempt itself fails on funds (the chain may not charge fees, may
+  // settle in a different fee token, or a paymaster may sponsor).
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   // Prevent unnecessary estimate fee calls. Track the controller too: on a chain
   // switch a *new* Controller instance is created (bound to the new RPC), and the
@@ -171,6 +176,7 @@ export function ExecutionContainer({
 
   const handleSubmit = async () => {
     setIsLoading(true);
+    setSubmitAttempted(true);
     try {
       await onSubmit(maxFee);
     } catch (e) {
@@ -274,6 +280,22 @@ export function ExecutionContainer({
                 </>
               );
             case ErrorCode.InsufficientBalance:
+              // On appchains, don't gate on a client-side balance check up front:
+              // the chain may not actually charge fees, may settle in a different
+              // fee token, or a paymaster may sponsor. Let the user attempt the
+              // action first; only surface "Add Funds" once the submission itself
+              // has failed on funds.
+              if (isAppchain && !submitAttempted) {
+                return (
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    disabled={isLoading || !transactions}
+                  >
+                    {buttonText}
+                  </Button>
+                );
+              }
               return (
                 <>
                   <Fees

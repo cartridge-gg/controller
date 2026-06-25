@@ -237,6 +237,29 @@ describe("ExecutionContainer", () => {
     expect(screen.getByText("ADD FUNDS")).toBeInTheDocument();
   });
 
+  it("attempts the action (no upfront Add Funds) on an appchain when balance is insufficient", async () => {
+    await act(async () => {
+      renderWithConnection(
+        <ExecutionContainer
+          {...defaultProps}
+          executionError={{
+            code: 113, // ErrorCode.InsufficientBalance,
+            message: "Insufficient balance",
+          }}
+        />,
+        {
+          // Appchain: the chain may not charge fees / may use a different fee token,
+          // so the user should be able to attempt the action before being asked to
+          // add funds.
+          isAppchain: true,
+        },
+      );
+    });
+
+    expect(screen.getByText("SUBMIT")).toBeInTheDocument();
+    expect(screen.queryByText("ADD FUNDS")).not.toBeInTheDocument();
+  });
+
   it("shows continue button for already registered session", async () => {
     await act(async () => {
       renderWithConnection(
