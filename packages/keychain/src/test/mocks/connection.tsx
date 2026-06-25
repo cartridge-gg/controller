@@ -18,6 +18,9 @@ const defaultMockController: any = {
   chainId: vi.fn().mockImplementation(() => constants.StarknetChainId.SN_MAIN),
   address: vi.fn().mockImplementation(async () => "0x123456789abcdef"),
   username: vi.fn().mockImplementation(async () => "testuser"),
+  provider: {
+    getClassHashAt: vi.fn().mockResolvedValue("0x0"),
+  },
 } as const;
 
 export const defaultMockConnection: ConnectionContextValue = {

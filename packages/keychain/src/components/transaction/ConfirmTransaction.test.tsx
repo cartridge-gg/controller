@@ -42,6 +42,18 @@ vi.mock("@/context/toast", () => ({
   })),
 }));
 
+// Stub the balance-change simulation. These tests assert on the confirm/execute
+// flow, not on simulation output. The real hook kicks off an async tx simulation
+// (and a 10s repeat loop) that outlives the test and, on its error path, rejects
+// late into a torn-down environment — surfacing as a flaky unhandled rejection.
+vi.mock("@/components/simulation/use-simulate", () => ({
+  useSimulateBalanceChanges: () => ({
+    isSimulating: false,
+    simulationError: null,
+    simulationBalances: [],
+  }),
+}));
+
 describe("ConfirmTransaction", () => {
   const mockTransactions = [
     {
