@@ -36,6 +36,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   isPoliciesResolved: true,
   isPoliciesError: false,
   isMainnet: false,
+  isAppchain: false,
   theme: {
     verified: true,
     name: "test",

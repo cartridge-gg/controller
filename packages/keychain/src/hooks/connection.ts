@@ -41,6 +41,7 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
   LORDS_CONTRACT_ADDRESS,
+  isPublicChain,
 } from "@cartridge/controller-ui/utils";
 import { Eip191Credentials } from "@cartridge/controller-ui/utils/api/cartridge";
 import { getAddress } from "ethers";
@@ -391,6 +392,7 @@ export function useConnectionValue() {
     () => !!initialPreset,
   );
   const [isMainnet, setIsMainnet] = useState<boolean>(false);
+  const [isAppchain, setIsAppchain] = useState<boolean>(false);
   const [configData, setConfigData] = useState<Record<string, unknown> | null>(
     null,
   );
@@ -746,6 +748,8 @@ export function useConnectionValue() {
 
   useEffect(() => {
     setIsMainnet(controller?.chainId() === constants.StarknetChainId.SN_MAIN);
+    const chainId = controller?.chainId();
+    setIsAppchain(!!chainId && !isPublicChain(chainId));
   }, [controller]);
 
   // Load config when preset is provided
@@ -1174,6 +1178,7 @@ export function useConnectionValue() {
     isPoliciesResolved,
     isPoliciesError,
     isMainnet,
+    isAppchain,
     verified,
     chainId,
     setController,

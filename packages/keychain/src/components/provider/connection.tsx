@@ -41,6 +41,7 @@ export type ConnectionContextValue = {
   isPoliciesResolved: boolean;
   isPoliciesError: boolean;
   isMainnet: boolean;
+  isAppchain: boolean; // not public chains (mainnet/sepolia)
   verified: boolean;
   chainId?: string;
   setController: (controller?: Controller) => void;

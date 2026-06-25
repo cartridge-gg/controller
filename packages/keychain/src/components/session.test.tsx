@@ -89,6 +89,7 @@ describe("Session", () => {
       isPoliciesResolved: true,
       isPoliciesError: false,
       isMainnet: false,
+      isAppchain: false,
       verified: true,
       chainId: "SN_MAIN",
       setController: vi.fn(),
