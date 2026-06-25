@@ -98,7 +98,7 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
   const [client, setClient] = useState<torii.ToriiClient>();
   const entitySubscriptionRef = useRef<torii.Subscription | null>(null);
   const eventSubscriptionRef = useRef<torii.Subscription | null>(null);
-  const { namespace, project } = useConnection();
+  const { namespace, toriiUrl } = useConnection();
   const [definitions, setDefinitions] = useState<QuestDefinition[]>([]);
   const [completions, setCompletions] = useState<QuestCompletion[]>([]);
   const [advancements, setAdvancements] = useState<QuestAdvancement[]>([]);
@@ -109,16 +109,16 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize Torii client
   useEffect(() => {
-    if (!namespace || !project) return;
+    if (!namespace || !toriiUrl) return;
     const getClient = async () => {
       const client = await new torii.ToriiClient({
-        toriiUrl: `https://api.cartridge.gg/x/${project}/torii`,
+        toriiUrl,
         worldAddress: "0x0",
       });
       setClient(client);
     };
     getClient();
-  }, [project, namespace]);
+  }, [toriiUrl, namespace]);
 
   // Handler for entity updates (definitions, completions, advancements, creations)
   const onEntityUpdate = useCallback(
@@ -218,7 +218,7 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (
       !namespace ||
-      !project ||
+      !toriiUrl ||
       entitySubscriptionRef.current ||
       eventSubscriptionRef.current
     )
@@ -241,7 +241,7 @@ export function QuestProvider({ children }: { children: React.ReactNode }) {
         eventSubscriptionRef.current.cancel();
       }
     };
-  }, [refresh, namespace, project]);
+  }, [refresh, namespace, toriiUrl]);
 
   // Compute quests from the raw data
   const quests: QuestProps[] = useMemo(() => {

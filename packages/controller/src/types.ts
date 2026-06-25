@@ -292,6 +292,8 @@ export type KeychainOptions = IFrameOptions & {
   shouldOverridePresetPolicies?: boolean;
   /** The project name of Slot instance. */
   slot?: string;
+  /** The Torii indexer URL used to fetch tokens/collections. Takes precedence over `slot`. */
+  toriiUrl?: string;
   /** The namespace to use to fetch trophies data from indexer. Will be mandatory once profile page is in production */
   namespace?: string;
   /** The tokens to be listed on Inventory modal */

@@ -28,6 +28,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     policies,
     version,
     slot,
+    toriiUrl,
     namespace,
     tokens,
     preset,
@@ -64,6 +65,10 @@ export class KeychainIFrame extends IFrame<Keychain> {
 
     if (slot) {
       _url.searchParams.set("ps", encodeURIComponent(slot));
+    }
+
+    if (toriiUrl) {
+      _url.searchParams.set("torii", encodeURIComponent(toriiUrl));
     }
 
     if (namespace) {

@@ -9,14 +9,13 @@ const BATCH_SIZE = 1000;
  */
 export default {
   /**
-   * Get a ToriiClient instance for a given project
-   * @param project - The project name
+   * Get a ToriiClient instance for a resolved Torii URL
+   * @param toriiUrl - The resolved Torii base URL (see `getToriiUrl`)
    * @returns A ToriiClient instance
    */
-  async getClient(project: string): Promise<torii.ToriiClient> {
-    const url = `https://api.cartridge.gg/x/${project}/torii`;
+  async getClient(toriiUrl: string): Promise<torii.ToriiClient> {
     const client = new torii.ToriiClient({
-      toriiUrl: url,
+      toriiUrl,
       worldAddress: "0x0",
     });
     return client;

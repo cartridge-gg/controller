@@ -63,6 +63,7 @@ describe("Session", () => {
       origin: "https://test.app",
       rpcUrl: "https://rpc.test.app",
       project: null,
+      toriiUrl: null,
       namespace: null,
       propagateError: false,
       webauthnPopup: {

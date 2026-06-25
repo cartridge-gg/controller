@@ -43,7 +43,7 @@ import { formatUsdValue } from "@/utils/format-value";
 
 export function CollectionPurchase() {
   const { address: contractAddress, tokenId } = useParams();
-  const { project, controller, closeModal } = useConnection();
+  const { toriiUrl, controller, closeModal } = useConnection();
   const { goBack, canGoBack } = useNavigation();
   const { tokens } = useTokens();
   const [royalties, setRoyalties] = useState<{ [orderId: number]: bigint }>({});
@@ -131,8 +131,8 @@ export function CollectionPurchase() {
         } catch {
           tokenName = asset.name;
         }
-        const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
-        const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+        const newImage = `${toriiUrl}/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
+        const oldImage = `${toriiUrl}/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
         return {
           orderId: order.id,
           images: [newImage, oldImage],
@@ -150,7 +150,7 @@ export function CollectionPurchase() {
     tokenContract,
     tokenOrders,
     contractAddress,
-    project,
+    toriiUrl,
     token?.metadata.decimals,
   ]);
 

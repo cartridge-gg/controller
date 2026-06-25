@@ -14,7 +14,7 @@ export function useTokenContract({
 }: {
   contractAddress?: string;
 }): UseTokenContractResponse {
-  const { project } = useConnection();
+  const { toriiUrl } = useConnection();
   const [tokenContract, setTokenContract] = useState<
     torii.TokenContract | undefined
   >(undefined);
@@ -27,9 +27,9 @@ export function useTokenContract({
   );
 
   useEffect(() => {
-    if (!project) return;
-    Torii.getClient(project).then((client) => setClient(client));
-  }, [project]);
+    if (!toriiUrl) return;
+    Torii.getClient(toriiUrl).then((client) => setClient(client));
+  }, [toriiUrl]);
 
   // console.log("COLLECTION", contractAddress?.slice(0, 10), tokenIds, address)
 
@@ -48,7 +48,7 @@ export function useTokenContract({
       }
     };
     getTokenContract();
-  }, [client, trigger, project, contractAddress]);
+  }, [client, trigger, toriiUrl, contractAddress]);
 
   const refetch = useCallback(() => {
     setTrigger(true);

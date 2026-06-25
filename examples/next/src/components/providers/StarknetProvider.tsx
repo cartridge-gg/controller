@@ -314,6 +314,10 @@ export const controllerConnector = new ControllerConnector({
     erc20: ["lords", "strk"],
   },
   ...(controllerPreset ? presets[controllerPreset] : {}),
+  /// slot instance for tokens
+  // slot: "pg-mainnet-10", // build torii url
+  toriiUrl: "https://api.cartridge.gg/x/pg-mainnet-10/torii",
+  // toriiUrl: "http://localhost:8080",
 });
 
 const session = new SessionConnector({

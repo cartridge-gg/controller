@@ -23,6 +23,7 @@ export type ConnectionContextValue = {
   origin: string;
   rpcUrl: string;
   project: string | null;
+  toriiUrl: string | null;
   namespace: string | null;
   propagateError: boolean;
   webauthnPopup: {

@@ -29,6 +29,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   chainId: "SN_MAIN",
   parent: undefined,
   project: null,
+  toriiUrl: null,
   namespace: null,
   verified: false,
   isConfigLoading: false,

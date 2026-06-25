@@ -43,7 +43,7 @@ import { formatUsdValue } from "@/utils/format-value";
 
 export function CollectiblePurchase() {
   const { address: contractAddress, tokenId } = useParams();
-  const { project, controller, closeModal } = useConnection();
+  const { project, toriiUrl, controller, closeModal } = useConnection();
   const { goBack, canGoBack } = useNavigation();
   const { tokens } = useTokens();
   const [royalties, setRoyalties] = useState<{ [orderId: number]: bigint }>({});
@@ -88,11 +88,13 @@ export function CollectiblePurchase() {
   const { collections, status: collectionStatus } = useToriiCollections();
 
   const collection = useMemo(() => {
-    if (!project || !collections || !contractAddress) return;
-    const projectCollections = collections[project];
+    // Must match the key `useToriiCollections` stores collections under.
+    const projectKey = project ?? toriiUrl;
+    if (!projectKey || !collections || !contractAddress) return;
+    const projectCollections = collections[projectKey];
     if (!projectCollections) return;
     return projectCollections[getChecksumAddress(contractAddress)];
-  }, [collections, contractAddress, project]);
+  }, [collections, contractAddress, project, toriiUrl]);
 
   const { tokens: assets, status: assetsStatus } = useToriiCollection({
     contractAddress: contractAddress || "",
@@ -182,11 +184,16 @@ export function CollectiblePurchase() {
         } catch {
           tokenName = asset.name;
         }
-        const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
-        const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+        const newImage = toriiUrl
+          ? `${toriiUrl}/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`
+          : undefined;
+        const oldImage = toriiUrl
+          ? `${toriiUrl}/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`
+          : undefined;
+        const images = [newImage, oldImage].filter(Boolean) as string[];
         return {
           orderId: order.id,
-          images: [newImage, oldImage],
+          images,
           name: tokenName,
           collection: collection.name,
           collectionAddress: contractAddress,
@@ -201,7 +208,7 @@ export function CollectiblePurchase() {
     collection,
     tokenOrders,
     contractAddress,
-    project,
+    toriiUrl,
     token?.metadata.decimals,
   ]);
 

@@ -20,10 +20,9 @@ import * as torii from "@dojoengine/torii-wasm";
 
 const CONTRACT_TYPES: torii.ContractType[] = ["ERC20"];
 
-async function getToriiClient(project: string): Promise<torii.ToriiClient> {
-  const url = `https://api.cartridge.gg/x/${project}/torii`;
+async function getToriiClient(toriiUrl: string): Promise<torii.ToriiClient> {
   const client = await new torii.ToriiClient({
-    toriiUrl: url,
+    toriiUrl,
     worldAddress: "0x0",
   });
   return client;
@@ -206,20 +205,20 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   const provider = controller?.provider;
   const account = useAccount();
   const address = account?.address || "";
-  const { project } = useConnection();
+  const { toriiUrl } = useConnection();
   const [contracts, setContracts] = useState<string[]>([]);
 
   useEffect(() => {
     async function getContracts() {
-      if (!project || !address) return;
-      const client = await getToriiClient(project);
+      if (!toriiUrl || !address) return;
+      const client = await getToriiClient(toriiUrl);
       const contracts = await fetchContracts(client);
       setContracts(
         contracts.map((c) => getChecksumAddress(c.contract_address)),
       );
     }
     getContracts();
-  }, [project, address]);
+  }, [toriiUrl, address]);
 
   // Fetch credits
   const { username } = useUsername({ address });

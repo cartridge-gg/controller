@@ -5,6 +5,7 @@ import {
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
 import { useNavigation } from "@/context/navigation";
+import { getToriiUrl } from "@/helpers/torii-url";
 import { connectToController } from "@/utils/connection";
 import type { HeadlessConnectionState } from "@/utils/connection/headless";
 import { requestPopupAuthOrigin } from "@/utils/connection/popup";
@@ -76,6 +77,7 @@ type ResolvedUrlParams = {
   shouldOverridePresetPolicies: boolean;
   version: string | null;
   project: string | null;
+  toriiUrl: string | null;
   namespace: string | null;
   tokens: string[];
   ref: string | null;
@@ -541,6 +543,8 @@ export function useConnectionValue() {
       urlParams.get("should_override_preset_policies") === "true";
     const version = urlParams.get("v");
     const project = urlParams.get("ps");
+    const toriiUrlParam = urlParams.get("torii");
+    const toriiUrl = toriiUrlParam ? decodeURIComponent(toriiUrlParam) : null;
     const namespace = urlParams.get("ns");
     const ref = urlParams.get("ref");
     const refGroup = urlParams.get("ref_group");
@@ -598,6 +602,7 @@ export function useConnectionValue() {
         false,
       version: version || urlParamsRef.current?.version || null,
       project: project || urlParamsRef.current?.project || null,
+      toriiUrl: toriiUrl || urlParamsRef.current?.toriiUrl || null,
       namespace: namespace || urlParamsRef.current?.namespace || null,
       tokens: erc20Param ? tokens : urlParamsRef.current?.tokens || tokens,
       ref: ref || urlParamsRef.current?.ref || null,
@@ -1141,6 +1146,12 @@ export function useConnectionValue() {
     [parent],
   );
 
+  // Resolved Torii URL: the `toriiUrl` override wins, else the Slot URL from `project`.
+  const toriiUrl = useMemo(
+    () => getToriiUrl(urlParams.project, urlParams.toriiUrl),
+    [urlParams.project, urlParams.toriiUrl],
+  );
+
   return {
     parent,
     controller,
@@ -1151,6 +1162,7 @@ export function useConnectionValue() {
     setOnModalClose,
     theme,
     project: urlParams.project,
+    toriiUrl,
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
