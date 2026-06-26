@@ -1,7 +1,6 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
-import { useConnection } from "@/hooks/connection";
 import { useControllerPurchase } from "@/hooks/payments/controller";
-import { USDC_ADDRESSES, USDC_ICON } from "@/utils/ekubo";
+import { useUsdcToken } from "@/hooks/payments/usdc";
 import type { TokenOption } from "@/context";
 
 /**
@@ -43,23 +42,9 @@ export function ControllerRailProvider({
   onComplete: () => void;
   children: ReactNode;
 }) {
-  const { controller } = useConnection();
-
   // Paying with the controller fronts USDC, so the deposit is denominated in the
-  // chain's USDC. Derive it here so the host doesn't have to.
-  const usdcToken = useMemo<TokenOption>(
-    () => ({
-      name: "USD Coin",
-      symbol: "USDC",
-      decimals: 6,
-      address: controller
-        ? (USDC_ADDRESSES[controller.chainId()] ?? "usdc")
-        : "usdc",
-      icon: USDC_ICON,
-      contract: {} as TokenOption["contract"],
-    }),
-    [controller],
-  );
+  // chain's USDC.
+  const usdcToken = useUsdcToken();
 
   const { usdcBalance, hasInsufficientBalance, handlePurchaseWithController } =
     useControllerPurchase({ usdcToken, amount });

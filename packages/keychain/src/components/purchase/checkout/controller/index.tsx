@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, TokenCard } from "@cartridge/controller-ui";
-import { useTokens } from "@/hooks/token";
-import { formatCredits, usdToCreditUnits } from "@/utils/credits";
-import { ErrorAlert } from "@/components/ErrorAlert";
+import { Button } from "@cartridge/controller-ui";
 import { ConfirmingTransaction } from "@/components/purchase/pending/confirming-transaction";
-import { CostBreakdown } from "@/components/purchase/review/cost";
-import { WalletSelector } from "@/components/purchase/checkout/onchain/selector";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
+import { CheckoutReviewContent } from "@/components/credits/CheckoutReviewContent";
 import type { PaymentMethodSelection } from "@/components/purchase/checkout/onchain/wallet-drawer";
 import { useControllerRail } from "../rails";
 
@@ -23,17 +19,16 @@ interface ControllerCheckoutProps {
 
 /**
  * Self-contained controller (USDC deposit) checkout. Owns its own
- * idle|processing|success|error status machine and renders the deposit review —
- * mirroring how `CoinbaseCheckout` / `CoinflowForm` own their rail UI. All
- * purchase data + the deposit action come from `useControllerRail()`; the host
- * only supplies the neutral rail value and the change-method/amount chrome.
+ * idle|processing|success|error status machine and renders the shared checkout
+ * review (the same details body the fiat rails use). All purchase data + the
+ * deposit action come from `useControllerRail()`; the host supplies the neutral
+ * rail value and the change-method/amount chrome.
  */
 export function ControllerCheckout({
   paymentMethod,
   onChangeMethod,
   onChangeAmount,
 }: ControllerCheckoutProps) {
-  const { credits } = useTokens();
   const { amount, usdcToken, hasInsufficientBalance, execute, onComplete } =
     useControllerRail();
 
@@ -77,40 +72,28 @@ export function ControllerCheckout({
   }
 
   return (
-    <>
-      <TokenCard
-        image={credits.metadata.image}
-        title={credits.metadata.name}
-        value={`$${amount.toFixed(2)}`}
-        amount={`${formatCredits(usdToCreditUnits(amount)).formatted} USD`}
-        onClick={onChangeAmount}
-        clickable
-        className="rounded"
-      />
-
-      <WalletSelector method={paymentMethod} onClick={onChangeMethod} />
-
-      {hasInsufficientBalance && (
-        <ErrorCard
-          variant="warning"
-          title="Insufficient Balance"
-          message="You need more USDC to complete this purchase."
-        />
-      )}
-
-      {error && <ErrorAlert title="Purchase Failed" description={error} />}
-
-      <CostBreakdown
-        tokens={[usdcToken]}
-        selectedToken={usdcToken}
-        onSelectToken={() => {}}
-        tokenSelectDisabled
-        value={<span className="text-foreground-100">{amount.toFixed(2)}</span>}
-      />
-
-      <Button disabled={!canDeposit} onClick={handleDeposit}>
-        DEPOSIT USD
-      </Button>
-    </>
+    <CheckoutReviewContent
+      paymentMethod={paymentMethod}
+      amount={amount}
+      onChangeMethod={onChangeMethod}
+      onChangeAmount={onChangeAmount}
+      costToken={usdcToken}
+      costValue={
+        <span className="text-foreground-100">{amount.toFixed(2)}</span>
+      }
+      warning={
+        hasInsufficientBalance ? (
+          <ErrorCard
+            variant="warning"
+            title="Insufficient Balance"
+            message="You need more USDC to complete this purchase."
+          />
+        ) : undefined
+      }
+      error={error}
+      buttonLabel="DEPOSIT USD"
+      onContinue={handleDeposit}
+      buttonDisabled={!canDeposit}
+    />
   );
 }

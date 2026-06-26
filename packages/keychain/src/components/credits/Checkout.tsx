@@ -2,11 +2,11 @@ import { useCallback } from "react";
 import { Drawer, DrawerContent, DepositIcon } from "@cartridge/controller-ui";
 import { useTokens } from "@/hooks/token";
 import type { PaymentMethodSelection } from "@/components/purchase/checkout/onchain/wallet-drawer";
-// import { useIdentityContext } from "@/components/identity/provider";
 import { ControllerRailProvider } from "@/components/purchase/checkout/rails";
 import { ControllerCheckout } from "@/components/purchase/checkout/controller";
-import { VerificationDrawer } from "@/components/purchase/verification/drawer";
 import { useCreditsContext } from "./provider";
+import { CoinflowCreditsCheckout } from "./CoinflowCreditsCheckout";
+import { CoinbaseCreditsCheckout } from "./CoinbaseCreditsCheckout";
 
 interface CheckoutProps {
   isOpen: boolean;
@@ -17,10 +17,15 @@ interface CheckoutProps {
   onChangeAmount: () => void;
 }
 
-/** Container for the checkout step: supplies the neutral rail contexts and
- * mounts the matching self-contained rail checkout. Each rail
- * (controller / Coinflow / Apple Pay) owns its own status + review UI; the host
- * just supplies the amount and the completion seam. */
+/** Container for the checkout step. Every method starts from the same checkout
+ * details review:
+ *  - controller: ControllerCheckout shows the review and runs the deposit.
+ *  - fiat (Apple Pay / card): the rail checkout shows the review, then on
+ *    continue runs the rail-required verification (if needed) and the payment
+ *    drawer. Each rail owns its own review → verify → pay flow.
+ * The shared completion seam (refresh balance → fire the success callback
+ * registered by initiateCreditsDeposit → close) is computed here and handed to
+ * every rail. */
 export function Checkout({
   isOpen,
   onClose,
@@ -31,20 +36,6 @@ export function Checkout({
 }: CheckoutProps) {
   const { credits } = useTokens();
   const { onDepositFinished } = useCreditsContext();
-  // const { isEmailVerified, isPhoneNumberVerified } = useIdentityContext();
-
-  const isController = paymentMethod?.type === "controller";
-
-  // Verification is required by the fiat rails, not the controller (USDC
-  // deposit) rail. Leave the method undefined for controller so the drawer
-  // stays inert; the fiat rails set it in Phase 2c.
-  const verificationMethod: "coinflow" | "apple-pay" | undefined =
-    paymentMethod?.type === "apple-pay"
-      ? "apple-pay"
-      : paymentMethod?.type === "coinflow"
-        ? "coinflow"
-        : undefined;
-  const needsVerification = false;
 
   const onComplete = useCallback(async () => {
     await credits.refetch?.();
@@ -54,39 +45,48 @@ export function Checkout({
     onClose();
   }, [credits, onDepositFinished, onClose]);
 
-  return (
-    <>
-      <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-        <DrawerContent
-          title="Deposit USD"
-          icon={<DepositIcon variant="solid" />}
-        >
-          {isController && (
-            <ControllerRailProvider amount={amount} onComplete={onComplete}>
-              <ControllerCheckout
-                paymentMethod={paymentMethod}
-                onChangeMethod={onChangeMethod}
-                onChangeAmount={onChangeAmount}
-              />
-            </ControllerRailProvider>
-          )}
-          {/* Coinflow (card) + Coinbase (Apple Pay) rails wired in Phase 2c. */}
-        </DrawerContent>
-      </Drawer>
+  const methodType = paymentMethod?.type;
 
-      <VerificationDrawer
-        isOpen={isOpen && needsVerification && verificationMethod !== undefined}
-        method={verificationMethod}
-        onClose={() => {
-          // Canceled verification — back to the payment method picker.
-          onChangeMethod();
-          onChangeAmount();
-        }}
-        onSuccess={() => {
-          // Verified — refetchUserData (run by the identity drawers) flips
-          // needsVerification false and the Coinbase drawer opens.
-        }}
+  if (methodType === "coinflow") {
+    return (
+      <CoinflowCreditsCheckout
+        isOpen={isOpen}
+        onClose={onClose}
+        onComplete={onComplete}
+        amount={amount}
+        paymentMethod={paymentMethod}
+        onChangeMethod={onChangeMethod}
+        onChangeAmount={onChangeAmount}
       />
-    </>
+    );
+  }
+
+  if (methodType === "apple-pay") {
+    return (
+      <CoinbaseCreditsCheckout
+        isOpen={isOpen}
+        onClose={onClose}
+        onComplete={onComplete}
+        amount={amount}
+        paymentMethod={paymentMethod}
+        onChangeMethod={onChangeMethod}
+        onChangeAmount={onChangeAmount}
+      />
+    );
+  }
+
+  // Controller (USDC deposit) — review + deposit live in ControllerCheckout.
+  return (
+    <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
+      <DrawerContent title="Deposit USD" icon={<DepositIcon variant="solid" />}>
+        <ControllerRailProvider amount={amount} onComplete={onComplete}>
+          <ControllerCheckout
+            paymentMethod={paymentMethod}
+            onChangeMethod={onChangeMethod}
+            onChangeAmount={onChangeAmount}
+          />
+        </ControllerRailProvider>
+      </DrawerContent>
+    </Drawer>
   );
 }

@@ -15,6 +15,7 @@ import { ExternalWallet } from "@cartridge/controller";
 import { useStarterpackContext } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { useFeature } from "@/hooks/features";
+import { useTripleClick } from "@/hooks/tripple-click";
 import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent } from "@/types/analytics";
 import { getWallet, networkWalletData } from "../../wallet/config";
@@ -86,6 +87,10 @@ export function WalletSelectionDrawer({
   showCredits = false,
 }: WalletSelectionDrawerProps) {
   const isCoinflowEnabled = useFeature("coinflow-support");
+
+  const handleIconTripleClick = useTripleClick({
+    featureName: "coinflow-support",
+  });
 
   const { isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails } = useStarterpackContext();
@@ -357,7 +362,10 @@ export function WalletSelectionDrawer({
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="bg-[#0F1410] gap-4">
-      <DrawerContent title={title} icon={icon}>
+      <DrawerContent
+        title={title}
+        icon={<div onClick={handleIconTripleClick}>{icon}</div>}
+      >
         {step === "method" ? (
           <>
             {showController && (
