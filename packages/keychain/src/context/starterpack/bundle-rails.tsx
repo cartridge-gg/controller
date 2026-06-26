@@ -59,7 +59,7 @@ export function BundleRailProviders({ children }: { children: ReactNode }) {
       createOrder: onCreateCoinbaseOrder,
       openPaymentPopup,
       closePaymentPopup,
-      onConfirmed: () => navigate("/purchase/pending", { reset: true }),
+      onComplete: () => navigate("/purchase/pending", { reset: true }),
     }),
     [
       orderId,
@@ -85,7 +85,7 @@ export function BundleRailProviders({ children }: { children: ReactNode }) {
     () => ({
       intent: coinflowIntent,
       env: coinflowEnv,
-      onSuccess: () => navigate("/purchase/success", { reset: true }),
+      onComplete: () => navigate("/purchase/success", { reset: true }),
     }),
     [coinflowIntent, coinflowEnv, navigate],
   );

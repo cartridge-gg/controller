@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback } from "react";
+import { Drawer, DrawerContent, DepositIcon } from "@cartridge/controller-ui";
 import { useTokens } from "@/hooks/token";
-import { useConnection } from "@/hooks/connection";
-import { USDC_ADDRESSES, USDC_ICON } from "@/utils/ekubo";
-import type { TokenOption } from "@/context";
 import type { PaymentMethodSelection } from "@/components/purchase/checkout/onchain/wallet-drawer";
 // import { useIdentityContext } from "@/components/identity/provider";
-import { VerificationDrawer } from "../purchase/verification/drawer";
+import { ControllerRailProvider } from "@/components/purchase/checkout/rails";
+import { ControllerCheckout } from "@/components/purchase/checkout/controller";
+import { VerificationDrawer } from "@/components/purchase/verification/drawer";
 import { useCreditsContext } from "./provider";
-import { useControllerPurchase } from "./controller-purchase";
-import { CheckoutDrawer } from "./CheckoutDrawer";
 
 interface CheckoutProps {
   isOpen: boolean;
@@ -19,9 +17,10 @@ interface CheckoutProps {
   onChangeAmount: () => void;
 }
 
-/** Container for the checkout step: owns the purchase logic and routes between
- * the controller (USDC) review drawer and the Apple Pay (Coinbase) flow. The
- * UI is rendered by the presentational CheckoutDrawer. */
+/** Container for the checkout step: supplies the neutral rail contexts and
+ * mounts the matching self-contained rail checkout. Each rail
+ * (controller / Coinflow / Apple Pay) owns its own status + review UI; the host
+ * just supplies the amount and the completion seam. */
 export function Checkout({
   isOpen,
   onClose,
@@ -31,129 +30,53 @@ export function Checkout({
   onChangeAmount,
 }: CheckoutProps) {
   const { credits } = useTokens();
-  const { controller } = useConnection();
-  const [error, setError] = useState<string | null>(null);
-  const { onDepositStarted, onDepositFinished, depositInProgress } =
-    useCreditsContext();
+  const { onDepositFinished } = useCreditsContext();
   // const { isEmailVerified, isPhoneNumberVerified } = useIdentityContext();
 
-  // An in-progress deposit carries its own method/amount so the right rail
-  // keeps rendering while bridging.
-  const activeMethod = depositInProgress?.paymentMethod ?? paymentMethod;
-  const activeAmount = depositInProgress?.amount || amount;
+  const isController = paymentMethod?.type === "controller";
 
-  const isController = activeMethod?.type === "controller";
-  const isApplePay = activeMethod?.type === "apple-pay";
-  const isCoinFlow = activeMethod?.type === "coinflow";
-
+  // Verification is required by the fiat rails, not the controller (USDC
+  // deposit) rail. Leave the method undefined for controller so the drawer
+  // stays inert; the fiat rails set it in Phase 2c.
+  const verificationMethod: "coinflow" | "apple-pay" | undefined =
+    paymentMethod?.type === "apple-pay"
+      ? "apple-pay"
+      : paymentMethod?.type === "coinflow"
+        ? "coinflow"
+        : undefined;
   const needsVerification = false;
 
-  const usdcToken = useMemo<TokenOption>(
-    () => ({
-      name: "USD Coin",
-      symbol: "USDC",
-      decimals: 6,
-      address: controller
-        ? (USDC_ADDRESSES[controller.chainId()] ?? "usdc")
-        : "usdc",
-      icon: USDC_ICON,
-      contract: {} as TokenOption["contract"],
-    }),
-    [controller],
-  );
-
-  const { hasInsufficientBalance, handlePurchaseWithController } =
-    useControllerPurchase({ usdcToken, amount: activeAmount });
-
-  // reset transient state when (re)entering the checkout step
-  useEffect(() => {
-    setError(null);
-  }, [isOpen]);
-
-  const isProcessing = depositInProgress?.status === "processing";
-  const isSuccess = depositInProgress?.status === "success";
-
-  // auto close on success
-  useEffect(() => {
-    if (isSuccess && isOpen) {
-      onClose();
-    }
-  }, [isSuccess, isOpen, onClose]);
-
-  // main payment switcher
-  const handlePurchase = useCallback(async () => {
-    if (!activeMethod || !activeAmount) return;
-    onDepositStarted(activeMethod, activeAmount);
-    setError(null);
-    try {
-      if (isController) {
-        await handlePurchaseWithController();
-      }
-      await onDepositFinished();
-      console.log(`USD deposit successful.`);
-      await credits.refetch?.();
-    } catch (e) {
-      console.error(`USD deposit error:`, e);
-      const error = (e instanceof Error ? e : new Error(String(e))).message;
-      await onDepositFinished(error);
-      setError(error);
-    }
-  }, [
-    activeMethod,
-    activeAmount,
-    isController,
-    credits,
-    handlePurchaseWithController,
-    onDepositStarted,
-    onDepositFinished,
-  ]);
-
-  const canPurchase = useMemo(() => {
-    if (!activeAmount || !activeMethod || isProcessing) {
-      return false;
-    }
-    if (isController) {
-      return !hasInsufficientBalance && !!controller;
-    }
-    if (isApplePay) {
-      return false;
-    }
-    if (isCoinFlow) {
-      return false;
-    }
-    return false;
-  }, [
-    activeAmount,
-    activeMethod,
-    isProcessing,
-    isController,
-    isApplePay,
-    isCoinFlow,
-    hasInsufficientBalance,
-    controller,
-  ]);
+  const onComplete = useCallback(async () => {
+    await credits.refetch?.();
+    // Fires the success callback registered by initiateCreditsDeposit (e.g. the
+    // bundle-with-credits flow resumes by refetching its balance), then closes.
+    await onDepositFinished();
+    onClose();
+  }, [credits, onDepositFinished, onClose]);
 
   return (
     <>
-      <CheckoutDrawer
-        isOpen={isOpen}
-        onClose={onClose}
-        paymentMethod={activeMethod}
-        amount={activeAmount}
-        usdcToken={usdcToken}
-        hasInsufficientBalance={hasInsufficientBalance}
-        error={error}
-        isProcessing={isProcessing}
-        isSuccess={isSuccess}
-        canPurchase={canPurchase}
-        onChangeMethod={onChangeMethod}
-        onChangeAmount={onChangeAmount}
-        handlePurchase={handlePurchase}
-      />
+      <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
+        <DrawerContent
+          title="Deposit USD"
+          icon={<DepositIcon variant="solid" />}
+        >
+          {isController && (
+            <ControllerRailProvider amount={amount} onComplete={onComplete}>
+              <ControllerCheckout
+                paymentMethod={paymentMethod}
+                onChangeMethod={onChangeMethod}
+                onChangeAmount={onChangeAmount}
+              />
+            </ControllerRailProvider>
+          )}
+          {/* Coinflow (card) + Coinbase (Apple Pay) rails wired in Phase 2c. */}
+        </DrawerContent>
+      </Drawer>
 
       <VerificationDrawer
-        isOpen={isOpen && needsVerification}
-        method="apple-pay"
+        isOpen={isOpen && needsVerification && verificationMethod !== undefined}
+        method={verificationMethod}
         onClose={() => {
           // Canceled verification — back to the payment method picker.
           onChangeMethod();

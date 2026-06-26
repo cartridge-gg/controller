@@ -25,16 +25,16 @@ export function CoinbasePopupStatus({
   onBack,
   hideHeader,
 }: CoinbasePopupStatusProps = {}) {
-  const { orderStatus, popupClosed, paymentSuccess, onConfirmed } =
+  const { orderStatus, popupClosed, paymentSuccess, onComplete } =
     useCoinbaseRail();
   const { navigate } = useNavigation();
   const isFailed = orderStatus === CoinbaseOnrampStatus.Failed;
 
   useEffect(() => {
     if (paymentSuccess || orderStatus === CoinbaseOnrampStatus.Completed) {
-      onConfirmed();
+      onComplete();
     }
-  }, [paymentSuccess, orderStatus, onConfirmed]);
+  }, [paymentSuccess, orderStatus, onComplete]);
 
   const handleBack = onBack ?? (() => navigate(-1));
 
