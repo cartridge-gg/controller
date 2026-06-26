@@ -17,29 +17,68 @@ import { useCreditPurchaseContext } from "./credit-purchase";
  */
 export function BundleRailProviders({ children }: { children: ReactNode }) {
   const { navigate } = useNavigation();
-  const onchain = useOnchainPurchaseContext();
+  // Destructure the specific fields rather than depending on the whole context
+  // object: the onchain context value is a plain (unmemoized) literal recreated
+  // every render, so a `[onchain]` dep would rebuild the rail value — and
+  // re-render every rail consumer — on every render. The pulled fields are all
+  // stable (state values + useCallback'd actions), so individual deps rebuild
+  // the rail value only when something actually changes.
+  const {
+    orderId,
+    paymentLink,
+    isCreatingOrder,
+    orderStatus,
+    popupClosed,
+    paymentSuccess,
+    coinbaseQuote,
+    coinbaseLimits,
+    isFetchingCoinbaseLimits,
+    isSubmittingLimitsUpgrade,
+    fetchCoinbaseLimits,
+    submitCoinbaseLimitsUpgrade,
+    onCreateCoinbaseOrder,
+    openPaymentPopup,
+    closePaymentPopup,
+  } = useOnchainPurchaseContext();
   const { coinflowIntent, coinflowEnv } = useCreditPurchaseContext();
 
   const coinbaseValue = useMemo<CoinbaseRailContextValue>(
     () => ({
-      orderId: onchain.orderId,
-      paymentLink: onchain.paymentLink,
-      isCreatingOrder: onchain.isCreatingOrder,
-      orderStatus: onchain.orderStatus,
-      popupClosed: onchain.popupClosed,
-      paymentSuccess: onchain.paymentSuccess,
-      quote: onchain.coinbaseQuote,
-      limits: onchain.coinbaseLimits,
-      isFetchingLimits: onchain.isFetchingCoinbaseLimits,
-      isSubmittingLimitsUpgrade: onchain.isSubmittingLimitsUpgrade,
-      fetchLimits: onchain.fetchCoinbaseLimits,
-      submitLimitsUpgrade: onchain.submitCoinbaseLimitsUpgrade,
-      createOrder: onchain.onCreateCoinbaseOrder,
-      openPaymentPopup: onchain.openPaymentPopup,
-      closePaymentPopup: onchain.closePaymentPopup,
+      orderId,
+      paymentLink,
+      isCreatingOrder,
+      orderStatus,
+      popupClosed,
+      paymentSuccess,
+      quote: coinbaseQuote,
+      limits: coinbaseLimits,
+      isFetchingLimits: isFetchingCoinbaseLimits,
+      isSubmittingLimitsUpgrade,
+      fetchLimits: fetchCoinbaseLimits,
+      submitLimitsUpgrade: submitCoinbaseLimitsUpgrade,
+      createOrder: onCreateCoinbaseOrder,
+      openPaymentPopup,
+      closePaymentPopup,
       onConfirmed: () => navigate("/purchase/pending", { reset: true }),
     }),
-    [onchain, navigate],
+    [
+      orderId,
+      paymentLink,
+      isCreatingOrder,
+      orderStatus,
+      popupClosed,
+      paymentSuccess,
+      coinbaseQuote,
+      coinbaseLimits,
+      isFetchingCoinbaseLimits,
+      isSubmittingLimitsUpgrade,
+      fetchCoinbaseLimits,
+      submitCoinbaseLimitsUpgrade,
+      onCreateCoinbaseOrder,
+      openPaymentPopup,
+      closePaymentPopup,
+      navigate,
+    ],
   );
 
   const coinflowValue = useMemo<CoinflowRailContextValue>(
