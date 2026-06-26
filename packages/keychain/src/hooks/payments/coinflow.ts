@@ -20,6 +20,12 @@ export type {
   CoinflowStarterpackQuote,
 } from "@/utils/api";
 
+// Neutral alias for the Coinflow intent shape. Every Coinflow intent (bundle,
+// credits, future assets) returns the same `{ id, sessionKey, jwtToken,
+// merchantId, pricing }` shape and is completed by the same coinflowCardCheckout
+// mutation, so rail-level code should depend on this product-agnostic name.
+export type { CoinflowStarterpackIntent as CoinflowIntent } from "@/utils/api";
+
 const useCoinflowPayment = () => {
   const { controller } = useConnection();
   const [error, setError] = useState<Error | null>(null);

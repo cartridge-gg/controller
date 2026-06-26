@@ -42,6 +42,12 @@ export const COINBASE_APPLE_PAY_MIN_USD = 1.86;
 
 export interface CreateOrderInput {
   purchaseUSDCAmount: string;
+  /**
+   * When true, the onramp tops up the account's off-chain credit balance
+   * instead of delivering USDC to the controller (credits-unification Phase 2).
+   * The backend derives the credit amount from purchaseUSDCAmount.
+   */
+  credits?: boolean;
 }
 
 export interface CoinbaseQuoteInput {
@@ -109,6 +115,7 @@ const createCoinbaseOrder = async (
       input: {
         purchaseUSDCAmount: input.purchaseUSDCAmount,
         sandbox,
+        ...(input.credits ? { credits: true } : {}),
       },
     },
   );
