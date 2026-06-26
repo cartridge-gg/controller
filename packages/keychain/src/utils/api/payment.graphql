@@ -73,6 +73,23 @@ mutation CreateCoinflowStarterpackIntent(
   }
 }
 
+mutation CreateCoinflowCreditsIntent(
+  $input: CreateCoinflowCreditsIntentInput!
+) {
+  createCoinflowCreditsIntent(input: $input) {
+    id
+    sessionKey
+    jwtToken
+    merchantId
+    pricing {
+      subtotalInCents
+      cardFeeInCents
+      gasFeeInCents
+      totalInCents
+    }
+  }
+}
+
 mutation CoinflowCardCheckout($input: CoinflowCardCheckoutInput!) {
   coinflowCardCheckout(input: $input) {
     paymentId

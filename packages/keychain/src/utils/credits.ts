@@ -57,6 +57,16 @@ export function usdToCreditUnits(usd: number): bigint {
   return BigInt(Math.round(usd * 1e8));
 }
 
+/**
+ * USD dollars → whole "plain" credits (100 per $1) for a `CreditsInput.amount`
+ * sent with `decimals: 0`. The backend normalizes this to 6-decimal raw units
+ * (`amount * 1e6`), so $2 → 200 credits and $25,000 → 2,500,000 — both well
+ * within GraphQL's 32-bit `Int`.
+ */
+export function usdToCredits(usd: number): number {
+  return Math.round(usd * 100);
+}
+
 /** USD dollars → USDC wei (USDC has 6 decimals; $1 = 1 USDC). */
 export function usdToUsdcWei(usd: number): bigint {
   return BigInt(Math.round(usd * 10 ** USDC_DECIMALS));
