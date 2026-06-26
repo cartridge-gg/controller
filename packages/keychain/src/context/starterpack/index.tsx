@@ -43,12 +43,15 @@ import { ReactNode } from "react";
 import { StarterpackProvider } from "./starterpack";
 import { OnchainPurchaseProvider } from "./onchain-purchase";
 import { CreditPurchaseProvider } from "./credit-purchase";
+import { BundleRailProviders } from "./bundle-rails";
 
 export function StarterpackProviders({ children }: { children: ReactNode }) {
   return (
     <StarterpackProvider>
       <OnchainPurchaseProvider>
-        <CreditPurchaseProvider>{children}</CreditPurchaseProvider>
+        <CreditPurchaseProvider>
+          <BundleRailProviders>{children}</BundleRailProviders>
+        </CreditPurchaseProvider>
       </OnchainPurchaseProvider>
     </StarterpackProvider>
   );

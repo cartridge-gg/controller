@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { CoinbaseIcon, Drawer, DrawerContent } from "@cartridge/controller-ui";
-import { useOnchainPurchaseContext } from "@/context";
+import { useCoinbaseRail } from "../rails";
 import { CoinbaseCheckout, type PanelMode } from "./index";
 
 interface CoinbaseDrawerProps {
@@ -41,7 +41,7 @@ const HEADER_BY_MODE: Record<PanelMode, DrawerHeader> = {
 export function CoinbaseDrawer({ isOpen, onClose }: CoinbaseDrawerProps) {
   const [isCommitting, setIsCommitting] = useState(false);
   const [mode, setMode] = useState<PanelMode>("policies");
-  const { closePaymentPopup } = useOnchainPurchaseContext();
+  const { closePaymentPopup } = useCoinbaseRail();
 
   const handleClose = useCallback(() => {
     // Kill any in-flight payment popup so dismissing the drawer also dismisses
