@@ -8,3 +8,8 @@ export {
   useCoinflowRail,
   type CoinflowRailContextValue,
 } from "./coinflow-rail";
+export {
+  ControllerRailProvider,
+  useControllerRail,
+  type ControllerRailContextValue,
+} from "./controller-rail";

@@ -11,7 +11,7 @@ import type { TokenOption } from "@/context";
 
 // Encapsulates the controller (USDC) payment rail: the controller's USDC
 // balance used to gate the purchase, and the transaction that fronts USDC to a
-// derived deposit address. Lives here so CheckoutDrawer stays focused on UI.
+// derived deposit address. Lives here so ControllerCheckout stays focused on UI.
 export function useControllerPurchase({
   usdcToken,
   amount,

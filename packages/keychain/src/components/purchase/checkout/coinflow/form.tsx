@@ -46,7 +46,7 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
   const {
     intent: coinflowIntent,
     env: coinflowEnv,
-    onSuccess,
+    onComplete,
   } = useCoinflowRail();
   const controllerTheme = useControllerTheme();
   const coinflowTheme = useMemo<MerchantTheme>(() => {
@@ -101,7 +101,7 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
         },
       });
 
-      onSuccess();
+      onComplete();
     } catch (e) {
       setError(e instanceof Error ? e : new Error("Payment failed"));
     } finally {
@@ -117,7 +117,7 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
     address1,
     city,
     state,
-    onSuccess,
+    onComplete,
   ]);
 
   const onCardFormLoad = useCallback(() => setIsFormReady(true), []);

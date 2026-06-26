@@ -10,13 +10,15 @@ import type { CoinflowIntent } from "@/hooks/payments/coinflow";
  * difference is which mutation creates the intent and where to go on success.
  * Each product supplies a provider:
  *  - `intent` is the already-created Coinflow intent the form tokenizes against.
- *  - `onSuccess` lets the product decide the post-payment destination (route
+ *  - `onComplete` lets the product decide the post-payment destination (route
  *    navigation for the bundle flow, close-and-refresh for the credits drawer).
+ *    The name is shared by every rail (Coinbase, Coinflow, controller) so the
+ *    host has one uniform completion seam.
  */
 export interface CoinflowRailContextValue {
   intent: CoinflowIntent | undefined;
   env: "prod" | "sandbox";
-  onSuccess: () => void;
+  onComplete: () => void;
 }
 
 const CoinflowRailContext = createContext<CoinflowRailContextValue | undefined>(
