@@ -5,7 +5,7 @@ import { constants } from "starknet";
 import { toHex } from "viem";
 
 const meta = {
-  title: "Network",
+  title: "Primitives/Network",
   component: Network,
   tags: ["autodocs"],
 } satisfies Meta<typeof Network>;

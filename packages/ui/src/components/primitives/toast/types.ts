@@ -1,3 +1,7 @@
+// Wire-protocol contract for controller toasts. This is the single source of
+// truth shared by BOTH the keychain emitter (postMessage) and the exported
+// receiver <ControllerToaster /> (which re-exports this file from
+// `@/components/controller-export/types`). Keep changes backward-compatible.
 export type ToastPosition =
   | "top-left"
   | "top-right"

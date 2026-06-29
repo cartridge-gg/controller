@@ -12,21 +12,23 @@ import {
   CONTROLLER_TOAST_MESSAGE_TYPE,
   ToastPosition,
   NetworkSwitchToastOptions,
-} from "@/components/primitives/toast/types";
-import { ControllerToaster } from "@/components/primitives/toast/controller-toaster";
+} from "./types";
+import {
+  ControllerToaster,
+  ControllerNotificationTypes,
+} from "./controller-toaster";
 import { toast as sonnerToast } from "sonner";
 import {
-  ControllerNotificationTypes,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
   Switch,
-} from "..";
+} from "../..";
 
 const meta: Meta = {
-  title: "Primitives/Toast/Controller Integration",
+  title: "Controller Export/Toaster/Controller Toaster",
   parameters: {
     layout: "centered",
     backgrounds: {
@@ -238,29 +240,6 @@ function ControllerToasterDemo() {
     emitControllerToast("achievement", options);
   };
 
-  // const showAchievementCustomToast = () => {
-  //   const options: AchievementToastOptions = {
-  //     variant: "achievement",
-  //     title: "Pacifist Path",
-  //     subtitle: "Earned!",
-  //     iconUrl: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/a3bfe959-50c4-4f89-0aef-b19207d82a00/logo",
-  //     xpAmount: 100,
-  //     progress: 100,
-  //     duration: 5000,
-  //   };
-  //   emitControllerToast("achievementCustom", options);
-  // };
-
-  // const showQuestToast = () => {
-  //   const options: QuestToastOptions = {
-  //     variant: "quest",
-  //     title: "Daily Quest",
-  //     subtitle: "Conquered!",
-  //     duration: 5000,
-  //   };
-  //   emitControllerToast("quest", options);
-  // };
-
   const switchDisabledType = (type: ControllerNotificationTypes) => {
     setDisabledTypes((prev) => {
       if (prev.includes(type)) {
@@ -395,20 +374,6 @@ function ControllerToasterDemo() {
           >
             {isLoading.achievement ? "Loading..." : "Achievement Complete"}
           </Button>
-          {/* <Button
-            onClick={showAchievementCustomToast}
-            className="w-full"
-            disabled={isLoading.achievementCustom}
-          >
-            {isLoading.achievementCustom ? "Loading..." : "Achievement Custom"}
-          </Button> */}
-          {/* <Button
-            onClick={showQuestToast}
-            className="w-full"
-            disabled={isLoading.quest}
-          >
-            {isLoading.quest ? "Loading..." : "Quest"}
-          </Button> */}
         </div>
 
         <div>
@@ -507,14 +472,15 @@ export const UsageExample: Story = {
       <div className="space-y-3 text-sm">
         <div>
           <h3 className="font-medium text-green-400">
-            1. Add the {"<ControllerToaster />"} component to your game: 2. If
+            1. Add the {"<ControllerToaster />"} component to your game. 2. If
             you already have a sonner toaster, remove its {"<Toaster />"}{" "}
-            component: 3. Or, if you want the controller toasters to be
+            component. 3. Or, if you want the controller toasters to be
             independent from your existing sonner toaster, give it a toasterId:{" "}
             {'<ControllerToaster toasterId="controller" />'}
           </h3>
           <pre className="bg-gray-800 p-2 rounded mt-1 text-xs">
-            {`import { ControllerToaster } from "@cartridge/controller-ui";
+            {`import { ControllerToaster } from "@cartridge/controller/ui";
+import "@cartridge/controller/ui/styles.css";
 
 function App() {
   return (
