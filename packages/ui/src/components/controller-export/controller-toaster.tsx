@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { Toaster as Sonner } from "sonner";
 import {
   showErrorToast,
   showSuccessToast,
@@ -8,7 +9,7 @@ import {
   showMarketplaceToast,
   showAchievementToast,
   showNetworkSwitchToast,
-} from "@/components/primitives/toast/specialized-toasts";
+} from "./specialized-toasts";
 import { useToast, ToasterToast } from "./use-toast";
 import {
   ToastPosition,
@@ -20,7 +21,10 @@ import {
   CONTROLLER_TOAST_MESSAGE_TYPE,
   NetworkSwitchToastOptions,
 } from "./types";
-import { SonnerToaster } from "@/components/primitives/sonner";
+
+type SonnerToasterProps = React.ComponentProps<typeof Sonner> & {
+  toasterId?: string;
+};
 
 export type ControllerNotificationTypes =
   | "error"
@@ -35,6 +39,7 @@ export function ControllerToaster({
   disabledTypes = [],
   collapseTransactions,
   toasterId,
+  ...props
 }: {
   position?: ToastPosition;
   disabledTypes?: ControllerNotificationTypes[];
@@ -132,5 +137,30 @@ export function ControllerToaster({
     };
   }, [disabledTypes.join(","), collapseTransactions, toasterId]);
 
-  return <SonnerToaster position={position} toasterId={toasterId} />;
+  const theme = useMemo(
+    () => localStorage.getItem("vite-ui-colorScheme") ?? "system",
+    [],
+  );
+
+  return (
+    <Sonner
+      id={toasterId}
+      position={position}
+      theme={theme as SonnerToasterProps["theme"]}
+      className="toaster group"
+      duration={1000}
+      toastOptions={{
+        classNames: {
+          toast:
+            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg rounded-lg",
+          description: "group-[.toast]:text-foreground-400",
+          actionButton:
+            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+          cancelButton:
+            "group-[.toast]:bg-background-200 group-[.toast]:text-foreground-400",
+        },
+      }}
+      {...props}
+    />
+  );
 }

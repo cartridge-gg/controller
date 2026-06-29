@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { Toaster as SonnerToster } from "sonner";
+import { Toaster as Sonner } from "sonner";
 
-type SonnerToasterProps = React.ComponentProps<typeof SonnerToster> & {
+type SonnerToasterProps = React.ComponentProps<typeof Sonner> & {
   toasterId?: string;
 };
 
@@ -14,7 +14,7 @@ const SonnerToaster = ({ toasterId, ...props }: SonnerToasterProps) => {
   );
 
   return (
-    <SonnerToster
+    <Sonner
       theme={theme as SonnerToasterProps["theme"]}
       className="toaster group"
       duration={1000}
