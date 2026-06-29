@@ -5,6 +5,7 @@ import {
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
 import { useNavigation } from "@/context/navigation";
+import { getToriiUrl } from "@/helpers/torii-url";
 import { connectToController } from "@/utils/connection";
 import type { HeadlessConnectionState } from "@/utils/connection/headless";
 import { requestPopupAuthOrigin } from "@/utils/connection/popup";
@@ -40,6 +41,7 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
   LORDS_CONTRACT_ADDRESS,
+  isPublicChain,
 } from "@cartridge/controller-ui/utils";
 import { Eip191Credentials } from "@cartridge/controller-ui/utils/api/cartridge";
 import { getAddress } from "ethers";
@@ -76,6 +78,7 @@ type ResolvedUrlParams = {
   shouldOverridePresetPolicies: boolean;
   version: string | null;
   project: string | null;
+  toriiUrl: string | null;
   namespace: string | null;
   tokens: string[];
   ref: string | null;
@@ -389,6 +392,7 @@ export function useConnectionValue() {
     () => !!initialPreset,
   );
   const [isMainnet, setIsMainnet] = useState<boolean>(false);
+  const [isAppchain, setIsAppchain] = useState<boolean>(false);
   const [configData, setConfigData] = useState<Record<string, unknown> | null>(
     null,
   );
@@ -541,6 +545,8 @@ export function useConnectionValue() {
       urlParams.get("should_override_preset_policies") === "true";
     const version = urlParams.get("v");
     const project = urlParams.get("ps");
+    const toriiUrlParam = urlParams.get("torii");
+    const toriiUrl = toriiUrlParam ? decodeURIComponent(toriiUrlParam) : null;
     const namespace = urlParams.get("ns");
     const ref = urlParams.get("ref");
     const refGroup = urlParams.get("ref_group");
@@ -598,6 +604,7 @@ export function useConnectionValue() {
         false,
       version: version || urlParamsRef.current?.version || null,
       project: project || urlParamsRef.current?.project || null,
+      toriiUrl: toriiUrl || urlParamsRef.current?.toriiUrl || null,
       namespace: namespace || urlParamsRef.current?.namespace || null,
       tokens: erc20Param ? tokens : urlParamsRef.current?.tokens || tokens,
       ref: ref || urlParamsRef.current?.ref || null,
@@ -741,6 +748,8 @@ export function useConnectionValue() {
 
   useEffect(() => {
     setIsMainnet(controller?.chainId() === constants.StarknetChainId.SN_MAIN);
+    const chainId = controller?.chainId();
+    setIsAppchain(!!chainId && !isPublicChain(chainId));
   }, [controller]);
 
   // Load config when preset is provided
@@ -1141,6 +1150,12 @@ export function useConnectionValue() {
     [parent],
   );
 
+  // Resolved Torii URL: the `toriiUrl` override wins, else the Slot URL from `project`.
+  const toriiUrl = useMemo(
+    () => getToriiUrl(urlParams.project, urlParams.toriiUrl),
+    [urlParams.project, urlParams.toriiUrl],
+  );
+
   return {
     parent,
     controller,
@@ -1151,6 +1166,7 @@ export function useConnectionValue() {
     setOnModalClose,
     theme,
     project: urlParams.project,
+    toriiUrl,
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
@@ -1162,6 +1178,7 @@ export function useConnectionValue() {
     isPoliciesResolved,
     isPoliciesError,
     isMainnet,
+    isAppchain,
     verified,
     chainId,
     setController,

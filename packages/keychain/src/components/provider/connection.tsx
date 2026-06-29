@@ -23,6 +23,7 @@ export type ConnectionContextValue = {
   origin: string;
   rpcUrl: string;
   project: string | null;
+  toriiUrl: string | null;
   namespace: string | null;
   propagateError: boolean;
   webauthnPopup: {
@@ -40,6 +41,7 @@ export type ConnectionContextValue = {
   isPoliciesResolved: boolean;
   isPoliciesError: boolean;
   isMainnet: boolean;
+  isAppchain: boolean; // not public chains (mainnet/sepolia)
   verified: boolean;
   chainId?: string;
   setController: (controller?: Controller) => void;

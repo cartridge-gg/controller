@@ -7,18 +7,18 @@ import type { TokenTransfer } from "@dojoengine/torii-wasm";
 export type Transfer = TokenTransfer;
 
 export const useTransfers = (contractAddress: string, tokenId: string[]) => {
-  const { project } = useConnection();
+  const { toriiUrl } = useConnection();
   const [client, setClient] = useState<Awaited<
     ReturnType<typeof Torii.getClient>
   > | null>(null);
 
   useEffect(() => {
-    if (!project) return;
-    Torii.getClient(project).then(setClient);
-  }, [project]);
+    if (!toriiUrl) return;
+    Torii.getClient(toriiUrl).then(setClient);
+  }, [toriiUrl]);
 
   const query = useQuery(
-    ["transfers", contractAddress, tokenId, project],
+    ["transfers", contractAddress, tokenId, toriiUrl],
     async () => {
       if (!client) return [];
       const result = await Torii.fetchTransfers(

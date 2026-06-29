@@ -89,7 +89,7 @@ function SlotCryptoFundInner({
   onBack,
   onComplete,
 }: SlotCryptoFundProps) {
-  const { controller } = useConnection();
+  const { controller, isMainnet } = useConnection();
   const { setOnBackCallback } = useNavigation();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { account: extAccount } = useAccount();
@@ -263,7 +263,7 @@ function SlotCryptoFundInner({
         tokenAddress: selectedToken.address,
         tokenAmount: amount,
         teamId: team.id,
-        isMainnet: controller.chainId() === constants.StarknetChainId.SN_MAIN,
+        isMainnet,
       });
 
       setPhase("transferring");
@@ -289,7 +289,15 @@ function SlotCryptoFundInner({
     } finally {
       setPhase("idle");
     }
-  }, [amount, controller, extAccount, onComplete, selectedToken, team.id]);
+  }, [
+    amount,
+    controller,
+    extAccount,
+    onComplete,
+    selectedToken,
+    team.id,
+    isMainnet,
+  ]);
 
   const phaseLabel = getPhaseLabel(phase);
   const walletConnectors = connectors.filter((c) =>

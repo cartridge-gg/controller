@@ -7,6 +7,7 @@ import {
 } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
+import { getToriiUrl } from "@/helpers/torii-url";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/controller-ui/utils";
@@ -65,7 +66,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     () => (account ? addAddressPadding(account.address) : ""),
     [account],
   );
-  const { project } = useConnection();
+  const { project, toriiUrl } = useConnection();
   const shouldFetchHistory = useMemo(
     () => shouldFetchProfileHistory(location.pathname),
     [location.pathname],
@@ -225,7 +226,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
               metadata.attributes?.find(
                 (attribute) => attribute.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
-            const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/${addAddressPadding(transfer.contractAddress)}/${transfer.tokenId}/image`;
+            const image = `${toriiUrl ?? getToriiUrl(item.meta.project)}/static/${addAddressPadding(transfer.contractAddress)}/${transfer.tokenId}/image`;
             const userAddress =
               BigInt(transfer.fromAddress) === BigInt(address)
                 ? transfer.toAddress
@@ -259,7 +260,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           });
       }) || []
     );
-  }, [transfers, address, getUsername, theme]);
+  }, [transfers, address, getUsername, theme, toriiUrl]);
 
   const actions: CardProps[] = useMemo(() => {
     return (

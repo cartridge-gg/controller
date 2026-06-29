@@ -50,7 +50,7 @@ export function ExecutionContainer({
   children,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
-  const { controller, policies } = useConnection();
+  const { controller, policies, isAppchain } = useConnection();
   const { navigate } = useNavigation();
   const [maxFee, setMaxFee] = useState<FeeEstimate | undefined>();
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
@@ -59,6 +59,11 @@ export function ExecutionContainer({
   const [isLoading, setIsLoading] = useState(false);
   const [isEstimating, setIsEstimating] = useState(true);
   const [ctaState, setCTAState] = useState<"deploy" | "execute">("execute");
+  // Tracks whether the user has already attempted to submit. On appchains we
+  // attempt the action optimistically and only fall back to the "Add Funds" flow
+  // if that attempt itself fails on funds (the chain may not charge fees, may
+  // settle in a different fee token, or a paymaster may sponsor).
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   // Prevent unnecessary estimate fee calls. Track the controller too: on a chain
   // switch a *new* Controller instance is created (bound to the new RPC), and the
@@ -171,6 +176,7 @@ export function ExecutionContainer({
 
   const handleSubmit = async () => {
     setIsLoading(true);
+    setSubmitAttempted(true);
     try {
       await onSubmit(maxFee);
     } catch (e) {
@@ -245,6 +251,26 @@ export function ExecutionContainer({
         {(() => {
           switch (ctrlError?.code) {
             case ErrorCode.CartridgeControllerNotDeployed:
+              // On appchains the controller deploys itself on first execute, so
+              // there's no separate deploy step: submitting the transaction deploys
+              // and executes in one shot (the wasm estimates the fee internally when
+              // none is provided up front). Surfacing the deploy screen here instead
+              // double-deploys and fails with "contract already deployed". Only
+              // mainnet keeps the explicit deploy/fund flow.
+              if (isAppchain) {
+                // No fee estimate is shown: the account isn't deployed yet, so the
+                // fee can't be estimated up front. The wasm estimates internally and
+                // deploys + executes when the transaction is submitted.
+                return (
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    disabled={isEstimating || !transactions}
+                  >
+                    {buttonText}
+                  </Button>
+                );
+              }
               return (
                 <>
                   <ControllerErrorAlert error={ctrlError} />
@@ -254,6 +280,22 @@ export function ExecutionContainer({
                 </>
               );
             case ErrorCode.InsufficientBalance:
+              // On appchains, don't gate on a client-side balance check up front:
+              // the chain may not actually charge fees, may settle in a different
+              // fee token, or a paymaster may sponsor. Let the user attempt the
+              // action first; only surface "Add Funds" once the submission itself
+              // has failed on funds.
+              if (isAppchain && !submitAttempted) {
+                return (
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    disabled={isLoading || !transactions}
+                  >
+                    {buttonText}
+                  </Button>
+                );
+              }
               return (
                 <>
                   <Fees

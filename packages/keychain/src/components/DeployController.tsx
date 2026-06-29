@@ -75,7 +75,7 @@ export function DeployControllerView({
   onComplete: (hash: string) => void;
   ctrlError?: ControllerError;
 }) {
-  const { controller } = useConnection();
+  const { controller, isMainnet } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
   const { token: feeToken, isLoading } = useFeeToken();
   const [deployHash, setDeployHash] = useState<string>();
@@ -89,10 +89,7 @@ export function DeployControllerView({
   const feeEstimate: FeeEstimate | undefined = ctrlError?.data?.fee_estimate;
 
   useEffect(() => {
-    if (
-      !controller ||
-      controller.chainId() === constants.StarknetChainId.SN_MAIN
-    ) {
+    if (!controller || isMainnet) {
       return;
     }
 
@@ -101,7 +98,7 @@ export function DeployControllerView({
     // not-deployed state can arrive without `fee_estimate`. Move straight to the
     // deploy step regardless; selfDeploy estimates internally when no fee is given.
     setAccountState("deploy");
-  }, [controller, feeEstimate]);
+  }, [controller, feeEstimate, isMainnet]);
 
   useEffect(() => {
     if (deployHash && controller) {

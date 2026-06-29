@@ -45,7 +45,7 @@ export function useCollection({
   tokenIds?: string[];
 }): UseCollectionResponse {
   const { address } = useAccountProfile({ overridable: true });
-  const { project } = useConnection();
+  const { toriiUrl } = useConnection();
 
   const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
   const [collection, setCollection] = useState<Collection | undefined>(
@@ -57,9 +57,9 @@ export function useCollection({
   );
 
   useEffect(() => {
-    if (!project) return;
-    Torii.getClient(project).then((client) => setClient(client));
-  }, [project]);
+    if (!toriiUrl) return;
+    Torii.getClient(toriiUrl).then((client) => setClient(client));
+  }, [toriiUrl]);
 
   useEffect(() => {
     if (!client || !address || !trigger || !contractAddress) return;
@@ -97,9 +97,9 @@ export function useCollection({
         console.error(error);
       }
       if (!metadata.name || !metadata.image) return;
-      const contractImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/image`;
-      const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
-      const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
+      const contractImage = `${toriiUrl}/static/${addAddressPadding(contractAddress)}/image`;
+      const oldImage = `${toriiUrl}/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+      const newImage = `${toriiUrl}/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
       const newCollection: Collection = {
         address: contractAddress,
         name: asset.name || metadata.name,
@@ -130,8 +130,8 @@ export function useCollection({
               BigInt(b.balance) !== 0n,
           )?.account_address;
           if (!owner) return; // Skip assets without owners
-          const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
-          const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
+          const oldImage = `${toriiUrl}/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+          const newImage = `${toriiUrl}/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
           const balance =
             balances.find(
               (b) =>
@@ -153,7 +153,7 @@ export function useCollection({
       setAssets(newAssets);
     };
     getCollections();
-  }, [client, address, trigger, project, contractAddress, tokenIds]);
+  }, [client, address, trigger, toriiUrl, contractAddress, tokenIds]);
 
   const refetch = useCallback(() => {
     setTrigger(true);
@@ -195,7 +195,7 @@ export type CollectionType = {
 
 export function useCollections(): UseCollectionsResponse {
   const { address } = useAccountProfile({ overridable: true });
-  const { project } = useConnection();
+  const { toriiUrl } = useConnection();
   const [collections, setCollections] = useState<{ [key: string]: Collection }>(
     {},
   );
@@ -205,9 +205,9 @@ export function useCollections(): UseCollectionsResponse {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    if (!project) return;
-    Torii.getClient(project).then((client) => setClient(client));
-  }, [project]);
+    if (!toriiUrl) return;
+    Torii.getClient(toriiUrl).then((client) => setClient(client));
+  }, [toriiUrl]);
 
   useEffect(() => {
     if (!client || !address || !trigger) return;
@@ -249,8 +249,8 @@ export function useCollections(): UseCollectionsResponse {
           } catch (error) {
             console.error(error);
           }
-          const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
-          const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
+          const oldImage = `${toriiUrl}/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+          const newImage = `${toriiUrl}/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
           const type = contracts.find(
             (c) => c.contract_address === contractAddress,
           )?.contract_type;
@@ -266,7 +266,7 @@ export function useCollections(): UseCollectionsResponse {
       setCollections(collections);
     };
     getCollections();
-  }, [client, address, project, trigger]);
+  }, [client, address, toriiUrl, trigger]);
 
   const refetch = useCallback(() => {
     setTrigger(true);
@@ -289,17 +289,20 @@ export type UseToriiCollectionsResponse = {
 
 export function useToriiCollections(): UseToriiCollectionsResponse {
   const { provider } = useMarketplace();
-  const { project } = useConnection();
+  const { project, toriiUrl } = useConnection();
   const [client, setClient] = useState<ToriiClient | undefined>(undefined);
   const [status, setStatus] = useState<
     "success" | "error" | "idle" | "loading"
   >("idle");
   const [collections, setCollections] = useState<Collections>({});
 
+  // Identifier under which the marketplace keys this project's collections.
+  const projectKey = project ?? toriiUrl;
+
   const refetch = useCallback(() => {
-    if (!client || !project) return;
+    if (!client || !projectKey) return;
     setStatus("loading");
-    Marketplace.fetchCollections({ [project]: client }, LIMIT)
+    Marketplace.fetchCollections({ [projectKey]: client }, LIMIT)
       .then((collections) => {
         setCollections(collections);
         setStatus("success");
@@ -308,17 +311,16 @@ export function useToriiCollections(): UseToriiCollectionsResponse {
         setStatus("error");
         console.error(error);
       });
-  }, [project, client, setStatus, setCollections]);
+  }, [projectKey, client, setStatus, setCollections]);
 
   useEffect(() => {
-    if (!project) return;
+    if (!toriiUrl) return;
     const getClients = async () => {
-      const url = `https://api.cartridge.gg/x/${project}/torii`;
-      const client = await provider.getToriiClient(url);
+      const client = await provider.getToriiClient(toriiUrl);
       setClient(client);
     };
     getClients();
-  }, [provider, project]);
+  }, [provider, toriiUrl]);
 
   useEffect(() => {
     refetch();
@@ -345,7 +347,7 @@ export function useToriiCollection({
   tokenIds: string[];
 }): UseToriiCollectionResponse {
   const { provider } = useMarketplace();
-  const { project } = useConnection();
+  const { toriiUrl } = useConnection();
   const [client, setClient] = useState<ToriiClient | undefined>(undefined);
   const [status, setStatus] = useState<
     "success" | "error" | "idle" | "loading"
@@ -353,14 +355,13 @@ export function useToriiCollection({
   const [tokens, setTokens] = useState<Token[]>([]);
 
   useEffect(() => {
-    if (!project) return;
+    if (!toriiUrl) return;
     const getClient = async () => {
-      const url = `https://api.cartridge.gg/x/${project}/torii`;
-      const client = await provider.getToriiClient(url);
+      const client = await provider.getToriiClient(toriiUrl);
       setClient(client);
     };
     getClient();
-  }, [provider, project]);
+  }, [provider, toriiUrl]);
 
   const refetch = useCallback(() => {
     if (!client || !contractAddress || !tokenIds.length) return;

@@ -197,6 +197,29 @@ describe("ExecutionContainer", () => {
     expect(screen.getByText("DEPLOY ACCOUNT")).toBeInTheDocument();
   });
 
+  it("submits without a deploy screen when not deployed on an appchain", async () => {
+    await act(async () => {
+      renderWithConnection(
+        <ExecutionContainer
+          {...defaultProps}
+          executionError={{
+            code: 112, // ErrorCode.CartridgeControllerNotDeployed,
+            message: "Controller not deployed",
+          }}
+        />,
+        {
+          // On an appchain the controller deploys itself on first execute, so the
+          // transaction submits directly rather than diverting to the
+          // (double-deploying) deploy screen.
+          isAppchain: true,
+        },
+      );
+    });
+
+    expect(screen.getByText("SUBMIT")).toBeInTheDocument();
+    expect(screen.queryByText("DEPLOY ACCOUNT")).not.toBeInTheDocument();
+  });
+
   it("shows funding view when balance is insufficient", async () => {
     await act(async () => {
       renderWithProviders(
@@ -212,6 +235,29 @@ describe("ExecutionContainer", () => {
     });
 
     expect(screen.getByText("ADD FUNDS")).toBeInTheDocument();
+  });
+
+  it("attempts the action (no upfront Add Funds) on an appchain when balance is insufficient", async () => {
+    await act(async () => {
+      renderWithConnection(
+        <ExecutionContainer
+          {...defaultProps}
+          executionError={{
+            code: 113, // ErrorCode.InsufficientBalance,
+            message: "Insufficient balance",
+          }}
+        />,
+        {
+          // Appchain: the chain may not charge fees / may use a different fee token,
+          // so the user should be able to attempt the action before being asked to
+          // add funds.
+          isAppchain: true,
+        },
+      );
+    });
+
+    expect(screen.getByText("SUBMIT")).toBeInTheDocument();
+    expect(screen.queryByText("ADD FUNDS")).not.toBeInTheDocument();
   });
 
   it("shows continue button for already registered session", async () => {

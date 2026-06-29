@@ -63,6 +63,7 @@ describe("Session", () => {
       origin: "https://test.app",
       rpcUrl: "https://rpc.test.app",
       project: null,
+      toriiUrl: null,
       namespace: null,
       propagateError: false,
       webauthnPopup: {
@@ -88,6 +89,7 @@ describe("Session", () => {
       isPoliciesResolved: true,
       isPoliciesError: false,
       isMainnet: false,
+      isAppchain: false,
       verified: true,
       chainId: "SN_MAIN",
       setController: vi.fn(),
