@@ -5,10 +5,17 @@ import topLevelAwait from "vite-plugin-top-level-await";
 import dts from "vite-plugin-dts";
 import { visualizer } from "rollup-plugin-visualizer";
 
-// List peer dependencies, prevents bundling into library
+// List peer dependencies, prevents bundling into library.
+// react / react-dom are externalized so the `ui` chunk treats them as
+// (optional) peer deps instead of bundling a second React copy; "react"
+// also covers "react/jsx-runtime" via the prefix check below. The rest of
+// the UI dependencies (controller-ui, sonner, radix, etc.) are intentionally
+// bundled into the ui chunk.
 const externalDeps = [
   "open",
   "starknet",
+  "react",
+  "react-dom",
 ];
 
 export default defineConfig(({ mode }) => ({
@@ -50,6 +57,7 @@ export default defineConfig(({ mode }) => ({
       entry: {
         index: resolve(__dirname, "src/index.ts"),
         session: resolve(__dirname, "src/session/index.ts"),
+        "ui/index": resolve(__dirname, "src/ui/index.ts"),
       },
       name: "CartridgeController",
       formats: ["es"],
