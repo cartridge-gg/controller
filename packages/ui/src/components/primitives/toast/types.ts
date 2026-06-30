@@ -75,6 +75,14 @@ export interface MarketplaceToastOptions extends BaseToastOptions {
   action: "purchased" | "sold" | "sent" | "listed" | "unlisted";
 }
 
+// User Toast
+export interface UserToastOptions extends BaseToastOptions {
+  variant: "user";
+  username: string;
+  kind?: "created" | "connected" | "disconnected";
+  message?: string;
+}
+
 // Union type for all toast variants
 export type ToastOptions =
   | ErrorToastOptions
@@ -83,7 +91,8 @@ export type ToastOptions =
   | NetworkSwitchToastOptions
   | AchievementToastOptions
   | QuestToastOptions
-  | MarketplaceToastOptions;
+  | MarketplaceToastOptions
+  | UserToastOptions;
 
 export const CONTROLLER_TOAST_MESSAGE_TYPE = "controller-toast";
 

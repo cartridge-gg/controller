@@ -11,7 +11,7 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
+        default: "border bg-spacer-100 text-foreground",
         destructive:
           "destructive group border-destructive-100 bg-destructive-100 text-destructive-100",
       },
@@ -39,7 +39,7 @@ export const CloseButton = memo<CloseButtonProps>(
     return (
       <button
         className={cn(
-          "flex items-center justify-center w-6 h-6 rounded transition-colors",
+          "flex items-center justify-center p-0 w-6 h-6 rounded transition-colors bg-transparent border-none shadow-none",
           iconColorClass,
           className,
         )}
@@ -85,7 +85,7 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
         className={cn(toastVariants({ variant }), className)}
         {...props}
       >
-        <div className="flex items-center justify-between w-full flex-1">
+        <div className="flex items-center justify-between max-h-[64px] w-full flex-1">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {children}
           </div>

@@ -9,6 +9,7 @@ import {
   showMarketplaceToast,
   showAchievementToast,
   showNetworkSwitchToast,
+  showUserToast,
 } from "./specialized-toasts";
 import { useToast, ToasterToast } from "./use-toast";
 import {
@@ -20,6 +21,7 @@ import {
   AchievementToastOptions,
   CONTROLLER_TOAST_MESSAGE_TYPE,
   NetworkSwitchToastOptions,
+  UserToastOptions,
 } from "./types";
 
 type SonnerToasterProps = React.ComponentProps<typeof Sonner> & {
@@ -32,7 +34,8 @@ export type ControllerNotificationTypes =
   | "network-switch"
   | "transaction"
   | "marketplace"
-  | "achievement";
+  | "achievement"
+  | "user";
 
 export function ControllerToaster({
   position = "bottom-right",
@@ -125,6 +128,14 @@ export function ControllerToaster({
         const options = event.data.options as AchievementToastOptions;
         toast(
           showAchievementToast({
+            ...options,
+            toasterId,
+          }) as ToasterToast,
+        );
+      } else if (variant == "user" && !disabledTypes.includes("user")) {
+        const options = event.data.options as UserToastOptions;
+        toast(
+          showUserToast({
             ...options,
             toasterId,
           }) as ToasterToast,
