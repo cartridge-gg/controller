@@ -150,6 +150,9 @@ export function ControllerToaster({
       className="toaster group"
       duration={1000}
       toastOptions={{
+        // Toasts render in Inter (loaded by styles.css) with a sans-serif
+        // fallback.
+        style: { fontFamily: "Inter, sans-serif" },
         classNames: {
           toast:
             "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg rounded-lg",

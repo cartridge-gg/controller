@@ -1,9 +1,26 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import { execFileSync } from "child_process";
 import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
 import dts from "vite-plugin-dts";
 import { visualizer } from "rollup-plugin-visualizer";
+
+// Generate dist/ui/styles.css after the bundle is written. Done as a build
+// hook (not just a separate `build:styles` script) so it also runs on every
+// `vite build --watch` rebuild during `pnpm dev` — otherwise emptyOutDir wipes
+// styles.css and consumers importing `@cartridge/controller/ui/styles.css`
+// (e.g. the next example) fail to resolve it in dev.
+const buildUiStyles = () => ({
+  name: "controller-ui-styles",
+  closeBundle() {
+    execFileSync(
+      process.execPath,
+      [resolve(__dirname, "bin/build-ui-styles.mjs")],
+      { stdio: "inherit" },
+    );
+  },
+});
 
 // List peer dependencies, prevents bundling into library.
 // react / react-dom are externalized so the `ui` chunk treats them as
@@ -30,11 +47,12 @@ export default defineConfig(({ mode }) => ({
     }),
     mode === "production" &&
       visualizer({
-        open: false, 
-        filename: "dist/stats.html", 
+        open: false,
+        filename: "dist/stats.html",
         gzipSize: true,
         brotliSize: true,
       }),
+    buildUiStyles(),
   ],
 
   resolve: {

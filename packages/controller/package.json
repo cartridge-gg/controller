@@ -17,6 +17,7 @@
     "build:deps": "pnpm build:browser && pnpm build:node",
     "dev": "vite build --watch",
     "build:browser": "vite build",
+    "build:styles": "node bin/build-ui-styles.mjs",
     "build:node": "tsup --config tsup.node.config.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
@@ -74,6 +75,9 @@
   "devDependencies": {
     "@cartridge/controller-ui": "workspace:*",
     "@cartridge/tsconfig": "workspace:*",
+    "autoprefixer": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
     "@types/jest": "catalog:",
     "@types/mocha": "catalog:",
     "@types/node": "catalog:",

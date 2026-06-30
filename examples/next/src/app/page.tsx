@@ -16,8 +16,10 @@ import { Swap } from "components/Swap";
 import { Starterpack } from "components/Starterpack";
 import { KatanaAppchain } from "components/KatanaAppchain";
 import { UpdateSession } from "components/UpdateSession";
-import { ControllerToaster } from "@cartridge/controller-ui";
 import { Features } from "components/Features";
+// controller toaster (available to any app)
+import { ControllerToaster } from "@cartridge/controller/ui";
+import "@cartridge/controller/ui/styles.css";
 
 const Home: FC = () => {
   return (
