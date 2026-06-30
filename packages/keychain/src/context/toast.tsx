@@ -13,6 +13,7 @@ import {
 } from "@cartridge/controller-ui";
 import { isIframe } from "@cartridge/controller-ui/utils";
 import { toast as sonnerToast } from "sonner";
+import { useConnection } from "@/hooks/connection";
 
 interface ToastContextType {
   toast: {
@@ -60,30 +61,26 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  // toast injected at document level
-  // from @cartridge/controller
-  // const addToast = useCallback((options: ToastOptions) => {
-  //   if (!toast) return;
-  //   toast(options);
-  // }, []);
+  const { preset } = useConnection();
 
-  const emitToast = useCallback((options: ToastOptions) => {
-    if (isIframe()) {
-      const searchParams = new URLSearchParams(window.location.search);
-      const preset = searchParams.get("preset") ?? undefined;
-      window.parent.postMessage(
-        {
-          type: CONTROLLER_TOAST_MESSAGE_TYPE,
-          options: {
-            duration: 5000,
-            ...options,
-            preset,
+  const emitToast = useCallback(
+    (options: ToastOptions) => {
+      if (isIframe()) {
+        window.parent.postMessage(
+          {
+            type: CONTROLLER_TOAST_MESSAGE_TYPE,
+            options: {
+              duration: 5000,
+              ...options,
+              preset,
+            },
           },
-        },
-        "*",
-      );
-    }
-  }, []);
+          "*",
+        );
+      }
+    },
+    [preset],
+  );
 
   const toast = useMemo(
     () => ({

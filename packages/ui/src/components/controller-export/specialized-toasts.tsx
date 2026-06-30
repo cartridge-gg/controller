@@ -15,9 +15,9 @@ import {
 import { StarknetColorIcon } from "@/components/icons/brand-color";
 import { CollectibleImage } from "@/components/modules/collectibles";
 import { AchievementPlayerAvatar } from "@/components/modules/achievements/player-avatar";
+import { usePresetColor } from "./preset-provider";
 import { ToasterToast } from "./use-toast";
 import { Toast } from "./toast";
-import { usePresetColor } from "@/utils/context/presets";
 
 // Base toast container for specialized toasts
 const specializedToastVariants = cva(
@@ -309,7 +309,6 @@ const ErrorToast = memo<ErrorToastProps>(
   ({
     message,
     progress = 100,
-    preset,
     showClose,
     toastId,
     className,
@@ -333,7 +332,7 @@ const ErrorToast = memo<ErrorToastProps>(
           </span>
         </div>
       </div>
-      <ToastProgressBar progress={progress} variant="error" preset={preset} />
+      <ToastProgressBar progress={progress} variant="error" />
     </Toast>
   ),
 );

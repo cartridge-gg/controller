@@ -10,6 +10,7 @@ import {
   XPTag,
   ToastProgressBar,
 } from "./specialized-toasts";
+import { ControllerPresetProvider } from "./preset-provider";
 import { CloseButton } from "./toast";
 import { StarknetIcon } from "@/components/icons/brand";
 
@@ -68,6 +69,7 @@ function Item({
 // `duration={0}` so they render persistently for inspection / snapshots.
 export const AllToasts: Story = {
   render: () => (
+    <ControllerPresetProvider>
     <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
       <Section title="Achievement">
         <Item label="Standard (66.7%)">
@@ -291,5 +293,6 @@ export const AllToasts: Story = {
         </Item>
       </Section>
     </div>
+    </ControllerPresetProvider>
   ),
 };
