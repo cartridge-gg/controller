@@ -5,6 +5,7 @@ import {
   NetworkSwitchToast,
   ErrorToast,
   SuccessToast,
+  UserToast,
   TransactionToast,
   XPTag,
   ToastProgressBar,
@@ -186,6 +187,42 @@ export const AllToasts: Story = {
         <Item label="Long message">
           <SuccessToast
             message="You did something that really remarkable and profound!"
+            showClose={false}
+            duration={0}
+          />
+        </Item>
+      </Section>
+
+      <Section title="User">
+        <Item label="Created">
+          <UserToast
+            username="clicksave"
+            kind="created"
+            showClose={false}
+            duration={0}
+          />
+        </Item>
+        <Item label="Connected">
+          <UserToast
+            username="shinobi"
+            kind="connected"
+            showClose={false}
+            duration={0}
+          />
+        </Item>
+        <Item label="Disconnected">
+          <UserToast
+            username="0xmajor"
+            kind="disconnected"
+            showClose={false}
+            duration={0}
+          />
+        </Item>
+        <Item label="Custom message">
+          <UserToast
+            username="highlordaributtersworththethirdofcanterburyheightscountymaster"
+            kind="connected"
+            message="Welcome back!"
             showClose={false}
             duration={0}
           />

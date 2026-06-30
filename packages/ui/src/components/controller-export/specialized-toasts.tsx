@@ -14,17 +14,19 @@ import {
 } from "@/components/icons";
 import { StarknetColorIcon } from "@/components/icons/brand-color";
 import { CollectibleImage } from "@/components/modules/collectibles";
+import { AchievementPlayerAvatar } from "@/components/modules/achievements/player-avatar";
 import { ToasterToast } from "./use-toast";
 import { Toast } from "./toast";
 import { usePresetColor } from "@/utils/context/presets";
 
 // Base toast container for specialized toasts
 const specializedToastVariants = cva(
-  "flex flex-col items-start p-0 bg-background shadow-lg rounded-lg border-0 overflow-hidden relative",
+  "flex flex-col items-start p-0 bg-spacer-100 shadow-lg rounded-lg border-0 overflow-hidden relative",
   {
     variants: {
       variant: {
         achievement: "w-[360px] h-[68px]",
+        user: "w-[360px] h-[68px]",
         network: "w-[360px] h-[52px]",
         error: "w-[360px] h-[52px] bg-destructive",
         transaction: "w-[360px] h-[52px]",
@@ -383,6 +385,75 @@ const SuccessToast = memo<SuccessToastProps>(
 
 SuccessToast.displayName = "SuccessToast";
 
+// User Toast Component
+type UserToastKind = "created" | "connected" | "disconnected";
+
+const USER_TOAST_DEFAULT_MESSAGE: Record<UserToastKind, string> = {
+  created: "Controller Created!",
+  connected: "Controller Connected",
+  disconnected: "Controller Disconnected",
+};
+
+interface UserToastProps extends Omit<ToasterToast, "children"> {
+  username: string;
+  kind?: UserToastKind;
+  message?: string;
+  progress?: number;
+  preset?: string;
+}
+
+const UserToast = memo<UserToastProps>(
+  ({
+    username,
+    kind = "created",
+    message,
+    progress = 100,
+    preset,
+    showClose,
+    toastId,
+    className,
+    ...props
+  }) => {
+    const title = message ?? USER_TOAST_DEFAULT_MESSAGE[kind];
+
+    return (
+      <Toast
+        className={cn(specializedToastVariants({ variant: "user" }), className)}
+        showClose={showClose}
+        toastId={toastId}
+        {...props}
+      >
+        <div className="flex items-center justify-between px-3 py-3 w-full flex-1">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center justify-center w-10 h-10 bg-background rounded p-[5px] flex-shrink-0">
+              <AchievementPlayerAvatar
+                username={username}
+                size="lg"
+                className="text-foreground min-w-6"
+              />
+            </div>
+            <div className="flex flex-col justify-center gap-[2px] flex-1 min-w-0">
+              <span className="text-foreground text-sm font-medium leading-5 tracking-[0.01em] truncate">
+                {title}
+              </span>
+              <span className="text-foreground-300 text-xs font-normal leading-4 truncate">
+                {username}
+              </span>
+            </div>
+          </div>
+        </div>
+        <ToastProgressBar
+          progress={progress}
+          variant="achievement"
+          preset={preset}
+        />
+      </Toast>
+    );
+  },
+);
+
+UserToast.displayName = "UserToast";
+
 // Transaction Notification Component
 interface TransactionToastProps extends Omit<ToasterToast, "children"> {
   status: "confirming" | "confirmed";
@@ -542,6 +613,18 @@ export const showSuccessToast = (
   };
 };
 
+export const showUserToast = (
+  props: Omit<UserToastProps, ToastPropsToOmit>,
+) => {
+  const toastId = props.toastId || `user-${Date.now()}`;
+  return {
+    duration: props.duration,
+    toasterId: props.toasterId,
+    toastId,
+    element: <UserToast {...props} showClose={true} toastId={toastId} />,
+  };
+};
+
 export const showTransactionToast = (
   props: Omit<TransactionToastProps, ToastPropsToOmit>,
 ) => {
@@ -560,6 +643,7 @@ export {
   NetworkSwitchToast,
   ErrorToast,
   SuccessToast,
+  UserToast,
   TransactionToast,
   XPTag,
   ToastProgressBar,
@@ -568,5 +652,6 @@ export {
   type NetworkSwitchToastProps,
   type ErrorToastProps,
   type SuccessToastProps,
+  type UserToastProps,
   type TransactionToastProps,
 };

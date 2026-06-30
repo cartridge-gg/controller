@@ -8,6 +8,7 @@ import {
   AchievementToastOptions,
   QuestToastOptions,
   MarketplaceToastOptions,
+  UserToastOptions,
   CONTROLLER_TOAST_MESSAGE_TYPE,
 } from "@cartridge/controller-ui";
 import { isIframe } from "@cartridge/controller-ui/utils";
@@ -18,28 +19,41 @@ interface ToastContextType {
     error: (
       message: string,
       options?: Omit<ErrorToastOptions, "variant">,
+      disabled?: boolean,
     ) => void;
     success: (
       message: string,
       options?: Omit<SuccessToastOptions, "variant">,
+      disabled?: boolean,
     ) => void;
     transaction: (
       message: string,
       options: Omit<TransactionToastOptions, "variant">,
+      disabled?: boolean,
     ) => void;
     networkSwitch: (
       message: string,
       options: Omit<NetworkSwitchToastOptions, "variant">,
+      disabled?: boolean,
     ) => void;
     marketplace: (
       message: string,
       options: Omit<MarketplaceToastOptions, "variant">,
+      disabled?: boolean,
     ) => void;
     achievement: (
       message: string,
       options: Omit<AchievementToastOptions, "variant">,
+      disabled?: boolean,
     ) => void;
-    quest: (options: Omit<QuestToastOptions, "variant">) => void;
+    quest: (
+      options: Omit<QuestToastOptions, "variant">,
+      disabled?: boolean,
+    ) => void;
+    user: (
+      options: Omit<UserToastOptions, "variant">,
+      disabled?: boolean,
+    ) => void;
   };
 }
 
@@ -76,7 +90,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       error: (
         message: string,
         options?: Omit<ErrorToastOptions, "variant">,
+        disabled?: boolean,
       ) => {
+        if (disabled) return;
         if (message) sonnerToast.error(message);
         emitToast({
           variant: "error",
@@ -87,7 +103,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       success: (
         message: string,
         options?: Omit<SuccessToastOptions, "variant">,
+        disabled?: boolean,
       ) => {
+        if (disabled) return;
         if (message) sonnerToast.success(message);
         emitToast({
           variant: "success",
@@ -98,7 +116,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       transaction: (
         message: string,
         options: Omit<TransactionToastOptions, "variant">,
+        disabled?: boolean,
       ) => {
+        if (disabled) return;
         if (message) sonnerToast.success(message);
         emitToast({
           safeToClose: options.status === "confirmed",
@@ -109,7 +129,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       networkSwitch: (
         message: string,
         options: Omit<NetworkSwitchToastOptions, "variant">,
+        disabled?: boolean,
       ) => {
+        if (disabled) return;
         if (message) sonnerToast.success(message);
         emitToast({
           ...options,
@@ -119,7 +141,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       marketplace: (
         message: string,
         options: Omit<MarketplaceToastOptions, "variant">,
+        disabled?: boolean,
       ) => {
+        if (disabled) return;
         if (message) sonnerToast.success(message);
         emitToast({
           safeToClose: true,
@@ -130,18 +154,34 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       achievement: (
         message: string,
         options: Omit<AchievementToastOptions, "variant">,
+        disabled?: boolean,
       ) => {
+        if (disabled) return;
         if (message) sonnerToast.success(message);
         emitToast({
           ...options,
           variant: "achievement",
         });
       },
-      quest: (options: Omit<QuestToastOptions, "variant">) => {
+      quest: (
+        options: Omit<QuestToastOptions, "variant">,
+        disabled?: boolean,
+      ) => {
+        if (disabled) return;
         if (options.subtitle) sonnerToast.success(options.subtitle);
         emitToast({
           ...options,
           variant: "quest",
+        });
+      },
+      user: (
+        options: Omit<UserToastOptions, "variant">,
+        disabled?: boolean,
+      ) => {
+        if (disabled) return;
+        emitToast({
+          ...options,
+          variant: "user",
         });
       },
     }),

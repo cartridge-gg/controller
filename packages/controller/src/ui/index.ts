@@ -31,7 +31,8 @@ export type ControllerNotificationTypes =
   | "network-switch"
   | "transaction"
   | "marketplace"
-  | "achievement";
+  | "achievement"
+  | "user";
 
 export interface ControllerToasterProps {
   position?: ToastPosition;

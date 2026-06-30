@@ -12,6 +12,7 @@ import {
   CONTROLLER_TOAST_MESSAGE_TYPE,
   ToastPosition,
   NetworkSwitchToastOptions,
+  UserToastOptions,
 } from "./types";
 import {
   ControllerToaster,
@@ -240,6 +241,36 @@ function ControllerToasterDemo() {
     emitControllerToast("achievement", options);
   };
 
+  const showUserCreated = () => {
+    const options: UserToastOptions = {
+      variant: "user",
+      kind: "created",
+      username: "clicksave",
+      duration: 5000,
+    };
+    emitControllerToast("userCreated", options);
+  };
+
+  const showUserConnected = () => {
+    const options: UserToastOptions = {
+      variant: "user",
+      kind: "connected",
+      username: "shinobi",
+      duration: 5000,
+    };
+    emitControllerToast("userConnected", options);
+  };
+
+  const showUserDisconnected = () => {
+    const options: UserToastOptions = {
+      variant: "user",
+      kind: "disconnected",
+      username: "0xmajor",
+      duration: 5000,
+    };
+    emitControllerToast("userDisconnected", options);
+  };
+
   const switchDisabledType = (type: ControllerNotificationTypes) => {
     setDisabledTypes((prev) => {
       if (prev.includes(type)) {
@@ -374,6 +405,27 @@ function ControllerToasterDemo() {
           >
             {isLoading.achievement ? "Loading..." : "Achievement Complete"}
           </Button>
+          <Button
+            onClick={showUserCreated}
+            className="w-full"
+            disabled={isLoading.userCreated}
+          >
+            {isLoading.userCreated ? "Loading..." : "User Created"}
+          </Button>
+          <Button
+            onClick={showUserConnected}
+            className="w-full"
+            disabled={isLoading.userConnected}
+          >
+            {isLoading.userConnected ? "Loading..." : "User Connected"}
+          </Button>
+          <Button
+            onClick={showUserDisconnected}
+            className="w-full"
+            disabled={isLoading.userDisconnected}
+          >
+            {isLoading.userDisconnected ? "Loading..." : "User Disconnected"}
+          </Button>
         </div>
 
         <div>
@@ -437,6 +489,13 @@ function ControllerToasterDemo() {
               onCheckedChange={() => switchDisabledType("achievement")}
             />
             Disable Achievement
+          </div>
+          <div className="flex gap-2">
+            <Switch
+              value={disabledTypes.includes("user") ? 1 : 0}
+              onCheckedChange={() => switchDisabledType("user")}
+            />
+            Disable User
           </div>
           <div className="flex gap-2 pt-2">
             <Switch
