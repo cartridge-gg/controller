@@ -33,6 +33,7 @@ import {
 import { credentialToAuth } from "@/components/connect/types";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import { clearBearerToken } from "@/utils/bearer-token";
+import { createRateLimitedFetch } from "@/utils/rate-limit";
 import { toWasmPolicies } from "@cartridge/controller";
 import { CredentialMetadata } from "@cartridge/controller-ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
@@ -355,6 +356,7 @@ export default class Controller {
     const controller = Object.create(Controller.prototype) as Controller;
     controller.provider = new RpcProvider({
       nodeUrl: rpcUrl ?? meta.rpcUrl(),
+      baseFetch: createRateLimitedFetch(),
     });
     controller.cartridgeMeta = meta;
     controller.cartridge = accountWithMeta.intoAccount();

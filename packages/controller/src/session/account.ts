@@ -4,6 +4,7 @@ import { Call, InvokeFunctionResponse, WalletAccount } from "starknet";
 
 import { normalizeCalls } from "../utils";
 import BaseProvider from "../provider";
+import { createRateLimitedFetch, RateLimitRetryOptions } from "../rate-limit";
 
 export * from "../errors";
 export * from "../types";
@@ -24,6 +25,7 @@ export default class SessionAccount extends WalletAccount {
       guardianKeyGuid,
       metadataHash,
       sessionKeyGuid,
+      rpcRetry,
     }: {
       rpcUrl: string;
       privateKey: string;
@@ -35,10 +37,19 @@ export default class SessionAccount extends WalletAccount {
       guardianKeyGuid: string;
       metadataHash: string;
       sessionKeyGuid: string;
+      rpcRetry?: false | RateLimitRetryOptions;
     },
   ) {
+    const providerOptions =
+      rpcRetry === false
+        ? { nodeUrl: rpcUrl }
+        : {
+            nodeUrl: rpcUrl,
+            baseFetch: createRateLimitedFetch(rpcRetry),
+          };
+
     super({
-      provider: { nodeUrl: rpcUrl },
+      provider: providerOptions,
       walletProvider: provider,
       address,
     });

@@ -3,7 +3,10 @@ import {
   TokensContext,
   TokensContextValue,
 } from "@/components/provider/tokens";
+import { createRateLimitedFetch } from "@/utils/rate-limit";
 import { Call, getChecksumAddress, RpcProvider } from "starknet";
+
+const rateLimitedFetch = createRateLimitedFetch();
 
 export function useTokens(): TokensContextValue {
   const context = useContext(TokensContext);
@@ -186,7 +189,10 @@ export function useTokenDecimals(
 
     const fetchDecimals = async () => {
       try {
-        const provider = new RpcProvider({ nodeUrl: rpcUrl });
+        const provider = new RpcProvider({
+          nodeUrl: rpcUrl,
+          baseFetch: rateLimitedFetch,
+        });
         const checksumAddress = getChecksumAddress(contractAddress);
 
         const result = await provider.callContract({

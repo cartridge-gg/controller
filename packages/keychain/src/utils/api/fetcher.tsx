@@ -1,5 +1,8 @@
 import { useCartridgeAPI } from "@cartridge/controller-ui/utils";
 import { getBearerToken } from "@/utils/bearer-token";
+import { createRateLimitedFetch } from "@/utils/rate-limit";
+
+const rateLimitedFetch = createRateLimitedFetch();
 
 export function fetchDataCreator(
   url: string,
@@ -14,7 +17,7 @@ export function fetchDataCreator(
     signal?: AbortSignal,
   ): Promise<TData> => {
     const bearerToken = getBearerToken();
-    const res = await fetch(url, {
+    const res = await rateLimitedFetch(url, {
       method: "POST",
       credentials: options?.credentials || "include",
       headers: {
@@ -28,6 +31,10 @@ export function fetchDataCreator(
       }),
       signal,
     });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
 
     const json = await res.json();
 
