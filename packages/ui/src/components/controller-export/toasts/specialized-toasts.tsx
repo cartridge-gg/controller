@@ -15,8 +15,8 @@ import {
 import { StarknetColorIcon } from "@/components/icons/brand-color";
 import { CollectibleImage } from "@/components/modules/collectibles";
 import { AchievementPlayerAvatar } from "@/components/modules/achievements/player-avatar";
-import { usePresetColor } from "./preset-provider";
-import { ToasterToast } from "./use-toast";
+import { usePresetColor } from "../controller-toaster/preset-provider";
+import { ToasterToast } from "../controller-toaster/use-toast";
 import { Toast } from "./toast";
 
 // Base toast container for specialized toasts

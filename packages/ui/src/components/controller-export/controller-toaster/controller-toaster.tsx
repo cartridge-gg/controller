@@ -10,7 +10,7 @@ import {
   showAchievementToast,
   showNetworkSwitchToast,
   showUserToast,
-} from "./specialized-toasts";
+} from "../toasts/specialized-toasts";
 import { useToast, ToasterToast } from "./use-toast";
 import { ControllerPresetProvider } from "./preset-provider";
 import {
@@ -23,7 +23,7 @@ import {
   CONTROLLER_TOAST_MESSAGE_TYPE,
   NetworkSwitchToastOptions,
   UserToastOptions,
-} from "./types";
+} from "../types";
 
 type SonnerToasterProps = React.ComponentProps<typeof Sonner> & {
   toasterId?: string;

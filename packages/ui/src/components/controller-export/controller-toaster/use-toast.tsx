@@ -2,8 +2,8 @@
 
 import React, { useCallback } from "react";
 import { toast as sonnerToast, ExternalToast } from "sonner";
-import { ToastProps } from "./toast";
-import { ErrorToast, SuccessToast } from "./specialized-toasts";
+import { ErrorToast, SuccessToast } from "../toasts/specialized-toasts";
+import { ToastProps } from "../toasts/toast";
 
 export type ToasterToast = ToastProps & {
   title?: React.ReactNode;
