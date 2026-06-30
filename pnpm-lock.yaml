@@ -498,6 +498,9 @@ importers:
         specifier: ^8.5.2
         version: 8.5.2
     devDependencies:
+      '@cartridge/controller-ui':
+        specifier: workspace:*
+        version: link:../ui
       '@cartridge/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
@@ -510,12 +513,24 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 18.19.87
+      '@types/react':
+        specifier: 'catalog:'
+        version: 18.3.20
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 18.3.7(@types/react@18.3.20)
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@18.19.87)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3))
       prettier:
         specifier: 'catalog:'
         version: 3.5.3
+      react:
+        specifier: 'catalog:'
+        version: 18.3.1
+      react-dom:
+        specifier: 'catalog:'
+        version: 18.3.1(react@18.3.1)
       rollup-plugin-visualizer:
         specifier: ^5.12.0
         version: 5.14.0(rollup@4.40.2)
