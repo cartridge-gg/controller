@@ -13,7 +13,7 @@ import {
   ToastPosition,
   NetworkSwitchToastOptions,
   UserToastOptions,
-} from "./types";
+} from "../types";
 import {
   ControllerToaster,
   ControllerNotificationTypes,
@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
   Switch,
-} from "../..";
+} from "../../..";
 
 const meta: Meta = {
   title: "Controller Export/Toaster/Controller Toaster",
