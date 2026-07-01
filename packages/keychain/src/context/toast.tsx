@@ -70,7 +70,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           {
             type: CONTROLLER_TOAST_MESSAGE_TYPE,
             options: {
-              duration: 5000,
               ...options,
               preset,
             },

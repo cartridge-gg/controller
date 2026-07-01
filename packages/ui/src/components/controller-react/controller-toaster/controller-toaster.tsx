@@ -26,8 +26,8 @@ import {
 } from "../types";
 
 const TOASTER_ID = "controller-toaster";
-
-type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
+const TOASTER_POSITION = "bottom-right";
+const TOASTER_DURATION = 5000;
 
 export type ControllerNotificationTypes =
   | "error"
@@ -38,16 +38,22 @@ export type ControllerNotificationTypes =
   | "achievement"
   | "user";
 
-export function ControllerToaster({
-  position = "bottom-right",
-  disabledTypes = [],
-  collapseTransactions,
-  ...props
-}: {
+type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
+
+export type ControllerToastProps = SonnerToasterProps & {
+  duration?: number;
   position?: ToastPosition;
   disabledTypes?: ControllerNotificationTypes[];
   collapseTransactions?: boolean;
-}) {
+};
+
+export function ControllerToaster({
+  position = TOASTER_POSITION,
+  duration = TOASTER_DURATION,
+  disabledTypes = [],
+  collapseTransactions,
+  ...props
+}: ControllerToastProps) {
   const { toast } = useToast();
 
   useEffect(() => {
@@ -159,7 +165,7 @@ export function ControllerToaster({
         position={position}
         theme={theme as SonnerToasterProps["theme"]}
         className="toaster group"
-        duration={1000}
+        duration={duration}
         toastOptions={{
           // Toasts render in Inter (loaded by styles.css) with a sans-serif
           // fallback.

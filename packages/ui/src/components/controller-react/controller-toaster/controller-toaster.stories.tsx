@@ -20,6 +20,7 @@ import {
 } from "./controller-toaster";
 import { toast as sonnerToast } from "sonner";
 import {
+  Input,
   Select,
   SelectContent,
   SelectItem,
@@ -53,6 +54,7 @@ function ControllerToasterDemo() {
     ControllerNotificationTypes[]
   >([]);
   const [position, setPosition] = useState<ToastPosition>("bottom-right");
+  const [duration, setDuration] = useState<number | undefined>(undefined);
   const [txCount, setTxCount] = useState(1);
   const [txConfirming, setTxConfirming] = useState(false);
 
@@ -87,7 +89,6 @@ function ControllerToasterDemo() {
     const options: ErrorToastOptions = {
       variant: "error",
       message: "Failed to purchase asset!",
-      duration: 5000,
     };
     emitControllerToast("error", options);
   };
@@ -96,18 +97,25 @@ function ControllerToasterDemo() {
     const options: SuccessToastOptions = {
       variant: "success",
       message: "Address copied",
-      duration: 5000,
     };
     emitControllerToast("success", options);
   };
 
-  const showSuccessLonger = () => {
+  const showSuccessLongMessage = () => {
     const options: SuccessToastOptions = {
       variant: "success",
       message: "You did something that really remarkable and profound!",
-      duration: 5000,
     };
-    emitControllerToast("successLonger", options);
+    emitControllerToast("successLongMessage", options);
+  };
+
+  const showSuccessCustomDuration = () => {
+    const options: SuccessToastOptions = {
+      variant: "success",
+      message: "Catch me if you can!",
+      duration: 500,
+    };
+    emitControllerToast("successCustomDuration", options);
   };
 
   const showTransactionConfirming = () => {
@@ -117,7 +125,6 @@ function ControllerToasterDemo() {
       toastId: `tx-${txCount}`,
       label: "Purchase",
       progress: 50,
-      duration: 5000,
       safeToClose: false,
     };
     emitControllerToast("transactionConfirming", options);
@@ -130,7 +137,6 @@ function ControllerToasterDemo() {
       status: "confirmed",
       toastId: `tx-${txCount}`,
       progress: 50,
-      duration: 5000,
     };
     emitControllerToast("transactionConfirmed", options);
     setTxConfirming(false);
@@ -142,7 +148,6 @@ function ControllerToasterDemo() {
       variant: "error",
       message: "Transaction execution failed",
       toastId: `tx-${txCount}`,
-      duration: 5000,
     };
     emitControllerToast("transactionError", options);
     setTxConfirming(false);
@@ -154,7 +159,6 @@ function ControllerToasterDemo() {
       variant: "network-switch",
       networkName: "Starknet Mainnet",
       // networkIcon: "",
-      duration: 5000,
     };
     emitControllerToast("switchToStarknet", options);
   };
@@ -164,7 +168,6 @@ function ControllerToasterDemo() {
       variant: "network-switch",
       networkName: "Nums Chain",
       networkIcon: "https://static.cartridge.gg/presets/nums/icon.png",
-      duration: 5000,
     };
     emitControllerToast("switchToNums", options);
   };
@@ -222,7 +225,6 @@ function ControllerToasterDemo() {
       xpAmount: 50,
       isDraft: true,
       progress: 50,
-      duration: 5000,
       iconUrl: "",
     };
     emitControllerToast("achievementDraft", options);
@@ -235,7 +237,6 @@ function ControllerToasterDemo() {
       subtitle: "Earned!",
       xpAmount: 100,
       progress: 100,
-      duration: 5000,
       iconUrl: "",
     };
     emitControllerToast("achievement", options);
@@ -246,7 +247,6 @@ function ControllerToasterDemo() {
       variant: "user",
       kind: "created",
       username: "clicksave",
-      duration: 5000,
     };
     emitControllerToast("userCreated", options);
   };
@@ -256,7 +256,6 @@ function ControllerToasterDemo() {
       variant: "user",
       kind: "connected",
       username: "shinobi",
-      duration: 5000,
     };
     emitControllerToast("userConnected", options);
   };
@@ -266,7 +265,6 @@ function ControllerToasterDemo() {
       variant: "user",
       kind: "disconnected",
       username: "0xmajor",
-      duration: 5000,
     };
     emitControllerToast("userDisconnected", options);
   };
@@ -307,11 +305,22 @@ function ControllerToasterDemo() {
             {isLoading.success ? "Loading..." : "Success"}
           </Button>
           <Button
-            onClick={showSuccessLonger}
+            onClick={showSuccessLongMessage}
             className="w-full"
-            disabled={isLoading.successLonger}
+            disabled={isLoading.successLongMessage}
           >
-            {isLoading.successLonger ? "Loading..." : "Success (long message)"}
+            {isLoading.successLongMessage
+              ? "Loading..."
+              : "Success (long message)"}
+          </Button>
+          <Button
+            onClick={showSuccessCustomDuration}
+            className="w-full"
+            disabled={isLoading.successCustomDuration}
+          >
+            {isLoading.successCustomDuration
+              ? "Loading..."
+              : "Success (custom duration)"}
           </Button>
           <Button
             onClick={showTransactionConfirming}
@@ -429,7 +438,9 @@ function ControllerToasterDemo() {
         </div>
 
         <div>
-          <h3 className="text-white text-sm font-medium">Client Options</h3>
+          <h3 className="text-white text-sm font-medium">
+            ControllerToaster Options
+          </h3>
           <div className="py-2">
             <Select
               value={position}
@@ -504,13 +515,28 @@ function ControllerToasterDemo() {
             />
             Collapse Transactions
           </div>
+          <div className="pt-2">
+            <Input
+              type="number"
+              placeholder="Custom duration (ms)"
+              value={duration ?? ""}
+              onChange={(e) =>
+                setDuration(
+                  e.target.value && !Number.isNaN(e.target.value)
+                    ? Number(e.target.value)
+                    : undefined,
+                )
+              }
+            />
+          </div>
         </div>
       </div>
 
       <ControllerToaster
-        collapseTransactions={collapseTransactions}
-        disabledTypes={disabledTypes}
         position={position}
+        duration={duration}
+        disabledTypes={disabledTypes}
+        collapseTransactions={collapseTransactions}
       />
       {/* <ControllerToaster toasterId="controller" position="bottom-left" /> */}
     </div>
