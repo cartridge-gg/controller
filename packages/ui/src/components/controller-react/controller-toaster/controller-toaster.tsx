@@ -25,6 +25,8 @@ import {
   UserToastOptions,
 } from "../types";
 
+const TOASTER_ID = "controller-toaster";
+
 type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
 
 export type ControllerNotificationTypes =
@@ -40,13 +42,11 @@ export function ControllerToaster({
   position = "bottom-right",
   disabledTypes = [],
   collapseTransactions,
-  toasterId,
   ...props
 }: {
   position?: ToastPosition;
   disabledTypes?: ControllerNotificationTypes[];
   collapseTransactions?: boolean;
-  toasterId?: string | undefined;
 }) {
   const { toast } = useToast();
 
@@ -72,7 +72,7 @@ export function ControllerToaster({
         toast(
           showErrorToast({
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (variant == "success" && !disabledTypes.includes("success")) {
@@ -80,7 +80,7 @@ export function ControllerToaster({
         toast(
           showSuccessToast({
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (
@@ -91,7 +91,7 @@ export function ControllerToaster({
         toast(
           showNetworkSwitchToast({
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (
@@ -105,7 +105,7 @@ export function ControllerToaster({
             isExpanded:
               collapseTransactions !== undefined ? !collapseTransactions : true,
             duration: options.status == "confirming" ? 0 : options.duration,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (
@@ -117,7 +117,7 @@ export function ControllerToaster({
           showMarketplaceToast({
             title: `${options.action[0].toUpperCase()}${options.action.slice(1)}`,
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (
@@ -128,7 +128,7 @@ export function ControllerToaster({
         toast(
           showAchievementToast({
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (variant == "user" && !disabledTypes.includes("user")) {
@@ -136,7 +136,7 @@ export function ControllerToaster({
         toast(
           showUserToast({
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       }
@@ -145,7 +145,7 @@ export function ControllerToaster({
     return () => {
       window.removeEventListener("message", eventHandler);
     };
-  }, [disabledTypes.join(","), collapseTransactions, toasterId]);
+  }, [disabledTypes.join(","), collapseTransactions]);
 
   const theme = useMemo(
     () => localStorage.getItem("vite-ui-colorScheme") ?? "system",
@@ -155,7 +155,7 @@ export function ControllerToaster({
   return (
     <ControllerPresetProvider>
       <Sonner
-        id={toasterId}
+        id={TOASTER_ID}
         position={position}
         theme={theme as SonnerToasterProps["theme"]}
         className="toaster group"
