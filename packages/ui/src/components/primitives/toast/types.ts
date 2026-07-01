@@ -1,3 +1,7 @@
+// Wire-protocol contract for controller toasts. This is the single source of
+// truth shared by BOTH the keychain emitter (postMessage) and the exported
+// receiver <ControllerToaster /> (which re-exports this file from
+// `@/components/controller-react/types`). Keep changes backward-compatible.
 export type ToastPosition =
   | "top-left"
   | "top-right"
@@ -40,7 +44,8 @@ export interface TransactionToastOptions extends BaseToastOptions {
 // Network Switch Toast
 export interface NetworkSwitchToastOptions extends BaseToastOptions {
   variant: "network-switch";
-  networkName: string;
+  chainId: string;
+  networkName?: string;
   networkIcon?: string;
 }
 
@@ -71,6 +76,14 @@ export interface MarketplaceToastOptions extends BaseToastOptions {
   action: "purchased" | "sold" | "sent" | "listed" | "unlisted";
 }
 
+// User Toast
+export interface UserToastOptions extends BaseToastOptions {
+  variant: "user";
+  username: string;
+  kind?: "created" | "connected" | "disconnected";
+  message?: string;
+}
+
 // Union type for all toast variants
 export type ToastOptions =
   | ErrorToastOptions
@@ -79,7 +92,8 @@ export type ToastOptions =
   | NetworkSwitchToastOptions
   | AchievementToastOptions
   | QuestToastOptions
-  | MarketplaceToastOptions;
+  | MarketplaceToastOptions
+  | UserToastOptions;
 
 export const CONTROLLER_TOAST_MESSAGE_TYPE = "controller-toast";
 

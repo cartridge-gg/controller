@@ -264,7 +264,14 @@ export type IFrameOptions = {
 };
 
 export type Chain = {
+  /** RPC url */
   rpcUrl: string;
+  /** Chain id (for ui only) */
+  chainId?: ChainId;
+  /** Chain name (for ui only) */
+  name?: string;
+  /** Chain icon url (for ui only) */
+  icon?: string;
 };
 
 export type ProviderOptions = {

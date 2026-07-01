@@ -1,4 +1,5 @@
 packages:
+  - examples/minimal
   - examples/next
   - examples/node
   - examples/svelte

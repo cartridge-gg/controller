@@ -2,7 +2,7 @@
 
 import React, { memo, useState, useEffect } from "react";
 import { cva } from "class-variance-authority";
-import { cn } from "@/utils";
+import { cn, isSlotChain } from "@/utils";
 import {
   CheckIcon,
   SpinnerIcon,
@@ -11,20 +11,24 @@ import {
   SparklesIcon,
   SparklesDraftIcon,
   TransactionIcon,
+  SlotIcon,
+  GlobeIcon,
 } from "@/components/icons";
 import { StarknetColorIcon } from "@/components/icons/brand-color";
 import { CollectibleImage } from "@/components/modules/collectibles";
-import { ToasterToast } from "./use-toast";
+import { AchievementPlayerAvatar } from "@/components/modules/achievements/player-avatar";
+import { usePresetColor } from "../controller-toaster/preset-provider";
+import { ToasterToast } from "../controller-toaster/use-toast";
 import { Toast } from "./toast";
-import { usePresetColor } from "@/utils/context/presets";
 
 // Base toast container for specialized toasts
 const specializedToastVariants = cva(
-  "flex flex-col items-start p-0 bg-background shadow-lg rounded-lg border-0 overflow-hidden relative",
+  "flex flex-col items-start p-0 bg-spacer-100 shadow-lg rounded-lg border-0 overflow-hidden relative",
   {
     variants: {
       variant: {
         achievement: "w-[360px] h-[68px]",
+        user: "w-[360px] h-[68px]",
         network: "w-[360px] h-[52px]",
         error: "w-[360px] h-[52px] bg-destructive",
         transaction: "w-[360px] h-[52px]",
@@ -258,40 +262,87 @@ MarketplaceToast.displayName = "MarketplaceToast";
 
 // Network Switch Toast Component
 interface NetworkSwitchToastProps extends Omit<ToasterToast, "children"> {
-  networkName: string;
-  networkIcon?: React.ReactNode;
+  chainId: string;
+  networkName?: string;
+  networkIcon?: string | React.ReactNode;
 }
 
+export const TOAST_SN_MAIN = "0x534e5f4d41494e";
+export const TOAST_SN_SEPOLIA = "0x534e5f5345504f4c4941";
+
+const getNameFromChainId = (chainId: string) => {
+  // convert chain id hex to string without dependencies
+  const hex = chainId.startsWith("0x") ? chainId.slice(2) : chainId;
+  let name = "";
+  for (let i = 0; i < hex.length; i += 2) {
+    name += String.fromCharCode(parseInt(hex.slice(i, i + 2), 16));
+  }
+  // replace "_" for spaces and capitalize each word
+  return name
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+};
+
 const NetworkSwitchToast = memo<NetworkSwitchToastProps>(
-  ({ networkName, networkIcon, showClose, toastId, className, ...props }) => (
-    <Toast
-      className={cn(
-        specializedToastVariants({ variant: "network" }),
-        className,
-      )}
-      showClose={showClose}
-      toastId={toastId}
-      {...props}
-    >
-      <div className="flex items-center justify-between px-3 py-3 w-full h-full">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
-            {!networkIcon ? (
-              <StarknetColorIcon size="default" className="min-w-6 scale-125" />
-            ) : typeof networkIcon === "string" &&
-              networkIcon.startsWith("http") ? (
-              <img src={networkIcon} alt="" />
-            ) : (
-              networkIcon
-            )}
+  ({
+    chainId,
+    networkName,
+    networkIcon,
+    showClose,
+    toastId,
+    className,
+    ...props
+  }) => {
+    const isMainnet = BigInt(chainId) === BigInt(TOAST_SN_MAIN);
+    const isSepolia = BigInt(chainId) === BigInt(TOAST_SN_SEPOLIA);
+    const icon =
+      isMainnet || isSepolia ? (
+        <StarknetColorIcon size="default" className="min-w-6 scale-125" />
+      ) : networkIcon ? (
+        typeof networkIcon === "string" ? (
+          <img src={networkIcon} alt="" />
+        ) : (
+          networkIcon
+        )
+      ) : isSlotChain(chainId) ? (
+        <SlotIcon size="default" className="min-w-6 scale-125" />
+      ) : (
+        <GlobeIcon
+          variant="solid"
+          size="default"
+          className="min-w-6 scale-125"
+        />
+      );
+    const name = isMainnet
+      ? "Starknet Mainnet"
+      : isSepolia
+        ? "Starknet Sepolia"
+        : networkName || getNameFromChainId(chainId);
+
+    return (
+      <Toast
+        className={cn(
+          specializedToastVariants({ variant: "network" }),
+          className,
+        )}
+        showClose={showClose}
+        toastId={toastId}
+        {...props}
+      >
+        <div className="flex items-center justify-between px-3 py-3 w-full h-full">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+              {icon}
+            </div>
+            <span className="text-foreground text-sm font-medium leading-5 tracking-[0.01em] truncate">
+              Switched to {name}
+            </span>
           </div>
-          <span className="text-foreground text-sm font-medium leading-5 tracking-[0.01em] truncate">
-            Switched to {networkName}
-          </span>
         </div>
-      </div>
-    </Toast>
-  ),
+      </Toast>
+    );
+  },
 );
 
 NetworkSwitchToast.displayName = "NetworkSwitchToast";
@@ -304,15 +355,7 @@ interface ErrorToastProps extends Omit<ToasterToast, "children"> {
 }
 
 const ErrorToast = memo<ErrorToastProps>(
-  ({
-    message,
-    progress = 100,
-    preset,
-    showClose,
-    toastId,
-    className,
-    ...props
-  }) => (
+  ({ message, progress = 100, showClose, toastId, className, ...props }) => (
     <Toast
       className={cn(specializedToastVariants({ variant: "error" }), className)}
       showClose={showClose}
@@ -331,7 +374,7 @@ const ErrorToast = memo<ErrorToastProps>(
           </span>
         </div>
       </div>
-      <ToastProgressBar progress={progress} variant="error" preset={preset} />
+      <ToastProgressBar progress={progress} variant="error" />
     </Toast>
   ),
 );
@@ -382,6 +425,75 @@ const SuccessToast = memo<SuccessToastProps>(
 );
 
 SuccessToast.displayName = "SuccessToast";
+
+// User Toast Component
+type UserToastKind = "created" | "connected" | "disconnected";
+
+const USER_TOAST_DEFAULT_MESSAGE: Record<UserToastKind, string> = {
+  created: "Controller Created!",
+  connected: "Controller Connected",
+  disconnected: "Controller Disconnected",
+};
+
+interface UserToastProps extends Omit<ToasterToast, "children"> {
+  username: string;
+  kind?: UserToastKind;
+  message?: string;
+  progress?: number;
+  preset?: string;
+}
+
+const UserToast = memo<UserToastProps>(
+  ({
+    username,
+    kind = "created",
+    message,
+    progress = 100,
+    preset,
+    showClose,
+    toastId,
+    className,
+    ...props
+  }) => {
+    const title = message ?? USER_TOAST_DEFAULT_MESSAGE[kind];
+
+    return (
+      <Toast
+        className={cn(specializedToastVariants({ variant: "user" }), className)}
+        showClose={showClose}
+        toastId={toastId}
+        {...props}
+      >
+        <div className="flex items-center justify-between px-3 py-3 w-full flex-1">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center justify-center w-10 h-10 bg-background rounded p-[5px] flex-shrink-0">
+              <AchievementPlayerAvatar
+                username={username}
+                size="lg"
+                className="text-foreground min-w-6"
+              />
+            </div>
+            <div className="flex flex-col justify-center gap-[2px] flex-1 min-w-0">
+              <span className="text-foreground text-sm font-medium leading-5 tracking-[0.01em] truncate">
+                {title}
+              </span>
+              <span className="text-foreground-300 text-xs font-normal leading-4 truncate">
+                {username}
+              </span>
+            </div>
+          </div>
+        </div>
+        <ToastProgressBar
+          progress={progress}
+          variant="achievement"
+          preset={preset}
+        />
+      </Toast>
+    );
+  },
+);
+
+UserToast.displayName = "UserToast";
 
 // Transaction Notification Component
 interface TransactionToastProps extends Omit<ToasterToast, "children"> {
@@ -542,6 +654,18 @@ export const showSuccessToast = (
   };
 };
 
+export const showUserToast = (
+  props: Omit<UserToastProps, ToastPropsToOmit>,
+) => {
+  const toastId = props.toastId || `user-${Date.now()}`;
+  return {
+    duration: props.duration,
+    toasterId: props.toasterId,
+    toastId,
+    element: <UserToast {...props} showClose={true} toastId={toastId} />,
+  };
+};
+
 export const showTransactionToast = (
   props: Omit<TransactionToastProps, ToastPropsToOmit>,
 ) => {
@@ -560,6 +684,7 @@ export {
   NetworkSwitchToast,
   ErrorToast,
   SuccessToast,
+  UserToast,
   TransactionToast,
   XPTag,
   ToastProgressBar,
@@ -568,5 +693,6 @@ export {
   type NetworkSwitchToastProps,
   type ErrorToastProps,
   type SuccessToastProps,
+  type UserToastProps,
   type TransactionToastProps,
 };

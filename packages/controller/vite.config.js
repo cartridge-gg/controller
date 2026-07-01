@@ -1,14 +1,38 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import { execFileSync } from "child_process";
 import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
 import dts from "vite-plugin-dts";
 import { visualizer } from "rollup-plugin-visualizer";
 
-// List peer dependencies, prevents bundling into library
+// Generate dist/react/styles.css after the bundle is written. Done as a build
+// hook (not just a separate `build:styles` script) so it also runs on every
+// `vite build --watch` rebuild during `pnpm dev` — otherwise emptyOutDir wipes
+// styles.css and consumers importing `@cartridge/controller/react/styles.css`
+// (e.g. the next example) fail to resolve it in dev.
+const buildUiStyles = () => ({
+  name: "controller-ui-styles",
+  closeBundle() {
+    execFileSync(
+      process.execPath,
+      [resolve(__dirname, "bin/build-react-styles.mjs")],
+      { stdio: "inherit" },
+    );
+  },
+});
+
+// List peer dependencies, prevents bundling into library.
+// react / react-dom are externalized so the `react` chunk treats them as
+// (optional) peer deps instead of bundling a second React copy; "react"
+// also covers "react/jsx-runtime" via the prefix check below. The rest of
+// the UI dependencies (controller-ui, sonner, radix, etc.) are intentionally
+// bundled into the react chunk.
 const externalDeps = [
   "open",
   "starknet",
+  "react",
+  "react-dom",
 ];
 
 export default defineConfig(({ mode }) => ({
@@ -23,11 +47,12 @@ export default defineConfig(({ mode }) => ({
     }),
     mode === "production" &&
       visualizer({
-        open: false, 
-        filename: "dist/stats.html", 
+        open: false,
+        filename: "dist/stats.html",
         gzipSize: true,
         brotliSize: true,
       }),
+    buildUiStyles(),
   ],
 
   resolve: {
@@ -50,6 +75,7 @@ export default defineConfig(({ mode }) => ({
       entry: {
         index: resolve(__dirname, "src/index.ts"),
         session: resolve(__dirname, "src/session/index.ts"),
+        "react/index": resolve(__dirname, "src/react/index.ts"),
       },
       name: "CartridgeController",
       formats: ["es"],

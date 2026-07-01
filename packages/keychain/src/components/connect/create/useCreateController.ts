@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
+import { useToast } from "@/context/toast";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
@@ -87,6 +88,11 @@ export interface LoginResponse {
   signer: Signer;
 }
 
+// Emits a "Controller Created!"/"Controller Connected!" user toast. Threaded in
+// from the hook layer (which owns `useToast`) so the module-level resolution
+// helpers can notify without depending on React context directly.
+type EmitUserToast = (controller: Controller, isNewController: boolean) => void;
+
 const resolveConnect = async ({
   controller,
   params,
@@ -95,6 +101,7 @@ const resolveConnect = async ({
   searchParams,
   missingParamsMessage,
   isNewController,
+  emitUserToast,
 }: {
   controller: Controller;
   params?: ReturnType<typeof parseConnectParams>;
@@ -103,6 +110,7 @@ const resolveConnect = async ({
   searchParams: URLSearchParams;
   missingParamsMessage: string;
   isNewController: boolean;
+  emitUserToast?: EmitUserToast;
 }) => {
   let currentParams = params;
   if (!currentParams) {
@@ -133,6 +141,7 @@ const resolveConnect = async ({
   if (currentParams.params.id) {
     cleanupCallbacks(currentParams.params.id);
   }
+  emitUserToast?.(controller, isNewController);
   handleCompletion();
 };
 
@@ -145,6 +154,7 @@ const createSession = async ({
   closeModal,
   searchParams,
   isNewController,
+  emitUserToast,
 }: {
   controller: Controller;
   origin: string;
@@ -154,6 +164,7 @@ const createSession = async ({
   closeModal?: () => void;
   searchParams: URLSearchParams;
   isNewController: boolean;
+  emitUserToast?: EmitUserToast;
 }) => {
   // Handle no policies case - try to resolve connection, fallback to just closing modal
   if (!policies) {
@@ -166,6 +177,7 @@ const createSession = async ({
       missingParamsMessage:
         "No params available for no-policies case, falling back to closeModal",
       isNewController,
+      emitUserToast,
     });
     return;
   }
@@ -204,6 +216,7 @@ const createSession = async ({
     if (currentParams.params.id) {
       cleanupCallbacks(currentParams.params.id);
     }
+    emitUserToast?.(controller, isNewController);
     handleCompletion();
   } catch (e) {
     console.error("Failed to create verified session:", e);
@@ -220,6 +233,7 @@ const completePopupConnect = async ({
   closeModal,
   searchParams,
   isNewController,
+  emitUserToast,
 }: {
   controller: Controller;
   params?: ReturnType<typeof parseConnectParams>;
@@ -227,6 +241,7 @@ const completePopupConnect = async ({
   closeModal?: () => void;
   searchParams: URLSearchParams;
   isNewController: boolean;
+  emitUserToast?: EmitUserToast;
 }) => {
   await resolveConnect({
     controller,
@@ -237,6 +252,7 @@ const completePopupConnect = async ({
     missingParamsMessage:
       "Params not available after popup auth, falling back to closeModal",
     isNewController,
+    emitUserToast,
   });
 };
 
@@ -294,6 +310,23 @@ export function useCreateController({
     window.addEventListener("pagehide", handlePageHide);
     return () => window.removeEventListener("pagehide", handlePageHide);
   }, []);
+
+  const { toast } = useToast();
+  const emitUserToast = useCallback<EmitUserToast>(
+    (controller, isNewController) => {
+      const username = controller.username();
+      if (!username) return;
+      const disabled = !isNewController;
+      toast.user(
+        {
+          kind: isNewController ? "created" : "connected",
+          username,
+        },
+        disabled,
+      );
+    },
+    [toast],
+  );
 
   const [searchParams, setSearchParams] = useSearchParams();
   const {
@@ -525,6 +558,7 @@ export function useCreateController({
             handleCompletion,
             searchParams,
             isNewController: true,
+            emitUserToast,
           });
         }
 
@@ -542,6 +576,7 @@ export function useCreateController({
       params,
       searchParams,
       shouldAutoCreateSession,
+      emitUserToast,
     ],
   );
 
@@ -569,6 +604,7 @@ export function useCreateController({
                 handleCompletion,
                 searchParams,
                 isNewController: true,
+                emitUserToast,
               });
             }
             return;
@@ -704,6 +740,7 @@ export function useCreateController({
       handleCompletion,
       searchParams,
       changeWallet,
+      emitUserToast,
     ],
   );
 
@@ -833,6 +870,7 @@ export function useCreateController({
           handleCompletion,
           searchParams,
           isNewController: false,
+          emitUserToast,
         });
       }
 
@@ -849,6 +887,7 @@ export function useCreateController({
       params,
       searchParams,
       shouldAutoCreateSession,
+      emitUserToast,
     ],
   );
 
@@ -878,6 +917,7 @@ export function useCreateController({
             handleCompletion,
             searchParams,
             isNewController: false,
+            emitUserToast,
           });
         }
         return;
@@ -925,6 +965,7 @@ export function useCreateController({
                 handleCompletion,
                 searchParams,
                 isNewController: false,
+                emitUserToast,
               });
             }
             return;
@@ -939,6 +980,7 @@ export function useCreateController({
               handleCompletion,
               searchParams,
               isNewController: false,
+              emitUserToast,
             });
           }
 
@@ -1068,6 +1110,7 @@ export function useCreateController({
       smsState,
       setWaitingForConfirmation,
       changeWallet,
+      emitUserToast,
     ],
   );
 

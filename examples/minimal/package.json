@@ -1,0 +1,32 @@
+{
+  "name": "@cartridge/controller-example-minimal",
+  "private": true,
+  "version": "0.13.12",
+  "type": "module",
+  "scripts": {
+    "dev": "env-cmd -f .env.dev vite --port 3003",
+    "build": "vite build",
+    "format": "prettier --write ./src",
+    "format:check": "prettier --check ./src",
+    "preview": "vite preview --port 3003"
+  },
+  "dependencies": {
+    "@cartridge/connector": "workspace:*",
+    "@cartridge/controller": "workspace:*",
+    "@starknet-react/chains": "catalog:",
+    "@starknet-react/core": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "starknet": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react-swc": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-top-level-await": "catalog:",
+    "vite-plugin-wasm": "catalog:"
+  }
+}

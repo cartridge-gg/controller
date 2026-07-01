@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { Toaster as Sonner } from "sonner";
 import {
   showErrorToast,
   showSuccessToast,
@@ -8,8 +9,10 @@ import {
   showMarketplaceToast,
   showAchievementToast,
   showNetworkSwitchToast,
-} from "@/components/primitives/toast/specialized-toasts";
+  showUserToast,
+} from "../toasts/specialized-toasts";
 import { useToast, ToasterToast } from "./use-toast";
+import { ControllerPresetProvider } from "./preset-provider";
 import {
   ToastPosition,
   ErrorToastOptions,
@@ -19,8 +22,12 @@ import {
   AchievementToastOptions,
   CONTROLLER_TOAST_MESSAGE_TYPE,
   NetworkSwitchToastOptions,
-} from "./types";
-import { SonnerToaster } from "@/components/primitives/sonner";
+  UserToastOptions,
+} from "../types";
+
+const TOASTER_ID = "controller-toaster";
+const TOASTER_POSITION = "bottom-right";
+const TOASTER_DURATION = 5000;
 
 export type ControllerNotificationTypes =
   | "error"
@@ -28,19 +35,25 @@ export type ControllerNotificationTypes =
   | "network-switch"
   | "transaction"
   | "marketplace"
-  | "achievement";
+  | "achievement"
+  | "user";
 
-export function ControllerToaster({
-  position = "bottom-right",
-  disabledTypes = [],
-  collapseTransactions,
-  toasterId,
-}: {
+type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
+
+export type ControllerToastProps = SonnerToasterProps & {
+  duration?: number;
   position?: ToastPosition;
   disabledTypes?: ControllerNotificationTypes[];
   collapseTransactions?: boolean;
-  toasterId?: string | undefined;
-}) {
+};
+
+export function ControllerToaster({
+  position = TOASTER_POSITION,
+  duration = TOASTER_DURATION,
+  disabledTypes = [],
+  collapseTransactions,
+  ...props
+}: ControllerToastProps) {
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,7 +78,7 @@ export function ControllerToaster({
         toast(
           showErrorToast({
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (variant == "success" && !disabledTypes.includes("success")) {
@@ -73,7 +86,7 @@ export function ControllerToaster({
         toast(
           showSuccessToast({
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (
@@ -84,7 +97,7 @@ export function ControllerToaster({
         toast(
           showNetworkSwitchToast({
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (
@@ -98,7 +111,7 @@ export function ControllerToaster({
             isExpanded:
               collapseTransactions !== undefined ? !collapseTransactions : true,
             duration: options.status == "confirming" ? 0 : options.duration,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (
@@ -110,7 +123,7 @@ export function ControllerToaster({
           showMarketplaceToast({
             title: `${options.action[0].toUpperCase()}${options.action.slice(1)}`,
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       } else if (
@@ -121,7 +134,15 @@ export function ControllerToaster({
         toast(
           showAchievementToast({
             ...options,
-            toasterId,
+            toasterId: TOASTER_ID,
+          }) as ToasterToast,
+        );
+      } else if (variant == "user" && !disabledTypes.includes("user")) {
+        const options = event.data.options as UserToastOptions;
+        toast(
+          showUserToast({
+            ...options,
+            toasterId: TOASTER_ID,
           }) as ToasterToast,
         );
       }
@@ -130,7 +151,37 @@ export function ControllerToaster({
     return () => {
       window.removeEventListener("message", eventHandler);
     };
-  }, [disabledTypes.join(","), collapseTransactions, toasterId]);
+  }, [disabledTypes.join(","), collapseTransactions]);
 
-  return <SonnerToaster position={position} toasterId={toasterId} />;
+  const theme = useMemo(
+    () => localStorage.getItem("vite-ui-colorScheme") ?? "system",
+    [],
+  );
+
+  return (
+    <ControllerPresetProvider>
+      <Sonner
+        id={TOASTER_ID}
+        position={position}
+        theme={theme as SonnerToasterProps["theme"]}
+        className="toaster group"
+        duration={duration}
+        toastOptions={{
+          // Toasts render in Inter (loaded by styles.css) with a sans-serif
+          // fallback.
+          style: { fontFamily: "Inter, sans-serif" },
+          classNames: {
+            toast:
+              "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg rounded-lg",
+            description: "group-[.toast]:text-foreground-400",
+            actionButton:
+              "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+            cancelButton:
+              "group-[.toast]:bg-background-200 group-[.toast]:text-foreground-400",
+          },
+        }}
+        {...props}
+      />
+    </ControllerPresetProvider>
+  );
 }

@@ -10,10 +10,14 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "scripts": {
     "build:deps": "pnpm build:browser && pnpm build:node",
     "dev": "vite build --watch",
     "build:browser": "vite build",
+    "build:styles": "node bin/build-react-styles.mjs",
     "build:node": "tsup --config tsup.node.config.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
@@ -25,6 +29,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./react/styles.css": "./dist/react/styles.css",
     "./session": {
       "types": "./dist/session.d.ts",
       "import": "./dist/session.js"
@@ -51,13 +60,33 @@
     "open": "^10.1.0",
     "@walletconnect/ethereum-provider": "^2.20.0"
   },
+  "peerDependencies": {
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@cartridge/controller-ui": "workspace:*",
     "@cartridge/tsconfig": "workspace:*",
+    "autoprefixer": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
     "@types/jest": "catalog:",
     "@types/mocha": "catalog:",
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "jest": "^29.7.0",
     "prettier": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "rollup-plugin-visualizer": "^5.12.0",
     "ts-jest": "^29.2.5",
     "tsup": "catalog:",
