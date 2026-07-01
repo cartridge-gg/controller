@@ -1,4 +1,4 @@
-// Precompiles the drop-in stylesheet for `@cartridge/controller/ui/styles.css`.
+// Precompiles the drop-in stylesheet for `@cartridge/controller/react/styles.css`.
 //
 // Runs the Tailwind CLI (which loads the cartridge preset via jiti — the preset
 // imports `tailwindcss/defaultTheme`, which only resolves under CJS-style
@@ -8,15 +8,15 @@
 //   1. the theme `:root` custom properties (controller-ui themes/default.css),
 //      which the toast utilities reference (bg-background, text-foreground, …);
 //   2. Tailwind components/utilities, scanned against the BUNDLED ui chunk
-//      (dist/ui/index.js) so only classes actually shipped by
+//      (dist/react/index.js) so only classes actually shipped by
 //      <ControllerToaster /> are emitted.
 //
 // Preflight is disabled in tailwind.ui.config.mjs: this is a component
 // stylesheet meant to drop into an existing app, so it must NOT reset the host
 // page. Tailwind still emits the `--tw-*` defaults (shadows/transforms work).
 //
-// Runs after the Vite browser build (which produces dist/ui/index.js) — see the
-// `build:deps` script. Output: dist/ui/styles.css.
+// Runs after the Vite browser build (which produces dist/react/index.js) — see the
+// `build:deps` script. Output: dist/react/styles.css.
 import { execFileSync } from "node:child_process";
 import {
   readFileSync,
@@ -33,10 +33,10 @@ const require = createRequire(import.meta.url);
 const here = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = resolve(here, "..");
 
-const bundle = resolve(pkgRoot, "dist/ui/index.js");
+const bundle = resolve(pkgRoot, "dist/react/index.js");
 if (!existsSync(bundle)) {
   console.error(
-    `[build-ui-styles] ${bundle} not found — run \`pnpm build:browser\` first.`,
+    `[build-react-styles] ${bundle} not found — run \`pnpm build:browser\` first.`,
   );
   process.exit(1);
 }
@@ -62,7 +62,7 @@ writeFileSync(
   `${theme}\n@tailwind base;\n@tailwind components;\n@tailwind utilities;\n`,
 );
 
-const out = resolve(pkgRoot, "dist/ui/styles.css");
+const out = resolve(pkgRoot, "dist/react/styles.css");
 const tailwindCli = resolve(
   dirname(require.resolve("tailwindcss/package.json")),
   "lib/cli.js",
@@ -90,4 +90,4 @@ const interImport =
   '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");\n';
 writeFileSync(out, interImport + readFileSync(out, "utf8"));
 
-console.log(`[build-ui-styles] wrote ${out}`);
+console.log(`[build-react-styles] wrote ${out}`);

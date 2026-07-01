@@ -15,7 +15,7 @@ import { CloseButton } from "./toast";
 import { StarknetIcon } from "@/components/icons/brand";
 
 const meta: Meta = {
-  title: "Controller Export/Toaster/Toast",
+  title: "Controller React/Toaster/Toast",
   parameters: {
     layout: "padded",
     backgrounds: {

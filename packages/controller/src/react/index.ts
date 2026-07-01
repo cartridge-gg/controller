@@ -1,10 +1,10 @@
-// Public UI subpath for `@cartridge/controller/ui`.
+// Public React subpath for `@cartridge/controller/react`.
 //
 // Re-exports the toast receiver component from the in-repo UI library. This
-// entry is built as its own Vite chunk (dist/ui/index.js) and is never imported
-// by the SDK entry (dist/index.js), so apps that only import
+// entry is built as its own Vite chunk (dist/react/index.js) and is never
+// imported by the SDK entry (dist/index.js), so apps that only import
 // `@cartridge/controller` pay no extra footprint — the React/UI dependencies
-// are pulled in only when an app explicitly imports `@cartridge/controller/ui`.
+// are pulled in only when an app explicitly imports `@cartridge/controller/react`.
 //
 // The public types below are declared locally (and only reference `react`, an
 // optional peer dependency that `/ui` consumers already have) rather than
@@ -13,9 +13,9 @@
 // would leave the published `.d.ts` pointing at a module npm consumers don't
 // have installed. The value import below is erased from the generated `.d.ts`.
 //
-// Styling ships separately as `@cartridge/controller/ui/styles.css`.
+// Styling ships separately as `@cartridge/controller/react/styles.css`.
 import type { ReactElement } from "react";
-import { ControllerToaster as ControllerToasterImpl } from "@cartridge/controller-ui/controller-export";
+import { ControllerToaster as ControllerToasterImpl } from "@cartridge/controller-ui/controller-react";
 
 export type ToastPosition =
   | "top-left"

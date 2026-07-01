@@ -29,7 +29,7 @@ import {
 } from "../../..";
 
 const meta: Meta = {
-  title: "Controller Export/Toaster/Controller Toaster",
+  title: "Controller React/Toaster/Controller Toaster",
   parameters: {
     layout: "centered",
     backgrounds: {
@@ -538,8 +538,8 @@ export const UsageExample: Story = {
             {'<ControllerToaster toasterId="controller" />'}
           </h3>
           <pre className="bg-gray-800 p-2 rounded mt-1 text-xs">
-            {`import { ControllerToaster } from "@cartridge/controller/ui";
-import "@cartridge/controller/ui/styles.css";
+            {`import { ControllerToaster } from "@cartridge/controller/react";
+import "@cartridge/controller/react/styles.css";
 
 function App() {
   return (

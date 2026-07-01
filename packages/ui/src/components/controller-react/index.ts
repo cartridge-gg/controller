@@ -1,4 +1,4 @@
-// Public surface for the `@cartridge/controller/ui` subpath export.
+// Public surface for the `@cartridge/controller/react` subpath export.
 //
 // Only the receiver component and the prop types a consumer needs to configure
 // it are exported here. Everything else in this folder — the toast renderers

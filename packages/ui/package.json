@@ -16,10 +16,10 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./controller-export": {
-      "types": "./dist/components/controller-export/index.d.ts",
-      "import": "./dist/components/controller-export/index.js",
-      "default": "./dist/components/controller-export/index.js"
+    "./controller-react": {
+      "types": "./dist/components/controller-react/index.d.ts",
+      "import": "./dist/components/controller-react/index.js",
+      "default": "./dist/components/controller-react/index.js"
     },
     "./preset": {
       "types": "./dist/preset.d.ts",

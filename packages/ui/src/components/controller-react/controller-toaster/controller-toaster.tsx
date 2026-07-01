@@ -25,9 +25,7 @@ import {
   UserToastOptions,
 } from "../types";
 
-type SonnerToasterProps = React.ComponentProps<typeof Sonner> & {
-  toasterId?: string;
-};
+type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
 
 export type ControllerNotificationTypes =
   | "error"
