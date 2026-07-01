@@ -18,8 +18,8 @@ import { KatanaAppchain } from "components/KatanaAppchain";
 import { UpdateSession } from "components/UpdateSession";
 import { Features } from "components/Features";
 // controller toaster (available to any app)
-import { ControllerToaster } from "@cartridge/controller/ui";
-import "@cartridge/controller/ui/styles.css";
+import { ControllerToaster } from "@cartridge/controller/react";
+import "@cartridge/controller/react/styles.css";
 
 const Home: FC = () => {
   return (
