@@ -1325,6 +1325,24 @@ export type CoinflowCardCheckoutResult = {
   paymentId: Scalars["String"];
 };
 
+export type CoinflowCreditsIntent = {
+  __typename?: "CoinflowCreditsIntent";
+  /**
+   * Internal CoinflowPayments row ID. Use this with the coinflowPayment query to
+   * poll paymentStatus after checkout completes (purchaseFulfillment is null for a
+   * credits top-up).
+   */
+  id: Scalars["ID"];
+  /** Checkout JWT encoding subtotal, blockchain, settlement type, and destination. */
+  jwtToken: Scalars["String"];
+  /** Coinflow merchant ID for the checkout component. */
+  merchantId: Scalars["String"];
+  /** Pricing breakdown in cents (subtotal = the credit value, fees added on top). */
+  pricing: CoinflowPricingDetails;
+  /** Session key (JWT) for authenticating the checkout component with Coinflow. */
+  sessionKey: Scalars["String"];
+};
+
 export type CoinflowPayment = {
   __typename?: "CoinflowPayment";
   id: Scalars["ID"];
@@ -1570,6 +1588,14 @@ export type ControllerWhereInput = {
 
 export type CreateCoinbaseLayerswapOrderInput = {
   /**
+   * If true, the onramp tops up the user's off-chain credit balance instead of
+   * delivering USDC to their controller: the bridged USDC settles to a deposit
+   * address we control and the equivalent credits (computed on the backend from
+   * purchaseUSDCAmount) are granted when the swap completes. Subject to the
+   * standard buy-credits min/max ($2 / $25,000).
+   */
+  credits?: InputMaybe<Scalars["Boolean"]>;
+  /**
    * The amount of USDC to purchase (e.g., "100.000000" for 100 USDC).
    * This is the amount that will be delivered to the bridge.
    */
@@ -1585,6 +1611,12 @@ export type CreateCoinbaseOnrampOrderInput = {
   sandbox?: InputMaybe<Scalars["Boolean"]>;
   /** The EIP-3009 authorization for the USDC transfer. */
   usdcTransferAuthorization: UsdcTransferAuthorizationInput;
+};
+
+export type CreateCoinflowCreditsIntentInput = {
+  /** Credit amount to buy. Bounded by the standard $2 min / $25,000 max. */
+  credits: CreditsInput;
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type CreateCoinflowStarterpackIntentInput = {
@@ -3210,7 +3242,7 @@ export type Mutation = {
   /**
    * Process a card checkout using a tokenized card from the frontend.
    * The coinflowPaymentId must reference an existing intent created via
-   * createCoinflowStarterpackIntent.
+   * createCoinflowStarterpackIntent or createCoinflowCreditsIntent.
    */
   coinflowCardCheckout: CoinflowCardCheckoutResult;
   /**
@@ -3229,6 +3261,15 @@ export type Mutation = {
    * This mutation sends USDC to a burner address, which then transfers to the presigned destination.
    */
   createCoinbaseOnrampOrder: CoinbaseOnrampOrderResponse;
+  /**
+   * Create a Coinflow checkout intent to buy account credits (a top-up, not a
+   * bundle). Mirrors createCoinflowStarterpackIntent — same session key, JWT, and
+   * pricing — but creates a CoinflowPayments row WITHOUT a PurchaseFulfillment. On
+   * settlement the webhook grants credits (derived from the subtotal) instead of
+   * queueing a bundle. Complete the payment with coinflowCardCheckout, the same as
+   * the starterpack flow.
+   */
+  createCoinflowCreditsIntent: CoinflowCreditsIntent;
   /**
    * Create a Coinflow checkout intent for a starterpack purchase.
    * Mirrors createStripeStarterpackIntent: computes pricing, creates a
@@ -3369,6 +3410,10 @@ export type MutationCreateCoinbaseLayerswapOrderArgs = {
 
 export type MutationCreateCoinbaseOnrampOrderArgs = {
   input: CreateCoinbaseOnrampOrderInput;
+};
+
+export type MutationCreateCoinflowCreditsIntentArgs = {
+  input: CreateCoinflowCreditsIntentInput;
 };
 
 export type MutationCreateCoinflowStarterpackIntentArgs = {
@@ -7200,6 +7245,41 @@ export type CreditQuery = {
   } | null;
 };
 
+export type CreditsHistoryQueryVariables = Exact<{
+  username: Scalars["String"];
+  first?: InputMaybe<Scalars["Int"]>;
+  after?: InputMaybe<Scalars["Cursor"]>;
+}>;
+
+export type CreditsHistoryQuery = {
+  __typename?: "Query";
+  account?: {
+    __typename?: "Account";
+    creditsHistory: {
+      __typename?: "CreditsHistoryConnection";
+      totalCount: number;
+      pageInfo: {
+        __typename?: "PageInfo";
+        hasNextPage: boolean;
+        endCursor?: string | null;
+      };
+      edges?: Array<{
+        __typename?: "CreditsHistoryEdge";
+        node?: {
+          __typename?: "CreditsHistory";
+          id: string;
+          amount: number;
+          transactionType: CreditsHistoryTransactionType;
+          paymentMethod: CreditsPaymentMethod;
+          transactionHash?: string | null;
+          comment?: string | null;
+          createdAt: string;
+        } | null;
+      } | null> | null;
+    };
+  } | null;
+};
+
 export type AccountNameQueryVariables = Exact<{
   address: Scalars["String"];
 }>;
@@ -7391,6 +7471,52 @@ export type CreateCryptoPaymentMutation = {
   };
 };
 
+export type BundleCreditsQuoteQueryVariables = Exact<{
+  input: PurchaseBundleWithCreditsInput;
+}>;
+
+export type BundleCreditsQuoteQuery = {
+  __typename?: "Query";
+  bundleCreditsQuote: {
+    __typename?: "BundleCreditsQuote";
+    requiredCredits: string;
+    costInUsdc: string;
+    paymentToken: string;
+    paymentTokenAmount: string;
+    needsSwap: boolean;
+  };
+};
+
+export type PurchaseBundleWithCreditsMutationVariables = Exact<{
+  input: PurchaseBundleWithCreditsInput;
+}>;
+
+export type PurchaseBundleWithCreditsMutation = {
+  __typename?: "Mutation";
+  purchaseBundleWithCredits: {
+    __typename?: "PurchaseFulfillment";
+    id: string;
+    status: PurchaseFulfillmentStatus;
+    transactionHash?: string | null;
+    lastError?: string | null;
+  };
+};
+
+export type PurchaseFulfillmentQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type PurchaseFulfillmentQuery = {
+  __typename?: "Query";
+  purchaseFulfillment: {
+    __typename?: "PurchaseFulfillment";
+    id: string;
+    status: PurchaseFulfillmentStatus;
+    transactionHash?: string | null;
+    lastError?: string | null;
+  };
+};
+
 export type CreateCoinflowStarterpackIntentMutationVariables = Exact<{
   input: CreateCoinflowStarterpackIntentInput;
 }>;
@@ -7399,6 +7525,28 @@ export type CreateCoinflowStarterpackIntentMutation = {
   __typename?: "Mutation";
   createCoinflowStarterpackIntent: {
     __typename?: "CoinflowStarterpackIntent";
+    id: string;
+    sessionKey: string;
+    jwtToken: string;
+    merchantId: string;
+    pricing: {
+      __typename?: "CoinflowPricingDetails";
+      subtotalInCents: number;
+      cardFeeInCents: number;
+      gasFeeInCents: number;
+      totalInCents: number;
+    };
+  };
+};
+
+export type CreateCoinflowCreditsIntentMutationVariables = Exact<{
+  input: CreateCoinflowCreditsIntentInput;
+}>;
+
+export type CreateCoinflowCreditsIntentMutation = {
+  __typename?: "Mutation";
+  createCoinflowCreditsIntent: {
+    __typename?: "CoinflowCreditsIntent";
     id: string;
     sessionKey: string;
     jwtToken: string;
@@ -7974,6 +8122,48 @@ export const useCreditQuery = <TData = CreditQuery, TError = unknown>(
     ),
     options,
   );
+export const CreditsHistoryDocument = `
+    query CreditsHistory($username: String!, $first: Int, $after: Cursor) {
+  account(username: $username) {
+    creditsHistory(
+      first: $first
+      after: $after
+      orderBy: {field: CREATED_AT, direction: DESC}
+    ) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          id
+          amount
+          transactionType
+          paymentMethod
+          transactionHash
+          comment
+          createdAt
+        }
+      }
+    }
+  }
+}
+    `;
+export const useCreditsHistoryQuery = <
+  TData = CreditsHistoryQuery,
+  TError = unknown,
+>(
+  variables: CreditsHistoryQueryVariables,
+  options?: UseQueryOptions<CreditsHistoryQuery, TError, TData>,
+) =>
+  useQuery<CreditsHistoryQuery, TError, TData>(
+    ["CreditsHistory", variables],
+    useFetchData<CreditsHistoryQuery, CreditsHistoryQueryVariables>(
+      CreditsHistoryDocument,
+    ).bind(null, variables),
+    options,
+  );
 export const AccountNameDocument = `
     query AccountName($address: String!) {
   accounts(where: {hasControllersWith: {address: $address}}, first: 1) {
@@ -8324,6 +8514,89 @@ export const useCreateCryptoPaymentMutation = <
     >(CreateCryptoPaymentDocument),
     options,
   );
+export const BundleCreditsQuoteDocument = `
+    query BundleCreditsQuote($input: PurchaseBundleWithCreditsInput!) {
+  bundleCreditsQuote(input: $input) {
+    requiredCredits
+    costInUsdc
+    paymentToken
+    paymentTokenAmount
+    needsSwap
+  }
+}
+    `;
+export const useBundleCreditsQuoteQuery = <
+  TData = BundleCreditsQuoteQuery,
+  TError = unknown,
+>(
+  variables: BundleCreditsQuoteQueryVariables,
+  options?: UseQueryOptions<BundleCreditsQuoteQuery, TError, TData>,
+) =>
+  useQuery<BundleCreditsQuoteQuery, TError, TData>(
+    ["BundleCreditsQuote", variables],
+    useFetchData<BundleCreditsQuoteQuery, BundleCreditsQuoteQueryVariables>(
+      BundleCreditsQuoteDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const PurchaseBundleWithCreditsDocument = `
+    mutation PurchaseBundleWithCredits($input: PurchaseBundleWithCreditsInput!) {
+  purchaseBundleWithCredits(input: $input) {
+    id
+    status
+    transactionHash
+    lastError
+  }
+}
+    `;
+export const usePurchaseBundleWithCreditsMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    PurchaseBundleWithCreditsMutation,
+    TError,
+    PurchaseBundleWithCreditsMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    PurchaseBundleWithCreditsMutation,
+    TError,
+    PurchaseBundleWithCreditsMutationVariables,
+    TContext
+  >(
+    ["PurchaseBundleWithCredits"],
+    useFetchData<
+      PurchaseBundleWithCreditsMutation,
+      PurchaseBundleWithCreditsMutationVariables
+    >(PurchaseBundleWithCreditsDocument),
+    options,
+  );
+export const PurchaseFulfillmentDocument = `
+    query PurchaseFulfillment($id: ID!) {
+  purchaseFulfillment(id: $id) {
+    id
+    status
+    transactionHash
+    lastError
+  }
+}
+    `;
+export const usePurchaseFulfillmentQuery = <
+  TData = PurchaseFulfillmentQuery,
+  TError = unknown,
+>(
+  variables: PurchaseFulfillmentQueryVariables,
+  options?: UseQueryOptions<PurchaseFulfillmentQuery, TError, TData>,
+) =>
+  useQuery<PurchaseFulfillmentQuery, TError, TData>(
+    ["PurchaseFulfillment", variables],
+    useFetchData<PurchaseFulfillmentQuery, PurchaseFulfillmentQueryVariables>(
+      PurchaseFulfillmentDocument,
+    ).bind(null, variables),
+    options,
+  );
 export const CreateCoinflowStarterpackIntentDocument = `
     mutation CreateCoinflowStarterpackIntent($input: CreateCoinflowStarterpackIntentInput!) {
   createCoinflowStarterpackIntent(input: $input) {
@@ -8362,6 +8635,46 @@ export const useCreateCoinflowStarterpackIntentMutation = <
       CreateCoinflowStarterpackIntentMutation,
       CreateCoinflowStarterpackIntentMutationVariables
     >(CreateCoinflowStarterpackIntentDocument),
+    options,
+  );
+export const CreateCoinflowCreditsIntentDocument = `
+    mutation CreateCoinflowCreditsIntent($input: CreateCoinflowCreditsIntentInput!) {
+  createCoinflowCreditsIntent(input: $input) {
+    id
+    sessionKey
+    jwtToken
+    merchantId
+    pricing {
+      subtotalInCents
+      cardFeeInCents
+      gasFeeInCents
+      totalInCents
+    }
+  }
+}
+    `;
+export const useCreateCoinflowCreditsIntentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinflowCreditsIntentMutation,
+    TError,
+    CreateCoinflowCreditsIntentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinflowCreditsIntentMutation,
+    TError,
+    CreateCoinflowCreditsIntentMutationVariables,
+    TContext
+  >(
+    ["CreateCoinflowCreditsIntent"],
+    useFetchData<
+      CreateCoinflowCreditsIntentMutation,
+      CreateCoinflowCreditsIntentMutationVariables
+    >(CreateCoinflowCreditsIntentDocument),
     options,
   );
 export const CoinflowCardCheckoutDocument = `

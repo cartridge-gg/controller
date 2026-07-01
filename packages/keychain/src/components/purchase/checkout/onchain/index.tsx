@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  AppleIcon,
   Button,
-  CreditCardIcon,
   GiftIcon,
   HeaderInner,
   LayoutContent,
@@ -33,20 +31,24 @@ import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
 import { Receiving } from "../../receiving";
 import { OnchainCostBreakdown } from "../../review/cost";
 import { LoadingState } from "../../loading";
-import { getWallet } from "../../wallet/config";
 import { ErrorCard } from "./error";
 import { WalletSelector } from "./selector";
 import { QuantityControls } from "./quantity";
-import { WalletSelectionDrawer } from "./wallet-drawer";
+import {
+  WalletSelectionDrawer,
+  type PaymentMethod,
+  type PaymentMethodSelection,
+} from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
 import { CoinflowDrawer } from "../coinflow/drawer";
 import { CoinbaseDrawer } from "../coinbase/drawer";
 import { VerificationDrawer } from "../../verification/drawer";
 import { USDC_ADDRESSES } from "@/utils/ekubo";
-import { getIpLocation } from "@/utils/ip";
+import { useGeoLocation } from "@/hooks/geo";
 import { num } from "starknet";
 import { useIdentityContext } from "@/components/identity/provider";
 import { AgeGate } from "@/components/identity/AgeGate";
+import { useCreditsContext } from "@/components/credits/provider";
 
 export function OnchainCheckout() {
   const { navigate } = useNavigation();
@@ -84,6 +86,9 @@ export function OnchainCheckout() {
     isApplePaySelected,
     isCoinflowSelected,
     onCoinflowSelect,
+    onApplePaySelect,
+    onExternalConnect,
+    clearSelectedWallet,
     onCreateCoinbaseOrder,
     resetCoinbasePurchase,
     isCreatingOrder,
@@ -92,9 +97,22 @@ export function OnchainCheckout() {
     isFetchingCoinbaseLimits,
     fetchCoinbaseLimits,
     applePayMinQuantity,
+    isCreditsRailSelected,
+    isCreditsSelected,
+    onCreditsSelect,
   } = useOnchainPurchaseContext();
-  const { onCreditCardPurchase, isCoinflowLoading } =
-    useCreditPurchaseContext();
+  const {
+    onCreditCardPurchase,
+    isCoinflowLoading,
+    creditsQuote,
+    isCreditsQuoteLoading,
+    creditsQuoteError,
+    hasSufficientCredits,
+    isCreditsLoading,
+    onCreditsPurchase,
+    refetchCreditsBalance,
+  } = useCreditPurchaseContext();
+  const { initiateCreditsDeposit } = useCreditsContext();
 
   const {
     isEmailVerified,
@@ -112,15 +130,7 @@ export function OnchainCheckout() {
   const [verificationMethod, setVerificationMethod] = useState<
     "coinflow" | "apple-pay" | null
   >(null);
-  const [countryCodeLoaded, setCountryCodeLoaded] = useState<boolean>(false);
-  const [countryCode, setCountryCode] = useState<string | null>(null);
-
-  useEffect(() => {
-    getIpLocation()
-      .then((geo) => setCountryCode(geo.countryCode))
-      .catch((e) => console.error(`getIpLocation failed`, e))
-      .finally(() => setCountryCodeLoaded(true));
-  }, []);
+  const { isUS, countryCodeLoaded } = useGeoLocation();
 
   const handleIconTripleClick = useTripleClick({
     featureName: "coinflow-support",
@@ -194,7 +204,21 @@ export function OnchainCheckout() {
     [starterpackDetails, socialClaimConditions],
   );
 
-  const wallet = getWallet(selectedWallet?.type || "controller");
+  // Reconstruct the shared PaymentMethod from context flags so WalletSelector
+  // and the rest of the UI can render it without re-deriving name/icon. Covers
+  // restored methods (e.g. coinflow from localStorage) as well as drawer picks.
+  const selectedMethod = useMemo<PaymentMethod>(() => {
+    if (isCoinflowSelected) return { type: "coinflow" };
+    if (isApplePaySelected) return { type: "apple-pay" };
+    if (isCreditsRailSelected) return { type: "credits" };
+    if (selectedWallet) return { type: "external", wallet: selectedWallet };
+    return { type: "controller" };
+  }, [
+    isCoinflowSelected,
+    isApplePaySelected,
+    isCreditsRailSelected,
+    selectedWallet,
+  ]);
 
   const isFree = useMemo(() => {
     return quote ? quote.totalCost === BigInt(0) : undefined;
@@ -248,7 +272,25 @@ export function OnchainCheckout() {
     setSelectedToken,
   });
 
+  // Insufficient credits doesn't disable the CTA — it turns into "Buy
+  // Credits" and opens the top-up drawer (mirrors the Apple Pay
+  // limit-exceeded → "Verify to continue" pattern).
+  const showInsufficientCredits =
+    isCreditsSelected &&
+    !!creditsQuote &&
+    !hasSufficientCredits &&
+    !isCreditsQuoteLoading;
+
   const globalDisabled = useMemo(() => {
+    if (isCreditsSelected) {
+      return (
+        isCreditsQuoteLoading ||
+        !!creditsQuoteError ||
+        !creditsQuote ||
+        isCreditsLoading
+      );
+    }
+
     if (isCoinflowSelected) {
       return !isCoinflowStarterpackSupported || isCoinflowLoading;
     }
@@ -286,6 +328,11 @@ export function OnchainCheckout() {
     isCoinflowSelected,
     isCoinflowStarterpackSupported,
     isCoinflowLoading,
+    isCreditsSelected,
+    isCreditsQuoteLoading,
+    creditsQuoteError,
+    creditsQuote,
+    isCreditsLoading,
   ]);
 
   const showInsufficientBalance =
@@ -295,13 +342,15 @@ export function OnchainCheckout() {
     !bridgeFrom &&
     !isApplePaySelected &&
     !isCoinflowSelected &&
+    !isCreditsSelected &&
     !isCheckingFallback;
 
   const showConversionError =
     conversionError &&
     needsConversion &&
     !isApplePaySelected &&
-    !isCoinflowSelected;
+    !isCoinflowSelected &&
+    !isCreditsSelected;
 
   const showBridgeAmountTooLow =
     !isCoinflowSelected &&
@@ -310,6 +359,40 @@ export function OnchainCheckout() {
   const handleWalletSelect = useCallback(() => {
     setIsDrawerOpen(true);
   }, []);
+
+  const handlePaymentMethodSelect = useCallback(
+    async (method: PaymentMethodSelection) => {
+      switch (method.type) {
+        case "apple-pay":
+          onApplePaySelect();
+          break;
+        case "coinflow":
+          onCoinflowSelect();
+          break;
+        case "credits":
+          onCreditsSelect();
+          break;
+        case "controller":
+          clearSelectedWallet();
+          break;
+        case "external":
+          await onExternalConnect(
+            method.wallet,
+            method.network.platform,
+            method.chainId,
+          );
+          break;
+      }
+      setIsDrawerOpen(false);
+    },
+    [
+      onApplePaySelect,
+      onCoinflowSelect,
+      onCreditsSelect,
+      clearSelectedWallet,
+      onExternalConnect,
+    ],
+  );
 
   // Bearer-token expiry on the iframe surfaces here as an Authentication
   // Required error. Re-mint via the popup-backed login (cookie session is
@@ -340,6 +423,15 @@ export function OnchainCheckout() {
     if (isApplePayAmountTooLow) return;
     if (isCoinflowSelected) {
       if (!isCoinflowStarterpackSupported) return;
+    } else if (isCreditsSelected) {
+      // Not enough credits — the CTA reads "Deposit USD": open the top-up
+      // drawer and refresh the balance once the deposit lands.
+      if (!hasSufficientCredits) {
+        initiateCreditsDeposit(async () => {
+          await refetchCreditsBalance();
+        });
+        return;
+      }
     } else if (!hasSufficientBalance && !isFree && !isApplePaySelected) {
       console.warn("no means to pay");
       return;
@@ -351,14 +443,19 @@ export function OnchainCheckout() {
       ? "coinflow"
       : isApplePaySelected
         ? "apple-pay"
-        : "onchain";
+        : isCreditsSelected
+          ? "credits"
+          : "onchain";
     captureAnalyticsEvent(posthog, "purchase_checkout_started", { method });
 
     setIsLoading(true);
     clearError();
 
     try {
-      if (isCoinflowSelected) {
+      if (isCreditsSelected) {
+        await onCreditsPurchase();
+        navigate("/purchase/success", { reset: true });
+      } else if (isCoinflowSelected) {
         if (!isEmailVerified) {
           setVerificationMethod("coinflow");
           return;
@@ -430,6 +527,11 @@ export function OnchainCheckout() {
     navigate,
     clearError,
     isApplePayAmountTooLow,
+    isCreditsSelected,
+    hasSufficientCredits,
+    initiateCreditsDeposit,
+    refetchCreditsBalance,
+    onCreditsPurchase,
   ]);
 
   const handleBridge = useCallback(async () => {
@@ -456,9 +558,13 @@ export function OnchainCheckout() {
         lastMethod === "coinflow" &&
         isCoinflowEnabled &&
         isCoinflowStarterpackSupported &&
-        countryCode === "US"
+        isUS
       ) {
         onCoinflowSelect();
+      } else if (lastMethod === "credits") {
+        // No client-side gate: if the bundle isn't approved for credits the
+        // quote rejects and the checkout surfaces the backend message.
+        onCreditsSelect();
       }
     } catch {
       // localStorage may be unavailable
@@ -469,7 +575,8 @@ export function OnchainCheckout() {
     isCoinflowEnabled,
     isCoinflowStarterpackSupported,
     onCoinflowSelect,
-    countryCode,
+    onCreditsSelect,
+    isUS,
   ]);
 
   useEffect(() => {
@@ -596,6 +703,22 @@ export function OnchainCheckout() {
                   />
                 )}
 
+                {isCreditsSelected && creditsQuoteError && (
+                  <ErrorCard
+                    variant="error"
+                    title="Credits Checkout Unavailable"
+                    message={creditsQuoteError.message}
+                  />
+                )}
+
+                {showInsufficientCredits && (
+                  <ErrorCard
+                    variant="warning"
+                    title="Insufficient Credits"
+                    message="You need more credits to complete this purchase."
+                  />
+                )}
+
                 {isApplePayAmountTooLow && (
                   <ErrorCard
                     variant="warning"
@@ -613,22 +736,7 @@ export function OnchainCheckout() {
                 )}
 
                 <WalletSelector
-                  walletName={
-                    isCoinflowSelected
-                      ? "Credit Card"
-                      : isApplePaySelected
-                        ? "Apple Pay"
-                        : wallet.name
-                  }
-                  walletIcon={
-                    isCoinflowSelected ? (
-                      <CreditCardIcon size="xs" variant="solid" />
-                    ) : isApplePaySelected ? (
-                      <AppleIcon size="xs" />
-                    ) : (
-                      wallet.subIcon
-                    )
-                  }
+                  method={selectedMethod}
                   bridgeFrom={bridgeFrom}
                   onClick={handleWalletSelect}
                 />
@@ -643,14 +751,18 @@ export function OnchainCheckout() {
                     (bridgeFrom !== null && isFetchingFees) ||
                     isCreatingOrder ||
                     isCoinflowLoading ||
+                    (isCreditsSelected &&
+                      (isCreditsQuoteLoading || isCreditsLoading)) ||
                     applePayLimitsLoading
                   }
                   isSendingDeposit={isSendingDeposit}
                   globalDisabled={globalDisabled}
                   hasSufficientBalance={
-                    hasSufficientBalance ||
-                    isApplePaySelected ||
-                    isCoinflowSelected
+                    isCreditsSelected
+                      ? hasSufficientCredits
+                      : hasSufficientBalance ||
+                        isApplePaySelected ||
+                        isCoinflowSelected
                   }
                   bridgeFrom={bridgeFrom}
                   onIncrement={incrementQuantity}
@@ -663,7 +775,9 @@ export function OnchainCheckout() {
                       ? "Continue"
                       : applePayLimitExceeded
                         ? "Verify to continue"
-                        : undefined
+                        : showInsufficientCredits
+                          ? "Deposit USD"
+                          : undefined
                   }
                 />
               </>
@@ -675,7 +789,10 @@ export function OnchainCheckout() {
       <WalletSelectionDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        showFiatOptions={countryCode === "US"}
+        setSelected={handlePaymentMethodSelect}
+        showFiatOptions={isUS}
+        showCredits={false} // credits available from controller
+        showController={true}
       />
 
       <CoinflowDrawer

@@ -13,7 +13,7 @@ import { ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
 import { evaluateLocationGate } from "@/utils/location-gate";
-import { getIpLocation } from "@/utils/ip";
+import { useGeoLocation } from "@/hooks/geo";
 import { USMap } from "./USMap";
 
 type GateState = "checking" | "blocked" | "error";
@@ -30,7 +30,6 @@ export function LocationGate() {
   const { search } = useLocation();
   const navigate = useNavigate();
   const [state, setState] = useState<GateState>("checking");
-  const [error, setError] = useState<string | null>(null);
 
   const [presetGate, setPresetGate] = useState<LocationGateOptions | null>(
     null,
@@ -97,37 +96,39 @@ export function LocationGate() {
     [connectId, closeModal],
   );
 
-  // Auto-check IP location on mount once gate is available
+  const { countryCode, regionCode, countryCodeLoaded, isError } =
+    useGeoLocation();
+
+  // Evaluate the gate once the IP location resolves and the gate is available.
   useEffect(() => {
-    if (!gate || !returnTo) return;
+    if (!gate || !returnTo || !countryCodeLoaded) return;
 
-    let cancelled = false;
+    if (isError) {
+      setState("error");
+      return;
+    }
 
-    (async () => {
-      try {
-        const geo = await getIpLocation();
-        if (cancelled) return;
+    const result = evaluateLocationGate({
+      gate,
+      geo: { countryCode, regionCode },
+    });
 
-        const result = evaluateLocationGate({ gate, geo });
-
-        if (result.allowed) {
-          setLocationGateVerified(true);
-          navigate(returnTo, { replace: true });
-        } else {
-          setState("blocked");
-        }
-      } catch (err) {
-        if (cancelled) return;
-        console.error("Location gate check failed:", err);
-        setError("Unable to verify location.");
-        setState("error");
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [gate, returnTo, navigate, setLocationGateVerified]);
+    if (result.allowed) {
+      setLocationGateVerified(true);
+      navigate(returnTo, { replace: true });
+    } else {
+      setState("blocked");
+    }
+  }, [
+    gate,
+    returnTo,
+    navigate,
+    setLocationGateVerified,
+    countryCode,
+    regionCode,
+    countryCodeLoaded,
+    isError,
+  ]);
 
   const gameName =
     theme.name && theme.name !== defaultTheme.name ? theme.name : "This game";
@@ -150,9 +151,11 @@ export function LocationGate() {
           icon={<GlobeIcon variant="solid" size="lg" />}
         />
         <LayoutContent className="p-4">
-          {error && (
-            <ErrorAlert title="Error" description={error} isExpanded={true} />
-          )}
+          <ErrorAlert
+            title="Error"
+            description="Unable to verify location."
+            isExpanded={true}
+          />
         </LayoutContent>
         <LayoutFooter>
           <Button

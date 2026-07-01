@@ -69,17 +69,17 @@ export const ActivityCollectibleCard = ({
   const Icon = useMemo(() => {
     switch (action) {
       case "send":
-        return <PaperPlaneIcon variant="solid" className="w-full h-full" />;
+        return <PaperPlaneIcon variant="solid" size="auto" />;
       case "receive":
-        return <ArrowIcon variant="down" className="w-full h-full" />;
+        return <ArrowIcon variant="down" size="auto" />;
       case "mint":
-        return <SeedlingIcon variant="solid" className="w-full h-full" />;
+        return <SeedlingIcon variant="solid" size="auto" />;
       case "burn":
-        return <FireIcon variant="solid" className="w-full h-full" />;
+        return <FireIcon variant="solid" size="auto" />;
       case "list":
-        return <TagIcon variant="solid" className="w-full h-full" />;
+        return <TagIcon variant="solid" size="auto" />;
       case "sell":
-        return <MoneyIcon variant="solid" className="w-full h-full" />;
+        return <MoneyIcon variant="solid" size="auto" />;
       default:
         return undefined;
     }

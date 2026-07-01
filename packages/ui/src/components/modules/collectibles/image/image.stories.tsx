@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { CollectibleImage, CollectibleImageProps } from ".";
+import { UsdColorIcon } from "@/components/icons";
 
 const meta: Meta<typeof CollectibleImage> = {
   title: "Modules/Collectibles/Image",
@@ -109,6 +110,16 @@ export const BadUrlWithFallback: Story = {
             "https://static.cartridge.gg/presets/loot-survivor/icon.png",
           ]}
         />
+      </div>
+    );
+  },
+};
+
+export const Icon: Story = {
+  render: function Render(args: CollectibleImageProps) {
+    return (
+      <div className="flex gap-2 w-full h-[200px] border border-foreground-400">
+        <CollectibleImage {...args} images={[<UsdColorIcon size="auto" />]} />
       </div>
     );
   },

@@ -13,8 +13,10 @@ interface VerificationDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   /** Which downstream checkout is being gated by verification. Controls
-   * whether email-only or email+phone is required. */
-  method: "coinflow" | "apple-pay" | null;
+   * whether email-only or email+phone is required. Omit (undefined) for rails
+   * that require no verification (e.g. the controller USDC deposit) — the drawer
+   * then stays fully inert. */
+  method?: "coinflow" | "apple-pay" | null;
   /** Called when verification completes. The host should close this drawer
    * and open the matching payment drawer next. */
   onSuccess: () => void;

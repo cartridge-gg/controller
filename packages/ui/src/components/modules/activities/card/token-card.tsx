@@ -2,10 +2,13 @@ import { useMemo, useState } from "react";
 import {
   AchievementPlayerAvatar,
   ActivityPreposition,
+  ArrowFromLineIcon,
   ArrowIcon,
+  ArrowToLineIcon,
   CoinsIcon,
   CollectibleTag,
   FireIcon,
+  MoneyIcon,
   PaperPlaneIcon,
   SeedlingIcon,
   Thumbnail,
@@ -23,18 +26,30 @@ export interface ActivityTokenCardProps
   username?: string; // token owner username
   amount: string; // token amount
   value?: string; // usd value
-  image?: string; // token image
+  image?: string | React.ReactNode; // token image
   symbol?: string; // token symbol (used if no image)
   swappedAmount?: string;
   swappedImage?: string;
   swappedSymbol?: string;
   logo?: string; // game logo
-  action: "send" | "receive" | "mint" | "burn" | "swap";
+  action:
+    | "send"
+    | "receive"
+    | "mint"
+    | "burn"
+    | "swap"
+    | "claimed"
+    | "deposit"
+    | "withdraw"
+    | "spend";
+  item?: string;
   timestamp: number;
   error?: boolean;
   loading?: boolean;
   className?: string;
 }
+
+export type ActivityTokenCardAction = ActivityTokenCardProps["action"];
 
 export const ActivityTokenCard = ({
   address,
@@ -48,6 +63,7 @@ export const ActivityTokenCard = ({
   swappedSymbol,
   logo,
   action: actionProp,
+  item,
   timestamp,
   error,
   loading,
@@ -70,15 +86,22 @@ export const ActivityTokenCard = ({
   const Icon = useMemo(() => {
     switch (action) {
       case "send":
-        return <PaperPlaneIcon variant="solid" className="w-full h-full" />;
+        return <PaperPlaneIcon variant="solid" size="auto" />;
       case "receive":
-        return <ArrowIcon variant="down" className="w-full h-full" />;
+        return <ArrowIcon variant="down" size="auto" />;
       case "mint":
-        return <SeedlingIcon variant="solid" className="w-full h-full" />;
+      case "claimed":
+        return <SeedlingIcon variant="solid" size="auto" />;
       case "burn":
-        return <FireIcon variant="solid" className="w-full h-full" />;
+        return <FireIcon variant="solid" size="auto" />;
       case "swap":
-        return <TransferIcon className="w-full h-full" />;
+        return <TransferIcon size="auto" />;
+      case "deposit":
+        return <ArrowToLineIcon variant="down" size="auto" />;
+      case "withdraw":
+        return <ArrowFromLineIcon variant="up" size="auto" />;
+      case "spend":
+        return <MoneyIcon variant="solid" size="auto" />;
       default:
         return undefined;
     }
@@ -133,6 +156,10 @@ export const ActivityTokenCard = ({
         return <ActivityPreposition label="burned" />;
       case "swap":
         return <ActivityPreposition label="for" />;
+      case "claimed":
+        return <ActivityPreposition label="claimed" />;
+      case "spend":
+        return !!item && <ActivityPreposition label="on" />;
       default:
         return undefined;
     }
@@ -156,6 +183,17 @@ export const ActivityTokenCard = ({
             <WalletIcon variant="solid" size="xs" className="flex-none" />
             <p className="truncate">{formatAddress(address, { size: "xs" })}</p>
           </CollectibleTag>
+        );
+      case "spend":
+        return (
+          !!item && (
+            <CollectibleTag
+              variant="dark"
+              className="gap-1 shrink min-w-[60px]"
+            >
+              <p className="truncate">{item}</p>
+            </CollectibleTag>
+          )
         );
       case "swap":
         return (

@@ -9,13 +9,13 @@ import {
   ExternalIcon,
   cn,
 } from "@cartridge/controller-ui";
-import { useOnchainPurchaseContext } from "@/context";
 import { useNavigation } from "@/context";
+import { useCoinbaseRail } from "../rails";
 import {
   CoinbaseLimitUpgradeStatus,
   type SubmitCoinbaseLimitsUpgradeInput,
 } from "@/utils/api";
-import { exceedsLimit } from "@/hooks/starterpack/coinbase";
+import { exceedsLimit } from "@/hooks/payments/coinbase";
 import {
   VerifyActivePanel,
   VerifyFormPanel,
@@ -65,15 +65,15 @@ export function CoinbaseCheckout({
     paymentLink,
     orderId,
     isCreatingOrder,
-    onCreateCoinbaseOrder,
+    createOrder: onCreateCoinbaseOrder,
     openPaymentPopup,
-    coinbaseQuote,
-    coinbaseLimits,
-    isFetchingCoinbaseLimits,
+    quote: coinbaseQuote,
+    limits: coinbaseLimits,
+    isFetchingLimits: isFetchingCoinbaseLimits,
     isSubmittingLimitsUpgrade,
-    fetchCoinbaseLimits,
-    submitCoinbaseLimitsUpgrade,
-  } = useOnchainPurchaseContext();
+    fetchLimits: fetchCoinbaseLimits,
+    submitLimitsUpgrade: submitCoinbaseLimitsUpgrade,
+  } = useCoinbaseRail();
   const { navigate } = useNavigation();
 
   const [mode, setMode] = useState<PanelMode>("policies");

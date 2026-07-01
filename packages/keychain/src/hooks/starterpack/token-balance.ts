@@ -66,7 +66,7 @@ export function useTokenBalance({
 
   // Determine which token to check balance for and required amount
   const tokenToCheck = useMemo(() => {
-    if (!quote) return null;
+    if (!quote || selectedToken?.isCredits) return null;
 
     // If a token is selected and it's different from payment token, check selected token
     if (
@@ -92,7 +92,7 @@ export function useTokenBalance({
 
   // Check if we need token conversion (selected token differs from payment token)
   const needsConversion = useMemo(() => {
-    if (!quote || !selectedToken) return false;
+    if (!quote || !selectedToken || selectedToken.isCredits) return false;
     return num.toHex(selectedToken.address) !== num.toHex(quote.paymentToken);
   }, [quote, selectedToken]);
 

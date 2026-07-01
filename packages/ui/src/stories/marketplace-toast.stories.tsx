@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { MarketplaceToast } from "@/components/primitives/toast/specialized-toasts";
+import { UsdColorIcon } from "@/components";
 
 const meta: Meta<typeof MarketplaceToast> = {
   title: "Primitives/Toast/Marketplace Toast",
@@ -105,5 +106,14 @@ export const SentLords: Story = {
     itemImages: [
       "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/a3bfe959-50c4-4f89-0aef-b19207d82a00/logo",
     ],
+  },
+};
+
+export const DepositedCredits: Story = {
+  args: {
+    title: "Deposited",
+    collectionName: "USD",
+    itemNames: ["10.00 USD"],
+    itemImages: [<UsdColorIcon size="auto" />],
   },
 };

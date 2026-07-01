@@ -4,8 +4,10 @@ import {
   CoinflowStarterpackIntent,
   CoinflowStarterpackQuote,
   CreateCoinflowStarterpackIntentInput,
+  CreditsInput,
   useCoinflowStarterpackQuoteQuery,
   useCreateCoinflowStarterpackIntentMutation,
+  useCreateCoinflowCreditsIntentMutation,
 } from "@/utils/api";
 
 // Re-export generated enums/types for convenience so callers can import
@@ -19,6 +21,14 @@ export type {
   CoinflowStarterpackIntent,
   CoinflowStarterpackQuote,
 } from "@/utils/api";
+
+// Neutral type for the Coinflow intent shape. Every Coinflow intent (bundle,
+// credits, future assets) returns the same `{ id, sessionKey, jwtToken,
+// merchantId, pricing }` shape and is completed by the same coinflowCardCheckout
+// mutation, so rail-level code should depend on this product-agnostic type. The
+// `__typename` is dropped so both the starterpack and credits intents are
+// assignable to it.
+export type CoinflowIntent = Omit<CoinflowStarterpackIntent, "__typename">;
 
 const useCoinflowPayment = () => {
   const { controller } = useConnection();
@@ -65,6 +75,58 @@ const useCoinflowPayment = () => {
 };
 
 export default useCoinflowPayment;
+
+// ---------------------------------------------------------------------------
+// Credits top-up intent
+// ---------------------------------------------------------------------------
+
+/**
+ * Creates a Coinflow intent that funds account credits (rather than a bundle).
+ * Returns the same neutral `CoinflowIntent`, completed by the same
+ * `coinflowCardCheckout` mutation — only the creating mutation differs. The
+ * caller supplies the credit amount as a `CreditsInput` (e.g. `{ amount: usd *
+ * 100, decimals: 0 }`); `isMainnet` is derived from the connected controller.
+ */
+export const useCoinflowCreditsPayment = () => {
+  const { controller } = useConnection();
+  const [error, setError] = useState<Error | null>(null);
+
+  const isMainnet = controller?.chainId() === "0x534e5f4d41494e"; // SN_MAIN
+
+  const { mutateAsync, isLoading } = useCreateCoinflowCreditsIntentMutation();
+
+  const createIntent = useCallback(
+    async (credits: CreditsInput): Promise<CoinflowIntent> => {
+      if (!controller) {
+        throw new Error("Controller not connected");
+      }
+
+      try {
+        setError(null);
+
+        const result = await mutateAsync({
+          input: {
+            credits,
+            isMainnet,
+          },
+        });
+
+        return result.createCoinflowCreditsIntent;
+      } catch (e) {
+        setError(e as Error);
+        throw e;
+      }
+    },
+    [controller, isMainnet, mutateAsync],
+  );
+
+  return {
+    isLoading,
+    error,
+    createIntent,
+    env: isMainnet ? ("prod" as const) : ("sandbox" as const),
+  };
+};
 
 // ---------------------------------------------------------------------------
 // Quote query

@@ -199,7 +199,7 @@ interface MarketplaceToastProps extends Omit<ToasterToast, "children"> {
   title: string;
   collectionName: string;
   itemNames: string[];
-  itemImages: string[];
+  itemImages: (string | React.ReactNode)[];
   progress?: number;
   preset?: string;
 }

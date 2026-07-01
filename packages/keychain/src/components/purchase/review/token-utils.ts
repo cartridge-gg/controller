@@ -1,5 +1,5 @@
 import { USDC_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
-import { USDC_ADDRESSES, USDCE_ADDRESSES } from "@/utils/ekubo";
+import { USDC_ADDRESSES, USDC_ICON, USDCE_ADDRESSES } from "@/utils/ekubo";
 
 /**
  * Normalize a token address for comparison
@@ -87,7 +87,7 @@ export function getTokenSymbol(tokenAddress: string): string {
  */
 export function getTokenIcon(tokenAddress: string): string | null {
   if (isUsdcToken(tokenAddress)) {
-    return "https://static.cartridge.gg/tokens/usdc.svg";
+    return USDC_ICON;
   }
   return null;
 }

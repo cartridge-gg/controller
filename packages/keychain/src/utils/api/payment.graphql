@@ -28,10 +28,55 @@ mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
   }
 }
 
+query BundleCreditsQuote($input: PurchaseBundleWithCreditsInput!) {
+  bundleCreditsQuote(input: $input) {
+    requiredCredits
+    costInUsdc
+    paymentToken
+    paymentTokenAmount
+    needsSwap
+  }
+}
+
+mutation PurchaseBundleWithCredits($input: PurchaseBundleWithCreditsInput!) {
+  purchaseBundleWithCredits(input: $input) {
+    id
+    status
+    transactionHash
+    lastError
+  }
+}
+
+query PurchaseFulfillment($id: ID!) {
+  purchaseFulfillment(id: $id) {
+    id
+    status
+    transactionHash
+    lastError
+  }
+}
+
 mutation CreateCoinflowStarterpackIntent(
   $input: CreateCoinflowStarterpackIntentInput!
 ) {
   createCoinflowStarterpackIntent(input: $input) {
+    id
+    sessionKey
+    jwtToken
+    merchantId
+    pricing {
+      subtotalInCents
+      cardFeeInCents
+      gasFeeInCents
+      totalInCents
+    }
+  }
+}
+
+mutation CreateCoinflowCreditsIntent(
+  $input: CreateCoinflowCreditsIntentInput!
+) {
+  createCoinflowCreditsIntent(input: $input) {
     id
     sessionKey
     jwtToken

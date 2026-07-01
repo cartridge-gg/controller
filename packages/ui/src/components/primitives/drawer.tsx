@@ -78,7 +78,14 @@ export const DrawerContent = ({
           </div>
         </div>
       </SheetTitle>
-      <div className={cn("flex flex-col gap-4", className)}>{children}</div>
+      <div
+        className={cn(
+          "flex flex-col gap-4 max-h-[75vh] overflow-y-scroll",
+          className,
+        )}
+      >
+        {children}
+      </div>
     </>
   );
 };

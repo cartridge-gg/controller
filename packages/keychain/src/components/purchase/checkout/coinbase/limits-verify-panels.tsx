@@ -18,7 +18,7 @@ import {
   LIMIT_TYPE_LIFETIME_TRANSACTIONS,
   LIMIT_TYPE_WEEKLY_SPENDING,
   UNLIMITED_SENTINEL,
-} from "@/hooks/starterpack/coinbase";
+} from "@/hooks/payments/coinbase";
 import type { CoinbaseLimitsResult } from "@/hooks/starterpack";
 
 export interface VerifyFormPanelProps {

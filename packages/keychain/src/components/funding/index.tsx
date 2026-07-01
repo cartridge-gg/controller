@@ -40,7 +40,13 @@ export function Funding({ title, isSlot }: FundingProps) {
       </LayoutContent>
       <LayoutFooter>
         {!isSlot && (
-          <Button onClick={() => navigate("/funding/deposit")}>Deposit</Button>
+          <Button
+            onClick={() => {
+              navigate("/funding/deposit");
+            }}
+          >
+            Deposit
+          </Button>
         )}
       </LayoutFooter>
     </>

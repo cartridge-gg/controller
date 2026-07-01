@@ -39,11 +39,14 @@ export type {
   UseTokenFallbackReturn,
 } from "./token-fallback";
 
+// The Coinbase rail hook now lives under hooks/payments (it is payment-rail
+// infrastructure, not starterpack-specific). Re-exported here for back-compat
+// with existing barrel imports.
 export {
   useCoinbase,
   exceedsLimit,
   COINBASE_APPLE_PAY_MIN_USD,
-} from "./coinbase";
+} from "@/hooks/payments/coinbase";
 export type {
   CreateOrderInput,
   UseCoinbaseOptions,
@@ -53,6 +56,6 @@ export type {
   CoinbaseQuoteResult,
   CoinbaseOrderStatusResult,
   CoinbaseLimitsResult,
-} from "./coinbase";
+} from "@/hooks/payments/coinbase";
 
 export { useStarterpackPlayHandler } from "./play";

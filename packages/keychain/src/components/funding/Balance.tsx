@@ -10,6 +10,7 @@ import {
   CardTitle,
   TokenCard,
   TokenSummary,
+  UsdColorIcon,
 } from "@cartridge/controller-ui";
 import { useCreditBalance } from "@cartridge/controller-ui/utils";
 
@@ -47,12 +48,12 @@ export function Balance({ types, title, amount }: BalanceProps) {
       <TokenSummary className="rounded-tl-none rounded-tr-none">
         {types.includes(BalanceType.CREDITS) && (
           <TokenCard
-            image={"https://static.cartridge.gg/presets/credit/icon.svg"}
-            title={"Credits"}
+            image={<UsdColorIcon size="auto" />}
+            title={"USD"}
             amount={
               amount
                 ? `${amount.toFixed(2).toString()}`
-                : `${creditBalance.formatted} CREDITS`
+                : `${creditBalance.formatted} USD`
             }
           />
         )}
