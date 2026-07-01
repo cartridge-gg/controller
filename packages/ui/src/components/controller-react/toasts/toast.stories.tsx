@@ -9,6 +9,8 @@ import {
   TransactionToast,
   XPTag,
   ToastProgressBar,
+  TOAST_SN_MAIN,
+  TOAST_SN_SEPOLIA,
 } from "./specialized-toasts";
 import { ControllerPresetProvider } from "../controller-toaster/preset-provider";
 import { CloseButton } from "./toast";
@@ -139,18 +141,44 @@ export const AllToasts: Story = {
         <Section title="Network Switch">
           <Item label="Starknet Mainnet">
             <NetworkSwitchToast
-              networkName="Starknet Mainnet"
+              chainId={TOAST_SN_MAIN}
+              networkName="Ignored"
+              showClose={false}
+              duration={0}
+            />
+          </Item>
+          <Item label="Starknet Mainnet with Icon">
+            <NetworkSwitchToast
+              chainId={TOAST_SN_SEPOLIA}
               networkIcon={<StarknetIcon size="default" />}
+              networkName="Ignored"
               showClose={false}
               duration={0}
             />
           </Item>
           <Item label="Custom network">
             <NetworkSwitchToast
+              chainId={"0x4B4154414E415F4C4F43414C"} // "KATANA_LOCAL"
+              showClose={false}
+              duration={0}
+            />
+          </Item>
+          <Item label="Custom network">
+            <NetworkSwitchToast
+              chainId={"0x123456"}
               networkName="Nums Chain"
+              networkIcon="https://static.cartridge.gg/presets/nums/icon.png"
+              showClose={false}
+              duration={0}
+            />
+          </Item>
+          <Item label="Custom network">
+            <NetworkSwitchToast
+              chainId={"0x123456"}
+              networkName="Custom Chain"
               networkIcon={
                 <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                  N
+                  😛
                 </div>
               }
               showClose={false}

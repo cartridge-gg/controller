@@ -44,7 +44,8 @@ export interface TransactionToastOptions extends BaseToastOptions {
 // Network Switch Toast
 export interface NetworkSwitchToastOptions extends BaseToastOptions {
   variant: "network-switch";
-  networkName: string;
+  chainId: string;
+  networkName?: string;
   networkIcon?: string;
 }
 

@@ -45,10 +45,10 @@ export function createNetworkSwitchToast(
   icon.style.aspectRatio = "1/1";
   if (options.networkIcon) {
     (icon as HTMLImageElement).src = sanitizeImageSrc(options.networkIcon);
-    (icon as HTMLImageElement).alt = options.networkName;
+    (icon as HTMLImageElement).alt = options.networkName ?? "Network";
   } else {
     (icon as HTMLDivElement).style.backgroundColor = "#161A17";
-    (icon as HTMLDivElement).innerHTML = options.networkName
+    (icon as HTMLDivElement).innerHTML = (options.networkName ?? "Network")
       .charAt(0)
       .toUpperCase();
     (icon as HTMLDivElement).style.color = "#ffffff";

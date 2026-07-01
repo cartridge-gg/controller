@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { toast as sonnerToast } from "sonner";
 import { Button } from "@/components/primitives/button";
 import {
   ErrorToastOptions,
@@ -18,7 +19,6 @@ import {
   ControllerToaster,
   ControllerNotificationTypes,
 } from "./controller-toaster";
-import { toast as sonnerToast } from "sonner";
 import {
   Input,
   Select,
@@ -28,6 +28,7 @@ import {
   SelectValue,
   Switch,
 } from "../../..";
+import { TOAST_SN_MAIN, TOAST_SN_SEPOLIA } from "../toasts/specialized-toasts";
 
 const meta: Meta = {
   title: "Controller React/Toaster/Controller Toaster",
@@ -154,22 +155,40 @@ function ControllerToasterDemo() {
     setTxCount((prev) => prev + 1);
   };
 
-  const showSwitchToStarknet = () => {
+  const showSwitchToStarknetMainnet = () => {
     const options: NetworkSwitchToastOptions = {
       variant: "network-switch",
-      networkName: "Starknet Mainnet",
-      // networkIcon: "",
+      chainId: TOAST_SN_MAIN,
+      networkName: "Ignored",
+      networkIcon: "Ignored",
     };
-    emitControllerToast("switchToStarknet", options);
+    emitControllerToast("switchToStarknetMainnet", options);
   };
 
-  const showSwitchToNums = () => {
+  const showSwitchToStarknetSepolia = () => {
     const options: NetworkSwitchToastOptions = {
       variant: "network-switch",
+      chainId: TOAST_SN_SEPOLIA,
+    };
+    emitControllerToast("switchToStarknetSepolia", options);
+  };
+
+  const showSwitchToKatanaLocal = () => {
+    const options: NetworkSwitchToastOptions = {
+      variant: "network-switch",
+      chainId: "0x4B4154414E415F4C4F43414C", // "KATANA_LOCAL"
+    };
+    emitControllerToast("switchToKatanaLocal", options);
+  };
+
+  const showSwitchToNumsChain = () => {
+    const options: NetworkSwitchToastOptions = {
+      variant: "network-switch",
+      chainId: "0x1234567890",
       networkName: "Nums Chain",
       networkIcon: "https://static.cartridge.gg/presets/nums/icon.png",
     };
-    emitControllerToast("switchToNums", options);
+    emitControllerToast("switchToNumsChain", options);
   };
 
   const showMarketplacePurchaseBeast = () => {
@@ -350,18 +369,40 @@ function ControllerToasterDemo() {
               : `...TX${txCount} error`}
           </Button>
           <Button
-            onClick={showSwitchToStarknet}
+            onClick={showSwitchToStarknetMainnet}
             className="w-full"
-            disabled={isLoading.switchToStarknet}
+            disabled={isLoading.switchToStarkneMainnet}
           >
-            {isLoading.switchToStarknet ? "Loading..." : "Switch to Starknet"}
+            {isLoading.switchToStarkneMainnet
+              ? "Loading..."
+              : "Switch to Starknet Mainnet"}
           </Button>
           <Button
-            onClick={showSwitchToNums}
+            onClick={showSwitchToStarknetSepolia}
             className="w-full"
-            disabled={isLoading.switchToNums}
+            disabled={isLoading.switchToStarknetSepolia}
           >
-            {isLoading.switchToNums ? "Loading..." : "Switch to Nums"}
+            {isLoading.switchToStarknetSepolia
+              ? "Loading..."
+              : "Switch to Starknet Sepolia"}
+          </Button>
+          <Button
+            onClick={showSwitchToKatanaLocal}
+            className="w-full"
+            disabled={isLoading.switchToKatanaLocal}
+          >
+            {isLoading.switchToKatanaLocal
+              ? "Loading..."
+              : "Switch to Katana Local"}
+          </Button>
+          <Button
+            onClick={showSwitchToNumsChain}
+            className="w-full"
+            disabled={isLoading.switchToNumsChain}
+          >
+            {isLoading.switchToNumsChain
+              ? "Loading..."
+              : "Switch to Nums Chain"}
           </Button>
           <Button
             onClick={() =>
