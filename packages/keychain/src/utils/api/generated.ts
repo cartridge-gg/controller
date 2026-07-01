@@ -7539,6 +7539,28 @@ export type CreateCoinflowStarterpackIntentMutation = {
   };
 };
 
+export type CreateCoinflowCreditsIntentMutationVariables = Exact<{
+  input: CreateCoinflowCreditsIntentInput;
+}>;
+
+export type CreateCoinflowCreditsIntentMutation = {
+  __typename?: "Mutation";
+  createCoinflowCreditsIntent: {
+    __typename?: "CoinflowCreditsIntent";
+    id: string;
+    sessionKey: string;
+    jwtToken: string;
+    merchantId: string;
+    pricing: {
+      __typename?: "CoinflowPricingDetails";
+      subtotalInCents: number;
+      cardFeeInCents: number;
+      gasFeeInCents: number;
+      totalInCents: number;
+    };
+  };
+};
+
 export type CoinflowCardCheckoutMutationVariables = Exact<{
   input: CoinflowCardCheckoutInput;
 }>;
@@ -8613,6 +8635,46 @@ export const useCreateCoinflowStarterpackIntentMutation = <
       CreateCoinflowStarterpackIntentMutation,
       CreateCoinflowStarterpackIntentMutationVariables
     >(CreateCoinflowStarterpackIntentDocument),
+    options,
+  );
+export const CreateCoinflowCreditsIntentDocument = `
+    mutation CreateCoinflowCreditsIntent($input: CreateCoinflowCreditsIntentInput!) {
+  createCoinflowCreditsIntent(input: $input) {
+    id
+    sessionKey
+    jwtToken
+    merchantId
+    pricing {
+      subtotalInCents
+      cardFeeInCents
+      gasFeeInCents
+      totalInCents
+    }
+  }
+}
+    `;
+export const useCreateCoinflowCreditsIntentMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinflowCreditsIntentMutation,
+    TError,
+    CreateCoinflowCreditsIntentMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinflowCreditsIntentMutation,
+    TError,
+    CreateCoinflowCreditsIntentMutationVariables,
+    TContext
+  >(
+    ["CreateCoinflowCreditsIntent"],
+    useFetchData<
+      CreateCoinflowCreditsIntentMutation,
+      CreateCoinflowCreditsIntentMutationVariables
+    >(CreateCoinflowCreditsIntentDocument),
     options,
   );
 export const CoinflowCardCheckoutDocument = `
