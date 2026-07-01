@@ -41,10 +41,14 @@ export interface TransactionToastOptions extends BaseToastOptions {
   label?: string;
 }
 
-// Network Switch Toast
-export interface NetworkSwitchToastOptions extends BaseToastOptions {
-  variant: "network-switch";
-  networkName: string;
+// Network Toast
+export type NetworkToastKind = "connect" | "switch-chain";
+
+export interface NetworkToastOptions extends BaseToastOptions {
+  variant: "network";
+  kind: NetworkToastKind;
+  chainId: string;
+  networkName?: string;
   networkIcon?: string;
 }
 
@@ -88,7 +92,7 @@ export type ToastOptions =
   | ErrorToastOptions
   | SuccessToastOptions
   | TransactionToastOptions
-  | NetworkSwitchToastOptions
+  | NetworkToastOptions
   | AchievementToastOptions
   | QuestToastOptions
   | MarketplaceToastOptions

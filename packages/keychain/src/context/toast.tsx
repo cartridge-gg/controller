@@ -1,10 +1,17 @@
-import React, { createContext, useContext, useCallback, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useMemo,
+  useEffect,
+  useState,
+} from "react";
 import {
   ToastOptions,
   ErrorToastOptions,
   SuccessToastOptions,
   TransactionToastOptions,
-  NetworkSwitchToastOptions,
+  NetworkToastOptions,
   AchievementToastOptions,
   QuestToastOptions,
   MarketplaceToastOptions,
@@ -14,6 +21,7 @@ import {
 import { isIframe } from "@cartridge/controller-ui/utils";
 import { toast as sonnerToast } from "sonner";
 import { useConnection } from "@/hooks/connection";
+import type { Chain } from "@cartridge/controller";
 
 interface ToastContextType {
   toast: {
@@ -32,9 +40,9 @@ interface ToastContextType {
       options: Omit<TransactionToastOptions, "variant">,
       disabled?: boolean,
     ) => void;
-    networkSwitch: (
+    network: (
       message: string,
-      options: Omit<NetworkSwitchToastOptions, "variant">,
+      options: Omit<NetworkToastOptions, "variant">,
       disabled?: boolean,
     ) => void;
     marketplace: (
@@ -122,16 +130,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           variant: "transaction",
         });
       },
-      networkSwitch: (
+      network: (
         message: string,
-        options: Omit<NetworkSwitchToastOptions, "variant">,
+        options: Omit<NetworkToastOptions, "variant">,
         disabled?: boolean,
       ) => {
         if (disabled) return;
         if (message) sonnerToast.success(message);
         emitToast({
           ...options,
-          variant: "network-switch",
+          variant: "network",
         });
       },
       marketplace: (
@@ -189,7 +197,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
+    <ToastContext.Provider value={value}>
+      {children}
+      <ChainSwitchDetector />
+    </ToastContext.Provider>
   );
 }
 
@@ -199,4 +210,33 @@ export function useToast() {
     throw new Error("useToast must be used within a ToastProvider");
   }
   return context;
+}
+
+function ChainSwitchDetector() {
+  const { controller, configuredChains } = useConnection();
+  const connectedChainId = useMemo(() => controller?.chainId(), [controller]);
+  const [currentChainId, setCurrentChainId] = useState<string | undefined>();
+  const { toast } = useToast();
+  useEffect(() => {
+    if (connectedChainId && currentChainId !== connectedChainId) {
+      const chain: Chain | undefined = configuredChains.find(
+        (chain) => BigInt(chain?.chainId ?? 0) === BigInt(connectedChainId),
+      ) as Chain;
+      const kind = !currentChainId ? "connect" : "switch-chain";
+      const disabled = kind == "connect";
+      toast.network(
+        "",
+        {
+          kind,
+          chainId: connectedChainId,
+          networkName: chain?.name,
+          networkIcon: chain?.icon,
+        },
+        disabled,
+      );
+    }
+    setCurrentChainId(connectedChainId);
+  }, [controller, connectedChainId, currentChainId, configuredChains, toast]);
+
+  return <></>;
 }

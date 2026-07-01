@@ -28,7 +28,7 @@ export type ToastPosition =
 export type ControllerNotificationTypes =
   | "error"
   | "success"
-  | "network-switch"
+  | "network"
   | "transaction"
   | "marketplace"
   | "achievement"

@@ -2,7 +2,7 @@
 
 import React, { memo, useState, useEffect } from "react";
 import { cva } from "class-variance-authority";
-import { cn } from "@/utils";
+import { cn, isSlotChain } from "@/utils";
 import {
   CheckIcon,
   SpinnerIcon,
@@ -11,6 +11,8 @@ import {
   SparklesIcon,
   SparklesDraftIcon,
   TransactionIcon,
+  SlotIcon,
+  GlobeIcon,
 } from "@/components/icons";
 import { StarknetColorIcon } from "@/components/icons/brand-color";
 import { CollectibleImage } from "@/components/modules/collectibles";
@@ -258,45 +260,101 @@ const MarketplaceToast = memo<MarketplaceToastProps>(
 
 MarketplaceToast.displayName = "MarketplaceToast";
 
-// Network Switch Toast Component
-interface NetworkSwitchToastProps extends Omit<ToasterToast, "children"> {
-  networkName: string;
-  networkIcon?: React.ReactNode;
+// Network Toast Component
+type NetworkToastKind = "connect" | "switch-chain";
+
+const NETWORK_TOAST_ACTION: Record<NetworkToastKind, string> = {
+  connect: "Connected to",
+  "switch-chain": "Switched to",
+};
+
+interface NetworkToastProps extends Omit<ToasterToast, "children"> {
+  kind?: NetworkToastKind;
+  chainId: string;
+  networkName?: string;
+  networkIcon?: string | React.ReactNode;
 }
 
-const NetworkSwitchToast = memo<NetworkSwitchToastProps>(
-  ({ networkName, networkIcon, showClose, toastId, className, ...props }) => (
-    <Toast
-      className={cn(
-        specializedToastVariants({ variant: "network" }),
-        className,
-      )}
-      showClose={showClose}
-      toastId={toastId}
-      {...props}
-    >
-      <div className="flex items-center justify-between px-3 py-3 w-full h-full">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
-            {!networkIcon ? (
-              <StarknetColorIcon size="default" className="min-w-6 scale-125" />
-            ) : typeof networkIcon === "string" &&
-              networkIcon.startsWith("http") ? (
-              <img src={networkIcon} alt="" />
-            ) : (
-              networkIcon
-            )}
+export const TOAST_SN_MAIN = "0x534e5f4d41494e";
+export const TOAST_SN_SEPOLIA = "0x534e5f5345504f4c4941";
+
+const getNameFromChainId = (chainId: string) => {
+  // convert chain id hex to string without dependencies
+  const hex = chainId.startsWith("0x") ? chainId.slice(2) : chainId;
+  let name = "";
+  for (let i = 0; i < hex.length; i += 2) {
+    name += String.fromCharCode(parseInt(hex.slice(i, i + 2), 16));
+  }
+  // replace "_" for spaces and capitalize each word
+  return name
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+};
+
+const NetworkToast = memo<NetworkToastProps>(
+  ({
+    kind = "switch-chain",
+    chainId,
+    networkName,
+    networkIcon,
+    showClose,
+    toastId,
+    className,
+    ...props
+  }) => {
+    const isMainnet = BigInt(chainId) === BigInt(TOAST_SN_MAIN);
+    const isSepolia = BigInt(chainId) === BigInt(TOAST_SN_SEPOLIA);
+    const icon =
+      isMainnet || isSepolia ? (
+        <StarknetColorIcon size="default" className="min-w-6 scale-125" />
+      ) : networkIcon ? (
+        typeof networkIcon === "string" ? (
+          <img src={networkIcon} alt="" />
+        ) : (
+          networkIcon
+        )
+      ) : isSlotChain(chainId) ? (
+        <SlotIcon size="default" className="min-w-6 scale-125" />
+      ) : (
+        <GlobeIcon
+          variant="solid"
+          size="default"
+          className="min-w-6 scale-125"
+        />
+      );
+    const name = isMainnet
+      ? "Starknet Mainnet"
+      : isSepolia
+        ? "Starknet Sepolia"
+        : networkName || getNameFromChainId(chainId);
+
+    return (
+      <Toast
+        className={cn(
+          specializedToastVariants({ variant: "network" }),
+          className,
+        )}
+        showClose={showClose}
+        toastId={toastId}
+        {...props}
+      >
+        <div className="flex items-center justify-between px-3 py-3 w-full h-full">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+              {icon}
+            </div>
+            <span className="text-foreground text-sm font-medium leading-5 tracking-[0.01em] truncate">
+              {NETWORK_TOAST_ACTION[kind]} {name}
+            </span>
           </div>
-          <span className="text-foreground text-sm font-medium leading-5 tracking-[0.01em] truncate">
-            Switched to {networkName}
-          </span>
         </div>
-      </div>
-    </Toast>
-  ),
+      </Toast>
+    );
+  },
 );
 
-NetworkSwitchToast.displayName = "NetworkSwitchToast";
+NetworkToast.displayName = "NetworkToast";
 
 // Error Toast Component
 interface ErrorToastProps extends Omit<ToasterToast, "children"> {
@@ -306,14 +364,7 @@ interface ErrorToastProps extends Omit<ToasterToast, "children"> {
 }
 
 const ErrorToast = memo<ErrorToastProps>(
-  ({
-    message,
-    progress = 100,
-    showClose,
-    toastId,
-    className,
-    ...props
-  }) => (
+  ({ message, progress = 100, showClose, toastId, className, ...props }) => (
     <Toast
       className={cn(specializedToastVariants({ variant: "error" }), className)}
       showClose={showClose}
@@ -572,17 +623,15 @@ export const showMarketplaceToast = (
   };
 };
 
-export const showNetworkSwitchToast = (
-  props: Omit<NetworkSwitchToastProps, ToastPropsToOmit>,
+export const showNetworkToast = (
+  props: Omit<NetworkToastProps, ToastPropsToOmit>,
 ) => {
   const toastId = props.toastId || `network-${Date.now()}`;
   return {
     duration: props.duration,
     toasterId: props.toasterId,
     toastId,
-    element: (
-      <NetworkSwitchToast {...props} showClose={true} toastId={toastId} />
-    ),
+    element: <NetworkToast {...props} showClose={true} toastId={toastId} />,
   };
 };
 
@@ -639,7 +688,7 @@ export const showTransactionToast = (
 export {
   AchievementToast,
   MarketplaceToast,
-  NetworkSwitchToast,
+  NetworkToast,
   ErrorToast,
   SuccessToast,
   UserToast,
@@ -648,7 +697,8 @@ export {
   ToastProgressBar,
   type AchievementToastProps,
   type MarketplaceToastProps,
-  type NetworkSwitchToastProps,
+  type NetworkToastProps,
+  type NetworkToastKind,
   type ErrorToastProps,
   type SuccessToastProps,
   type UserToastProps,
