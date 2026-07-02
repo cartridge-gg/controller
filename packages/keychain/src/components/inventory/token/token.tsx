@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   LayoutContent,
@@ -69,7 +69,30 @@ function Credits() {
     username,
     interval: 30000,
   });
-  const { items: history, status: historyStatus } = useCreditsHistory();
+  const {
+    items: history,
+    status: historyStatus,
+    refetch: refetchHistory,
+  } = useCreditsHistory();
+
+  // Every balance movement (deposit landing, purchase debit, refund) writes a
+  // history row, so refetch the list whenever the balance changes. The balance
+  // is the one signal shared by every flow: the deposit drawer's completion
+  // refetches the same ['Credit'] query this screen polls (interval above), so
+  // a deposit made from here — or from the navigation header — shows up
+  // without coupling the history to any particular flow.
+  const balanceValue = credit.balance.value;
+  const prevBalanceRef = useRef<bigint | undefined>(undefined);
+  useEffect(() => {
+    if (credit.isLoading) return;
+    if (
+      prevBalanceRef.current !== undefined &&
+      prevBalanceRef.current !== balanceValue
+    ) {
+      refetchHistory();
+    }
+    prevBalanceRef.current = balanceValue;
+  }, [balanceValue, credit.isLoading, refetchHistory]);
 
   const entries = useMemo<
     {
