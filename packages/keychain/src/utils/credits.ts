@@ -9,6 +9,8 @@
 // count. Route all credit display through `formatCredits` so the conversion and
 // rounding can never drift.
 
+import { COINBASE_APPLE_PAY_MIN_USD } from "@/hooks/payments/coinbase";
+
 export const CREDIT_UNITS_PER_USD = 100_000_000n; // 1e8 raw units = $1
 export const CREDIT_UNITS_PER_CREDIT = 1_000_000n; // 1e6 raw units = 1 plain credit
 export const USDC_DECIMALS = 6; // $1 = 1 USDC = 1e6 USDC wei
@@ -71,3 +73,11 @@ export function usdToCredits(usd: number): number {
 export function usdToUsdcWei(usd: number): bigint {
   return BigInt(Math.round(usd * 10 ** USDC_DECIMALS));
 }
+
+// Backend bounds for a credits purchase (calculateCreditsDetails): $2 min /
+// $25,000 max. The min also absorbs Coinbase's own Apple Pay onramp floor so
+// every fiat rail can validate against the one constant. The controller (USDC
+// deposit) rail isn't bound server-side, but the deposit flow still caps it at
+// the same max for sanity.
+export const MIN_CREDITS_PURCHASE_USD = Math.max(2, COINBASE_APPLE_PAY_MIN_USD);
+export const MAX_CREDITS_PURCHASE_USD = 25_000;

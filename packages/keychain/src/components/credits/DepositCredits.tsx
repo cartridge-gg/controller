@@ -7,12 +7,10 @@ import {
 import { AmountSelectionDrawer } from "./AmountSelectionDrawer";
 import { Checkout } from "./Checkout";
 import { useCreditsContext } from "./provider";
-
-// Backend bounds for a credits purchase (calculateCreditsDetails): $2 min /
-// $25,000 max. The controller (USDC deposit) rail isn't bound server-side, but
-// we still cap it at the same max for sanity.
-const MIN_CREDITS_PURCHASE_USD = 2;
-const MAX_CREDITS_PURCHASE_USD = 25_000;
+import {
+  MIN_CREDITS_PURCHASE_USD,
+  MAX_CREDITS_PURCHASE_USD,
+} from "@/utils/credits";
 
 interface DepositCreditsProps {
   isOpen: boolean;

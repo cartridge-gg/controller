@@ -6,12 +6,11 @@ import {
   type CoinbaseRailContextValue,
 } from "@/components/purchase/checkout/rails";
 import { CoinbaseDrawer } from "@/components/purchase/checkout/coinbase/drawer";
-import {
-  useCoinbase,
-  COINBASE_APPLE_PAY_MIN_USD,
-} from "@/hooks/payments/coinbase";
+import { useCoinbase } from "@/hooks/payments/coinbase";
 import { waitForCryptoPaymentConfirmation } from "@/hooks/payments/crypto";
 import { useUsdcToken } from "@/hooks/payments/usdc";
+import { MIN_CREDITS_PURCHASE_USD } from "@/utils/credits";
+import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import { CoinbaseOnrampStatus } from "@/utils/api";
 import type { PaymentMethodSelection } from "@/components/purchase/checkout/onchain/wallet-drawer";
 import { CheckoutReviewContent } from "./CheckoutReviewContent";
@@ -83,15 +82,22 @@ export function CoinbaseCreditsCheckout({
   // this as dollars (see the same conversion in starterpack/onchain-purchase).
   const purchaseUSDCAmount = useMemo(() => amount.toFixed(6), [amount]);
 
+  // The amount drawer enforces this too, but the amount can be carried over
+  // from a method with a lower floor (controller allows $1), so the review
+  // must re-validate. MIN_CREDITS_PURCHASE_USD already absorbs Coinbase's own
+  // onramp minimum.
+  const amountTooLow = amount < MIN_CREDITS_PURCHASE_USD;
+
   // Fetch a quote on open so the review can show the total (incl. fees) and the
-  // Coinbase limit check (KYC) can evaluate the payment total.
+  // Coinbase limit check (KYC) can evaluate the payment total. Below the
+  // minimum there is nothing to quote — the review shows the amount warning.
   useEffect(() => {
-    if (!isOpen || amount < COINBASE_APPLE_PAY_MIN_USD) return;
+    if (!isOpen || amountTooLow) return;
     setOrderError(null);
     getQuote({ purchaseUSDCAmount, sandbox: !isMainnet }).catch(() => {
       // Surfaced via onError -> orderError in the review.
     });
-  }, [isOpen, amount, purchaseUSDCAmount, isMainnet, getQuote]);
+  }, [isOpen, amountTooLow, purchaseUSDCAmount, isMainnet, getQuote]);
 
   // The order guard reads live order state, but `createOrder` must keep a STABLE
   // identity: CoinbaseCheckout eager-creates the order in an effect keyed on it,
@@ -225,12 +231,22 @@ export function CoinbaseCreditsCheckout({
                 )
               }
               isCostLoading={isFetchingQuote && !coinbaseQuote}
+              warning={
+                amountTooLow ? (
+                  <ErrorCard
+                    variant="warning"
+                    title="Amount Too Low"
+                    message={`The minimum for an Apple Pay deposit is $${MIN_CREDITS_PURCHASE_USD.toFixed(2)}. Select a higher amount to continue.`}
+                  />
+                ) : undefined
+              }
               error={orderError?.message}
               buttonLabel="CONTINUE"
               onContinue={handleContinue}
-              // No usable quote (e.g. the onramp quote failed) — block CONTINUE
-              // so we don't advance into a payment flow that can't price/limit.
-              buttonDisabled={!!orderError || !coinbaseQuote}
+              // No usable quote (amount below the minimum, or the onramp quote
+              // failed) — block CONTINUE so we don't advance into a payment
+              // flow that can't price/limit.
+              buttonDisabled={amountTooLow || !!orderError || !coinbaseQuote}
             />
           </DrawerContent>
         </Drawer>

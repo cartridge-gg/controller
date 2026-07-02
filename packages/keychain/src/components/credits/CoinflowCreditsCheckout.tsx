@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Drawer, DrawerContent, DepositIcon } from "@cartridge/controller-ui";
-import { usdToCredits } from "@/utils/credits";
+import { usdToCredits, MIN_CREDITS_PURCHASE_USD } from "@/utils/credits";
+import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import {
   CoinflowRailProvider,
   type CoinflowRailContextValue,
@@ -51,10 +52,17 @@ export function CoinflowCreditsCheckout({
   const { phase, verifying, handleContinue, backToReview } =
     useFiatCheckoutFlow({ method: "coinflow" });
 
+  // The amount drawer enforces this too, but the amount can be carried over
+  // from a method with a lower floor (controller allows $1), so the review
+  // must re-validate against the backend's $2 buy-credits minimum.
+  const amountTooLow = amount < MIN_CREDITS_PURCHASE_USD;
+
   // Create the intent when the drawer opens so the review can quote a total and
   // the pay phase can reuse it. Drop it on close so a re-open mints a fresh one.
+  // Below the minimum the backend would reject the intent — the review shows
+  // the amount warning instead.
   useEffect(() => {
-    if (!isOpen || amount <= 0 || intent) return;
+    if (!isOpen || amount <= 0 || amountTooLow || intent) return;
     let active = true;
     createIntent({ amount: usdToCredits(amount), decimals: 0 })
       .then((i) => {
@@ -67,7 +75,7 @@ export function CoinflowCreditsCheckout({
     return () => {
       active = false;
     };
-  }, [isOpen, amount, intent, createIntent]);
+  }, [isOpen, amount, amountTooLow, intent, createIntent]);
 
   useEffect(() => {
     if (!isOpen) setIntent(undefined);
@@ -117,12 +125,22 @@ export function CoinflowCreditsCheckout({
                 )
               }
               isCostLoading={isLoading && !intent}
+              warning={
+                amountTooLow ? (
+                  <ErrorCard
+                    variant="warning"
+                    title="Amount Too Low"
+                    message={`The minimum for a card deposit is $${MIN_CREDITS_PURCHASE_USD.toFixed(2)}. Select a higher amount to continue.`}
+                  />
+                ) : undefined
+              }
               error={error?.message}
               buttonLabel="CONTINUE"
               onContinue={handleContinue}
-              // No usable intent (e.g. intent creation failed) — block CONTINUE
-              // so we don't advance into a card form that can't tokenize/charge.
-              buttonDisabled={!!error || !intent}
+              // No usable intent (amount below the minimum, or intent creation
+              // failed) — block CONTINUE so we don't advance into a card form
+              // that can't tokenize/charge.
+              buttonDisabled={amountTooLow || !!error || !intent}
             />
           </DrawerContent>
         </Drawer>
