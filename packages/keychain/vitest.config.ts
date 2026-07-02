@@ -104,6 +104,14 @@ export default defineConfig({
         replacement: resolveFromRoot("src/__mocks__/torii-wasm.ts"),
       },
       {
+        // The real package's CJS build requires the optional peer
+        // '@solana/web3.js' at load time; vite.config.ts shims that peer for
+        // the app build, but vitest externalizes node_modules requires, so
+        // alias the whole package to a stub in tests.
+        find: "@coinflowlabs/react",
+        replacement: resolveFromRoot("src/__mocks__/coinflowlabs-react.tsx"),
+      },
+      {
         find: "@",
         replacement: resolveFromRoot("src"),
       },
