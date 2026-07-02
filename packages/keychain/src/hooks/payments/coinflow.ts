@@ -1,6 +1,10 @@
 import { useCallback, useState } from "react";
 import { useConnection } from "../connection";
+import { request } from "@/utils/graphql";
 import {
+  CoinflowPaymentDocument,
+  CoinflowPaymentQuery,
+  CoinflowPaymentStatus,
   CoinflowStarterpackIntent,
   CoinflowStarterpackQuote,
   CreateCoinflowStarterpackIntentInput,
@@ -127,6 +131,51 @@ export const useCoinflowCreditsPayment = () => {
     env: isMainnet ? ("prod" as const) : ("sandbox" as const),
   };
 };
+
+// ---------------------------------------------------------------------------
+// Settlement polling
+// ---------------------------------------------------------------------------
+
+const SETTLEMENT_POLL_INTERVAL_MS = 2_000;
+
+/**
+ * Wait for a Coinflow payment to settle. `coinflowCardCheckout` resolves when
+ * the card is charged, but credits are only granted by the settlement webhook
+ * (credits-unification Phase 3), so a credits top-up must poll
+ * `coinflowPayment.paymentStatus` past the checkout step before treating the
+ * deposit as landed. Settlement is normally seconds; the timeout error is a
+ * soft "still settling" (the charge already succeeded), not a failure.
+ */
+export async function waitForCoinflowSettlement(
+  paymentId: string,
+  timeoutMs = 180_000,
+): Promise<void> {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const result = await request<CoinflowPaymentQuery>(
+      CoinflowPaymentDocument,
+      { id: paymentId },
+    );
+
+    switch (result.coinflowPayment?.paymentStatus) {
+      case CoinflowPaymentStatus.Succeeded:
+        return;
+      case CoinflowPaymentStatus.Failed:
+        throw new Error(
+          "The card payment failed to settle, so no credits were added. If you were charged, contact support.",
+        );
+      default:
+        await new Promise((resolve) =>
+          setTimeout(resolve, SETTLEMENT_POLL_INTERVAL_MS),
+        );
+    }
+  }
+
+  throw new Error(
+    "Your payment was accepted but is still settling. Your balance will update automatically once it completes.",
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Quote query

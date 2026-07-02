@@ -10,6 +10,7 @@ import {
   useCoinbase,
   COINBASE_APPLE_PAY_MIN_USD,
 } from "@/hooks/payments/coinbase";
+import { waitForCryptoPaymentConfirmation } from "@/hooks/payments/crypto";
 import { useUsdcToken } from "@/hooks/payments/usdc";
 import { CoinbaseOnrampStatus } from "@/utils/api";
 import type { PaymentMethodSelection } from "@/components/purchase/checkout/onchain/wallet-drawer";
@@ -19,13 +20,19 @@ import { useFiatCheckoutFlow } from "./useFiatCheckoutFlow";
 interface CoinbaseCreditsCheckoutProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Completion seam supplied by the host (refresh balance + close). */
-  onComplete: () => void;
+  /** Payment-accepted seam supplied by the host: shows the deposit status view
+   * and awaits the given settlement wait before declaring success. */
+  onPaymentComplete: (settle: () => Promise<void>) => void;
   amount: number;
   paymentMethod: PaymentMethodSelection | null;
   onChangeMethod: () => void;
   onChangeAmount: () => void;
 }
+
+/** How long to wait for the Base→Starknet bridge to complete and the Layerswap
+ * webhook to grant the credits. Matches the bundle flow's layerswap deposit
+ * window (bridging normally takes a few minutes). */
+const COINBASE_SETTLEMENT_TIMEOUT_MS = 10 * 60 * 1000;
 
 /**
  * Credits checkout for the Coinbase (Apple Pay) rail: review → verify
@@ -38,7 +45,7 @@ interface CoinbaseCreditsCheckoutProps {
 export function CoinbaseCreditsCheckout({
   isOpen,
   onClose,
-  onComplete,
+  onPaymentComplete,
   amount,
   paymentMethod,
   onChangeMethod,
@@ -108,6 +115,11 @@ export function CoinbaseCreditsCheckout({
     purchaseUSDCAmount,
   };
 
+  // The CryptoPayments row linked to the order — the Layerswap "completed"
+  // webhook grants the credits in the same transaction that confirms it, so
+  // its status is the "credits landed" signal to poll after Apple Pay.
+  const cryptoPaymentIdRef = useRef<string | undefined>(undefined);
+
   const createOrder = useCallback(
     async (opts?: { force?: boolean }) => {
       const g = guardRef.current;
@@ -122,10 +134,13 @@ export function CoinbaseCreditsCheckout({
         return;
       }
 
-      return createCoinbaseOrder({
+      const order = await createCoinbaseOrder({
         purchaseUSDCAmount: g.purchaseUSDCAmount,
         credits: true,
       });
+      cryptoPaymentIdRef.current =
+        order?.layerswapPayment?.cryptoPaymentId ?? undefined;
+      return order;
     },
     [createCoinbaseOrder],
   );
@@ -147,7 +162,20 @@ export function CoinbaseCreditsCheckout({
       createOrder,
       openPaymentPopup,
       closePaymentPopup,
-      onComplete,
+      // Apple Pay finishing is not the end of the flow: the USDC still has to
+      // bridge to Starknet and the Layerswap webhook grant the credits (plan
+      // §D: keep polling past the payment step). Hand the host a settlement
+      // wait on the linked crypto payment; if the order somehow carried no
+      // linked payment, complete optimistically (pre-polling behavior).
+      onComplete: () =>
+        onPaymentComplete(async () => {
+          const cryptoPaymentId = cryptoPaymentIdRef.current;
+          if (!cryptoPaymentId) return;
+          await waitForCryptoPaymentConfirmation(
+            cryptoPaymentId,
+            COINBASE_SETTLEMENT_TIMEOUT_MS,
+          );
+        }),
     }),
     [
       orderId,
@@ -165,7 +193,7 @@ export function CoinbaseCreditsCheckout({
       createOrder,
       openPaymentPopup,
       closePaymentPopup,
-      onComplete,
+      onPaymentComplete,
     ],
   );
 

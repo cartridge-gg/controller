@@ -12,6 +12,7 @@ import {
 } from "@/components/purchase/review/cost";
 import {
   useCoinflowCreditsPayment,
+  waitForCoinflowSettlement,
   type CoinflowIntent,
 } from "@/hooks/payments/coinflow";
 import type { PaymentMethodSelection } from "@/components/purchase/checkout/onchain/wallet-drawer";
@@ -21,8 +22,9 @@ import { useFiatCheckoutFlow } from "./useFiatCheckoutFlow";
 interface CoinflowCreditsCheckoutProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Completion seam supplied by the host (refresh balance + close). */
-  onComplete: () => void;
+  /** Payment-accepted seam supplied by the host: shows the deposit status view
+   * and awaits the given settlement wait before declaring success. */
+  onPaymentComplete: (settle: () => Promise<void>) => void;
   amount: number;
   paymentMethod: PaymentMethodSelection | null;
   onChangeMethod: () => void;
@@ -38,7 +40,7 @@ interface CoinflowCreditsCheckoutProps {
 export function CoinflowCreditsCheckout({
   isOpen,
   onClose,
-  onComplete,
+  onPaymentComplete,
   amount,
   paymentMethod,
   onChangeMethod,
@@ -71,9 +73,20 @@ export function CoinflowCreditsCheckout({
     if (!isOpen) setIntent(undefined);
   }, [isOpen]);
 
+  // The card charge succeeding is not the end of the flow: credits are granted
+  // by the Coinflow settlement webhook, so completion hands the host a
+  // settlement wait on this intent's payment (plan §E: poll paymentStatus past
+  // the checkout step).
   const value = useMemo<CoinflowRailContextValue>(
-    () => ({ intent, env, onComplete }),
-    [intent, env, onComplete],
+    () => ({
+      intent,
+      env,
+      onComplete: () => {
+        if (!intent) return;
+        onPaymentComplete(() => waitForCoinflowSettlement(intent.id));
+      },
+    }),
+    [intent, env, onPaymentComplete],
   );
 
   return (

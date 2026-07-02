@@ -85,6 +85,6 @@ export async function waitForCryptoPaymentConfirmation(
   }
 
   throw new Error(
-    "Payment was sent but has not been confirmed yet. Check the team balance again shortly.",
+    "Payment was sent but has not been confirmed yet. Check your balance again shortly.",
   );
 }

@@ -21,6 +21,8 @@ export type CreditsContextValue = {
     paymentMethod: PaymentMethodSelection;
     amount: number;
     status: CreditDepositStatus;
+    /** Failure/timeout message when status is "error". */
+    error?: string;
   };
 };
 
@@ -64,10 +66,13 @@ export function CreditsProvider({ children }: PropsWithChildren) {
   const onDepositFinished = useCallback(
     async (error?: string) => {
       setDepositInProgress((prev) => {
+        // prev is null when the user closed the status view before settlement
+        // finished — stay closed, but still run the success side effects.
         if (!prev) return null;
         return {
           ...prev,
           status: error ? "error" : "success",
+          error,
         };
       });
       if (!error) {
@@ -77,8 +82,11 @@ export function CreditsProvider({ children }: PropsWithChildren) {
     [depositSuccessCallback, setDepositInProgress],
   );
 
+  // Deliberately keep depositSuccessCallback across close: a fiat settlement
+  // can outlive the drawer (the user may close while it's processing), and the
+  // waiting flow (e.g. bundle purchase) still wants its balance refreshed when
+  // the credits land. The callback is replaced on the next initiateCreditsDeposit.
   const handleClose = useCallback(() => {
-    setDepositSuccessCallback(undefined);
     setDepositInProgress(null);
     setIsDepositOpen(false);
   }, []);
