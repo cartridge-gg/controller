@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Drawer, DrawerContent, DepositIcon } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
-import { usdToUsdcWei } from "@/utils/credits";
 import {
   CoinbaseRailProvider,
   type CoinbaseRailContextValue,
@@ -73,10 +72,9 @@ export function CoinbaseCreditsCheckout({
   const { phase, verifying, handleContinue, backToReview } =
     useFiatCheckoutFlow({ method: "apple-pay" });
 
-  const purchaseUSDCAmount = useMemo(
-    () => usdToUsdcWei(amount).toString(),
-    [amount],
-  );
+  // Decimal USDC string ("2.000000"), NOT base units — the onramp API reads
+  // this as dollars (see the same conversion in starterpack/onchain-purchase).
+  const purchaseUSDCAmount = useMemo(() => amount.toFixed(6), [amount]);
 
   // Fetch a quote on open so the review can show the total (incl. fees) and the
   // Coinbase limit check (KYC) can evaluate the payment total.
