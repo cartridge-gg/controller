@@ -63,6 +63,9 @@ export function AmountSelection({
             onClick={() => {
               setCustom(false);
               setSelectedAmount(value);
+              // Presets are always in range — drop any error left over from
+              // the custom input, or the sync effect keeps emitting 0.
+              setError(null);
             }}
           >
             {`$${value}`}

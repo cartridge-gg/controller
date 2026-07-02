@@ -170,6 +170,10 @@ export const CreditPurchaseProvider = ({
         registryAddress,
         ...(bundleId !== undefined && { clientPercentage: 0 }),
       });
+      // The success screen renders whichever result is set — drop a stale
+      // credits fulfillment from an earlier attempt on this same bundle so
+      // the card result wins.
+      setCreditsFulfillment(undefined);
       setCoinflowIntent(intent);
     } catch (e) {
       setDisplayError(e as Error);
@@ -206,6 +210,9 @@ export const CreditPurchaseProvider = ({
         registryAddress,
         ...(bundleId !== undefined && { clientPercentage: 0 }),
       });
+      // Inverse of the card path: a stale coinflow intent from an earlier
+      // attempt must not shadow this credits result on the success screen.
+      setCoinflowIntent(undefined);
       setCreditsFulfillment(fulfillment);
     } catch (e) {
       setDisplayError(e as Error);
