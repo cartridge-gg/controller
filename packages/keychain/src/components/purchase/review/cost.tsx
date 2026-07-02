@@ -149,6 +149,9 @@ export function OnchainCostBreakdown({
     isApplePaySelected,
     isCoinflowSelected,
     isCreditsSelected,
+    isCreditsRailSelected,
+    onCreditsSelect,
+    clearSelectedWallet,
     coinbaseQuote,
     isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
@@ -233,11 +236,25 @@ export function OnchainCostBreakdown({
       const token = availableTokens.find(
         (t) => t.address.toLowerCase() === address.toLowerCase(),
       );
-      if (token) {
-        setSelectedToken(token);
+      if (!token) return;
+      // The credits pseudo-token is a payment-method choice, not a token:
+      // route it through the rail so the payment method and the displayed
+      // token can never disagree, and leave the rail again when a real token
+      // is picked while credits is active.
+      if (token.isCredits) {
+        onCreditsSelect();
+      } else if (isCreditsRailSelected) {
+        clearSelectedWallet();
       }
+      setSelectedToken(token);
     },
-    [availableTokens, setSelectedToken],
+    [
+      availableTokens,
+      setSelectedToken,
+      onCreditsSelect,
+      isCreditsRailSelected,
+      clearSelectedWallet,
+    ],
   );
 
   const value = isCreditsSelected ? (

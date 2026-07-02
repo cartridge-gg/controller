@@ -233,25 +233,6 @@ export const OnchainPurchaseProvider = ({
     }
   }, [controller]);
 
-  const clearSelectedWallet = useCallback(() => {
-    clearSelectedWalletInternal();
-    setSelectedRail(null);
-    clearPaymentMethod();
-  }, [clearSelectedWalletInternal, clearPaymentMethod]);
-
-  const onExternalConnect = useCallback(
-    async (
-      wallet: ExternalWallet,
-      platform: ExternalPlatform,
-      chainId?: string,
-    ) => {
-      setSelectedRail(null);
-      clearPaymentMethod();
-      return onExternalConnectInternal(wallet, platform, chainId);
-    },
-    [onExternalConnectInternal, clearPaymentMethod],
-  );
-
   // Get onchain starterpack details if available
   const onchainDetails =
     starterpackDetails && isOnchainStarterpack(starterpackDetails)
@@ -273,6 +254,38 @@ export const OnchainPurchaseProvider = ({
     quantity,
     selectedPlatform,
   });
+
+  // The credits pseudo-token in the token selector doubles as a payment-method
+  // choice. Whenever a different method is picked (fiat rail, controller,
+  // external wallet), a lingering credits token must be cleared — otherwise
+  // the token-derived isCreditsSelected would keep routing the purchase
+  // through credits under the newly selected method's UI.
+  const clearCreditsToken = useCallback(() => {
+    if (selectedToken?.isCredits) {
+      resetTokenSelection();
+    }
+  }, [selectedToken, resetTokenSelection]);
+
+  const clearSelectedWallet = useCallback(() => {
+    clearSelectedWalletInternal();
+    setSelectedRail(null);
+    clearCreditsToken();
+    clearPaymentMethod();
+  }, [clearSelectedWalletInternal, clearCreditsToken, clearPaymentMethod]);
+
+  const onExternalConnect = useCallback(
+    async (
+      wallet: ExternalWallet,
+      platform: ExternalPlatform,
+      chainId?: string,
+    ) => {
+      setSelectedRail(null);
+      clearCreditsToken();
+      clearPaymentMethod();
+      return onExternalConnectInternal(wallet, platform, chainId);
+    },
+    [onExternalConnectInternal, clearCreditsToken, clearPaymentMethod],
+  );
 
   const {
     requestedAmount,
@@ -405,10 +418,15 @@ export const OnchainPurchaseProvider = ({
     setDisplayError,
   ]);
 
-  // Auto-select USDC when a card-based flow is selected
+  // Pin the credits pseudo-token while the credits rail is selected, and
+  // auto-select USDC when a card-based flow is selected. Keyed on the rail —
+  // not the token-derived isCreditsSelected — so switching to a fiat rail
+  // replaces a lingering credits token instead of re-pinning it.
   useEffect(() => {
-    if (isCreditsSelected) {
-      setSelectedToken(CREDITS_TOKEN);
+    if (isCreditsRailSelected) {
+      if (!selectedToken?.isCredits) {
+        setSelectedToken(CREDITS_TOKEN);
+      }
     } else if (
       (isApplePaySelected || isCoinflowSelected) &&
       availableTokens.length > 0
@@ -421,7 +439,7 @@ export const OnchainPurchaseProvider = ({
       }
     }
   }, [
-    isCreditsSelected,
+    isCreditsRailSelected,
     isApplePaySelected,
     isCoinflowSelected,
     availableTokens,
@@ -746,11 +764,19 @@ export const OnchainPurchaseProvider = ({
       resetCoinbasePurchase();
       setSelectedRail(rail);
       clearSelectedWalletInternal();
+      if (rail !== "credits") {
+        clearCreditsToken();
+      }
       if (opts?.persist) {
         savePaymentMethod(rail);
       }
     },
-    [clearSelectedWalletInternal, savePaymentMethod, resetCoinbasePurchase],
+    [
+      clearSelectedWalletInternal,
+      savePaymentMethod,
+      resetCoinbasePurchase,
+      clearCreditsToken,
+    ],
   );
 
   const onApplePaySelect = useCallback(

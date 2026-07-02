@@ -421,24 +421,10 @@ export function OnchainCheckout() {
   const handlePurchase = useCallback(async () => {
     if (purchaseInFlightRef.current) return;
     if (isApplePayAmountTooLow) return;
-    if (isCoinflowSelected) {
-      if (!isCoinflowStarterpackSupported) return;
-    } else if (isCreditsSelected) {
-      // Not enough credits — the CTA reads "Deposit USD": open the top-up
-      // drawer and refresh the balance once the deposit lands.
-      if (!hasSufficientCredits) {
-        initiateCreditsDeposit(async () => {
-          await refetchCreditsBalance();
-        });
-        return;
-      }
-    } else if (!hasSufficientBalance && !isFree && !isApplePaySelected) {
-      console.warn("no means to pay");
-      return;
-    }
 
-    purchaseInFlightRef.current = true;
-
+    // Explicit rails take precedence over the token-derived credits flag so
+    // a lingering credits pseudo-token can never reroute a card/Apple Pay
+    // purchase; the analytics method and the executed path stay in sync.
     const method = isCoinflowSelected
       ? "coinflow"
       : isApplePaySelected
@@ -446,16 +432,33 @@ export function OnchainCheckout() {
         : isCreditsSelected
           ? "credits"
           : "onchain";
+
+    if (method === "coinflow" && !isCoinflowStarterpackSupported) return;
+    if (method === "credits" && !hasSufficientCredits) {
+      // Not enough credits — the CTA reads "Deposit USD": open the top-up
+      // drawer and refresh the balance once the deposit lands.
+      initiateCreditsDeposit(async () => {
+        await refetchCreditsBalance();
+      });
+      return;
+    }
+    if (method === "onchain" && !hasSufficientBalance && !isFree) {
+      console.warn("no means to pay");
+      return;
+    }
+
+    purchaseInFlightRef.current = true;
+
     captureAnalyticsEvent(posthog, "purchase_checkout_started", { method });
 
     setIsLoading(true);
     clearError();
 
     try {
-      if (isCreditsSelected) {
+      if (method === "credits") {
         await onCreditsPurchase();
         navigate("/purchase/success", { reset: true });
-      } else if (isCoinflowSelected) {
+      } else if (method === "coinflow") {
         if (!isEmailVerified) {
           setVerificationMethod("coinflow");
           return;
@@ -463,7 +466,7 @@ export function OnchainCheckout() {
 
         await onCreditCardPurchase();
         setIsCoinflowDrawerOpen(true);
-      } else if (isApplePaySelected) {
+      } else if (method === "apple-pay") {
         resetCoinbasePurchase();
 
         if (!isEmailVerified || !isPhoneNumberVerified) {

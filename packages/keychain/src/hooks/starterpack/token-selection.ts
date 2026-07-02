@@ -100,8 +100,9 @@ export function useTokenSelection({
     (token: TokenOption | undefined) => {
       setSelectedTokenState(token);
 
-      // Persist to localStorage
-      if (token && controller) {
+      // Persist to localStorage (the credits pseudo-token is a payment-method
+      // choice persisted separately as lastPaymentMethod, not a real token)
+      if (token && controller && !token.isCredits) {
         try {
           localStorage.setItem(
             `@cartridge/lastPaymentToken:${controller.chainId()}`,
