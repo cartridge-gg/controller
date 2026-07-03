@@ -15,6 +15,7 @@ import {
   NetworkToastOptions,
   UserToastOptions,
   SettingToastOptions,
+  CreditsToastOptions,
 } from "../types";
 import {
   ControllerToaster,
@@ -323,6 +324,46 @@ function ControllerToasterDemo() {
     emitControllerToast("signerDeleted", options);
   };
 
+  const showCreditsDepositInitiated = () => {
+    const options: CreditsToastOptions = {
+      variant: "credits",
+      kind: "deposit",
+      status: "initiated",
+      amount: 100,
+    };
+    emitControllerToast("creditsDepositInitiated", options);
+  };
+
+  const showCreditsDepositCompleted = () => {
+    const options: CreditsToastOptions = {
+      variant: "credits",
+      kind: "deposit",
+      status: "completed",
+      amount: 100,
+    };
+    emitControllerToast("creditsDepositCompleted", options);
+  };
+
+  const showCreditsWithdrawInitiated = () => {
+    const options: CreditsToastOptions = {
+      variant: "credits",
+      kind: "withdraw",
+      status: "initiated",
+      amount: 42.5,
+    };
+    emitControllerToast("creditsWithdrawInitiated", options);
+  };
+
+  const showCreditsWithdrawCompleted = () => {
+    const options: CreditsToastOptions = {
+      variant: "credits",
+      kind: "withdraw",
+      status: "completed",
+      amount: 42.5,
+    };
+    emitControllerToast("creditsWithdrawCompleted", options);
+  };
+
   const switchDisabledType = (type: ControllerNotificationTypes) => {
     setDisabledTypes((prev) => {
       if (prev.includes(type)) {
@@ -341,9 +382,7 @@ function ControllerToasterDemo() {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
-          <h3 className="text-white text-sm font-medium">
-            Generic Controller events
-          </h3>
+          <h3 className="text-white text-sm font-medium">Error</h3>
           <Button
             onClick={showError}
             className="w-full"
@@ -351,6 +390,7 @@ function ControllerToasterDemo() {
           >
             {isLoading.error ? "Loading..." : "Error"}
           </Button>
+          <h3 className="text-white text-sm font-medium">Success</h3>
           <Button
             onClick={showSuccess}
             className="w-full"
@@ -376,33 +416,7 @@ function ControllerToasterDemo() {
               ? "Loading..."
               : "Success (custom duration)"}
           </Button>
-          <Button
-            onClick={showTransactionConfirming}
-            className="w-full"
-            disabled={isLoading.transactionConfirming || txConfirming}
-          >
-            {isLoading.transactionConfirming
-              ? "Loading..."
-              : `Confirm TX${txCount}...`}
-          </Button>
-          <Button
-            onClick={showTransactionConfirmed}
-            className="w-full"
-            disabled={isLoading.transactionConfirmed || !txConfirming}
-          >
-            {isLoading.transactionConfirmed
-              ? "Loading..."
-              : `...TX${txCount} confirmed`}
-          </Button>
-          <Button
-            onClick={showTransactionError}
-            className="w-full"
-            disabled={isLoading.transactionError || !txConfirming}
-          >
-            {isLoading.transactionError
-              ? "Loading..."
-              : `...TX${txCount} error`}
-          </Button>
+          <h3 className="text-white text-sm font-medium">Network</h3>
           <Button
             onClick={showConnectToStarknetMainnet}
             className="w-full"
@@ -448,6 +462,35 @@ function ControllerToasterDemo() {
               ? "Loading..."
               : "Switch to Nums Chain"}
           </Button>
+          <h3 className="text-white text-sm font-medium">Transaction</h3>
+          <Button
+            onClick={showTransactionConfirming}
+            className="w-full"
+            disabled={isLoading.transactionConfirming || txConfirming}
+          >
+            {isLoading.transactionConfirming
+              ? "Loading..."
+              : `Confirm TX${txCount}...`}
+          </Button>
+          <Button
+            onClick={showTransactionConfirmed}
+            className="w-full"
+            disabled={isLoading.transactionConfirmed || !txConfirming}
+          >
+            {isLoading.transactionConfirmed
+              ? "Loading..."
+              : `...TX${txCount} confirmed`}
+          </Button>
+          <Button
+            onClick={showTransactionError}
+            className="w-full"
+            disabled={isLoading.transactionError || !txConfirming}
+          >
+            {isLoading.transactionError
+              ? "Loading..."
+              : `...TX${txCount} error`}
+          </Button>
+          <h3 className="text-white text-sm font-medium">native sonner</h3>
           <Button
             onClick={() =>
               sonnerToast.success("called sonner with controller toasterId", {
@@ -462,7 +505,7 @@ function ControllerToasterDemo() {
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-white text-sm font-medium">Specialized events</h3>
+          <h3 className="text-white text-sm font-medium">Marketplace</h3>
           <Button
             onClick={showMarketplacePurchaseBeast}
             className="w-full"
@@ -488,6 +531,7 @@ function ControllerToasterDemo() {
           >
             {isLoading.sentToken ? "Loading..." : "Marketplace Sent Token"}
           </Button>
+          <h3 className="text-white text-sm font-medium">Achievement</h3>
           <Button
             onClick={showAchievementDraftToast}
             className="w-full"
@@ -502,6 +546,7 @@ function ControllerToasterDemo() {
           >
             {isLoading.achievement ? "Loading..." : "Achievement Complete"}
           </Button>
+          <h3 className="text-white text-sm font-medium">User</h3>
           <Button
             onClick={showUserCreated}
             className="w-full"
@@ -523,6 +568,7 @@ function ControllerToasterDemo() {
           >
             {isLoading.userDisconnected ? "Loading..." : "User Disconnected"}
           </Button>
+          <h3 className="text-white text-sm font-medium">Setting</h3>
           <Button
             onClick={showSignerCreated}
             className="w-full"
@@ -536,6 +582,43 @@ function ControllerToasterDemo() {
             disabled={isLoading.signerDeleted}
           >
             {isLoading.signerDeleted ? "Loading..." : "Signer Deleted"}
+          </Button>
+          <h3 className="text-white text-sm font-medium">Credits</h3>
+          <Button
+            onClick={showCreditsDepositInitiated}
+            className="w-full"
+            disabled={isLoading.creditsDepositInitiated}
+          >
+            {isLoading.creditsDepositInitiated
+              ? "Loading..."
+              : "Credits Deposit Initiated"}
+          </Button>
+          <Button
+            onClick={showCreditsDepositCompleted}
+            className="w-full"
+            disabled={isLoading.creditsDepositCompleted}
+          >
+            {isLoading.creditsDepositCompleted
+              ? "Loading..."
+              : "Credits Deposit Complete"}
+          </Button>
+          <Button
+            onClick={showCreditsWithdrawInitiated}
+            className="w-full"
+            disabled={isLoading.creditsWithdrawInitiated}
+          >
+            {isLoading.creditsWithdrawInitiated
+              ? "Loading..."
+              : "Credits Withdraw Initiated"}
+          </Button>
+          <Button
+            onClick={showCreditsWithdrawCompleted}
+            className="w-full"
+            disabled={isLoading.creditsWithdrawCompleted}
+          >
+            {isLoading.creditsWithdrawCompleted
+              ? "Loading..."
+              : "Credits Withdraw Complete"}
           </Button>
         </div>
 
@@ -616,6 +699,13 @@ function ControllerToasterDemo() {
               onCheckedChange={() => switchDisabledType("setting")}
             />
             Disable Setting
+          </div>
+          <div className="flex gap-2">
+            <Switch
+              value={disabledTypes.includes("credits") ? 1 : 0}
+              onCheckedChange={() => switchDisabledType("credits")}
+            />
+            Disable Credits
           </div>
           <div className="flex gap-2 pt-2">
             <Switch

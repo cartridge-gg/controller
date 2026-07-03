@@ -11,6 +11,7 @@ import {
   showNetworkToast,
   showUserToast,
   showSettingToast,
+  showCreditsToast,
 } from "../toasts/specialized-toasts";
 import { useToast, ToasterToast } from "./use-toast";
 import { ControllerPresetProvider } from "./preset-provider";
@@ -25,6 +26,7 @@ import {
   NetworkToastOptions,
   UserToastOptions,
   SettingToastOptions,
+  CreditsToastOptions,
 } from "../types";
 
 export const CONTROLLER_TOASTER_ID = "controller-toaster";
@@ -39,7 +41,8 @@ export type ControllerNotificationTypes =
   | "marketplace"
   | "achievement"
   | "user"
-  | "setting";
+  | "setting"
+  | "credits";
 
 type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -149,6 +152,14 @@ export function ControllerToaster({
         const options = event.data.options as SettingToastOptions;
         toast(
           showSettingToast({
+            ...options,
+            toasterId: CONTROLLER_TOASTER_ID,
+          }) as ToasterToast,
+        );
+      } else if (variant == "credits" && !disabledTypes.includes("credits")) {
+        const options = event.data.options as CreditsToastOptions;
+        toast(
+          showCreditsToast({
             ...options,
             toasterId: CONTROLLER_TOASTER_ID,
           }) as ToasterToast,

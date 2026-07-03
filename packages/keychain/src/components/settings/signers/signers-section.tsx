@@ -99,7 +99,10 @@ export const SignersSection = ({
                         }
                         await controller?.removeSigner(jsSigner);
                         await controllerQuery.refetch();
-                        toast.setting({ kind: "signer", action: "deleted" }, true); // disabled
+                        toast.setting(
+                          { kind: "signer", action: "deleted" },
+                          true,
+                        ); // disabled
                         return;
                       }
                 }

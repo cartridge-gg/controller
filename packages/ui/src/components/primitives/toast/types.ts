@@ -97,6 +97,17 @@ export interface SettingToastOptions extends BaseToastOptions {
   action: SettingToastAction;
 }
 
+// Credits Toast
+export type CreditsToastKind = "deposit" | "withdraw";
+export type CreditsToastStatus = "initiated" | "completed";
+
+export interface CreditsToastOptions extends BaseToastOptions {
+  variant: "credits";
+  kind: CreditsToastKind;
+  status: CreditsToastStatus;
+  amount: number;
+}
+
 // Union type for all toast variants
 export type ToastOptions =
   | ErrorToastOptions
@@ -107,7 +118,8 @@ export type ToastOptions =
   | QuestToastOptions
   | MarketplaceToastOptions
   | UserToastOptions
-  | SettingToastOptions;
+  | SettingToastOptions
+  | CreditsToastOptions;
 
 export const CONTROLLER_TOAST_MESSAGE_TYPE = "controller-toast";
 

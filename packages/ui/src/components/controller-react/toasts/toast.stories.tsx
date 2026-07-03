@@ -7,6 +7,7 @@ import {
   SuccessToast,
   UserToast,
   SettingToast,
+  CreditsToast,
   TransactionToast,
   XPTag,
   ToastProgressBar,
@@ -238,6 +239,25 @@ export const AllToasts: Story = {
           </Item>
         </Section>
 
+        <Section title="Setting">
+          <Item label="Signer created">
+            <SettingToast
+              kind="signer"
+              action="created"
+              showClose={false}
+              duration={0}
+            />
+          </Item>
+          <Item label="Signer deleted">
+            <SettingToast
+              kind="signer"
+              action="deleted"
+              showClose={false}
+              duration={0}
+            />
+          </Item>
+        </Section>
+
         <Section title="User">
           <Item label="Created">
             <UserToast
@@ -274,19 +294,39 @@ export const AllToasts: Story = {
           </Item>
         </Section>
 
-        <Section title="Setting">
-          <Item label="Signer created">
-            <SettingToast
-              kind="signer"
-              action="created"
+        <Section title="Credits">
+          <Item label="Deposit initiated">
+            <CreditsToast
+              kind="deposit"
+              status="initiated"
+              amount={100}
               showClose={false}
               duration={0}
             />
           </Item>
-          <Item label="Signer deleted">
-            <SettingToast
-              kind="signer"
-              action="deleted"
+          <Item label="Deposit complete">
+            <CreditsToast
+              kind="deposit"
+              status="completed"
+              amount={100}
+              showClose={false}
+              duration={0}
+            />
+          </Item>
+          <Item label="Withdraw initiated">
+            <CreditsToast
+              kind="withdraw"
+              status="initiated"
+              amount={42.5}
+              showClose={false}
+              duration={0}
+            />
+          </Item>
+          <Item label="Withdraw complete">
+            <CreditsToast
+              kind="withdraw"
+              status="completed"
+              amount={42.5}
               showClose={false}
               duration={0}
             />

@@ -15,7 +15,10 @@ import {
   GlobeIcon,
   AddUserIcon,
 } from "@/components/icons";
-import { StarknetColorIcon } from "@/components/icons/brand-color";
+import {
+  StarknetColorIcon,
+  UsdColorIcon,
+} from "@/components/icons/brand-color";
 import { CollectibleImage } from "@/components/modules/collectibles";
 import { AchievementPlayerAvatar } from "@/components/modules/achievements/player-avatar";
 import { usePresetColor } from "../controller-toaster/preset-provider";
@@ -31,6 +34,7 @@ const specializedToastVariants = cva(
         achievement: "w-[360px] h-[68px]",
         user: "w-[360px] h-[68px]",
         setting: "w-[360px] h-[68px]",
+        credits: "w-[360px] h-[68px]",
         network: "w-[360px] h-[52px]",
         error: "w-[360px] h-[52px] bg-destructive",
         transaction: "w-[360px] h-[52px]",
@@ -579,6 +583,81 @@ const SettingToast = memo<SettingToastProps>(
 
 SettingToast.displayName = "SettingToast";
 
+// Credits Toast Component
+type CreditsToastKind = "deposit" | "withdraw";
+type CreditsToastStatus = "initiated" | "completed";
+
+const CREDITS_TOAST_TITLE: Record<
+  CreditsToastKind,
+  Record<CreditsToastStatus, string>
+> = {
+  deposit: {
+    initiated: "Deposit Initiated",
+    completed: "Deposit Complete",
+  },
+  withdraw: {
+    initiated: "Withdraw Initiated",
+    completed: "Withdraw Complete",
+  },
+};
+
+interface CreditsToastProps extends Omit<ToasterToast, "children"> {
+  kind: CreditsToastKind;
+  status: CreditsToastStatus;
+  amount: number;
+  progress?: number;
+  preset?: string;
+}
+
+const CreditsToast = memo<CreditsToastProps>(
+  ({
+    kind,
+    status,
+    amount,
+    progress = 100,
+    preset,
+    showClose,
+    toastId,
+    className,
+    ...props
+  }) => {
+    return (
+      <Toast
+        className={cn(
+          specializedToastVariants({ variant: "credits" }),
+          className,
+        )}
+        showClose={showClose}
+        toastId={toastId}
+        {...props}
+      >
+        <div className="flex items-center justify-between px-3 py-3 w-full flex-1">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center justify-center w-10 h-10 bg-background rounded p-[5px] flex-shrink-0">
+              <UsdColorIcon size="lg" className="min-w-6" />
+            </div>
+            <div className="flex flex-col justify-center gap-[2px] flex-1 min-w-0">
+              <span className="text-foreground text-sm font-medium leading-5 tracking-[0.01em] truncate">
+                {CREDITS_TOAST_TITLE[kind][status]}
+              </span>
+              <span className="text-foreground-300 text-xs font-normal leading-4 truncate">
+                {amount} Credits (${amount.toFixed(2)})
+              </span>
+            </div>
+          </div>
+        </div>
+        <ToastProgressBar
+          progress={progress}
+          variant="achievement"
+          preset={preset}
+        />
+      </Toast>
+    );
+  },
+);
+
+CreditsToast.displayName = "CreditsToast";
+
 // Transaction Notification Component
 interface TransactionToastProps extends Omit<ToasterToast, "children"> {
   status: "confirming" | "confirmed";
@@ -760,6 +839,18 @@ export const showSettingToast = (
   };
 };
 
+export const showCreditsToast = (
+  props: Omit<CreditsToastProps, ToastPropsToOmit>,
+) => {
+  const toastId = props.toastId || `credits-${Date.now()}`;
+  return {
+    duration: props.duration,
+    toasterId: props.toasterId,
+    toastId,
+    element: <CreditsToast {...props} showClose={true} toastId={toastId} />,
+  };
+};
+
 export const showTransactionToast = (
   props: Omit<TransactionToastProps, ToastPropsToOmit>,
 ) => {
@@ -780,6 +871,7 @@ export {
   SuccessToast,
   UserToast,
   SettingToast,
+  CreditsToast,
   TransactionToast,
   XPTag,
   ToastProgressBar,
@@ -791,5 +883,6 @@ export {
   type SuccessToastProps,
   type UserToastProps,
   type SettingToastProps,
+  type CreditsToastProps,
   type TransactionToastProps,
 };
