@@ -124,7 +124,6 @@ export function ControllerToaster({
         const options = event.data.options as MarketplaceToastOptions;
         toast(
           showMarketplaceToast({
-            title: `${options.action[0].toUpperCase()}${options.action.slice(1)}`,
             ...options,
             toasterId: CONTROLLER_TOASTER_ID,
           }) as ToasterToast,

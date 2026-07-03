@@ -16,7 +16,6 @@ import {
 } from "./specialized-toasts";
 import { ControllerPresetProvider } from "../controller-toaster/preset-provider";
 import { CloseButton } from "./toast";
-import { StarknetIcon } from "@/components/icons/brand";
 
 const meta: Meta = {
   title: "Controller React/Toaster/Toast",
@@ -114,7 +113,7 @@ export const AllToasts: Story = {
         <Section title="Marketplace">
           <Item label="Single item purchased">
             <MarketplaceToast
-              title="Purchased"
+              action="purchased"
               collectionName="Beasts"
               itemNames={["Beast #1024"]}
               itemImages={[
@@ -127,7 +126,7 @@ export const AllToasts: Story = {
           </Item>
           <Item label="Multiple items">
             <MarketplaceToast
-              title="Purchased"
+              action="purchased"
               collectionName="Duelists"
               itemNames={["Duelist #111", "Duelist #222", "Duelist #333"]}
               itemImages={[
@@ -159,11 +158,10 @@ export const AllToasts: Story = {
               duration={0}
             />
           </Item>
-          <Item label="Switch to Starknet Mainnet with Icon">
+          <Item label="Switch to Starknet Sepolia">
             <NetworkToast
               kind="switch-chain"
               chainId={TOAST_SN_SEPOLIA}
-              networkIcon={<StarknetIcon size="default" />}
               networkName="Ignored"
               showClose={false}
               duration={0}
@@ -183,20 +181,6 @@ export const AllToasts: Story = {
               chainId={"0x123456"}
               networkName="Nums Chain"
               networkIcon="https://static.cartridge.gg/presets/nums/icon.png"
-              showClose={false}
-              duration={0}
-            />
-          </Item>
-          <Item label="Custom network">
-            <NetworkToast
-              kind="switch-chain"
-              chainId={"0x123456"}
-              networkName="Custom Chain"
-              networkIcon={
-                <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                  😛
-                </div>
-              }
               showClose={false}
               duration={0}
             />

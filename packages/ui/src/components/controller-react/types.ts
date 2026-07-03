@@ -61,7 +61,6 @@ export interface AchievementToastOptions extends BaseToastOptions {
   variant: "achievement";
   title: string;
   subtitle?: string;
-  iconUrl?: string;
   xpAmount: number;
   progress: number;
   isDraft?: boolean;

@@ -262,7 +262,6 @@ function ControllerToasterDemo() {
       xpAmount: 50,
       isDraft: true,
       progress: 50,
-      iconUrl: "",
     };
     emitControllerToast("achievementDraft", options);
   };
@@ -274,7 +273,6 @@ function ControllerToasterDemo() {
       subtitle: "Earned!",
       xpAmount: 100,
       progress: 100,
-      iconUrl: "",
     };
     emitControllerToast("achievement", options);
   };
