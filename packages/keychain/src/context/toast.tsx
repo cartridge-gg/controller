@@ -16,6 +16,7 @@ import {
   QuestToastOptions,
   MarketplaceToastOptions,
   UserToastOptions,
+  SettingToastOptions,
   CONTROLLER_TOAST_MESSAGE_TYPE,
 } from "@cartridge/controller-ui";
 import { isIframe } from "@cartridge/controller-ui/utils";
@@ -41,7 +42,6 @@ interface ToastContextType {
       disabled?: boolean,
     ) => void;
     network: (
-      message: string,
       options: Omit<NetworkToastOptions, "variant">,
       disabled?: boolean,
     ) => void;
@@ -61,6 +61,10 @@ interface ToastContextType {
     ) => void;
     user: (
       options: Omit<UserToastOptions, "variant">,
+      disabled?: boolean,
+    ) => void;
+    setting: (
+      options: Omit<SettingToastOptions, "variant">,
       disabled?: boolean,
     ) => void;
   };
@@ -131,12 +135,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         });
       },
       network: (
-        message: string,
         options: Omit<NetworkToastOptions, "variant">,
         disabled?: boolean,
       ) => {
         if (disabled) return;
-        if (message) sonnerToast.success(message);
         emitToast({
           ...options,
           variant: "network",
@@ -188,6 +190,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           variant: "user",
         });
       },
+      setting: (
+        options: Omit<SettingToastOptions, "variant">,
+        disabled?: boolean,
+      ) => {
+        if (disabled) return;
+        emitToast({
+          ...options,
+          variant: "setting",
+        });
+      },
     }),
     [emitToast],
   );
@@ -225,7 +237,6 @@ function ChainSwitchDetector() {
       const kind = !currentChainId ? "connect" : "switch-chain";
       const disabled = kind == "connect";
       toast.network(
-        "",
         {
           kind,
           chainId: connectedChainId,

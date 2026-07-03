@@ -13,6 +13,7 @@ import {
   TransactionIcon,
   SlotIcon,
   GlobeIcon,
+  AddUserIcon,
 } from "@/components/icons";
 import { StarknetColorIcon } from "@/components/icons/brand-color";
 import { CollectibleImage } from "@/components/modules/collectibles";
@@ -29,6 +30,7 @@ const specializedToastVariants = cva(
       variant: {
         achievement: "w-[360px] h-[68px]",
         user: "w-[360px] h-[68px]",
+        setting: "w-[360px] h-[68px]",
         network: "w-[360px] h-[52px]",
         error: "w-[360px] h-[52px] bg-destructive",
         transaction: "w-[360px] h-[52px]",
@@ -504,6 +506,79 @@ const UserToast = memo<UserToastProps>(
 
 UserToast.displayName = "UserToast";
 
+// Setting Toast Component
+type SettingToastKind = "signer";
+type SettingToastAction = "created" | "deleted";
+
+const SETTING_TOAST_ICON: Record<SettingToastKind, React.ReactNode> = {
+  signer: <AddUserIcon size="lg" className="text-foreground min-w-6" />,
+};
+
+const SETTING_TOAST_MESSAGE: Record<
+  SettingToastKind,
+  Record<SettingToastAction, string>
+> = {
+  signer: {
+    created: "New signer created",
+    deleted: "Signer deleted",
+  },
+};
+
+interface SettingToastProps extends Omit<ToasterToast, "children"> {
+  kind: SettingToastKind;
+  action: SettingToastAction;
+  progress?: number;
+  preset?: string;
+}
+
+const SettingToast = memo<SettingToastProps>(
+  ({
+    kind,
+    action,
+    progress = 100,
+    preset,
+    showClose,
+    toastId,
+    className,
+    ...props
+  }) => {
+    return (
+      <Toast
+        className={cn(
+          specializedToastVariants({ variant: "setting" }),
+          className,
+        )}
+        showClose={showClose}
+        toastId={toastId}
+        {...props}
+      >
+        <div className="flex items-center justify-between px-3 py-3 w-full flex-1">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center justify-center w-10 h-10 bg-background rounded p-[5px] flex-shrink-0">
+              {SETTING_TOAST_ICON[kind]}
+            </div>
+            <div className="flex flex-col justify-center gap-[2px] flex-1 min-w-0">
+              <span className="text-foreground text-sm font-medium leading-5 tracking-[0.01em] truncate">
+                Success!
+              </span>
+              <span className="text-foreground-300 text-xs font-normal leading-4 truncate">
+                {SETTING_TOAST_MESSAGE[kind][action]}
+              </span>
+            </div>
+          </div>
+        </div>
+        <ToastProgressBar
+          progress={progress}
+          variant="achievement"
+          preset={preset}
+        />
+      </Toast>
+    );
+  },
+);
+
+SettingToast.displayName = "SettingToast";
+
 // Transaction Notification Component
 interface TransactionToastProps extends Omit<ToasterToast, "children"> {
   status: "confirming" | "confirmed";
@@ -673,6 +748,18 @@ export const showUserToast = (
   };
 };
 
+export const showSettingToast = (
+  props: Omit<SettingToastProps, ToastPropsToOmit>,
+) => {
+  const toastId = props.toastId || `setting-${Date.now()}`;
+  return {
+    duration: props.duration,
+    toasterId: props.toasterId,
+    toastId,
+    element: <SettingToast {...props} showClose={true} toastId={toastId} />,
+  };
+};
+
 export const showTransactionToast = (
   props: Omit<TransactionToastProps, ToastPropsToOmit>,
 ) => {
@@ -692,6 +779,7 @@ export {
   ErrorToast,
   SuccessToast,
   UserToast,
+  SettingToast,
   TransactionToast,
   XPTag,
   ToastProgressBar,
@@ -702,5 +790,6 @@ export {
   type ErrorToastProps,
   type SuccessToastProps,
   type UserToastProps,
+  type SettingToastProps,
   type TransactionToastProps,
 };

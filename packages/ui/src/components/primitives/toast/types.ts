@@ -87,6 +87,16 @@ export interface UserToastOptions extends BaseToastOptions {
   message?: string;
 }
 
+// Setting Toast
+export type SettingToastKind = "signer";
+export type SettingToastAction = "created" | "deleted";
+
+export interface SettingToastOptions extends BaseToastOptions {
+  variant: "setting";
+  kind: SettingToastKind;
+  action: SettingToastAction;
+}
+
 // Union type for all toast variants
 export type ToastOptions =
   | ErrorToastOptions
@@ -96,7 +106,8 @@ export type ToastOptions =
   | AchievementToastOptions
   | QuestToastOptions
   | MarketplaceToastOptions
-  | UserToastOptions;
+  | UserToastOptions
+  | SettingToastOptions;
 
 export const CONTROLLER_TOAST_MESSAGE_TYPE = "controller-toast";
 

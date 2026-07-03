@@ -4,6 +4,7 @@ import {
 } from "@cartridge/controller-ui/utils/api/cartridge";
 
 import { useConnection } from "@/hooks/connection";
+import { useToast } from "@/context/toast";
 import { isCurrentSigner } from "@/utils/signers";
 import { JsRemoveSignerInput } from "@cartridge/controller-wasm";
 import {
@@ -24,6 +25,7 @@ export const SignersSection = ({
   controllerQuery: QueryObserverResult<ControllerQuery>;
 }) => {
   const { chainId, controller } = useConnection();
+  const { toast } = useToast();
   const [isAddSignerOpen, setIsAddSignerOpen] = useState(false);
 
   const signers = controllerQuery.data?.controller?.signers;
@@ -97,6 +99,7 @@ export const SignersSection = ({
                         }
                         await controller?.removeSigner(jsSigner);
                         await controllerQuery.refetch();
+                        toast.setting({ kind: "signer", action: "deleted" }, true); // disabled
                         return;
                       }
                 }

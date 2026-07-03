@@ -6,6 +6,7 @@ import {
   ErrorToast,
   SuccessToast,
   UserToast,
+  SettingToast,
   TransactionToast,
   XPTag,
   ToastProgressBar,
@@ -267,6 +268,25 @@ export const AllToasts: Story = {
               username="highlordaributtersworththethirdofcanterburyheightscountymaster"
               kind="connected"
               message="Welcome back!"
+              showClose={false}
+              duration={0}
+            />
+          </Item>
+        </Section>
+
+        <Section title="Setting">
+          <Item label="Signer created">
+            <SettingToast
+              kind="signer"
+              action="created"
+              showClose={false}
+              duration={0}
+            />
+          </Item>
+          <Item label="Signer deleted">
+            <SettingToast
+              kind="signer"
+              action="deleted"
               showClose={false}
               duration={0}
             />

@@ -14,6 +14,7 @@ import {
   ToastPosition,
   NetworkToastOptions,
   UserToastOptions,
+  SettingToastOptions,
 } from "../types";
 import {
   ControllerToaster,
@@ -304,6 +305,24 @@ function ControllerToasterDemo() {
     emitControllerToast("userDisconnected", options);
   };
 
+  const showSignerCreated = () => {
+    const options: SettingToastOptions = {
+      variant: "setting",
+      kind: "signer",
+      action: "created",
+    };
+    emitControllerToast("signerCreated", options);
+  };
+
+  const showSignerDeleted = () => {
+    const options: SettingToastOptions = {
+      variant: "setting",
+      kind: "signer",
+      action: "deleted",
+    };
+    emitControllerToast("signerDeleted", options);
+  };
+
   const switchDisabledType = (type: ControllerNotificationTypes) => {
     setDisabledTypes((prev) => {
       if (prev.includes(type)) {
@@ -504,6 +523,20 @@ function ControllerToasterDemo() {
           >
             {isLoading.userDisconnected ? "Loading..." : "User Disconnected"}
           </Button>
+          <Button
+            onClick={showSignerCreated}
+            className="w-full"
+            disabled={isLoading.signerCreated}
+          >
+            {isLoading.signerCreated ? "Loading..." : "Signer Created"}
+          </Button>
+          <Button
+            onClick={showSignerDeleted}
+            className="w-full"
+            disabled={isLoading.signerDeleted}
+          >
+            {isLoading.signerDeleted ? "Loading..." : "Signer Deleted"}
+          </Button>
         </div>
 
         <div>
@@ -576,6 +609,13 @@ function ControllerToasterDemo() {
               onCheckedChange={() => switchDisabledType("user")}
             />
             Disable User
+          </div>
+          <div className="flex gap-2">
+            <Switch
+              value={disabledTypes.includes("setting") ? 1 : 0}
+              onCheckedChange={() => switchDisabledType("setting")}
+            />
+            Disable Setting
           </div>
           <div className="flex gap-2 pt-2">
             <Switch

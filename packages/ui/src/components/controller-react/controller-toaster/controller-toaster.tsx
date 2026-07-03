@@ -10,6 +10,7 @@ import {
   showAchievementToast,
   showNetworkToast,
   showUserToast,
+  showSettingToast,
 } from "../toasts/specialized-toasts";
 import { useToast, ToasterToast } from "./use-toast";
 import { ControllerPresetProvider } from "./preset-provider";
@@ -23,6 +24,7 @@ import {
   CONTROLLER_TOAST_MESSAGE_TYPE,
   NetworkToastOptions,
   UserToastOptions,
+  SettingToastOptions,
 } from "../types";
 
 export const CONTROLLER_TOASTER_ID = "controller-toaster";
@@ -36,7 +38,8 @@ export type ControllerNotificationTypes =
   | "transaction"
   | "marketplace"
   | "achievement"
-  | "user";
+  | "user"
+  | "setting";
 
 type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -138,6 +141,14 @@ export function ControllerToaster({
         const options = event.data.options as UserToastOptions;
         toast(
           showUserToast({
+            ...options,
+            toasterId: CONTROLLER_TOASTER_ID,
+          }) as ToasterToast,
+        );
+      } else if (variant == "setting" && !disabledTypes.includes("setting")) {
+        const options = event.data.options as SettingToastOptions;
+        toast(
+          showSettingToast({
             ...options,
             toasterId: CONTROLLER_TOASTER_ID,
           }) as ToasterToast,
