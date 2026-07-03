@@ -28,6 +28,37 @@ The project consists of several packages in the `packages` directory:
 
 Integration examples live in `examples/` (Next.js, Svelte, Node.js).
 
+## Controller client notifications
+
+The controller emits toast notifications for wallet activity (transactions,
+network changes, achievements, etc.). To display them, mount
+`<ControllerToaster />` once in your app and import its stylesheet — it is
+self-contained, with no extra dependencies to install:
+
+```tsx
+import { ControllerToaster } from "@cartridge/controller/react";
+import "@cartridge/controller/react/styles.css";
+
+function App() {
+  return (
+    <>
+      {/* your app */}
+      <ControllerToaster />
+    </>
+  );
+}
+```
+
+Toast types emitted: `error`, `success`, `network`, `transaction`,
+`marketplace`, `achievement`, `user`, `setting`, `credits`.
+
+Optional props:
+
+- `position` — screen placement (default: `bottom-right`)
+- `duration` — display time in ms (default: `5000`)
+- `disabledTypes` — toast types to suppress
+- `collapseTransactions` — minimal transaction toasts (icon only)
+
 ## Development
 
 ### Frontend
