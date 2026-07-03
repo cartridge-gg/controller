@@ -294,16 +294,6 @@ export class WalletBridge {
   }
 }
 
-declare global {
-  interface Window {
-    ethereum?: any;
-    solana?: any;
-    starknet_argentX?: any;
-    starknet_braavos?: any;
-    wallet_bridge?: WalletBridge;
-  }
-}
-
 export type {
   ExternalWallet,
   ExternalWalletResponse,

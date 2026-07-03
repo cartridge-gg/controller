@@ -42,8 +42,21 @@ export default defineConfig(({ mode }) => ({
     dts({
       entryRoot: 'src',
       insertTypesEntry: true,
+      // src/global.d.ts (the internal-only Window augmentation) is inside
+      // include so the plugin's program typechecks, but as a source .d.ts it
+      // is never emitted (copyDtsFiles defaults to false) — which keeps
+      // `declare global` out of the published types, where the bundler would
+      // append it to every entry and leave it dangling in ones that don't
+      // declare WalletBridge.
       include: ["src/**/*.ts"],
       exclude: ["src/**/*.test.ts"],
+      // Flatten each entry's declarations into a single self-contained d.ts.
+      // Required so `src/react/index.ts` can re-export types from
+      // `@cartridge/controller-ui` (bundled at build time, not published to
+      // npm) without the emitted types referencing that package.
+      bundleTypes: {
+        bundledPackages: ["@cartridge/controller-ui"],
+      },
     }),
     mode === "production" &&
       visualizer({

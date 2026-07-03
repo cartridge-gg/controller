@@ -24,6 +24,14 @@ import { AchievementPlayerAvatar } from "@/components/modules/achievements/playe
 import { usePresetColor } from "../controller-toaster/preset-provider";
 import { ToasterToast } from "../controller-toaster/use-toast";
 import { Toast } from "./toast";
+import type {
+  NetworkToastKind,
+  UserToastKind,
+  SettingToastKind,
+  SettingToastAction,
+  CreditsToastKind,
+  CreditsToastStatus,
+} from "../types";
 
 // Base toast container for specialized toasts
 const specializedToastVariants = cva(
@@ -267,8 +275,6 @@ const MarketplaceToast = memo<MarketplaceToastProps>(
 MarketplaceToast.displayName = "MarketplaceToast";
 
 // Network Toast Component
-type NetworkToastKind = "connect" | "switch-chain";
-
 const NETWORK_TOAST_ACTION: Record<NetworkToastKind, string> = {
   connect: "Connected to",
   "switch-chain": "Switched to",
@@ -442,8 +448,6 @@ const SuccessToast = memo<SuccessToastProps>(
 SuccessToast.displayName = "SuccessToast";
 
 // User Toast Component
-type UserToastKind = "created" | "connected" | "disconnected";
-
 const USER_TOAST_DEFAULT_MESSAGE: Record<UserToastKind, string> = {
   created: "Controller Created!",
   connected: "Controller Connected",
@@ -511,9 +515,6 @@ const UserToast = memo<UserToastProps>(
 UserToast.displayName = "UserToast";
 
 // Setting Toast Component
-type SettingToastKind = "signer";
-type SettingToastAction = "created" | "deleted";
-
 const SETTING_TOAST_ICON: Record<SettingToastKind, React.ReactNode> = {
   signer: <AddUserIcon size="lg" className="text-foreground min-w-6" />,
 };
@@ -584,9 +585,6 @@ const SettingToast = memo<SettingToastProps>(
 SettingToast.displayName = "SettingToast";
 
 // Credits Toast Component
-type CreditsToastKind = "deposit" | "withdraw";
-type CreditsToastStatus = "initiated" | "completed";
-
 const CREDITS_TOAST_TITLE: Record<
   CreditsToastKind,
   Record<CreditsToastStatus, string>

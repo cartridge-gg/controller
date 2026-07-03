@@ -6,39 +6,30 @@
 // `@cartridge/controller` pay no extra footprint — the React/UI dependencies
 // are pulled in only when an app explicitly imports `@cartridge/controller/react`.
 //
-// The public types below are declared locally (and only reference `react`, an
-// optional peer dependency that `/ui` consumers already have) rather than
-// re-exported from `@cartridge/controller-ui`. That package is bundled into the
-// chunk at build time but is NOT a runtime dependency, so re-exporting its types
-// would leave the published `.d.ts` pointing at a module npm consumers don't
-// have installed. The value import below is erased from the generated `.d.ts`.
+// The public types are re-exported from `@cartridge/controller-ui` (their
+// single declaration site) rather than re-declared here. That package is
+// bundled into the chunk at build time and is NOT a runtime dependency, so
+// the build rolls the re-exported declarations up into a self-contained
+// `.d.ts` (see `rollupTypes`/`bundledPackages` in vite.config.js) — the
+// published types never reference a module npm consumers don't have.
 //
 // Styling ships separately as `@cartridge/controller/react/styles.css`.
 import type { ReactElement } from "react";
+import type {
+  ControllerNotificationTypes,
+  ToastPosition,
+} from "@cartridge/controller-ui/controller-react";
 import { ControllerToaster as ControllerToasterImpl } from "@cartridge/controller-ui/controller-react";
 
-export type ToastPosition =
-  | "top-left"
-  | "top-right"
-  | "top-center"
-  | "bottom-left"
-  | "bottom-right"
-  | "bottom-center";
+export type { ControllerNotificationTypes, ToastPosition };
 
-export type ControllerNotificationTypes =
-  | "error"
-  | "success"
-  | "network"
-  | "transaction"
-  | "marketplace"
-  | "achievement"
-  | "user";
-
+// Curated public props: a narrow subset of the bundled component's full prop
+// type (which also spreads sonner's Toaster props — internal detail).
 export interface ControllerToasterProps {
   position?: ToastPosition;
+  duration?: number;
   disabledTypes?: ControllerNotificationTypes[];
   collapseTransactions?: boolean;
-  toasterId?: string;
 }
 
 // The assignment (no cast) asserts the bundled component stays structurally
