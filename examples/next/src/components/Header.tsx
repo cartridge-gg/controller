@@ -372,7 +372,7 @@ const Header = () => {
               <SelectContent>
                 {Object.keys(presets).map((preset) => (
                   <SelectItem key={preset} value={preset}>
-                    {preset}
+                    {preset === "none" ? "no preset" : preset}
                   </SelectItem>
                 ))}
               </SelectContent>
