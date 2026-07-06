@@ -46,6 +46,25 @@ export type ControllerNotificationTypes =
 
 type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
 
+// Accepts messages from the same hostname on any port
+// (`localhost:1234` / `localhost:6789`) or from sibling subdomains
+// (`abc.cartridge.gg` / `xyz.cartridge.gg`).
+function getBaseDomain(hostname: string): string {
+  return hostname.split(".").slice(-2).join(".");
+}
+function isTrustedOrigin(origin: string): boolean {
+  try {
+    const originUrl = new URL(origin);
+    const locationUrl = new URL(window.location.origin);
+    return (
+      originUrl.hostname === locationUrl.hostname ||
+      getBaseDomain(originUrl.hostname) === getBaseDomain(locationUrl.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export type ControllerToastProps = SonnerToasterProps & {
   duration?: number;
   position?: ToastPosition;
@@ -64,6 +83,9 @@ export function ControllerToaster({
 
   useEffect(() => {
     const eventHandler = (event: MessageEvent) => {
+      if (!isTrustedOrigin(event.origin)) {
+        return;
+      }
       if (
         !event.data ||
         typeof event.data !== "object" ||
