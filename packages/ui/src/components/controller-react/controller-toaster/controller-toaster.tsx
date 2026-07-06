@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Toaster as Sonner } from "sonner";
 import {
   showErrorToast,
@@ -15,19 +15,8 @@ import {
 } from "../toasts/specialized-toasts";
 import { useToast, ToasterToast } from "./use-toast";
 import { ControllerPresetProvider } from "./preset-provider";
-import {
-  ToastPosition,
-  ErrorToastOptions,
-  SuccessToastOptions,
-  TransactionToastOptions,
-  MarketplaceToastOptions,
-  AchievementToastOptions,
-  CONTROLLER_TOAST_MESSAGE_TYPE,
-  NetworkToastOptions,
-  UserToastOptions,
-  SettingToastOptions,
-  CreditsToastOptions,
-} from "../types";
+import { ToastPosition } from "../types";
+import { isTrustedOrigin, parseToastEvent } from "./validation";
 
 export const CONTROLLER_TOASTER_ID = "controller-toaster";
 const TOASTER_POSITION = "bottom-right";
@@ -45,25 +34,6 @@ export type ControllerNotificationTypes =
   | "credits";
 
 type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
-
-// Accepts messages from the same hostname on any port
-// (`localhost:1234` / `localhost:6789`) or from sibling subdomains
-// (`abc.cartridge.gg` / `xyz.cartridge.gg`).
-function getBaseDomain(hostname: string): string {
-  return hostname.split(".").slice(-2).join(".");
-}
-function isTrustedOrigin(origin: string): boolean {
-  try {
-    const originUrl = new URL(origin);
-    const locationUrl = new URL(window.location.origin);
-    return (
-      originUrl.hostname === locationUrl.hostname ||
-      getBaseDomain(originUrl.hostname) === getBaseDomain(locationUrl.hostname)
-    );
-  } catch {
-    return false;
-  }
-}
 
 export type ControllerToastProps = SonnerToasterProps & {
   duration?: number;
@@ -86,39 +56,32 @@ export function ControllerToaster({
       if (!isTrustedOrigin(event.origin)) {
         return;
       }
-      if (
-        !event.data ||
-        typeof event.data !== "object" ||
-        !("type" in event.data) ||
-        !("options" in event.data)
-      ) {
+      const options = parseToastEvent(event.data);
+      if (!options) {
         return;
       }
 
-      const variant =
-        event.data.type === CONTROLLER_TOAST_MESSAGE_TYPE
-          ? event.data.options.variant
-          : undefined;
-      if (!variant) return;
-
-      if (variant == "error" && !disabledTypes.includes("error")) {
-        const options = event.data.options as ErrorToastOptions;
+      if (options.variant == "error" && !disabledTypes.includes("error")) {
         toast(
           showErrorToast({
             ...options,
             toasterId: CONTROLLER_TOASTER_ID,
           }) as ToasterToast,
         );
-      } else if (variant == "success" && !disabledTypes.includes("success")) {
-        const options = event.data.options as SuccessToastOptions;
+      } else if (
+        options.variant == "success" &&
+        !disabledTypes.includes("success")
+      ) {
         toast(
           showSuccessToast({
             ...options,
             toasterId: CONTROLLER_TOASTER_ID,
           }) as ToasterToast,
         );
-      } else if (variant == "network" && !disabledTypes.includes("network")) {
-        const options = event.data.options as NetworkToastOptions;
+      } else if (
+        options.variant == "network" &&
+        !disabledTypes.includes("network")
+      ) {
         toast(
           showNetworkToast({
             ...options,
@@ -126,10 +89,9 @@ export function ControllerToaster({
           }) as ToasterToast,
         );
       } else if (
-        variant == "transaction" &&
+        options.variant == "transaction" &&
         !disabledTypes.includes("transaction")
       ) {
-        const options = event.data.options as TransactionToastOptions;
         toast(
           showTransactionToast({
             ...options,
@@ -140,10 +102,9 @@ export function ControllerToaster({
           }) as ToasterToast,
         );
       } else if (
-        variant == "marketplace" &&
+        options.variant == "marketplace" &&
         !disabledTypes.includes("marketplace")
       ) {
-        const options = event.data.options as MarketplaceToastOptions;
         toast(
           showMarketplaceToast({
             ...options,
@@ -151,34 +112,36 @@ export function ControllerToaster({
           }) as ToasterToast,
         );
       } else if (
-        variant == "achievement" &&
+        options.variant == "achievement" &&
         !disabledTypes.includes("achievement")
       ) {
-        const options = event.data.options as AchievementToastOptions;
         toast(
           showAchievementToast({
             ...options,
             toasterId: CONTROLLER_TOASTER_ID,
           }) as ToasterToast,
         );
-      } else if (variant == "user" && !disabledTypes.includes("user")) {
-        const options = event.data.options as UserToastOptions;
+      } else if (options.variant == "user" && !disabledTypes.includes("user")) {
         toast(
           showUserToast({
             ...options,
             toasterId: CONTROLLER_TOASTER_ID,
           }) as ToasterToast,
         );
-      } else if (variant == "setting" && !disabledTypes.includes("setting")) {
-        const options = event.data.options as SettingToastOptions;
+      } else if (
+        options.variant == "setting" &&
+        !disabledTypes.includes("setting")
+      ) {
         toast(
           showSettingToast({
             ...options,
             toasterId: CONTROLLER_TOASTER_ID,
           }) as ToasterToast,
         );
-      } else if (variant == "credits" && !disabledTypes.includes("credits")) {
-        const options = event.data.options as CreditsToastOptions;
+      } else if (
+        options.variant == "credits" &&
+        !disabledTypes.includes("credits")
+      ) {
         toast(
           showCreditsToast({
             ...options,
@@ -193,17 +156,26 @@ export function ControllerToaster({
     };
   }, [disabledTypes.join(","), collapseTransactions]);
 
-  const theme = useMemo(
-    () => localStorage.getItem("vite-ui-colorScheme") ?? "system",
-    [],
-  );
+  // localStorage only exists in the browser and Next.js App Router
+  // server-renders "use client" components, so read it after mount.
+  const [theme, setTheme] = useState<SonnerToasterProps["theme"]>("system");
+  useEffect(() => {
+    const readTheme = () =>
+      setTheme(
+        (localStorage.getItem("vite-ui-colorScheme") ??
+          "system") as SonnerToasterProps["theme"],
+      );
+    readTheme();
+    window.addEventListener("storage", readTheme);
+    return () => window.removeEventListener("storage", readTheme);
+  }, []);
 
   return (
     <ControllerPresetProvider>
       <Sonner
         id={CONTROLLER_TOASTER_ID}
         position={position}
-        theme={theme as SonnerToasterProps["theme"]}
+        theme={theme}
         className="toaster group"
         duration={duration}
         toastOptions={{
