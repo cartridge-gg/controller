@@ -7,10 +7,8 @@ import {
   type CoinflowRailContextValue,
 } from "@/components/purchase/checkout/rails";
 import { CoinflowDrawer } from "@/components/purchase/checkout/coinflow/drawer";
-import {
-  CREDITS_TOKEN,
-  convertCentsToDollars,
-} from "@/components/purchase/review/cost";
+import { convertCentsToDollars } from "@/components/purchase/review/cost";
+import { useUsdcToken } from "@/hooks/payments/usdc";
 import {
   useCoinflowCreditsPayment,
   useCoinflowIsMainnet,
@@ -49,6 +47,7 @@ export function CoinflowCreditsCheckout({
   onChangeAmount,
 }: CoinflowCreditsCheckoutProps) {
   const { createIntent, env, isLoading, error } = useCoinflowCreditsPayment();
+  const usdcToken = useUsdcToken();
   const { isCoinflowSandbox } = useCoinflowIsMainnet();
   const [intent, setIntent] = useState<CoinflowIntent>();
   const { phase, verifying, handleContinue, backToReview } =
@@ -116,7 +115,7 @@ export function CoinflowCreditsCheckout({
               amount={amount}
               onChangeMethod={onChangeMethod}
               onChangeAmount={onChangeAmount}
-              costToken={CREDITS_TOKEN}
+              costToken={usdcToken}
               costValue={
                 intent ? (
                   <span className="text-foreground-100">
