@@ -13,6 +13,7 @@ import {
 } from "@/components/purchase/review/cost";
 import {
   useCoinflowCreditsPayment,
+  useCoinflowIsMainnet,
   waitForCoinflowSettlement,
   type CoinflowIntent,
 } from "@/hooks/payments/coinflow";
@@ -48,6 +49,7 @@ export function CoinflowCreditsCheckout({
   onChangeAmount,
 }: CoinflowCreditsCheckoutProps) {
   const { createIntent, env, isLoading, error } = useCoinflowCreditsPayment();
+  const { isCoinflowSandbox } = useCoinflowIsMainnet();
   const [intent, setIntent] = useState<CoinflowIntent>();
   const { phase, verifying, handleContinue, backToReview } =
     useFiatCheckoutFlow({ method: "coinflow" });
@@ -126,12 +128,23 @@ export function CoinflowCreditsCheckout({
               }
               isCostLoading={isLoading && !intent}
               warning={
-                amountTooLow ? (
-                  <ErrorCard
-                    variant="warning"
-                    title="Amount Too Low"
-                    message={`The minimum for a card deposit is $${MIN_CREDITS_PURCHASE_USD.toFixed(2)}. Select a higher amount to continue.`}
-                  />
+                amountTooLow || isCoinflowSandbox ? (
+                  <>
+                    {amountTooLow && (
+                      <ErrorCard
+                        variant="warning"
+                        title="Amount Too Low"
+                        message={`The minimum for a card deposit is $${MIN_CREDITS_PURCHASE_USD.toFixed(2)}. Select a higher amount to continue.`}
+                      />
+                    )}
+                    {isCoinflowSandbox && (
+                      <ErrorCard
+                        variant="warning"
+                        title="Coinflow Sandbox Enabled"
+                        message="Card checkout will run in Coinflow's sandbox environment. No real charge will be made."
+                      />
+                    )}
+                  </>
                 ) : undefined
               }
               error={error?.message}

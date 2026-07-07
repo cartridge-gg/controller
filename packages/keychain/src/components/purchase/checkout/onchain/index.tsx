@@ -16,6 +16,7 @@ import {
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { useFeature } from "@/hooks/features";
+import { useCoinflowIsMainnet } from "@/hooks/payments/coinflow";
 import { useTripleClick } from "@/hooks/tripple-click";
 import {
   exceedsLimit,
@@ -122,6 +123,7 @@ export function OnchainCheckout() {
   } = useIdentityContext();
   const { loginViaPopup: loginWithWebauthnPopup } = useWebauthnAuthentication();
   const isCoinflowEnabled = useFeature("coinflow-support");
+  const { isCoinflowSandbox } = useCoinflowIsMainnet();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -695,6 +697,14 @@ export function OnchainCheckout() {
                     variant="warning"
                     title="Amount Too Low"
                     message="Bridge amount is too low for this network. Try increasing quantity or selecting a different network."
+                  />
+                )}
+
+                {isCoinflowSelected && isCoinflowSandbox && (
+                  <ErrorCard
+                    variant="warning"
+                    title="Coinflow Sandbox Enabled"
+                    message="Card checkout will run in Coinflow's sandbox environment. No real charge will be made."
                   />
                 )}
 

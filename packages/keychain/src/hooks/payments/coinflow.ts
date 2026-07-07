@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useConnection } from "../connection";
+import { useFeature } from "../features";
 import { request } from "@/utils/graphql";
 import {
   CoinflowPaymentDocument,
@@ -34,11 +35,28 @@ export type {
 // assignable to it.
 export type CoinflowIntent = Omit<CoinflowStarterpackIntent, "__typename">;
 
+/**
+ * Effective network for everything Coinflow. Coinflow runs in its sandbox
+ * (UAT) environment whenever this is false: on non-mainnet chains, or on any
+ * chain when the "coinflow-sandbox" feature flag is enabled. The backend
+ * derives sandbox from `!isMainnet`, so this one value drives every Coinflow
+ * route input, the card form's `env`, and the checkout sandbox warnings.
+ */
+export const useCoinflowIsMainnet = () => {
+  const { isMainnet } = useConnection();
+  const sandboxEnabled = useFeature("coinflow-sandbox");
+  const isCoinflowMainnet = isMainnet && !sandboxEnabled;
+  return {
+    isCoinflowMainnet,
+    isCoinflowSandbox: !isCoinflowMainnet,
+  };
+};
+
 const useCoinflowPayment = () => {
   const { controller } = useConnection();
   const [error, setError] = useState<Error | null>(null);
 
-  const isMainnet = controller?.chainId() === "0x534e5f4d41494e"; // SN_MAIN
+  const { isCoinflowMainnet } = useCoinflowIsMainnet();
 
   const { mutateAsync, isLoading } =
     useCreateCoinflowStarterpackIntentMutation();
@@ -57,7 +75,7 @@ const useCoinflowPayment = () => {
         const result = await mutateAsync({
           input: {
             ...input,
-            isMainnet,
+            isMainnet: isCoinflowMainnet,
           },
         });
 
@@ -67,14 +85,14 @@ const useCoinflowPayment = () => {
         throw e;
       }
     },
-    [controller, isMainnet, mutateAsync],
+    [controller, isCoinflowMainnet, mutateAsync],
   );
 
   return {
     isLoading,
     error,
     createIntent,
-    env: isMainnet ? ("prod" as const) : ("sandbox" as const),
+    env: isCoinflowMainnet ? ("prod" as const) : ("sandbox" as const),
   };
 };
 
@@ -95,7 +113,7 @@ export const useCoinflowCreditsPayment = () => {
   const { controller } = useConnection();
   const [error, setError] = useState<Error | null>(null);
 
-  const isMainnet = controller?.chainId() === "0x534e5f4d41494e"; // SN_MAIN
+  const { isCoinflowMainnet } = useCoinflowIsMainnet();
 
   const { mutateAsync, isLoading } = useCreateCoinflowCreditsIntentMutation();
 
@@ -111,7 +129,7 @@ export const useCoinflowCreditsPayment = () => {
         const result = await mutateAsync({
           input: {
             credits,
-            isMainnet,
+            isMainnet: isCoinflowMainnet,
           },
         });
 
@@ -121,14 +139,14 @@ export const useCoinflowCreditsPayment = () => {
         throw e;
       }
     },
-    [controller, isMainnet, mutateAsync],
+    [controller, isCoinflowMainnet, mutateAsync],
   );
 
   return {
     isLoading,
     error,
     createIntent,
-    env: isMainnet ? ("prod" as const) : ("sandbox" as const),
+    env: isCoinflowMainnet ? ("prod" as const) : ("sandbox" as const),
   };
 };
 
@@ -206,7 +224,7 @@ export const useCoinflowStarterpackQuote = ({
   enabled = true,
 }: UseCoinflowStarterpackQuoteParams) => {
   const { controller } = useConnection();
-  const isMainnet = controller?.chainId() === "0x534e5f4d41494e"; // SN_MAIN
+  const { isCoinflowMainnet } = useCoinflowIsMainnet();
 
   const isReady =
     enabled &&
@@ -224,7 +242,7 @@ export const useCoinflowStarterpackQuote = ({
         referral,
         referralGroup,
         clientPercentage,
-        isMainnet,
+        isMainnet: isCoinflowMainnet,
       },
     },
     {
