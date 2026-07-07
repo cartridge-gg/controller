@@ -370,6 +370,26 @@ export function getStandaloneAppOrigin(redirectUrl: string): string {
   return redirectUrlObj.origin === "null" ? redirectUrl : redirectUrlObj.origin;
 }
 
+/**
+ * Compare two RPC URLs for equality after WHATWG normalization.
+ *
+ * The stored controller's rpcUrl round-trips through the WASM's Rust `url`
+ * crate, which normalizes bare origins by appending a trailing slash
+ * (`http://localhost:5050` -> `http://localhost:5050/`), while the dapp's
+ * `rpc_url` query param arrives verbatim. A raw string comparison would treat
+ * these as different chains and log the user out on every reload.
+ */
+export function isSameRpcUrl(a: string, b: string): boolean {
+  if (a === b) {
+    return true;
+  }
+  try {
+    return new URL(a).href === new URL(b).href;
+  } catch {
+    return false;
+  }
+}
+
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
@@ -514,7 +534,7 @@ export function useConnectionValue() {
   const urlRpcReconciledRef = useRef(false);
   useEffect(() => {
     if (!controller || !urlRpcUrl) return;
-    if (controller.rpcUrl() === urlRpcUrl) {
+    if (isSameRpcUrl(controller.rpcUrl(), urlRpcUrl)) {
       urlRpcReconciledRef.current = true;
       return;
     }

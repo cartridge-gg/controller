@@ -56,7 +56,7 @@ const RegisterSessionLayout = ({
   expiresAtOverride?: bigint;
 }) => {
   const { policies } = useCreateSession();
-  const { controller, theme, origin } = useConnection();
+  const { controller, theme, origin, isAppchain } = useConnection();
   const [transactions, setTransactions] = useState<Call[] | undefined>(
     undefined,
   );
@@ -87,7 +87,10 @@ const RegisterSessionLayout = ({
 
   const onRegisterSession = useCallback(
     async (maxFee?: FeeEstimate) => {
-      if (maxFee == undefined || !publicKey || !controller) {
+      // On appchains a fee estimate may be unavailable up front (e.g. the fee
+      // check failed on funds); submit anyway and let the wasm estimate
+      // internally — mirrors ConfirmTransaction.
+      if ((maxFee === undefined && !isAppchain) || !publicKey || !controller) {
         return;
       }
 
@@ -109,7 +112,7 @@ const RegisterSessionLayout = ({
 
       onConnect(transaction_hash, expiresAt);
     },
-    [controller, expiresAt, policies, publicKey, onConnect, origin],
+    [controller, expiresAt, policies, publicKey, onConnect, origin, isAppchain],
   );
 
   if (!transactions) {

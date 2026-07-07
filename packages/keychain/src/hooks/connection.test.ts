@@ -3,6 +3,7 @@ import {
   getStandaloneRedirectUrl,
   isNestedIframe,
   isOriginVerified,
+  isSameRpcUrl,
   resolvePolicies,
   verifyStandaloneOrigin,
 } from "./connection";
@@ -79,6 +80,59 @@ describe("isOriginVerified", () => {
       false,
     );
     expect(isOriginVerified("https://example.co", allowedOrigins)).toBe(false);
+  });
+});
+
+describe("isSameRpcUrl", () => {
+  it("matches identical URLs", () => {
+    expect(
+      isSameRpcUrl(
+        "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9",
+        "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9",
+      ),
+    ).toBe(true);
+  });
+
+  it("treats a bare origin and its normalized form as the same (katana reconnect regression)", () => {
+    // The WASM stores the rpcUrl via Rust's `url` crate, which appends a
+    // trailing slash to bare origins. The dapp's rpc_url param arrives
+    // verbatim. These must compare equal or the keychain logs the user out
+    // on every reload when connected to a self-hosted Katana.
+    expect(
+      isSameRpcUrl("http://localhost:5050/", "http://localhost:5050"),
+    ).toBe(true);
+    expect(
+      isSameRpcUrl("http://localhost:5050", "http://localhost:5050/"),
+    ).toBe(true);
+  });
+
+  it("normalizes default ports and host casing", () => {
+    expect(isSameRpcUrl("http://Localhost:5050", "http://localhost:5050")).toBe(
+      true,
+    );
+    expect(
+      isSameRpcUrl("https://example.com:443/rpc", "https://example.com/rpc"),
+    ).toBe(true);
+  });
+
+  it("does not match different chains", () => {
+    expect(
+      isSameRpcUrl(
+        "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9",
+        "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9",
+      ),
+    ).toBe(false);
+    expect(isSameRpcUrl("http://localhost:5050", "http://localhost:5051")).toBe(
+      false,
+    );
+    expect(
+      isSameRpcUrl("http://localhost:5050/", "http://localhost:5050/rpc"),
+    ).toBe(false);
+  });
+
+  it("falls back to strict equality for unparseable values", () => {
+    expect(isSameRpcUrl("not-a-url", "not-a-url")).toBe(true);
+    expect(isSameRpcUrl("not-a-url", "other")).toBe(false);
   });
 });
 
