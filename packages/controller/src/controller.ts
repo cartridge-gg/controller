@@ -608,6 +608,25 @@ export default class ControllerProvider extends BaseProvider {
     return this.keychain.username();
   }
 
+  /**
+   * Get the Cartridge Credits balance of the currently connected account.
+   *
+   * The balance is returned as a raw credits amount, where 1 credit = $0.01
+   * USD. Games typically format it as dollars for display, e.g.
+   * `(credits / 100).toFixed(2)`.
+   *
+   * This is a display-only read; the Cartridge backend remains authoritative
+   * for all credits accounting.
+   */
+  credits() {
+    if (!this.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    return this.keychain.credits();
+  }
+
   async openLocationPrompt(options?: LocationPromptOptions) {
     if (!this.iframes) {
       return;

@@ -2,6 +2,7 @@ import Controller from "@/utils/controller";
 import { connectToParent } from "@cartridge/penpal";
 import { normalize } from "@cartridge/controller-ui/utils";
 import { connect } from "./connect";
+import { creditsFactory } from "./credits";
 import { deployFactory } from "./deploy";
 import { estimateInvokeFee } from "./estimate";
 import { execute } from "./execute";
@@ -173,6 +174,7 @@ export function connectToController<
         await window.controller?.disconnect();
       },
       username: () => () => window.controller?.username(),
+      credits: () => creditsFactory(),
       delegateAccount: () => () => window.controller?.delegateAccount(),
       openPurchaseCredits: () => () => {
         navigate("/funding", { replace: true });

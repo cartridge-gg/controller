@@ -198,6 +198,7 @@ export interface Keychain {
   }>;
   delegateAccount(): string;
   username(): string;
+  credits(): Promise<number>;
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   openLocationPrompt(
