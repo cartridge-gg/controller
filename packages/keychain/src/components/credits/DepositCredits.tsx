@@ -52,7 +52,7 @@ export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
         setSelected={(selection: PaymentMethodSelection) => {
           setPaymentMethod(selection);
         }}
-        showFiatOptions={isUS}
+        showFiatOptions={isUS && false} // disabled cards
         showController={true}
         showCrypto={false}
       />
