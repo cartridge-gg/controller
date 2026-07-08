@@ -76,12 +76,17 @@ export class WalletConnectWallet implements WalletAdapter {
 
   getInfo(): ExternalWallet {
     const available = this.isAvailable();
+    // The injected provider may carry wallet-specific extras (version,
+    // chainId) that the standard EIP-1193 typing doesn't declare.
+    const ethereum = window.ethereum as
+      | { version?: string; chainId?: string }
+      | undefined;
 
     return {
       type: this.type,
       available,
-      version: available ? window.ethereum?.version || "Unknown" : undefined,
-      chainId: available ? window.ethereum?.chainId : undefined,
+      version: available ? ethereum?.version || "Unknown" : undefined,
+      chainId: available ? ethereum?.chainId : undefined,
       name: "WalletConnect",
       platform: this.platform,
     };

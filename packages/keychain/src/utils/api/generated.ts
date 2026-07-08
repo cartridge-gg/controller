@@ -1325,6 +1325,24 @@ export type CoinflowCardCheckoutResult = {
   paymentId: Scalars["String"];
 };
 
+export type CoinflowCreditsIntent = {
+  __typename?: "CoinflowCreditsIntent";
+  /**
+   * Internal CoinflowPayments row ID. Use this with the coinflowPayment query to
+   * poll paymentStatus after checkout completes (purchaseFulfillment is null for a
+   * credits top-up).
+   */
+  id: Scalars["ID"];
+  /** Checkout JWT encoding subtotal, blockchain, settlement type, and destination. */
+  jwtToken: Scalars["String"];
+  /** Coinflow merchant ID for the checkout component. */
+  merchantId: Scalars["String"];
+  /** Pricing breakdown in cents (subtotal = the credit value, fees added on top). */
+  pricing: CoinflowPricingDetails;
+  /** Session key (JWT) for authenticating the checkout component with Coinflow. */
+  sessionKey: Scalars["String"];
+};
+
 export type CoinflowPayment = {
   __typename?: "CoinflowPayment";
   id: Scalars["ID"];
@@ -1570,6 +1588,14 @@ export type ControllerWhereInput = {
 
 export type CreateCoinbaseLayerswapOrderInput = {
   /**
+   * If true, the onramp tops up the user's off-chain credit balance instead of
+   * delivering USDC to their controller: the bridged USDC settles to a deposit
+   * address we control and the equivalent credits (computed on the backend from
+   * purchaseUSDCAmount) are granted when the swap completes. Subject to the
+   * standard buy-credits min/max ($2 / $25,000).
+   */
+  credits?: InputMaybe<Scalars["Boolean"]>;
+  /**
    * The amount of USDC to purchase (e.g., "100.000000" for 100 USDC).
    * This is the amount that will be delivered to the bridge.
    */
@@ -1585,6 +1611,12 @@ export type CreateCoinbaseOnrampOrderInput = {
   sandbox?: InputMaybe<Scalars["Boolean"]>;
   /** The EIP-3009 authorization for the USDC transfer. */
   usdcTransferAuthorization: UsdcTransferAuthorizationInput;
+};
+
+export type CreateCoinflowCreditsIntentInput = {
+  /** Credit amount to buy. Bounded by the standard $2 min / $25,000 max. */
+  credits: CreditsInput;
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type CreateCoinflowStarterpackIntentInput = {
@@ -3210,7 +3242,7 @@ export type Mutation = {
   /**
    * Process a card checkout using a tokenized card from the frontend.
    * The coinflowPaymentId must reference an existing intent created via
-   * createCoinflowStarterpackIntent.
+   * createCoinflowStarterpackIntent or createCoinflowCreditsIntent.
    */
   coinflowCardCheckout: CoinflowCardCheckoutResult;
   /**
@@ -3229,6 +3261,15 @@ export type Mutation = {
    * This mutation sends USDC to a burner address, which then transfers to the presigned destination.
    */
   createCoinbaseOnrampOrder: CoinbaseOnrampOrderResponse;
+  /**
+   * Create a Coinflow checkout intent to buy account credits (a top-up, not a
+   * bundle). Mirrors createCoinflowStarterpackIntent — same session key, JWT, and
+   * pricing — but creates a CoinflowPayments row WITHOUT a PurchaseFulfillment. On
+   * settlement the webhook grants credits (derived from the subtotal) instead of
+   * queueing a bundle. Complete the payment with coinflowCardCheckout, the same as
+   * the starterpack flow.
+   */
+  createCoinflowCreditsIntent: CoinflowCreditsIntent;
   /**
    * Create a Coinflow checkout intent for a starterpack purchase.
    * Mirrors createStripeStarterpackIntent: computes pricing, creates a
@@ -3369,6 +3410,10 @@ export type MutationCreateCoinbaseLayerswapOrderArgs = {
 
 export type MutationCreateCoinbaseOnrampOrderArgs = {
   input: CreateCoinbaseOnrampOrderInput;
+};
+
+export type MutationCreateCoinflowCreditsIntentArgs = {
+  input: CreateCoinflowCreditsIntentInput;
 };
 
 export type MutationCreateCoinflowStarterpackIntentArgs = {

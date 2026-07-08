@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { constants } from "starknet";
 import { ResponseCodes, toast } from "@cartridge/controller";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
@@ -53,9 +54,7 @@ export function Profile() {
     setTimeout(() => {
       toast({
         variant: "network-switch",
-        networkName: "Starknet Mainnet",
-        networkIcon:
-          "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
+        chainId: constants.StarknetChainId.SN_MAIN,
       });
     }, 2000);
 

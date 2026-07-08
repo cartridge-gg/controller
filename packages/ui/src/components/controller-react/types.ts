@@ -1,3 +1,11 @@
+// Wire-protocol contract for controller toasts. This is the SINGLE source of
+// truth: the exported receiver <ControllerToaster /> consumes these types
+// directly, the keychain emitter imports them from the
+// `@cartridge/controller-ui` root (re-exported via
+// `@/components/primitives/toast`), and `@cartridge/controller/react`
+// re-exports the public subset — its build inlines them into the published
+// `.d.ts` (see packages/controller/vite.config.js). Keep changes
+// backward-compatible.
 export type ToastPosition =
   | "top-left"
   | "top-right"
@@ -37,10 +45,14 @@ export interface TransactionToastOptions extends BaseToastOptions {
   label?: string;
 }
 
-// Network Switch Toast
-export interface NetworkSwitchToastOptions extends BaseToastOptions {
-  variant: "network-switch";
-  networkName: string;
+// Network Toast
+export type NetworkToastKind = "connect" | "switch-chain";
+
+export interface NetworkToastOptions extends BaseToastOptions {
+  variant: "network";
+  kind: NetworkToastKind;
+  chainId: string;
+  networkName?: string;
   networkIcon?: string;
 }
 
@@ -49,7 +61,6 @@ export interface AchievementToastOptions extends BaseToastOptions {
   variant: "achievement";
   title: string;
   subtitle?: string;
-  iconUrl?: string;
   xpAmount: number;
   progress: number;
   isDraft?: boolean;
@@ -71,15 +82,49 @@ export interface MarketplaceToastOptions extends BaseToastOptions {
   action: "purchased" | "sold" | "sent" | "listed" | "unlisted";
 }
 
+// User Toast
+export type UserToastKind = "created" | "connected" | "disconnected";
+
+export interface UserToastOptions extends BaseToastOptions {
+  variant: "user";
+  username: string;
+  kind?: UserToastKind;
+  message?: string;
+}
+
+// Setting Toast
+export type SettingToastKind = "signer";
+export type SettingToastAction = "created" | "deleted";
+
+export interface SettingToastOptions extends BaseToastOptions {
+  variant: "setting";
+  kind: SettingToastKind;
+  action: SettingToastAction;
+}
+
+// Credits Toast
+export type CreditsToastKind = "deposit" | "withdraw";
+export type CreditsToastStatus = "initiated" | "completed";
+
+export interface CreditsToastOptions extends BaseToastOptions {
+  variant: "credits";
+  kind: CreditsToastKind;
+  status: CreditsToastStatus;
+  amount: number;
+}
+
 // Union type for all toast variants
 export type ToastOptions =
   | ErrorToastOptions
   | SuccessToastOptions
   | TransactionToastOptions
-  | NetworkSwitchToastOptions
+  | NetworkToastOptions
   | AchievementToastOptions
   | QuestToastOptions
-  | MarketplaceToastOptions;
+  | MarketplaceToastOptions
+  | UserToastOptions
+  | SettingToastOptions
+  | CreditsToastOptions;
 
 export const CONTROLLER_TOAST_MESSAGE_TYPE = "controller-toast";
 

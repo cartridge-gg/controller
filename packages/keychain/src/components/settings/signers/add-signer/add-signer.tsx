@@ -34,6 +34,7 @@ import {
 } from "@cartridge/controller-ui/utils/api/cartridge";
 import { QueryObserverResult } from "react-query";
 import { ExternalWalletError } from "@/utils/errors";
+import { useToast } from "@/context/toast";
 import { SignerAlert } from "../signer-alert";
 import { SocialProviderType } from "@/wallets/social/turnkey_utils";
 
@@ -82,6 +83,7 @@ export function AddSignerDrawer({
   controllerQuery,
 }: AddSignerDrawerProps) {
   const { controller } = useController();
+  const { toast } = useToast();
   const smsAuth = useSmsAuthentication();
   const [wallets, setWallets] = useState<boolean>(false);
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
@@ -216,11 +218,12 @@ export function AddSignerDrawer({
     ) {
       const timer = setTimeout(async () => {
         await controllerQuery.refetch();
+        toast.setting({ kind: "signer", action: "created" });
         handleClose();
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [signerPending, controllerQuery, handleClose]);
+  }, [signerPending, controllerQuery, handleClose, toast]);
 
   const isChooseOpen = isOpen && signerPending === null && smsState === null;
   const isSmsOpen = isOpen && signerPending === null && smsState !== null;

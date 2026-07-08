@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
+import { toast as sonnerToast } from "sonner";
 import { Button } from "@/components/primitives/button";
 import {
   ErrorToastOptions,
@@ -11,22 +12,29 @@ import {
   ToastOptions,
   CONTROLLER_TOAST_MESSAGE_TYPE,
   ToastPosition,
-  NetworkSwitchToastOptions,
-} from "@/components/primitives/toast/types";
-import { ControllerToaster } from "@/components/primitives/toast/controller-toaster";
-import { toast as sonnerToast } from "sonner";
+  NetworkToastOptions,
+  UserToastOptions,
+  SettingToastOptions,
+  CreditsToastOptions,
+} from "../types";
 import {
+  ControllerToaster,
   ControllerNotificationTypes,
+  CONTROLLER_TOASTER_ID,
+} from "./controller-toaster";
+import {
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
   Switch,
-} from "..";
+} from "../../..";
+import { TOAST_SN_MAIN, TOAST_SN_SEPOLIA } from "../toasts/specialized-toasts";
 
 const meta: Meta = {
-  title: "Primitives/Toast/Controller Integration",
+  title: "Controller React/Toaster/Controller Toaster",
   parameters: {
     layout: "centered",
     backgrounds: {
@@ -50,6 +58,7 @@ function ControllerToasterDemo() {
     ControllerNotificationTypes[]
   >([]);
   const [position, setPosition] = useState<ToastPosition>("bottom-right");
+  const [duration, setDuration] = useState<number | undefined>(undefined);
   const [txCount, setTxCount] = useState(1);
   const [txConfirming, setTxConfirming] = useState(false);
 
@@ -84,7 +93,6 @@ function ControllerToasterDemo() {
     const options: ErrorToastOptions = {
       variant: "error",
       message: "Failed to purchase asset!",
-      duration: 5000,
     };
     emitControllerToast("error", options);
   };
@@ -93,18 +101,25 @@ function ControllerToasterDemo() {
     const options: SuccessToastOptions = {
       variant: "success",
       message: "Address copied",
-      duration: 5000,
     };
     emitControllerToast("success", options);
   };
 
-  const showSuccessLonger = () => {
+  const showSuccessLongMessage = () => {
     const options: SuccessToastOptions = {
       variant: "success",
       message: "You did something that really remarkable and profound!",
-      duration: 5000,
     };
-    emitControllerToast("successLonger", options);
+    emitControllerToast("successLongMessage", options);
+  };
+
+  const showSuccessCustomDuration = () => {
+    const options: SuccessToastOptions = {
+      variant: "success",
+      message: "Catch me if you can!",
+      duration: 500,
+    };
+    emitControllerToast("successCustomDuration", options);
   };
 
   const showTransactionConfirming = () => {
@@ -114,7 +129,6 @@ function ControllerToasterDemo() {
       toastId: `tx-${txCount}`,
       label: "Purchase",
       progress: 50,
-      duration: 5000,
       safeToClose: false,
     };
     emitControllerToast("transactionConfirming", options);
@@ -127,7 +141,6 @@ function ControllerToasterDemo() {
       status: "confirmed",
       toastId: `tx-${txCount}`,
       progress: 50,
-      duration: 5000,
     };
     emitControllerToast("transactionConfirmed", options);
     setTxConfirming(false);
@@ -139,31 +152,61 @@ function ControllerToasterDemo() {
       variant: "error",
       message: "Transaction execution failed",
       toastId: `tx-${txCount}`,
-      duration: 5000,
     };
     emitControllerToast("transactionError", options);
     setTxConfirming(false);
     setTxCount((prev) => prev + 1);
   };
 
-  const showSwitchToStarknet = () => {
-    const options: NetworkSwitchToastOptions = {
-      variant: "network-switch",
-      networkName: "Starknet Mainnet",
-      // networkIcon: "",
-      duration: 5000,
+  const showConnectToStarknetMainnet = () => {
+    const options: NetworkToastOptions = {
+      variant: "network",
+      kind: "connect",
+      chainId: TOAST_SN_MAIN,
+      networkName: "Ignored",
+      networkIcon: "Ignored",
     };
-    emitControllerToast("switchToStarknet", options);
+    emitControllerToast("connectToStarknetMainnet", options);
   };
 
-  const showSwitchToNums = () => {
-    const options: NetworkSwitchToastOptions = {
-      variant: "network-switch",
+  const showSwitchToStarknetMainnet = () => {
+    const options: NetworkToastOptions = {
+      variant: "network",
+      kind: "switch-chain",
+      chainId: TOAST_SN_MAIN,
+      networkName: "Ignored",
+      networkIcon: "Ignored",
+    };
+    emitControllerToast("switchToStarknetMainnet", options);
+  };
+
+  const showSwitchToStarknetSepolia = () => {
+    const options: NetworkToastOptions = {
+      variant: "network",
+      kind: "switch-chain",
+      chainId: TOAST_SN_SEPOLIA,
+    };
+    emitControllerToast("switchToStarknetSepolia", options);
+  };
+
+  const showSwitchToKatanaLocal = () => {
+    const options: NetworkToastOptions = {
+      variant: "network",
+      kind: "switch-chain",
+      chainId: "0x4B4154414E415F4C4F43414C", // "KATANA_LOCAL"
+    };
+    emitControllerToast("switchToKatanaLocal", options);
+  };
+
+  const showSwitchToNumsChain = () => {
+    const options: NetworkToastOptions = {
+      variant: "network",
+      kind: "switch-chain",
+      chainId: "0x1234567890",
       networkName: "Nums Chain",
       networkIcon: "https://static.cartridge.gg/presets/nums/icon.png",
-      duration: 5000,
     };
-    emitControllerToast("switchToNums", options);
+    emitControllerToast("switchToNumsChain", options);
   };
 
   const showMarketplacePurchaseBeast = () => {
@@ -219,8 +262,6 @@ function ControllerToasterDemo() {
       xpAmount: 50,
       isDraft: true,
       progress: 50,
-      duration: 5000,
-      iconUrl: "",
     };
     emitControllerToast("achievementDraft", options);
   };
@@ -232,34 +273,94 @@ function ControllerToasterDemo() {
       subtitle: "Earned!",
       xpAmount: 100,
       progress: 100,
-      duration: 5000,
-      iconUrl: "",
     };
     emitControllerToast("achievement", options);
   };
 
-  // const showAchievementCustomToast = () => {
-  //   const options: AchievementToastOptions = {
-  //     variant: "achievement",
-  //     title: "Pacifist Path",
-  //     subtitle: "Earned!",
-  //     iconUrl: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/a3bfe959-50c4-4f89-0aef-b19207d82a00/logo",
-  //     xpAmount: 100,
-  //     progress: 100,
-  //     duration: 5000,
-  //   };
-  //   emitControllerToast("achievementCustom", options);
-  // };
+  const showUserCreated = () => {
+    const options: UserToastOptions = {
+      variant: "user",
+      kind: "created",
+      username: "clicksave",
+    };
+    emitControllerToast("userCreated", options);
+  };
 
-  // const showQuestToast = () => {
-  //   const options: QuestToastOptions = {
-  //     variant: "quest",
-  //     title: "Daily Quest",
-  //     subtitle: "Conquered!",
-  //     duration: 5000,
-  //   };
-  //   emitControllerToast("quest", options);
-  // };
+  const showUserConnected = () => {
+    const options: UserToastOptions = {
+      variant: "user",
+      kind: "connected",
+      username: "shinobi",
+    };
+    emitControllerToast("userConnected", options);
+  };
+
+  const showUserDisconnected = () => {
+    const options: UserToastOptions = {
+      variant: "user",
+      kind: "disconnected",
+      username: "0xmajor",
+    };
+    emitControllerToast("userDisconnected", options);
+  };
+
+  const showSignerCreated = () => {
+    const options: SettingToastOptions = {
+      variant: "setting",
+      kind: "signer",
+      action: "created",
+    };
+    emitControllerToast("signerCreated", options);
+  };
+
+  const showSignerDeleted = () => {
+    const options: SettingToastOptions = {
+      variant: "setting",
+      kind: "signer",
+      action: "deleted",
+    };
+    emitControllerToast("signerDeleted", options);
+  };
+
+  const showCreditsDepositInitiated = () => {
+    const options: CreditsToastOptions = {
+      variant: "credits",
+      kind: "deposit",
+      status: "initiated",
+      amount: 100,
+    };
+    emitControllerToast("creditsDepositInitiated", options);
+  };
+
+  const showCreditsDepositCompleted = () => {
+    const options: CreditsToastOptions = {
+      variant: "credits",
+      kind: "deposit",
+      status: "completed",
+      amount: 100,
+    };
+    emitControllerToast("creditsDepositCompleted", options);
+  };
+
+  const showCreditsWithdrawInitiated = () => {
+    const options: CreditsToastOptions = {
+      variant: "credits",
+      kind: "withdraw",
+      status: "initiated",
+      amount: 42.5,
+    };
+    emitControllerToast("creditsWithdrawInitiated", options);
+  };
+
+  const showCreditsWithdrawCompleted = () => {
+    const options: CreditsToastOptions = {
+      variant: "credits",
+      kind: "withdraw",
+      status: "completed",
+      amount: 42.5,
+    };
+    emitControllerToast("creditsWithdrawCompleted", options);
+  };
 
   const switchDisabledType = (type: ControllerNotificationTypes) => {
     setDisabledTypes((prev) => {
@@ -279,9 +380,7 @@ function ControllerToasterDemo() {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
-          <h3 className="text-white text-sm font-medium">
-            Generic Controller events
-          </h3>
+          <h3 className="text-white text-sm font-medium">Error</h3>
           <Button
             onClick={showError}
             className="w-full"
@@ -289,6 +388,7 @@ function ControllerToasterDemo() {
           >
             {isLoading.error ? "Loading..." : "Error"}
           </Button>
+          <h3 className="text-white text-sm font-medium">Success</h3>
           <Button
             onClick={showSuccess}
             className="w-full"
@@ -297,12 +397,70 @@ function ControllerToasterDemo() {
             {isLoading.success ? "Loading..." : "Success"}
           </Button>
           <Button
-            onClick={showSuccessLonger}
+            onClick={showSuccessLongMessage}
             className="w-full"
-            disabled={isLoading.successLonger}
+            disabled={isLoading.successLongMessage}
           >
-            {isLoading.successLonger ? "Loading..." : "Success (long message)"}
+            {isLoading.successLongMessage
+              ? "Loading..."
+              : "Success (long message)"}
           </Button>
+          <Button
+            onClick={showSuccessCustomDuration}
+            className="w-full"
+            disabled={isLoading.successCustomDuration}
+          >
+            {isLoading.successCustomDuration
+              ? "Loading..."
+              : "Success (custom duration)"}
+          </Button>
+          <h3 className="text-white text-sm font-medium">Network</h3>
+          <Button
+            onClick={showConnectToStarknetMainnet}
+            className="w-full"
+            disabled={isLoading.connectToStarknetMainnet}
+          >
+            {isLoading.connectToStarknetMainnet
+              ? "Loading..."
+              : "Connect to Starknet Mainnet"}
+          </Button>
+          <Button
+            onClick={showSwitchToStarknetMainnet}
+            className="w-full"
+            disabled={isLoading.switchToStarkneMainnet}
+          >
+            {isLoading.switchToStarkneMainnet
+              ? "Loading..."
+              : "Switch to Starknet Mainnet"}
+          </Button>
+          <Button
+            onClick={showSwitchToStarknetSepolia}
+            className="w-full"
+            disabled={isLoading.switchToStarknetSepolia}
+          >
+            {isLoading.switchToStarknetSepolia
+              ? "Loading..."
+              : "Switch to Starknet Sepolia"}
+          </Button>
+          <Button
+            onClick={showSwitchToKatanaLocal}
+            className="w-full"
+            disabled={isLoading.switchToKatanaLocal}
+          >
+            {isLoading.switchToKatanaLocal
+              ? "Loading..."
+              : "Switch to Katana Local"}
+          </Button>
+          <Button
+            onClick={showSwitchToNumsChain}
+            className="w-full"
+            disabled={isLoading.switchToNumsChain}
+          >
+            {isLoading.switchToNumsChain
+              ? "Loading..."
+              : "Switch to Nums Chain"}
+          </Button>
+          <h3 className="text-white text-sm font-medium">Transaction</h3>
           <Button
             onClick={showTransactionConfirming}
             className="w-full"
@@ -330,23 +488,13 @@ function ControllerToasterDemo() {
               ? "Loading..."
               : `...TX${txCount} error`}
           </Button>
-          <Button
-            onClick={showSwitchToStarknet}
-            className="w-full"
-            disabled={isLoading.switchToStarknet}
-          >
-            {isLoading.switchToStarknet ? "Loading..." : "Switch to Starknet"}
-          </Button>
-          <Button
-            onClick={showSwitchToNums}
-            className="w-full"
-            disabled={isLoading.switchToNums}
-          >
-            {isLoading.switchToNums ? "Loading..." : "Switch to Nums"}
-          </Button>
+          <h3 className="text-white text-sm font-medium">native sonner</h3>
           <Button
             onClick={() =>
-              sonnerToast.success("sonner.success()", { duration: 5000 })
+              sonnerToast.success("called sonner with controller toasterId", {
+                duration: 5000,
+                toasterId: CONTROLLER_TOASTER_ID,
+              })
             }
             className="w-full"
           >
@@ -355,7 +503,7 @@ function ControllerToasterDemo() {
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-white text-sm font-medium">Specialized events</h3>
+          <h3 className="text-white text-sm font-medium">Marketplace</h3>
           <Button
             onClick={showMarketplacePurchaseBeast}
             className="w-full"
@@ -381,6 +529,7 @@ function ControllerToasterDemo() {
           >
             {isLoading.sentToken ? "Loading..." : "Marketplace Sent Token"}
           </Button>
+          <h3 className="text-white text-sm font-medium">Achievement</h3>
           <Button
             onClick={showAchievementDraftToast}
             className="w-full"
@@ -395,24 +544,86 @@ function ControllerToasterDemo() {
           >
             {isLoading.achievement ? "Loading..." : "Achievement Complete"}
           </Button>
-          {/* <Button
-            onClick={showAchievementCustomToast}
+          <h3 className="text-white text-sm font-medium">User</h3>
+          <Button
+            onClick={showUserCreated}
             className="w-full"
-            disabled={isLoading.achievementCustom}
+            disabled={isLoading.userCreated}
           >
-            {isLoading.achievementCustom ? "Loading..." : "Achievement Custom"}
-          </Button> */}
-          {/* <Button
-            onClick={showQuestToast}
+            {isLoading.userCreated ? "Loading..." : "User Created"}
+          </Button>
+          <Button
+            onClick={showUserConnected}
             className="w-full"
-            disabled={isLoading.quest}
+            disabled={isLoading.userConnected}
           >
-            {isLoading.quest ? "Loading..." : "Quest"}
-          </Button> */}
+            {isLoading.userConnected ? "Loading..." : "User Connected"}
+          </Button>
+          <Button
+            onClick={showUserDisconnected}
+            className="w-full"
+            disabled={isLoading.userDisconnected}
+          >
+            {isLoading.userDisconnected ? "Loading..." : "User Disconnected"}
+          </Button>
+          <h3 className="text-white text-sm font-medium">Setting</h3>
+          <Button
+            onClick={showSignerCreated}
+            className="w-full"
+            disabled={isLoading.signerCreated}
+          >
+            {isLoading.signerCreated ? "Loading..." : "Signer Created"}
+          </Button>
+          <Button
+            onClick={showSignerDeleted}
+            className="w-full"
+            disabled={isLoading.signerDeleted}
+          >
+            {isLoading.signerDeleted ? "Loading..." : "Signer Deleted"}
+          </Button>
+          <h3 className="text-white text-sm font-medium">Credits</h3>
+          <Button
+            onClick={showCreditsDepositInitiated}
+            className="w-full"
+            disabled={isLoading.creditsDepositInitiated}
+          >
+            {isLoading.creditsDepositInitiated
+              ? "Loading..."
+              : "Credits Deposit Initiated"}
+          </Button>
+          <Button
+            onClick={showCreditsDepositCompleted}
+            className="w-full"
+            disabled={isLoading.creditsDepositCompleted}
+          >
+            {isLoading.creditsDepositCompleted
+              ? "Loading..."
+              : "Credits Deposit Complete"}
+          </Button>
+          <Button
+            onClick={showCreditsWithdrawInitiated}
+            className="w-full"
+            disabled={isLoading.creditsWithdrawInitiated}
+          >
+            {isLoading.creditsWithdrawInitiated
+              ? "Loading..."
+              : "Credits Withdraw Initiated"}
+          </Button>
+          <Button
+            onClick={showCreditsWithdrawCompleted}
+            className="w-full"
+            disabled={isLoading.creditsWithdrawCompleted}
+          >
+            {isLoading.creditsWithdrawCompleted
+              ? "Loading..."
+              : "Credits Withdraw Complete"}
+          </Button>
         </div>
 
         <div>
-          <h3 className="text-white text-sm font-medium">Client Options</h3>
+          <h3 className="text-white text-sm font-medium">
+            ControllerToaster Options
+          </h3>
           <div className="py-2">
             <Select
               value={position}
@@ -447,10 +658,10 @@ function ControllerToasterDemo() {
           </div>
           <div className="flex gap-2">
             <Switch
-              value={disabledTypes.includes("network-switch") ? 1 : 0}
-              onCheckedChange={() => switchDisabledType("network-switch")}
+              value={disabledTypes.includes("network") ? 1 : 0}
+              onCheckedChange={() => switchDisabledType("network")}
             />
-            Disable Network Switch
+            Disable Network
           </div>
           <div className="flex gap-2">
             <Switch
@@ -473,6 +684,27 @@ function ControllerToasterDemo() {
             />
             Disable Achievement
           </div>
+          <div className="flex gap-2">
+            <Switch
+              value={disabledTypes.includes("user") ? 1 : 0}
+              onCheckedChange={() => switchDisabledType("user")}
+            />
+            Disable User
+          </div>
+          <div className="flex gap-2">
+            <Switch
+              value={disabledTypes.includes("setting") ? 1 : 0}
+              onCheckedChange={() => switchDisabledType("setting")}
+            />
+            Disable Setting
+          </div>
+          <div className="flex gap-2">
+            <Switch
+              value={disabledTypes.includes("credits") ? 1 : 0}
+              onCheckedChange={() => switchDisabledType("credits")}
+            />
+            Disable Credits
+          </div>
           <div className="flex gap-2 pt-2">
             <Switch
               value={collapseTransactions ? 1 : 0}
@@ -480,13 +712,28 @@ function ControllerToasterDemo() {
             />
             Collapse Transactions
           </div>
+          <div className="pt-2">
+            <Input
+              type="number"
+              placeholder="Custom duration (ms)"
+              value={duration ?? ""}
+              onChange={(e) =>
+                setDuration(
+                  e.target.value && !Number.isNaN(e.target.value)
+                    ? Number(e.target.value)
+                    : undefined,
+                )
+              }
+            />
+          </div>
         </div>
       </div>
 
       <ControllerToaster
-        collapseTransactions={collapseTransactions}
-        disabledTypes={disabledTypes}
         position={position}
+        duration={duration}
+        disabledTypes={disabledTypes}
+        collapseTransactions={collapseTransactions}
       />
       {/* <ControllerToaster toasterId="controller" position="bottom-left" /> */}
     </div>
@@ -495,38 +742,4 @@ function ControllerToasterDemo() {
 
 export const IntegrationDemo: Story = {
   render: () => <ControllerToasterDemo />,
-};
-
-export const UsageExample: Story = {
-  render: () => (
-    <div className="space-y-4 text-white">
-      <h2 className="text-lg font-semibold">
-        Integrate Controller Toasts in your app:
-      </h2>
-
-      <div className="space-y-3 text-sm">
-        <div>
-          <h3 className="font-medium text-green-400">
-            1. Add the {"<ControllerToaster />"} component to your game: 2. If
-            you already have a sonner toaster, remove its {"<Toaster />"}{" "}
-            component: 3. Or, if you want the controller toasters to be
-            independent from your existing sonner toaster, give it a toasterId:{" "}
-            {'<ControllerToaster toasterId="controller" />'}
-          </h3>
-          <pre className="bg-gray-800 p-2 rounded mt-1 text-xs">
-            {`import { ControllerToaster } from "@cartridge/controller-ui";
-
-function App() {
-  return (
-    <div>
-      {/* Your app content */}
-      <ControllerToaster />
-    </div>
-  );
-}`}
-          </pre>
-        </div>
-      </div>
-    </div>
-  ),
 };

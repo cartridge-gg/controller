@@ -1,23 +1,28 @@
 "use client";
 
-import { useMemo } from "react";
-import { Toaster as SonnerToster } from "sonner";
+import { useEffect, useState } from "react";
+import { Toaster as Sonner } from "sonner";
 
-type SonnerToasterProps = React.ComponentProps<typeof SonnerToster> & {
+type SonnerToasterProps = React.ComponentProps<typeof Sonner> & {
   toasterId?: string;
 };
 
 const SonnerToaster = ({ toasterId, ...props }: SonnerToasterProps) => {
-  const theme = useMemo(
-    () => localStorage.getItem("vite-ui-colorScheme") ?? "system",
-    [],
-  );
+  // localStorage only exists in the browser; read it after mount so the
+  // component stays SSR-safe.
+  const [theme, setTheme] = useState<SonnerToasterProps["theme"]>("system");
+  useEffect(() => {
+    setTheme(
+      (localStorage.getItem("vite-ui-colorScheme") ??
+        "system") as SonnerToasterProps["theme"],
+    );
+  }, []);
 
   return (
-    <SonnerToster
-      theme={theme as SonnerToasterProps["theme"]}
+    <Sonner
+      theme={theme}
       className="toaster group"
-      duration={1000}
+      duration={5000}
       id={toasterId}
       toastOptions={{
         classNames: {
