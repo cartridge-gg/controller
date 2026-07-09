@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.13.13] - 2026-07-09
+
+### ✨ New Features
+- **@cartridge/controller**: Added `ControllerOptions.toriiUrl` so applications can provide an explicit Torii endpoint; it takes precedence over the legacy Slot-derived endpoint while preserving the Slot fallback (#2626)
+- **@cartridge/controller**: Added controller credit-balance reads, React toast exports, and wallet-standard registration for get-starknet and starknet-start integrations (#2628, #2627, #2575)
+- **@cartridge/keychain**: Added credit and bundle purchasing, crypto-funded paymasters, and consolidated starterpack purchase flows (#2618, #2588, #2574, #2573, #2604, #2605)
+- **@cartridge/keychain**: Added SMS authentication, user identity verification, onboarding drawers, and redesigned transfer flows (#2593, #2602, #2578, #2571)
+- **@cartridge/controller-ui**: Added the shared Controller UI package with reusable wallet, purchase, settings, token, and navigation primitives (#2552)
+
+### 🚀 Improvements
+- **Hosted keychain compatibility**: Hardened the shared iframe contract for Controller 0.13.12 and newer by preserving legacy connect and execute argument positions, gating newer onboarding behavior by SDK version, and allowing disconnect replies to complete before iframe reload (#2631)
+- **@cartridge/keychain**: Improved account creation, recovery, and session lifecycle behavior across passkey, social, SMS, and password sign-in methods (#2559, #2568, #2610, #2613)
+- **@cartridge/keychain**: Improved appchain and Katana connection, deployment, fee estimation, and controller-upgrade behavior (#2625, #2629, #2609, #2616)
+- **@cartridge/keychain**: Consolidated payment experiences into responsive drawers and improved Coinbase, Coinflow, Apple Pay, and token-price handling (#2561, #2562, #2567, #2580, #2620)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed custom Torii normalization and legacy Slot fallback coverage without changing the Starknet.js v8 protocol boundary (#2626, #2631)
+- **@cartridge/keychain**: Fixed OAuth and social-auth retries, Safari iframe bearer authentication, popup-origin verification, and reconnect blank screens (#2559, #2583, #2619, #2621, #2613)
+- **@cartridge/keychain**: Fixed in-session chain switching, fee re-estimation, and undeployed-account upgrade prompts (#2612, #2609, #2622)
+- **@cartridge/keychain**: Fixed duplicate or stale purchase actions, Android Apple Pay visibility, and Coinbase order reuse (#2591, #2595, #2596, #2576, #2577)
+- **@cartridge/keychain**: Prevented development PostHog capture and restored analytics funnel consistency (#2624, #2594, #2598, #2599, #2601)
+
+### 📦 Dependencies
+- **@cartridge/controller-wasm**: Updated to version 0.10.1 (#2563)
+- **Starknet.js**: Remains on the v8 line (`^8.5.2`, workspace `8.5.4`) for Controller 0.13.13 compatibility
+
 ## [0.13.12] - 2026-04-16
 
 ### ✨ New Features

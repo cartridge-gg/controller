@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.13.12",
+  "version": "0.13.13",
   "description": "Cartridge Controller Connector",
   "repository": {
     "type": "git",
