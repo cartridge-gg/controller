@@ -10,8 +10,10 @@ import {
   CardTitle,
   TokenCard,
   TokenSummary,
+  UsdColorIcon,
 } from "@cartridge/controller-ui";
 import { useCreditBalance } from "@cartridge/controller-ui/utils";
+import { formatCredits } from "@/utils/credits";
 
 export enum BalanceType {
   CREDITS = "credits",
@@ -47,12 +49,15 @@ export function Balance({ types, title, amount }: BalanceProps) {
       <TokenSummary className="rounded-tl-none rounded-tr-none">
         {types.includes(BalanceType.CREDITS) && (
           <TokenCard
-            image={"https://static.cartridge.gg/presets/credit/icon.svg"}
-            title={"Credits"}
+            image={<UsdColorIcon size="auto" />}
+            title={"USD"}
             amount={
               amount
                 ? `${amount.toFixed(2).toString()}`
-                : `${creditBalance.formatted} CREDITS`
+                : // Raw credit units are 1e8 per USD — formatCredits owns the
+                  // conversion; useCreditBalance's formatted string is the old
+                  // 100-per-USD plain-credit figure and must not be shown as USD.
+                  `${formatCredits(creditBalance.value).formatted} USD`
             }
           />
         )}

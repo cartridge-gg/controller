@@ -37,11 +37,18 @@ export const LIMIT_TYPE_LIFETIME_TRANSACTIONS = "lifetime_transactions";
 /** Sentinel for unlimited limit / remaining values. */
 export const UNLIMITED_SENTINEL = "-1";
 
-/** Coinbase's minimum USD amount for an Apple Pay onramp purchase. */
+/** Coinbase's minimum USD amount for an Apple Pay onramp purchase. Also feeds
+ * the credits deposit floor (MIN_CREDITS_PURCHASE_USD in utils/credits). */
 export const COINBASE_APPLE_PAY_MIN_USD = 1.86;
 
 export interface CreateOrderInput {
   purchaseUSDCAmount: string;
+  /**
+   * When true, the onramp tops up the account's off-chain credit balance
+   * instead of delivering USDC to the controller (credits-unification Phase 2).
+   * The backend derives the credit amount from purchaseUSDCAmount.
+   */
+  credits?: boolean;
 }
 
 export interface CoinbaseQuoteInput {
@@ -109,6 +116,7 @@ const createCoinbaseOrder = async (
       input: {
         purchaseUSDCAmount: input.purchaseUSDCAmount,
         sandbox,
+        ...(input.credits ? { credits: true } : {}),
       },
     },
   );

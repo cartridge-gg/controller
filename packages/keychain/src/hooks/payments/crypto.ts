@@ -26,7 +26,8 @@ type CryptoPaymentResult = {
 export type CreateStarknetCryptoPaymentInput = {
   tokenAddress: string;
   tokenAmount: bigint;
-  teamId: string;
+  // Omit for account credits; set only when funding a team pool.
+  teamId?: string;
   isMainnet: boolean;
 };
 
@@ -43,7 +44,7 @@ export async function createStarknetCryptoPayment({
         network: "STARKNET",
         tokenAddress,
         tokenAmount: tokenAmount.toString(),
-        teamId,
+        ...(teamId ? { teamId } : {}),
         isMainnet,
       },
     },
@@ -84,6 +85,6 @@ export async function waitForCryptoPaymentConfirmation(
   }
 
   throw new Error(
-    "Payment was sent but has not been confirmed yet. Check the team balance again shortly.",
+    "Payment was sent but has not been confirmed yet. Check your balance again shortly.",
   );
 }

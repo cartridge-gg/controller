@@ -5,11 +5,7 @@ import {
   type MerchantTheme,
 } from "@coinflowlabs/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  useNavigation,
-  useStarterpackContext,
-  useCreditPurchaseContext,
-} from "@/context";
+import { useCoinflowRail } from "../rails";
 import { Input, Skeleton } from "@cartridge/controller-ui";
 import { useControllerTheme } from "@/hooks/connection";
 import { useCoinflowCardCheckoutMutation } from "@/utils/api";
@@ -47,9 +43,11 @@ export interface CoinflowFormProps {
 }
 
 export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
-  const { clearError } = useStarterpackContext();
-  const { coinflowIntent, coinflowEnv } = useCreditPurchaseContext();
-  const { navigate } = useNavigation();
+  const {
+    intent: coinflowIntent,
+    env: coinflowEnv,
+    onComplete,
+  } = useCoinflowRail();
   const controllerTheme = useControllerTheme();
   const coinflowTheme = useMemo<MerchantTheme>(() => {
     const primary = controllerTheme?.colors?.primary;
@@ -73,11 +71,6 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
   const [error, setError] = useState<Error | null>(null);
 
   const { mutateAsync: cardCheckout } = useCoinflowCardCheckoutMutation();
-
-  useEffect(() => {
-    clearError();
-    return () => clearError();
-  }, [clearError]);
 
   const handleSubmit = useCallback(async () => {
     if (!coinflowIntent || !cardFormRef.current) return;
@@ -108,7 +101,7 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
         },
       });
 
-      navigate("/purchase/success", { reset: true });
+      onComplete();
     } catch (e) {
       setError(e instanceof Error ? e : new Error("Payment failed"));
     } finally {
@@ -124,7 +117,7 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
     address1,
     city,
     state,
-    navigate,
+    onComplete,
   ]);
 
   const onCardFormLoad = useCallback(() => setIsFormReady(true), []);

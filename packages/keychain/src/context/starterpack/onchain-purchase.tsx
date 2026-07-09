@@ -42,8 +42,12 @@ import {
 } from "@/hooks/starterpack";
 import { useSocialClaimConnection } from "@/hooks/starterpack/social";
 import { Explorer } from "@/hooks/starterpack/layerswap";
+import { CREDITS_TOKEN } from "@/components/purchase/review/cost";
 
 export type { TokenOption } from "@/hooks/starterpack";
+
+/** Non-wallet payment rails selectable in the checkout. */
+export type PurchaseRail = "apple-pay" | "coinflow" | "credits";
 
 export interface OnchainPurchaseContextType {
   // Purchase items
@@ -95,6 +99,8 @@ export interface OnchainPurchaseContextType {
   // Coinbase / Apple Pay state
   isApplePaySelected: boolean;
   isCoinflowSelected: boolean;
+  isCreditsRailSelected: boolean; // credits selected as payment method
+  isCreditsSelected: boolean; // credits is selected as a fake controller token
   paymentLink: string | undefined;
   isCreatingOrder: boolean;
   coinbaseQuote: CoinbaseQuoteResult | undefined;
@@ -124,6 +130,7 @@ export interface OnchainPurchaseContextType {
   waitForDeposit: (swapId: string) => Promise<string>;
   onApplePaySelect: () => void;
   onCoinflowSelect: () => void;
+  onCreditsSelect: () => void;
   onCreateCoinbaseOrder: (opts?: {
     force?: boolean;
   }) => Promise<CoinbaseOrderResult | undefined>;
@@ -226,27 +233,6 @@ export const OnchainPurchaseProvider = ({
     }
   }, [controller]);
 
-  const clearSelectedWallet = useCallback(() => {
-    clearSelectedWalletInternal();
-    setIsApplePaySelected(false);
-    setIsCoinflowSelected(false);
-    clearPaymentMethod();
-  }, [clearSelectedWalletInternal, clearPaymentMethod]);
-
-  const onExternalConnect = useCallback(
-    async (
-      wallet: ExternalWallet,
-      platform: ExternalPlatform,
-      chainId?: string,
-    ) => {
-      setIsApplePaySelected(false);
-      setIsCoinflowSelected(false);
-      clearPaymentMethod();
-      return onExternalConnectInternal(wallet, platform, chainId);
-    },
-    [onExternalConnectInternal, clearPaymentMethod],
-  );
-
   // Get onchain starterpack details if available
   const onchainDetails =
     starterpackDetails && isOnchainStarterpack(starterpackDetails)
@@ -269,6 +255,38 @@ export const OnchainPurchaseProvider = ({
     selectedPlatform,
   });
 
+  // The credits pseudo-token in the token selector doubles as a payment-method
+  // choice. Whenever a different method is picked (fiat rail, controller,
+  // external wallet), a lingering credits token must be cleared — otherwise
+  // the token-derived isCreditsSelected would keep routing the purchase
+  // through credits under the newly selected method's UI.
+  const clearCreditsToken = useCallback(() => {
+    if (selectedToken?.isCredits) {
+      resetTokenSelection();
+    }
+  }, [selectedToken, resetTokenSelection]);
+
+  const clearSelectedWallet = useCallback(() => {
+    clearSelectedWalletInternal();
+    setSelectedRail(null);
+    clearCreditsToken();
+    clearPaymentMethod();
+  }, [clearSelectedWalletInternal, clearCreditsToken, clearPaymentMethod]);
+
+  const onExternalConnect = useCallback(
+    async (
+      wallet: ExternalWallet,
+      platform: ExternalPlatform,
+      chainId?: string,
+    ) => {
+      setSelectedRail(null);
+      clearCreditsToken();
+      clearPaymentMethod();
+      return onExternalConnectInternal(wallet, platform, chainId);
+    },
+    [onExternalConnectInternal, clearCreditsToken, clearPaymentMethod],
+  );
+
   const {
     requestedAmount,
     setRequestedAmount,
@@ -290,8 +308,15 @@ export const OnchainPurchaseProvider = ({
     onError: setDisplayError,
   });
 
-  const [isApplePaySelected, setIsApplePaySelected] = useState(false);
-  const [isCoinflowSelected, setIsCoinflowSelected] = useState(false);
+  // Single source of truth for the selected non-wallet payment rail. The
+  // rails are mutually exclusive by construction; wallet payment (controller
+  // or external) is rail === null. The per-rail booleans are derived so
+  // consumers keep their existing API.
+  const [selectedRail, setSelectedRail] = useState<PurchaseRail | null>(null);
+  const isApplePaySelected = selectedRail === "apple-pay";
+  const isCoinflowSelected = selectedRail === "coinflow";
+  const isCreditsRailSelected = selectedRail === "credits";
+  const isCreditsSelected = isCreditsRailSelected || !!selectedToken?.isCredits;
   const [coinbaseLsSwapId, setCoinbaseLsSwapId] = useState<
     string | undefined
   >();
@@ -336,7 +361,7 @@ export const OnchainPurchaseProvider = ({
     const searchParams = new URLSearchParams(location.search);
     if (searchParams.get("method") === "apple-pay") {
       resetCoinbasePurchase();
-      setIsApplePaySelected(true);
+      setSelectedRail("apple-pay");
       clearSelectedWalletInternal();
     }
   }, [location.search, clearSelectedWalletInternal, resetCoinbasePurchase]);
@@ -393,9 +418,16 @@ export const OnchainPurchaseProvider = ({
     setDisplayError,
   ]);
 
-  // Auto-select USDC when a card-based flow is selected
+  // Pin the credits pseudo-token while the credits rail is selected, and
+  // auto-select USDC when a card-based flow is selected. Keyed on the rail —
+  // not the token-derived isCreditsSelected — so switching to a fiat rail
+  // replaces a lingering credits token instead of re-pinning it.
   useEffect(() => {
-    if (
+    if (isCreditsRailSelected) {
+      if (!selectedToken?.isCredits) {
+        setSelectedToken(CREDITS_TOKEN);
+      }
+    } else if (
       (isApplePaySelected || isCoinflowSelected) &&
       availableTokens.length > 0
     ) {
@@ -407,12 +439,18 @@ export const OnchainPurchaseProvider = ({
       }
     }
   }, [
+    isCreditsRailSelected,
     isApplePaySelected,
     isCoinflowSelected,
     availableTokens,
     selectedToken,
     setSelectedToken,
   ]);
+
+  const listedTokens = useMemo(() => {
+    if (isApplePaySelected || isCoinflowSelected) return availableTokens;
+    return [...availableTokens, CREDITS_TOKEN];
+  }, [availableTokens, isApplePaySelected, isCoinflowSelected]);
 
   // Wrap onSendDeposit to clear errors before sending
   const onSendDeposit = useCallback(async () => {
@@ -484,7 +522,12 @@ export const OnchainPurchaseProvider = ({
   // When a swap is required we add a 2% buffer so the on-chain swap — which runs
   // minutes later against a fresh quote — has enough USDC after price drift.
   const applePayUsdcAmount = useMemo<string | undefined>(() => {
-    if (!onchainDetails?.quote || !selectedToken || !convertedPrice) {
+    if (
+      !onchainDetails?.quote ||
+      !selectedToken ||
+      !convertedPrice ||
+      selectedToken.isCredits
+    ) {
       return undefined;
     }
     if (convertedPrice.quantity !== quantity) {
@@ -713,20 +756,43 @@ export const OnchainPurchaseProvider = ({
     setDisplayError,
   ]);
 
-  const onApplePaySelect = useCallback(() => {
-    resetCoinbasePurchase();
-    setIsApplePaySelected(true);
-    setIsCoinflowSelected(false);
-    clearSelectedWalletInternal();
-  }, [clearSelectedWalletInternal, resetCoinbasePurchase]);
+  // Selecting a rail deselects any wallet (and the other rails, since the
+  // rail is a single state). Apple Pay is intentionally not persisted as the
+  // last payment method — only coinflow/credits are restored on revisit.
+  const selectRail = useCallback(
+    (rail: PurchaseRail, opts?: { persist?: boolean }) => {
+      resetCoinbasePurchase();
+      setSelectedRail(rail);
+      clearSelectedWalletInternal();
+      if (rail !== "credits") {
+        clearCreditsToken();
+      }
+      if (opts?.persist) {
+        savePaymentMethod(rail);
+      }
+    },
+    [
+      clearSelectedWalletInternal,
+      savePaymentMethod,
+      resetCoinbasePurchase,
+      clearCreditsToken,
+    ],
+  );
 
-  const onCoinflowSelect = useCallback(() => {
-    resetCoinbasePurchase();
-    setIsCoinflowSelected(true);
-    setIsApplePaySelected(false);
-    clearSelectedWalletInternal();
-    savePaymentMethod("coinflow");
-  }, [clearSelectedWalletInternal, savePaymentMethod, resetCoinbasePurchase]);
+  const onApplePaySelect = useCallback(
+    () => selectRail("apple-pay"),
+    [selectRail],
+  );
+
+  const onCoinflowSelect = useCallback(
+    () => selectRail("coinflow", { persist: true }),
+    [selectRail],
+  );
+
+  const onCreditsSelect = useCallback(
+    () => selectRail("credits", { persist: true }),
+    [selectRail],
+  );
 
   const onCreateCoinbaseOrder = useCallback(
     async (opts?: { force?: boolean }) => {
@@ -786,14 +852,17 @@ export const OnchainPurchaseProvider = ({
     selectedPlatform,
     walletAddress,
     clearSelectedWallet,
-    availableTokens,
+    availableTokens: listedTokens,
     selectedToken,
     setSelectedToken,
     convertedPrice,
     swapQuote,
     isFetchingConversion,
     isTokenSelectionLocked:
-      isTokenSelectionLocked || isApplePaySelected || isCoinflowSelected,
+      isTokenSelectionLocked ||
+      isApplePaySelected ||
+      isCoinflowSelected ||
+      isCreditsRailSelected,
     conversionError,
     usdAmount,
     layerswapFees,
@@ -807,6 +876,8 @@ export const OnchainPurchaseProvider = ({
     feeEstimationError,
     isApplePaySelected,
     isCoinflowSelected,
+    isCreditsRailSelected,
+    isCreditsSelected,
     paymentLink,
     isCreatingOrder,
     coinbaseQuote,
@@ -824,6 +895,7 @@ export const OnchainPurchaseProvider = ({
     waitForDeposit,
     onApplePaySelect,
     onCoinflowSelect,
+    onCreditsSelect,
     onCreateCoinbaseOrder,
     openPaymentPopup,
     closePaymentPopup,

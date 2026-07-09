@@ -22,9 +22,8 @@ const MAINNET_RPC =
 const SEPOLIA_RPC =
   process.env.NEXT_PUBLIC_RPC_SEPOLIA ??
   "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9";
-const KATANA_RPC = process.env.NEXT_PUBLIC_RPC_LOCAL ?? "http://localhost:5050";
-const KATANA_CHAIN_ID =
-  process.env.NEXT_PUBLIC_LOCAL_CHAIN_ID ?? "KATANA_LOCAL";
+const KATANA_RPC = process.env.NEXT_PUBLIC_RPC_LOCAL;
+const KATANA_CHAIN_ID = process.env.NEXT_PUBLIC_LOCAL_CHAIN_ID;
 
 export enum ConnectOptions {
   DefaultChainId = "default-chain-id",
@@ -124,7 +123,7 @@ const policies: SessionPolicies = {
 };
 
 let localKatanaChain: Chain | undefined = undefined;
-if (KATANA_RPC) {
+if (KATANA_RPC && KATANA_CHAIN_ID) {
   localKatanaChain = {
     id: num.toBigInt(shortString.encodeShortString(KATANA_CHAIN_ID)),
     network: KATANA_CHAIN_ID,

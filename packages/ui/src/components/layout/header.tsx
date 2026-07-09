@@ -25,6 +25,8 @@ export type HeaderProps = HeaderInnerProps & {
   onFollowersClick?: () => void;
   onFollowingsClick?: () => void;
   onOpenSettings?: () => void;
+  onDeposit?: () => void;
+  onWithdraw?: () => void;
   onLogout?: () => void;
 };
 
@@ -36,6 +38,8 @@ export function LayoutHeader({
   hideSettings,
   onOpenStarterPack,
   onOpenSettings,
+  onDeposit,
+  onWithdraw,
   ...innerProps
 }: HeaderProps) {
   const {
@@ -143,6 +147,8 @@ export function LayoutHeader({
                   onOpenSettings={
                     onOpenSettings ? onOpenSettings : openSettings
                   }
+                  onDeposit={onDeposit}
+                  onWithdraw={onWithdraw}
                   onLogout={onLogout}
                 />
               </>

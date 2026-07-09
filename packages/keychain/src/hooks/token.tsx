@@ -17,6 +17,7 @@ import { constants, getChecksumAddress } from "starknet";
 import { useEffect, useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
 import * as torii from "@dojoengine/torii-wasm";
+import { UsdColorIcon } from "@cartridge/controller-ui";
 
 const CONTRACT_TYPES: torii.ContractType[] = ["ERC20"];
 
@@ -52,12 +53,13 @@ export type Metadata = {
   symbol: string;
   decimals: number;
   address: string;
-  image: string | undefined;
+  image: string | React.ReactNode | undefined;
 };
 
 export type Token = {
   balance: Balance;
   metadata: Metadata;
+  refetch?: () => Promise<unknown>;
 };
 
 export type UseBalanceResponse = {
@@ -229,17 +231,18 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   const credits: Token = useMemo(() => {
     return {
       balance: {
-        amount: Number(creditBalance.balance.value) / 10 ** 6,
-        value: 0,
+        amount: Number(creditBalance.balance.value) / 10 ** 8,
+        value: Number(creditBalance.balance.value) / 10 ** 8,
         change: 0,
       },
       metadata: {
-        name: "Credits",
-        symbol: "Credits",
-        decimals: 6,
+        name: "USD",
+        symbol: "USD",
+        decimals: 8,
         address: "credit",
-        image: "https://static.cartridge.gg/presets/credit/icon.svg",
+        image: <UsdColorIcon size="auto" />,
       },
+      refetch: creditBalance.refetch,
     };
   }, [creditBalance]);
 

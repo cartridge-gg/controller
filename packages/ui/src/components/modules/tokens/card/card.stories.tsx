@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { TokenCard } from "./";
+import { UsdColorIcon } from "@/components/icons";
 
 const meta: Meta<typeof TokenCard> = {
   title: "Modules/Tokens/Card",
@@ -61,6 +62,15 @@ export const Free: Story = {
   args: {
     isFree: true,
     clickable: false,
+  },
+};
+
+export const IconImage: Story = {
+  args: {
+    title: "USD",
+    image: <UsdColorIcon size="auto" />,
+    value: "1.1234",
+    amount: "$1.12",
   },
 };
 

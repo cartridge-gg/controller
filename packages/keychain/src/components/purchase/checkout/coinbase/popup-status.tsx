@@ -8,7 +8,8 @@ import {
   SpinnerIcon,
   TimesIcon,
 } from "@cartridge/controller-ui";
-import { useNavigation, useOnchainPurchaseContext } from "@/context";
+import { useNavigation } from "@/context";
+import { useCoinbaseRail } from "../rails";
 import { CoinbaseOnrampStatus } from "@/utils/api";
 
 interface CoinbasePopupStatusProps {
@@ -24,16 +25,16 @@ export function CoinbasePopupStatus({
   onBack,
   hideHeader,
 }: CoinbasePopupStatusProps = {}) {
-  const { orderStatus, popupClosed, paymentSuccess } =
-    useOnchainPurchaseContext();
+  const { orderStatus, popupClosed, paymentSuccess, onComplete } =
+    useCoinbaseRail();
   const { navigate } = useNavigation();
   const isFailed = orderStatus === CoinbaseOnrampStatus.Failed;
 
   useEffect(() => {
     if (paymentSuccess || orderStatus === CoinbaseOnrampStatus.Completed) {
-      navigate("/purchase/pending", { reset: true });
+      onComplete();
     }
-  }, [paymentSuccess, orderStatus, navigate]);
+  }, [paymentSuccess, orderStatus, onComplete]);
 
   const handleBack = onBack ?? (() => navigate(-1));
 

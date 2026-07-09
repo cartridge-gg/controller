@@ -23,6 +23,7 @@ import {
   CoinflowPaymentStatus,
   PurchaseFulfillmentStatus,
   useCoinflowPaymentQuery,
+  usePurchaseFulfillmentQuery,
 } from "@/utils/api";
 import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent } from "@/types/analytics";
@@ -31,7 +32,7 @@ export function Success() {
   const { starterpackDetails, transactionHash, claimItems } =
     useStarterpackContext();
   const { purchaseItems } = useOnchainPurchaseContext();
-  const { coinflowIntent } = useCreditPurchaseContext();
+  const { coinflowIntent, creditsFulfillment } = useCreditPurchaseContext();
 
   const items = useMemo(() => {
     if (starterpackDetails?.type === "claimed") {
@@ -40,6 +41,16 @@ export function Success() {
 
     return purchaseItems;
   }, [starterpackDetails, claimItems, purchaseItems]);
+
+  if (starterpackDetails?.type === "onchain" && creditsFulfillment) {
+    return (
+      <CreditsPurchaseSuccess
+        items={items}
+        name={starterpackDetails.name}
+        fulfillmentId={creditsFulfillment.id}
+      />
+    );
+  }
 
   if (starterpackDetails?.type === "onchain" && coinflowIntent) {
     return (
@@ -263,6 +274,154 @@ export function CoinflowPurchaseSuccess({
               }
             />
           )}
+        </div>
+        <Button onClick={handlePlay} disabled={!isPurchaseComplete}>
+          Play
+        </Button>
+      </LayoutFooter>
+    </>
+  );
+}
+
+/**
+ * Post-purchase status for the credits rail. The credit debit settled
+ * synchronously in the mutation, so unlike Coinflow there is no payment stage
+ * to confirm — we render it as already succeeded and poll only the
+ * PurchaseFulfillment until the operator-paid onchain issuance confirms.
+ * On terminal failure the backend has already refunded the credits.
+ */
+export function CreditsPurchaseSuccess({
+  items,
+  name,
+  fulfillmentId,
+}: {
+  items: Item[];
+  name: string;
+  fulfillmentId: string;
+}) {
+  const { quantity } = useOnchainPurchaseContext();
+  const { refetchCreditsBalance } = useCreditPurchaseContext();
+  const { isMainnet } = useConnection();
+  const handlePlay = useStarterpackPlayHandler();
+  const quantityText = quantity > 1 ? `(${quantity})` : "";
+
+  const { data, error, isLoading, isFetching, refetch } =
+    usePurchaseFulfillmentQuery(
+      { id: fulfillmentId },
+      {
+        enabled: true,
+        retry: false,
+      },
+    );
+
+  const fulfillment = data?.purchaseFulfillment;
+  const fulfillmentStatus = fulfillment?.status;
+  const transactionHash = fulfillment?.transactionHash ?? undefined;
+
+  const isPurchaseComplete =
+    fulfillmentStatus === PurchaseFulfillmentStatus.Confirmed;
+  const isFulfillmentFailed =
+    fulfillmentStatus === PurchaseFulfillmentStatus.Failed;
+
+  const hasCapturedPurchase = useRef(false);
+
+  useEffect(() => {
+    if (isPurchaseComplete && !hasCapturedPurchase.current) {
+      hasCapturedPurchase.current = true;
+      captureAnalyticsEvent(posthog, "purchase_completed", {
+        method: "credits",
+      });
+    }
+  }, [isPurchaseComplete]);
+
+  // Refresh the credit balance once the fulfillment settles: on success the
+  // debit is final, on failure the backend refunded the credits.
+  const hasRefetchedBalance = useRef(false);
+  useEffect(() => {
+    if (
+      (isPurchaseComplete || isFulfillmentFailed) &&
+      !hasRefetchedBalance.current
+    ) {
+      hasRefetchedBalance.current = true;
+      void refetchCreditsBalance();
+    }
+  }, [isPurchaseComplete, isFulfillmentFailed, refetchCreditsBalance]);
+
+  useEffect(() => {
+    if (
+      isLoading ||
+      isFetching ||
+      error ||
+      isPurchaseComplete ||
+      isFulfillmentFailed
+    ) {
+      return;
+    }
+
+    const pollTimer = window.setTimeout(() => {
+      void refetch();
+    }, 3000);
+
+    return () => window.clearTimeout(pollTimer);
+  }, [
+    error,
+    isFetching,
+    isLoading,
+    isPurchaseComplete,
+    isFulfillmentFailed,
+    fulfillmentStatus,
+    refetch,
+  ]);
+
+  const statusError = useMemo(() => {
+    if (error) {
+      return error instanceof Error
+        ? error
+        : new Error("Unable to load purchase status.");
+    }
+
+    return undefined;
+  }, [error]);
+
+  const fulfillmentStage = getFulfillmentStage(fulfillmentStatus);
+
+  return (
+    <>
+      <HeaderInner
+        title={isPurchaseComplete ? "Purchase Complete" : `Purchasing ${name}`}
+        icon={isPurchaseComplete ? <CheckIcon /> : undefined}
+      />
+      <LayoutContent>
+        <Receiving
+          title={`${isPurchaseComplete ? "You Received" : "Receiving"} ${quantityText}`}
+          items={items}
+          isLoading={false}
+          showPrice={true}
+        />
+      </LayoutContent>
+      <LayoutFooter>
+        {isFulfillmentFailed ? (
+          <ErrorAlert
+            title="Purchase Failure"
+            description={`${
+              fulfillment?.lastError || "Onchain purchase failed."
+            } Your credits have been automatically refunded.`}
+            variant="error"
+          />
+        ) : statusError ? (
+          <ControllerErrorAlert error={statusError} />
+        ) : null}
+        <div className="space-y-2">
+          <ConfirmingTransaction title="Paid with Credits" status="success" />
+          <ConfirmingTransaction
+            title={fulfillmentStage.title}
+            status={fulfillmentStage.status}
+            externalLink={
+              transactionHash
+                ? getExplorer("starknet", transactionHash, isMainnet)?.url
+                : undefined
+            }
+          />
         </div>
         <Button onClick={handlePlay} disabled={!isPurchaseComplete}>
           Play

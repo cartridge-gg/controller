@@ -15,7 +15,7 @@ export type ERC20Metadata = {
   symbol: string;
   decimals: number;
   address: string;
-  image: string | undefined;
+  image: string | React.ReactNode | undefined;
 };
 
 export type Token = {
@@ -49,6 +49,8 @@ export const TokenSelect = ({
     }
   };
 
+  const singleToken = tokens.length <= 1;
+
   return (
     <Select
       {...props}
@@ -56,7 +58,7 @@ export const TokenSelect = ({
       onValueChange={handleChangeToken}
       defaultValue={currentToken.metadata.address}
     >
-      <TokenSelectHeader />
+      <TokenSelectHeader singleToken={singleToken} />
       <SelectContent viewPortClassName="gap-0">
         {tokens.map((token, i) => (
           <TokenSelectRow

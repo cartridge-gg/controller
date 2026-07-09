@@ -5,6 +5,7 @@ import {
   CardListContent,
   CardTitle,
   cn,
+  UsdColorIcon,
   Spinner,
   Thumbnail,
 } from "@cartridge/controller-ui";
@@ -47,7 +48,7 @@ export function Receiving({
           .map((item, index) => {
             const Logo = (
               <Thumbnail
-                icon="https://static.cartridge.gg/presets/credit/icon.svg"
+                icon={<UsdColorIcon size="auto" />}
                 size="lg"
                 rounded
               />
