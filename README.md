@@ -28,6 +28,24 @@ The project consists of several packages in the `packages` directory:
 
 Integration examples live in `examples/` (Next.js, Svelte, Node.js).
 
+## Custom Torii endpoint
+
+Set `toriiUrl` when a game uses a Torii indexer that is not derived from its
+Slot project name:
+
+```ts
+import Controller from "@cartridge/controller";
+
+const controller = new Controller({
+  slot: "my-game-mainnet",
+  toriiUrl: "https://torii.example.com",
+});
+```
+
+An explicit `toriiUrl` takes precedence over `slot`. When `toriiUrl` is omitted,
+Controller retains the legacy Slot-derived endpoint at
+`https://api.cartridge.gg/x/<slot>/torii`.
+
 ## Controller client notifications
 
 The controller emits toast notifications for wallet activity (transactions,
