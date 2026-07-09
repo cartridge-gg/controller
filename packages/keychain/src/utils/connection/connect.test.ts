@@ -13,7 +13,15 @@ import type {
   ConnectReply,
 } from "@cartridge/controller";
 import { ResponseCodes } from "@cartridge/controller";
-import { createConnectUrl, parseConnectParams, connect } from "./connect";
+import { SemVer } from "semver";
+import {
+  createConnectReply,
+  createConnectUrl,
+  parseConnectParams,
+  shouldContinueConnectOnboarding,
+  connect,
+  supportsConnectKeepOpen,
+} from "./connect";
 import { getCallbacks, storeCallbacks } from "./callbacks";
 
 describe("connect utils", () => {
@@ -39,6 +47,42 @@ describe("connect utils", () => {
       const searchParams = new URLSearchParams(url.split("?")[1]);
       expect(searchParams.get("id")).toBe("test-id");
       expect(searchParams.get("signers")).toBe(JSON.stringify(signers));
+    });
+  });
+
+  describe("keepOpen version gate", () => {
+    it("keeps onboarding out of the published 0.13.12 iframe", () => {
+      expect(supportsConnectKeepOpen(new SemVer("0.13.12"), false)).toBe(false);
+      expect(createConnectReply("0xabc", false, false)).toEqual({
+        code: ResponseCodes.SUCCESS,
+        address: "0xabc",
+      });
+      expect(shouldContinueConnectOnboarding(true, false, "/connect")).toBe(
+        false,
+      );
+    });
+
+    it("enables additive keepOpen behavior from 0.13.13 onward", () => {
+      expect(supportsConnectKeepOpen(new SemVer("0.13.13"), false)).toBe(true);
+      expect(supportsConnectKeepOpen(new SemVer("0.14.0-alpha.1"), false)).toBe(
+        true,
+      );
+      expect(createConnectReply("0xabc", true, true)).toEqual({
+        code: ResponseCodes.SUCCESS,
+        address: "0xabc",
+        keepOpen: true,
+      });
+      expect(shouldContinueConnectOnboarding(true, true, "/connect")).toBe(
+        true,
+      );
+      expect(shouldContinueConnectOnboarding(true, true, "/session")).toBe(
+        false,
+      );
+    });
+
+    it("uses current onboarding behavior in standalone mode", () => {
+      expect(supportsConnectKeepOpen(undefined, true)).toBe(true);
+      expect(supportsConnectKeepOpen(undefined, false)).toBe(false);
     });
   });
 
@@ -134,6 +178,39 @@ describe("connect utils", () => {
         code: ResponseCodes.SUCCESS,
         address: "0xabc",
       });
+    });
+
+    it("keeps the Controller 0.13.12 positional connect signature", () => {
+      const navigate = vi.fn();
+      const setRpcUrl = vi.fn();
+      const connectFn = connect({ navigate, setRpcUrl })();
+      const policies = {
+        contracts: {
+          "0x123": {
+            methods: [{ entrypoint: "transfer" }],
+          },
+        },
+      };
+
+      void connectFn(policies, "https://rpc.example.com", ["webauthn"]);
+
+      expect(setRpcUrl).toHaveBeenCalledWith("https://rpc.example.com");
+      const url = vi.mocked(navigate).mock.calls[0][0] as string;
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      expect(searchParams.get("signers")).toBe(JSON.stringify(["webauthn"]));
+    });
+
+    it("keeps the current ConnectOptions object signature", () => {
+      const navigate = vi.fn();
+      const setRpcUrl = vi.fn();
+      const connectFn = connect({ navigate, setRpcUrl })();
+
+      void connectFn({ signupOptions: ["password"] });
+
+      expect(setRpcUrl).not.toHaveBeenCalled();
+      const url = vi.mocked(navigate).mock.calls[0][0] as string;
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      expect(searchParams.get("signers")).toBe(JSON.stringify(["password"]));
     });
   });
 });

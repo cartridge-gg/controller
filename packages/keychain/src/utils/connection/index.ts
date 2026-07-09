@@ -67,6 +67,17 @@ function merkleDropsPath(keys: string[], options?: MerkleDropsRouteOptions) {
   return `/purchase/merkle-drops/${encodedKeys}${query ? `?${query}` : ""}`;
 }
 
+/**
+ * Reload after Penpal has had a chance to serialize and post the RPC reply.
+ * Published Controller 0.13.12 awaits disconnect without catching an iframe
+ * unload rejection, so a synchronous reload prevents its remaining cleanup.
+ */
+export function scheduleKeychainReload(
+  reload: () => void = () => window.location.reload(),
+) {
+  setTimeout(reload, 0);
+}
+
 export function connectToController<
   ParentMethods extends HeadlessConnectParent,
 >({
@@ -165,7 +176,7 @@ export function connectToController<
         // Reload the iframe so the next bootstrap (main.tsx -> Controller.fromStore)
         // runs against cleared storage and lands on a fresh login, matching the
         // internal "Log out" flow (packages/keychain/src/hooks/connection.ts).
-        window.location.reload();
+        scheduleKeychainReload();
       },
       logout: () => async () => {
         // First clear the React state

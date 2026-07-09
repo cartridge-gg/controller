@@ -3,6 +3,11 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context";
+import { isIframe } from "@cartridge/controller-ui/utils";
+import {
+  shouldContinueConnectOnboarding,
+  supportsConnectKeepOpen,
+} from "@/utils/connection/connect";
 
 /**
  * Common hook for parsing route params from URL and managing callbacks
@@ -54,18 +59,34 @@ export function useRouteParams<
  * Hook for handling route completion (returnTo navigation or modal close)
  */
 export function useRouteCompletion() {
-  const { closeModal, isNewControllerRef, setIsNewController } =
-    useConnection();
+  const {
+    closeModal,
+    isNewControllerRef,
+    setIsNewController,
+    controllerVersion,
+  } = useConnection();
   const navigate = useNavigate();
   const { navigate: navigateWithStack } = useNavigation();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo");
+  const canKeepOpen = supportsConnectKeepOpen(controllerVersion, !isIframe());
 
   const handleCompletion = useCallback(() => {
-    if (isNewControllerRef.current && location.pathname !== "/session") {
-      // ignore on SessionProvider
+    const isNewController = isNewControllerRef.current === true;
+    if (isNewController) {
       setIsNewController(false);
+    }
+
+    if (
+      shouldContinueConnectOnboarding(
+        isNewController,
+        canKeepOpen,
+        location.pathname,
+      )
+    ) {
+      // The supporting SDK keeps the iframe visible while onboarding runs.
+      // Ignore on SessionProvider, which owns its own completion flow.
       navigateWithStack(`/welcome?${searchParams.toString()}`, { reset: true });
     } else if (returnTo) {
       navigate(returnTo, { replace: true });
@@ -82,6 +103,7 @@ export function useRouteCompletion() {
     isNewControllerRef,
     setIsNewController,
     location.pathname,
+    canKeepOpen,
   ]);
 
   return handleCompletion;
