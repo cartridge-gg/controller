@@ -3,6 +3,7 @@ import { screen, waitFor } from "@testing-library/react";
 import { ConnectRoute } from "./ConnectRoute";
 import { renderWithProviders } from "@/test/mocks/providers";
 import { ResponseCodes } from "@cartridge/controller";
+import { SemVer } from "semver";
 
 // Mock dependencies
 const mockSafeRedirect = vi.fn();
@@ -46,6 +47,7 @@ const defaultConnection = {
   ageGate: undefined,
   locationGateVerified: false,
   isNewControllerRef: { current: false },
+  controllerVersion: new SemVer("0.13.13"),
 };
 
 const mockUseConnection = vi.fn();
@@ -76,9 +78,14 @@ vi.mock("@/utils/connection/callbacks", () => ({
 }));
 
 const mockParseConnectParams = vi.fn();
-vi.mock("@/utils/connection/connect", () => ({
-  parseConnectParams: (...args: unknown[]) => mockParseConnectParams(...args),
-}));
+vi.mock("@/utils/connection/connect", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/utils/connection/connect")>();
+  return {
+    ...actual,
+    parseConnectParams: (...args: unknown[]) => mockParseConnectParams(...args),
+  };
+});
 
 // Snapshot functionality removed in commit 66db7db5
 // const mockSnapshotLocalStorageToCookie = vi.fn();
@@ -150,6 +157,45 @@ describe("ConnectRoute", () => {
           keepOpen: false,
         });
         expect(mockCleanupCallbacks).toHaveBeenCalledWith("test-id");
+      });
+    });
+
+    it("keeps onboarding visible on first mount for v0.13.13", async () => {
+      mockLocation.search = "?v=0.13.13";
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        controllerVersion: new SemVer("0.13.13"),
+        policies: null,
+        isNewControllerRef: { current: true },
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      await waitFor(() => {
+        expect(mockParams.resolve).toHaveBeenCalledWith({
+          code: ResponseCodes.SUCCESS,
+          address: "0x123456789abcdef",
+          keepOpen: true,
+        });
+      });
+    });
+
+    it("omits keepOpen for a preloaded v0.13.12 controller", async () => {
+      mockLocation.search = "?v=0.13.12";
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        controllerVersion: new SemVer("0.13.12"),
+        policies: null,
+        isNewControllerRef: { current: true },
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      await waitFor(() => {
+        expect(mockParams.resolve).toHaveBeenCalledWith({
+          code: ResponseCodes.SUCCESS,
+          address: "0x123456789abcdef",
+        });
       });
     });
 

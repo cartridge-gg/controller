@@ -29,6 +29,20 @@ export type ControllerError = {
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
+export function normalizeExecuteCompatibility(
+  feeSourceOrLegacyError?: FeeSource | ControllerError,
+  error?: ControllerError,
+): { feeSource?: FeeSource; error?: ControllerError } {
+  if (
+    feeSourceOrLegacyError &&
+    typeof feeSourceOrLegacyError === "object" &&
+    "message" in feeSourceOrLegacyError
+  ) {
+    return { error: error ?? feeSourceOrLegacyError };
+  }
+  return { feeSource: feeSourceOrLegacyError, error };
+}
+
 export interface ExecuteParams {
   id: string;
   transactions: Call[];
@@ -127,15 +141,19 @@ export function execute({
       __?: Abi[],
       ___?: InvocationsDetails,
       sync?: boolean,
-      feeSource?: FeeSource,
+      feeSourceOrLegacyError?: FeeSource | ControllerError,
       error?: ControllerError,
     ): Promise<InvokeFunctionResponse | ConnectError> => {
       const calls = normalizeCalls(transactions);
+      const normalized = normalizeExecuteCompatibility(
+        feeSourceOrLegacyError,
+        error,
+      );
 
       if (sync) {
         return await new Promise((resolve, reject) => {
           const url = createExecuteUrl(toArray(transactions), {
-            error,
+            error: normalized.error,
             resolve,
             reject,
           });
@@ -178,7 +196,7 @@ export function execute({
             const { transaction_hash } = await executeCore(
               origin,
               calls,
-              feeSource,
+              normalized.feeSource,
             );
             return resolve({
               code: ResponseCodes.SUCCESS,

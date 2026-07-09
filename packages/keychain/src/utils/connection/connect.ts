@@ -4,10 +4,51 @@ import {
   ConnectOptions,
   ConnectReply,
   LocationGateOptions,
+  ResponseCodes,
 } from "@cartridge/controller";
 import { SessionPolicies } from "@cartridge/presets";
 import { generateCallbackId, storeCallbacks, getCallbacks } from "./callbacks";
 import { createLocationGateUrl } from "./location-gate";
+import type { SemVer } from "semver";
+import gte from "semver/functions/gte";
+
+export const CONNECT_KEEP_OPEN_MIN_VERSION = "0.13.13";
+
+/**
+ * `keepOpen` was added after the published 0.13.12 SDK. Standalone keychain
+ * flows have no parent SDK and always use the current behavior.
+ */
+export function supportsConnectKeepOpen(
+  controllerVersion: SemVer | undefined,
+  isStandalone: boolean,
+): boolean {
+  return (
+    isStandalone ||
+    (!!controllerVersion &&
+      gte(controllerVersion, CONNECT_KEEP_OPEN_MIN_VERSION))
+  );
+}
+
+/** Only add the response field for SDKs that know how to keep the iframe open. */
+export function createConnectReply(
+  address: string,
+  keepOpen: boolean,
+  includeKeepOpen: boolean,
+): ConnectReply {
+  return {
+    code: ResponseCodes.SUCCESS,
+    address,
+    ...(includeKeepOpen ? { keepOpen } : {}),
+  };
+}
+
+export function shouldContinueConnectOnboarding(
+  isNewController: boolean,
+  canKeepOpen: boolean,
+  pathname: string,
+): boolean {
+  return isNewController && canKeepOpen && pathname !== "/session";
+}
 
 export interface ConnectParams {
   id: string;

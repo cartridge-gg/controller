@@ -4,7 +4,11 @@ import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
-import { parseConnectParams } from "@/utils/connection/connect";
+import {
+  createConnectReply,
+  parseConnectParams,
+  supportsConnectKeepOpen,
+} from "@/utils/connection/connect";
 import { hasConfiguredLocationGate } from "@/utils/location-gate";
 import { createLocationGateUrl } from "@/utils/connection/location-gate";
 import { CreateSession } from "./connect/CreateSession";
@@ -56,6 +60,7 @@ export function ConnectRoute() {
     locationGate,
     locationGateVerified,
     isNewControllerRef,
+    controllerVersion,
   } = useConnection();
   const navigate = useNavigate();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
@@ -87,6 +92,7 @@ export function ConnectRoute() {
 
   // Check if this is standalone mode (not in iframe)
   const isStandalone = useMemo(() => !isIframe(), []);
+  const canKeepOpen = supportsConnectKeepOpen(controllerVersion, isStandalone);
 
   // Get redirect_url from query params for standalone mode
   const redirectUrl = useMemo(() => {
@@ -163,11 +169,13 @@ export function ConnectRoute() {
       }
     }
 
-    params.resolve?.({
-      code: ResponseCodes.SUCCESS,
-      address: controller.address(),
-      keepOpen: isNewControllerRef.current,
-    });
+    params.resolve?.(
+      createConnectReply(
+        controller.address(),
+        isNewControllerRef.current === true,
+        canKeepOpen,
+      ),
+    );
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
@@ -212,6 +220,7 @@ export function ConnectRoute() {
     isStandalone,
     redirectUrl,
     isNewControllerRef,
+    canKeepOpen,
   ]);
 
   const handleSkip = useCallback(async () => {
@@ -227,11 +236,13 @@ export function ConnectRoute() {
       }
     }
 
-    params.resolve?.({
-      code: ResponseCodes.SUCCESS,
-      address: controller.address(),
-      keepOpen: isNewControllerRef.current,
-    });
+    params.resolve?.(
+      createConnectReply(
+        controller.address(),
+        isNewControllerRef.current === true,
+        canKeepOpen,
+      ),
+    );
     if (params.params.id) {
       cleanupCallbacks(params.params.id);
     }
@@ -276,6 +287,7 @@ export function ConnectRoute() {
     isStandalone,
     redirectUrl,
     isNewControllerRef,
+    canKeepOpen,
   ]);
 
   // Handle cases where we can connect immediately (embedded mode only)
@@ -304,11 +316,13 @@ export function ConnectRoute() {
       if (hasRequestedSession) {
         setHasAutoConnected(true);
         clearConnectParams();
-        params.resolve?.({
-          code: ResponseCodes.SUCCESS,
-          address: controller.address(),
-          keepOpen: isNewControllerRef.current,
-        });
+        params.resolve?.(
+          createConnectReply(
+            controller.address(),
+            isNewControllerRef.current === true,
+            canKeepOpen,
+          ),
+        );
 
         if (params.params.id) {
           cleanupCallbacks(params.params.id);
@@ -349,11 +363,13 @@ export function ConnectRoute() {
 
     // if no policies, we can connect immediately
     if (!policies) {
-      params.resolve?.({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address(),
-        keepOpen: isNewControllerRef.current,
-      });
+      params.resolve?.(
+        createConnectReply(
+          controller.address(),
+          isNewControllerRef.current === true,
+          canKeepOpen,
+        ),
+      );
 
       if (params.params.id) {
         cleanupCallbacks(params.params.id);
@@ -377,11 +393,13 @@ export function ConnectRoute() {
               policies,
             });
           }
-          params.resolve?.({
-            code: ResponseCodes.SUCCESS,
-            address: controller.address(),
-            keepOpen: isNewControllerRef.current,
-          });
+          params.resolve?.(
+            createConnectReply(
+              controller.address(),
+              isNewControllerRef.current === true,
+              canKeepOpen,
+            ),
+          );
           if (params.params.id) {
             cleanupCallbacks(params.params.id);
           }
@@ -421,6 +439,7 @@ export function ConnectRoute() {
     locationGateVerified,
     navigate,
     isNewControllerRef,
+    canKeepOpen,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
@@ -457,11 +476,13 @@ export function ConnectRoute() {
           } else {
             await createVerifiedSession({ controller, origin, policies });
           }
-          params?.resolve?.({
-            code: ResponseCodes.SUCCESS,
-            address: controller.address(),
-            keepOpen: isNewControllerRef.current,
-          });
+          params?.resolve?.(
+            createConnectReply(
+              controller.address(),
+              isNewControllerRef.current === true,
+              canKeepOpen,
+            ),
+          );
           if (params?.params.id) {
             cleanupCallbacks(params.params.id);
           }

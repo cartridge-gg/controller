@@ -13,6 +13,7 @@ import {
   ResponseCodes,
   WalletAdapter,
 } from "@cartridge/controller";
+import { isIframe } from "@cartridge/controller-ui/utils";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
 import {
   ControllerQuery,
@@ -38,7 +39,11 @@ import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
-import { parseConnectParams } from "@/utils/connection/connect";
+import {
+  createConnectReply,
+  parseConnectParams,
+  supportsConnectKeepOpen,
+} from "@/utils/connection/connect";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import { safeRedirect } from "@/utils/url-validator";
 import {
@@ -101,6 +106,7 @@ const resolveConnect = async ({
   searchParams,
   missingParamsMessage,
   isNewController,
+  canKeepOpen,
   emitUserToast,
 }: {
   controller: Controller;
@@ -110,6 +116,7 @@ const resolveConnect = async ({
   searchParams: URLSearchParams;
   missingParamsMessage: string;
   isNewController: boolean;
+  canKeepOpen: boolean;
   emitUserToast?: EmitUserToast;
 }) => {
   let currentParams = params;
@@ -133,11 +140,9 @@ const resolveConnect = async ({
   url.search = "";
   window.history.replaceState(null, "", url.toString());
 
-  currentParams.resolve?.({
-    code: ResponseCodes.SUCCESS,
-    address: controller.address(),
-    keepOpen: isNewController,
-  });
+  currentParams.resolve?.(
+    createConnectReply(controller.address(), isNewController, canKeepOpen),
+  );
   if (currentParams.params.id) {
     cleanupCallbacks(currentParams.params.id);
   }
@@ -154,6 +159,7 @@ const createSession = async ({
   closeModal,
   searchParams,
   isNewController,
+  canKeepOpen,
   emitUserToast,
 }: {
   controller: Controller;
@@ -164,6 +170,7 @@ const createSession = async ({
   closeModal?: () => void;
   searchParams: URLSearchParams;
   isNewController: boolean;
+  canKeepOpen: boolean;
   emitUserToast?: EmitUserToast;
 }) => {
   // Handle no policies case - try to resolve connection, fallback to just closing modal
@@ -177,6 +184,7 @@ const createSession = async ({
       missingParamsMessage:
         "No params available for no-policies case, falling back to closeModal",
       isNewController,
+      canKeepOpen,
       emitUserToast,
     });
     return;
@@ -208,11 +216,9 @@ const createSession = async ({
       origin,
       policies,
     });
-    currentParams.resolve?.({
-      code: ResponseCodes.SUCCESS,
-      address: controller.address(),
-      keepOpen: isNewController,
-    });
+    currentParams.resolve?.(
+      createConnectReply(controller.address(), isNewController, canKeepOpen),
+    );
     if (currentParams.params.id) {
       cleanupCallbacks(currentParams.params.id);
     }
@@ -233,6 +239,7 @@ const completePopupConnect = async ({
   closeModal,
   searchParams,
   isNewController,
+  canKeepOpen,
   emitUserToast,
 }: {
   controller: Controller;
@@ -241,6 +248,7 @@ const completePopupConnect = async ({
   closeModal?: () => void;
   searchParams: URLSearchParams;
   isNewController: boolean;
+  canKeepOpen: boolean;
   emitUserToast?: EmitUserToast;
 }) => {
   await resolveConnect({
@@ -252,6 +260,7 @@ const completePopupConnect = async ({
     missingParamsMessage:
       "Params not available after popup auth, falling back to closeModal",
     isNewController,
+    canKeepOpen,
     emitUserToast,
   });
 };
@@ -341,7 +350,9 @@ export function useCreateController({
     locationGateVerified,
     setIsNewController,
     webauthnPopup,
+    controllerVersion,
   } = useConnection();
+  const canKeepOpen = supportsConnectKeepOpen(controllerVersion, !isIframe());
 
   // When location gate is configured and not yet verified, skip auto-session
   // creation and connect resolution. The natural re-render will show LocationGate
@@ -558,6 +569,7 @@ export function useCreateController({
             handleCompletion,
             searchParams,
             isNewController: true,
+            canKeepOpen,
             emitUserToast,
           });
         }
@@ -576,6 +588,7 @@ export function useCreateController({
       params,
       searchParams,
       shouldAutoCreateSession,
+      canKeepOpen,
       emitUserToast,
     ],
   );
@@ -604,6 +617,7 @@ export function useCreateController({
                 handleCompletion,
                 searchParams,
                 isNewController: true,
+                canKeepOpen,
                 emitUserToast,
               });
             }
@@ -740,6 +754,7 @@ export function useCreateController({
       handleCompletion,
       searchParams,
       changeWallet,
+      canKeepOpen,
       emitUserToast,
     ],
   );
@@ -870,6 +885,7 @@ export function useCreateController({
           handleCompletion,
           searchParams,
           isNewController: false,
+          canKeepOpen,
           emitUserToast,
         });
       }
@@ -887,6 +903,7 @@ export function useCreateController({
       params,
       searchParams,
       shouldAutoCreateSession,
+      canKeepOpen,
       emitUserToast,
     ],
   );
@@ -917,6 +934,7 @@ export function useCreateController({
             handleCompletion,
             searchParams,
             isNewController: false,
+            canKeepOpen,
             emitUserToast,
           });
         }
@@ -965,6 +983,7 @@ export function useCreateController({
                 handleCompletion,
                 searchParams,
                 isNewController: false,
+                canKeepOpen,
                 emitUserToast,
               });
             }
@@ -980,6 +999,7 @@ export function useCreateController({
               handleCompletion,
               searchParams,
               isNewController: false,
+              canKeepOpen,
               emitUserToast,
             });
           }
@@ -1110,6 +1130,7 @@ export function useCreateController({
       smsState,
       setWaitingForConfirmation,
       changeWallet,
+      canKeepOpen,
       emitUserToast,
     ],
   );

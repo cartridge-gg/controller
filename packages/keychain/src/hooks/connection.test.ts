@@ -4,6 +4,7 @@ import {
   isNestedIframe,
   isOriginVerified,
   isSameRpcUrl,
+  parseControllerVersion,
   resolvePolicies,
   verifyStandaloneOrigin,
 } from "./connection";
@@ -15,6 +16,20 @@ vi.mock("@cartridge/controller", async () => {
     ...actual,
     getPresetSessionPolicies: vi.fn(() => undefined),
   };
+});
+
+describe("parseControllerVersion", () => {
+  it("validates the initial v query synchronously", () => {
+    expect(parseControllerVersion("0.13.13")?.version).toBe("0.13.13");
+    expect(parseControllerVersion("0.14.0-alpha.1")?.version).toBe(
+      "0.14.0-alpha.1",
+    );
+  });
+
+  it("rejects missing or invalid versions", () => {
+    expect(parseControllerVersion(null)).toBeUndefined();
+    expect(parseControllerVersion("not-semver")).toBeUndefined();
+  });
 });
 
 describe("isOriginVerified", () => {

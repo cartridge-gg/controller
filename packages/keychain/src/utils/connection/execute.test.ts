@@ -3,9 +3,10 @@ import {
   createExecuteUrl,
   parseControllerError,
   execute,
+  normalizeExecuteCompatibility,
   normalizeCalls,
 } from "./execute";
-import { ResponseCodes } from "@cartridge/controller";
+import { FeeSource, ResponseCodes } from "@cartridge/controller";
 import { ErrorCode } from "@cartridge/controller-wasm";
 import { storeCallbacks, cleanupCallbacks } from "./callbacks";
 import { Call } from "starknet";
@@ -39,6 +40,21 @@ const mockController = {
 };
 
 describe("execute utils", () => {
+  it("accepts the published 0.13.12 manual error in position five", () => {
+    const legacyError = {
+      code: ErrorCode.ManualExecutionRequired,
+      message: "manual approval",
+    };
+
+    expect(normalizeExecuteCompatibility(legacyError)).toEqual({
+      error: legacyError,
+    });
+    expect(normalizeExecuteCompatibility(FeeSource.PAYMASTER)).toEqual({
+      feeSource: FeeSource.PAYMASTER,
+      error: undefined,
+    });
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     // @ts-expect-error - Mocking global

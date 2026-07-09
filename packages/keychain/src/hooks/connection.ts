@@ -93,6 +93,17 @@ type ResolvedUrlParams = {
 export const URL_PARAMS_STORAGE_KEY = "keychain.urlParams";
 export const PRESERVE_URL_PARAMS_FLAG = "keychain.preserveOnReload";
 
+export function parseControllerVersion(
+  value?: string | null,
+): SemVer | undefined {
+  if (!value) return undefined;
+  try {
+    return new SemVer(decodeURIComponent(value));
+  } catch {
+    return undefined;
+  }
+}
+
 // Stable fallback so consumers keyed on `configuredChains` identity don't re-run.
 const NO_CONFIGURED_CHAINS: Chain[] = [];
 
@@ -426,7 +437,17 @@ export function useConnectionValue() {
   });
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
-  const [controllerVersion, setControllerVersion] = useState<SemVer>();
+  // Read `v` synchronously so descendant auto-connect effects cannot resolve a
+  // stored controller using legacy behavior before the provider effect runs.
+  const [controllerVersion, setControllerVersion] = useState<
+    SemVer | undefined
+  >(() =>
+    parseControllerVersion(
+      typeof window === "undefined"
+        ? null
+        : new URLSearchParams(window.location.search).get("v"),
+    ),
+  );
   const connectionStateRef = useRef<HeadlessConnectionState>({
     origin,
     chainId,
@@ -902,13 +923,7 @@ export function useConnectionValue() {
   }, [urlParams, verified, configData, isConfigLoading, theme.name]);
 
   useEffect(() => {
-    if (urlParams.version) {
-      const validatedControllerVersion = new SemVer(
-        urlParams.version ?? "0.0.0",
-      );
-
-      setControllerVersion(validatedControllerVersion);
-    }
+    setControllerVersion(parseControllerVersion(urlParams.version));
   }, [urlParams.version]);
 
   // Handle policies configuration
