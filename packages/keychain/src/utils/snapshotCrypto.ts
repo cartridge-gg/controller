@@ -62,9 +62,15 @@ export async function importKey(keyBytes: Uint8Array): Promise<CryptoKey> {
     throw new Error("Invalid key length: expected 32 bytes for AES-256");
   }
 
+  // TS 5.9 models Uint8Array as potentially backed by SharedArrayBuffer,
+  // while WebCrypto only accepts ArrayBuffer-backed input. Copy the bytes into
+  // a dedicated ArrayBuffer so the runtime and type-level contract agree.
+  const rawKey = new ArrayBuffer(keyBytes.byteLength);
+  new Uint8Array(rawKey).set(keyBytes);
+
   return crypto.subtle.importKey(
     "raw",
-    keyBytes,
+    rawKey,
     {
       name: "AES-GCM",
       length: 256,

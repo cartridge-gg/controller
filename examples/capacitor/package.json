@@ -2,6 +2,9 @@
   "name": "cartridge-capacitor-example",
   "version": "0.13.13",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

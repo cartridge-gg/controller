@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { constants, num } from "starknet";
-import { useAccount, useNetwork } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector/controller";
+import { useAccount, useNetwork } from "@starknet-start/react";
+import { controllerConnector } from "./providers/StarknetProvider";
 import { Button, Input } from "@cartridge/controller-ui";
 import {
   ABYSS_REGISTRY_MAINNET,
@@ -12,10 +12,8 @@ import {
 } from "./Profile";
 
 export const Starterpack = () => {
-  const { account, connector } = useAccount();
+  const { address } = useAccount();
   const { chain } = useNetwork();
-
-  const controllerConnector = connector as unknown as ControllerConnector;
 
   const getDefaultStarterpackIds = useCallback(() => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
@@ -96,7 +94,7 @@ export const Starterpack = () => {
     previousChainRef.current = chain;
   }, [chain, getDefaultStarterpackIds]);
 
-  if (!account) {
+  if (!address) {
     return null;
   }
 

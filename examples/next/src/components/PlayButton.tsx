@@ -1,9 +1,7 @@
 "use client";
 
 import { Button } from "@cartridge/controller-ui";
-import ControllerConnector from "@cartridge/connector/controller";
-import { useConnect } from "@starknet-react/core";
-import { useMemo } from "react";
+import { controllerConnector } from "./providers/StarknetProvider";
 
 interface Game {
   name: string;
@@ -25,12 +23,6 @@ const GAMES: Game[] = [
 ];
 
 export const PlayButton = () => {
-  const { connectors } = useConnect();
-  const controllerConnector = useMemo(
-    () => ControllerConnector.fromConnectors(connectors),
-    [connectors],
-  );
-
   const handlePlayGame = async (game: Game) => {
     if (!controllerConnector) {
       console.error("Controller connector not available");

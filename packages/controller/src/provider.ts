@@ -114,7 +114,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           } as UNEXPECTED_ERROR;
         }
 
-        return await this.account.getChainId();
+        return await this.account.provider.getChainId();
 
       case "wallet_deploymentData":
         throw {

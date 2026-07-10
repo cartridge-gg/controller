@@ -1,40 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock starknet-react's InjectedConnector so we can control what super.connect returns.
-vi.mock("@starknet-react/core", () => {
-  type InjectedConnectorOptions = { id: string; name?: string };
-
-  class InjectedConnector {
-    private readonly _options: InjectedConnectorOptions;
-
-    constructor({ options }: { options: InjectedConnectorOptions }) {
-      this._options = options;
-    }
-
-    get id(): string {
-      return this._options.id;
-    }
-
-    get name(): string {
-      return this._options.name ?? this._options.id;
-    }
-
-    // Simulate an edge case where the injected request resolves but returns an
-    // empty/undefined account. Our connector should still return the address
-    // from controller.connect().
-    async connect(): Promise<{ account?: string; chainId?: bigint }> {
-      return { account: undefined, chainId: 1n };
-    }
-
-    async disconnect(): Promise<void> {}
-  }
-
-  // The real module exports both, but ControllerConnector only needs InjectedConnector.
-  class Connector {}
-
-  return { Connector, InjectedConnector };
-});
-
 // Mock controller SDK so ControllerConnector doesn't need a real iframe/keychain.
 vi.mock("@cartridge/controller", () => {
   class ControllerProvider {
@@ -59,7 +24,9 @@ vi.mock("@cartridge/controller", () => {
       return true;
     }
     delegateAccount() {}
-    asWalletStandard() {}
+    asWalletStandard() {
+      return { name: this.name };
+    }
   }
 
   return {
@@ -79,7 +46,7 @@ describe("ControllerConnector", () => {
     delete (globalThis as any).window;
   });
 
-  it("returns the address from controller.connect() even if injected connect has no account", async () => {
+  it("returns the address from controller.connect()", async () => {
     const connector = new ControllerConnector();
 
     const result = await connector.connect();

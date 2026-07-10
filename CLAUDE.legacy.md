@@ -62,7 +62,7 @@ This is a **monorepo** using **pnpm workspaces** and **Turbo** for build orchest
 ### Technology Stack
 
 -   **Frontend**: React 18, TypeScript 5.7, Next.js 15.3, Svelte, TailwindCSS 3.4, Vite 6.0
--   **Blockchain**: StarkNet 8.5.4, starknet.js, @starknet-react/core 5.0.1
+-   **Blockchain**: Starknet.js 10.0.2, Starknet Start React 1.0.8
 -   **Testing**: Vitest 2.1.8, Jest 29, Playwright, Storybook 8.5
 -   **Build**: Turbo, tsup, pnpm workspaces (v10) with catalog for deps
 -   **Authentication**: WebAuthn/Passkeys, Session Tokens, Auth0, Turnkey

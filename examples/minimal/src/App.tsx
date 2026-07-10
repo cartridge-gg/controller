@@ -1,24 +1,30 @@
 import { useEffect, useState } from "react";
-import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
+import { useAccount, useConnect, useDisconnect } from "@starknet-start/react";
 import { controllerConnector } from "./StarknetProvider";
 
 export function App() {
-  const { account } = useAccount();
-  const { connect } = useConnect();
+  const { address } = useAccount();
+  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const [username, setUsername] = useState<string>();
 
   useEffect(() => {
-    if (!account) {
+    if (!address) {
       setUsername(undefined);
       return;
     }
     controllerConnector.controller.username()?.then(setUsername);
-  }, [account]);
+  }, [address]);
 
-  if (!account) {
+  if (!address) {
+    const controllerWallet = connectors.find(
+      (connector) => connector.name === controllerConnector.name,
+    );
     return (
-      <button onClick={() => connect({ connector: controllerConnector })}>
+      <button
+        disabled={!controllerWallet}
+        onClick={() => connect({ connector: controllerWallet })}
+      >
         Connect
       </button>
     );

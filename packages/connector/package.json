@@ -10,6 +10,9 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "sideEffects": false,
   "scripts": {
     "build:deps": "tsup --dts-resolve",
@@ -48,7 +51,7 @@
     "dts": "resolve"
   },
   "peerDependencies": {
-    "@starknet-react/core": "catalog:"
+    "@starknet-start/react": "catalog:"
   },
   "dependencies": {
     "@cartridge/controller": "workspace:*"

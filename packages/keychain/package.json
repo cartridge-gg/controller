@@ -3,6 +3,9 @@
   "version": "0.13.13",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "env-cmd -f .env.dev vite",
     "dev:live": "env-cmd -f .env.live vite",
@@ -56,8 +59,10 @@
     "@icons-pack/react-simple-icons": "^13.8.0",
     "@noble/hashes": "catalog:",
     "@starknet-io/types-js": "catalog:",
-    "@starknet-react/chains": "4.0.1-beta.3",
-    "@starknet-react/core": "4.0.1-beta.4",
+    "@starknet-start/chains": "catalog:",
+    "@starknet-start/explorers": "catalog:",
+    "@starknet-start/providers": "catalog:",
+    "@starknet-start/react": "catalog:",
     "@turnkey/api-key-stamper": "^0.6.3",
     "@turnkey/crypto": "^2.9.0",
     "@turnkey/encoding": "^0.6.0",

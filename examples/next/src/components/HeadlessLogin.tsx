@@ -1,6 +1,6 @@
 "use client";
 
-import { useConnect } from "@starknet-react/core";
+import { useConnect } from "@starknet-start/react";
 import { useState } from "react";
 import { controllerConnector } from "./providers/StarknetProvider";
 
@@ -20,7 +20,7 @@ export function HeadlessLogin({
   onDone?: () => void;
   onError?: () => void;
 }) {
-  const { connectAsync } = useConnect();
+  const { connectAsync, connectors } = useConnect();
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState<AuthMethod | null>(null);
   const [result, setResult] = useState<{
@@ -60,8 +60,11 @@ export function HeadlessLogin({
         throw new Error("Failed to connect");
       }
 
-      // Sync starknet-react state so the header/app reflect the new connection.
-      await connectAsync({ connector: controllerConnector });
+      const wallet = connectors.find(
+        (connector) => connector.name === controllerConnector.name,
+      );
+      if (!wallet) throw new Error("Controller wallet was not discovered");
+      await connectAsync({ connector: wallet });
 
       setResult({
         success: true,
@@ -114,8 +117,11 @@ export function HeadlessLogin({
         throw new Error("Failed to connect");
       }
 
-      // Sync starknet-react state so the header/app reflect the new connection.
-      await connectAsync({ connector: controllerConnector });
+      const wallet = connectors.find(
+        (connector) => connector.name === controllerConnector.name,
+      );
+      if (!wallet) throw new Error("Controller wallet was not discovered");
+      await connectAsync({ connector: wallet });
 
       setResult({
         success: true,

@@ -1,6 +1,9 @@
 {
   "name": "@cartridge/controller-example-minimal",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "version": "0.13.13",
   "type": "module",
   "scripts": {
@@ -13,8 +16,10 @@
   "dependencies": {
     "@cartridge/connector": "workspace:*",
     "@cartridge/controller": "workspace:*",
-    "@starknet-react/chains": "catalog:",
-    "@starknet-react/core": "catalog:",
+    "@starknet-start/chains": "catalog:",
+    "@starknet-start/explorers": "catalog:",
+    "@starknet-start/providers": "catalog:",
+    "@starknet-start/react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "starknet": "catalog:"

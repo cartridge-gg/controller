@@ -49,7 +49,11 @@ export const useSimulateBalanceChanges = (
           tip: 0,
         },
       );
-      return await parseSimulationEvents(results, provider, BigInt(address));
+      return await parseSimulationEvents(
+        results.simulated_transactions,
+        provider,
+        BigInt(address),
+      );
     };
 
     let timeoutId: NodeJS.Timeout;

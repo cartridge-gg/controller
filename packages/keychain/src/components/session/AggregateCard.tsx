@@ -20,7 +20,7 @@ import {
   TooltipTrigger,
 } from "@cartridge/controller-ui";
 import { formatAddress, cn } from "@cartridge/controller-ui/utils";
-import { useExplorer } from "@starknet-react/core";
+import { useExplorer } from "@starknet-start/react";
 import { Link } from "react-router-dom";
 import { constants } from "starknet";
 import { MessageContent } from "./MessageCard";

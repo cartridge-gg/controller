@@ -5,16 +5,17 @@ import {
   useMemo,
   useState,
 } from "react";
-import { mainnet, sepolia } from "@starknet-react/chains";
+import { mainnet, sepolia } from "@starknet-start/chains";
+import { cartridge } from "@starknet-start/explorers";
 import {
-  Connector,
   StarknetConfig,
-  cartridge,
   useAccount,
   useConnect,
-  useInjectedConnectors,
-} from "@starknet-react/core";
-import { CallData, cairo, constants, num, uint256, wallet } from "starknet";
+  useSendTransaction,
+  useSwitchChain,
+  type UseConnectResult,
+} from "@starknet-start/react";
+import { CallData, cairo, constants, num, uint256 } from "starknet";
 import {
   ArgentIcon,
   BraavosIcon,
@@ -75,6 +76,7 @@ type SlotCryptoFundProps = {
 };
 
 type FundingPhase = "idle" | "creating" | "transferring";
+type ExternalConnector = UseConnectResult["connectors"][number];
 
 export function SlotCryptoFund(props: SlotCryptoFundProps) {
   return (
@@ -92,7 +94,9 @@ function SlotCryptoFundInner({
   const { controller, isMainnet } = useConnection();
   const { setOnBackCallback } = useNavigation();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { account: extAccount } = useAccount();
+  const { address: extAddress } = useAccount();
+  const { sendAsync } = useSendTransaction({});
+  const { switchChainAsync } = useSwitchChain({});
 
   useEffect(() => {
     setOnBackCallback(() => onBack);
@@ -158,7 +162,7 @@ function SlotCryptoFundInner({
   }, [selectedToken]);
 
   useEffect(() => {
-    if (!controller || !extAccount || !selectedToken) {
+    if (!controller || !extAddress || !selectedToken) {
       setBalance(null);
       setIsBalanceLoading(false);
       setBalanceError(null);
@@ -170,11 +174,7 @@ function SlotCryptoFundInner({
     setBalance(null);
     setBalanceError(null);
 
-    fetchTokenBalance(
-      controller.provider,
-      selectedToken.address,
-      extAccount.address,
-    )
+    fetchTokenBalance(controller.provider, selectedToken.address, extAddress)
       .then((nextBalance) => {
         if (!cancelled) {
           setBalance(nextBalance);
@@ -194,7 +194,7 @@ function SlotCryptoFundInner({
     return () => {
       cancelled = true;
     };
-  }, [controller, extAccount, selectedToken]);
+  }, [controller, extAddress, selectedToken]);
 
   const amount = useMemo(
     () => parseTokenAmount(amountInput, selectedToken.decimals),
@@ -221,7 +221,7 @@ function SlotCryptoFundInner({
     amount !== undefined && maxAmount !== undefined && amount > maxAmount;
   const canSubmit =
     !!controller &&
-    !!extAccount &&
+    !!extAddress &&
     amount !== undefined &&
     amount > 0n &&
     !hasInsufficientBalance &&
@@ -230,28 +230,22 @@ function SlotCryptoFundInner({
     !isSubmitting;
 
   const onConnect = useCallback(
-    (c: Connector) => {
+    (c: ExternalConnector) => {
       if (!controller) return;
 
       connectAsync({ connector: c })
         .then(async () => {
-          const connectedChain = await c.chainId();
-          if (num.toHex(connectedChain) !== controller.chainId()) {
-            await wallet.switchStarknetChain(
-              window.starknet,
-              controller.chainId(),
-            );
-          }
+          await switchChainAsync({ chainId: controller.chainId() });
         })
         .catch(() => {
           /* user abort */
         });
     },
-    [connectAsync, controller],
+    [connectAsync, controller, switchChainAsync],
   );
 
   const handleSubmit = useCallback(async () => {
-    if (!controller || !extAccount || !amount || amount <= 0n) {
+    if (!controller || !extAddress || !amount || amount <= 0n) {
       return;
     }
 
@@ -267,7 +261,7 @@ function SlotCryptoFundInner({
       });
 
       setPhase("transferring");
-      const { transaction_hash } = await extAccount.execute([
+      const { transaction_hash } = await sendAsync([
         {
           contractAddress: selectedToken.address,
           entrypoint: "transfer",
@@ -292,16 +286,17 @@ function SlotCryptoFundInner({
   }, [
     amount,
     controller,
-    extAccount,
+    extAddress,
     onComplete,
     selectedToken,
     team.id,
     isMainnet,
+    sendAsync,
   ]);
 
   const phaseLabel = getPhaseLabel(phase);
   const walletConnectors = connectors.filter((c) =>
-    ["argentX", "braavos"].includes(c.id),
+    ["argent", "braavos"].some((name) => c.name.toLowerCase().includes(name)),
   );
 
   return (
@@ -380,7 +375,7 @@ function SlotCryptoFundInner({
               </SelectContent>
             </Select>
           </div>
-          {extAccount && (
+          {extAddress && (
             <div className="text-xs text-foreground-400">
               Available:{" "}
               {isBalanceLoading
@@ -435,20 +430,20 @@ function SlotCryptoFundInner({
             description={getHumanReadableError(error)}
           />
         )}
-        {!extAccount ? (
+        {!extAddress ? (
           isConnecting ? (
             <Button isLoading />
           ) : walletConnectors.length > 0 ? (
             <div className="flex gap-3">
               {walletConnectors.map((c) => (
                 <Button
-                  key={c.id}
+                  key={c.name}
                   className="flex-1"
                   onClick={() => onConnect(c)}
                 >
-                  {c.id === "argentX" ? (
+                  {c.name.toLowerCase().includes("argent") ? (
                     <ArgentIcon size="sm" />
-                  ) : c.id === "braavos" ? (
+                  ) : c.name.toLowerCase().includes("braavos") ? (
                     <BraavosIcon size="sm" />
                   ) : null}
                   {c.name}
@@ -477,7 +472,6 @@ function SlotCryptoFundInner({
 }
 
 function ExternalWalletProvider({ children }: PropsWithChildren) {
-  const { connectors } = useInjectedConnectors({});
   const { controller } = useConnection();
   const defaultChainId = useMemo(
     () => num.toBigInt(controller?.chainId() || 0),
@@ -493,7 +487,6 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
       chains={[sepolia, mainnet]}
       defaultChainId={defaultChainId}
       provider={() => controller.provider}
-      connectors={connectors}
       explorer={cartridge}
     >
       {children}

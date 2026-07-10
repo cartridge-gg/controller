@@ -2,36 +2,46 @@ import ControllerProvider, {
   ConnectOptions,
   ControllerOptions,
 } from "@cartridge/controller";
-import { Connector, InjectedConnector } from "@starknet-react/core";
+import type { UseConnectResult } from "@starknet-start/react";
 
-export default class ControllerConnector extends InjectedConnector {
+type StarknetStartConnector = UseConnectResult["connectors"][number];
+
+export default class ControllerConnector {
+  private static current?: ControllerConnector;
+
   public controller: ControllerProvider;
 
   constructor(options: ControllerOptions = {}) {
-    let controller: ControllerProvider;
-
-    if (typeof window !== "undefined" && (window as any).starknet_controller) {
+    const controllerWindow =
+      typeof window === "undefined"
+        ? undefined
+        : (window as unknown as {
+            starknet_controller?: ControllerProvider;
+          });
+    if (controllerWindow?.starknet_controller) {
       console.warn(
         "ControllerConnector was instantiated multiple times. " +
           "Reusing existing controller to prevent errors. " +
           "To fix, create the connector at the module level instead of inside a React component.",
       );
-      controller = (window as any).starknet_controller;
+      this.controller = controllerWindow.starknet_controller;
     } else {
-      controller = new ControllerProvider(options);
+      this.controller = new ControllerProvider(options);
     }
 
-    super({ options: { id: controller.id, name: controller.name } });
-    this.controller = controller;
+    ControllerConnector.current = this;
+  }
+
+  get id() {
+    return this.controller.id;
+  }
+
+  get name() {
+    return this.controller.name;
   }
 
   async disconnect() {
     await this.controller.disconnect();
-    try {
-      await super.disconnect();
-    } catch {
-      // Best-effort: starknet-react may call disconnect even when the injected wallet isn't present.
-    }
   }
 
   username() {
@@ -66,26 +76,29 @@ export default class ControllerConnector extends InjectedConnector {
       throw new Error("Failed to connect controller");
     }
 
-    // Ensure the injected wallet instance used by starknet-react (window.starknet_controller)
-    // always points at the same ControllerProvider instance this connector wraps.
-    if (typeof window !== "undefined") {
-      (window as any).starknet_controller = this.controller;
-    }
-
-    const data = await super.connect({ chainIdHint });
-
-    // `@starknet-react/core` updates its state from the `account` returned here.
-    // Use the authoritative address from `controller.connect()` to avoid edge cases
-    // where the injected wallet request returns an empty/undefined account.
-    return { ...data, account: account.address };
+    return { account: account.address, chainId: chainIdHint };
   }
 
-  static fromConnectors(connectors: Connector[]): ControllerConnector {
-    const connector = connectors.find((c) => c.id === "controller");
+  static walletFromConnectors(
+    connectors: StarknetStartConnector[],
+  ): StarknetStartConnector {
+    const connector = connectors.find(
+      (candidate) => candidate.name === "Controller",
+    );
     if (!connector) {
       throw new Error("Controller connector not found");
     }
-    return connector as ControllerConnector;
+    return connector;
+  }
+
+  static fromConnectors(
+    connectors: StarknetStartConnector[],
+  ): ControllerConnector {
+    ControllerConnector.walletFromConnectors(connectors);
+    if (!ControllerConnector.current) {
+      throw new Error("ControllerConnector has not been instantiated");
+    }
+    return ControllerConnector.current;
   }
 
   asWalletStandard() {

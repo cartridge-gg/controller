@@ -1,21 +1,21 @@
 import { PropsWithChildren, useCallback, useState } from "react";
-import { mainnet, sepolia } from "@starknet-react/chains";
+import { mainnet, sepolia } from "@starknet-start/chains";
+import { cartridge } from "@starknet-start/explorers";
 import {
-  Connector,
   StarknetConfig,
   useAccount,
   useConnect,
-  useInjectedConnectors,
-  cartridge,
-} from "@starknet-react/core";
+  useProvider,
+  useSendTransaction,
+  useSwitchChain,
+  type UseConnectResult,
+} from "@starknet-start/react";
 import {
   CallData,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
   addAddressPadding,
   cairo,
-  num,
-  wallet,
 } from "starknet";
 import {
   LayoutContent,
@@ -40,6 +40,8 @@ type DepositProps = {
   onComplete?: (deployHash?: string) => void;
 };
 
+type ExternalConnector = UseConnectResult["connectors"][number];
+
 export function Deposit(innerProps: DepositProps) {
   return (
     <ExternalWalletProvider>
@@ -51,7 +53,10 @@ export function Deposit(innerProps: DepositProps) {
 function DepositInner({ onComplete }: DepositProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller } = useConnection();
-  const { account: extAccount } = useAccount();
+  const { address: extAddress } = useAccount();
+  const { provider } = useProvider();
+  const { sendAsync } = useSendTransaction({});
+  const { switchChainAsync } = useSwitchChain({});
   const { token: feeToken } = useFeeToken();
   const { toast } = useToast();
 
@@ -74,18 +79,12 @@ function DepositInner({ onComplete }: DepositProps) {
   );
 
   const onConnect = useCallback(
-    (c: Connector) => {
+    (c: ExternalConnector) => {
       if (!controller) return;
 
       connectAsync({ connector: c })
         .then(async () => {
-          const connectedChain = await c.chainId();
-          if (num.toHex(connectedChain) !== controller.chainId()) {
-            await wallet.switchStarknetChain(
-              window.starknet,
-              controller.chainId(),
-            );
-          }
+          await switchChainAsync({ chainId: controller.chainId() });
 
           setState("fund");
         })
@@ -93,11 +92,11 @@ function DepositInner({ onComplete }: DepositProps) {
           /* user abort */
         });
     },
-    [connectAsync, controller],
+    [connectAsync, controller, switchChainAsync],
   );
 
   const onFund = useCallback(async () => {
-    if (!extAccount) {
+    if (!extAddress) {
       throw new Error("External account is not connected");
     }
 
@@ -125,8 +124,8 @@ function DepositInner({ onComplete }: DepositProps) {
           }),
         },
       ];
-      const res = await extAccount.execute(calls);
-      await extAccount.waitForTransaction(res.transaction_hash, {
+      const res = await sendAsync(calls);
+      await provider.waitForTransaction(res.transaction_hash, {
         retryInterval: 1000,
         successStates: [
           TransactionExecutionStatus.SUCCEEDED,
@@ -140,7 +139,15 @@ function DepositInner({ onComplete }: DepositProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [feeToken, extAccount, controller, tokenAmount, onComplete]);
+  }, [
+    feeToken,
+    extAddress,
+    controller,
+    tokenAmount,
+    onComplete,
+    provider,
+    sendAsync,
+  ]);
 
   const onCopy = useCallback(() => {
     if (!controller) return;
@@ -190,22 +197,26 @@ function DepositInner({ onComplete }: DepositProps) {
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-full flex gap-4">
                     {connectors
-                      .filter((c) => ["argentX", "braavos"].includes(c.id))
+                      .filter((c) =>
+                        ["argent", "braavos"].some((name) =>
+                          c.name.toLowerCase().includes(name),
+                        ),
+                      )
                       .map((c) => (
                         <Button
-                          key={c.id}
+                          key={c.name}
                           onClick={() => onConnect(c)}
                           className="flex-1"
                         >
                           {(() => {
-                            switch (c.id) {
-                              case "argentX":
-                                return <ArgentIcon size="sm" />;
-                              case "braavos":
-                                return <BraavosIcon size="sm" />;
-                              default:
-                                return null;
+                            const name = c.name.toLowerCase();
+                            if (name.includes("argent")) {
+                              return <ArgentIcon size="sm" />;
                             }
+                            if (name.includes("braavos")) {
+                              return <BraavosIcon size="sm" />;
+                            }
+                            return null;
                           })()}
                           {c.name}
                         </Button>
@@ -240,7 +251,6 @@ function DepositInner({ onComplete }: DepositProps) {
 }
 
 function ExternalWalletProvider({ children }: PropsWithChildren) {
-  const { connectors } = useInjectedConnectors({});
   const { controller } = useConnection();
 
   if (!controller) {
@@ -251,7 +261,6 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
     <StarknetConfig
       chains={[sepolia, mainnet]}
       provider={() => controller.provider}
-      connectors={connectors}
       explorer={cartridge}
     >
       {children}
@@ -266,10 +275,3 @@ const getHumanReadableError = (error: Error): string => {
   }
   return message;
 };
-
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    starknet: any;
-  }
-}

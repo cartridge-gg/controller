@@ -34,6 +34,9 @@
     "test:ci": "pnpm keychain test:ci --coverage && pnpm controller test && pnpm connector test:ci && pnpm ui test:ci",
     "test:storybook": "pnpm turbo build:deps test:storybook",
     "test:storybook:update": "pnpm turbo build:deps test:storybook:update",
+    "compat:keychain:prepare": "node compat/keychain-browser/build-fixtures.mjs",
+    "compat:keychain:test": "pnpm --filter @cartridge/controller-example-next exec playwright test --config ../../compat/keychain-browser/playwright.config.ts",
+    "compat:keychain": "pnpm compat:keychain:prepare && pnpm compat:keychain:test",
     "check:regression": "pnpm ./scripts/check_regression.sh",
     "preview": "turbo build:deps preview",
     "prepare": "husky"
@@ -62,9 +65,12 @@
       "@dojoengine/core": "catalog:",
       "@dojoengine/torii-wasm": "catalog:",
       "@dojoengine/sdk": "catalog:",
-      "@starknet-react/core": "catalog:",
-      "@starknet-react/chains": "catalog:",
-      "@starknet-io/types-js": "catalog:"
+      "@starknet-start/chains": "catalog:",
+      "@starknet-start/explorers": "catalog:",
+      "@starknet-start/providers": "catalog:",
+      "@starknet-start/react": "catalog:",
+      "@starknet-io/types-js": "catalog:",
+      "starknet": "10.0.2"
     }
   },
   "files": [

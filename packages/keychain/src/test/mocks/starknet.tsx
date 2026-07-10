@@ -1,10 +1,8 @@
 import { ReactNode } from "react";
-import {
-  StarknetConfig,
-  jsonRpcProvider,
-  cartridge,
-} from "@starknet-react/core";
-import { sepolia, mainnet } from "@starknet-react/chains";
+import { StarknetConfig } from "@starknet-start/react";
+import { sepolia, mainnet } from "@starknet-start/chains";
+import { cartridge } from "@starknet-start/explorers";
+import { jsonRpcProvider } from "@starknet-start/providers";
 
 const defaultConfig = {
   defaultChainId: BigInt(1),

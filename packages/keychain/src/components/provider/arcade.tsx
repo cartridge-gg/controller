@@ -233,9 +233,9 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   }, [initialized, handleMarketplaceEntities]);
 
   const marketplaceAddress = useMemo<string | undefined>(() => {
-    return provider?.manifest.contracts.find((c: { tag: string }) =>
+    return (provider?.manifest.contracts ?? []).find((c: { tag: string }) =>
       c.tag?.includes("Marketplace"),
-    )?.address as string;
+    )?.address;
   }, [provider?.manifest.contracts]);
 
   return (

@@ -404,7 +404,7 @@ export function isSameRpcUrl(a: string, b: string): boolean {
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
-  const parentRef = useRef<ParentMethods>();
+  const parentRef = useRef<ParentMethods | undefined>(undefined);
   const [origin, setOrigin] = useState<string | undefined>(undefined);
   const [rpcUrl, setRpcUrl] = useState<string>(
     import.meta.env.VITE_RPC_MAINNET,
@@ -427,8 +427,8 @@ export function useConnectionValue() {
   const [configData, setConfigData] = useState<Record<string, unknown> | null>(
     null,
   );
-  const locationGateRef = useRef<LocationGateOptions | undefined>();
-  const ageGateRef = useRef<AgeGateOptions | undefined>();
+  const locationGateRef = useRef<LocationGateOptions | undefined>(undefined);
+  const ageGateRef = useRef<AgeGateOptions | undefined>(undefined);
   const [locationGateVerified, setLocationGateVerified] =
     useState<boolean>(false);
   const [theme, setTheme] = useState<VerifiableControllerTheme>({

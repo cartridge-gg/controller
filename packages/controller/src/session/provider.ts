@@ -6,6 +6,11 @@ import {
 } from "@cartridge/controller-wasm";
 import { loadConfig, SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
+import {
+  StarknetInjectedWallet,
+  type WalletWithStarknetFeatures,
+} from "@starknet-io/get-starknet-core";
+import { registerWallet } from "@wallet-standard/wallet";
 import { encode } from "starknet";
 import { API_URL, KEYCHAIN_URL, REDIRECT_QUERY_NAME } from "../constants";
 import { parsePolicies, ParsedSessionPolicies } from "../policies";
@@ -107,7 +112,43 @@ export default class SessionProvider extends BaseProvider {
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller_session = this;
+      registerWallet(this.asWalletStandard());
     }
+  }
+
+  asWalletStandard(): WalletWithStarknetFeatures {
+    const provider = this;
+    const inner = new StarknetInjectedWallet(provider);
+
+    return {
+      get version() {
+        return inner.version;
+      },
+      get name() {
+        return inner.name;
+      },
+      get icon() {
+        return inner.icon;
+      },
+      get chains() {
+        return inner.chains;
+      },
+      get accounts() {
+        return inner.accounts;
+      },
+      get features() {
+        return {
+          ...inner.features,
+          "standard:disconnect": {
+            version: "1.0.0" as const,
+            disconnect: async () => {
+              await inner.features["standard:disconnect"].disconnect();
+              await provider.disconnect();
+            },
+          },
+        };
+      },
+    };
   }
 
   private _setSigningKeys(): void {

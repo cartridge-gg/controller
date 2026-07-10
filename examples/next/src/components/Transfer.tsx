@@ -1,42 +1,46 @@
 "use client";
 
 import { Button } from "@cartridge/controller-ui";
-import { useAccount, useNetwork } from "@starknet-react/core";
+import {
+  useAccount,
+  useNetwork,
+  useSendTransaction,
+} from "@starknet-start/react";
 import { useCallback, useState } from "react";
 import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 
 export const Transfer = () => {
   const [submitted, setSubmitted] = useState<boolean>(false);
-  const { account } = useAccount();
+  const { address } = useAccount();
+  const { sendAsync } = useSendTransaction({});
   const { chain } = useNetwork();
   const [txnHash, setTxnHash] = useState<string>();
   const [network, setNetwork] = useState<string>();
 
   const execute = useCallback(
     async (amount: string) => {
-      if (!account) {
+      if (!address) {
         return;
       }
       setSubmitted(true);
       setTxnHash(undefined);
 
-      account
-        .execute([
-          ...(amount != "0x0"
-            ? [
-                {
-                  contractAddress: STRK_CONTRACT_ADDRESS,
-                  entrypoint: "approve",
-                  calldata: [account?.address, amount, "0x0"],
-                },
-              ]
-            : []),
-          {
-            contractAddress: STRK_CONTRACT_ADDRESS,
-            entrypoint: "transfer",
-            calldata: [account?.address, amount, "0x0"],
-          },
-        ])
+      sendAsync([
+        ...(amount != "0x0"
+          ? [
+              {
+                contractAddress: STRK_CONTRACT_ADDRESS,
+                entrypoint: "approve",
+                calldata: [address, amount, "0x0"],
+              },
+            ]
+          : []),
+        {
+          contractAddress: STRK_CONTRACT_ADDRESS,
+          entrypoint: "transfer",
+          calldata: [address, amount, "0x0"],
+        },
+      ])
         .then(({ transaction_hash }) => {
           setTxnHash(transaction_hash);
           setNetwork(chain.network);
@@ -44,10 +48,10 @@ export const Transfer = () => {
         .catch((e) => console.error(e))
         .finally(() => setSubmitted(false));
     },
-    [account, chain],
+    [address, chain, sendAsync],
   );
 
-  if (!account) {
+  if (!address) {
     return null;
   }
 

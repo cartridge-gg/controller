@@ -1,4 +1,4 @@
-import { useContract } from "@starknet-react/core";
+import { useContract } from "@starknet-start/react";
 import { Abi } from "starknet";
 
 import CounterAbi from "abi/counter.json";

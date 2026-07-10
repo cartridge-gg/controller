@@ -40,7 +40,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SendCollectibleDrawer } from "./send/collectible-drawer";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { useExplorer } from "@starknet-react/core";
+import { useExplorer } from "@starknet-start/react";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { OrderModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
@@ -163,9 +163,12 @@ export function CollectibleAsset() {
       if (!contractAddress || !asset || !selfOrders) return;
       setLoading(true);
       try {
-        const marketplaceAddress: string = provider.manifest.contracts.find(
+        const marketplaceAddress = (provider.manifest.contracts ?? []).find(
           (c: { tag: string }) => c.tag?.includes("Marketplace"),
         )?.address;
+        if (!marketplaceAddress) {
+          throw new Error("Marketplace contract not found in manifest");
+        }
         const orderIds =
           orderId === undefined
             ? selfOrders.map((order) => order.id)

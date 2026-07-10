@@ -1,0 +1,41 @@
+name: Hosted keychain browser compatibility
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-contract-matrix:
+    name: Controller 0.13.12+ browser contract matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+          run_install: |
+            - args: [--frozen-lockfile]
+      - name: Install Chromium
+        run:
+          pnpm --filter @cartridge/controller-example-next exec playwright
+          install --with-deps chromium
+      - name: Run hosted-keychain browser contract matrix
+        run: pnpm compat:keychain
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: keychain-compatibility-playwright-report
+          path: playwright-report/
+          retention-days: 30
