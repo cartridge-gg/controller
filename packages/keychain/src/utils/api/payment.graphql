@@ -258,6 +258,84 @@ fragment CoinbaseOnrampLimitsFields on CoinbaseOnrampLimits {
   }
 }
 
+# ---------------------------------------------------------------------------
+# Coinflow payouts (off-ramp / withdrawals)
+# ---------------------------------------------------------------------------
+# Every op takes `isMainnet` (a top-level arg on the status query, an `input`
+# field on everything else); the backend defaults to sandbox when it is absent
+# or false. See hooks/payments/coinflow-withdraw.ts.
+
+query CoinflowWithdrawStatus($isMainnet: Boolean) {
+  coinflowWithdrawStatus(isMainnet: $isMainnet) {
+    kycStatus
+    verificationLink
+    destinations {
+      ...CoinflowDestinationFields
+    }
+    minCents
+    maxCents
+    activeWithdrawalId
+  }
+}
+
+mutation CreateCoinflowKYC($input: CreateCoinflowKYCInput) {
+  createCoinflowKYC(input: $input) {
+    status
+    verificationLink
+  }
+}
+
+mutation CreateCoinflowBankAccount($input: CreateCoinflowBankAccountInput!) {
+  createCoinflowBankAccount(input: $input) {
+    ...CoinflowDestinationFields
+  }
+}
+
+mutation DeleteCoinflowDestination($input: DeleteCoinflowDestinationInput!) {
+  deleteCoinflowDestination(input: $input)
+}
+
+query CoinflowWithdrawQuote($input: CoinflowWithdrawQuoteInput!) {
+  coinflowWithdrawQuote(input: $input) {
+    amountCents
+    feeCents
+    netCents
+    remainingLimitCents
+    eta
+  }
+}
+
+mutation CreateCoinflowWithdrawal($input: CreateCoinflowWithdrawalInput!) {
+  createCoinflowWithdrawal(input: $input) {
+    ...CoinflowWithdrawalFields
+  }
+}
+
+query CoinflowWithdrawal($id: ID!) {
+  coinflowWithdrawal(id: $id) {
+    ...CoinflowWithdrawalFields
+  }
+}
+
+fragment CoinflowDestinationFields on CoinflowDestination {
+  type
+  token
+  display
+  supportedSpeeds
+}
+
+fragment CoinflowWithdrawalFields on CoinflowWithdrawal {
+  id
+  status
+  amountCents
+  feeCents
+  netCents
+  method
+  destinationDisplay
+  failureCode
+  failureReason
+}
+
 fragment CryptoPaymentFields on CryptoPayment {
   id
   tokenAmount
