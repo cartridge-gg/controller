@@ -51,6 +51,9 @@ query CreditsHistory($username: String!, $first: Int, $after: Cursor) {
           transactionHash
           comment
           createdAt
+          coinflowPayout {
+            ...CoinflowWithdrawalFields
+          }
         }
       }
     }
