@@ -1,10 +1,6 @@
-import {
-  ArrowFromLineIcon,
-  Drawer,
-  DrawerContent,
-  SpinnerIcon,
-} from "@cartridge/controller-ui";
+import { useCoinflowIsMainnet } from "@/hooks/payments/coinflow-withdraw";
 import { useWithdrawContext } from "./provider";
+import { OverviewDrawer } from "./OverviewDrawer";
 
 interface WithdrawCreditsProps {
   isOpen: boolean;
@@ -12,25 +8,41 @@ interface WithdrawCreditsProps {
 }
 
 /**
- * Step orchestrator for the withdraw (off-ramp) flow — mirror of
- * DepositCredits. Each step drawer will render with
- * `isOpen={isOpen && step === "..."}` so transitions are pure state changes.
- * The per-step drawers (ConfirmIdentity, WithdrawTo/AddBank, Amount, Confirm,
- * status) land in later steps of the plan; this shell renders a single empty
- * drawer while the flow is being built out.
+ * Orchestrator for the withdraw (off-ramp) flow. One drawer: the overview,
+ * which reveals the amount selection in place once the user clicks WITHDRAW.
+ * The verification/KYC and bank-onboarding gates (plan steps 4–5) run between
+ * the WITHDRAW click and amount mode; until they land, WITHDRAW goes straight
+ * to the amount selection so the flow is testable behind the flag.
  */
 export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
-  const { statusLoading } = useWithdrawContext();
+  const {
+    step,
+    status,
+    statusLoading,
+    statusError,
+    beginWithdraw,
+    setCredits,
+  } = useWithdrawContext();
+
+  const { isCoinflowSandbox } = useCoinflowIsMainnet();
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-      <DrawerContent title="Withdraw" icon={<ArrowFromLineIcon variant="up" />}>
-        {statusLoading && (
-          <div className="flex items-center justify-center py-8">
-            <SpinnerIcon className="animate-spin text-foreground-300" />
-          </div>
-        )}
-      </DrawerContent>
-    </Drawer>
+    <OverviewDrawer
+      isOpen={isOpen}
+      onClose={onClose}
+      onWithdraw={beginWithdraw}
+      minCredits={status?.minCredits}
+      maxCredits={status?.maxCredits}
+      withdrawableCredits={status?.withdrawableCredits}
+      isLoading={statusLoading}
+      error={statusError}
+      sandbox={isCoinflowSandbox}
+      amountMode={step !== "overview"}
+      onContinue={(credits) => {
+        // Whole credits, ready for the quote/withdrawal inputs. Plan step 6
+        // fetches the quote here and advances to confirm.
+        setCredits(credits);
+      }}
+    />
   );
 }

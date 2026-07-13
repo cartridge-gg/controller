@@ -142,6 +142,10 @@ vi.mock("@/components/credits/provider", () => ({
   CreditsProvider: ({ children }: PropsWithChildren) => <>{children}</>,
 }));
 
+vi.mock("@/components/withdraw/provider", () => ({
+  WithdrawProvider: ({ children }: PropsWithChildren) => <>{children}</>,
+}));
+
 vi.mock("@cartridge/arcade/marketplace/react", () => ({
   MarketplaceClientProvider: ({ children }: PropsWithChildren) => (
     <>{children}</>

@@ -272,8 +272,9 @@ query CoinflowWithdrawStatus($isMainnet: Boolean) {
     destinations {
       ...CoinflowDestinationFields
     }
-    minCents
-    maxCents
+    minCredits
+    maxCredits
+    withdrawableCredits
     activeWithdrawalId
   }
 }

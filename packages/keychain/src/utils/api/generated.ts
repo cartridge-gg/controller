@@ -1479,7 +1479,7 @@ export type CoinflowStarterpackQuoteInput = {
 
 export type CoinflowWithdrawQuote = {
   __typename?: "CoinflowWithdrawQuote";
-  /** Gross amount requested (echoed back), in USD cents. */
+  /** Gross amount requested, in USD cents (the requested credits converted to cents). */
   amountCents: Scalars["Int"];
   /** Human-readable ETA for this speed, if Coinflow reports one. */
   eta?: Maybe<Scalars["String"]>;
@@ -1492,8 +1492,12 @@ export type CoinflowWithdrawQuote = {
 };
 
 export type CoinflowWithdrawQuoteInput = {
-  /** Gross amount to withdraw in USD cents (credits debited). */
-  amountCents: Scalars["Int"];
+  /**
+   * Gross amount to withdraw, in whole account credits (no decimals). 1 credit = $0.01,
+   * so 1000 credits = $10. The backend converts credits → cents once before quoting; all
+   * amounts in the response are the resulting cents.
+   */
+  credits: Scalars["Int"];
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   /** Delivery speed; must be one of the destination's supportedSpeeds. */
   method: CoinflowPayoutSpeed;
@@ -1508,12 +1512,17 @@ export type CoinflowWithdrawStatus = {
   /** Live linked destinations (empty until the user links one). */
   destinations: Array<CoinflowDestination>;
   kycStatus: CoinflowKycStatus;
-  /** Maximum withdrawal in USD cents right now (hard cap clamped by credits balance). */
-  maxCents: Scalars["Int"];
-  /** Minimum withdrawal in USD cents. */
-  minCents: Scalars["Int"];
+  /**
+   * Maximum withdrawal in whole credits: the fixed per-withdrawal ceiling from Coinflow,
+   * NOT trimmed to the balance. Clamp against withdrawableCredits client-side.
+   */
+  maxCredits: Scalars["Int"];
+  /** Minimum withdrawal in whole credits (1 credit = $0.01). */
+  minCredits: Scalars["Int"];
   /** Coinflow-hosted link to complete/refresh KYC, when verification is required. */
   verificationLink?: Maybe<Scalars["String"]>;
+  /** The user's current withdrawable balance, in whole credits. */
+  withdrawableCredits: Scalars["Int"];
 };
 
 export type CoinflowWithdrawal = {
@@ -1811,8 +1820,11 @@ export type CreateCoinflowStarterpackIntentInput = {
 };
 
 export type CreateCoinflowWithdrawalInput = {
-  /** Gross amount to withdraw in USD cents (credits debited). */
-  amountCents: Scalars["Int"];
+  /**
+   * Gross amount to withdraw, in whole account credits (no decimals). 1 credit = $0.01,
+   * so 1000 credits = $10. The backend converts credits → cents once before initiating.
+   */
+  credits: Scalars["Int"];
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   method: CoinflowPayoutSpeed;
   /** Destination token to pay out to. */
@@ -8237,8 +8249,9 @@ export type CoinflowWithdrawStatusQuery = {
     __typename?: "CoinflowWithdrawStatus";
     kycStatus: CoinflowKycStatus;
     verificationLink?: string | null;
-    minCents: number;
-    maxCents: number;
+    minCredits: number;
+    maxCredits: number;
+    withdrawableCredits: number;
     activeWithdrawalId?: string | null;
     destinations: Array<{
       __typename?: "CoinflowDestination";
@@ -9580,8 +9593,9 @@ export const CoinflowWithdrawStatusDocument = `
     destinations {
       ...CoinflowDestinationFields
     }
-    minCents
-    maxCents
+    minCredits
+    maxCredits
+    withdrawableCredits
     activeWithdrawalId
   }
 }
