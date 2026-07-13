@@ -20,12 +20,15 @@ export type CoinflowWithdrawStatus =
   CoinflowWithdrawStatusQuery["coinflowWithdrawStatus"];
 
 /**
- * Flow steps, derived from live data (mirrors DepositCredits' derived step) —
- * never a manually-advanced counter. A returning, fully-onboarded user lands
- * on "amount" automatically; a mid-flow KYC failure demotes the step back to
- * "onboarding-kyc". "confirm"/"status" progressions land with their drawers.
+ * Flow steps. "overview" (the Withdraw Funds summary drawer) shows first on
+ * every open; past it the step is derived from live data (mirrors
+ * DepositCredits' derived step) — never a manually-advanced counter. A
+ * returning, fully-onboarded user lands on "amount" automatically; a mid-flow
+ * KYC failure demotes the step back to "onboarding-kyc". "confirm"/"status"
+ * progressions land with their drawers.
  */
 export type WithdrawStep =
+  | "overview"
   | "onboarding-kyc"
   | "onboarding-bank"
   | "amount"
@@ -46,9 +49,24 @@ export type WithdrawContextValue = {
   withdrawHidden: boolean;
   withdrawDisabled: boolean;
   step: WithdrawStep;
+  /**
+   * Advances past the overview drawer into the flow proper (the WITHDRAW
+   * button). Verification/KYC/bank gates run between here and the amount
+   * step once their drawers land (plan steps 4–5).
+   */
+  beginWithdraw: () => void;
   /** Live withdrawal status; undefined until the query resolves. */
   status?: CoinflowWithdrawStatus;
   statusLoading: boolean;
+  /** Set when the status query failed — the flow can't proceed without it. */
+  statusError: Error | null;
+  /**
+   * Gross amount picked on the amount step, in whole account credits
+   * (1 credit = $0.01, so numerically credits == cents); sent as `credits`
+   * on the quote + withdrawal inputs.
+   */
+  credits?: number;
+  setCredits: (credits: number | undefined) => void;
 };
 
 export const WithdrawContext = createContext<WithdrawContextValue>({
@@ -57,18 +75,30 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
   closeWithdraw: () => {},
   withdrawHidden: true,
   withdrawDisabled: true,
-  step: "onboarding-kyc",
+  step: "overview",
+  beginWithdraw: () => {},
   status: undefined,
   statusLoading: false,
+  statusError: null,
+  credits: undefined,
+  setCredits: () => {},
 });
 
 export function WithdrawProvider({ children }: PropsWithChildren) {
   const [isOpen, setIsOpen] = useState(false);
+  // False while the overview drawer shows; beginWithdraw flips it to enter the
+  // derived flow. Reset on close so every open starts at the overview.
+  const [started, setStarted] = useState(false);
+  const [credits, setCredits] = useState<number | undefined>();
 
   // Live gate: KYC state, destinations, bounds, active withdrawal. Only
   // fetched while the flow is open; refetch-on-focus (in the hook) covers the
   // hosted-KYC-window round-trip.
-  const { data: status, isLoading: statusLoading } = useCoinflowWithdrawStatus({
+  const {
+    data: status,
+    isLoading: statusLoading,
+    error: statusError,
+  } = useCoinflowWithdrawStatus({
     enabled: isOpen,
   });
 
@@ -89,13 +119,25 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
 
   const closeWithdraw = useCallback(() => {
     setIsOpen(false);
+    setStarted(false);
+    setCredits(undefined);
   }, []);
 
-  // Derived per §3.1 of the plan: kycStatus !== APPROVED → onboarding-kyc;
-  // no linked destination → onboarding-bank; else the amount step. The
-  // "confirm"/"status" progressions are driven by user actions once their
-  // drawers exist.
+  // Enters the flow from the overview drawer. Requires the status to have
+  // resolved — the derived step below is meaningless without it.
+  const beginWithdraw = useCallback(() => {
+    if (!status) return;
+    setStarted(true);
+  }, [status]);
+
+  // "overview" until the user hits WITHDRAW; then derived per §3.1 of the
+  // plan: kycStatus !== APPROVED → onboarding-kyc; no linked destination →
+  // onboarding-bank; else the amount step. The "confirm"/"status"
+  // progressions are driven by user actions once their drawers exist.
   const step = useMemo<WithdrawStep>(() => {
+    if (!started) {
+      return "overview";
+    }
     if (!status || status.kycStatus !== CoinflowKycStatus.Approved) {
       return "onboarding-kyc";
     }
@@ -103,7 +145,7 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
       return "onboarding-bank";
     }
     return "amount";
-  }, [status]);
+  }, [started, status]);
 
   return (
     <WithdrawContext.Provider
@@ -114,8 +156,12 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
         withdrawHidden,
         withdrawDisabled,
         step,
+        beginWithdraw,
         status,
         statusLoading,
+        statusError: (statusError as Error | null) ?? null,
+        credits,
+        setCredits,
       }}
     >
       {children}

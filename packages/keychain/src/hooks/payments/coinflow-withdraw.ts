@@ -176,9 +176,13 @@ const QUOTE_STALE_MS = 60_000;
  * speed + destination. Disabled until all three are present. The merchant
  * balance pre-check runs here, so `UNAVAILABLE` "temporarily unavailable" can
  * surface at quote time.
+ *
+ * The request amount is `credits` — whole account credits, no decimals
+ * (1 credit = $0.01, so numerically credits == cents). Everything in the
+ * response is USD cents.
  */
 export const useCoinflowWithdrawQuote = (
-  amountCents: number | undefined,
+  credits: number | undefined,
   method: CoinflowPayoutSpeed,
   token: string | undefined,
   options?: { enabled?: boolean },
@@ -187,15 +191,15 @@ export const useCoinflowWithdrawQuote = (
 
   const isReady =
     (options?.enabled ?? true) &&
-    !!amountCents &&
-    amountCents > 0 &&
+    !!credits &&
+    credits > 0 &&
     !!token &&
     !!method;
 
   const result = useCoinflowWithdrawQuoteQuery(
     {
       input: {
-        amountCents: amountCents ?? 0,
+        credits: credits ?? 0,
         method,
         token: token ?? "",
         isMainnet: isCoinflowMainnet,
@@ -219,8 +223,10 @@ export const useCoinflowWithdrawQuote = (
 // ---------------------------------------------------------------------------
 
 /**
- * Initiates a withdrawal. Credits are debited server-side in the same
- * transaction, so the returned `CoinflowWithdrawal` already exists in credits
+ * Initiates a withdrawal. The gross amount is `credits` (whole account
+ * credits; 1 credit = $0.01 — numerically credits == cents); the returned
+ * `CoinflowWithdrawal` amounts are USD cents. Credits are debited server-side
+ * in the same transaction, so the withdrawal already exists in credits
  * history. Poll it with `waitForCoinflowWithdrawal`.
  */
 export const useCreateCoinflowWithdrawal = () => {
