@@ -27,6 +27,8 @@ export type HeaderProps = HeaderInnerProps & {
   onOpenSettings?: () => void;
   onDeposit?: () => void;
   onWithdraw?: () => void;
+  /** Renders the Withdraw button disabled (e.g. non-US or signed-out users). */
+  withdrawDisabled?: boolean;
   onLogout?: () => void;
 };
 
@@ -40,6 +42,7 @@ export function LayoutHeader({
   onOpenSettings,
   onDeposit,
   onWithdraw,
+  withdrawDisabled,
   ...innerProps
 }: HeaderProps) {
   const advancedView = useAdvancedView();
@@ -150,6 +153,7 @@ export function LayoutHeader({
                   }
                   onDeposit={onDeposit}
                   onWithdraw={onWithdraw}
+                  withdrawDisabled={withdrawDisabled}
                   onLogout={onLogout}
                 />
               </>
