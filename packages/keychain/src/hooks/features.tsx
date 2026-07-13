@@ -15,6 +15,7 @@ export type Feature =
   | "advanced-view"
   | "coinflow-support"
   | "coinflow-sandbox"
+  | "coinflow-payouts"
   | "connection-instagram"
   | "connection-tiktok"
   | "registered-accounts"
