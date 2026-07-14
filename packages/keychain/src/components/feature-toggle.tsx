@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   Badge,
   Button,
@@ -9,6 +9,7 @@ import {
   LayoutFooter,
 } from "@cartridge/controller-ui";
 import { Feature, useFeatures } from "@/hooks/features";
+import { useConnection } from "@/hooks/connection";
 
 type FeatureParams = {
   name: Feature;
@@ -18,7 +19,7 @@ type FeatureParams = {
 export function FeatureToggle() {
   const { name, action } = useParams<FeatureParams>();
   const { features, enableFeature, disableFeature } = useFeatures();
-  const navigate = useNavigate();
+  const { closeModal } = useConnection();
 
   const isValidAction = action === "enable" || action === "disable";
 
@@ -94,8 +95,8 @@ export function FeatureToggle() {
         </div>
       </LayoutContent>
       <LayoutFooter>
-        <Button variant="secondary" onClick={() => navigate("/")}>
-          Back
+        <Button variant="secondary" onClick={() => closeModal?.()}>
+          Close
         </Button>
       </LayoutFooter>
     </>

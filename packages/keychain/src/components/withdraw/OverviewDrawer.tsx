@@ -5,6 +5,7 @@ import {
   Drawer,
   DrawerContent,
   InfoIcon,
+  Spinner,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -112,6 +113,43 @@ export function OverviewDrawer({
         {/* Always visible while sandbox is active, whatever the drawer state. */}
         {sandbox && <SandboxWarning />}
 
+        <div className="p-3 text-xs border border-background-200 rounded text-foreground-300">
+          <p>Cash must be played through once to be withdrawn</p>
+          {minCredits && (
+            <>
+              <p>{`${formatUsdValue(minCredits! / 100)} minimum withdrawal`}</p>
+              {belowMin && (
+                <p className="mt-1 text-destructive-100">
+                  You need at least {formatUsdValue(minCredits! / 100)} in
+                  withdrawable cash to withdraw.
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3 p-3 bg-background-100 rounded">
+          <OverviewRow
+            label="Withdrawable Cash"
+            value={formatUsdValue((withdrawableCredits ?? 0) / 100)}
+            tooltip="You can cash this out, taking into account fees and withdrawal limits."
+            isLoading={loading}
+          />
+          {dailyLimit && (
+            <OverviewRow
+              label="Daily Limit Remaining"
+              value={formatUsdValue(dailyLimit.remainingCents / 100)}
+              tooltip={
+                dailyLimit.limitCents !== undefined
+                  ? `The amount you can still withdraw today. ${formatUsdValue(
+                      (dailyLimit.limitCents - dailyLimit.remainingCents) / 100,
+                    )}/${formatUsdValue(dailyLimit.limitCents / 100)} withdrawn`
+                  : "The amount you can still withdraw today."
+              }
+            />
+          )}
+        </div>
+
         {error ? (
           <>
             <ErrorAlert
@@ -124,44 +162,6 @@ export function OverviewDrawer({
           </>
         ) : (
           <>
-            {!loading && (
-              <>
-                <div className="p-3 text-xs border border-background-200 rounded text-foreground-300">
-                  <p>Cash must be played through once to be withdrawn</p>
-                  <p>{`${formatUsdValue(minCredits! / 100)} minimum withdrawal`}</p>
-                  {belowMin && (
-                    <p className="mt-1 text-destructive-100">
-                      You need at least {formatUsdValue(minCredits! / 100)} in
-                      withdrawable cash to withdraw.
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-3 p-3 bg-background-100 rounded">
-                  <OverviewRow
-                    label="Withdrawable Cash"
-                    value={formatUsdValue((withdrawableCredits ?? 0) / 100)}
-                    tooltip="You can cash this out, taking into account fees and withdrawal limits."
-                  />
-                  {dailyLimit && (
-                    <OverviewRow
-                      label="Daily Limit Remaining"
-                      value={formatUsdValue(dailyLimit.remainingCents / 100)}
-                      tooltip={
-                        dailyLimit.limitCents !== undefined
-                          ? `The amount you can still withdraw today. ${formatUsdValue(
-                              (dailyLimit.limitCents -
-                                dailyLimit.remainingCents) /
-                                100,
-                            )}/${formatUsdValue(dailyLimit.limitCents / 100)} withdrawn`
-                          : "The amount you can still withdraw today."
-                      }
-                    />
-                  )}
-                </div>
-              </>
-            )}
-
             {amountMode && !loading && (
               <div className="flex flex-col gap-3">
                 <p className="text-xs font-semibold text-foreground-400">
@@ -201,10 +201,12 @@ function OverviewRow({
   label,
   value,
   tooltip,
+  isLoading = false,
 }: {
   label: string;
   value: string;
   tooltip: string;
+  isLoading?: boolean;
 }) {
   return (
     <div className="flex gap-1 w-full items-center justify-between cursor-default select-none">
@@ -230,7 +232,11 @@ function OverviewRow({
         </Tooltip>
       </TooltipProvider>
       <div className="flex-1" />
-      <p className="text-xs font-medium text-foreground-100">{value}</p>
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <p className="text-xs font-medium text-foreground-100">{value}</p>
+      )}
     </div>
   );
 }
