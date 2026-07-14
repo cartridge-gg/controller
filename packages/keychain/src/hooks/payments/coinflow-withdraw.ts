@@ -89,7 +89,7 @@ export const useCreateCoinflowKYC = () => {
   const { mutateAsync, isLoading, error } = useCreateCoinflowKycMutation();
 
   const createKYC = useCallback(
-    async (address?: Omit<CreateCoinflowKycInput, "isMainnet">) => {
+    async (address: Omit<CreateCoinflowKycInput, "isMainnet">) => {
       const result = await mutateAsync({
         input: { ...address, isMainnet: isCoinflowMainnet },
       });

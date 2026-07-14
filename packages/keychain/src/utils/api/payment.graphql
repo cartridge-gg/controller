@@ -279,7 +279,7 @@ query CoinflowWithdrawStatus($isMainnet: Boolean) {
   }
 }
 
-mutation CreateCoinflowKYC($input: CreateCoinflowKYCInput) {
+mutation CreateCoinflowKYC($input: CreateCoinflowKYCInput!) {
   createCoinflowKYC(input: $input) {
     status
     verificationLink

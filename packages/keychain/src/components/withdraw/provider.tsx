@@ -14,6 +14,7 @@ import type { CoinflowWithdrawStatusQuery } from "@/utils/api";
 import { useConnection } from "@/hooks/connection";
 import { useFeature } from "@/hooks/features";
 import { useGeoLocation } from "@/hooks/geo";
+import { useIdentityContext } from "@/components/identity/provider";
 import { WithdrawCredits } from "./WithdrawCredits";
 
 export type CoinflowWithdrawStatus =
@@ -22,13 +23,17 @@ export type CoinflowWithdrawStatus =
 /**
  * Flow steps. "overview" (the Withdraw Funds summary drawer) shows first on
  * every open; past it the step is derived from live data (mirrors
- * DepositCredits' derived step) — never a manually-advanced counter. A
+ * DepositCredits' derived step) — never a manually-advanced counter.
+ * "verification" is the email/phone/identity gauntlet (the same identity
+ * required by the credit-card on-ramp); it re-appears automatically if the
+ * identity provider reports a verification as invalidated or deleted. A
  * returning, fully-onboarded user lands on "amount" automatically; a mid-flow
  * KYC failure demotes the step back to "onboarding-kyc". "confirm"/"status"
  * progressions land with their drawers.
  */
 export type WithdrawStep =
   | "overview"
+  | "verification"
   | "onboarding-kyc"
   | "onboarding-bank"
   | "amount"
@@ -51,10 +56,16 @@ export type WithdrawContextValue = {
   step: WithdrawStep;
   /**
    * Advances past the overview drawer into the flow proper (the WITHDRAW
-   * button). Verification/KYC/bank gates run between here and the amount
-   * step once their drawers land (plan steps 4–5).
+   * button). The verification/KYC gates run between here and the amount step
+   * (the bank gate lands with plan step 5).
    */
   beginWithdraw: () => void;
+  /**
+   * Cancels the in-flight gate (verification gauntlet or KYC drawer) back to
+   * the overview drawer; clicking WITHDRAW again resumes at the first
+   * incomplete gate — completed verifications are never requested twice.
+   */
+  returnToOverview: () => void;
   /** Live withdrawal status; undefined until the query resolves. */
   status?: CoinflowWithdrawStatus;
   statusLoading: boolean;
@@ -77,6 +88,7 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
   withdrawDisabled: true,
   step: "overview",
   beginWithdraw: () => {},
+  returnToOverview: () => {},
   status: undefined,
   statusLoading: false,
   statusError: null,
@@ -130,13 +142,31 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     setStarted(true);
   }, [status]);
 
+  // Cancels an in-flight gate back to the overview; WITHDRAW resumes at the
+  // first incomplete gate (the derived step recomputes from live data).
+  const returnToOverview = useCallback(() => {
+    setStarted(false);
+  }, []);
+
+  // Email/phone/identity are derived live from the identity provider, so a
+  // verification that gets invalidated or deleted upstream re-gates the flow
+  // automatically — completed ones are never requested twice.
+  const { isEmailVerified, isPhoneNumberVerified, isIdentityVerified } =
+    useIdentityContext();
+  const isIdentityGateVerified =
+    isEmailVerified && isPhoneNumberVerified && isIdentityVerified;
+
   // "overview" until the user hits WITHDRAW; then derived per §3.1 of the
-  // plan: kycStatus !== APPROVED → onboarding-kyc; no linked destination →
-  // onboarding-bank; else the amount step. The "confirm"/"status"
-  // progressions are driven by user actions once their drawers exist.
+  // plan: email/phone/identity not all verified → verification; kycStatus
+  // !== APPROVED → onboarding-kyc; no linked destination → onboarding-bank;
+  // else the amount step. The "confirm"/"status" progressions are driven by
+  // user actions once their drawers exist.
   const step = useMemo<WithdrawStep>(() => {
     if (!started) {
       return "overview";
+    }
+    if (!isIdentityGateVerified) {
+      return "verification";
     }
     if (!status || status.kycStatus !== CoinflowKycStatus.Approved) {
       return "onboarding-kyc";
@@ -145,7 +175,7 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
       return "onboarding-bank";
     }
     return "amount";
-  }, [started, status]);
+  }, [started, isIdentityGateVerified, status]);
 
   return (
     <WithdrawContext.Provider
@@ -157,6 +187,7 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
         withdrawDisabled,
         step,
         beginWithdraw,
+        returnToOverview,
         status,
         statusLoading,
         statusError: (statusError as Error | null) ?? null,

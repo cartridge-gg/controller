@@ -1801,12 +1801,17 @@ export type CreateCoinflowCreditsIntentInput = {
 };
 
 export type CreateCoinflowKycInput = {
-  /** Optional address to satisfy US KYC; name/DOB/email are pre-filled server-side. */
-  address1?: InputMaybe<Scalars["String"]>;
-  city?: InputMaybe<Scalars["String"]>;
+  /** US address; all fields are required by Coinflow's US KYC schema. */
+  address1: Scalars["String"];
+  city: Scalars["String"];
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
-  state?: InputMaybe<Scalars["String"]>;
-  zip?: InputMaybe<Scalars["String"]>;
+  /**
+   * Last 4 digits of the SSN. Required by Coinflow's US KYC schema; passed through to
+   * Coinflow and never persisted on our side.
+   */
+  ssnLast4: Scalars["String"];
+  state: Scalars["String"];
+  zip: Scalars["String"];
 };
 
 export type CreateCoinflowStarterpackIntentInput = {
@@ -3495,8 +3500,11 @@ export type Mutation = {
    */
   createCoinflowCreditsIntent: CoinflowCreditsIntent;
   /**
-   * Register (or refresh) payout KYC, pre-filled from the identity we already hold.
-   * Returns the verification status or a Coinflow-hosted verificationLink to complete.
+   * Register (or refresh) payout KYC. Name/DOB/email are pre-filled server-side from the
+   * identity we already hold; the client supplies the address and SSN last-4 (Coinflow's
+   * US KYC schema requires every info field, ssn included — it is passed through and never
+   * persisted). Returns the verification status or a Coinflow-hosted verificationLink to
+   * complete.
    */
   createCoinflowKYC: CoinflowKycResult;
   /**
@@ -3664,7 +3672,7 @@ export type MutationCreateCoinflowCreditsIntentArgs = {
 };
 
 export type MutationCreateCoinflowKycArgs = {
-  input?: InputMaybe<CreateCoinflowKycInput>;
+  input: CreateCoinflowKycInput;
 };
 
 export type MutationCreateCoinflowStarterpackIntentArgs = {
@@ -8264,7 +8272,7 @@ export type CoinflowWithdrawStatusQuery = {
 };
 
 export type CreateCoinflowKycMutationVariables = Exact<{
-  input?: InputMaybe<CreateCoinflowKycInput>;
+  input: CreateCoinflowKycInput;
 }>;
 
 export type CreateCoinflowKycMutation = {
@@ -9618,7 +9626,7 @@ export const useCoinflowWithdrawStatusQuery = <
     options,
   );
 export const CreateCoinflowKycDocument = `
-    mutation CreateCoinflowKYC($input: CreateCoinflowKYCInput) {
+    mutation CreateCoinflowKYC($input: CreateCoinflowKYCInput!) {
   createCoinflowKYC(input: $input) {
     status
     verificationLink
