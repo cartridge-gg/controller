@@ -6,7 +6,6 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
@@ -66,11 +65,11 @@ cpSync(
 );
 
 function replaceVersion(directory) {
-  for (const entry of readdirSync(directory)) {
-    const target = path.join(directory, entry);
-    if (statSync(target).isDirectory()) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const target = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
       replaceVersion(target);
-    } else if (/\.(?:js|cjs|mjs|map|d\.ts)$/.test(entry)) {
+    } else if (/\.(?:js|cjs|mjs|map|d\.ts)$/.test(entry.name)) {
       const contents = readFileSync(target, "utf8");
       writeFileSync(target, contents.replaceAll("0.13.13", alphaVersion));
     }
