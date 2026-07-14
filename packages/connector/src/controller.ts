@@ -76,7 +76,31 @@ export default class ControllerConnector {
       throw new Error("Failed to connect controller");
     }
 
-    return { account: account.address, chainId: chainIdHint };
+    let chainId = BigInt(
+      await this.controller.request({ type: "wallet_requestChainId" }),
+    );
+
+    if (chainIdHint !== undefined && chainId !== chainIdHint) {
+      const switched = await this.controller.request({
+        type: "wallet_switchStarknetChain",
+        params: { chainId: `0x${chainIdHint.toString(16)}` },
+      });
+      if (!switched) {
+        throw new Error(
+          `Controller rejected chain switch to 0x${chainIdHint.toString(16)}`,
+        );
+      }
+      chainId = BigInt(
+        await this.controller.request({ type: "wallet_requestChainId" }),
+      );
+      if (chainId !== chainIdHint) {
+        throw new Error(
+          `Controller chain mismatch after switch: expected 0x${chainIdHint.toString(16)}, received 0x${chainId.toString(16)}`,
+        );
+      }
+    }
+
+    return { account: account.address, chainId };
   }
 
   static walletFromConnectors(

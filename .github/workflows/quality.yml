@@ -29,4 +29,5 @@ jobs:
         with:
           run_install: false
       - run: pnpm install --frozen-lockfile
+      - run: pnpm assert:starknet-graph
       - run: pnpm lint:check

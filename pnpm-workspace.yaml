@@ -6,15 +6,15 @@ packages:
   - examples/capacitor
   - packages/*
 catalog:
-  "@cartridge/arcade": "0.3.12"
+  "@cartridge/arcade": "0.4.0"
   "@cartridge/controller-wasm": "0.10.1"
   "@cartridge/penpal": "^6.2.4"
   "@cartridge/presets": "github:cartridge-gg/presets#f0f3bb5"
   "@eslint/js": "^9.18.0"
   "@noble/curves": "^1.9.0"
   "@noble/hashes": "^1.8.0"
-  "@dojoengine/core": 1.9.0
-  "@dojoengine/sdk": 1.10.0
+  "@dojoengine/core": 2.0.0
+  "@dojoengine/sdk": 2.0.0
   "@dojoengine/torii-wasm": 1.8.2
   "@effect-atom/atom": "^0.1.22"
   "@effect-atom/atom-react": "^0.1.17"

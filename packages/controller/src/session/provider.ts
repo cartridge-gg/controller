@@ -131,7 +131,7 @@ export default class SessionProvider extends BaseProvider {
         return inner.icon;
       },
       get chains() {
-        return inner.chains;
+        return [`starknet:${provider._chainId}`] as const;
       },
       get accounts() {
         return inner.accounts;

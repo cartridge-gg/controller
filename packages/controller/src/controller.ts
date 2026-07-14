@@ -11,7 +11,7 @@ import {
   AddStarknetChainParameters,
   ChainId,
 } from "@starknet-io/types-js";
-import { constants, shortString, WalletAccount } from "starknet";
+import { constants, RpcProvider, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { KEYCHAIN_URL } from "./constants";
@@ -54,6 +54,7 @@ export default class ControllerProvider extends BaseProvider {
   private userChains: Chain[];
   private referral: { ref?: string; refGroup?: string };
   private encryptedBlob?: string;
+  private chainSwitchQueue: Promise<void> = Promise.resolve();
 
   isReady(): boolean {
     return !!this.keychain;
@@ -386,19 +387,33 @@ export default class ControllerProvider extends BaseProvider {
       return false;
     }
 
-    const currentChain = this.selectedChain;
+    const switchRequest = this.chainSwitchQueue.then(async () => {
+      let rpcUrl: string;
+      try {
+        rpcUrl = this.rpcUrlFor(chainId);
+        await this.keychain!.switchChain(rpcUrl);
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
 
-    try {
       this.selectedChain = chainId;
-      await this.keychain.switchChain(this.rpcUrl());
-    } catch (e) {
-      console.error(e);
-      this.selectedChain = currentChain;
-      return false;
-    }
+      if (this.account) {
+        this.account.provider = new RpcProvider({ nodeUrl: rpcUrl });
+      }
+      this.emitNetworkChanged(chainId);
+      return true;
+    });
 
-    this.emitNetworkChanged(chainId);
-    return true;
+    this.chainSwitchQueue = switchRequest.then(
+      () => undefined,
+      () => undefined,
+    );
+    return await switchRequest;
+  }
+
+  protected async getChainId(): Promise<string> {
+    return this.selectedChain;
   }
 
   addStarknetChain(_chain: AddStarknetChainParameters): Promise<boolean> {
@@ -587,13 +602,17 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   rpcUrl(): string {
-    const chain = this.chains.get(this.selectedChain);
+    return this.rpcUrlFor(this.selectedChain);
+  }
+
+  private rpcUrlFor(chainId: ChainId): string {
+    const chain = this.chains.get(chainId);
     if (!chain) {
       const availableChains = Array.from(this.chains.keys()).map((chain) =>
         shortString.decodeShortString(chain),
       );
       throw new Error(
-        `Chain not found: ${shortString.decodeShortString(this.selectedChain)}. Available chains: ${availableChains.join(", ")}`,
+        `Chain not found: ${shortString.decodeShortString(chainId)}. Available chains: ${availableChains.join(", ")}`,
       );
     }
     return chain.rpcUrl;

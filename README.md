@@ -44,6 +44,14 @@ moved to `@starknet-start/react@1.0.8`, with `@starknet-start/chains@1.0.7`,
 `@starknet-start/providers@1.0.7`, and `@starknet-start/explorers@1.0.7`.
 Starknet Start requires React 19.
 
+Controller's marketplace and achievement integrations use
+`@cartridge/arcade@0.4.0`, whose published dependency graph is aligned on
+Dojo.js 2 (`@dojoengine/core`, `@dojoengine/grpc`, and `@dojoengine/sdk` at
+`2.0.0`). Together, this migration requires Node.js 22, React 19, and the exact
+Starknet.js `10.0.2` version described above. Applications should upgrade these
+dependencies together rather than mixing the previous Arcade 0.3 or Dojo.js 1
+packages with Controller 0.14.
+
 The workspace temporarily overrides transitive Starknet.js versions to `10.0.2`
 because `@starknet-start/providers@1.0.7` and `@starknet-start/query@1.0.7`
 resolve Starknet.js v9. The override collapses application bundles to the exact

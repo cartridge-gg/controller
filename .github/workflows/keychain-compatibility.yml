@@ -37,5 +37,5 @@ jobs:
         if: failure()
         with:
           name: keychain-compatibility-playwright-report
-          path: playwright-report/
+          path: compat/keychain-browser/.artifacts/test-results/
           retention-days: 30
