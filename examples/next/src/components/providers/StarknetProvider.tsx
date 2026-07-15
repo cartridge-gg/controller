@@ -305,6 +305,7 @@ export const controllerConnector = new ControllerConnector({
   defaultChainId, // if not mainnet, only the original signer will be shown
   url: getKeychainUrl(),
   signupOptions,
+  defaultPaymentMethod: "credit-card",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   shouldOverridePresetPolicies: overridePolicies,
