@@ -23,6 +23,7 @@ import { CoinbaseOnrampStatus } from "@/utils/api";
 import { useStarterpackPlayHandler } from "@/hooks/starterpack";
 import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
+import { useAdvancedView } from "@/hooks/features";
 
 interface TransitionStepProps {
   isVisible: boolean;
@@ -79,6 +80,7 @@ export function BridgePending({
   const { transactionHash: currentTxHash } = useStarterpackContext();
   const { externalWaitForTransaction, controller, isMainnet } = useConnection();
   const handlePlay = useStarterpackPlayHandler();
+  const advancedView = useAdvancedView();
 
   // Use props if provided (for stories), otherwise use context
   const selectedPlatform =
@@ -282,9 +284,11 @@ export function BridgePending({
               >
                 <ConfirmingTransaction
                   title={
-                    paymentCompleted
-                      ? "Bridged to Starknet"
-                      : "Bridging to Starknet"
+                    advancedView
+                      ? paymentCompleted
+                        ? "Bridged to Starknet"
+                        : "Bridging to Starknet"
+                      : "Moving funds"
                   }
                   externalLink={
                     orderTxHash || initialBridgeHash
@@ -297,9 +301,13 @@ export function BridgePending({
               <TransitionStep isVisible={showPurchasing}>
                 <ConfirmingTransaction
                   title={
-                    purchaseCompleted
-                      ? "Purchased on Starknet"
-                      : "Purchasing on Starknet"
+                    advancedView
+                      ? purchaseCompleted
+                        ? "Purchased on Starknet"
+                        : "Purchasing on Starknet"
+                      : purchaseCompleted
+                        ? "Purchase complete"
+                        : "Confirming purchase"
                   }
                   externalLink={
                     purchaseTxHash

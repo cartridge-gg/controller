@@ -1,5 +1,6 @@
 import {
   AchievementPlayerBadge,
+  AdvancedDetails,
   ArrowFromLineIcon,
   ArrowToLineIcon,
   Button,
@@ -150,34 +151,36 @@ export const ConnectionTooltipContent = ({
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-px bg-background-200">
-        <div className="flex items-center justify-between gap-2 px-2 py-2.5 bg-background-150">
-          <p className="text-sm text-foreground-400 select-none">Address:</p>
-          <div onClick={() => setOpen?.(false)}>
-            <div
-              className="flex items-center gap-1 cursor-pointer text-foreground-300 hover:text-foreground-200"
-              onClick={onCopy}
-            >
-              <p className="text-sm font-normal">{formattedAddress}</p>
-              <CopyIcon size="sm" />
+      <AdvancedDetails>
+        <div className="flex flex-col gap-px bg-background-200">
+          <div className="flex items-center justify-between gap-2 px-2 py-2.5 bg-background-150">
+            <p className="text-sm text-foreground-400 select-none">Address:</p>
+            <div onClick={() => setOpen?.(false)}>
+              <div
+                className="flex items-center gap-1 cursor-pointer text-foreground-300 hover:text-foreground-200"
+                onClick={onCopy}
+              >
+                <p className="text-sm font-normal">{formattedAddress}</p>
+                <CopyIcon size="sm" />
+              </div>
+            </div>
+          </div>
+          <div
+            className={cn(
+              "flex items-center justify-between gap-2 px-2 py-2.5 bg-background-150",
+              hideNetwork && "hidden",
+            )}
+          >
+            <p className="text-sm text-foreground-400 select-none">Network:</p>
+            <div className="flex items-center gap-1.5">
+              <Thumbnail size="xs" icon={Icon} rounded />
+              <p className="text-sm font-normal capitalize">
+                {getChainName(chainId).toLowerCase()}
+              </p>
             </div>
           </div>
         </div>
-        <div
-          className={cn(
-            "flex items-center justify-between gap-2 px-2 py-2.5 bg-background-150",
-            hideNetwork && "hidden",
-          )}
-        >
-          <p className="text-sm text-foreground-400 select-none">Network:</p>
-          <div className="flex items-center gap-1.5">
-            <Thumbnail size="xs" icon={Icon} rounded />
-            <p className="text-sm font-normal capitalize">
-              {getChainName(chainId).toLowerCase()}
-            </p>
-          </div>
-        </div>
-      </div>
+      </AdvancedDetails>
       <div
         className={cn(
           "flex items-center justify-between gap-3",

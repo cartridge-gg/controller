@@ -30,6 +30,7 @@ import {
   HeaderInner,
 } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
+import { useAdvancedView } from "@/hooks/features";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "./Balance";
@@ -54,6 +55,7 @@ function DepositInner({ onComplete }: DepositProps) {
   const { account: extAccount } = useAccount();
   const { token: feeToken } = useFeeToken();
   const { toast } = useToast();
+  const advancedView = useAdvancedView();
 
   const [state, setState] = useState<"connect" | "fund">("connect");
   const [tokenAmount, setTokenAmount] = useState<bigint>();
@@ -175,7 +177,7 @@ function DepositInner({ onComplete }: DepositProps) {
         {error && (
           <ErrorAlert
             title="Account deposit error"
-            description={getHumanReadableError(error)}
+            description={getHumanReadableError(error, advancedView)}
           />
         )}
 
@@ -259,12 +261,14 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
   );
 }
 
-const getHumanReadableError = (error: Error): string => {
+const getHumanReadableError = (error: Error, advancedView: boolean): string => {
   const message = error.message;
   if (message.includes("USER_REFUSED_OP")) {
     return "Transaction approval refused in wallet";
   }
-  return message;
+  return advancedView
+    ? message
+    : "The deposit could not be completed. Please try again.";
 };
 
 declare global {

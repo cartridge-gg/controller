@@ -5,6 +5,7 @@ import { CONTROLLER_TOAST_MESSAGE_TYPE } from "@cartridge/controller-ui";
 import { isIframe } from "@cartridge/controller-ui/utils";
 import { toast as sonnerToast } from "sonner";
 import { useConnection } from "@/hooks/connection";
+import { FeatureProvider } from "@/hooks/features";
 import { ToastProvider, useToast } from "./toast";
 
 vi.mock("sonner", () => ({
@@ -45,7 +46,9 @@ function setConnection(overrides: Record<string, unknown> = {}) {
 }
 
 const wrapper: React.FC<PropsWithChildren> = ({ children }) => (
-  <ToastProvider>{children}</ToastProvider>
+  <FeatureProvider>
+    <ToastProvider>{children}</ToastProvider>
+  </FeatureProvider>
 );
 
 function renderToast() {
@@ -57,6 +60,7 @@ describe("ToastProvider", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     setConnection();
     vi.mocked(isIframe).mockReturnValue(true);
     postMessageSpy = vi
@@ -311,6 +315,7 @@ describe("ChainSwitchDetector", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     vi.mocked(isIframe).mockReturnValue(true);
     postMessageSpy = vi
       .spyOn(window.parent, "postMessage")
@@ -321,7 +326,11 @@ describe("ChainSwitchDetector", () => {
     postMessageSpy.mockRestore();
   });
 
-  it("suppresses the initial connect toast but emits on chain switch", () => {
+  it("suppresses the initial connect toast but emits on chain switch in advanced view", () => {
+    localStorage.setItem(
+      "@cartridge/features",
+      JSON.stringify({ "advanced-view": true }),
+    );
     const chains = [
       { chainId: "0x1", name: "Mainnet", icon: "main.png" },
       { chainId: "0x2", name: "Testnet", icon: "test.png" },
@@ -363,5 +372,34 @@ describe("ChainSwitchDetector", () => {
       networkName: "Testnet",
       networkIcon: "test.png",
     });
+  });
+
+  it("suppresses chain switch toasts in simple view", () => {
+    const chains = [
+      { chainId: "0x1", name: "Mainnet", icon: "main.png" },
+      { chainId: "0x2", name: "Testnet", icon: "test.png" },
+    ];
+
+    setConnection({
+      controller: { chainId: () => "0x1" },
+      configuredChains: chains,
+    });
+
+    const { rerender } = renderHook(() => useToast(), { wrapper });
+    postMessageSpy.mockClear();
+
+    setConnection({
+      controller: { chainId: () => "0x2" },
+      configuredChains: chains,
+    });
+    act(() => rerender());
+
+    expect(
+      postMessageSpy.mock.calls.filter(
+        (call) =>
+          (call[0] as { options?: { variant?: string } })?.options?.variant ===
+          "network",
+      ),
+    ).toHaveLength(0);
   });
 });

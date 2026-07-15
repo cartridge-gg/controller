@@ -1,5 +1,5 @@
 import React from "react";
-import { ErrorAlert } from "@/components/ErrorAlert";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import {
   useNavigation,
   useStarterpackContext,
@@ -166,7 +166,7 @@ export function PurchaseStarterpack() {
         />
         <LayoutContent />
         <LayoutFooter>
-          <ErrorAlert title="Error" description={displayError.message} />
+          <ControllerErrorAlert error={displayError} />
         </LayoutFooter>
       </>
     );
@@ -228,7 +228,7 @@ export function ClaimStarterPackInner({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error && <ControllerErrorAlert error={error} />}
         {!error && (
           <Card>
             <CardContent
@@ -340,7 +340,7 @@ export function OnchainStarterPackInner({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error && <ControllerErrorAlert error={error} />}
 
         {/* Insufficient Liquidity Warning - only show if we need conversion */}
         {conversionError && needsConversion && (

@@ -23,6 +23,7 @@ import { isIframe } from "@cartridge/controller-ui/utils";
 import { toast as sonnerToast } from "sonner";
 import { useConnection } from "@/hooks/connection";
 import type { Chain } from "@cartridge/controller";
+import { useAdvancedView } from "@/hooks/features";
 
 interface ToastContextType {
   toast: {
@@ -225,6 +226,7 @@ export function useToast() {
 }
 
 function ChainSwitchDetector() {
+  const advancedView = useAdvancedView();
   const { controller, configuredChains } = useConnection();
   const connectedChainId = useMemo(() => controller?.chainId(), [controller]);
   const [currentChainId, setCurrentChainId] = useState<string | undefined>();
@@ -235,7 +237,7 @@ function ChainSwitchDetector() {
         (chain) => BigInt(chain?.chainId ?? 0) === BigInt(connectedChainId),
       ) as Chain;
       const kind = !currentChainId ? "connect" : "switch-chain";
-      const disabled = kind == "connect";
+      const disabled = kind === "connect" || !advancedView;
       toast.network(
         {
           kind,
@@ -247,7 +249,14 @@ function ChainSwitchDetector() {
       );
     }
     setCurrentChainId(connectedChainId);
-  }, [controller, connectedChainId, currentChainId, configuredChains, toast]);
+  }, [
+    advancedView,
+    controller,
+    connectedChainId,
+    currentChainId,
+    configuredChains,
+    toast,
+  ]);
 
   return <></>;
 }

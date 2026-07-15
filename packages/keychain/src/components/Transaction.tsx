@@ -1,6 +1,8 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { constants } from "starknet";
 import {
+  AdvancedDetails,
+  AdvancedLink,
   CheckIcon,
   ExternalIcon,
   Spinner,
@@ -9,7 +11,6 @@ import {
 import { useController } from "@/hooks/controller";
 import { useChainName } from "@/hooks/chain";
 import { useExplorer } from "@starknet-react/core";
-import { Link } from "react-router-dom";
 
 export type TransactionState = "pending" | "success" | "error";
 
@@ -61,15 +62,22 @@ export function Transaction({
         <div>{name}</div>
       </div>
 
-      <div className="flex items-center gap-1">
-        <div className="flex items-center text-foreground-400 gap-1 border-r px-3">
-          <StarknetIcon size="sm" />
-          <div>{chainName}</div>
+      <AdvancedDetails>
+        <div className="flex items-center gap-1">
+          <div className="flex items-center text-foreground-400 gap-1 border-r px-3">
+            <StarknetIcon size="sm" />
+            <div>{chainName}</div>
+          </div>
+          <AdvancedLink
+            href={explorer.transaction(hash)}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`View ${name} transaction`}
+          >
+            <ExternalIcon size="sm" />
+          </AdvancedLink>
         </div>
-        <Link to={explorer.transaction(hash)} target="_blank">
-          <ExternalIcon size="sm" />
-        </Link>
-      </div>
+      </AdvancedDetails>
     </div>
   );
 }

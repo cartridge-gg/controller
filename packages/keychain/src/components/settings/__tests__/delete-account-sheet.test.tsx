@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { DeleteAccountSheet } from "../delete-account-sheet";
+import { FeatureProvider } from "@/hooks/features";
 
 // Mock @cartridge/controller-ui components
 vi.mock("@cartridge/controller-ui", () => ({
@@ -64,15 +65,23 @@ const defaultProps = {
   onConfirm: vi.fn().mockResolvedValue(undefined),
 };
 
+function renderSheet(props = defaultProps) {
+  return render(
+    <FeatureProvider>
+      <DeleteAccountSheet {...props} />
+    </FeatureProvider>,
+  );
+}
+
 describe("DeleteAccountSheet", () => {
   it("delete button is disabled when input is empty", () => {
-    render(<DeleteAccountSheet {...defaultProps} />);
+    renderSheet();
     const deleteButton = screen.getByTestId("delete-confirm-button");
     expect(deleteButton).toBeDisabled();
   });
 
   it("delete button is disabled when input doesn't match username", () => {
-    render(<DeleteAccountSheet {...defaultProps} />);
+    renderSheet();
     const input = screen.getByTestId("delete-confirm-input");
     fireEvent.change(input, { target: { value: "wronguser" } });
     const deleteButton = screen.getByTestId("delete-confirm-button");
@@ -80,7 +89,7 @@ describe("DeleteAccountSheet", () => {
   });
 
   it("delete button is enabled when input matches username exactly", () => {
-    render(<DeleteAccountSheet {...defaultProps} />);
+    renderSheet();
     const input = screen.getByTestId("delete-confirm-input");
     fireEvent.change(input, { target: { value: "testuser" } });
     const deleteButton = screen.getByTestId("delete-confirm-button");
@@ -89,7 +98,7 @@ describe("DeleteAccountSheet", () => {
 
   it("both buttons are disabled during loading state", async () => {
     const neverResolve = vi.fn(() => new Promise<void>(() => {}));
-    render(<DeleteAccountSheet {...defaultProps} onConfirm={neverResolve} />);
+    renderSheet({ ...defaultProps, onConfirm: neverResolve });
 
     const input = screen.getByTestId("delete-confirm-input");
     fireEvent.change(input, { target: { value: "testuser" } });

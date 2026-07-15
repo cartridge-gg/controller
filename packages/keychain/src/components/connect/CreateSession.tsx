@@ -26,6 +26,7 @@ import { SpendingLimitPage } from "./SpendingLimitPage";
 import { useNavigation } from "@/context/navigation";
 import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent, sanitizeErrorCode } from "@/types/analytics";
+import { useAdvancedView } from "@/hooks/features";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -78,6 +79,7 @@ const CreateSessionLayout = ({
     useCreateSession();
 
   const { controller, theme, origin } = useConnection();
+  const advancedView = useAdvancedView();
   const sessionStartTime = useRef(performance.now());
 
   const hasTokenApprovals = useMemo(
@@ -320,8 +322,9 @@ const CreateSessionLayout = ({
               }}
             />
             <h1 className="text-xs font-normal select-none">
-              These contracts are not verified. I agree to grant this game
-              permission to execute the actions listed above.
+              {advancedView
+                ? "These contracts are not verified. I agree to grant this game permission to execute the actions listed above."
+                : "These permissions are not verified. I agree to let this game perform the actions listed above."}
             </h1>
           </div>
         )}

@@ -10,8 +10,10 @@ import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useToast } from "@/context/toast";
 import { formatTokenAmount, formatUsdValue } from "@/utils/format-value";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { useAdvancedView } from "@/hooks/features";
 
 export function SendToken() {
+  const advancedView = useAdvancedView();
   const [searchParams] = useSearchParams();
   const tokenAddress = searchParams.get("tokenAddress");
   const recipient = searchParams.get("recipient") ?? "0x0";
@@ -89,7 +91,7 @@ export function SendToken() {
 
   return (
     <ExecutionContainer
-      title="Review Transaction"
+      title={advancedView ? "Review Transaction" : "Review request"}
       icon={
         <PaperPlaneIcon
           variant="solid"

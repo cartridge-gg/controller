@@ -5,12 +5,14 @@ import placeholder from "/placeholder.svg?url";
 import { useSimulateBalanceChanges } from "./use-simulate";
 import { SimulationBalance } from "./event-parser";
 import { formatTokenValue, formatUsdValue } from "@/utils/format-value";
+import { useAdvancedView } from "@/hooks/features";
 
 interface SimulationResultsProps {
   calls: Call[];
 }
 
 export function SimulationResults({ calls }: SimulationResultsProps) {
+  const advancedView = useAdvancedView();
   const { simulationBalances, isSimulating, simulationError } =
     useSimulateBalanceChanges(calls, 10);
 
@@ -41,16 +43,29 @@ export function SimulationResults({ calls }: SimulationResultsProps) {
       title={
         isSimulating ? (
           <div className="flex items-center gap-1">
-            <Spinner size="xs" /> Simulating transactions...
+            <Spinner size="xs" />
+            {advancedView
+              ? "Simulating transactions..."
+              : "Checking changes..."}
           </div>
         ) : simulationError === "error" ? (
-          <span className="text-destructive">Simulation error.</span>
+          <span className="text-destructive">
+            {advancedView ? "Simulation error." : "Changes unavailable."}
+          </span>
         ) : simulationError === "controller-not-deployed" ? (
-          <>Controller not deployed yet, unable to simulate.</>
+          <>
+            {advancedView
+              ? "Controller not deployed yet, unable to simulate."
+              : "Changes will be available after setup."}
+          </>
         ) : simulationBalances.length == 0 ? (
-          <>No standard token balance changes detected</>
+          <>
+            {advancedView
+              ? "No standard token balance changes detected"
+              : "No balance changes detected"}
+          </>
         ) : (
-          <>Simulation Results</>
+          <>{advancedView ? "Simulation Results" : "Changes"}</>
         )
       }
       className="flex-none"

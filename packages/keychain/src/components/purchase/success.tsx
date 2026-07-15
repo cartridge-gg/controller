@@ -27,6 +27,7 @@ import {
 } from "@/utils/api";
 import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent } from "@/types/analytics";
+import { useAdvancedView } from "@/hooks/features";
 
 export function Success() {
   const { starterpackDetails, transactionHash, claimItems } =
@@ -78,26 +79,27 @@ type PurchaseStage = {
 
 function getFulfillmentStage(
   fulfillmentStatus: PurchaseFulfillmentStatus | undefined,
+  advancedView: boolean,
 ): PurchaseStage {
   switch (fulfillmentStatus) {
     case PurchaseFulfillmentStatus.Confirmed:
       return {
-        title: "Confirmed on Starknet",
+        title: advancedView ? "Confirmed on Starknet" : "Purchase complete",
         status: "success",
       };
     case PurchaseFulfillmentStatus.Failed:
       return {
-        title: "Failed on Starknet",
+        title: advancedView ? "Failed on Starknet" : "Purchase failed",
         status: "error",
       };
     case PurchaseFulfillmentStatus.Submitted:
       return {
-        title: "Submitted to Starknet",
+        title: advancedView ? "Submitted to Starknet" : "Confirming purchase",
         status: "loading",
       };
     default:
       return {
-        title: "Purchasing on Starknet",
+        title: advancedView ? "Purchasing on Starknet" : "Confirming purchase",
         status: "loading",
       };
   }
@@ -137,6 +139,7 @@ export function CoinflowPurchaseSuccess({
   const { quantity } = useOnchainPurchaseContext();
   const { isMainnet } = useConnection();
   const handlePlay = useStarterpackPlayHandler();
+  const advancedView = useAdvancedView();
   const quantityText = quantity > 1 ? `(${quantity})` : "";
 
   const { data, error, isLoading, isFetching, refetch } =
@@ -229,7 +232,7 @@ export function CoinflowPurchaseSuccess({
   }, [error, isPaymentFailed]);
 
   const paymentStage = getCoinflowPaymentStage(paymentStatus);
-  const fulfillmentStage = getFulfillmentStage(fulfillmentStatus);
+  const fulfillmentStage = getFulfillmentStage(fulfillmentStatus, advancedView);
 
   return (
     <>
@@ -250,8 +253,10 @@ export function CoinflowPurchaseSuccess({
           <ErrorAlert
             title="Purchase Failure"
             description={
-              fulfillment?.lastError ||
-              "Onchain purchase failed after Coinflow payment confirmation."
+              advancedView
+                ? fulfillment?.lastError ||
+                  "Onchain purchase failed after Coinflow payment confirmation."
+                : "The payment was confirmed, but the purchase could not be completed. Please try again."
             }
             variant="error"
           />
@@ -303,6 +308,7 @@ export function CreditsPurchaseSuccess({
   const { refetchCreditsBalance } = useCreditPurchaseContext();
   const { isMainnet } = useConnection();
   const handlePlay = useStarterpackPlayHandler();
+  const advancedView = useAdvancedView();
   const quantityText = quantity > 1 ? `(${quantity})` : "";
 
   const { data, error, isLoading, isFetching, refetch } =
@@ -383,7 +389,7 @@ export function CreditsPurchaseSuccess({
     return undefined;
   }, [error]);
 
-  const fulfillmentStage = getFulfillmentStage(fulfillmentStatus);
+  const fulfillmentStage = getFulfillmentStage(fulfillmentStatus, advancedView);
 
   return (
     <>
@@ -403,9 +409,11 @@ export function CreditsPurchaseSuccess({
         {isFulfillmentFailed ? (
           <ErrorAlert
             title="Purchase Failure"
-            description={`${
-              fulfillment?.lastError || "Onchain purchase failed."
-            } Your credits have been automatically refunded.`}
+            description={
+              advancedView
+                ? `${fulfillment?.lastError || "Onchain purchase failed."} Your credits have been automatically refunded.`
+                : "The purchase could not be completed. Your credits have been automatically refunded."
+            }
             variant="error"
           />
         ) : statusError ? (
@@ -443,6 +451,7 @@ export function PurchaseSuccessInner({
   const { quantity } = useOnchainPurchaseContext();
   const { isMainnet } = useConnection();
   const handlePlay = useStarterpackPlayHandler();
+  const advancedView = useAdvancedView();
   const quantityText = quantity > 1 ? `(${quantity})` : "";
 
   useEffect(() => {
@@ -469,7 +478,13 @@ export function PurchaseSuccessInner({
       <LayoutFooter>
         {transactionHash && (
           <ConfirmingTransaction
-            title={`${type === "claimed" ? "Claimed" : "Confirmed"} on Starknet`}
+            title={
+              advancedView
+                ? `${type === "claimed" ? "Claimed" : "Confirmed"} on Starknet`
+                : type === "claimed"
+                  ? "Claim complete"
+                  : "Purchase complete"
+            }
             externalLink={
               getExplorer("starknet", transactionHash, isMainnet)?.url
             }

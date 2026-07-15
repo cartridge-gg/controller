@@ -14,7 +14,7 @@ import {
 import { ExternalWallet } from "@cartridge/controller";
 import { useStarterpackContext } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { useFeature } from "@/hooks/features";
+import { useAdvancedView, useFeature } from "@/hooks/features";
 import { useTripleClick } from "@/hooks/tripple-click";
 import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent } from "@/types/analytics";
@@ -87,6 +87,7 @@ export function WalletSelectionDrawer({
   showCredits = false,
 }: WalletSelectionDrawerProps) {
   const isCoinflowEnabled = useFeature("coinflow-support");
+  const advancedView = useAdvancedView();
 
   const handleIconTripleClick = useTripleClick({
     featureName: "coinflow-support",
@@ -463,7 +464,9 @@ export function WalletSelectionDrawer({
 
         {error && (
           <div className="text-destructive-100 text-sm mt-2">
-            {error.message}
+            {advancedView
+              ? error.message
+              : "The wallet could not be connected. Please try again."}
           </div>
         )}
       </DrawerContent>

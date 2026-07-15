@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { PropsWithChildren, useCallback, useMemo, useState } from "react";
 import {
+  AdvancedLink,
   ActivityAchievementCard,
   ActivityCollectibleCard,
   ActivityGameCard,
@@ -17,6 +17,22 @@ import { useData } from "@/hooks/data";
 import { CardProps } from "@/components/provider/data";
 
 const OFFSET = 100;
+
+function ActivityExplorerLink({
+  href,
+  children,
+}: PropsWithChildren<{ href: string }>) {
+  return (
+    <AdvancedLink
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      fallback={children}
+    >
+      {children}
+    </AdvancedLink>
+  );
+}
 
 export function Activity() {
   const [cap, setCap] = useState(OFFSET);
@@ -58,10 +74,9 @@ export function Activity() {
                   switch (props.variant) {
                     case "token":
                       return (
-                        <Link
+                        <ActivityExplorerLink
                           key={`${index}-${props.key}-${props.username}`}
-                          to={to(props.transactionHash)}
-                          target="_blank"
+                          href={to(props.transactionHash)}
                         >
                           <ActivityTokenCard
                             amount={props.amount}
@@ -72,14 +87,13 @@ export function Activity() {
                             action={props.action}
                             timestamp={props.timestamp * 1000}
                           />
-                        </Link>
+                        </ActivityExplorerLink>
                       );
                     case "collectible":
                       return (
-                        <Link
+                        <ActivityExplorerLink
                           key={`${index}-${props.key}`}
-                          to={to(props.transactionHash)}
-                          target="_blank"
+                          href={to(props.transactionHash)}
                         >
                           <ActivityCollectibleCard
                             name={props.name}
@@ -90,14 +104,13 @@ export function Activity() {
                             action={props.action}
                             timestamp={props.timestamp * 1000}
                           />
-                        </Link>
+                        </ActivityExplorerLink>
                       );
                     case "game":
                       return (
-                        <Link
+                        <ActivityExplorerLink
                           key={`${index}-${props.key}`}
-                          to={to(props.transactionHash)}
-                          target="_blank"
+                          href={to(props.transactionHash)}
                         >
                           <ActivityGameCard
                             action={props.title}
@@ -107,7 +120,7 @@ export function Activity() {
                             certified={props.certified}
                             timestamp={props.timestamp * 1000}
                           />
-                        </Link>
+                        </ActivityExplorerLink>
                       );
                     case "achievement":
                       return (

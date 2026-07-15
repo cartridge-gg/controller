@@ -11,6 +11,7 @@ import {
   TrashIcon,
 } from "@cartridge/controller-ui";
 import { useRef, useState } from "react";
+import { useAdvancedView } from "@/hooks/features";
 
 export interface DeleteAccountSheetProps {
   open: boolean;
@@ -25,6 +26,7 @@ export function DeleteAccountSheet({
   username,
   onConfirm,
 }: DeleteAccountSheetProps) {
+  const advancedView = useAdvancedView();
   const [confirmText, setConfirmText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,11 @@ export function DeleteAccountSheet({
     try {
       await onConfirm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete account");
+      setError(
+        advancedView && err instanceof Error
+          ? err.message
+          : "The account could not be deleted. Please try again.",
+      );
     } finally {
       setIsLoading(false);
       deletingRef.current = false;

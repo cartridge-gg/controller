@@ -15,7 +15,7 @@ import {
   OnchainStarterpackDetails,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { useFeature } from "@/hooks/features";
+import { useAdvancedView, useFeature } from "@/hooks/features";
 import { useCoinflowIsMainnet } from "@/hooks/payments/coinflow";
 import { useTripleClick } from "@/hooks/tripple-click";
 import {
@@ -52,6 +52,7 @@ import { AgeGate } from "@/components/identity/AgeGate";
 import { useCreditsContext } from "@/components/credits/provider";
 
 export function OnchainCheckout() {
+  const advancedView = useAdvancedView();
   const { navigate } = useNavigation();
   const { controller } = useConnection();
   const {
@@ -720,7 +721,11 @@ export function OnchainCheckout() {
                   <ErrorCard
                     variant="error"
                     title="Credits Checkout Unavailable"
-                    message={creditsQuoteError.message}
+                    message={
+                      advancedView
+                        ? creditsQuoteError.message
+                        : "Credits checkout could not be prepared. Please try again."
+                    }
                   />
                 )}
 
