@@ -4,6 +4,7 @@ import { Button } from "@cartridge/controller-ui";
 import { useAccount, useSendTransaction } from "@starknet-start/react";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { controllerConnector } from "./providers/StarknetProvider";
+import { AccountInterface } from "starknet";
 
 export function InvalidTxn() {
   const { address } = useAccount();
@@ -57,16 +58,21 @@ export function InvalidTxn() {
         <Button onClick={() => invalidEntrypoint()}>Invalid Entrypoint</Button>
         <Button
           onClick={() =>
-            account.execute([
+            (account as AccountInterface).execute(
+              [
+                {
+                  contractAddress: ETH_CONTRACT_ADDRESS,
+                  entrypoint: "approve",
+                  calldata: [account.address, "0x0", "0x0"],
+                },
+              ],
               {
-                contractAddress: ETH_CONTRACT_ADDRESS,
-                entrypoint: "approve",
-                calldata: [account.address, "0x0", "0x0"],
+                maxFee: 10000000000000000000000000000000000000000n,
               },
-            ])
+            )
           }
         >
-          Manual invoke
+          Manual high fee
         </Button>
       </div>
     </div>
