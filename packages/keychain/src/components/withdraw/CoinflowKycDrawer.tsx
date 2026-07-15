@@ -5,6 +5,7 @@ import {
   DrawerContent,
   Input,
   UserIcon,
+  UsStateSelect,
 } from "@cartridge/controller-ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { CoinflowKycStatus } from "@/hooks/payments/coinflow-withdraw";
@@ -77,12 +78,13 @@ export function CoinflowKycDrawer({
   const [zip, setZip] = useState("");
   const [ssnLast4, setSsnLast4] = useState("");
 
+  const zipValid = /^\d{5}$/.test(zip);
   const ssnValid = /^\d{4}$/.test(ssnLast4);
   const canSubmit =
     !!address1.trim() &&
     !!city.trim() &&
     !!state.trim() &&
-    !!zip.trim() &&
+    zipValid &&
     ssnValid;
 
   const pending = kycStatus === CoinflowKycStatus.Pending;
@@ -141,85 +143,94 @@ export function CoinflowKycDrawer({
 
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-foreground-300 font-medium">
-                  Your verified identity
+                <label className="text-xs text-foreground-400 font-medium">
+                  Full name
                 </label>
-                <p className="text-xs text-foreground-400">
-                  These details come from your verified identity and can't be
-                  edited here.
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <Input
-                  aria-label="First name"
-                  value={userData.firstName ?? ""}
-                  disabled
-                />
-                <Input
-                  aria-label="Last name"
-                  value={userData.lastName ?? ""}
-                  disabled
-                />
               </div>
               <Input
-                aria-label="Date of birth"
-                value={userData.dob ?? ""}
-                disabled
-              />
-              <Input aria-label="Email" value={userData.email ?? ""} disabled />
-              <Input
-                aria-label="Phone number"
-                value={userData.phoneNumber ?? ""}
+                aria-label="Full name"
+                value={`${userData.firstName!} ${userData.lastName!}`}
                 disabled
               />
             </div>
 
             <div className="flex flex-col gap-3">
-              <label className="text-xs text-foreground-300 font-medium">
-                Home address
-              </label>
-              <Input
-                placeholder="Address"
-                value={address1}
-                onChange={(e) => setAddress1(e.target.value)}
-              />
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="address1"
+                  className="text-xs text-foreground-400 font-medium"
+                >
+                  Address
+                </label>
                 <Input
-                  placeholder="City"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                />
-                <Input
-                  placeholder="State"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
+                  id="address1"
+                  label="Address"
+                  placeholder="Address"
+                  value={address1}
+                  onChange={(e) => setAddress1(e.target.value)}
                 />
               </div>
-              <Input
-                placeholder="Zip code"
-                value={zip}
-                onChange={(e) => setZip(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="ssn-last4"
-                className="text-xs text-foreground-300 font-medium"
-              >
-                Last 4 digits of SSN
-              </label>
-              <Input
-                id="ssn-last4"
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder="••••"
-                maxLength={4}
-                value={ssnLast4}
-                onChange={(e) =>
-                  setSsnLast4(e.target.value.replace(/\D/g, "").slice(0, 4))
-                }
-              />
+              <div className="flex gap-3">
+                <div className="flex flex-[7] flex-col gap-1">
+                  <label
+                    htmlFor="city"
+                    className="text-xs text-foreground-400 font-medium"
+                  >
+                    City
+                  </label>
+                  <Input
+                    id="city"
+                    placeholder="City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-[3] flex-col gap-1">
+                  <label className="text-xs text-foreground-400 font-medium">
+                    State
+                  </label>
+                  <UsStateSelect value={state} setValue={setState} />
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex flex-1 flex-col gap-1">
+                  <label
+                    htmlFor="zip"
+                    className="text-xs text-foreground-400 font-medium"
+                  >
+                    Zip Code
+                  </label>
+                  <Input
+                    id="zip"
+                    placeholder="Zip code"
+                    inputMode="numeric"
+                    maxLength={5}
+                    value={zip}
+                    onChange={(e) =>
+                      setZip(e.target.value.replace(/\D/g, "").slice(0, 5))
+                    }
+                  />
+                </div>
+                <div className="flex flex-1 flex-col gap-1">
+                  <label
+                    htmlFor="ssn-last4"
+                    className="text-xs text-foreground-400 font-medium"
+                  >
+                    Last 4 Digits of SSN
+                  </label>
+                  <Input
+                    id="ssn-last4"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="••••"
+                    maxLength={4}
+                    value={ssnLast4}
+                    onChange={(e) =>
+                      setSsnLast4(e.target.value.replace(/\D/g, "").slice(0, 4))
+                    }
+                  />
+                </div>
+              </div>
             </div>
 
             {error && (
