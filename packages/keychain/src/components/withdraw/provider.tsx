@@ -9,6 +9,7 @@ import {
 import {
   CoinflowKycStatus,
   useCoinflowWithdrawStatus,
+  type CoinflowDestination,
 } from "@/hooks/payments/coinflow-withdraw";
 import type { CoinflowWithdrawStatusQuery } from "@/utils/api";
 import { useConnection } from "@/hooks/connection";
@@ -28,15 +29,19 @@ export type CoinflowWithdrawStatus =
  * required by the credit-card on-ramp); it re-appears automatically if the
  * identity provider reports a verification as invalidated or deleted. A
  * returning, fully-onboarded user lands on "amount" automatically; a mid-flow
- * KYC failure demotes the step back to "onboarding-kyc". "confirm"/"status"
- * progressions land with their drawers.
+ * KYC failure demotes the step back to "onboarding-kyc". "select-method" and
+ * "add-bank" are user-action sub-steps of "amount": Continue with no confirmed
+ * transfer method opens the method picker (or the add-bank form when nothing
+ * is linked yet), and both return to "amount". "confirm"/"status" progressions
+ * land with their drawers.
  */
 export type WithdrawStep =
   | "overview"
   | "verification"
   | "onboarding-kyc"
-  | "onboarding-bank"
   | "amount"
+  | "select-method"
+  | "add-bank"
   | "confirm"
   | "status";
 
@@ -78,6 +83,22 @@ export type WithdrawContextValue = {
    */
   credits?: number;
   setCredits: (credits: number | undefined) => void;
+  /**
+   * The confirmed transfer method — a linked Coinflow destination. Undefined
+   * until the user picks one on the method drawer (or links a bank account);
+   * the overview drawer's amount step renders it as SelectedWithdrawMethod.
+   */
+  selectedDestination?: CoinflowDestination;
+  /** Confirms a destination and returns to the amount step. */
+  selectDestination: (destination: CoinflowDestination) => void;
+  /**
+   * Opens the transfer-method sub-step: the picker when destinations exist,
+   * the add-bank form otherwise (amount Continue with no confirmed method,
+   * or the SelectedWithdrawMethod change affordance).
+   */
+  openMethodSelection: () => void;
+  /** Cancels the method sub-step back to the amount step. */
+  closeMethodSelection: () => void;
 };
 
 export const WithdrawContext = createContext<WithdrawContextValue>({
@@ -94,6 +115,10 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
   statusError: null,
   credits: undefined,
   setCredits: () => {},
+  selectedDestination: undefined,
+  selectDestination: () => {},
+  openMethodSelection: () => {},
+  closeMethodSelection: () => {},
 });
 
 export function WithdrawProvider({ children }: PropsWithChildren) {
@@ -102,6 +127,15 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   // derived flow. Reset on close so every open starts at the overview.
   const [started, setStarted] = useState(false);
   const [credits, setCredits] = useState<number | undefined>();
+  // The method sub-step in flight ("select" = picker drawer, "add" = bank
+  // form) and the confirmed destination. Entered from the amount step, never
+  // derived — a user with a linked bank still confirms it explicitly.
+  const [methodFlow, setMethodFlow] = useState<"none" | "select" | "add">(
+    "none",
+  );
+  const [selectedDestination, setSelectedDestination] = useState<
+    CoinflowDestination | undefined
+  >();
 
   // Live gate: KYC state, destinations, bounds, active withdrawal. Only
   // fetched while the flow is open; refetch-on-focus (in the hook) covers the
@@ -133,6 +167,8 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     setIsOpen(false);
     setStarted(false);
     setCredits(undefined);
+    setMethodFlow("none");
+    setSelectedDestination(undefined);
   }, []);
 
   // Enters the flow from the overview drawer. Requires the status to have
@@ -146,6 +182,25 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   // first incomplete gate (the derived step recomputes from live data).
   const returnToOverview = useCallback(() => {
     setStarted(false);
+    setMethodFlow("none");
+  }, []);
+
+  // Enters the method sub-step from the amount step: pick among the linked
+  // destinations, or straight to the add-bank form when nothing is linked yet.
+  const openMethodSelection = useCallback(() => {
+    if (!status) return;
+    setMethodFlow(status.destinations.length === 0 ? "add" : "select");
+  }, [status]);
+
+  const closeMethodSelection = useCallback(() => {
+    setMethodFlow("none");
+  }, []);
+
+  // Confirms a destination (picked on the method drawer, or freshly returned
+  // by createCoinflowBankAccount) and lands back on the amount step.
+  const selectDestination = useCallback((destination: CoinflowDestination) => {
+    setSelectedDestination(destination);
+    setMethodFlow("none");
   }, []);
 
   // Email/phone/identity are derived live from the identity provider, so a
@@ -158,9 +213,9 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
 
   // "overview" until the user hits WITHDRAW; then derived per §3.1 of the
   // plan: email/phone/identity not all verified → verification; kycStatus
-  // !== APPROVED → onboarding-kyc; no linked destination → onboarding-bank;
-  // else the amount step. The "confirm"/"status" progressions are driven by
-  // user actions once their drawers exist.
+  // !== APPROVED → onboarding-kyc; else the amount step. The method sub-steps
+  // are user-action-driven from there (amount Continue / change affordance),
+  // not derived — as the "confirm"/"status" progressions will be.
   const step = useMemo<WithdrawStep>(() => {
     if (!started) {
       return "overview";
@@ -171,11 +226,14 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     if (!status || status.kycStatus !== CoinflowKycStatus.Approved) {
       return "onboarding-kyc";
     }
-    if (status.destinations.length === 0) {
-      return "onboarding-bank";
+    if (methodFlow === "add") {
+      return "add-bank";
+    }
+    if (methodFlow === "select") {
+      return "select-method";
     }
     return "amount";
-  }, [started, isIdentityGateVerified, status]);
+  }, [started, isIdentityGateVerified, status, methodFlow]);
 
   return (
     <WithdrawContext.Provider
@@ -193,6 +251,10 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
         statusError: (statusError as Error | null) ?? null,
         credits,
         setCredits,
+        selectedDestination,
+        selectDestination,
+        openMethodSelection,
+        closeMethodSelection,
       }}
     >
       {children}

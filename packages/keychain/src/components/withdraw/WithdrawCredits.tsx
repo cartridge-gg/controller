@@ -1,12 +1,15 @@
 import {
   useCoinflowIsMainnet,
+  useCreateCoinflowBankAccount,
   useCreateCoinflowKYC,
 } from "@/hooks/payments/coinflow-withdraw";
 import { useIdentityContext } from "@/components/identity/provider";
 import { Verification } from "@/components/purchase/verification";
 import { useWithdrawContext } from "./provider";
 import { CoinflowKycDrawer } from "./CoinflowKycDrawer";
+import { CreateBankAccountDrawer } from "./CreateBankAccountDrawer";
 import { OverviewDrawer } from "./OverviewDrawer";
+import { WithdrawMethodDrawer } from "./WithdrawMethodDrawer";
 
 interface WithdrawCreditsProps {
   isOpen: boolean;
@@ -21,9 +24,11 @@ interface WithdrawCreditsProps {
  * revealed in place on the overview drawer. Canceling any gate returns to the
  * overview; WITHDRAW resumes at the first incomplete gate — completed
  * verifications are never requested twice unless the identity provider or
- * Coinflow reports them invalidated. The bank-onboarding gate (plan step 5)
- * lands next; until then an approved user with no destination goes straight
- * to amount mode so the flow stays testable behind the flag.
+ * Coinflow reports them invalidated. Continue on the amount step with no
+ * confirmed transfer method opens the method picker (or the add-bank form
+ * when nothing is linked); both land back on the amount step with the
+ * confirmed method summarized inline. Continue with a method confirmed
+ * advances to the quote step (plan step 6).
  */
 export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
   const {
@@ -33,7 +38,12 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
     statusError,
     beginWithdraw,
     returnToOverview,
+    credits,
     setCredits,
+    selectedDestination,
+    selectDestination,
+    openMethodSelection,
+    closeMethodSelection,
   } = useWithdrawContext();
 
   const { isCoinflowSandbox } = useCoinflowIsMainnet();
@@ -45,12 +55,17 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
     error: kycError,
   } = useCreateCoinflowKYC();
 
+  const {
+    createBankAccount,
+    isLoading: isBankSubmitting,
+    error: bankError,
+  } = useCreateCoinflowBankAccount();
+
   // The Drawer dismiss path fires onClose when a drawer closes because the
   // step moved on (not just on user intent) — same as DepositCredits, every
   // drawer's onClose must be guarded on its own step or advancing the flow
   // tears it down.
-  const isOverviewStep =
-    step === "overview" || step === "amount" || step === "onboarding-bank";
+  const isOverviewStep = step === "overview" || step === "amount";
 
   return (
     <>
@@ -66,11 +81,56 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
         isLoading={statusLoading}
         error={statusError}
         sandbox={isCoinflowSandbox}
-        amountMode={step === "amount" || step === "onboarding-bank"}
+        amountMode={step === "amount"}
+        // Restores the picked amount when the drawer re-opens after the
+        // method sub-step (the drawer resets its input on close).
+        defaultAmountValue={credits ? (credits / 100).toFixed(2) : undefined}
+        selectedDestination={selectedDestination}
+        onChangeMethod={openMethodSelection}
         onContinue={(credits) => {
-          // Whole credits, ready for the quote/withdrawal inputs. Plan step 6
-          // fetches the quote here and advances to confirm.
+          // Whole credits, ready for the quote/withdrawal inputs.
           setCredits(credits);
+          if (!selectedDestination) {
+            // No transfer method confirmed yet: pick among the linked
+            // destinations, or link a bank account when none exist.
+            openMethodSelection();
+            return;
+          }
+          // Plan step 6 fetches the quote here and advances to confirm.
+        }}
+      />
+
+      <WithdrawMethodDrawer
+        isOpen={isOpen && step === "select-method"}
+        onClose={() => {
+          // Cancel back to the amount step — only on user intent; the same
+          // dismiss fires when confirming a method advances the step.
+          if (step === "select-method") closeMethodSelection();
+        }}
+        destinations={status?.destinations ?? []}
+        credits={credits ?? 0}
+        selectedToken={selectedDestination?.token}
+        sandbox={isCoinflowSandbox}
+        onSelect={selectDestination}
+      />
+
+      <CreateBankAccountDrawer
+        isOpen={isOpen && step === "add-bank"}
+        onClose={() => {
+          // Cancel back to the amount step — only on user intent (see above).
+          if (step === "add-bank") closeMethodSelection();
+        }}
+        isSubmitting={isBankSubmitting}
+        error={bankError}
+        sandbox={isCoinflowSandbox}
+        onSubmit={(form) => {
+          // The mutation returns the normalized CoinflowDestination — select
+          // it directly (the invalidated status query lists the same entry).
+          // Failures surface through the hook's error; "address required"
+          // reveals the drawer's address fields for a resubmit (§8.10).
+          createBankAccount(form)
+            .then(selectDestination)
+            .catch(() => {});
         }}
       />
 

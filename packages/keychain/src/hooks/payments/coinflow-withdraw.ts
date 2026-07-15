@@ -27,6 +27,7 @@ import { useCoinflowIsMainnet } from "./coinflow";
 // place instead of reaching into the generated module (mirrors coinflow.ts).
 export {
   CoinflowBankAccountType,
+  CoinflowDestinationType,
   CoinflowKycStatus,
   CoinflowPayoutSpeed,
   CoinflowWithdrawalFailureCode,

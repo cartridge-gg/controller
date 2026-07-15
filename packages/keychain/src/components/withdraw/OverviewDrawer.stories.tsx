@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
+import {
+  CoinflowDestinationType,
+  CoinflowPayoutSpeed,
+} from "@/hooks/payments/coinflow-withdraw";
 import { OverviewDrawer } from "./OverviewDrawer";
 
 const meta = {
@@ -98,5 +102,21 @@ export const AmountBelowMin: Story = {
   args: {
     amountMode: true,
     defaultAmountValue: "1.00",
+  },
+};
+
+/** Transfer method confirmed — the slim SelectedWithdrawMethod row shows
+ * below the amount selection; clicking it re-opens the method drawer. */
+export const AmountWithMethod: Story = {
+  args: {
+    amountMode: true,
+    defaultAmountValue: "6.13",
+    selectedDestination: {
+      type: CoinflowDestinationType.Bank,
+      token: "bank-token-1",
+      display: "Bank ****0283",
+      supportedSpeeds: [CoinflowPayoutSpeed.Standard],
+    },
+    onChangeMethod: () => {},
   },
 };

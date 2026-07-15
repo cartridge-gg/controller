@@ -14,7 +14,9 @@ import {
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import { formatUsdValue } from "@/utils/format-value";
+import type { CoinflowDestination } from "@/hooks/payments/coinflow-withdraw";
 import { AmountSelection } from "./AmountSelection";
+import { SelectedWithdrawMethod } from "./SelectedWithdrawMethod";
 
 /**
  * Same warning as the deposit flow (CoinflowCreditsCheckout) — shown on every
@@ -56,9 +58,16 @@ interface OverviewDrawerProps {
   sandbox?: boolean;
   /** True past the WITHDRAW click — shows the amount selection + Continue. */
   amountMode?: boolean;
-  /** Seeds the amount input (dollars string) — stories/tests only. */
+  /** Seeds the amount input (dollars string) — also used to restore the
+   * picked amount when the drawer re-opens after the method sub-step. */
   defaultAmountValue?: string;
-  /** Continue with the picked amount (whole credits); the quote step consumes it. */
+  /** The confirmed transfer method, once one is selected/linked — rendered as
+   * the slim SelectedWithdrawMethod row on the amount step. */
+  selectedDestination?: CoinflowDestination;
+  /** Re-opens the transfer-method drawer to change the selection. */
+  onChangeMethod?: () => void;
+  /** Continue with the picked amount (whole credits); opens the method
+   * sub-step when no method is confirmed yet, the quote step otherwise. */
   onContinue: (credits: number) => void;
 }
 
@@ -80,6 +89,8 @@ export function OverviewDrawer({
   sandbox,
   amountMode = false,
   defaultAmountValue,
+  selectedDestination,
+  onChangeMethod,
   onContinue,
 }: OverviewDrawerProps) {
   const [credits, setCredits] = useState(0);
@@ -174,6 +185,12 @@ export function OverviewDrawer({
                   defaultValue={defaultAmountValue}
                   onChange={setCredits}
                 />
+                {selectedDestination && onChangeMethod && (
+                  <SelectedWithdrawMethod
+                    destination={selectedDestination}
+                    onClick={onChangeMethod}
+                  />
+                )}
               </div>
             )}
 
@@ -197,7 +214,7 @@ export function OverviewDrawer({
   );
 }
 
-function OverviewRow({
+export function OverviewRow({
   label,
   value,
   tooltip,
