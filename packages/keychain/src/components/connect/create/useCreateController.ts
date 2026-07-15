@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
-import { useConnection } from "@/hooks/connection";
+import { useConnection, type SessionChainPolicies } from "@/hooks/connection";
 import { useToast } from "@/context/toast";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
@@ -154,6 +154,7 @@ const createSession = async ({
   controller,
   origin,
   policies,
+  chainPolicies,
   params,
   handleCompletion,
   closeModal,
@@ -165,6 +166,7 @@ const createSession = async ({
   controller: Controller;
   origin: string;
   policies?: ParsedSessionPolicies;
+  chainPolicies?: SessionChainPolicies;
   params?: ReturnType<typeof parseConnectParams>;
   handleCompletion: () => void;
   closeModal?: () => void;
@@ -215,6 +217,7 @@ const createSession = async ({
       controller,
       origin,
       policies,
+      chainPolicies,
     });
     currentParams.resolve?.(
       createConnectReply(controller.address(), isNewController, canKeepOpen),
@@ -344,6 +347,7 @@ export function useCreateController({
     chainId,
     setController,
     policies,
+    chainPolicies,
     isConfigLoading,
     isPoliciesResolved,
     locationGate,
@@ -366,7 +370,7 @@ export function useCreateController({
   }, [searchParams]);
   const handleCompletion = useRouteCompletion();
   const hasPolicies = !!policies;
-  const shouldAutoCreateSession = canAutoCreateSession(policies);
+  const shouldAutoCreateSession = canAutoCreateSession(policies, chainPolicies);
 
   const {
     signup: signupWithWebauthn,
@@ -564,6 +568,7 @@ export function useCreateController({
             controller,
             origin: effectiveOrigin,
             policies,
+            chainPolicies,
             params,
             handleCompletion,
             searchParams,
@@ -579,6 +584,7 @@ export function useCreateController({
       }
     },
     [
+      chainPolicies,
       setController,
       origin,
       policies,
@@ -880,6 +886,7 @@ export function useCreateController({
           controller: loginRet.controller,
           origin: effectiveOrigin,
           policies,
+          chainPolicies,
           params,
           handleCompletion,
           searchParams,
@@ -894,6 +901,7 @@ export function useCreateController({
       }
     },
     [
+      chainPolicies,
       origin,
       setController,
       policies,
@@ -994,6 +1002,7 @@ export function useCreateController({
               controller: loginController.controller,
               origin,
               policies,
+              chainPolicies,
               params,
               handleCompletion,
               searchParams,
@@ -1107,6 +1116,7 @@ export function useCreateController({
       });
     },
     [
+      chainPolicies,
       isSlot,
       loginWithWebauthn,
       loginWithWebauthnPopup,

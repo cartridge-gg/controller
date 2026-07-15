@@ -1,9 +1,10 @@
-import { ParentMethods } from "@/hooks/connection";
+import { ParentMethods, SessionChainPolicies } from "@/hooks/connection";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import Controller from "@/utils/controller";
 import {
   type Chain,
   type DefaultPaymentMethod,
+  type SessionChain,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -35,10 +36,16 @@ export type ConnectionContextValue = {
   };
   /** Chains the dapp explicitly configured (SDK `chains` param). */
   configuredChains: Chain[];
+  /** Chains covered by a multichain session approval (SDK `multichainSessions`
+   *  opt-in), resolved to their rpcUrl. */
+  sessionChains?: SessionChain[];
   preset: string | null;
   policiesStr: string | null;
   tokens?: string[];
   policies?: ParsedSessionPolicies;
+  /** One policy set per chain of a multichain session approval (SDK
+   *  `multichainSessions` opt-in). Undefined in single-chain mode. */
+  chainPolicies?: SessionChainPolicies;
   theme: VerifiableControllerTheme;
   isConfigLoading: boolean;
   isPoliciesResolved: boolean;

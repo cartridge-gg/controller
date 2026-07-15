@@ -15,6 +15,7 @@ import {
   CartridgeAccount,
   CartridgeAccountMeta,
   ControllerFactory,
+  ErrorCode,
   ImportedControllerMetadata,
   ImportedSessionMetadata,
   JsAddSignerInput,
@@ -42,6 +43,24 @@ export interface ImportedControllerState {
   controller: ImportedControllerMetadata;
   session?: ImportedSessionMetadata;
 }
+
+export type MultichainSessionInput = {
+  chainId: string;
+  rpcUrl: string;
+  policies: ParsedSessionPolicies;
+};
+
+export type MultichainSessionResult = {
+  chainId: string;
+  session?: AuthorizedSession;
+  error?: Error;
+};
+
+export type MultichainRegisterResult = {
+  chainId: string;
+  transactionHash?: string;
+  error?: Error;
+};
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -142,6 +161,178 @@ export default class Controller {
       toWasmPolicies(policies),
       expiresAt,
     );
+  }
+
+  /**
+   * Creates one session per chain within a single approval flow.
+   *
+   * The session hash is chain-bound (its SNIP-12 domain embeds the chain id),
+   * so each chain requires its own owner signature — sequential by design
+   * since WebAuthn owners get one prompt per signature. Sessions are created
+   * on ephemeral per-chain accounts sharing this controller's identity (the
+   * same pattern as `switchChain`); the WASM persists each one under
+   * chain-scoped storage keys, so a later chain switch finds its session
+   * without re-approval.
+   *
+   * A failed chain does not abort the loop: already-created sessions stay
+   * valid and the caller can retry the remaining chains.
+   */
+  async createMultichainSession(
+    appId: string,
+    expiresAt: bigint,
+    chainSessions: MultichainSessionInput[],
+    onProgress?: (chainId: string, index: number, total: number) => void,
+  ): Promise<MultichainSessionResult[]> {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    // Active chain first so the primary session lands even if the user
+    // cancels a later signature.
+    const activeChainId = BigInt(this.chainId());
+    const ordered = [...chainSessions].sort((a, b) => {
+      const aActive = BigInt(a.chainId) === activeChainId ? 0 : 1;
+      const bActive = BigInt(b.chainId) === activeChainId ? 0 : 1;
+      return aActive - bActive;
+    });
+
+    const results: MultichainSessionResult[] = [];
+    let usedEphemeralAccount = false;
+
+    for (const [index, chain] of ordered.entries()) {
+      const isActiveChain = BigInt(chain.chainId) === activeChainId;
+      onProgress?.(chain.chainId, index, ordered.length);
+      try {
+        if (isActiveChain) {
+          const session = await this.createSession(
+            appId,
+            expiresAt,
+            chain.policies,
+          );
+          results.push({ chainId: chain.chainId, session });
+        } else {
+          usedEphemeralAccount = true;
+          const session = await this.withEphemeralAccount(
+            chain.rpcUrl,
+            (account) =>
+              account.createSession(
+                appId,
+                toWasmPolicies(chain.policies),
+                expiresAt,
+              ),
+          );
+          results.push({ chainId: chain.chainId, session });
+        }
+      } catch (e) {
+        results.push({
+          chainId: chain.chainId,
+          error: e instanceof Error ? e : new Error(String(e)),
+        });
+      }
+    }
+
+    // Constructing a per-chain account may repoint the WASM's persisted
+    // "active" selector at the last chain touched, which would resurrect the
+    // controller on the wrong chain after a reload. Re-materialize the active
+    // chain's account to leave storage pointing where it started.
+    if (usedEphemeralAccount) {
+      try {
+        await this.withEphemeralAccount(this.rpcUrl(), async () => {});
+      } catch (e) {
+        console.error("Failed to restore active chain account state:", e);
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Registers a session on-chain (`register_session`) on each given chain,
+   * sequentially, via ephemeral per-chain accounts. Used by the standalone
+   * `/session` flow where the dapp supplies the session public key; the
+   * active chain is expected to be registered through the regular execution
+   * flow and NOT included here.
+   *
+   * An already-registered session on a chain counts as success, which makes
+   * retries idempotent.
+   */
+  async registerSessionOnChains(
+    appId: string,
+    expiresAt: bigint,
+    chains: MultichainSessionInput[],
+    publicKey: string,
+    onProgress?: (chainId: string, index: number, total: number) => void,
+  ): Promise<MultichainRegisterResult[]> {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    const results: MultichainRegisterResult[] = [];
+
+    for (const [index, chain] of chains.entries()) {
+      onProgress?.(chain.chainId, index, chains.length);
+      try {
+        const { transaction_hash } = await this.withEphemeralAccount(
+          chain.rpcUrl,
+          (account) =>
+            account.registerSession(
+              appId,
+              toWasmPolicies(chain.policies),
+              expiresAt,
+              publicKey,
+              undefined,
+            ),
+        );
+        results.push({
+          chainId: chain.chainId,
+          transactionHash: transaction_hash,
+        });
+      } catch (e) {
+        if (
+          (e as { code?: number })?.code === ErrorCode.SessionAlreadyRegistered
+        ) {
+          results.push({ chainId: chain.chainId });
+          continue;
+        }
+        results.push({
+          chainId: chain.chainId,
+          error: e instanceof Error ? e : new Error(String(e)),
+        });
+      }
+    }
+
+    if (chains.length > 0) {
+      try {
+        await this.withEphemeralAccount(this.rpcUrl(), async () => {});
+      } catch (e) {
+        console.error("Failed to restore active chain account state:", e);
+      }
+    }
+
+    return results;
+  }
+
+  // Builds a short-lived WASM account for another chain sharing this
+  // controller's identity (same owner/classHash/address), runs `fn`, and
+  // frees the WASM handles.
+  private async withEphemeralAccount<T>(
+    rpcUrl: string,
+    fn: (account: CartridgeAccount) => Promise<T>,
+  ): Promise<T> {
+    const accountWithMeta = await CartridgeAccount.new(
+      this.classHash(),
+      rpcUrl,
+      this.address(),
+      this.username(),
+      this.owner(),
+      import.meta.env.VITE_CARTRIDGE_API_URL,
+    );
+    const account = accountWithMeta.intoAccount();
+    try {
+      return await fn(account);
+    } finally {
+      account.free();
+    }
   }
 
   async skipSession(appId: string, policies: ParsedSessionPolicies) {

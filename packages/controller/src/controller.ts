@@ -38,6 +38,7 @@ import {
   MerkleDropsOptions,
   UpdateSessionOptions,
   BundleOptions,
+  SessionChain,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
@@ -157,6 +158,7 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     this.initializeChains(chains);
+    this.validateMultichainSessions();
 
     this.iframes = {
       keychain: options.lazyload ? undefined : this.createKeychainIframe(),
@@ -913,6 +915,45 @@ export default class ControllerProvider extends BaseProvider {
     }
   }
 
+  // Multichain sessions are an explicit opt-in with a security contract: every
+  // requested chain must be one the dapp configured, and session policies must
+  // be resolvable — fail fast at construction instead of silently degrading.
+  private validateMultichainSessions() {
+    const sessionChainIds = this.options.multichainSessions;
+    if (!sessionChainIds || sessionChainIds.length === 0) {
+      return;
+    }
+
+    if (!this.options.policies && !this.options.preset) {
+      throw new Error(
+        "`multichainSessions` requires `policies` or `preset` to be provided.",
+      );
+    }
+
+    for (const chainId of sessionChainIds) {
+      if (!this.chains.has(chainId)) {
+        throw new Error(
+          `\`multichainSessions\` chain ${chainId} is not a configured chain. ` +
+            `Available chains: ${Array.from(this.chains.keys()).join(", ")}`,
+        );
+      }
+    }
+  }
+
+  // Resolve the opted-in session chains to their rpcUrl so the keychain never
+  // has to re-derive chain ids from URLs.
+  private sessionChains(): SessionChain[] | undefined {
+    const sessionChainIds = this.options.multichainSessions;
+    if (!sessionChainIds || sessionChainIds.length === 0) {
+      return undefined;
+    }
+
+    return sessionChainIds.map((chainId) => ({
+      chainId,
+      rpcUrl: this.chains.get(chainId)!.rpcUrl,
+    }));
+  }
+
   private createKeychainIframe(): KeychainIFrame {
     // Check if we're returning from standalone auth flow
     const isReturningFromRedirect =
@@ -944,6 +985,7 @@ export default class ControllerProvider extends BaseProvider {
       ...this.options,
       rpcUrl: this.rpcUrl(),
       userChains: this.userChains,
+      sessionChains: this.sessionChains(),
       onClose: () => {
         this.keychain?.reset?.();
       },

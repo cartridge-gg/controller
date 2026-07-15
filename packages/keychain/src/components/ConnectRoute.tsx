@@ -53,6 +53,7 @@ export function ConnectRoute() {
   const {
     controller,
     policies,
+    chainPolicies,
     origin,
     theme,
     webauthnPopup,
@@ -388,17 +389,25 @@ export function ConnectRoute() {
 
     // Bypass session approval screen for verified sessions in embedded mode
     // Note: This is a fallback - main logic is handled in useCreateController
-    if (!requiresSessionApproval(policies)) {
+    if (!requiresSessionApproval(policies, chainPolicies)) {
       const createSessionForVerifiedPolicies = async () => {
         try {
           if (requiresWebauthnPopup) {
             // When session auth relies on WebAuthn, delegate it to a popup window.
+            // The popup export blob carries a single session, so multichain
+            // approvals degrade to the active chain here.
+            if (chainPolicies?.length) {
+              console.warn(
+                "[ConnectRoute] Multichain sessions are not supported via the WebAuthn popup flow; creating a session for the active chain only.",
+              );
+            }
             await createSessionViaPopup(controller, setController, popupParams);
           } else {
             await createVerifiedSession({
               controller,
               origin,
               policies,
+              chainPolicies,
             });
           }
           params.resolve?.(
@@ -432,6 +441,7 @@ export function ConnectRoute() {
     params,
     controller,
     policies,
+    chainPolicies,
     handleCompletion,
     isStandalone,
     redirectUrl,
@@ -509,7 +519,7 @@ export function ConnectRoute() {
     return null;
   }
 
-  if (policies.verified && !hasTokenApprovals) {
+  if (!requiresSessionApproval(policies, chainPolicies)) {
     // Auto session creation failed on Chrome iOS — show a "Continue" button
     // so the user tap provides the gesture required by WebAuthn.
     if (showContinueButton) {
@@ -521,7 +531,12 @@ export function ConnectRoute() {
           if (requiresWebauthnPopup) {
             await createSessionViaPopup(controller, setController, popupParams);
           } else {
-            await createVerifiedSession({ controller, origin, policies });
+            await createVerifiedSession({
+              controller,
+              origin,
+              policies,
+              chainPolicies,
+            });
           }
           params?.resolve?.(
             createConnectReply(
@@ -587,6 +602,7 @@ export function ConnectRoute() {
   return (
     <CreateSession
       policies={policies}
+      chainPolicies={chainPolicies}
       onConnect={handleConnect}
       onSkip={handleSkip}
     />

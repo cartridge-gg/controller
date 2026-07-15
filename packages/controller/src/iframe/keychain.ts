@@ -1,5 +1,5 @@
 import { KEYCHAIN_URL } from "../constants";
-import { Chain, Keychain, KeychainOptions } from "../types";
+import { Chain, Keychain, KeychainOptions, SessionChain } from "../types";
 import { WalletBridge } from "../wallets/bridge";
 import { IFrame, IFrameOptions } from "./base";
 
@@ -15,6 +15,11 @@ type KeychainIframeOptions = IFrameOptions<Keychain> &
     encryptedBlob?: string;
     /** Chains the dapp explicitly configured (see Controller.userChains). */
     userChains?: Chain[];
+    /**
+     * Chains covered by a single multichain session approval, resolved to
+     * their rpcUrl SDK-side so the keychain doesn't re-derive chain ids.
+     */
+    sessionChains?: SessionChain[];
   };
 
 const STARTERPACK_PLAY_CALLBACK_DELAY_MS = 200;
@@ -47,6 +52,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     coinflowSandbox,
     webauthnPopup,
     userChains,
+    sessionChains,
     ...iframeOptions
   }: KeychainIframeOptions) {
     let onStarterpackPlayHandler: (() => Promise<void>) | undefined;
@@ -103,6 +109,16 @@ export class KeychainIFrame extends IFrame<Keychain> {
       _url.searchParams.set(
         "chains",
         encodeURIComponent(JSON.stringify(userChains)),
+      );
+    }
+
+    // Chains covered by a single multichain session approval (explicit opt-in
+    // via ControllerOptions.multichainSessions). The keychain creates one
+    // session per entry within one approval flow.
+    if (sessionChains && sessionChains.length > 0) {
+      _url.searchParams.set(
+        "session_chains",
+        encodeURIComponent(JSON.stringify(sessionChains)),
       );
     }
 
