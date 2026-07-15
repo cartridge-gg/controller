@@ -18,10 +18,11 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  AdvancedDetails,
+  AdvancedLink,
 } from "@cartridge/controller-ui";
 import { formatAddress, cn } from "@cartridge/controller-ui/utils";
 import { useExplorer } from "@starknet-react/core";
-import { Link } from "react-router-dom";
 import { constants } from "starknet";
 import { MessageContent } from "./MessageCard";
 import { humanizeString } from "@cartridge/controller";
@@ -95,20 +96,23 @@ export function AggregateCard({
               <div key={address} className="flex flex-col gap-2">
                 <div className="py-2 px-1 flex items-center justify-between bg-background-200 text-xs font-medium">
                   <h1 className="text-foregroung-100">{name}</h1>
-                  <Link
-                    to={
-                      controller?.chainId() ===
-                        constants.StarknetChainId.SN_MAIN ||
-                      controller?.chainId() ===
-                        constants.StarknetChainId.SN_SEPOLIA
-                        ? explorer.contract(address)
-                        : `#` // TODO: Add explorer for worlds.dev
-                    }
-                    target="_blank"
-                    className="text-foreground-400 hover:underline"
-                  >
-                    {formatAddress(address, { first: 5, last: 5 })}
-                  </Link>
+                  <AdvancedDetails>
+                    <AdvancedLink
+                      href={
+                        controller?.chainId() ===
+                          constants.StarknetChainId.SN_MAIN ||
+                        controller?.chainId() ===
+                          constants.StarknetChainId.SN_SEPOLIA
+                          ? explorer.contract(address)
+                          : undefined
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-foreground-400 hover:underline"
+                    >
+                      {formatAddress(address, { first: 5, last: 5 })}
+                    </AdvancedLink>
+                  </AdvancedDetails>
                 </div>
 
                 <div className="flex flex-col gap-px rounded overflow-auto border border-background divide-y divide-solid divide-background">

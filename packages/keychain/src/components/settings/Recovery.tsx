@@ -11,10 +11,12 @@ import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { createExecuteUrl } from "@/utils/connection/execute";
 import { useNavigate } from "react-router-dom";
+import { useAdvancedView } from "@/hooks/features";
 
 export function Recovery() {
   const { controller } = useConnection();
   const navigate = useNavigate();
+  const advancedView = useAdvancedView();
   const [externalOwnerAddress, setExternalOwnerAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -46,13 +48,18 @@ export function Recovery() {
 
   return (
     <>
-      <HeaderInner variant="compressed" title="Add Recovery Account" hideIcon />
+      <HeaderInner
+        variant="compressed"
+        title={advancedView ? "Add Recovery Account" : "Add a recovery account"}
+        hideIcon
+      />
       <LayoutContent>
         {/* TODO: Get rid of this div once Content is updated with TW */}
         <div className="flex flex-col gap-4">
           <div className="text-sm text-foreground-400">
-            Recovery accounts are Starknet wallets that can be used to recover
-            your Controller if you lose access to your signers.
+            {advancedView
+              ? "Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
+              : "Use a compatible account to recover your Controller."}
           </div>
           <div className="flex flex-col gap-2">
             <Input

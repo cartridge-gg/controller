@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { useAdvancedView } from "@/hooks/features";
 
 // Thrown when the backend rejects an OTP code as invalid or expired. The
 // drawer treats this as recoverable (let the user re-enter the code); any
@@ -12,12 +13,21 @@ export class InvalidVerificationCodeError extends Error {
 }
 
 export const VerifyErrorAlert = ({ error }: { error: string }) => {
-  const { title, description } = useMemo(
-    () => ({
-      title: error.split("desc = ").at(-1) as string,
-      description: error.includes("desc = ") ? error : undefined,
-    }),
-    [error],
-  );
+  const advancedView = useAdvancedView();
+  const { title, description } = useMemo(() => {
+    if (advancedView) {
+      return {
+        title: error.split("desc = ").at(-1) as string,
+        description: error.includes("desc = ") ? error : undefined,
+      };
+    }
+
+    return error.toLowerCase().includes("invalid or expired verification")
+      ? { title: "Invalid or expired verification code" }
+      : {
+          title: "Verification failed",
+          description: "Please try again.",
+        };
+  }, [advancedView, error]);
   return <ErrorAlert title={title} description={description} />;
 };

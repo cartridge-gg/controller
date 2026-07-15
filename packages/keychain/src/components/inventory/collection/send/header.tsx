@@ -1,4 +1,5 @@
 import { Thumbnail, PaperPlaneIcon, TagIcon } from "@cartridge/controller-ui";
+import { useAdvancedView } from "@/hooks/features";
 
 interface HeaderProps {
   image?: string;
@@ -23,9 +24,10 @@ export function SendHeader({ image, title }: HeaderProps) {
 }
 
 export function ReviewHeader() {
+  const advancedView = useAdvancedView();
   return (
     <Header
-      label="Review Transaction"
+      label={advancedView ? "Review Transaction" : "Review request"}
       Icon={
         <PaperPlaneIcon
           variant="solid"

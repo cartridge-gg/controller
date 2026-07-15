@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   LayoutContent,
   LayoutFooter,
@@ -13,6 +13,7 @@ import {
   useDisclosure,
   UsdColorIcon,
   ActivityTokenCardAction,
+  AdvancedLink,
 } from "@cartridge/controller-ui";
 
 import { useData } from "@/hooks/data";
@@ -37,6 +38,7 @@ import { EmptyState, LoadingState } from "@/components/activity";
 import { SendTokenDrawer } from "./send/send-drawer";
 import { useCreditsContext } from "@/components/credits/provider";
 import { formatCredits } from "@/utils/credits";
+import { useAdvancedView } from "@/hooks/features";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -50,7 +52,7 @@ export function Token() {
 }
 
 export const CREDITS_DESCRIPTION =
-  "USD Credits are an account balance that can be used to pay for games and network activity.";
+  "USD Credits are an account balance that can be used to pay for games and purchases.";
 
 const PAYMENT_METHOD_LABELS: Record<CreditsPaymentMethod, string> = {
   [CreditsPaymentMethod.Card]: "Card",
@@ -60,6 +62,7 @@ const PAYMENT_METHOD_LABELS: Record<CreditsPaymentMethod, string> = {
 };
 
 function Credits() {
+  const advancedView = useAdvancedView();
   // TODO: Get parent from keychain connection if needed
   // const { navigate } = useNavigation();
   const account = useAccount();
@@ -123,12 +126,12 @@ function Credits() {
             : "spend",
         item: isDeposit
           ? PAYMENT_METHOD_LABELS[item.paymentMethod]
-          : item.comment || "Network Fee",
+          : item.comment || (advancedView ? "Network Fee" : "Processing fee"),
         date: getDate(timestamp),
         timestamp,
       };
     });
-  }, [history]);
+  }, [advancedView, history]);
 
   // Show loading state while credits are being fetched
   if (credit.balance.value === undefined) {
@@ -353,9 +356,9 @@ function ERC20() {
                   {date}
                 </p>
                 {transactions.map((item) => (
-                  <Link
+                  <AdvancedLink
                     key={item.key}
-                    to={to(item.transactionHash)}
+                    href={to(item.transactionHash)}
                     target="_blank"
                   >
                     <ActivityTokenCard
@@ -372,7 +375,7 @@ function ERC20() {
                       action={item.action}
                       timestamp={item.timestamp}
                     />
-                  </Link>
+                  </AdvancedLink>
                 ))}
               </div>
             ))}

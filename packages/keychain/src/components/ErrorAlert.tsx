@@ -31,6 +31,7 @@ import React, {
   useState,
 } from "react";
 import { Link } from "react-router-dom";
+import { useAdvancedView } from "@/hooks/features";
 
 export function ErrorAlert({
   title,
@@ -152,6 +153,21 @@ export function ControllerErrorAlert({
   isPaymaster?: boolean;
   className?: string;
 }) {
+  const advancedView = useAdvancedView();
+
+  if (!advancedView) {
+    const presentation = getSimpleErrorPresentation(error);
+    return (
+      <ErrorAlert
+        title={presentation.title}
+        description={presentation.description}
+        variant={presentation.variant ?? "error"}
+        isExpanded
+        className={className}
+      />
+    );
+  }
+
   let title = "An error occurred";
   let description: string | React.ReactElement = error.message;
   let isExpanded = false;
@@ -438,6 +454,150 @@ export function ControllerErrorAlert({
     />
   );
 }
+
+type SimpleErrorPresentation = {
+  title: string;
+  description: string;
+  variant?: string;
+};
+
+function getSimpleErrorPresentation(
+  error: ControllerError | Error | ErrorWithGraphQL,
+): SimpleErrorPresentation {
+  if (!isControllerError(error)) {
+    if (error instanceof ExternalWalletError) {
+      if (isExplicitWalletRejection(error.message)) {
+        return {
+          title: "Request cancelled",
+          description: "Nothing was changed.",
+        };
+      }
+
+      return {
+        title: "Wallet request failed",
+        description:
+          "Check your wallet and recent activity before trying again.",
+      };
+    }
+
+    if ("graphqlError" in error && error.graphqlError) {
+      return connectionProblem;
+    }
+
+    return unknownProblem;
+  }
+
+  switch (error.code) {
+    case ErrorCode.SignError:
+    case ErrorCode.DeviceCreateCredential:
+    case ErrorCode.DeviceGetAssertion:
+    case ErrorCode.DeviceBadAssertion:
+    case ErrorCode.DeviceChannel:
+      return {
+        title: "Authentication failed",
+        description:
+          "The request timed out or was cancelled. Please try again.",
+      };
+    case ErrorCode.InsufficientBalance:
+    case ErrorCode.StarknetInsufficientAccountBalance:
+    case ErrorCode.StarknetInsufficientMaxFee:
+    case ErrorCode.AccountFeeOutOfRange:
+      return {
+        title: "Not enough funds",
+        description: "Add funds or choose a smaller amount, then try again.",
+        variant: "warning",
+      };
+    case ErrorCode.StorageError:
+      return {
+        title: "Couldn't access saved Controller data",
+        description: "Check browser storage permissions, then try again.",
+      };
+    case ErrorCode.ProviderRateLimited:
+    case ErrorCode.ProviderArrayLengthMismatch:
+    case ErrorCode.ProviderOther:
+      return connectionProblem;
+    case ErrorCode.AccountFactoryError:
+    case ErrorCode.CartridgeControllerNotDeployed:
+      return {
+        title: "Controller setup failed",
+        description: "Try setting up your Controller again.",
+      };
+    case ErrorCode.OriginError:
+    case ErrorCode.DeviceOrigin:
+      return {
+        title: "Security check failed",
+        description: "Return to the game and start the request again.",
+      };
+    case ErrorCode.PolicyChainIdMismatch:
+      return {
+        title: "Wrong network selected",
+        description:
+          "The request does not match the selected network. Return to the game and try again.",
+        variant: "warning",
+      };
+    case ErrorCode.EncodingError:
+    case ErrorCode.SerdeWasmBindgenError:
+    case ErrorCode.CairoSerdeError:
+    case ErrorCode.CairoShortStringToFeltError:
+    case ErrorCode.PaymasterExecutionTimeNotReached:
+    case ErrorCode.PaymasterExecutionTimePassed:
+    case ErrorCode.PaymasterInvalidCaller:
+    case ErrorCode.PaymasterRateLimitExceeded:
+    case ErrorCode.PaymasterNotSupported:
+    case ErrorCode.PaymasterHttp:
+    case ErrorCode.PaymasterExcecution:
+    case ErrorCode.PaymasterSerialization:
+    case ErrorCode.AccountSigning:
+    case ErrorCode.AccountProvider:
+    case ErrorCode.AccountClassHashCalculation:
+    case ErrorCode.StarknetFailedToReceiveTransaction:
+    case ErrorCode.StarknetContractNotFound:
+    case ErrorCode.StarknetClassHashNotFound:
+    case ErrorCode.StarknetTransactionHashNotFound:
+    case ErrorCode.StarknetNoBlocks:
+    case ErrorCode.StarknetInvalidContinuationToken:
+    case ErrorCode.StarknetTooManyKeysInFilter:
+    case ErrorCode.StarknetContractError:
+    case ErrorCode.StarknetClassAlreadyDeclared:
+    case ErrorCode.StarknetInvalidTransactionNonce:
+    case ErrorCode.StarknetCompilationFailed:
+    case ErrorCode.StarknetContractClassSizeIsTooLarge:
+    case ErrorCode.StarknetNonAccount:
+    case ErrorCode.StarknetDuplicateTx:
+    case ErrorCode.StarknetCompiledClassHashMismatch:
+    case ErrorCode.StarknetUnsupportedTxVersion:
+    case ErrorCode.StarknetUnsupportedContractClassVersion:
+    case ErrorCode.StarknetNoTraceAvailable:
+    case ErrorCode.StarknetUnexpectedError:
+    case ErrorCode.StarknetTransactionExecutionError:
+    case ErrorCode.StarknetValidationFailure:
+      return transactionFailed;
+    default:
+      return unknownProblem;
+  }
+}
+
+function isExplicitWalletRejection(message: string): boolean {
+  return /USER_REFUSED_OP|user (?:rejected|denied)|request (?:cancelled|canceled)|rejected by user/i.test(
+    message,
+  );
+}
+
+const connectionProblem: SimpleErrorPresentation = {
+  title: "Connection problem",
+  description: "Check your connection and try again.",
+};
+
+const transactionFailed: SimpleErrorPresentation = {
+  title: "Transaction failed",
+  description:
+    "Review the request and try again. If it keeps failing, contact support.",
+};
+
+const unknownProblem: SimpleErrorPresentation = {
+  title: "Something went wrong",
+  description: "Please try again. If it keeps failing, contact support.",
+};
 
 function StackTraceDisplay({
   stackTrace,

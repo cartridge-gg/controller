@@ -98,7 +98,7 @@ describe("ConfirmTransaction", () => {
         } as any,
       });
     });
-    expect(screen.getByText("Review Transaction")).toBeInTheDocument();
+    expect(screen.getByText("Review request")).toBeInTheDocument();
   });
 
   it("displays validation error state when execution fails with validation error", async () => {
@@ -128,9 +128,9 @@ describe("ConfirmTransaction", () => {
       );
     });
 
-    // Wait for component to settle and check that at least one error message is displayed
+    // Simple view presents one safe error summary without duplicating raw details.
     await waitFor(() => {
-      expect(screen.getAllByText("Account validation failed")).toHaveLength(2);
+      expect(screen.getAllByText("Transaction failed")).toHaveLength(1);
     });
 
     // Check that the submit button is disabled due to error
@@ -179,9 +179,9 @@ describe("ConfirmTransaction", () => {
       );
     });
 
-    // Check that error is displayed (should have 2 instances of the error message)
+    // Check that the safe simple-view error is displayed once.
     await waitFor(() => {
-      expect(screen.getAllByText("Account validation failed")).toHaveLength(2);
+      expect(screen.getAllByText("Transaction failed")).toHaveLength(1);
     });
 
     // Submit errors must be propagated so caller promises can resolve/reject
@@ -222,7 +222,7 @@ describe("ConfirmTransaction", () => {
 
     // Should show the transaction review screen directly
     await waitFor(() => {
-      expect(screen.getByText("Review Transaction")).toBeInTheDocument();
+      expect(screen.getByText("Review request")).toBeInTheDocument();
     });
   });
 

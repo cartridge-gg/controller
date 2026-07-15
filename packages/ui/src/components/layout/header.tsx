@@ -8,7 +8,7 @@ import {
 } from "@/components/icons";
 import { Network } from "@/components/network";
 import { Button } from "@/components/primitives/button";
-import { useUI } from "@/hooks";
+import { useAdvancedView, useUI } from "@/hooks";
 import { ConnectionTooltip, Thumbnail } from "@/index";
 import { cn, isIframe } from "@/utils";
 import { useMemo } from "react";
@@ -42,6 +42,7 @@ export function LayoutHeader({
   onWithdraw,
   ...innerProps
 }: HeaderProps) {
+  const advancedView = useAdvancedView();
   const {
     account,
     chainId,
@@ -153,7 +154,7 @@ export function LayoutHeader({
                 />
               </>
             ) : (
-              !hideNetwork && <Network chainId={chainId} />
+              !hideNetwork && advancedView && <Network chainId={chainId} />
             ))}
 
           {openSettings && !hideSettings && (

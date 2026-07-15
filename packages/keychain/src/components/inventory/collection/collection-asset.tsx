@@ -19,6 +19,7 @@ import {
   Spinner,
   Thumbnail,
   useDisclosure,
+  AdvancedLink,
 } from "@cartridge/controller-ui";
 
 import { cn } from "@cartridge/controller-ui/utils";
@@ -258,9 +259,9 @@ export function CollectionAsset() {
                   value="activity"
                 >
                   {events.map((props: CardProps, index: number) => (
-                    <Link
+                    <AdvancedLink
                       key={`${index}-${props.key}`}
-                      to={to(props.transactionHash)}
+                      href={to(props.transactionHash)}
                       target="_blank"
                     >
                       <TraceabilityCollectibleCard
@@ -276,7 +277,7 @@ export function CollectionAsset() {
                         collectibleName={title || collection.name}
                         currencyImage={props.currencyImage}
                       />
-                    </Link>
+                    </AdvancedLink>
                   ))}
                   <Button
                     variant="secondary"

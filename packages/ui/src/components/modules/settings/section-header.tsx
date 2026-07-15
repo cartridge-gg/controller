@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@cartridge/controller-ui/utils";
 import { Status } from "./status";
-import { Spinner } from "@/index";
+import { Spinner, useAdvancedView } from "@/index";
 
 export type SectionHeaderKind =
   | "sessions"
@@ -101,6 +101,11 @@ export const SectionHeader = React.forwardRef<
     ref,
   ) => {
     const { title, description } = variants[kind];
+    const advancedView = useAdvancedView();
+    const resolvedDescription =
+      kind === "recovery" && !advancedView
+        ? "Use a compatible account to recover your Controller if you lose access to your signers."
+        : description;
     return (
       <div ref={ref} className={cn("space-y-2", className)} {...props}>
         <div className="flex flex-row items-center justify-between">
@@ -111,7 +116,9 @@ export const SectionHeader = React.forwardRef<
           {showStatus && <Status isActive={isActive} />}
           {extraContent}
         </div>
-        <p className="text-foreground-300 text-xs font-normal">{description}</p>
+        <p className="text-foreground-300 text-xs font-normal">
+          {resolvedDescription}
+        </p>
       </div>
     );
   },

@@ -4,6 +4,7 @@ import { useDeploy } from "@/hooks/deploy";
 import { useFeeToken } from "@/hooks/tokens";
 import { ControllerError } from "@/utils/connection";
 import {
+  AdvancedDetails,
   Button,
   CheckIcon,
   ControllerIcon,
@@ -34,6 +35,7 @@ import {
   useRouteCompletion,
   useRouteCallbacks,
 } from "@/hooks/route";
+import { useAdvancedView } from "@/hooks/features";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -83,6 +85,7 @@ export function DeployControllerView({
   const [accountState, setAccountState] = useState<
     "fund" | "deploy" | "deploying" | "deployed"
   >("fund");
+  const advancedView = useAdvancedView();
 
   const chainId = controller?.chainId();
   const chainName = chainId ? getChainName(chainId) : "Unknown";
@@ -154,40 +157,55 @@ export function DeployControllerView({
 
   switch (accountState) {
     case "fund":
-      return <Funding title={"Fund Controller"} />;
+      return <Funding title={advancedView ? "Fund Controller" : "Add funds"} />;
     case "deploy":
       return (
         <>
           <HeaderInner
             variant="expanded"
             icon={<ControllerIcon size="lg" />}
-            title="Deploy Controller"
-            description="This will deploy your Controller"
+            title={
+              advancedView ? "Deploy Controller" : "Set up your Controller"
+            }
+            description={
+              advancedView
+                ? "This will deploy your Controller"
+                : "Finish setting up your Controller."
+            }
             hideIcon
           />
           <LayoutContent>
-            <TransactionSummary
-              calls={[
-                {
-                  entrypoint: "deploy",
-                  contractAddress:
-                    "0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
-                },
-              ]}
-            />
+            <AdvancedDetails>
+              <TransactionSummary
+                calls={[
+                  {
+                    entrypoint: "deploy",
+                    contractAddress:
+                      "0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
+                  },
+                ]}
+              />
+            </AdvancedDetails>
           </LayoutContent>
 
           <LayoutFooter>
             {error ? (
-              <ErrorAlert
-                title="Something went wrong"
-                description={error.message}
-              />
+              advancedView ? (
+                <ErrorAlert
+                  title="Something went wrong"
+                  description={error.message}
+                />
+              ) : (
+                <ErrorAlert
+                  title="Setup failed"
+                  description="Try setting up your Controller again."
+                />
+              )
             ) : (
               <Fees isLoading={false} maxFee={feeEstimate} />
             )}
             <Button onClick={onDeploy} isLoading={isDeploying}>
-              DEPLOY
+              {advancedView ? "DEPLOY" : "SET UP"}
             </Button>
             <Button variant="secondary" onClick={onCancel}>
               Cancel
@@ -201,8 +219,16 @@ export function DeployControllerView({
           <HeaderInner
             variant="expanded"
             icon={<Spinner size="xl" />}
-            title="Deploying Controller"
-            description={`Your controller is being deployed on ${chainName}`}
+            title={
+              advancedView
+                ? "Deploying Controller"
+                : "Preparing your Controller"
+            }
+            description={
+              advancedView
+                ? `Your controller is being deployed on ${chainName}`
+                : "This may take a moment."
+            }
             hideIcon
           />
           <LayoutContent>
@@ -215,10 +241,17 @@ export function DeployControllerView({
           </LayoutContent>
           <LayoutFooter>
             {error ? (
-              <ErrorAlert
-                title="Something went wrong"
-                description={error.message}
-              />
+              advancedView ? (
+                <ErrorAlert
+                  title="Something went wrong"
+                  description={error.message}
+                />
+              ) : (
+                <ErrorAlert
+                  title="Setup failed"
+                  description="Try setting up your Controller again."
+                />
+              )
             ) : !deployHash && ctrlError ? (
               <ControllerErrorAlert error={ctrlError} />
             ) : null}
@@ -234,8 +267,12 @@ export function DeployControllerView({
           <HeaderInner
             variant="expanded"
             Icon={CheckIcon}
-            title="Success!"
-            description={`Your controller has been deployed on ${chainName}`}
+            title={advancedView ? "Success!" : "Setup complete"}
+            description={
+              advancedView
+                ? `Your controller has been deployed on ${chainName}`
+                : "Your Controller is ready."
+            }
             hideIcon
           />
           <LayoutContent className="items-center">
@@ -248,10 +285,17 @@ export function DeployControllerView({
           </LayoutContent>
           <LayoutFooter>
             {error ? (
-              <ErrorAlert
-                title="Something went wrong"
-                description={error.message}
-              />
+              advancedView ? (
+                <ErrorAlert
+                  title="Something went wrong"
+                  description={error.message}
+                />
+              ) : (
+                <ErrorAlert
+                  title="Setup failed"
+                  description="Try setting up your Controller again."
+                />
+              )
             ) : !deployHash && ctrlError ? (
               <ControllerErrorAlert error={ctrlError} />
             ) : null}
@@ -281,13 +325,16 @@ function ExplorerLink({
   }
 
   return (
-    <Link
-      to={explorer.transaction(txHash)}
-      target="_blank"
-      className="flex items-center gap-1 text-sm text-foreground-400 underline"
-    >
-      View Transaction
-      <ExternalIcon size="sm" />
-    </Link>
+    <AdvancedDetails>
+      <Link
+        to={explorer.transaction(txHash)}
+        target="_blank"
+        rel="noreferrer"
+        className="flex items-center gap-1 text-sm text-foreground-400 underline"
+      >
+        View Transaction
+        <ExternalIcon size="sm" />
+      </Link>
+    </AdvancedDetails>
   );
 }

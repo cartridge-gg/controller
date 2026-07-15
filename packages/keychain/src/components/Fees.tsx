@@ -9,6 +9,8 @@ import { useTokens } from "@/hooks/token";
 import { ErrorAlert } from "./ErrorAlert";
 import { FeesRow } from "./FeesRow";
 import { cn } from "@cartridge/controller-ui/utils";
+import { Spinner } from "@cartridge/controller-ui";
+import { useAdvancedView } from "@/hooks/features";
 
 export type FeesData = {
   label: string;
@@ -36,6 +38,7 @@ export function Fees({
   const [feeValue, setFeeValue] = useState<number>();
   const [usdFee, setUsdFee] = useState<string>();
   const isLoading = isEstimating || isPriceLoading;
+  const advancedView = useAdvancedView();
 
   const { tokens, status: tokensStatus } = useTokens();
 
@@ -101,39 +104,55 @@ export function Fees({
               isLoading={tokensStatus == "loading"}
             />
           ))}
-          {displayFees && (
-            <FeesRow
-              label={
-                isWaiting
-                  ? "Building transactions"
-                  : isLoading
-                    ? "Calculating Fees"
-                    : "Network Fee"
-              }
-              amount={feeValue ?? 0}
-              decimals={2}
-              usdValue={usdFee}
-              token={
-                feeToken
-                  ? {
-                      balance: {
-                        amount: Number(feeToken?.balance ?? 0),
-                        value: 0,
-                        change: 0,
-                      },
-                      metadata: {
-                        name: feeToken.name,
-                        address: feeToken.address,
-                        decimals: feeToken.decimals,
-                        symbol: feeToken.symbol,
-                        image: feeToken.icon,
-                      },
-                    }
-                  : undefined
-              }
-              isLoading={isLoading}
-            />
-          )}
+          {displayFees &&
+            (advancedView ? (
+              <FeesRow
+                label={
+                  isWaiting
+                    ? "Building transactions"
+                    : isLoading
+                      ? "Calculating Fees"
+                      : "Network Fee"
+                }
+                amount={feeValue ?? 0}
+                decimals={2}
+                usdValue={usdFee}
+                token={
+                  feeToken
+                    ? {
+                        balance: {
+                          amount: Number(feeToken?.balance ?? 0),
+                          value: 0,
+                          change: 0,
+                        },
+                        metadata: {
+                          name: feeToken.name,
+                          address: feeToken.address,
+                          decimals: feeToken.decimals,
+                          symbol: feeToken.symbol,
+                          image: feeToken.icon,
+                        },
+                      }
+                    : undefined
+                }
+                isLoading={isLoading}
+              />
+            ) : (
+              <div className="flex gap-1 w-full items-center justify-between select-none">
+                <p className="text-sm text-foreground-300">
+                  {isWaiting
+                    ? "Preparing request"
+                    : isLoading
+                      ? "Calculating fee"
+                      : "Processing fee"}
+                </p>
+                {isLoading ? (
+                  <Spinner />
+                ) : (
+                  <p className="text-sm text-foreground-300">{usdFee}</p>
+                )}
+              </div>
+            ))}
         </div>
       )}
     </>

@@ -48,6 +48,7 @@ import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { createStarknetCryptoPayment } from "@/hooks/payments/crypto";
 import { Team } from "./teams";
+import { useAdvancedView } from "@/hooks/features";
 
 type SlotFundingToken = {
   key: "USDC" | "STRK";
@@ -93,6 +94,7 @@ function SlotCryptoFundInner({
   const { setOnBackCallback } = useNavigation();
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { account: extAccount } = useAccount();
+  const advancedView = useAdvancedView();
 
   useEffect(() => {
     setOnBackCallback(() => onBack);
@@ -136,7 +138,7 @@ function SlotCryptoFundInner({
       {
         key: "STRK",
         symbol: "STRK",
-        name: "Starknet Token",
+        name: "STRK Token",
         decimals: 18,
         address: STRK_CONTRACT_ADDRESS,
         icon: <StarknetColorIcon />,
@@ -397,7 +399,11 @@ function SlotCryptoFundInner({
           <ErrorAlert
             variant="error"
             title="Balance Error"
-            description={balanceError.message}
+            description={
+              advancedView
+                ? balanceError.message
+                : "Your balance could not be loaded. Check your connection and try again."
+            }
           />
         )}
         {amountInput && amount === undefined && (
@@ -432,7 +438,11 @@ function SlotCryptoFundInner({
           <ErrorAlert
             variant="error"
             title="Funding Error"
-            description={getHumanReadableError(error)}
+            description={
+              advancedView
+                ? getHumanReadableError(error)
+                : "The funds could not be sent. Please try again."
+            }
           />
         )}
         {!extAccount ? (
@@ -458,7 +468,11 @@ function SlotCryptoFundInner({
           ) : (
             <ErrorAlert
               variant="info"
-              title="No Starknet wallet detected"
+              title={
+                advancedView
+                  ? "No Starknet wallet detected"
+                  : "No compatible wallet detected"
+              }
               description="Install Argent or Braavos to fund this team."
             />
           )

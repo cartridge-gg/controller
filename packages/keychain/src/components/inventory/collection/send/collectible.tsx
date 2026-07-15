@@ -19,11 +19,13 @@ import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { SendCollectibleDrawer } from "./collectible-drawer";
 import { Sending } from "./sending";
 import placeholder from "/placeholder.svg?url";
+import { useAdvancedView } from "@/hooks/features";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
 
 export function SendCollectible() {
+  const advancedView = useAdvancedView();
   const { address: contractAddress, tokenId } = useParams();
   const { controller } = useConnection();
   const { goBack } = useNavigation();
@@ -159,7 +161,7 @@ export function SendCollectible() {
                 className="h-[30px] w-[30px]"
               />
             }
-            title="Review Transaction"
+            title={advancedView ? "Review Transaction" : "Review request"}
             transactions={transactions ?? []}
             onSubmit={onSubmitSend}
             buttonText="Send"

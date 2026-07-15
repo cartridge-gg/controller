@@ -9,6 +9,7 @@ import {
   LayoutContainer,
 } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
+import { useAdvancedView } from "@/hooks/features";
 import { CARTRIDGE_DISCORD_LINK } from "@/constants";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
@@ -39,6 +40,7 @@ export class ErrorBoundary extends React.Component<
 
 export function ErrorPage({ error }: { error: Error }) {
   const { closeModal } = useConnection();
+  const advancedView = useAdvancedView();
 
   const posthog = usePostHog();
 
@@ -64,7 +66,11 @@ export function ErrorPage({ error }: { error: Error }) {
         />
         <LayoutContent className="gap-4">
           <div className="flex w-full px-4 py-6 bg-background-200 border border-background-300 rounded">
-            <p className="w-full text-sm">{error.message}</p>
+            <p className="w-full text-sm">
+              {advancedView
+                ? error.message
+                : "Something went wrong. Please close Controller and try again."}
+            </p>
           </div>
 
           <div className="flex items-center justify-between w-full px-4 py-6 bg-background-200 border border-background-300 rounded">

@@ -22,6 +22,7 @@ import { RegisteredAccountSection } from "./registered-account-section";
 import { UserDataSection } from "./user-data-section";
 import { DeleteAccountSection } from "./delete-account-section";
 import { useFeature } from "@/hooks/features";
+import { AdvancedViewSection } from "./advanced-view-section";
 
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
@@ -55,6 +56,8 @@ export function Settings() {
         Icon={GearIcon}
       />
       <LayoutContent>
+        <AdvancedViewSection />
+
         <SessionsSection />
 
         <SignersSection controllerQuery={controllerQuery} />

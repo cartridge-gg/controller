@@ -6,12 +6,14 @@ import {
   ClockIcon,
   HeaderInner,
 } from "@cartridge/controller-ui";
+import { useAdvancedView } from "@/hooks/features";
 
 export function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
   const [title, setTitle] = useState("Pending...");
   const [description, setDescription] = useState("This may take a second");
   const { chainId, txns } = useUrlTxns();
+  const advancedView = useAdvancedView();
 
   useEffect(() => {
     if (txnResults.length > 0 && txnResults.length === txns.length) {
@@ -23,11 +25,15 @@ export function Pending() {
       }
 
       setTitle("Success!");
-      setDescription("Your transaction was successful");
+      setDescription(
+        advancedView
+          ? "Your transaction was successful"
+          : "Your request was successful",
+      );
     }
 
     // pending
-  }, [txnResults, txns]);
+  }, [advancedView, txnResults, txns]);
 
   return (
     <>
@@ -39,14 +45,14 @@ export function Pending() {
       />
       <LayoutContent>
         {chainId &&
-          [...txns, { name: "name", hash: "hash" }].map((txn, idx) => (
+          txns.map((txn, idx) => (
             <Transaction
               key={idx}
               name={txn.name}
               chainId={chainId}
               hash={txn.hash}
               finalized={(state: TransactionState) => {
-                setTxnResults([...txnResults, state]);
+                setTxnResults((current) => [...current, state]);
               }}
             />
           ))}

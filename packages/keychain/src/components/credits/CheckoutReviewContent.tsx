@@ -7,6 +7,7 @@ import { CostBreakdown } from "@/components/purchase/review/cost";
 import { WalletSelector } from "@/components/purchase/checkout/onchain/selector";
 import type { PaymentMethodSelection } from "@/components/purchase/checkout/onchain/wallet-drawer";
 import type { TokenOption } from "@/context";
+import { useAdvancedView } from "@/hooks/features";
 
 interface CheckoutReviewContentProps {
   paymentMethod: PaymentMethodSelection | null;
@@ -51,6 +52,7 @@ export function CheckoutReviewContent({
   buttonDisabled,
 }: CheckoutReviewContentProps) {
   const { credits } = useTokens();
+  const advancedView = useAdvancedView();
 
   return (
     <>
@@ -68,7 +70,16 @@ export function CheckoutReviewContent({
 
       {warning}
 
-      {error && <ErrorAlert title="Purchase Failed" description={error} />}
+      {error && (
+        <ErrorAlert
+          title="Purchase Failed"
+          description={
+            advancedView
+              ? error
+              : "The purchase could not be prepared. Please try again."
+          }
+        />
+      )}
 
       <CostBreakdown
         tokens={[costToken]}

@@ -12,6 +12,7 @@ const LOCAL_STORAGE_KEY = "@cartridge/features";
 
 export type Feature =
   | "none"
+  | "advanced-view"
   | "coinflow-support"
   | "coinflow-sandbox"
   | "connection-instagram"
@@ -21,13 +22,31 @@ export type Feature =
 
 // --- Helper Functions ---
 
+const normalizeFeatures = (value: unknown): Record<string, boolean> => {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, boolean] => {
+      return typeof entry[1] === "boolean";
+    }),
+  );
+};
+
+const parseFeatures = (value: string | null): Record<string, boolean> => {
+  if (value === null) return {};
+
+  return normalizeFeatures(JSON.parse(value));
+};
+
 const loadFeaturesFromStorage = (): Record<string, boolean> => {
   try {
     const storedFeatures = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return storedFeatures ? JSON.parse(storedFeatures) : {};
+    return parseFeatures(storedFeatures);
   } catch (error) {
     console.error("Failed to load features from local storage:", error);
-    return {}; // Return empty object on error
+    return {};
   }
 };
 
@@ -58,33 +77,37 @@ export const FeatureProvider: React.FC<PropsWithChildren> = ({ children }) => {
   );
 
   useEffect(() => {
-    window.addEventListener(
-      "storage",
-      function (event) {
-        if (event.storageArea === localStorage) {
-          setFeatures(loadFeaturesFromStorage());
-        }
-      },
-      false,
-    );
-    return () => {
-      window.removeEventListener("storage", () => {});
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== LOCAL_STORAGE_KEY) return;
+
+      try {
+        setFeatures(parseFeatures(event.newValue));
+      } catch (error) {
+        console.error("Failed to load features from local storage:", error);
+        setFeatures({});
+      }
     };
-  }, [setFeatures]);
+
+    window.addEventListener("storage", handleStorage, false);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage, false);
+    };
+  }, []);
 
   // Persist changes to local storage
   useEffect(() => {
     saveFeaturesToStorage(features);
   }, [features]);
 
-  const enableFeature = useCallback((name: string) => {
+  const enableFeature = useCallback((name: Feature) => {
     setFeatures((prevFeatures) => ({
       ...prevFeatures,
       [name]: true,
     }));
   }, []);
 
-  const disableFeature = useCallback((name: string) => {
+  const disableFeature = useCallback((name: Feature) => {
     setFeatures((prevFeatures) => ({
       ...prevFeatures,
       [name]: false,
@@ -92,8 +115,8 @@ export const FeatureProvider: React.FC<PropsWithChildren> = ({ children }) => {
   }, []);
 
   const isFeatureEnabled = useCallback(
-    (name: string) => {
-      return features[name] === true; // Explicitly check for true
+    (name: Feature) => {
+      return features[name] === true;
     },
     [features],
   );
@@ -128,4 +151,8 @@ export function useFeatures(): FeaturesContextValue {
 export function useFeature(name: Feature): boolean {
   const { isFeatureEnabled } = useFeatures();
   return isFeatureEnabled(name);
+}
+
+export function useAdvancedView(): boolean {
+  return useFeature("advanced-view");
 }
