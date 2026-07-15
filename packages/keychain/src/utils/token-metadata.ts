@@ -45,7 +45,7 @@ const CACHED_TOKEN_METADATA: Record<string, TokenMetadata> = {
     decimals: 6,
   },
   [STRK_CONTRACT_ADDRESS.toLowerCase()]: {
-    name: "STRK Token",
+    name: "Starknet Token",
     symbol: "STRK",
     decimals: 18,
   },

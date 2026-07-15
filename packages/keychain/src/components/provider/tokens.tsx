@@ -34,7 +34,7 @@ export const DEFAULT_TOKENS = [
   },
   {
     address: STRK_CONTRACT_ADDRESS,
-    name: "STRK Token",
+    name: "Starknet Token",
     symbol: "STRK",
     decimals: 18,
     icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",

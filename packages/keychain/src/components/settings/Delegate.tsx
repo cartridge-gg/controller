@@ -11,12 +11,10 @@ import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { createExecuteUrl } from "@/utils/connection/execute";
 import { useNavigate } from "react-router-dom";
-import { useAdvancedView } from "@/hooks/features";
 
 export function Delegate() {
   const { controller } = useConnection();
   const navigate = useNavigate();
-  const advancedView = useAdvancedView();
   const [delegateAddress, setDelegateAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -46,25 +44,17 @@ export function Delegate() {
 
   return (
     <>
-      <HeaderInner
-        variant="compressed"
-        title={
-          advancedView ? "Delegate account" : "Connect a compatible account"
-        }
-        hideIcon
-      />
+      <HeaderInner variant="compressed" title="Delegate account" hideIcon />
       <LayoutContent>
         <div className="flex flex-col gap-4">
           <div className="text-sm text-foreground-400 text-center">
-            {advancedView
-              ? "Your Controller can be owned by an existing Starknet wallet that receives the rewards you earn while playing."
-              : "Enter the account address. This account can receive the rewards you earn while playing."}
-            <br />
+            Your controller can be owned by an existing Starknet wallet which
+            can receive the rewards you earn while playing. <br />
             (This can be updated later)
           </div>
           <div className="flex flex-col gap-2">
             <Input
-              placeholder={advancedView ? "0x..." : "Account address"}
+              placeholder="0x..."
               value={delegateAddress}
               onChange={(e) => setDelegateAddress(e.target.value)}
             />

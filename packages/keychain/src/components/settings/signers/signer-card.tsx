@@ -18,7 +18,6 @@ import { formatAddress } from "@cartridge/controller-ui/utils";
 import { CredentialMetadata } from "@cartridge/controller-ui/utils/api/cartridge";
 import React, { useEffect, useState } from "react";
 import { credentialToAddress, credentialToAuth } from "../../connect/types";
-import { useAdvancedView } from "@/hooks/features";
 export interface Signer {
   signer: CredentialMetadata;
 }
@@ -43,7 +42,6 @@ export const SignerCard = React.forwardRef<
     ref,
   ) => {
     const signerType = credentialToAuth(signer);
-    const advancedView = useAdvancedView();
     const { controller } = useController();
     const controllerUsername = controller?.username();
     const [signerIdentifyingInfo, setSignerIdentifyingInfo] = useState<
@@ -57,37 +55,25 @@ export const SignerCard = React.forwardRef<
     }, [signer, controllerUsername]);
 
     const canDelete = !isOriginalSigner && !current && !!onDelete;
-    const isStarknetSigner = signer.__typename === "StarknetCredentials";
-    const signerLabel =
-      isStarknetSigner && !advancedView
-        ? "External wallet"
-        : signerType
-          ? AUTH_METHODS_LABELS[signerType]
-          : "Unknown";
+    const signerLabel = signerType
+      ? AUTH_METHODS_LABELS[signerType]
+      : "Unknown";
     const label = signerType
       ? `${signerLabel} ${current ? "(current)" : ""} ${isOriginalSigner ? "(original)" : ""}`
       : signerLabel;
-    const identifyingInfo =
-      isStarknetSigner && !advancedView ? undefined : signerIdentifyingInfo;
 
     return (
       <SettingsCard
         ref={ref}
         className={className}
-        icon={
-          isStarknetSigner && !advancedView ? (
-            <WalletConnectIcon size="sm" />
-          ) : (
-            <SignerIcon size="sm" signerType={signerType} />
-          )
-        }
+        icon={<SignerIcon size="sm" signerType={signerType} />}
         label={label}
-        rightText={identifyingInfo}
-        isLoading={identifyingInfo === "pending"}
+        rightText={signerIdentifyingInfo}
+        isLoading={signerIdentifyingInfo === "pending"}
         onDelete={canDelete ? onDelete : undefined}
         confirm={canDelete ? "delete" : undefined}
         confirmLabel={`${signerLabel} Signer`}
-        confirmSubTitle={identifyingInfo}
+        confirmSubTitle={signerIdentifyingInfo}
         {...props}
       />
     );

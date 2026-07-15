@@ -138,7 +138,7 @@ function SlotCryptoFundInner({
       {
         key: "STRK",
         symbol: "STRK",
-        name: "STRK Token",
+        name: "Starknet Token",
         decimals: 18,
         address: STRK_CONTRACT_ADDRESS,
         icon: <StarknetColorIcon />,
@@ -468,11 +468,7 @@ function SlotCryptoFundInner({
           ) : (
             <ErrorAlert
               variant="info"
-              title={
-                advancedView
-                  ? "No Starknet wallet detected"
-                  : "No compatible wallet detected"
-              }
+              title="No Starknet wallet detected"
               description="Install Argent or Braavos to fund this team."
             />
           )

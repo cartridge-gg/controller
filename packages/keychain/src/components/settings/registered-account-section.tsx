@@ -6,7 +6,6 @@ import {
   SettingsCard,
 } from "@cartridge/controller-ui";
 import { formatAddress } from "@cartridge/controller-ui/utils";
-import { useAdvancedView } from "@/hooks/features";
 
 export interface RegisteredAccount {
   accountName: string;
@@ -21,8 +20,6 @@ const registeredAccounts: RegisteredAccount[] = [
 ];
 
 export function RegisteredAccountSection() {
-  const advancedView = useAdvancedView();
-
   return (
     <section className="space-y-4">
       <SectionHeader kind="registered-account" />
@@ -31,14 +28,10 @@ export function RegisteredAccountSection() {
           <SettingsCard
             icon={<ArgentIcon />}
             label={i.accountName}
-            rightText={
-              advancedView
-                ? formatAddress(i.accountAddress, {
-                    first: 4,
-                    last: 4,
-                  })
-                : undefined
-            }
+            rightText={formatAddress(i.accountAddress, {
+              first: 4,
+              last: 4,
+            })}
             onDelete={async () => {}}
             confirm="delete"
             confirmLabel={i.accountName}

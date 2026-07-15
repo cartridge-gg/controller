@@ -1,4 +1,4 @@
-import { AdvancedDetails, Card } from "@cartridge/controller-ui";
+import { Card } from "@cartridge/controller-ui";
 import { formatAddress } from "@cartridge/controller-ui/utils";
 import { useStarkName } from "@/hooks/starknetid";
 
@@ -15,11 +15,9 @@ export const RecoveryAccountCard = ({ address }: RecoveryAccountCardProps) => {
         {name ?? formatAddress(address, { first: 6, last: 4 })}
       </p>
       {name && (
-        <AdvancedDetails>
-          <p className="text-xs text-foreground-300">
-            {formatAddress(address, { first: 6, last: 4 })}
-          </p>
-        </AdvancedDetails>
+        <p className="text-xs text-foreground-300">
+          {formatAddress(address, { first: 6, last: 4 })}
+        </p>
       )}
     </Card>
   );
