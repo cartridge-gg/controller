@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Drawer, DrawerContent, DepositIcon } from "@cartridge/controller-ui";
+import { Drawer, DrawerContent } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import {
   CoinbaseRailProvider,
@@ -211,10 +211,7 @@ export function CoinbaseCreditsCheckout({
           rather than aborting the whole deposit. */}
       {verifying ? null : phase === "review" ? (
         <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-          <DrawerContent
-            title="Deposit USD"
-            icon={<DepositIcon variant="solid" />}
-          >
+          <DrawerContent title="Deposit USD">
             <CheckoutReviewContent
               paymentMethod={paymentMethod}
               amount={amount}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Drawer, DrawerContent, DepositIcon } from "@cartridge/controller-ui";
+import { Drawer, DrawerContent } from "@cartridge/controller-ui";
 import { usdToCredits, MIN_CREDITS_PURCHASE_USD } from "@/utils/credits";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import {
@@ -106,10 +106,7 @@ export function CoinflowCreditsCheckout({
           rather than aborting the whole deposit. */}
       {verifying ? null : phase === "review" ? (
         <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-          <DrawerContent
-            title="Deposit USD"
-            icon={<DepositIcon variant="solid" />}
-          >
+          <DrawerContent title="Deposit USD">
             <CheckoutReviewContent
               paymentMethod={paymentMethod}
               amount={amount}

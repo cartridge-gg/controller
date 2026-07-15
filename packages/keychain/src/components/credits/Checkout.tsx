@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import {
-  Button,
-  Drawer,
-  DrawerContent,
-  DepositIcon,
-} from "@cartridge/controller-ui";
+import { Button, Drawer, DrawerContent } from "@cartridge/controller-ui";
 import { useTokens } from "@/hooks/token";
 import { ConfirmingTransaction } from "@/components/purchase/pending/confirming-transaction";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
@@ -118,10 +113,7 @@ export function Checkout({
     const { status } = depositInProgress;
     return (
       <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-        <DrawerContent
-          title="Deposit USD"
-          icon={<DepositIcon variant="solid" />}
-        >
+        <DrawerContent title="Deposit USD">
           <div className="flex flex-col gap-4">
             {status === "error" ? (
               <ErrorCard
@@ -187,7 +179,7 @@ export function Checkout({
   // Controller (USDC deposit) — review + deposit live in ControllerCheckout.
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-      <DrawerContent title="Deposit USD" icon={<DepositIcon variant="solid" />}>
+      <DrawerContent title="Deposit USD">
         <ControllerRailProvider amount={amount} onComplete={onComplete}>
           <ControllerCheckout
             paymentMethod={paymentMethod}
