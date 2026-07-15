@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": "/src",
       "@solana/web3.js": path.resolve(__dirname, "src/shims/solana-web3.ts"),
-      ...(mode === "production"
+      ...(mode === "production" || mode === "compatibility"
         ? {
             "fetch-cookie": "/src/shims/fetch-cookie.ts",
             pako: "/src/shims/pako.ts",
@@ -47,7 +47,15 @@ export default defineConfig(({ mode }) => ({
   root: "./",
   publicDir: "public",
   build: {
+    outDir:
+      mode === "compatibility"
+        ? "../../compat/keychain-browser/.artifacts/keychain"
+        : "dist",
     rollupOptions: {
+      input:
+        mode === "compatibility"
+          ? path.resolve(__dirname, "compat.html")
+          : undefined,
       external: [],
       output: {
         manualChunks(id) {

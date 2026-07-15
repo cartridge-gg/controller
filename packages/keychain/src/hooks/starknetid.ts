@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 import { useConnection } from "@/hooks/connection";
 import { useState } from "react";
+import { StarknetIdImpl } from "starknet";
 
 export const useStarkName = ({ address }: { address: string }) => {
   const { controller } = useConnection();
@@ -11,7 +12,9 @@ export const useStarkName = ({ address }: { address: string }) => {
     queryKey: ["starkname", address],
     queryFn: async () => {
       try {
-        const name = await provider?.getStarkName(address);
+        const name = provider
+          ? await StarknetIdImpl.getStarkName(provider, address)
+          : undefined;
         return name ?? null;
       } catch {
         return null;
@@ -32,7 +35,9 @@ export const useStarkAddress = ({ name }: { name: string }) => {
     queryKey: ["starknetid", name],
     queryFn: async () => {
       setError("");
-      const address = await provider?.getAddressFromStarkName(name);
+      const address = provider
+        ? await StarknetIdImpl.getAddressFromStarkName(provider, name)
+        : undefined;
       if (!address || address === "0x0") {
         setError("Could not get address from stark name");
         return null;

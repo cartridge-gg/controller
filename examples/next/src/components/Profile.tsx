@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import { constants } from "starknet";
 import { ResponseCodes, toast } from "@cartridge/controller";
-import { useAccount } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector/controller";
+import { useAccount } from "@starknet-start/react";
+import { controllerConnector } from "./providers/StarknetProvider";
 import { Button } from "@cartridge/controller-ui";
 import {
   STRK_CONTRACT_ADDRESS,
@@ -24,8 +24,8 @@ export const STARTERPACK_REGISTRY_MAINNET =
   "0x3eb03b8f2be0ec2aafd186d72f6d8f3dd320dbc89f2b6802bca7465f6ccaa43";
 
 export function Profile() {
-  const { account, connector } = useAccount();
-  const ctrlConnector = connector as unknown as ControllerConnector;
+  const { address } = useAccount();
+  const ctrlConnector = controllerConnector;
   const [locationCoords, setLocationCoords] = useState<{
     latitude: number;
     longitude: number;
@@ -95,7 +95,7 @@ export function Profile() {
     }, 5000);
   };
 
-  if (!account) {
+  if (!address) {
     return null;
   }
 

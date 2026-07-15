@@ -13,20 +13,49 @@ The project consists of several packages in the `packages` directory:
 
 - **[keychain](packages/keychain)** - Sandboxed iframe hosted at
   https://x.cartridge.gg/ that fills the same role as an injected wallet like
-  MetaMask or Rabby: holds keys, signs transactions, and prompts user for approval.
-  Also displays account state (balances, activities, achievements).
+  MetaMask or Rabby: holds keys, signs transactions, and prompts user for
+  approval. Also displays account state (balances, activities, achievements).
 - **[controller](packages/controller)** - Main SDK implementing the account
   interfaces required by [starknet.js](https://github.com/0xs34n/starknet.js).
   Ships two provider modes:
-  - **ControllerProvider** (web apps) - Full-featured web wallet communicating with an
-    embedded keychain iframe. Supports sessions as well as per-transaction approval.
-  - **SessionProvider** (native apps) - Creates ephemeral session keys with pre-configured
-    policies so transactions can execute without per-call approval.
-- **[connector](packages/connector)** - Thin adapter that wraps providers
-  as [starknet-react](https://github.com/apibara/starknet-react) connectors,
-  making them drop-in compatible with `<StarknetConfig>`.
+  - **ControllerProvider** (web apps) - Full-featured web wallet communicating
+    with an embedded keychain iframe. Supports sessions as well as
+    per-transaction approval.
+  - **SessionProvider** (native apps) - Creates ephemeral session keys with
+    pre-configured policies so transactions can execute without per-call
+    approval.
+- **[connector](packages/connector)** - Registers configured providers through
+  wallet-standard discovery, making them available to Starknet Start's
+  `<StarknetConfig>`.
 
 Integration examples live in `examples/` (Next.js, Svelte, Node.js).
+
+## Requirements and Starknet.js v10 migration
+
+Controller requires Node.js 22 or newer and uses Starknet.js `10.0.2`.
+Applications upgrading from Controller 0.13.x should align their Starknet.js
+dependency to `10.0.2`. Starknet.js v10 no longer exposes provider methods
+through account instances, so application code should use
+`account.provider.getChainId()`, `account.provider.callContract()`, and
+`account.provider.waitForTransaction()`.
+
+The previous `@starknet-react/core` and `@starknet-react/chains` integration has
+moved to `@starknet-start/react@1.0.8`, with `@starknet-start/chains@1.0.7`,
+`@starknet-start/providers@1.0.7`, and `@starknet-start/explorers@1.0.7`.
+Starknet Start requires React 19.
+
+Controller's marketplace and achievement integrations use
+`@cartridge/arcade@0.4.0`, whose published dependency graph is aligned on
+Dojo.js 2 (`@dojoengine/core`, `@dojoengine/grpc`, and `@dojoengine/sdk` at
+`2.0.0`). Together, this migration requires Node.js 22, React 19, and the exact
+Starknet.js `10.0.2` version described above. Applications should upgrade these
+dependencies together rather than mixing the previous Arcade 0.3 or Dojo.js 1
+packages with Controller 0.14.
+
+The workspace temporarily overrides transitive Starknet.js versions to `10.0.2`
+because `@starknet-start/providers@1.0.7` and `@starknet-start/query@1.0.7`
+resolve Starknet.js v9. The override collapses application bundles to the exact
+v10 version and can be removed once those packages depend on Starknet.js v10.
 
 ## Custom Torii endpoint
 

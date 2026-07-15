@@ -1,17 +1,15 @@
 "use client";
 
-import { useAccount } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector/controller";
+import { useAccount } from "@starknet-start/react";
+import { controllerConnector } from "./providers/StarknetProvider";
 import { Button } from "@cartridge/controller-ui";
 import { useState } from "react";
 
 export const UpdateSession = () => {
-  const { account, connector } = useAccount();
+  const { address } = useAccount();
   const [loading, setLoading] = useState(false);
 
-  const controllerConnector = connector as unknown as ControllerConnector;
-
-  if (!account) {
+  if (!address) {
     return null;
   }
 

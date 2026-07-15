@@ -1,7 +1,11 @@
 "use client";
 
 import { Button, Textarea } from "@cartridge/controller-ui";
-import { useAccount, useSignTypedData } from "@starknet-react/core";
+import {
+  useAccount,
+  useProvider,
+  useSignTypedData,
+} from "@starknet-start/react";
 import { useCallback, useState } from "react";
 import {
   ArraySignatureType,
@@ -52,7 +56,8 @@ const MESSAGE: TypedData = {
 };
 
 export function SignMessage() {
-  const { address, account } = useAccount();
+  const { address } = useAccount();
+  const { provider } = useProvider();
   const [message, setMessage] = useState(MESSAGE);
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const { signTypedData, data: signature } = useSignTypedData({
@@ -60,14 +65,14 @@ export function SignMessage() {
   });
 
   const onValidateSig = useCallback(async () => {
-    if (!account || !address) {
+    if (!address) {
       return;
     }
 
     setIsValid(null);
     try {
       const msgHash = typedData.getMessageHash(message, address);
-      const res = await account.callContract(
+      const res = await provider.callContract(
         {
           contractAddress: address,
           entrypoint: "is_valid_signature",
@@ -85,7 +90,7 @@ export function SignMessage() {
       console.error("Validation error:", error);
       setIsValid(false);
     }
-  }, [address, message, signature, account]);
+  }, [address, message, signature, provider]);
 
   const openSignMessageModal = useCallback(() => {
     const params = {
@@ -99,7 +104,7 @@ export function SignMessage() {
     window.open(url, "_blank", "width=400,height=600");
   }, [message]);
 
-  if (!account || !address) return <></>;
+  if (!address) return <></>;
 
   return (
     <div className="flex flex-col gap-2">

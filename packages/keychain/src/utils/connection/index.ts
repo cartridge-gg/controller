@@ -118,7 +118,7 @@ export function connectToController<
     getLocationGate,
   });
 
-  return connectToParent<ParentMethods>({
+  const connection = connectToParent<ParentMethods>({
     methods: {
       connect: normalize((origin) => {
         const uiConnectFn = uiConnect();
@@ -145,7 +145,7 @@ export function connectToController<
       execute: normalize(
         execute({ navigate, propagateError, errorDisplayMode }),
       ),
-      estimateInvokeFee: () => estimateInvokeFee,
+      estimateInvokeFee: () => estimateInvokeFee(),
       probe: normalize(probe({ setController })),
       signMessage: normalize(
         signMessageFactory({
@@ -236,4 +236,6 @@ export function connectToController<
       updateSession: updateSession({ navigate }),
     },
   });
+
+  return connection;
 }

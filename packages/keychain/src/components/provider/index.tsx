@@ -3,12 +3,10 @@ import { useConnectionValue } from "@/hooks/connection";
 import { WalletsProvider } from "@/hooks/wallets";
 import { ENDPOINT } from "@/utils/graphql";
 import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
-import { mainnet, sepolia } from "@starknet-react/chains";
-import {
-  jsonRpcProvider,
-  StarknetConfig,
-  cartridge,
-} from "@starknet-react/core";
+import { mainnet, sepolia } from "@starknet-start/chains";
+import { cartridge } from "@starknet-start/explorers";
+import { jsonRpcProvider } from "@starknet-start/providers";
+import { StarknetConfig } from "@starknet-start/react";
 import { TurnkeyProvider } from "@turnkey/sdk-react";
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";

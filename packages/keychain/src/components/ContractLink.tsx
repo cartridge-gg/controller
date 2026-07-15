@@ -1,6 +1,6 @@
 import { useConnection } from "@/hooks/connection";
 import { Address, cn } from "@cartridge/controller-ui";
-import { useExplorer } from "@starknet-react/core";
+import { useExplorer } from "@starknet-start/react";
 import { constants } from "starknet";
 
 export function ContractLink({

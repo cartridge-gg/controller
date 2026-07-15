@@ -1,62 +1,60 @@
 "use client";
 
-import { useAccount } from "@starknet-react/core";
+import { useAccount, useSendTransaction } from "@starknet-start/react";
 import { useCallback, useEffect, useState } from "react";
 import { constants } from "starknet";
-import { ControllerConnector } from "@cartridge/connector";
 import { Button, Input } from "@cartridge/controller-ui";
+import { controllerConnector } from "./providers/StarknetProvider";
 
 export const DelegateAccount = () => {
   const [chainId] = useState<constants.StarknetChainId>(
     constants.StarknetChainId.SN_SEPOLIA,
   );
   const [submitted, setSubmitted] = useState<boolean>(false);
-  const { account, connector } = useAccount();
+  const { address } = useAccount();
+  const { sendAsync } = useSendTransaction({});
 
   const [delegateAddress, setDelegateAddress] = useState("");
   const [delegateAddressInput, setDelegateAddressInput] = useState("");
   const [isDelegateSupported, setIsDelegateSupported] = useState(false);
 
-  const controller = connector as unknown as ControllerConnector;
-
   const load = useCallback(async () => {
-    if (!account) {
+    if (!address) {
       return;
     }
 
     try {
-      const delegate = await controller.delegateAccount();
+      const delegate = await controllerConnector.delegateAccount();
       setDelegateAddress(delegate?.toString() || "");
       setIsDelegateSupported(true);
     } catch (e) {
       console.log(e);
       // controller doesnt support delegateAccount, ignore
     }
-  }, [account, controller]);
+  }, [address]);
 
   const execute = useCallback(async () => {
-    if (!account) {
+    if (!address) {
       return;
     }
     setSubmitted(true);
 
-    account
-      .execute([
-        {
-          contractAddress: account.address,
-          entrypoint: "set_delegate_account",
-          calldata: [delegateAddressInput],
-        },
-      ])
+    sendAsync([
+      {
+        contractAddress: address,
+        entrypoint: "set_delegate_account",
+        calldata: [delegateAddressInput],
+      },
+    ])
       .catch((e) => console.error(e))
       .finally(() => setSubmitted(false));
-  }, [account, delegateAddressInput]);
+  }, [address, delegateAddressInput, sendAsync]);
 
   useEffect(() => {
     load();
-  }, [account, chainId, load]);
+  }, [address, chainId, load]);
 
-  if (!account) {
+  if (!address) {
     return null;
   }
 

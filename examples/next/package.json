@@ -1,6 +1,9 @@
 {
   "name": "@cartridge/controller-example-next",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "version": "0.13.13",
   "scripts": {
     "dev": "env-cmd -f .env.dev next dev -p 3002",
@@ -18,13 +21,15 @@
     "@cartridge/connector": "workspace:*",
     "@cartridge/controller": "workspace:*",
     "@cartridge/controller-ui": "workspace:*",
-    "@starknet-react/chains": "catalog:",
-    "@starknet-react/core": "catalog:",
+    "@starknet-start/chains": "catalog:",
+    "@starknet-start/explorers": "catalog:",
+    "@starknet-start/providers": "catalog:",
+    "@starknet-start/react": "catalog:",
     "next": "15.5.18",
     "next-themes": "^0.3.0",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "starknet": "^8.5.4"
+    "starknet": "catalog:"
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",

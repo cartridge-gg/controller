@@ -1,11 +1,9 @@
 import React, { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { mainnet } from "@starknet-react/chains";
-import {
-  StarknetConfig,
-  cartridge,
-  publicProvider,
-} from "@starknet-react/core";
+import { mainnet } from "@starknet-start/chains";
+import { cartridge } from "@starknet-start/explorers";
+import { publicProvider } from "@starknet-start/providers";
+import { StarknetConfig } from "@starknet-start/react";
 import { BrowserRouter } from "react-router-dom";
 import { ConnectionContext } from "../src/components/provider/connection";
 import { UIProvider } from "../src/components/provider/ui";

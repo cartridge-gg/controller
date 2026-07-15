@@ -69,7 +69,7 @@ export const StarryHeaderBackground: React.FC<StarryHeaderBackgroundProps> = ({
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
   });
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
   const containerRectRef = useRef<DOMRect | null>(null);
 
   // Performance optimization refs

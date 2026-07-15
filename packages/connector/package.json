@@ -10,13 +10,16 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "sideEffects": false,
   "scripts": {
     "build:deps": "tsup --dts-resolve",
     "test": "vitest",
     "test:ci": "vitest run",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\""
   },
   "exports": {
     ".": "./dist/index.js",
@@ -48,15 +51,21 @@
     "dts": "resolve"
   },
   "peerDependencies": {
-    "@starknet-react/core": "catalog:"
+    "@starknet-start/react": "catalog:"
   },
   "dependencies": {
     "@cartridge/controller": "workspace:*"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
+    "@starknet-start/chains": "catalog:",
+    "@starknet-start/providers": "catalog:",
+    "@testing-library/react": "^16.3.0",
     "@vitest/coverage-v8": "catalog:",
+    "jsdom": "^25.0.1",
     "prettier": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

@@ -22,7 +22,7 @@ import {
   Separator,
 } from "@cartridge/controller-ui";
 import { cn, formatAddress } from "@cartridge/controller-ui/utils";
-import { useExplorer } from "@starknet-react/core";
+import { useExplorer } from "@starknet-start/react";
 import React, {
   ReactElement,
   useCallback,

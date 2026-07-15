@@ -6,22 +6,23 @@ packages:
   - examples/capacitor
   - packages/*
 catalog:
-  "@cartridge/arcade": "0.3.12"
+  "@cartridge/arcade": "0.4.0"
   "@cartridge/controller-wasm": "0.10.1"
   "@cartridge/penpal": "^6.2.4"
   "@cartridge/presets": "github:cartridge-gg/presets#f0f3bb5"
   "@eslint/js": "^9.18.0"
   "@noble/curves": "^1.9.0"
   "@noble/hashes": "^1.8.0"
-  "@dojoengine/core": 1.8.8
-  "@dojoengine/sdk": 1.8.12
-  "@dojoengine/react": 1.8.7
+  "@dojoengine/core": 2.0.0
+  "@dojoengine/sdk": 2.0.0
   "@dojoengine/torii-wasm": 1.8.2
   "@effect-atom/atom": "^0.1.22"
   "@effect-atom/atom-react": "^0.1.17"
-  "@starknet-io/types-js": "^0.8.4"
-  "@starknet-react/chains": "^5.0.1"
-  "@starknet-react/core": "^5.0.1"
+  "@starknet-io/types-js": 0.10.2
+  "@starknet-start/chains": 1.0.7
+  "@starknet-start/explorers": 1.0.7
+  "@starknet-start/providers": 1.0.7
+  "@starknet-start/react": 1.0.8
   "@storybook/addon-essentials": "^8.5.0"
   "@storybook/addon-themes": "^8.5.0"
   "@storybook/blocks": "^8.5.0"
@@ -32,9 +33,9 @@ catalog:
   "@storybook/theming": "^8.5.0"
   "@types/jest-image-snapshot": "^6.4.0"
   "@types/lodash": "^4.17.14"
-  "@types/node": "^18.0.6"
-  "@types/react": "^18.2.0"
-  "@types/react-dom": "^18.2.0"
+  "@types/node": "^22.12.0"
+  "@types/react": "^19.0.0"
+  "@types/react-dom": "^19.0.0"
   "@types/jest": "^29.5.14"
   "@types/mocha": "^10.0.10"
   "@vitejs/plugin-react-swc": "^3.5.0"
@@ -56,13 +57,13 @@ catalog:
   postcss: "^8.4.35"
   postcss-import: "^16.1.0"
   prettier: "^3.4.2"
-  react: "^18.2.0"
-  react-dom: "^18.2.0"
+  react: "^19.0.0"
+  react-dom: "^19.0.0"
   react-query: "^3.39.2"
   react-router-dom: "^6.27.0"
   sonner: "^2.0.7"
   start-server-and-test: "^2.0.9"
-  starknet: 8.5.4
+  starknet: 10.0.2
   storybook: "^8.5.0"
   swr: "^2.2.5"
   tailwindcss: "^3.4.3"

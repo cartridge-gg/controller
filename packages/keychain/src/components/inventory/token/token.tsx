@@ -22,7 +22,7 @@ import {
   useCreditBalance,
 } from "@cartridge/controller-ui/utils";
 // import { useNavigation } from "@/context/navigation";
-import { useExplorer } from "@starknet-react/core";
+import { useExplorer } from "@starknet-start/react";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useCreditsHistory } from "@/hooks/credits-history";

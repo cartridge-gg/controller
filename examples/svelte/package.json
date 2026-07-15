@@ -2,6 +2,9 @@
 	"name": "@cartridge/controller-example-svelte",
 	"version": "0.13.13",
 	"private": true,
+	"engines": {
+		"node": ">=22"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",

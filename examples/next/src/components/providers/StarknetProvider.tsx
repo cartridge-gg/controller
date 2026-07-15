@@ -3,12 +3,10 @@
 import ControllerConnector from "@cartridge/connector/controller";
 import SessionConnector from "@cartridge/connector/session";
 import { AuthOptions, SessionPolicies } from "@cartridge/controller";
-import { Chain, mainnet, sepolia } from "@starknet-react/chains";
-import {
-  cartridge,
-  jsonRpcProvider,
-  StarknetConfig,
-} from "@starknet-react/core";
+import { Chain, mainnet, sepolia } from "@starknet-start/chains";
+import { cartridge } from "@starknet-start/explorers";
+import { jsonRpcProvider } from "@starknet-start/providers";
+import { StarknetConfig } from "@starknet-start/react";
 import { PropsWithChildren } from "react";
 import { constants, num, shortString } from "starknet";
 import {
@@ -319,7 +317,7 @@ export const controllerConnector = new ControllerConnector({
   // toriiUrl: "http://localhost:8080",
 });
 
-const session = new SessionConnector({
+export const sessionConnector = new SessionConnector({
   shouldOverridePresetPolicies: overridePolicies,
   policies: overridePolicies ? policies : {},
   rpc: defaultChainRpc!,
@@ -338,7 +336,6 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       autoConnect
       defaultChainId={BigInt(defaultChainId)}
       chains={starknetConfigChains}
-      connectors={[controllerConnector, session]}
       explorer={cartridge}
       provider={provider}
     >

@@ -1,7 +1,7 @@
-import { useAccount, useSendTransaction } from "@starknet-react/core";
+import { useAccount, useSendTransaction } from "@starknet-start/react";
 
 export function IncrementCounter() {
-  const { account } = useAccount();
+  const { address } = useAccount();
   const { send } = useSendTransaction({
     calls: [
       {
@@ -13,7 +13,7 @@ export function IncrementCounter() {
     ],
   });
 
-  if (!account) {
+  if (!address) {
     return null;
   }
 

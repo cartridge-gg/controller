@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { hash, num } from "starknet";
+import { hash, num, type EVENTS_CHUNK } from "starknet";
 import { useConnection } from "./connection";
 
 export function useExternalOwners() {
@@ -26,7 +26,7 @@ export function useExternalOwners() {
       let continuationToken: string | undefined = "0";
 
       while (continuationToken && mounted) {
-        const events = await controller.provider.getEvents({
+        const events: EVENTS_CHUNK = await controller.provider.getEvents({
           address: controller.address(),
           from_block: { block_number: 1151644 }, // controller class hash deployed
           keys: [

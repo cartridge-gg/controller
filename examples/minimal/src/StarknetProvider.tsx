@@ -1,6 +1,8 @@
 import { PropsWithChildren } from "react";
-import { mainnet } from "@starknet-react/chains";
-import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
+import { mainnet } from "@starknet-start/chains";
+import { voyager } from "@starknet-start/explorers";
+import { jsonRpcProvider } from "@starknet-start/providers";
+import { StarknetConfig } from "@starknet-start/react";
 import ControllerConnector from "@cartridge/connector/controller";
 
 const RPC_URL = "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9";
@@ -20,7 +22,6 @@ export function StarknetProvider({ children }: PropsWithChildren) {
     <StarknetConfig
       chains={[mainnet]}
       provider={provider}
-      connectors={[controllerConnector]}
       explorer={voyager}
       autoConnect
     >

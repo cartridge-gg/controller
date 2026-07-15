@@ -7,9 +7,9 @@ import {
   useBalance,
   useBlockNumber,
   useNetwork,
-} from "@starknet-react/core";
+} from "@starknet-start/react";
 import { Button } from "@cartridge/controller-ui";
-import ControllerConnector from "@cartridge/connector/controller";
+import { controllerConnector } from "./providers/StarknetProvider";
 
 const PREDEPLOYED_ACCOUNT_ADDRESS =
   "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec";
@@ -24,21 +24,21 @@ const ONE_ETH = 10n ** 18n;
 const POINT_ONE_ETH = 10n ** 17n;
 
 export const KatanaAppchain = () => {
-  const { account, connector } = useAccount();
+  const { address } = useAccount();
+  const account = controllerConnector.controller.account;
   const { chain } = useNetwork();
-  const controller = connector as unknown as ControllerConnector;
   const chainName = shortString.decodeShortString(num.toHex(chain.id));
   const isKatana = chainName.includes("KATANA");
 
   // Player balances, refreshed on every new block via `watch`.
   const { data: ethBalance, refetch: refetchEth } = useBalance({
     token: KATANA_ETH_ADDRESS,
-    address: account?.address as `0x${string}` | undefined,
+    address,
     watch: true,
   });
   const { data: strkBalance, refetch: refetchStrk } = useBalance({
     token: KATANA_STRK_ADDRESS,
-    address: account?.address as `0x${string}` | undefined,
+    address,
     watch: true,
   });
 
@@ -62,19 +62,19 @@ export const KatanaAppchain = () => {
   // Whether the connected controller account is deployed on-chain.
   const [isDeployed, setIsDeployed] = useState<boolean>();
   const refetchDeployed = useCallback(() => {
-    if (!account || !isKatana) {
+    if (!address || !isKatana) {
       setIsDeployed(undefined);
       return;
     }
     let cancelled = false;
     provider
-      .getClassHashAt(account.address)
+      .getClassHashAt(address)
       .then(() => !cancelled && setIsDeployed(true))
       .catch(() => !cancelled && setIsDeployed(false));
     return () => {
       cancelled = true;
     };
-  }, [account, isKatana, provider]);
+  }, [address, isKatana, provider]);
 
   // Re-checked on every block so it flips once the account deploys.
   const { data: blockNumber } = useBlockNumber({
@@ -89,7 +89,7 @@ export const KatanaAppchain = () => {
 
   const transfer = useCallback(
     async (tokenAddress: string, amount: bigint) => {
-      if (!account) {
+      if (!address) {
         return;
       }
       const { transaction_hash } = await signer.execute(
@@ -98,14 +98,14 @@ export const KatanaAppchain = () => {
             contractAddress: tokenAddress,
             entrypoint: "transfer",
             // u256: amount fits in the low felt, high is 0.
-            calldata: [account.address, num.toHex(amount), "0x0"],
+            calldata: [address, num.toHex(amount), "0x0"],
           },
         ],
         { tip: 0 },
       );
-      await signer.waitForTransaction(transaction_hash);
+      await signer.provider.waitForTransaction(transaction_hash);
     },
-    [account, signer],
+    [address, signer],
   );
 
   const getETH = useCallback(
@@ -141,17 +141,17 @@ export const KatanaAppchain = () => {
         },
       ];
       if (kind == "controller") {
-        controller.controller.openExecute(transactions).catch((e) => {
+        controllerConnector.controller.openExecute(transactions).catch((e) => {
           console.error(e);
         });
       } else if (kind == "signer") {
         account.execute(transactions);
       }
     },
-    [account, controller],
+    [account],
   );
 
-  if (!account || !isKatana) {
+  if (!address || !account || !isKatana) {
     return null;
   }
 

@@ -257,7 +257,9 @@ function PinInput({
       {Array.from({ length }).map((_, i) => (
         <Input
           key={i}
-          ref={(el: HTMLInputElement | null) => (inputRefs.current[i] = el)}
+          ref={(el: HTMLInputElement | null) => {
+            inputRefs.current[i] = el;
+          }}
           className="w-11 h-14 text-center text-md bg-background-100 border-background-200 focus:border-primary-100"
           value={value[i] || ""}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

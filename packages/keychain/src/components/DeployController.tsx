@@ -16,7 +16,7 @@ import {
 import { getChainName } from "@cartridge/controller-ui/utils";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useExplorer } from "@starknet-react/core";
+import { useExplorer } from "@starknet-start/react";
 import {
   constants,
   FeeEstimate,

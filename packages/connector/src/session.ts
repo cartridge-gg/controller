@@ -1,37 +1,50 @@
 import SessionProvider, { SessionOptions } from "@cartridge/controller/session";
-import { Connector, InjectedConnector } from "@starknet-react/core";
+import type { UseConnectResult } from "@starknet-start/react";
 
-export default class SessionConnector extends InjectedConnector {
+type StarknetStartConnector = UseConnectResult["connectors"][number];
+
+export default class SessionConnector {
+  private static current?: SessionConnector;
+
   public controller: SessionProvider;
 
   constructor(options: SessionOptions) {
-    const controller = new SessionProvider(options);
+    this.controller = new SessionProvider(options);
+    SessionConnector.current = this;
+  }
 
-    super({
-      options: {
-        id: controller.id,
-        name: controller.name,
-      },
-    });
+  get id() {
+    return this.controller.id;
+  }
 
-    this.controller = controller;
+  get name() {
+    return this.controller.name;
   }
 
   async disconnect() {
     await this.controller.disconnect();
-    try {
-      await super.disconnect();
-    } catch {
-      // Best-effort: disconnect should not throw if the injected wallet isn't available.
-    }
   }
 
-  static fromConnectors(connectors: Connector[]): SessionConnector {
-    const connector = connectors.find((c) => c.id === "controller_session");
+  static walletFromConnectors(
+    connectors: StarknetStartConnector[],
+  ): StarknetStartConnector {
+    const connector = connectors.find(
+      (candidate) => candidate.name === "Controller Session",
+    );
     if (!connector) {
       throw new Error("Session connector not found");
     }
-    return connector as SessionConnector;
+    return connector;
+  }
+
+  static fromConnectors(
+    connectors: StarknetStartConnector[],
+  ): SessionConnector {
+    SessionConnector.walletFromConnectors(connectors);
+    if (!SessionConnector.current) {
+      throw new Error("SessionConnector has not been instantiated");
+    }
+    return SessionConnector.current;
   }
 
   username() {
