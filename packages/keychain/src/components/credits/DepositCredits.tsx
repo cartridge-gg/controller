@@ -7,6 +7,7 @@ import {
 import { AmountSelectionDrawer } from "./AmountSelectionDrawer";
 import { Checkout } from "./Checkout";
 import { useCreditsContext } from "./provider";
+import { useConnection } from "@/hooks/connection";
 import {
   MIN_CREDITS_PURCHASE_USD,
   MAX_CREDITS_PURCHASE_USD,
@@ -21,17 +22,29 @@ export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethodSelection | null>(null);
   const [amount, setAmount] = useState(0);
-  const { depositInProgress } = useCreditsContext();
+  const { depositInProgress, depositRequest } = useCreditsContext();
+  const { defaultPaymentMethod } = useConnection();
 
-  const { isUS } = useGeoLocation();
+  const { isUS, countryCodeLoaded } = useGeoLocation();
+  const configuredCard = defaultPaymentMethod === "credit-card";
 
   const isController = paymentMethod?.type == "controller";
 
   // initialize on open and close
   useEffect(() => {
-    setPaymentMethod(null);
-    setAmount(0);
-  }, [isOpen]);
+    if (!isOpen) {
+      setPaymentMethod(null);
+      setAmount(0);
+      return;
+    }
+    const preferred = depositRequest?.preferredMethod;
+    setPaymentMethod(
+      preferred?.type === "coinflow" && (!countryCodeLoaded || !isUS)
+        ? null
+        : (preferred ?? null),
+    );
+    setAmount(depositRequest?.defaultAmount ?? 0);
+  }, [isOpen, depositRequest, countryCodeLoaded, isUS]);
 
   const step = useMemo(() => {
     if (depositInProgress) return "checkout";
@@ -52,15 +65,20 @@ export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
         setSelected={(selection: PaymentMethodSelection) => {
           setPaymentMethod(selection);
         }}
-        showFiatOptions={isUS && false} // disabled cards
+        showFiatOptions={isUS && configuredCard}
+        enableCoinflow={configuredCard}
         showController={true}
         showCrypto={false}
       />
 
       <AmountSelectionDrawer
         isOpen={isOpen && step == "amount"}
-        minAmount={isController ? 1 : MIN_CREDITS_PURCHASE_USD}
+        minAmount={
+          depositRequest?.minimumAmount ??
+          (isController ? 1 : MIN_CREDITS_PURCHASE_USD)
+        }
         maxAmount={MAX_CREDITS_PURCHASE_USD}
+        initialAmount={depositRequest?.defaultAmount}
         onClose={() => {
           if (step == "amount") {
             onClose();

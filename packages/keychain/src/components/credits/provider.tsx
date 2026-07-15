@@ -3,6 +3,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useRef,
   useState,
 } from "react";
 import { DepositCredits } from "./DepositCredits";
@@ -10,29 +11,44 @@ import { PaymentMethodSelection } from "../purchase/checkout/onchain/wallet-draw
 
 export type CreditDepositStatus = "processing" | "success" | "error" | "idle";
 
+export type CreditsDepositRequest = {
+  preferredMethod?: PaymentMethodSelection;
+  defaultAmount?: number;
+  minimumAmount?: number;
+  purchaseKey?: string;
+  onSuccess?: () => Promise<void>;
+};
+
+export type ActiveCreditsDepositRequest = CreditsDepositRequest & {
+  attemptId: string;
+};
+
 export type CreditsContextValue = {
-  initiateCreditsDeposit: (onSuccessCallback?: () => Promise<void>) => void;
+  initiateCreditsDeposit: (request?: CreditsDepositRequest) => void;
   onDepositStarted: (
     paymentMethod: PaymentMethodSelection,
     amount: number,
-  ) => void;
-  onDepositFinished: (error?: string) => Promise<void>;
+  ) => string;
+  onDepositFinished: (attemptId: string, error?: string) => Promise<void>;
   depositInProgress: null | {
     paymentMethod: PaymentMethodSelection;
     amount: number;
+    attemptId: string;
     status: CreditDepositStatus;
     /** Failure/timeout message when status is "error". */
     error?: string;
   };
+  depositRequest?: ActiveCreditsDepositRequest;
 };
 
 type DepositInProgress = CreditsContextValue["depositInProgress"];
 
 export const CreditsContext = createContext<CreditsContextValue>({
   initiateCreditsDeposit: () => {},
-  onDepositStarted: () => {},
+  onDepositStarted: () => "",
   onDepositFinished: async () => {},
   depositInProgress: null,
+  depositRequest: undefined,
 });
 
 export function CreditsProvider({ children }: PropsWithChildren) {
@@ -41,48 +57,77 @@ export function CreditsProvider({ children }: PropsWithChildren) {
   const [depositInProgress, setDepositInProgress] =
     useState<DepositInProgress | null>(null);
 
-  const [depositSuccessCallback, setDepositSuccessCallback] = useState<
-    (() => Promise<void>) | undefined
-  >(undefined);
+  const [depositRequest, setDepositRequest] =
+    useState<ActiveCreditsDepositRequest>();
+  const attemptCounterRef = useRef(0);
+  const consumedAttemptsRef = useRef(new Set<string>());
   const initiateCreditsDeposit = useCallback(
-    (onSuccessCallback?: () => Promise<void>) => {
-      setDepositSuccessCallback(() => onSuccessCallback);
+    (request?: CreditsDepositRequest) => {
+      attemptCounterRef.current += 1;
+      setDepositRequest({
+        ...request,
+        attemptId: `credits-deposit-${attemptCounterRef.current}`,
+      });
       setIsDepositOpen(true);
     },
     [],
   );
 
   const onDepositStarted = useCallback(
-    async (paymentMethod: PaymentMethodSelection, amount: number) => {
+    (paymentMethod: PaymentMethodSelection, amount: number) => {
+      const attemptId =
+        depositRequest?.attemptId ??
+        `credits-deposit-${attemptCounterRef.current}`;
       setDepositInProgress({
         paymentMethod,
         amount,
+        attemptId,
         status: "processing",
       });
+      return attemptId;
     },
-    [],
+    [depositRequest],
   );
 
   const onDepositFinished = useCallback(
-    async (error?: string) => {
+    async (attemptId: string, error?: string) => {
+      if (!attemptId || depositRequest?.attemptId !== attemptId) return;
+      let completionError = error;
+      if (!completionError && !consumedAttemptsRef.current.has(attemptId)) {
+        consumedAttemptsRef.current.add(attemptId);
+        const callback = depositRequest?.onSuccess;
+        // Consume before awaiting so duplicate settlement signals cannot debit
+        // the originating bundle twice.
+        setDepositRequest((current) =>
+          current?.attemptId === attemptId
+            ? { ...current, onSuccess: undefined }
+            : current,
+        );
+        try {
+          await callback?.();
+        } catch (callbackError) {
+          completionError =
+            callbackError instanceof Error
+              ? callbackError.message
+              : String(callbackError);
+        }
+      }
+
       setDepositInProgress((prev) => {
         // prev is null when the user closed the status view before settlement
         // finished — stay closed, but still run the success side effects.
-        if (!prev) return null;
+        if (!prev || prev.attemptId !== attemptId) return prev;
         return {
           ...prev,
-          status: error ? "error" : "success",
-          error,
+          status: completionError ? "error" : "success",
+          error: completionError,
         };
       });
-      if (!error) {
-        await depositSuccessCallback?.();
-      }
     },
-    [depositSuccessCallback, setDepositInProgress],
+    [depositRequest, setDepositInProgress],
   );
 
-  // Deliberately keep depositSuccessCallback across close: a fiat settlement
+  // Deliberately keep the deposit request across close: a fiat settlement
   // can outlive the drawer (the user may close while it's processing), and the
   // waiting flow (e.g. bundle purchase) still wants its balance refreshed when
   // the credits land. The callback is replaced on the next initiateCreditsDeposit.
@@ -98,6 +143,7 @@ export function CreditsProvider({ children }: PropsWithChildren) {
         onDepositStarted,
         onDepositFinished,
         depositInProgress,
+        depositRequest,
       }}
     >
       {children}

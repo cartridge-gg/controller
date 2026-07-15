@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   ReactNode,
 } from "react";
 import { useConnection } from "@/hooks/connection";
@@ -45,7 +46,9 @@ export interface CreditPurchaseContextType {
   creditsQuoteError: Error | undefined;
   /** Raw credit balance in 1e8-per-USD units (same unit as requiredCredits). */
   creditsBalance: bigint;
-  refetchCreditsBalance: () => Promise<unknown>;
+  refetchCreditsBalance: () => Promise<bigint>;
+  isCreditsBalanceLoading: boolean;
+  creditsBalanceError: Error | undefined;
   hasSufficientCredits: boolean;
   isCreditsLoading: boolean;
   creditsFulfillment: CreditsBundleFulfillment | undefined;
@@ -120,12 +123,26 @@ export const CreditPurchaseProvider = ({
 
   // Credit balance — raw 1e8-per-USD units, same unit as the quote's
   // requiredCredits, so the sufficiency check needs no conversion.
-  const { balance: rawCreditBalance, refetch: refetchCreditsBalance } =
-    useCreditBalance({
-      username: controller?.username(),
-      interval: undefined,
-    });
+  const {
+    balance: rawCreditBalance,
+    refetch: refetchRawCreditsBalance,
+    isLoading: isCreditsBalanceLoading,
+    error: creditsBalanceError,
+  } = useCreditBalance({
+    username: controller?.username(),
+    interval: undefined,
+  });
   const creditsBalance = rawCreditBalance.value;
+  const creditsBalanceRef = useRef(creditsBalance);
+  creditsBalanceRef.current = creditsBalance;
+
+  const refetchCreditsBalance = useCallback(async (): Promise<bigint> => {
+    const result = (await refetchRawCreditsBalance()) as {
+      data?: { account?: { credits?: { amount?: string } } | null };
+    };
+    const amount = result.data?.account?.credits?.amount;
+    return amount === undefined ? creditsBalanceRef.current : BigInt(amount);
+  }, [refetchRawCreditsBalance]);
   const hasSufficientCredits = useMemo(() => {
     if (!creditsQuote) return false;
     return creditsBalance >= BigInt(creditsQuote.requiredCredits);
@@ -247,6 +264,8 @@ export const CreditPurchaseProvider = ({
     creditsQuoteError: (creditsQuoteError as Error) ?? undefined,
     creditsBalance,
     refetchCreditsBalance,
+    isCreditsBalanceLoading,
+    creditsBalanceError: creditsBalanceError ?? undefined,
     hasSufficientCredits,
     isCreditsLoading,
     creditsFulfillment,

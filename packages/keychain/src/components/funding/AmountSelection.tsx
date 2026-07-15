@@ -14,6 +14,7 @@ type AmountSelectionProps = {
   minAmount?: number;
   maxAmount?: number;
   onChange: (creditAmount: number) => void;
+  initialAmount?: number;
 };
 
 export function AmountSelection({
@@ -23,13 +24,25 @@ export function AmountSelection({
   minAmount,
   maxAmount,
   onChange,
+  initialAmount,
 }: AmountSelectionProps) {
   const [selectedAmount, setSelectedAmount] = useState<number | undefined>(
-    creditAmounts[0],
+    initialAmount ?? creditAmounts[0],
   );
-  const [custom, setCustom] = useState<boolean>(false);
+  const [custom, setCustom] = useState<boolean>(
+    initialAmount !== undefined && !creditAmounts.includes(initialAmount),
+  );
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const initialAmountIsPreset =
+    initialAmount !== undefined && creditAmounts.includes(initialAmount);
+
+  useEffect(() => {
+    if (initialAmount === undefined) return;
+    setSelectedAmount(initialAmount);
+    setCustom(!initialAmountIsPreset);
+    setError(null);
+  }, [initialAmount, initialAmountIsPreset]);
 
   useEffect(() => {
     onChange(selectedAmount && !error ? selectedAmount : 0);
@@ -49,28 +62,31 @@ export function AmountSelection({
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3 text-sm">
-        {creditAmounts.map((value) => (
-          <Button
-            key={value}
-            variant="secondary"
-            className={cn(
-              "font-sans font-medium w-full tracking-normal",
-              value === selectedAmount && !custom
-                ? "bg-background-300 text-foreground-100 hover:bg-background-400 hover:text-foreground-100 "
-                : "bg-background-100 text-foreground-300 hover:bg-background-300 hover:text-foreground-100 ",
-            )}
-            disabled={lockSelection}
-            onClick={() => {
-              setCustom(false);
-              setSelectedAmount(value);
-              // Presets are always in range — drop any error left over from
-              // the custom input, or the sync effect keeps emitting 0.
-              setError(null);
-            }}
-          >
-            {`$${value}`}
-          </Button>
-        ))}
+        {creditAmounts.map((value) => {
+          const isOutOfRange =
+            (minAmount !== undefined && value < minAmount) ||
+            (maxAmount !== undefined && value > maxAmount);
+          return (
+            <Button
+              key={value}
+              variant="secondary"
+              className={cn(
+                "font-sans font-medium w-full tracking-normal",
+                value === selectedAmount && !custom
+                  ? "bg-background-300 text-foreground-100 hover:bg-background-400 hover:text-foreground-100 "
+                  : "bg-background-100 text-foreground-300 hover:bg-background-300 hover:text-foreground-100 ",
+              )}
+              disabled={lockSelection || isOutOfRange}
+              onClick={() => {
+                setCustom(false);
+                setSelectedAmount(value);
+                setError(null);
+              }}
+            >
+              {`$${value}`}
+            </Button>
+          );
+        })}
         {enableCustom && (
           <Button
             variant="secondary"
@@ -96,14 +112,13 @@ export function AmountSelection({
             ref={inputRef}
             className="pl-8 flex-1"
             type="number"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            step="1"
+            inputMode="decimal"
+            step="0.01"
             value={selectedAmount ?? ""}
             disabled={lockSelection}
             onChange={(e) => {
               const clean = e.target.value.replace(/^0+/, "");
-              const amount = clean ? Number.parseInt(clean, 10) : undefined;
+              const amount = clean ? Number.parseFloat(clean) : undefined;
               setSelectedAmount(amount);
               const min = minAmount ?? DEFAULT_MIN_AMOUNT;
               const max = maxAmount ?? DEFAULT_MAX_AMOUNT;

@@ -168,6 +168,16 @@ export const useCoinflowCreditsPayment = () => {
 
 const SETTLEMENT_POLL_INTERVAL_MS = 2_000;
 
+/** A polling window elapsed, but the payment has not terminally failed. */
+export class CoinflowSettlementPendingError extends Error {
+  constructor(public readonly paymentId: string) {
+    super(
+      "Your payment was accepted but is still settling. Your balance will update automatically once it completes.",
+    );
+    this.name = "CoinflowSettlementPendingError";
+  }
+}
+
 /**
  * Wait for a Coinflow payment to settle. `coinflowCardCheckout` resolves when
  * the card is charged, but credits are only granted by the settlement webhook
@@ -202,9 +212,7 @@ export async function waitForCoinflowSettlement(
     }
   }
 
-  throw new Error(
-    "Your payment was accepted but is still settling. Your balance will update automatically once it completes.",
-  );
+  throw new CoinflowSettlementPendingError(paymentId);
 }
 
 // ---------------------------------------------------------------------------

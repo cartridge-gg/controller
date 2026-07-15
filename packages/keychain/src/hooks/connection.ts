@@ -24,6 +24,7 @@ import {
   WalletAdapter,
   WalletBridge,
   type Chain,
+  type DefaultPaymentMethod,
 } from "@cartridge/controller";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import {
@@ -84,6 +85,8 @@ type ResolvedUrlParams = {
   ref: string | null;
   refGroup: string | null;
   propagateError: boolean;
+  /** Optional so snapshots persisted before this field existed stay valid. */
+  defaultPaymentMethod?: DefaultPaymentMethod;
   errorDisplayMode?: "modal" | "notification" | "silent";
   /** Chains the dapp explicitly configured (SDK `chains` param). Optional so
    *  url-param snapshots persisted before this field existed stay valid. */
@@ -102,6 +105,21 @@ export function parseControllerVersion(
   } catch {
     return undefined;
   }
+}
+
+export function parseDefaultPaymentMethod(
+  value?: string | null,
+): DefaultPaymentMethod | undefined {
+  return value === "credit-card" ? value : undefined;
+}
+
+export function resolveDefaultPaymentMethod(
+  value?: string | null,
+  previousValue?: string | null,
+): DefaultPaymentMethod | undefined {
+  return (
+    parseDefaultPaymentMethod(value) ?? parseDefaultPaymentMethod(previousValue)
+  );
 }
 
 // Stable fallback so consumers keyed on `configuredChains` identity don't re-run.
@@ -592,6 +610,10 @@ export function useConnectionValue() {
     const ref = urlParams.get("ref");
     const refGroup = urlParams.get("ref_group");
     const propagateError = urlParams.get("propagate_error") === "true";
+    const defaultPaymentMethod = resolveDefaultPaymentMethod(
+      urlParams.get("default_payment_method"),
+      urlParamsRef.current?.defaultPaymentMethod,
+    );
     const errorDisplayMode = urlParams.get("error_display_mode") as
       | "modal"
       | "notification"
@@ -652,6 +674,7 @@ export function useConnectionValue() {
       refGroup: refGroup || urlParamsRef.current?.refGroup || null,
       propagateError:
         propagateError || urlParamsRef.current?.propagateError || false,
+      defaultPaymentMethod,
       errorDisplayMode:
         errorDisplayMode || urlParamsRef.current?.errorDisplayMode || undefined,
       chains: chains ?? urlParamsRef.current?.chains ?? [],
@@ -1205,6 +1228,7 @@ export function useConnectionValue() {
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
+    defaultPaymentMethod: urlParams.defaultPaymentMethod,
     webauthnPopup,
     configuredChains: urlParams.chains ?? NO_CONFIGURED_CHAINS,
     preset: urlParams.preset,

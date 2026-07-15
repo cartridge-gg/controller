@@ -15,6 +15,7 @@ interface AmountSelectionDrawerProps {
   maxAmount?: number;
   isLoading?: boolean;
   onContinue: (amount: number) => void;
+  initialAmount?: number;
 }
 
 export function AmountSelectionDrawer({
@@ -24,8 +25,9 @@ export function AmountSelectionDrawer({
   maxAmount,
   isLoading,
   onContinue,
+  initialAmount,
 }: AmountSelectionDrawerProps) {
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState(initialAmount ?? 0);
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
       <DrawerContent title="Deposit USD" icon={<DepositIcon variant="solid" />}>
@@ -34,6 +36,7 @@ export function AmountSelectionDrawer({
           enableCustom={true}
           minAmount={minAmount}
           maxAmount={maxAmount}
+          initialAmount={initialAmount}
           onChange={setAmount}
         />
 
