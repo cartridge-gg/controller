@@ -144,14 +144,6 @@ export function resolveInitialPaymentMethod({
   if (funding === "funded") {
     return { status: "resolved", method: "controller" };
   }
-  if (funding === "indeterminate") {
-    return {
-      status: "resolved",
-      method: "controller",
-      showMethodPicker: true,
-    };
-  }
-
   if (credits === "pending") return { status: "pending" };
   if (credits === "available" && (hasSufficientCredits || cardTopupAvailable)) {
     return { status: "resolved", method: "credits" };

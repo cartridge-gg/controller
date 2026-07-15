@@ -113,12 +113,25 @@ describe("payment preference", () => {
     ).toEqual({ status: "resolved", method: "credits" });
   });
 
-  it("shows the picker when funding is indeterminate", () => {
+  it("uses credits when Controller funding is indeterminate but card top-up is available", () => {
     expect(
       resolveInitialPaymentMethod({
         configuredDefault: true,
         funding: "indeterminate",
         credits: "available",
+        hasSufficientCredits: false,
+        cardTopupAvailable: true,
+        directCardAvailable: true,
+      }),
+    ).toEqual({ status: "resolved", method: "credits" });
+  });
+
+  it("shows the picker when funding is indeterminate and credits are unavailable", () => {
+    expect(
+      resolveInitialPaymentMethod({
+        configuredDefault: true,
+        funding: "indeterminate",
+        credits: "unavailable",
         hasSufficientCredits: false,
         cardTopupAvailable: true,
         directCardAvailable: true,
