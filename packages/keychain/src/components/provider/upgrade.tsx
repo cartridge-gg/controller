@@ -79,13 +79,10 @@ const findVersion = (classHash: string): ControllerVersionInfo | undefined =>
 /** The controller version actually deployed at `address` on a chain, or `undefined`
  *  when the account isn't deployed there yet.
  *
- *  A counterfactual account's address is bound to its creation class, so it can only
- *  ever deploy *as* that class and then upgrade in place — there's no way to upgrade it
- *  before it exists on-chain (the upgrade runs via `execute_from_outside`, which needs a
- *  deployed contract). So we deliberately do NOT report the creation class here: a not-
- *  yet-deployed account must not be flagged as "outdated", or we'd offer a premature
- *  upgrade that can't execute. It deploys at its creation class on first use, and the
- *  upgrade is offered then — once `getClassHashAt` returns a real, deployed class. */
+ *  A counterfactual account's address is bound to its creation class, so on a chain
+ *  where it isn't deployed yet it can only ever deploy *as* that class (and upgrade in
+ *  place afterwards). `undefined` therefore means "will be the creation class on first
+ *  use" — the caller substitutes it accordingly. */
 async function deployedVersion(
   provider: Pick<RpcProvider, "getClassHashAt">,
   address: string,
@@ -202,7 +199,7 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
     (async () => {
       try {
         const address = controller.address();
-        // const creationClassHash = controller.classHash();
+        const creation = findVersion(controller.classHash());
         const activeRpcUrl = controller.rpcUrl();
 
         const active = await deployedVersion(controller.provider, address);
@@ -219,8 +216,9 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
                   version: await deployedVersion(provider, address),
                 };
               } catch {
-                // A single unreachable chain must not block the upgrade gate.
-                return { rpcUrl, version: undefined };
+                // A single unreachable chain must not block the upgrade gate —
+                // and must not be mistaken for "not deployed" either; skip it.
+                return null;
               }
             }),
         );
@@ -229,11 +227,23 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
 
         const outdated = [
           { rpcUrl: activeRpcUrl, version: active },
-          ...others,
-        ].filter(
-          (c): c is OutdatedChain =>
-            !!c.version && determineUpgradePath(c.version, isBeta).available,
-        );
+          ...others.filter((c): c is Exclude<typeof c, null> => c !== null),
+        ]
+          // A chain with no deployment yet will get the account AT ITS CREATION
+          // CLASS on first use (the address is bound to that class), so when the
+          // creation class is behind, that chain needs the same upgrade — and it
+          // can run immediately: the paymaster deploys the account when the
+          // upgrade's outside execution lands. Substituting the creation class
+          // here surfaces the upgrade right after login, instead of letting the
+          // first game action deploy a stale class and fail (e.g.
+          // ENTRYPOINT_NOT_FOUND on execute_from_outside_v3 for ≤ v1.0.5).
+          // Fresh accounts are unaffected: their creation class IS the stable
+          // class, so determineUpgradePath reports no upgrade.
+          .map((c) => (c.version ? c : { ...c, version: creation }))
+          .filter(
+            (c): c is OutdatedChain =>
+              !!c.version && determineUpgradePath(c.version, isBeta).available,
+          );
 
         setCurrent(active);
         setOutdated(outdated);
