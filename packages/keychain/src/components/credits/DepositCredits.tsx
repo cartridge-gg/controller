@@ -43,7 +43,7 @@ export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
         ? null
         : (preferred ?? null),
     );
-    setAmount(depositRequest?.defaultAmount ?? 0);
+    setAmount(0);
   }, [isOpen, depositRequest, countryCodeLoaded, isUS]);
 
   const step = useMemo(() => {
@@ -78,7 +78,6 @@ export function DepositCredits({ isOpen, onClose }: DepositCreditsProps) {
           (isController ? 1 : MIN_CREDITS_PURCHASE_USD)
         }
         maxAmount={MAX_CREDITS_PURCHASE_USD}
-        initialAmount={depositRequest?.defaultAmount}
         onClose={() => {
           if (step == "amount") {
             onClose();

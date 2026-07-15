@@ -644,7 +644,6 @@ export function OnchainCheckout() {
         preferredMethod: configuredCoinflowAvailable
           ? { type: "coinflow" }
           : undefined,
-        defaultAmount: topupAmount,
         minimumAmount: topupAmount,
         purchaseKey: originatingPurchaseKey,
         onSuccess: async () => {

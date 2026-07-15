@@ -14,7 +14,6 @@ type AmountSelectionProps = {
   minAmount?: number;
   maxAmount?: number;
   onChange: (creditAmount: number) => void;
-  initialAmount?: number;
 };
 
 export function AmountSelection({
@@ -24,25 +23,32 @@ export function AmountSelection({
   minAmount,
   maxAmount,
   onChange,
-  initialAmount,
 }: AmountSelectionProps) {
+  const firstAvailablePreset = creditAmounts.find(
+    (value) =>
+      (minAmount === undefined || value >= minAmount) &&
+      (maxAmount === undefined || value <= maxAmount),
+  );
   const [selectedAmount, setSelectedAmount] = useState<number | undefined>(
-    initialAmount ?? creditAmounts[0],
+    firstAvailablePreset ?? minAmount ?? creditAmounts[0],
   );
   const [custom, setCustom] = useState<boolean>(
-    initialAmount !== undefined && !creditAmounts.includes(initialAmount),
+    firstAvailablePreset === undefined,
   );
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const initialAmountIsPreset =
-    initialAmount !== undefined && creditAmounts.includes(initialAmount);
 
   useEffect(() => {
-    if (initialAmount === undefined) return;
-    setSelectedAmount(initialAmount);
-    setCustom(!initialAmountIsPreset);
+    const selectionIsInRange =
+      selectedAmount !== undefined &&
+      (minAmount === undefined || selectedAmount >= minAmount) &&
+      (maxAmount === undefined || selectedAmount <= maxAmount);
+    if (selectionIsInRange) return;
+
+    setSelectedAmount(firstAvailablePreset ?? minAmount);
+    setCustom(firstAvailablePreset === undefined);
     setError(null);
-  }, [initialAmount, initialAmountIsPreset]);
+  }, [firstAvailablePreset, maxAmount, minAmount, selectedAmount]);
 
   useEffect(() => {
     onChange(selectedAmount && !error ? selectedAmount : 0);
@@ -112,13 +118,14 @@ export function AmountSelection({
             ref={inputRef}
             className="pl-8 flex-1"
             type="number"
-            inputMode="decimal"
-            step="0.01"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            step="1"
             value={selectedAmount ?? ""}
             disabled={lockSelection}
             onChange={(e) => {
               const clean = e.target.value.replace(/^0+/, "");
-              const amount = clean ? Number.parseFloat(clean) : undefined;
+              const amount = clean ? Number.parseInt(clean, 10) : undefined;
               setSelectedAmount(amount);
               const min = minAmount ?? DEFAULT_MIN_AMOUNT;
               const max = maxAmount ?? DEFAULT_MAX_AMOUNT;

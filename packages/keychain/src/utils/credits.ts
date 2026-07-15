@@ -74,10 +74,10 @@ export function usdToUsdcWei(usd: number): bigint {
   return BigInt(Math.round(usd * 10 ** USDC_DECIMALS));
 }
 
-// Backend bounds for a credits purchase (calculateCreditsDetails): $2 min /
+// Product bounds for a credits purchase: $5 min /
 // $25,000 max. The min also absorbs Coinbase's own Apple Pay onramp floor so
 // every fiat rail can validate against the one constant. The controller (USDC
 // deposit) rail isn't bound server-side, but the deposit flow still caps it at
 // the same max for sanity.
-export const MIN_CREDITS_PURCHASE_USD = Math.max(2, COINBASE_APPLE_PAY_MIN_USD);
+export const MIN_CREDITS_PURCHASE_USD = Math.max(5, COINBASE_APPLE_PAY_MIN_USD);
 export const MAX_CREDITS_PURCHASE_USD = 25_000;

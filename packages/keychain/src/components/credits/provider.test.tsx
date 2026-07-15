@@ -19,8 +19,7 @@ describe("CreditsProvider", () => {
     act(() => {
       result.current.initiateCreditsDeposit({
         preferredMethod: { type: "coinflow" },
-        defaultAmount: 2,
-        minimumAmount: 2,
+        minimumAmount: 5,
         purchaseKey: "purchase-1",
         onSuccess,
       });

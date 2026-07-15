@@ -13,7 +13,6 @@ export type CreditDepositStatus = "processing" | "success" | "error" | "idle";
 
 export type CreditsDepositRequest = {
   preferredMethod?: PaymentMethodSelection;
-  defaultAmount?: number;
   minimumAmount?: number;
   purchaseKey?: string;
   onSuccess?: () => Promise<void>;
