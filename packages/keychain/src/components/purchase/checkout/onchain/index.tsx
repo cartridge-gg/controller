@@ -428,6 +428,7 @@ export function OnchainCheckout() {
     !!creditsQuote &&
     !hasSufficientCredits &&
     !isCreditsQuoteLoading;
+  const showConfiguredCreditsTopup = configuredCard && showInsufficientCredits;
 
   const globalDisabled = useMemo(() => {
     if (isCreditsSelected) {
@@ -956,8 +957,16 @@ export function OnchainCheckout() {
                 {showInsufficientCredits && (
                   <ErrorCard
                     variant="warning"
-                    title="Insufficient Credits"
-                    message="You need more credits to complete this purchase."
+                    title={
+                      showConfiguredCreditsTopup
+                        ? "Insufficient Balance"
+                        : "Insufficient Credits"
+                    }
+                    message={
+                      showConfiguredCreditsTopup
+                        ? "You need to deposit funds to complete this purchase."
+                        : "You need more credits to complete this purchase."
+                    }
                   />
                 )}
 
@@ -977,11 +986,13 @@ export function OnchainCheckout() {
                   />
                 )}
 
-                <WalletSelector
-                  method={selectedMethod}
-                  bridgeFrom={bridgeFrom}
-                  onClick={handleWalletSelect}
-                />
+                {!showConfiguredCreditsTopup && (
+                  <WalletSelector
+                    method={selectedMethod}
+                    bridgeFrom={bridgeFrom}
+                    onClick={handleWalletSelect}
+                  />
+                )}
 
                 <OnchainCostBreakdown quote={quote} />
 
