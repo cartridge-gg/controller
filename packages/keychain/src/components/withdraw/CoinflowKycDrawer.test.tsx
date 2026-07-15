@@ -1,7 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { CoinflowKycStatus } from "@/hooks/payments/coinflow-withdraw";
 import { CoinflowKycDrawer } from "./CoinflowKycDrawer";
+
+// jsdom lacks the pointer-capture/scroll APIs Radix Select relies on.
+beforeAll(() => {
+  window.HTMLElement.prototype.hasPointerCapture = vi.fn();
+  window.HTMLElement.prototype.releasePointerCapture = vi.fn();
+  window.HTMLElement.prototype.scrollIntoView = vi.fn();
+});
 
 const userData = {
   firstName: "Jane",
@@ -27,17 +34,9 @@ describe("CoinflowKycDrawer", () => {
   it("prefills the identity summary read-only from the verified user data", () => {
     render(<CoinflowKycDrawer {...baseProps} />);
 
-    for (const [label, value] of [
-      ["First name", userData.firstName],
-      ["Last name", userData.lastName],
-      ["Date of birth", userData.dob],
-      ["Email", userData.email],
-      ["Phone number", userData.phoneNumber],
-    ]) {
-      const input = screen.getByLabelText(label) as HTMLInputElement;
-      expect(input.value).toBe(value);
-      expect(input).toBeDisabled();
-    }
+    const input = screen.getByLabelText("Full name") as HTMLInputElement;
+    expect(input.value).toBe(`${userData.firstName} ${userData.lastName}`);
+    expect(input).toBeDisabled();
   });
 
   it("requires every field before Continue enables, then submits them", () => {
@@ -53,16 +52,17 @@ describe("CoinflowKycDrawer", () => {
     fireEvent.change(screen.getByPlaceholderText("City"), {
       target: { value: "Austin" },
     });
-    fireEvent.change(screen.getByPlaceholderText("State"), {
-      target: { value: "TX" },
-    });
+    // The state select is a Radix Select — open the trigger (keyboard, the
+    // pointer path needs real PointerEvents jsdom doesn't have) and pick Texas.
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" });
+    fireEvent.click(screen.getByText("Texas"));
     fireEvent.change(screen.getByPlaceholderText("Zip code"), {
       target: { value: "73301" },
     });
     // Still disabled: the last 4 digits of the SSN are required too.
     expect(continueButton).toBeDisabled();
 
-    fireEvent.change(screen.getByLabelText("Last 4 digits of SSN"), {
+    fireEvent.change(screen.getByLabelText("Last 4 Digits of SSN"), {
       target: { value: "1234" },
     });
     expect(continueButton).toBeEnabled();

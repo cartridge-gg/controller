@@ -164,7 +164,6 @@ export function CoinflowKycDrawer({
                 </label>
                 <Input
                   id="address1"
-                  label="Address"
                   placeholder="Address"
                   value={address1}
                   onChange={(e) => setAddress1(e.target.value)}
