@@ -300,6 +300,8 @@ export type KeychainOptions = IFrameOptions & {
   signupOptions?: AuthOptions;
   /** Preferred fallback when no explicit choice or funded Controller token is available. */
   defaultPaymentMethod?: DefaultPaymentMethod;
+  /** Use Coinflow's sandbox checkout, including on mainnet. Sandbox payments do not grant spendable credits. */
+  coinflowSandbox?: boolean;
   /** When true, manually provided policies will override preset policies. Default is false. */
   shouldOverridePresetPolicies?: boolean;
   /** The project name of Slot instance. */

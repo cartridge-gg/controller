@@ -28,6 +28,7 @@ export type ConnectionContextValue = {
   namespace: string | null;
   propagateError: boolean;
   defaultPaymentMethod?: DefaultPaymentMethod;
+  coinflowSandbox: boolean;
   webauthnPopup: {
     create: boolean;
     get: boolean;

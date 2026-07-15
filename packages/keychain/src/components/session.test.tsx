@@ -66,6 +66,7 @@ describe("Session", () => {
       toriiUrl: null,
       namespace: null,
       propagateError: false,
+      coinflowSandbox: false,
       webauthnPopup: {
         create: false,
         get: false,

@@ -87,6 +87,8 @@ type ResolvedUrlParams = {
   propagateError: boolean;
   /** Optional so snapshots persisted before this field existed stay valid. */
   defaultPaymentMethod?: DefaultPaymentMethod;
+  /** Optional so snapshots persisted before this field existed stay valid. */
+  coinflowSandbox?: boolean;
   errorDisplayMode?: "modal" | "notification" | "silent";
   /** Chains the dapp explicitly configured (SDK `chains` param). Optional so
    *  url-param snapshots persisted before this field existed stay valid. */
@@ -120,6 +122,15 @@ export function resolveDefaultPaymentMethod(
   return (
     parseDefaultPaymentMethod(value) ?? parseDefaultPaymentMethod(previousValue)
   );
+}
+
+export function resolveCoinflowSandbox(
+  value?: string | null,
+  previousValue?: boolean,
+): boolean {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return previousValue ?? false;
 }
 
 // Stable fallback so consumers keyed on `configuredChains` identity don't re-run.
@@ -614,6 +625,10 @@ export function useConnectionValue() {
       urlParams.get("default_payment_method"),
       urlParamsRef.current?.defaultPaymentMethod,
     );
+    const coinflowSandbox = resolveCoinflowSandbox(
+      urlParams.get("coinflow_sandbox"),
+      urlParamsRef.current?.coinflowSandbox,
+    );
     const errorDisplayMode = urlParams.get("error_display_mode") as
       | "modal"
       | "notification"
@@ -675,6 +690,7 @@ export function useConnectionValue() {
       propagateError:
         propagateError || urlParamsRef.current?.propagateError || false,
       defaultPaymentMethod,
+      coinflowSandbox,
       errorDisplayMode:
         errorDisplayMode || urlParamsRef.current?.errorDisplayMode || undefined,
       chains: chains ?? urlParamsRef.current?.chains ?? [],
@@ -1229,6 +1245,7 @@ export function useConnectionValue() {
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
     defaultPaymentMethod: urlParams.defaultPaymentMethod,
+    coinflowSandbox: urlParams.coinflowSandbox ?? false,
     webauthnPopup,
     configuredChains: urlParams.chains ?? NO_CONFIGURED_CHAINS,
     preset: urlParams.preset,

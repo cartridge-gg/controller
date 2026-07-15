@@ -103,6 +103,22 @@ describe("hosted keychain compatibility contract", () => {
     ).toBe(false);
   });
 
+  it("sends the configured Coinflow sandbox mode additively", () => {
+    createKeychain({ coinflowSandbox: true });
+
+    expect(mockIFrameOptions.url.searchParams.get("coinflow_sandbox")).toBe(
+      "true",
+    );
+  });
+
+  it("omits Coinflow sandbox mode when it is not configured", () => {
+    createKeychain();
+
+    expect(mockIFrameOptions.url.searchParams.has("coinflow_sandbox")).toBe(
+      false,
+    );
+  });
+
   it.each(["0.13.12", "0.13.13", "0.14.0-alpha.1"])(
     "keeps the same hosted bridge surface for Controller %s",
     (version) => {

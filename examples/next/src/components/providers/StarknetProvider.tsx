@@ -306,6 +306,9 @@ export const controllerConnector = new ControllerConnector({
   url: getKeychainUrl(),
   signupOptions,
   defaultPaymentMethod: "credit-card",
+  // Exercise the card UI before the production Coinflow integration is active.
+  // Sandbox payments intentionally do not grant spendable credits.
+  coinflowSandbox: true,
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   shouldOverridePresetPolicies: overridePolicies,

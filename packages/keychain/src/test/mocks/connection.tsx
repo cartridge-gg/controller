@@ -48,6 +48,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   },
   propagateError: false,
   defaultPaymentMethod: undefined,
+  coinflowSandbox: false,
   webauthnPopup: {
     create: false,
     get: false,
