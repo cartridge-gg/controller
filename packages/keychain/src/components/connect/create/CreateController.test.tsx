@@ -189,6 +189,48 @@ describe("CreateController", () => {
     });
   });
 
+  it("opens SMS signup directly when SMS is the only auth option", async () => {
+    const handleSubmit = vi.fn().mockResolvedValue(undefined);
+    const setAuthenticationStep = vi.fn();
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit,
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
+      setChangeWallet: vi.fn(),
+      signupOptions: ["sms"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
+      shouldAutoCreateSession: true,
+      hasPolicies: true,
+    });
+
+    renderComponent();
+    const input = screen.getByPlaceholderText("Username");
+    fireEvent.change(input, { target: { value: "newuser" } });
+    fireEvent.blur(input);
+
+    const submitButton = screen.getByTestId("submit-button");
+    await waitFor(() => expect(submitButton).not.toBeDisabled());
+    expect(submitButton).toHaveTextContent("sign up");
+    expect(submitButton).not.toHaveTextContent("sign up with SMS");
+    fireEvent.submit(submitButton.closest("form")!);
+
+    await waitFor(() => {
+      expect(setAuthenticationStep).toHaveBeenCalledWith(
+        AuthenticationStep.SmsForm,
+      );
+    });
+    expect(handleSubmit).not.toHaveBeenCalled();
+    expect(setAuthenticationStep).not.toHaveBeenCalledWith(
+      AuthenticationStep.ChooseMethod,
+    );
+  });
+
   it("shows loading state during submission", async () => {
     mockUseCreateController.mockReturnValue({
       isLoading: true,

@@ -228,6 +228,9 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
 
       // Single signer signup/initial: show branded text immediately
       if (signupOptions?.length === 1 && option?.label) {
+        if (!isLogin && signupOptions[0] === "sms") {
+          return "sign up";
+        }
         return isLogin
           ? `log in with ${option.label}`
           : `sign up with ${option.label}`;
