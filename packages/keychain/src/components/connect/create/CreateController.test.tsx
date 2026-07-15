@@ -218,6 +218,7 @@ describe("CreateController", () => {
     await waitFor(() => expect(submitButton).not.toBeDisabled());
     expect(submitButton).toHaveTextContent("sign up");
     expect(submitButton).not.toHaveTextContent("sign up with SMS");
+    expect(submitButton.querySelector("svg")).not.toBeInTheDocument();
     fireEvent.submit(submitButton.closest("form")!);
 
     await waitFor(() => {
