@@ -198,7 +198,7 @@ function DepositInner({ onComplete }: DepositProps) {
                   <div className="w-full flex gap-4">
                     {connectors
                       .filter((c) =>
-                        ["argent", "braavos"].some((name) =>
+                        ["ready x", "braavos"].some((name) =>
                           c.name.toLowerCase().includes(name),
                         ),
                       )
@@ -210,7 +210,7 @@ function DepositInner({ onComplete }: DepositProps) {
                         >
                           {(() => {
                             const name = c.name.toLowerCase();
-                            if (name.includes("argent")) {
+                            if (name.includes("ready x")) {
                               return <ArgentIcon size="sm" />;
                             }
                             if (name.includes("braavos")) {

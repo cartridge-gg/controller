@@ -296,7 +296,7 @@ function SlotCryptoFundInner({
 
   const phaseLabel = getPhaseLabel(phase);
   const walletConnectors = connectors.filter((c) =>
-    ["argent", "braavos"].some((name) => c.name.toLowerCase().includes(name)),
+    ["Ready X", "braavos"].some((name) => c.name.toLowerCase().includes(name)),
   );
 
   return (
@@ -441,7 +441,7 @@ function SlotCryptoFundInner({
                   className="flex-1"
                   onClick={() => onConnect(c)}
                 >
-                  {c.name.toLowerCase().includes("argent") ? (
+                  {c.name.toLowerCase().includes("ready x") ? (
                     <ArgentIcon size="sm" />
                   ) : c.name.toLowerCase().includes("braavos") ? (
                     <BraavosIcon size="sm" />
