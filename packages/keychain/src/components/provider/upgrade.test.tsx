@@ -167,11 +167,55 @@ describe("UpgradeProvider", () => {
     expect(result.current.isBeta).toBe(false);
   });
 
-  it("should not offer an upgrade for an account that isn't deployed on the chain", async () => {
-    // A counterfactual account's address is bound to its creation class, so it can
-    // only deploy as that class and upgrade in place — it can't be upgraded before it
-    // exists on-chain. So a "Contract not found" must NOT be reported as outdated,
-    // even though the mock's creation class (CONTROLLER_VERSIONS[3]) is behind latest.
+  it("offers an upgrade for an UNDEPLOYED account whose creation class is outdated", async () => {
+    // A counterfactual account deploys AT ITS CREATION CLASS on first use (the
+    // address is bound to that class). The mock's creation class is
+    // CONTROLLER_VERSIONS[3] — behind stable — so "Contract not found" must be
+    // treated as that outdated class, surfacing the upgrade right after login
+    // (the paymaster deploys the account when the upgrade's outside execution
+    // lands) instead of letting the first action deploy a stale class and fail.
+    mockController.provider.getClassHashAt.mockRejectedValueOnce(
+      new Error("Contract not found"),
+    );
+
+    const { result } = renderHook(() => useUpgrade(), { wrapper });
+
+    // Wait for the component to update
+    await act(async () => {
+      // Wait for all promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    // Wait for the component to update
+    await act(async () => {
+      // Manually trigger the state updates that would happen after API calls
+      await vi.waitFor(
+        () => {
+          return result.current.isSynced === true;
+        },
+        { timeout: 5000 },
+      );
+    });
+
+    expect(result.current.available).toBe(true);
+    // The ACTIVE chain has no deployed class — `current` reports what's on-chain.
+    expect(result.current.current).toBeUndefined();
+    expect(result.current.latest).toBe(STABLE_CONTROLLER);
+
+    // The upgrade executes at the CREATION class's outside-execution version
+    // (VERSIONS[3] is V3) — the paymaster auto-deploys the account beneath it.
+    await act(async () => {
+      await result.current.onUpgrade();
+    });
+    expect(mockController.executeFromOutsideV3).toHaveBeenCalled();
+    expect(mockController.executeFromOutsideV2).not.toHaveBeenCalled();
+  });
+
+  it("should not offer an upgrade for an undeployed account created on the stable class", async () => {
+    // Fresh accounts must stay unprompted (the original point of the undeployed
+    // guard): their creation class IS the stable class, so there is nothing to
+    // upgrade — on this chain or any other.
+    mockController.classHash.mockReturnValue(STABLE_CONTROLLER.hash);
     mockController.provider.getClassHashAt.mockRejectedValueOnce(
       new Error("Contract not found"),
     );
@@ -198,6 +242,9 @@ describe("UpgradeProvider", () => {
     expect(result.current.available).toBe(false);
     expect(result.current.current).toBeUndefined();
     expect(result.current.latest).toBe(STABLE_CONTROLLER);
+
+    // Restore the module-scope mock for subsequent tests.
+    mockController.classHash.mockReturnValue(CONTROLLER_VERSIONS[3].hash);
   });
 
   it("should handle other errors", async () => {

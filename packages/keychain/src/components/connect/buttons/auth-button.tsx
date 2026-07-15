@@ -116,6 +116,12 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
 
     const { isLoading, disabled, ...restProps } = props;
 
+    const isSmsOnlySignup =
+      !!username &&
+      !validation.exists &&
+      signupOptions?.length === 1 &&
+      signupOptions[0] === "sms";
+
     const option = useMemo(() => {
       // Login flow: use existing signers (only when account exists)
       if (
@@ -167,9 +173,12 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       if (isLoading || waitingForConfirmation) {
         return <Spinner size="sm" />;
       }
+      if (isSmsOnlySignup) {
+        return null;
+      }
       const IconComponent = option?.Icon;
       return IconComponent ? <IconComponent size="sm" /> : null;
-    }, [isLoading, waitingForConfirmation, option]);
+    }, [isLoading, waitingForConfirmation, isSmsOnlySignup, option]);
 
     // Check if login has single signer (or all same auth type)
     const isSingleSignerLogin = useMemo(() => {
@@ -228,6 +237,9 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
 
       // Single signer signup/initial: show branded text immediately
       if (signupOptions?.length === 1 && option?.label) {
+        if (isSmsOnlySignup) {
+          return "sign up";
+        }
         return isLogin
           ? `log in with ${option.label}`
           : `sign up with ${option.label}`;
@@ -242,6 +254,7 @@ export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
       username,
       signupOptions,
       isSingleSignerLogin,
+      isSmsOnlySignup,
       usesWebauthnPopup,
     ]);
 
