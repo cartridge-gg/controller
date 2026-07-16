@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { LocationGateOptions } from "@cartridge/controller";
 import { connect } from "@/utils/connection/connect";
 import { LocationGate } from "./LocationGate";
 
@@ -21,7 +22,7 @@ vi.mock("@/hooks/connection", () => ({
 }));
 
 vi.mock("@/components/ErrorAlert", () => ({
-  ErrorAlert: ({ description }: { description: string }) => (
+  ErrorAlert: ({ description }: { description: React.ReactNode }) => (
     <div>{description}</div>
   ),
 }));
@@ -60,15 +61,19 @@ vi.mock("@cartridge/presets", () => ({
 }));
 
 vi.mock("./USMap", () => ({
-  USMap: () => <div data-testid="us-map" />,
+  USMap: ({ supportedStates }: { supportedStates: string[] }) => (
+    <div
+      data-testid="us-map"
+      data-supported-states={supportedStates.join(",")}
+    />
+  ),
 }));
 
-const route = `/location-gate?${new URLSearchParams({
-  returnTo: "/connect?id=connect-1",
-  gate: JSON.stringify({ blocked: ["US-NY"] }),
-})}`;
-
-function renderGate() {
+function renderGate(gate: LocationGateOptions = { blocked: ["US-NY"] }) {
+  const route = `/location-gate?${new URLSearchParams({
+    returnTo: "/connect?id=connect-1",
+    gate: JSON.stringify(gate),
+  })}`;
   return render(
     <MemoryRouter initialEntries={[route]}>
       <LocationGate />
@@ -88,7 +93,20 @@ describe("LocationGate", () => {
       configurable: true,
       value: { query: mocks.queryPermission },
     });
+    Object.defineProperty(navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 AppleWebKit/537.36 Chrome/126.0.0.0 Safari/537.36",
+    });
     mocks.queryPermission.mockResolvedValue({ state: "prompt" });
+  });
+
+  it("shows a map of the supported states on the verification screen", async () => {
+    renderGate({ allowed: ["US-CA", "US-TX"], blocked: ["US-TX"] });
+
+    expect(await screen.findByTestId("us-map")).toHaveAttribute(
+      "data-supported-states",
+      "US-CA",
+    );
   });
 
   it("requests browser geolocation after the user continues", async () => {
@@ -135,6 +153,10 @@ describe("LocationGate", () => {
   });
 
   it("does not pass when browser geolocation permission is denied", async () => {
+    Object.defineProperty(navigator, "userAgent", {
+      configurable: true,
+      value: "Mozilla/5.0 Firefox/128.0",
+    });
     renderGate();
     fireEvent.click(await screen.findByRole("button", { name: "CONTINUE" }));
 
@@ -144,6 +166,19 @@ describe("LocationGate", () => {
     expect(
       await screen.findByText("Location permission was denied."),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "Learn how to enable location in Firefox.",
+      }),
+    ).toHaveAttribute(
+      "href",
+      "https://support.mozilla.org/en-US/kb/does-firefox-share-my-location-websites",
+    );
+    expect(screen.getByRole("link")).toHaveAttribute("target", "_blank");
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "rel",
+      "noopener noreferrer",
+    );
     expect(mocks.setLocationGateVerified).not.toHaveBeenCalled();
   });
 

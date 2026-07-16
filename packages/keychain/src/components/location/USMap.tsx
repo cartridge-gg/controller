@@ -2,14 +2,14 @@ import { useMemo } from "react";
 import { STATE_PATHS } from "./us-state-paths";
 
 type USMapProps = {
-  /** Region codes to highlight as blocked, e.g. ["US-HI", "US-NY"] */
-  blockedStates: string[];
+  /** Region codes to highlight as supported, e.g. ["US-CA", "US-TX"] */
+  supportedStates: string[];
 };
 
-export function USMap({ blockedStates }: USMapProps) {
-  const blockedSet = useMemo(
-    () => new Set(blockedStates.map((s) => s.toUpperCase())),
-    [blockedStates],
+export function USMap({ supportedStates }: USMapProps) {
+  const supportedSet = useMemo(
+    () => new Set(supportedStates.map((state) => state.toUpperCase())),
+    [supportedStates],
   );
 
   return (
@@ -29,18 +29,18 @@ export function USMap({ blockedStates }: USMapProps) {
         xmlns="http://www.w3.org/2000/svg"
         className="w-full"
         role="img"
-        aria-label="Map of the United States showing restricted states"
+        aria-label="Map of supported states in the United States"
       >
         {Object.entries(STATE_PATHS).map(([code, d]) => {
-          const isBlocked = blockedSet.has(code);
+          const isSupported = supportedSet.has(code);
           return (
             <path
               key={code}
               d={d}
               className={
-                isBlocked
-                  ? "fill-background-200 stroke-background"
-                  : "fill-primary-100 stroke-background"
+                isSupported
+                  ? "fill-primary-100 stroke-background"
+                  : "fill-background-200 stroke-background"
               }
               strokeWidth={0.7}
               strokeLinejoin="round"

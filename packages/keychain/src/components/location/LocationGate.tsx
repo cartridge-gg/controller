@@ -16,6 +16,7 @@ import {
   evaluateLocationGate,
   reverseGeocodeLocation,
 } from "@/utils/location-gate";
+import { getLocationPermissionHelp, getSupportedUSStates } from "./location-ui";
 import { USMap } from "./USMap";
 
 type GateState = "checking" | "idle" | "requesting" | "blocked";
@@ -227,10 +228,15 @@ export function LocationGate() {
   const gameName =
     theme.name && theme.name !== defaultTheme.name ? theme.name : "This game";
 
-  const blockedUSStates = useMemo(() => {
-    if (!gate?.blocked) return [];
-    return gate.blocked.filter((code) => code.toUpperCase().startsWith("US-"));
-  }, [gate]);
+  const supportedUSStates = useMemo(() => getSupportedUSStates(gate), [gate]);
+
+  const permissionHelp = useMemo(
+    () =>
+      getLocationPermissionHelp(
+        typeof navigator === "undefined" ? "" : navigator.userAgent,
+      ),
+    [],
+  );
 
   if (!gate || state === "checking") {
     return null;
@@ -244,11 +250,9 @@ export function LocationGate() {
           icon={<GlobeIcon variant="solid" size="lg" />}
         />
         <LayoutContent className="p-4">
-          {blockedUSStates.length > 0 && (
-            <div className="mb-3">
-              <USMap blockedStates={blockedUSStates} />
-            </div>
-          )}
+          <div className="mb-3">
+            <USMap supportedStates={supportedUSStates} />
+          </div>
           <p className="text-sm text-foreground-300 leading-relaxed">
             {gameName} is not available in your region.
           </p>
@@ -273,16 +277,34 @@ export function LocationGate() {
         icon={<GlobeIcon variant="solid" size="lg" />}
       />
       <LayoutContent className="p-4 gap-3">
-        {blockedUSStates.length > 0 && (
-          <USMap blockedStates={blockedUSStates} />
-        )}
+        <USMap supportedStates={supportedUSStates} />
         <p className="text-sm text-foreground-300 leading-relaxed">
           {gameName} needs your location to confirm availability in your region.
         </p>
       </LayoutContent>
       <LayoutFooter>
         {error && (
-          <ErrorAlert title="Error" description={error} isExpanded={true} />
+          <ErrorAlert
+            title="Error"
+            description={
+              error === "Location permission was denied." ? (
+                <>
+                  <span>{error} </span>
+                  <a
+                    href={permissionHelp.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    Learn how to enable location in {permissionHelp.name}.
+                  </a>
+                </>
+              ) : (
+                error
+              )
+            }
+            isExpanded={true}
+          />
         )}
         <Button
           variant="primary"
