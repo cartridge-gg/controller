@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   queryPermission: vi.fn(),
   reverseGeocodeLocation: vi.fn(),
   setLocationGateVerified: vi.fn(),
+  setShowClose: vi.fn(),
 }));
 
 vi.mock("@/hooks/connection", () => ({
@@ -18,6 +19,12 @@ vi.mock("@/hooks/connection", () => ({
     closeModal: mocks.closeModal,
     setLocationGateVerified: mocks.setLocationGateVerified,
     theme: { name: "Test Game" },
+  }),
+}));
+
+vi.mock("@/context", () => ({
+  useNavigation: () => ({
+    setShowClose: mocks.setShowClose,
   }),
 }));
 
@@ -128,6 +135,14 @@ describe("LocationGate", () => {
         timeout: 15000,
       },
     );
+  });
+
+  it("uses a close button instead of the back button", async () => {
+    renderGate();
+
+    await screen.findByText("Location Verification");
+
+    expect(mocks.setShowClose).toHaveBeenCalledWith(true);
   });
 
   it("uses the GPS result as the primary geofence signal", async () => {

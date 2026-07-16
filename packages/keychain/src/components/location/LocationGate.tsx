@@ -10,6 +10,7 @@ import {
 import { LocationGateOptions, ResponseCodes } from "@cartridge/controller";
 import { defaultTheme, loadConfig } from "@cartridge/presets";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
 import {
@@ -40,6 +41,7 @@ function errorResponse(gameName: string) {
 
 export function LocationGate() {
   const { closeModal, setLocationGateVerified, theme } = useConnection();
+  const { setShowClose } = useNavigation();
   const { search } = useLocation();
   const navigate = useNavigate();
   const [state, setState] = useState<GateState>("checking");
@@ -84,6 +86,10 @@ export function LocationGate() {
   }, [preset, gateFromUrl]);
 
   const gate = gateFromUrl ?? presetGate;
+
+  useEffect(() => {
+    setShowClose(true);
+  }, [setShowClose]);
 
   const connectId = useMemo(() => {
     if (!returnTo) {
