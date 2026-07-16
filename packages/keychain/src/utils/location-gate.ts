@@ -1,4 +1,7 @@
-import type { LocationGateOptions } from "@cartridge/controller";
+import type {
+  LocationCoordinates,
+  LocationGateOptions,
+} from "@cartridge/controller";
 
 /**
  * Returns true if the location gate has any configured rules (allowed or blocked).
@@ -14,6 +17,40 @@ type GeoLocation = {
   countryCode?: string | null;
   regionCode?: string | null;
 };
+
+/**
+ * Resolve browser coordinates into the country and ISO subdivision codes used
+ * by location-gate rules.
+ */
+export async function reverseGeocodeLocation(
+  coords: Pick<LocationCoordinates, "latitude" | "longitude">,
+): Promise<GeoLocation> {
+  const url = new URL(
+    "https://api.bigdatacloud.net/data/reverse-geocode-client",
+  );
+  url.searchParams.set("latitude", coords.latitude.toString());
+  url.searchParams.set("longitude", coords.longitude.toString());
+  url.searchParams.set("localityLanguage", "en");
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    throw new Error("Failed to resolve browser location");
+  }
+
+  const data = (await response.json()) as {
+    countryCode?: string | null;
+    principalSubdivisionCode?: string | null;
+  };
+
+  if (!data.countryCode) {
+    throw new Error("Browser location did not resolve to a country");
+  }
+
+  return {
+    countryCode: data.countryCode,
+    regionCode: data.principalSubdivisionCode ?? null,
+  };
+}
 
 /**
  * Splits a list of location codes into country codes and region codes.
