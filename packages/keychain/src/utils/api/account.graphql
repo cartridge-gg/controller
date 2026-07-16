@@ -120,7 +120,12 @@ query AccountSearch($query: String!, $limit: Int = 5) {
 }
 
 mutation AccountVerify($input: AccountVerifyInput!) {
-  accountVerify(input: $input)
+  accountVerify(input: $input) {
+    verified
+    reasonCode
+    retryable
+    correlationId
+  }
 }
 
 mutation DeleteMe {
