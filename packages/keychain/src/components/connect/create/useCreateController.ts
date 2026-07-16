@@ -355,9 +355,8 @@ export function useCreateController({
   const canKeepOpen = supportsConnectKeepOpen(controllerVersion, !isIframe());
 
   // When location gate is configured and not yet verified, skip auto-session
-  // creation and connect resolution. The natural re-render will show LocationGate
-  // (since the URL is still /location-gate), and after verification LocationGate
-  // navigates to /connect where ConnectRoute handles session + resolution.
+  // creation and connect resolution. Once authentication sets the controller,
+  // ConnectRoute redirects to LocationGate and resumes after verification.
   const locationGatePending =
     hasConfiguredLocationGate(locationGate) && !locationGateVerified;
 
@@ -552,9 +551,9 @@ export function useCreateController({
         // }
 
         // If location gate is pending, skip session creation and connect
-        // resolution. The re-render will show LocationGate at the current URL;
-        // after verification it navigates to /connect where ConnectRoute handles
-        // session creation and resolution.
+        // resolution. The controller re-render lets ConnectRoute redirect to
+        // LocationGate; after verification, ConnectRoute handles session
+        // creation and resolution.
         if (locationGatePending) {
           return;
         }
@@ -868,9 +867,9 @@ export function useCreateController({
       // }
 
       // If location gate is pending, skip session creation and connect
-      // resolution. The re-render will show LocationGate at the current URL;
-      // after verification it navigates to /connect where ConnectRoute handles
-      // session creation and resolution.
+      // resolution. The controller re-render lets ConnectRoute redirect to
+      // LocationGate; after verification, ConnectRoute handles session
+      // creation and resolution.
       if (locationGatePending) {
         return;
       }

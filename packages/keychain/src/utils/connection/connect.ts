@@ -8,7 +8,6 @@ import {
 } from "@cartridge/controller";
 import { SessionPolicies } from "@cartridge/presets";
 import { generateCallbackId, storeCallbacks, getCallbacks } from "./callbacks";
-import { createLocationGateUrl } from "./location-gate";
 import type { SemVer } from "semver";
 import gte from "semver/functions/gte";
 
@@ -179,7 +178,6 @@ export function parseConnectParams(searchParams: URLSearchParams): {
 export function connect({
   navigate,
   setRpcUrl,
-  getLocationGate,
   resetLocationGateVerified,
 }: {
   navigate: (
@@ -256,20 +254,9 @@ export function connect({
           reject,
         });
 
-        const locationGate = getLocationGate?.();
-        const hasLocationGate =
-          !!locationGate &&
-          ((locationGate.allowed?.length ?? 0) > 0 ||
-            (locationGate.blocked?.length ?? 0) > 0);
-
-        const destination = hasLocationGate
-          ? createLocationGateUrl({
-              returnTo: url,
-              gate: locationGate!,
-            })
-          : url;
-
-        navigate(destination, { replace: true });
+        // Authentication must complete before ConnectRoute redirects an
+        // authenticated controller to the configured location gate.
+        navigate(url, { replace: true });
       });
     };
   };

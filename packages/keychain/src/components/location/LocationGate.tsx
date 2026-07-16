@@ -16,10 +16,14 @@ import {
   evaluateLocationGate,
   reverseGeocodeLocation,
 } from "@/utils/location-gate";
-import { getIpLocation, type IpLocation } from "@/utils/ip";
 import { USMap } from "./USMap";
 
-type GateState = "idle" | "requesting" | "blocked";
+type GateState = "checking" | "idle" | "requesting" | "blocked";
+
+type ResolvedLocation = {
+  countryCode?: string | null;
+  regionCode?: string | null;
+};
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -37,7 +41,7 @@ export function LocationGate() {
   const { closeModal, setLocationGateVerified, theme } = useConnection();
   const { search } = useLocation();
   const navigate = useNavigate();
-  const [state, setState] = useState<GateState>("idle");
+  const [state, setState] = useState<GateState>("checking");
   const [error, setError] = useState<string | null>(null);
 
   const [presetGate, setPresetGate] = useState<LocationGateOptions | null>(
@@ -106,7 +110,7 @@ export function LocationGate() {
   );
 
   const evaluateAndContinue = useCallback(
-    (geo: IpLocation) => {
+    (geo: ResolvedLocation) => {
       if (!gate || !returnTo) {
         throw new Error("Location requirements are missing");
       }
@@ -126,59 +130,95 @@ export function LocationGate() {
     [gate, navigate, returnTo, setLocationGateVerified],
   );
 
-  const fallBackToIpLocation = useCallback(async () => {
-    const ipLocation = await getIpLocation();
-    evaluateAndContinue(ipLocation);
-  }, [evaluateAndContinue]);
-
-  const handleLocationFailure = useCallback(async () => {
-    try {
-      await fallBackToIpLocation();
-    } catch (locationError) {
-      console.error("Location gate failed:", locationError);
+  const handleLocationError = useCallback(
+    (geoError?: Pick<GeolocationPositionError, "code" | "message">) => {
       setState("idle");
-      setError("Unable to verify location.");
+      if (geoError?.code === 1) {
+        setError("Location permission was denied.");
+        return;
+      }
+      setError(geoError?.message || "Unable to verify location.");
+    },
+    [],
+  );
+
+  const requestLocation = useCallback(
+    (silent = false) => {
+      if (!gate || !returnTo) {
+        setState("idle");
+        setError("Location requirements are missing.");
+        return;
+      }
+
+      if (typeof navigator === "undefined" || !navigator.geolocation) {
+        setState("idle");
+        setError("Location services are not available in this browser.");
+        return;
+      }
+
+      setError(null);
+      setState(silent ? "checking" : "requesting");
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          void (async () => {
+            try {
+              const geo = await reverseGeocodeLocation(position.coords);
+              evaluateAndContinue({
+                countryCode: geo.countryCode ?? null,
+                regionCode: geo.regionCode ?? null,
+              });
+            } catch (locationError) {
+              console.error("Location gate failed:", locationError);
+              setState("idle");
+              setError("Unable to verify location.");
+            }
+          })();
+        },
+        handleLocationError,
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 60000,
+        },
+      );
+    },
+    [evaluateAndContinue, gate, handleLocationError, returnTo],
+  );
+
+  useEffect(() => {
+    if (!gate || !returnTo) return;
+
+    let cancelled = false;
+    const showPrompt = () => {
+      if (!cancelled) setState("idle");
+    };
+
+    if (typeof navigator === "undefined" || !navigator.permissions?.query) {
+      showPrompt();
+      return;
     }
-  }, [fallBackToIpLocation]);
+
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((permission) => {
+        if (cancelled) return;
+        if (permission.state === "granted") {
+          requestLocation(true);
+        } else {
+          setState("idle");
+        }
+      })
+      .catch(showPrompt);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [gate, requestLocation, returnTo]);
 
   const handleContinue = useCallback(() => {
-    if (!gate || !returnTo) {
-      setError("Location requirements are missing.");
-      return;
-    }
-
-    setError(null);
-    setState("requesting");
-
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      void handleLocationFailure();
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        void (async () => {
-          try {
-            const geo = await reverseGeocodeLocation(position.coords);
-            evaluateAndContinue({
-              countryCode: geo.countryCode ?? null,
-              regionCode: geo.regionCode ?? null,
-            });
-          } catch {
-            await handleLocationFailure();
-          }
-        })();
-      },
-      () => {
-        void handleLocationFailure();
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60000,
-      },
-    );
-  }, [evaluateAndContinue, gate, handleLocationFailure, returnTo]);
+    requestLocation();
+  }, [requestLocation]);
 
   const handleCancel = useCallback(() => {
     resolveConnect(CANCEL_RESPONSE);
@@ -192,7 +232,7 @@ export function LocationGate() {
     return gate.blocked.filter((code) => code.toUpperCase().startsWith("US-"));
   }, [gate]);
 
-  if (!gate) {
+  if (!gate || state === "checking") {
     return null;
   }
 
