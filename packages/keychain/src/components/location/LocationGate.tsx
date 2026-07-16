@@ -57,10 +57,13 @@ export function LocationGate({
   gate,
   onExit,
   onVerified,
+  persistVerification = true,
 }: {
   gate: LocationGateOptions;
   onExit: (response: LocationGateResponse) => void;
   onVerified?: () => void;
+  /** Connect flows persist this globally; purchase flows resume locally. */
+  persistVerification?: boolean;
 }) {
   const { setLocationGateVerified, theme } = useConnection();
   const { setShowClose } = useNavigation();
@@ -83,10 +86,12 @@ export function LocationGate({
         return;
       }
 
-      setLocationGateVerified(true);
+      if (persistVerification) {
+        setLocationGateVerified(true);
+      }
       onVerified?.();
     },
-    [gate, onVerified, setLocationGateVerified],
+    [gate, onVerified, persistVerification, setLocationGateVerified],
   );
 
   const handleLocationError = useCallback(

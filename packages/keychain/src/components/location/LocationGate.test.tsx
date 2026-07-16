@@ -76,12 +76,16 @@ vi.mock("./USMap", () => ({
   ),
 }));
 
-function renderGate(gate: LocationGateOptions = { blocked: ["US-NY"] }) {
+function renderGate(
+  gate: LocationGateOptions = { blocked: ["US-NY"] },
+  persistVerification = true,
+) {
   return render(
     <LocationGate
       gate={gate}
       onExit={mocks.onExit}
       onVerified={mocks.onVerified}
+      persistVerification={persistVerification}
     />,
   );
 }
@@ -165,6 +169,24 @@ describe("LocationGate", () => {
       expect.objectContaining({ latitude: 34.05, longitude: -118.24 }),
     );
     expect(mocks.onExit).not.toHaveBeenCalled();
+  });
+
+  it("can verify a purchase without updating global connection state", async () => {
+    mocks.reverseGeocodeLocation.mockResolvedValue({
+      countryCode: "US",
+      regionCode: "US-CA",
+    });
+    renderGate({ blocked: ["US-NY"] }, false);
+    fireEvent.click(await screen.findByRole("button", { name: "CONTINUE" }));
+
+    const onSuccess = mocks.getCurrentPosition.mock.calls[0][0];
+    onSuccess({
+      coords: { latitude: 34.05, longitude: -118.24 },
+      timestamp: 1,
+    });
+
+    await waitFor(() => expect(mocks.onVerified).toHaveBeenCalledOnce());
+    expect(mocks.setLocationGateVerified).not.toHaveBeenCalled();
   });
 
   it("does not pass when browser geolocation permission is denied", async () => {

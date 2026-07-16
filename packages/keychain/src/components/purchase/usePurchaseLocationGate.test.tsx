@@ -37,9 +37,7 @@ describe("usePurchaseLocationGate", () => {
 
     act(() => result.current.runAfterLocationGate(firstPurchase));
 
-    expect(mocks.connection.setLocationGateVerified).toHaveBeenCalledWith(
-      false,
-    );
+    expect(mocks.connection.setLocationGateVerified).not.toHaveBeenCalled();
     expect(result.current.locationGateView).not.toBeNull();
     expect(firstPurchase).not.toHaveBeenCalled();
 
@@ -54,7 +52,7 @@ describe("usePurchaseLocationGate", () => {
 
     act(() => result.current.runAfterLocationGate(secondPurchase));
 
-    expect(mocks.connection.setLocationGateVerified).toHaveBeenCalledTimes(2);
+    expect(mocks.connection.setLocationGateVerified).not.toHaveBeenCalled();
     expect(result.current.locationGateView).not.toBeNull();
     expect(secondPurchase).not.toHaveBeenCalled();
   });
