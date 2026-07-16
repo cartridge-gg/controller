@@ -7,6 +7,7 @@ import { LocationGate } from "./LocationGate";
 
 const mocks = vi.hoisted(() => ({
   onExit: vi.fn(),
+  onVerified: vi.fn(),
   getCurrentPosition: vi.fn(),
   queryPermission: vi.fn(),
   reverseGeocodeLocation: vi.fn(),
@@ -76,7 +77,13 @@ vi.mock("./USMap", () => ({
 }));
 
 function renderGate(gate: LocationGateOptions = { blocked: ["US-NY"] }) {
-  return render(<LocationGate gate={gate} onExit={mocks.onExit} />);
+  return render(
+    <LocationGate
+      gate={gate}
+      onExit={mocks.onExit}
+      onVerified={mocks.onVerified}
+    />,
+  );
 }
 
 describe("LocationGate", () => {
@@ -153,6 +160,7 @@ describe("LocationGate", () => {
     await waitFor(() => {
       expect(mocks.setLocationGateVerified).toHaveBeenCalledWith(true);
     });
+    expect(mocks.onVerified).toHaveBeenCalledOnce();
     expect(mocks.reverseGeocodeLocation).toHaveBeenCalledWith(
       expect.objectContaining({ latitude: 34.05, longitude: -118.24 }),
     );
@@ -242,6 +250,9 @@ describe("LocationGate", () => {
 
     expect(
       await screen.findByText("Location Verification"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Location permission was denied."),
     ).toBeInTheDocument();
     expect(mocks.getCurrentPosition).not.toHaveBeenCalled();
     expect(mocks.setLocationGateVerified).not.toHaveBeenCalled();

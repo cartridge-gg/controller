@@ -62,6 +62,7 @@ import {
   CreditsBalancePendingError,
   waitForCreditsBalance,
 } from "@/utils/credits-settlement";
+import { usePurchaseLocationGate } from "@/components/purchase/usePurchaseLocationGate";
 
 export function OnchainCheckout() {
   const advancedView = useAdvancedView();
@@ -149,10 +150,11 @@ export function OnchainCheckout() {
   const [isCoinflowDrawerOpen, setIsCoinflowDrawerOpen] = useState(false);
   const [isCoinbaseDrawerOpen, setIsCoinbaseDrawerOpen] = useState(false);
   const [verificationMethod, setVerificationMethod] = useState<
-    "coinflow" | "apple-pay" | "identity" | null
+    "apple-pay" | "identity" | null
   >(null);
   const { isUS, countryCodeLoaded } = useGeoLocation();
   const configuredCard = defaultPaymentMethod === "credit-card";
+  const { runAfterLocationGate, locationGateView } = usePurchaseLocationGate();
 
   const handleIconTripleClick = useTripleClick({
     featureName: isUS ? "coinflow-support" : undefined,
@@ -597,7 +599,7 @@ export function OnchainCheckout() {
   const autoCreditsPurchaseRef = useRef<string>();
 
   const purchaseInFlightRef = useRef(false);
-  const handlePurchase = useCallback(async () => {
+  const continuePurchase = useCallback(async () => {
     if (purchaseInFlightRef.current) return;
     if (isApplePayAmountTooLow) return;
 
@@ -721,11 +723,6 @@ export function OnchainCheckout() {
         await onCreditsPurchase();
         navigate("/purchase/success", { reset: true });
       } else if (method === "coinflow") {
-        if (!isEmailVerified) {
-          setVerificationMethod("coinflow");
-          return;
-        }
-
         await onCreditCardPurchase();
         setIsCoinflowDrawerOpen(true);
       } else if (method === "apple-pay") {
@@ -809,6 +806,10 @@ export function OnchainCheckout() {
     isBlocked,
   ]);
 
+  const handlePurchase = useCallback(() => {
+    runAfterLocationGate(continuePurchase);
+  }, [runAfterLocationGate, continuePurchase]);
+
   const handleBridge = useCallback(async () => {
     clearError();
 
@@ -832,6 +833,10 @@ export function OnchainCheckout() {
     (!isFree && !isInitialPaymentResolved)
   ) {
     return <LoadingState />;
+  }
+
+  if (locationGateView) {
+    return locationGateView;
   }
 
   return (
@@ -1075,10 +1080,10 @@ export function OnchainCheckout() {
         method={verificationMethod}
         onClose={() => setVerificationMethod(null)}
         onSuccess={() => {
-          // Verification done — close drawer and re-run the purchase which
-          // will now pass the email/phone gate and open the payment drawer.
+          // Verification is part of the purchase attempt that already passed
+          // its fresh location check, so continue without starting a new one.
           setVerificationMethod(null);
-          handlePurchase();
+          void continuePurchase();
         }}
       />
     </>

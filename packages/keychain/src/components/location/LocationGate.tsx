@@ -56,9 +56,11 @@ function errorResponse(gameName: string): LocationGateResponse {
 export function LocationGate({
   gate,
   onExit,
+  onVerified,
 }: {
   gate: LocationGateOptions;
   onExit: (response: LocationGateResponse) => void;
+  onVerified?: () => void;
 }) {
   const { setLocationGateVerified, theme } = useConnection();
   const { setShowClose } = useNavigation();
@@ -82,8 +84,9 @@ export function LocationGate({
       }
 
       setLocationGateVerified(true);
+      onVerified?.();
     },
-    [gate, setLocationGateVerified],
+    [gate, onVerified, setLocationGateVerified],
   );
 
   const handleLocationError = useCallback(
@@ -155,6 +158,9 @@ export function LocationGate({
           requestLocation(true);
         } else {
           setState("idle");
+          if (permission.state === "denied") {
+            setError("Location permission was denied.");
+          }
         }
       })
       .catch(showPrompt);

@@ -3,14 +3,13 @@ import { useIdentityContext } from "@/components/identity/provider";
 
 /**
  * Drives the fiat (Apple Pay / card) credits checkout: review → [continue]
- * verify-if-needed → pay. Verification is required by the rail, not the product
- * — Coinflow needs a verified email; Apple Pay additionally needs a verified
- * phone — and happens *after* the checkout-details review, gated by continue.
+ * verify-if-needed → pay. Apple Pay requires a verified email and phone;
+ * Coinflow card purchases do not require contact verification.
  *
  * Rather than the shared Verification component (which, for "apple-pay", also
  * forces identity and fires a single combined onSuccess), we orchestrate the
- * required steps explicitly against the identity context: open email, then (for
- * Apple Pay) phone, then advance. The identity drawers themselves are rendered
+ * Apple Pay steps explicitly against the identity context: open email, then
+ * phone, then advance. The identity drawers themselves are rendered
  * by IdentityProvider; we just sequence which one opens.
  */
 export function useFiatCheckoutFlow({
@@ -27,7 +26,7 @@ export function useFiatCheckoutFlow({
     isCanceled,
   } = useIdentityContext();
 
-  const needsEmail = !isEmailVerified;
+  const needsEmail = method === "apple-pay" && !isEmailVerified;
   const needsPhone = method === "apple-pay" && !isPhoneNumberVerified;
   const needsVerification = needsEmail || needsPhone;
 

@@ -32,7 +32,7 @@ interface CoinflowCreditsCheckoutProps {
 }
 
 /**
- * Credits checkout for the Coinflow (card) rail: review → verify (email) → pay.
+ * Credits checkout for the Coinflow (card) rail: review → pay.
  * The intent is created up front so the review can show the real total (incl.
  * fees) and surface any quote error; the same intent is reused by the
  * CoinflowDrawer in the pay phase.
