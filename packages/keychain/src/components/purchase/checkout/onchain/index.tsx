@@ -136,8 +136,8 @@ export function OnchainCheckout() {
   const { isUS, countryCodeLoaded } = useGeoLocation();
 
   const handleIconTripleClick = useTripleClick({
-    featureName: "coinflow-support",
-    callback: onCoinflowSelect,
+    featureName: isUS ? "coinflow-support" : undefined,
+    callback: isUS ? onCoinflowSelect : undefined,
   });
 
   const totalUsdAmount = useMemo(() => {
@@ -370,6 +370,7 @@ export function OnchainCheckout() {
           onApplePaySelect();
           break;
         case "coinflow":
+          if (!isUS) return;
           onCoinflowSelect();
           break;
         case "credits":
@@ -394,6 +395,7 @@ export function OnchainCheckout() {
       onCreditsSelect,
       clearSelectedWallet,
       onExternalConnect,
+      isUS,
     ],
   );
 
@@ -436,7 +438,12 @@ export function OnchainCheckout() {
           ? "credits"
           : "onchain";
 
-    if (method === "coinflow" && !isCoinflowStarterpackSupported) return;
+    if (
+      method === "coinflow" &&
+      (!isUS || !isCoinflowEnabled || !isCoinflowStarterpackSupported)
+    ) {
+      return;
+    }
     if (method === "credits" && !hasSufficientCredits) {
       // Not enough credits — the CTA reads "Deposit USD": open the top-up
       // drawer and refresh the balance once the deposit lands.
@@ -520,7 +527,9 @@ export function OnchainCheckout() {
     hasSufficientBalance,
     isFree,
     isCoinflowSelected,
+    isCoinflowEnabled,
     isCoinflowStarterpackSupported,
+    isUS,
     isApplePaySelected,
     applePayLimitExceeded,
     fetchCoinbaseLimits,

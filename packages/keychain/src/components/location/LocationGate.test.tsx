@@ -1,12 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { connect } from "@/utils/connection/connect";
 import { LocationGate } from "./LocationGate";
 
 const mocks = vi.hoisted(() => ({
   closeModal: vi.fn(),
   getCurrentPosition: vi.fn(),
-  getIpLocation: vi.fn(),
+  queryPermission: vi.fn(),
   reverseGeocodeLocation: vi.fn(),
   setLocationGateVerified: vi.fn(),
 }));
@@ -43,10 +44,6 @@ vi.mock("@cartridge/controller-ui", () => ({
   LayoutFooter: ({ children }: React.PropsWithChildren) => (
     <footer>{children}</footer>
   ),
-}));
-
-vi.mock("@/utils/ip", () => ({
-  getIpLocation: mocks.getIpLocation,
 }));
 
 vi.mock("@/utils/location-gate", async (importOriginal) => {
@@ -87,12 +84,19 @@ describe("LocationGate", () => {
       configurable: true,
       value: { getCurrentPosition: mocks.getCurrentPosition },
     });
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: { query: mocks.queryPermission },
+    });
+    mocks.queryPermission.mockResolvedValue({ state: "prompt" });
   });
 
-  it("requests browser geolocation after the user continues", () => {
+  it("requests browser geolocation after the user continues", async () => {
     renderGate();
 
-    expect(screen.getByText("Location Verification")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Location Verification"),
+    ).toBeInTheDocument();
     expect(mocks.getCurrentPosition).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "CONTINUE" }));
@@ -114,7 +118,7 @@ describe("LocationGate", () => {
       regionCode: "US-CA",
     });
     renderGate();
-    fireEvent.click(screen.getByRole("button", { name: "CONTINUE" }));
+    fireEvent.click(await screen.findByRole("button", { name: "CONTINUE" }));
 
     const onSuccess = mocks.getCurrentPosition.mock.calls[0][0];
     onSuccess({
@@ -128,65 +132,102 @@ describe("LocationGate", () => {
     expect(mocks.reverseGeocodeLocation).toHaveBeenCalledWith(
       expect.objectContaining({ latitude: 34.05, longitude: -118.24 }),
     );
-    expect(mocks.getIpLocation).not.toHaveBeenCalled();
   });
 
-  it("falls back to IP geolocation when browser geolocation fails", async () => {
-    mocks.getIpLocation.mockResolvedValue({
-      countryCode: "US",
-      regionCode: "US-NY",
-    });
+  it("does not pass when browser geolocation permission is denied", async () => {
     renderGate();
-    fireEvent.click(screen.getByRole("button", { name: "CONTINUE" }));
+    fireEvent.click(await screen.findByRole("button", { name: "CONTINUE" }));
 
     const onError = mocks.getCurrentPosition.mock.calls[0][1];
     onError({ code: 1, message: "Permission denied" });
 
-    expect(await screen.findByText("Region Restricted")).toBeInTheDocument();
-    expect(mocks.getIpLocation).toHaveBeenCalledOnce();
+    expect(
+      await screen.findByText("Location permission was denied."),
+    ).toBeInTheDocument();
     expect(mocks.setLocationGateVerified).not.toHaveBeenCalled();
   });
 
-  it("falls back to IP geolocation when browser geolocation is unavailable", async () => {
+  it("does not pass when browser geolocation is unavailable", async () => {
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
       value: undefined,
     });
-    mocks.getIpLocation.mockResolvedValue({
+    renderGate();
+
+    fireEvent.click(await screen.findByRole("button", { name: "CONTINUE" }));
+
+    expect(
+      await screen.findByText(
+        "Location services are not available in this browser.",
+      ),
+    ).toBeInTheDocument();
+    expect(mocks.getCurrentPosition).not.toHaveBeenCalled();
+    expect(mocks.setLocationGateVerified).not.toHaveBeenCalled();
+  });
+
+  it("silently checks location when browser permission is already granted", async () => {
+    mocks.queryPermission.mockResolvedValue({ state: "granted" });
+    mocks.reverseGeocodeLocation.mockResolvedValue({
       countryCode: "US",
       regionCode: "US-CA",
     });
+
     renderGate();
 
-    fireEvent.click(screen.getByRole("button", { name: "CONTINUE" }));
+    await waitFor(() => {
+      expect(mocks.getCurrentPosition).toHaveBeenCalledOnce();
+    });
+    expect(screen.queryByText("Location Verification")).not.toBeInTheDocument();
+
+    const onSuccess = mocks.getCurrentPosition.mock.calls[0][0];
+    onSuccess({
+      coords: { latitude: 34.05, longitude: -118.24 },
+      timestamp: 1,
+    });
 
     await waitFor(() => {
       expect(mocks.setLocationGateVerified).toHaveBeenCalledWith(true);
     });
-    expect(mocks.getCurrentPosition).not.toHaveBeenCalled();
-    expect(mocks.getIpLocation).toHaveBeenCalledOnce();
   });
 
-  it("cancels the location gate without requesting location", () => {
+  it("shows consent without checking when browser permission is denied", async () => {
+    mocks.queryPermission.mockResolvedValue({ state: "denied" });
+
     renderGate();
 
-    fireEvent.click(screen.getByRole("button", { name: "CANCEL" }));
+    expect(
+      await screen.findByText("Location Verification"),
+    ).toBeInTheDocument();
+    expect(mocks.getCurrentPosition).not.toHaveBeenCalled();
+    expect(mocks.setLocationGateVerified).not.toHaveBeenCalled();
+  });
+
+  it("shows consent when the browser permission status cannot be queried", async () => {
+    mocks.queryPermission.mockRejectedValue(new Error("Unsupported"));
+
+    renderGate();
+
+    expect(
+      await screen.findByText("Location Verification"),
+    ).toBeInTheDocument();
+    expect(mocks.getCurrentPosition).not.toHaveBeenCalled();
+  });
+
+  it("cancels the location gate without requesting location", async () => {
+    renderGate();
+
+    fireEvent.click(await screen.findByRole("button", { name: "CANCEL" }));
 
     expect(mocks.closeModal).toHaveBeenCalledOnce();
     expect(mocks.getCurrentPosition).not.toHaveBeenCalled();
-    expect(mocks.getIpLocation).not.toHaveBeenCalled();
   });
 
-  it("fails closed when neither GPS nor IP can resolve a location", async () => {
+  it("fails closed when GPS cannot resolve a location", async () => {
     mocks.reverseGeocodeLocation.mockRejectedValue(
       new Error("Reverse geocoding failed"),
     );
-    mocks.getIpLocation.mockResolvedValue({
-      countryCode: null,
-      regionCode: null,
-    });
     renderGate();
-    fireEvent.click(screen.getByRole("button", { name: "CONTINUE" }));
+    fireEvent.click(await screen.findByRole("button", { name: "CONTINUE" }));
 
     const onSuccess = mocks.getCurrentPosition.mock.calls[0][0];
     onSuccess({
@@ -198,5 +239,23 @@ describe("LocationGate", () => {
       await screen.findByText("Unable to verify location."),
     ).toBeInTheDocument();
     expect(mocks.setLocationGateVerified).not.toHaveBeenCalled();
+  });
+});
+
+describe("location gate routing", () => {
+  it("starts authentication before a configured location gate", () => {
+    const navigate = vi.fn();
+    const connectFn = connect({
+      navigate,
+      setRpcUrl: vi.fn(),
+      getLocationGate: () => ({ blocked: ["US-NY"] }),
+    })();
+
+    void connectFn({ signupOptions: ["password"] });
+
+    expect(navigate).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/connect\?/),
+      { replace: true },
+    );
   });
 });

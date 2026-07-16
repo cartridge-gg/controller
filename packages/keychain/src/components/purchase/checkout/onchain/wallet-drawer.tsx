@@ -18,6 +18,7 @@ import { useAdvancedView, useFeature } from "@/hooks/features";
 import { useTripleClick } from "@/hooks/tripple-click";
 import { posthog } from "@/components/provider/posthog";
 import { captureAnalyticsEvent } from "@/types/analytics";
+import { useGeoLocation } from "@/hooks/geo";
 import { getWallet, networkWalletData } from "../../wallet/config";
 import { Network } from "../../types";
 
@@ -87,6 +88,7 @@ export function WalletSelectionDrawer({
   showCredits = false,
 }: WalletSelectionDrawerProps) {
   const isCoinflowEnabled = useFeature("coinflow-support");
+  const { isUS } = useGeoLocation();
   const advancedView = useAdvancedView();
 
   const handleIconTripleClick = useTripleClick({
@@ -393,7 +395,7 @@ export function WalletSelectionDrawer({
                 )}
               />
             )}
-            {showFiatOptions && isCoinflowEnabled && (
+            {showFiatOptions && isUS && isCoinflowEnabled && (
               <PurchaseCard
                 key="coinflow-checkout"
                 text="Credit Card"

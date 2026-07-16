@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useConnection } from "../connection";
 import { useFeature } from "../features";
+import { useGeoLocation } from "../geo";
 import { request } from "@/utils/graphql";
 import {
   CoinflowPaymentDocument,
@@ -35,6 +36,9 @@ export type {
 // assignable to it.
 export type CoinflowIntent = Omit<CoinflowStarterpackIntent, "__typename">;
 
+const COINFLOW_US_ONLY_ERROR =
+  "Credit card checkout is only available in the United States.";
+
 /**
  * Effective network for everything Coinflow. Coinflow runs in its sandbox
  * (UAT) environment whenever this is false: on non-mainnet chains, or on any
@@ -54,6 +58,7 @@ export const useCoinflowIsMainnet = () => {
 
 const useCoinflowPayment = () => {
   const { controller } = useConnection();
+  const { isUS, countryCodeLoaded } = useGeoLocation();
   const [error, setError] = useState<Error | null>(null);
 
   const { isCoinflowMainnet } = useCoinflowIsMainnet();
@@ -71,6 +76,9 @@ const useCoinflowPayment = () => {
 
       try {
         setError(null);
+        if (!countryCodeLoaded || !isUS) {
+          throw new Error(COINFLOW_US_ONLY_ERROR);
+        }
 
         const result = await mutateAsync({
           input: {
@@ -85,7 +93,7 @@ const useCoinflowPayment = () => {
         throw e;
       }
     },
-    [controller, isCoinflowMainnet, mutateAsync],
+    [controller, countryCodeLoaded, isUS, isCoinflowMainnet, mutateAsync],
   );
 
   return {
@@ -111,6 +119,7 @@ export default useCoinflowPayment;
  */
 export const useCoinflowCreditsPayment = () => {
   const { controller } = useConnection();
+  const { isUS, countryCodeLoaded } = useGeoLocation();
   const [error, setError] = useState<Error | null>(null);
 
   const { isCoinflowMainnet } = useCoinflowIsMainnet();
@@ -125,6 +134,9 @@ export const useCoinflowCreditsPayment = () => {
 
       try {
         setError(null);
+        if (!countryCodeLoaded || !isUS) {
+          throw new Error(COINFLOW_US_ONLY_ERROR);
+        }
 
         const result = await mutateAsync({
           input: {
@@ -139,7 +151,7 @@ export const useCoinflowCreditsPayment = () => {
         throw e;
       }
     },
-    [controller, isCoinflowMainnet, mutateAsync],
+    [controller, countryCodeLoaded, isUS, isCoinflowMainnet, mutateAsync],
   );
 
   return {
@@ -224,10 +236,13 @@ export const useCoinflowStarterpackQuote = ({
   enabled = true,
 }: UseCoinflowStarterpackQuoteParams) => {
   const { controller } = useConnection();
+  const { isUS, countryCodeLoaded } = useGeoLocation();
   const { isCoinflowMainnet } = useCoinflowIsMainnet();
 
   const isReady =
     enabled &&
+    countryCodeLoaded &&
+    isUS &&
     !!controller &&
     !!starterpackId &&
     !!registryAddress &&

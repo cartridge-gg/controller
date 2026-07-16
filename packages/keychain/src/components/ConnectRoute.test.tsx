@@ -11,6 +11,19 @@ vi.mock("@/utils/url-validator", () => ({
   safeRedirect: (...args: unknown[]) => mockSafeRedirect(...args),
 }));
 
+const mockUseGeoLocation = vi.fn();
+vi.mock("@/hooks/geo", () => ({
+  useGeoLocation: () => mockUseGeoLocation(),
+}));
+
+const mockCreateLocationGateUrl = vi.fn((args: unknown) => {
+  void args;
+  return "/location-gate";
+});
+vi.mock("@/utils/connection/location-gate", () => ({
+  createLocationGateUrl: (args: unknown) => mockCreateLocationGateUrl(args),
+}));
+
 const mockIsIframe = vi.fn();
 vi.mock("@cartridge/controller-ui/utils", async (importOriginal) => {
   const actual =
@@ -129,6 +142,15 @@ describe("ConnectRoute", () => {
     mockUseRouteParams.mockReturnValue(mockParams);
     mockUseRouteCompletion.mockReturnValue(vi.fn());
     mockLocation.search = "";
+    mockUseGeoLocation.mockReturnValue({
+      countryCode: "US",
+      regionCode: "US-CA",
+      isUS: true,
+      countryCodeLoaded: true,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
     // mockSnapshotLocalStorageToCookie.mockResolvedValue("mock-encrypted-blob");
 
     mockUseConnection.mockReturnValue({});
@@ -158,6 +180,70 @@ describe("ConnectRoute", () => {
         });
         expect(mockCleanupCallbacks).toHaveBeenCalledWith("test-id");
       });
+    });
+
+    it("runs a configured location gate for US users", async () => {
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        locationGate: { blocked: ["US-NY"] },
+        locationGateVerified: false,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      await waitFor(() => {
+        expect(mockCreateLocationGateUrl).toHaveBeenCalledOnce();
+      });
+      expect(mockParams.resolve).not.toHaveBeenCalled();
+    });
+
+    it("skips a configured location gate for non-US users", async () => {
+      mockUseGeoLocation.mockReturnValue({
+        countryCode: "CA",
+        regionCode: "CA-ON",
+        isUS: false,
+        countryCodeLoaded: true,
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        locationGate: { blocked: ["US-NY"] },
+        locationGateVerified: false,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      await waitFor(() => {
+        expect(mockParams.resolve).toHaveBeenCalled();
+      });
+      expect(mockCreateLocationGateUrl).not.toHaveBeenCalled();
+    });
+
+    it("waits for country detection before deciding on location gating", () => {
+      mockUseGeoLocation.mockReturnValue({
+        countryCode: null,
+        regionCode: null,
+        isUS: false,
+        countryCodeLoaded: false,
+        isLoading: true,
+        isError: false,
+        error: null,
+      });
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        locationGate: { blocked: ["US-NY"] },
+        locationGateVerified: false,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      expect(mockCreateLocationGateUrl).not.toHaveBeenCalled();
+      expect(mockParams.resolve).not.toHaveBeenCalled();
     });
 
     it("keeps onboarding visible on first mount for v0.13.13", async () => {
