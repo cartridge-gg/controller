@@ -34,6 +34,7 @@ import {
   LayoutFooter,
 } from "@cartridge/controller-ui";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
+import { useGeoLocation } from "@/hooks/geo";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -93,6 +94,7 @@ export function ConnectRoute() {
   // Check if this is standalone mode (not in iframe)
   const isStandalone = useMemo(() => !isIframe(), []);
   const canKeepOpen = supportsConnectKeepOpen(controllerVersion, isStandalone);
+  const { isUS, countryCodeLoaded } = useGeoLocation();
 
   // Get redirect_url from query params for standalone mode
   const redirectUrl = useMemo(() => {
@@ -296,10 +298,16 @@ export function ConnectRoute() {
       return;
     }
 
-    // If location gate is configured but not yet verified, redirect to it
-    // before allowing any auto-connect. This catches the race condition where
-    // connect() was called before the preset config loaded.
-    if (hasConfiguredLocationGate(locationGate) && !locationGateVerified) {
+    const hasLocationGate = hasConfiguredLocationGate(locationGate);
+
+    // Location gating is a US-only feature. Wait for the shared IP-country
+    // lookup before deciding whether a GPS check is required so connect cannot
+    // race ahead for a US user.
+    if (hasLocationGate && !countryCodeLoaded) {
+      return;
+    }
+
+    if (hasLocationGate && isUS && !locationGateVerified) {
       const currentUrl = window.location.pathname + window.location.search;
       navigate(
         createLocationGateUrl({ returnTo: currentUrl, gate: locationGate! }),
@@ -437,6 +445,8 @@ export function ConnectRoute() {
     clearConnectParams,
     locationGate,
     locationGateVerified,
+    countryCodeLoaded,
+    isUS,
     navigate,
     isNewControllerRef,
     canKeepOpen,
