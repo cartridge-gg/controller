@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  Drawer,
-  DrawerContent,
-  DepositIcon,
-  Button,
-} from "@cartridge/controller-ui";
+import { Drawer, DrawerContent, Button } from "@cartridge/controller-ui";
 import { CREDITS_DESCRIPTION } from "@/components/inventory/token";
 import { AmountSelection } from "@/components/funding/AmountSelection";
 
@@ -28,7 +23,7 @@ export function AmountSelectionDrawer({
   const [amount, setAmount] = useState(0);
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-      <DrawerContent title="Deposit USD" icon={<DepositIcon variant="solid" />}>
+      <DrawerContent title="Deposit USD">
         <AmountSelection
           lockSelection={isLoading}
           enableCustom={true}

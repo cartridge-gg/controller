@@ -39,7 +39,7 @@ export interface DrawerContentProps
   extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   subTitle?: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   className?: string;
   titleClassName?: string;
   children: React.ReactNode;
@@ -59,13 +59,15 @@ export const DrawerContent = ({
         className={cn("text-lg text-start font-semibold", titleClassName)}
       >
         <div className="flex flex-row gap-3 items-center">
-          <Thumbnail
-            icon={React.cloneElement(icon as React.ReactElement, {
-              size: "lg",
-            })}
-            size="lg"
-            className="bg-background-100"
-          />
+          {icon && (
+            <Thumbnail
+              icon={React.cloneElement(icon as React.ReactElement, {
+                size: "lg",
+              })}
+              size="lg"
+              className="bg-background-100"
+            />
+          )}
           <div className="flex flex-col gap-0 max-w-[75%]">
             <div className="flex-grow truncate text-foreground-100">
               {title}

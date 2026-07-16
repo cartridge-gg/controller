@@ -39,17 +39,28 @@ export type CoinflowIntent = Omit<CoinflowStarterpackIntent, "__typename">;
 const COINFLOW_US_ONLY_ERROR =
   "Credit card checkout is only available in the United States.";
 
+export const resolveCoinflowMainnet = (
+  isMainnet: boolean,
+  configuredSandbox: boolean,
+  featureSandbox: boolean,
+) => isMainnet && !configuredSandbox && !featureSandbox;
+
 /**
  * Effective network for everything Coinflow. Coinflow runs in its sandbox
  * (UAT) environment whenever this is false: on non-mainnet chains, or on any
- * chain when the "coinflow-sandbox" feature flag is enabled. The backend
- * derives sandbox from `!isMainnet`, so this one value drives every Coinflow
- * route input, the card form's `env`, and the checkout sandbox warnings.
+ * chain when the Controller option or local "coinflow-sandbox" feature flag is
+ * enabled. The backend derives sandbox from `!isMainnet`, so this one value
+ * drives every Coinflow route input, the card form's `env`, and the checkout
+ * sandbox warnings.
  */
 export const useCoinflowIsMainnet = () => {
-  const { isMainnet } = useConnection();
-  const sandboxEnabled = useFeature("coinflow-sandbox");
-  const isCoinflowMainnet = isMainnet && !sandboxEnabled;
+  const { isMainnet, coinflowSandbox } = useConnection();
+  const featureSandbox = useFeature("coinflow-sandbox");
+  const isCoinflowMainnet = resolveCoinflowMainnet(
+    isMainnet,
+    coinflowSandbox,
+    featureSandbox,
+  );
   return {
     isCoinflowMainnet,
     isCoinflowSandbox: !isCoinflowMainnet,
@@ -168,6 +179,16 @@ export const useCoinflowCreditsPayment = () => {
 
 const SETTLEMENT_POLL_INTERVAL_MS = 2_000;
 
+/** A polling window elapsed, but the payment has not terminally failed. */
+export class CoinflowSettlementPendingError extends Error {
+  constructor(public readonly paymentId: string) {
+    super(
+      "Your payment was accepted but is still settling. Your balance will update automatically once it completes.",
+    );
+    this.name = "CoinflowSettlementPendingError";
+  }
+}
+
 /**
  * Wait for a Coinflow payment to settle. `coinflowCardCheckout` resolves when
  * the card is charged, but credits are only granted by the settlement webhook
@@ -202,9 +223,7 @@ export async function waitForCoinflowSettlement(
     }
   }
 
-  throw new Error(
-    "Your payment was accepted but is still settling. Your balance will update automatically once it completes.",
-  );
+  throw new CoinflowSettlementPendingError(paymentId);
 }
 
 // ---------------------------------------------------------------------------

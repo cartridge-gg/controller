@@ -43,6 +43,8 @@ export class KeychainIFrame extends IFrame<Keychain> {
     encryptedBlob,
     propagateSessionErrors,
     errorDisplayMode,
+    defaultPaymentMethod,
+    coinflowSandbox,
     webauthnPopup,
     userChains,
     ...iframeOptions
@@ -57,6 +59,14 @@ export class KeychainIFrame extends IFrame<Keychain> {
 
     if (errorDisplayMode) {
       _url.searchParams.set("error_display_mode", errorDisplayMode);
+    }
+
+    if (defaultPaymentMethod) {
+      _url.searchParams.set("default_payment_method", defaultPaymentMethod);
+    }
+
+    if (coinflowSandbox !== undefined) {
+      _url.searchParams.set("coinflow_sandbox", String(coinflowSandbox));
     }
 
     if (version) {

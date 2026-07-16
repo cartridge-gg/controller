@@ -3,6 +3,7 @@ import { ParsedSessionPolicies } from "@/hooks/session";
 import Controller from "@/utils/controller";
 import {
   type Chain,
+  type DefaultPaymentMethod,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -26,6 +27,8 @@ export type ConnectionContextValue = {
   toriiUrl: string | null;
   namespace: string | null;
   propagateError: boolean;
+  defaultPaymentMethod?: DefaultPaymentMethod;
+  coinflowSandbox: boolean;
   webauthnPopup: {
     create: boolean;
     get: boolean;

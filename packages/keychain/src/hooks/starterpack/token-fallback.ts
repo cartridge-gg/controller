@@ -36,12 +36,14 @@ export interface UseTokenFallbackOptions {
   quantity: number;
   isCoinflowSelected: boolean;
   isApplePaySelected: boolean;
+  isCreditsSelected: boolean;
   selectedPlatform: ExternalPlatform | undefined;
   setSelectedToken: (token: TokenOption) => void;
 }
 
 export interface UseTokenFallbackReturn {
   isCheckingFallback: boolean;
+  status: "pending" | "funded" | "exhausted" | "indeterminate";
 }
 
 async function fetchBalance(
@@ -93,41 +95,97 @@ export function useTokenFallback({
   quantity,
   isCoinflowSelected,
   isApplePaySelected,
+  isCreditsSelected,
   selectedPlatform,
   setSelectedToken,
 }: UseTokenFallbackOptions): UseTokenFallbackReturn {
   const [isCheckingFallback, setIsCheckingFallback] = useState(false);
-  const hasAttemptedFallback = useRef(false);
+  const [status, setStatus] =
+    useState<UseTokenFallbackReturn["status"]>("pending");
+  const generationRef = useRef(0);
+  const scanKeyRef = useRef<string>();
+  const foundTokenRef = useRef<string>();
 
   useEffect(() => {
+    const quote =
+      starterpackDetails && isOnchainStarterpack(starterpackDetails)
+        ? starterpackDetails.quote
+        : undefined;
+    const scanKey =
+      controller && quote
+        ? [
+            controller.address(),
+            controller.chainId(),
+            quote.paymentToken,
+            quote.totalCost.toString(),
+            quantity.toString(),
+            selectedPlatform ?? "starknet",
+          ].join(":")
+        : undefined;
+
+    if (scanKeyRef.current !== scanKey) {
+      generationRef.current += 1;
+      scanKeyRef.current = scanKey;
+      foundTokenRef.current = undefined;
+      setStatus("pending");
+    }
+
+    if (isCoinflowSelected || isApplePaySelected || isCreditsSelected) {
+      setIsCheckingFallback(false);
+      return;
+    }
+
     if (
       isLoadingBalance ||
-      hasSufficientBalance ||
-      !!balanceError ||
-      hasAttemptedFallback.current ||
       !controller ||
       !starterpackDetails ||
       !isOnchainStarterpack(starterpackDetails) ||
       !selectedToken ||
-      isCoinflowSelected ||
-      isApplePaySelected ||
-      (selectedPlatform && selectedPlatform !== "starknet")
+      !quote ||
+      !scanKey
     ) {
+      setStatus("pending");
       return;
     }
 
-    const quote = starterpackDetails.quote;
-    if (!quote || quote.totalCost === 0n) return;
+    if (quote.totalCost === 0n || hasSufficientBalance) {
+      setIsCheckingFallback(false);
+      setStatus("funded");
+      return;
+    }
 
-    hasAttemptedFallback.current = true;
+    if (balanceError) {
+      setIsCheckingFallback(false);
+      setStatus("indeterminate");
+      return;
+    }
+
+    if (selectedPlatform && selectedPlatform !== "starknet") {
+      setIsCheckingFallback(false);
+      setStatus("exhausted");
+      return;
+    }
+
+    if (
+      foundTokenRef.current &&
+      num.toHex(foundTokenRef.current) === num.toHex(selectedToken.address)
+    ) {
+      setStatus("funded");
+      return;
+    }
 
     const abortController = new AbortController();
+    const generation = ++generationRef.current;
 
     const checkFallbacks = async () => {
       setIsCheckingFallback(true);
+      setStatus("pending");
+      let indeterminate = false;
       try {
         const candidates = availableTokens.filter(
-          (token) => token.address !== selectedToken.address,
+          (token) =>
+            !token.isCredits &&
+            num.toHex(token.address) !== num.toHex(selectedToken.address),
         );
 
         const ownerAddress = controller.address();
@@ -176,21 +234,34 @@ export function useTokenFallback({
             if (abortController.signal.aborted) return;
 
             if (balance !== null && balance >= requiredAmount) {
+              if (generation !== generationRef.current) return;
+              foundTokenRef.current = candidate.address;
               setSelectedToken(candidate);
+              setStatus("funded");
               return;
             }
+            if (balance === null) indeterminate = true;
           } catch (error) {
             console.warn(
               `Fallback check failed for ${candidate.symbol}:`,
               error,
             );
+            indeterminate = true;
             continue;
           }
+        }
+        if (
+          !abortController.signal.aborted &&
+          generation === generationRef.current
+        ) {
+          setStatus(indeterminate ? "indeterminate" : "exhausted");
         }
       } finally {
         // Always clear the loading flag, even on abort / early return, so the
         // Buy button doesn't stick in a spinning state.
-        setIsCheckingFallback(false);
+        if (generation === generationRef.current) {
+          setIsCheckingFallback(false);
+        }
       }
     };
 
@@ -198,6 +269,9 @@ export function useTokenFallback({
 
     return () => {
       abortController.abort();
+      if (generationRef.current === generation) {
+        generationRef.current += 1;
+      }
     };
   }, [
     controller,
@@ -210,9 +284,10 @@ export function useTokenFallback({
     quantity,
     isCoinflowSelected,
     isApplePaySelected,
+    isCreditsSelected,
     selectedPlatform,
     setSelectedToken,
   ]);
 
-  return { isCheckingFallback };
+  return { isCheckingFallback, status };
 }

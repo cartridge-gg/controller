@@ -47,6 +47,8 @@ export const defaultMockConnection: ConnectionContextValue = {
     cover: "test-cover",
   },
   propagateError: false,
+  defaultPaymentMethod: undefined,
+  coinflowSandbox: false,
   webauthnPopup: {
     create: false,
     get: false,

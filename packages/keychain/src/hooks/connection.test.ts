@@ -5,6 +5,9 @@ import {
   isOriginVerified,
   isSameRpcUrl,
   parseControllerVersion,
+  parseDefaultPaymentMethod,
+  resolveCoinflowSandbox,
+  resolveDefaultPaymentMethod,
   resolvePolicies,
   verifyStandaloneOrigin,
 } from "./connection";
@@ -29,6 +32,43 @@ describe("parseControllerVersion", () => {
   it("rejects missing or invalid versions", () => {
     expect(parseControllerVersion(null)).toBeUndefined();
     expect(parseControllerVersion("not-semver")).toBeUndefined();
+  });
+});
+
+describe("parseDefaultPaymentMethod", () => {
+  it("accepts the supported payment method", () => {
+    expect(parseDefaultPaymentMethod("credit-card")).toBe("credit-card");
+  });
+
+  it("ignores missing and unknown payment methods", () => {
+    expect(parseDefaultPaymentMethod(null)).toBeUndefined();
+    expect(parseDefaultPaymentMethod("crypto")).toBeUndefined();
+  });
+
+  it("preserves a valid value across internal navigation", () => {
+    expect(resolveDefaultPaymentMethod(null, "credit-card")).toBe(
+      "credit-card",
+    );
+    expect(resolveDefaultPaymentMethod("crypto", "credit-card")).toBe(
+      "credit-card",
+    );
+  });
+
+  it("rejects invalid persisted values", () => {
+    expect(resolveDefaultPaymentMethod(null, "crypto")).toBeUndefined();
+  });
+});
+
+describe("resolveCoinflowSandbox", () => {
+  it("accepts explicit true and false values", () => {
+    expect(resolveCoinflowSandbox("true", false)).toBe(true);
+    expect(resolveCoinflowSandbox("false", true)).toBe(false);
+  });
+
+  it("preserves the previous value when the parameter is absent or invalid", () => {
+    expect(resolveCoinflowSandbox(null, true)).toBe(true);
+    expect(resolveCoinflowSandbox("invalid", true)).toBe(true);
+    expect(resolveCoinflowSandbox(null)).toBe(false);
   });
 });
 

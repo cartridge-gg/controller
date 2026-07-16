@@ -87,6 +87,38 @@ describe("hosted keychain compatibility contract", () => {
     expect(mockIFrameOptions.url.searchParams.has("torii")).toBe(false);
   });
 
+  it("sends the configured default payment method additively", () => {
+    createKeychain({ defaultPaymentMethod: "credit-card" });
+
+    expect(
+      mockIFrameOptions.url.searchParams.get("default_payment_method"),
+    ).toBe("credit-card");
+  });
+
+  it("omits the default payment method when it is not configured", () => {
+    createKeychain();
+
+    expect(
+      mockIFrameOptions.url.searchParams.has("default_payment_method"),
+    ).toBe(false);
+  });
+
+  it("sends the configured Coinflow sandbox mode additively", () => {
+    createKeychain({ coinflowSandbox: true });
+
+    expect(mockIFrameOptions.url.searchParams.get("coinflow_sandbox")).toBe(
+      "true",
+    );
+  });
+
+  it("omits Coinflow sandbox mode when it is not configured", () => {
+    createKeychain();
+
+    expect(mockIFrameOptions.url.searchParams.has("coinflow_sandbox")).toBe(
+      false,
+    );
+  });
+
   it.each(["0.13.12", "0.13.13", "0.14.0-alpha.1"])(
     "keeps the same hosted bridge surface for Controller %s",
     (version) => {

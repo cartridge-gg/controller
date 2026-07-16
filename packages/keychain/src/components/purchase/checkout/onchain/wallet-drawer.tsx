@@ -76,6 +76,8 @@ interface WalletSelectionDrawerProps {
   showController?: boolean;
   showCrypto?: boolean;
   showCredits?: boolean;
+  /** Allow a dapp-configured Coinflow flow without the local developer flag. */
+  enableCoinflow?: boolean;
 }
 
 export function WalletSelectionDrawer({
@@ -86,8 +88,10 @@ export function WalletSelectionDrawer({
   showController = false,
   showCrypto = true,
   showCredits = false,
+  enableCoinflow = false,
 }: WalletSelectionDrawerProps) {
-  const isCoinflowEnabled = useFeature("coinflow-support");
+  const featureCoinflowEnabled = useFeature("coinflow-support");
+  const isCoinflowEnabled = enableCoinflow || featureCoinflowEnabled;
   const { isUS } = useGeoLocation();
   const advancedView = useAdvancedView();
 

@@ -9,8 +9,10 @@ import { useCoinflowRail } from "../rails";
 import { Input, Skeleton } from "@cartridge/controller-ui";
 import { useControllerTheme } from "@/hooks/connection";
 import { useCoinflowCardCheckoutMutation } from "@/utils/api";
+import { useIdentityContext } from "@/components/identity/provider";
 
 const COINFLOW_PRIMARY_FALLBACK = "#fbcb4a";
+const COINFLOW_COUNTRY = "US";
 
 // Match Coinflow's iframe to the keychain Input component so the card
 // fields read as a single form with the surrounding inputs. Pulled from
@@ -48,6 +50,7 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
     env: coinflowEnv,
     onComplete,
   } = useCoinflowRail();
+  const { userData, isIdentityVerified } = useIdentityContext();
   const controllerTheme = useControllerTheme();
   const coinflowTheme = useMemo<MerchantTheme>(() => {
     const primary = controllerTheme?.colors?.primary;
@@ -59,9 +62,14 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
   }, [controllerTheme]);
 
   const cardFormRef = useRef<CardFormRef>(null);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [country, setCountry] = useState("US");
+  const verifiedFirstName = isIdentityVerified
+    ? (userData.firstName?.trim() ?? "")
+    : "";
+  const verifiedLastName = isIdentityVerified
+    ? (userData.lastName?.trim() ?? "")
+    : "";
+  const [firstName, setFirstName] = useState(verifiedFirstName);
+  const [lastName, setLastName] = useState(verifiedLastName);
   const [zip, setZip] = useState("");
   const [address1, setAddress1] = useState("");
   const [city, setCity] = useState("");
@@ -71,6 +79,17 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
   const [error, setError] = useState<Error | null>(null);
 
   const { mutateAsync: cardCheckout } = useCoinflowCardCheckoutMutation();
+
+  // Prove data can arrive after the payment form mounts. Fill blank fields
+  // once it is verified, but never overwrite a name the user already edited.
+  useEffect(() => {
+    if (verifiedFirstName) {
+      setFirstName((current) => current || verifiedFirstName);
+    }
+    if (verifiedLastName) {
+      setLastName((current) => current || verifiedLastName);
+    }
+  }, [verifiedFirstName, verifiedLastName]);
 
   const handleSubmit = useCallback(async () => {
     if (!coinflowIntent || !cardFormRef.current) return;
@@ -93,7 +112,7 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
           expYear,
           firstName,
           lastName,
-          country,
+          country: COINFLOW_COUNTRY,
           zip,
           address1,
           city,
@@ -112,7 +131,6 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
     cardCheckout,
     firstName,
     lastName,
-    country,
     zip,
     address1,
     city,
@@ -129,9 +147,8 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
       !!lastName &&
       !!address1 &&
       !!city &&
-      !!country &&
       !isSubmitting,
-    [isFormReady, firstName, lastName, address1, city, country, isSubmitting],
+    [isFormReady, firstName, lastName, address1, city, isSubmitting],
   );
 
   useEffect(() => {
@@ -166,10 +183,7 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
             <Skeleton className="h-10 flex-1 rounded" />
             <Skeleton className="h-10 flex-1 rounded" />
           </div>
-          <div className="flex gap-3">
-            <Skeleton className="h-10 flex-1 rounded" />
-            <Skeleton className="h-10 flex-1 rounded" />
-          </div>
+          <Skeleton className="h-10 w-full rounded" />
         </div>
       )}
 
@@ -183,11 +197,15 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
           </label>
           <div className="flex gap-3">
             <Input
+              name="billing-first-name"
+              autoComplete="billing cc-given-name"
               placeholder="First name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
             <Input
+              name="billing-last-name"
+              autoComplete="billing cc-family-name"
               placeholder="Last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
@@ -213,17 +231,23 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
             Billing address
           </label>
           <Input
+            name="billing-address-line1"
+            autoComplete="billing address-line1"
             placeholder="Address"
             value={address1}
             onChange={(e) => setAddress1(e.target.value)}
           />
           <div className="flex gap-3">
             <Input
+              name="billing-city"
+              autoComplete="billing address-level2"
               placeholder="City"
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
             <Input
+              name="billing-state"
+              autoComplete="billing address-level1"
               placeholder="State"
               value={state}
               onChange={(e) => setState(e.target.value)}
@@ -231,26 +255,13 @@ export function CoinflowForm({ onStateChange }: CoinflowFormProps) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-xs text-foreground-300 font-medium">
-            Country or region
-          </label>
-          <div className="flex gap-3">
-            <Input
-              placeholder="Country (ISO 3166-1 alpha-2, e.g. US)"
-              value={country}
-              onChange={(e) =>
-                setCountry(e.target.value.toUpperCase().slice(0, 2))
-              }
-              maxLength={2}
-            />
-            <Input
-              placeholder="Postal code"
-              value={zip}
-              onChange={(e) => setZip(e.target.value)}
-            />
-          </div>
-        </div>
+        <Input
+          name="billing-postal-code"
+          autoComplete="billing postal-code"
+          placeholder="Postal code"
+          value={zip}
+          onChange={(e) => setZip(e.target.value)}
+        />
       </div>
     </>
   );

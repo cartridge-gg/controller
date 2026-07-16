@@ -280,6 +280,8 @@ export type ProviderOptions = {
   chains?: Chain[];
 };
 
+export type DefaultPaymentMethod = "credit-card";
+
 export type KeychainOptions = IFrameOptions & {
   policies?: SessionPolicies;
   /** The URL of keychain */
@@ -296,6 +298,10 @@ export type KeychainOptions = IFrameOptions & {
   feeSource?: FeeSource;
   /** Signup options (the order of the options is reflected in the UI. It's recommended to group socials and wallets together ) */
   signupOptions?: AuthOptions;
+  /** Preferred fallback when no explicit choice or funded Controller token is available. */
+  defaultPaymentMethod?: DefaultPaymentMethod;
+  /** Use Coinflow's sandbox checkout, including on mainnet. Sandbox payments do not grant spendable credits. */
+  coinflowSandbox?: boolean;
   /** When true, manually provided policies will override preset policies. Default is false. */
   shouldOverridePresetPolicies?: boolean;
   /** The project name of Slot instance. */
