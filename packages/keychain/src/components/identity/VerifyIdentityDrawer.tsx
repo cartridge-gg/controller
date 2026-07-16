@@ -15,7 +15,7 @@ import { VerifyErrorAlert } from "./error";
 interface VerifyIdentityDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onVerified: (result: boolean) => void;
+  onVerified: (result: boolean) => void | Promise<void>;
 }
 
 export function VerifyIdentityDrawer({
@@ -69,12 +69,14 @@ export function VerifyIdentityDrawer({
         setError("Account verification failed");
         return;
       }
-      onVerified(true);
-      onClose();
+      // The owner closes the drawer after it refreshes verified user data.
+      // Calling onClose here reports a cancellation and can discard the
+      // purchase/deposit that is waiting for Prove to finish.
+      await onVerified(true);
     } catch (err) {
       console.error("verifyAsync error:", (err as Error).message);
     }
-  }, [verifyAsync, firstName, lastName, dob, onVerified, onClose]);
+  }, [verifyAsync, firstName, lastName, dob, onVerified]);
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose}>

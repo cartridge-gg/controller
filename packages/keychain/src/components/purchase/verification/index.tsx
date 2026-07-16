@@ -59,7 +59,7 @@ export function Verification({
         text: "Email Address",
         icon: <EnvelopeIcon />,
         onClick: initiateEmailVerification,
-        required: !method || method === "apple-pay" || method === "coinflow",
+        required: !method || method === "apple-pay",
         completed: isEmailVerified,
       },
       {
