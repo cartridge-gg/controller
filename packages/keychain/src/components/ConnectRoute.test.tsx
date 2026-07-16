@@ -1,5 +1,4 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import { useState } from "react";
 import { screen, waitFor } from "@testing-library/react";
 import { ConnectRoute } from "./ConnectRoute";
 import { renderWithProviders } from "@/test/mocks/providers";
@@ -263,55 +262,58 @@ describe("ConnectRoute", () => {
       expect(mockParams.resolve).not.toHaveBeenCalled();
     });
 
-    it("resumes and resolves the pending connect after gate verification", async () => {
-      // Regression: the gate used to live on its own route; navigating there
-      // unmounted ConnectRoute, whose unmount cleanup deleted the stored
-      // connect callbacks — the parent SDK's connect() promise then never
-      // settled and the modal hung blank after verification.
-      Object.defineProperty(navigator, "permissions", {
-        configurable: true,
-        value: { query: vi.fn().mockResolvedValue({ state: "granted" }) },
-      });
-      Object.defineProperty(navigator, "geolocation", {
-        configurable: true,
-        value: {
-          getCurrentPosition: (
-            success: (position: {
-              coords: { latitude: number; longitude: number };
-            }) => void,
-          ) => success({ coords: { latitude: 34.05, longitude: -118.24 } }),
-        },
-      });
-      mockReverseGeocodeLocation.mockResolvedValue({
-        countryCode: "US",
-        regionCode: "US-CA",
-      });
+    it.each([
+      { authFlow: "login", isNewController: false, keepOpen: false },
+      { authFlow: "signup", isNewController: true, keepOpen: true },
+    ])(
+      "resumes the pending $authFlow after gate verification",
+      async ({ isNewController, keepOpen }) => {
+        // Regression: the gate used to live on its own route; navigating there
+        // unmounted ConnectRoute, whose unmount cleanup deleted the stored
+        // connect callbacks — the parent SDK's connect() promise then never
+        // settled and the modal hung blank after verification.
+        Object.defineProperty(navigator, "permissions", {
+          configurable: true,
+          value: { query: vi.fn().mockResolvedValue({ state: "granted" }) },
+        });
+        Object.defineProperty(navigator, "geolocation", {
+          configurable: true,
+          value: {
+            getCurrentPosition: (
+              success: (position: {
+                coords: { latitude: number; longitude: number };
+              }) => void,
+            ) => success({ coords: { latitude: 34.05, longitude: -118.24 } }),
+          },
+        });
+        mockReverseGeocodeLocation.mockResolvedValue({
+          countryCode: "US",
+          regionCode: "US-CA",
+        });
 
-      // Stateful harness: the real LocationGate flips locationGateVerified
-      // through the connection context, which resumes the connect effect.
-      function Harness() {
-        const [verified, setVerified] = useState(false);
+        const setLocationGateVerified = vi.fn();
         mockUseConnection.mockReturnValue({
           controller: mockController,
           policies: null,
           locationGate: { blocked: ["US-NY"] },
-          locationGateVerified: verified,
-          setLocationGateVerified: setVerified,
+          locationGateVerified: false,
+          setLocationGateVerified,
+          isNewControllerRef: { current: isNewController },
         });
-        return <ConnectRoute />;
-      }
 
-      renderWithProviders(<Harness />);
+        renderWithProviders(<ConnectRoute />);
 
-      await waitFor(() => {
-        expect(mockParams.resolve).toHaveBeenCalledWith({
-          code: ResponseCodes.SUCCESS,
-          address: "0x123456789abcdef",
-          keepOpen: false,
+        await waitFor(() => {
+          expect(mockParams.resolve).toHaveBeenCalledWith({
+            code: ResponseCodes.SUCCESS,
+            address: "0x123456789abcdef",
+            keepOpen,
+          });
         });
-      });
-      expect(mockCleanupCallbacks).toHaveBeenCalledWith("test-id");
-    });
+        expect(mockCleanupCallbacks).toHaveBeenCalledWith("test-id");
+        expect(setLocationGateVerified).not.toHaveBeenCalled();
+      },
+    );
 
     it("settles the pending connect when the gate is cancelled", async () => {
       const closeModal = vi.fn();
