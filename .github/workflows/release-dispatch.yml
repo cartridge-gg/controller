@@ -54,12 +54,11 @@ jobs:
 
       - name: Generate Changelog with Claude
         id: changelog
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1.0.175
         with:
-          mode: agent
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          direct_prompt: |
+          prompt: |
             Generate a changelog entry for version ${{ github.event.inputs.version }} of the Cartridge Controller SDK.
 
             This is a monorepo containing:
@@ -88,7 +87,7 @@ jobs:
             - [List significant dependency updates]
 
             Focus on user-facing changes and be professional. Group changes by package (@cartridge/controller vs @cartridge/connector) when relevant.
-          allowed_tools: "Read,Write,Bash"
+          claude_args: "--allowedTools Read,Write,Bash"
 
       - name: Create Release Pull Request
         if: ${{ github.event.inputs.tag == 'latest' }}
