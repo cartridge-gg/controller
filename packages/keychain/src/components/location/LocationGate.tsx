@@ -17,6 +17,7 @@ import {
   reverseGeocodeLocation,
 } from "@/utils/location-gate";
 import { USMap } from "./USMap";
+import { STATE_PATHS } from "./us-state-paths";
 
 type GateState = "checking" | "idle" | "requesting" | "blocked";
 
@@ -34,6 +35,42 @@ function errorResponse(gameName: string) {
   return {
     code: ResponseCodes.ERROR,
     message: `${gameName} is not available in your region.`,
+  };
+}
+
+type BrowserHelp = {
+  name: string;
+  url: string;
+};
+
+function getLocationPermissionHelp(userAgent: string): BrowserHelp {
+  if (/Edg\//i.test(userAgent)) {
+    return {
+      name: "Microsoft Edge",
+      url: "https://support.microsoft.com/en-us/microsoft-edge/location-and-privacy-in-microsoft-edge-31b5d154-0b1b-90ef-e389-7c7d4ffe7b04",
+    };
+  }
+  if (/Firefox|FxiOS/i.test(userAgent)) {
+    return {
+      name: "Firefox",
+      url: "https://support.mozilla.org/en-US/kb/does-firefox-share-my-location-websites",
+    };
+  }
+  if (/Chrome|CriOS|Chromium/i.test(userAgent)) {
+    return {
+      name: "Chrome",
+      url: "https://support.google.com/chrome/answer/142065?hl=en",
+    };
+  }
+  if (/Safari/i.test(userAgent)) {
+    return {
+      name: "Safari",
+      url: "https://support.apple.com/guide/safari/customize-settings-per-website-ibrw7f78f7fe/mac",
+    };
+  }
+  return {
+    name: "your browser",
+    url: "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API#security_considerations",
   };
 }
 
@@ -227,10 +264,32 @@ export function LocationGate() {
   const gameName =
     theme.name && theme.name !== defaultTheme.name ? theme.name : "This game";
 
-  const blockedUSStates = useMemo(() => {
-    if (!gate?.blocked) return [];
-    return gate.blocked.filter((code) => code.toUpperCase().startsWith("US-"));
+  const supportedUSStates = useMemo(() => {
+    const allStates = Object.keys(STATE_PATHS);
+    const allowed = new Set(
+      (gate?.allowed ?? []).map((code) => code.trim().toUpperCase()),
+    );
+    const blocked = new Set(
+      (gate?.blocked ?? []).map((code) => code.trim().toUpperCase()),
+    );
+    const hasAllowlist = allowed.size > 0;
+    const supportsAllUSStates = !hasAllowlist || allowed.has("US");
+
+    if (blocked.has("US")) return [];
+
+    return allStates.filter(
+      (state) =>
+        (supportsAllUSStates || allowed.has(state)) && !blocked.has(state),
+    );
   }, [gate]);
+
+  const permissionHelp = useMemo(
+    () =>
+      getLocationPermissionHelp(
+        typeof navigator === "undefined" ? "" : navigator.userAgent,
+      ),
+    [],
+  );
 
   if (!gate || state === "checking") {
     return null;
@@ -244,11 +303,9 @@ export function LocationGate() {
           icon={<GlobeIcon variant="solid" size="lg" />}
         />
         <LayoutContent className="p-4">
-          {blockedUSStates.length > 0 && (
-            <div className="mb-3">
-              <USMap blockedStates={blockedUSStates} />
-            </div>
-          )}
+          <div className="mb-3">
+            <USMap supportedStates={supportedUSStates} />
+          </div>
           <p className="text-sm text-foreground-300 leading-relaxed">
             {gameName} is not available in your region.
           </p>
@@ -273,16 +330,34 @@ export function LocationGate() {
         icon={<GlobeIcon variant="solid" size="lg" />}
       />
       <LayoutContent className="p-4 gap-3">
-        {blockedUSStates.length > 0 && (
-          <USMap blockedStates={blockedUSStates} />
-        )}
+        <USMap supportedStates={supportedUSStates} />
         <p className="text-sm text-foreground-300 leading-relaxed">
           {gameName} needs your location to confirm availability in your region.
         </p>
       </LayoutContent>
       <LayoutFooter>
         {error && (
-          <ErrorAlert title="Error" description={error} isExpanded={true} />
+          <ErrorAlert
+            title="Error"
+            description={
+              error === "Location permission was denied." ? (
+                <>
+                  <span>{error} </span>
+                  <a
+                    href={permissionHelp.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    Learn how to enable location in {permissionHelp.name}.
+                  </a>
+                </>
+              ) : (
+                error
+              )
+            }
+            isExpanded={true}
+          />
         )}
         <Button
           variant="primary"
