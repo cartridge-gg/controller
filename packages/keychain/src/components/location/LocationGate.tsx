@@ -1,18 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import {
   Button,
   GlobeIcon,
   HeaderInner,
   LayoutContent,
   LayoutFooter,
+  SpinnerIcon,
 } from "@cartridge/controller-ui";
 import { LocationGateOptions, ResponseCodes } from "@cartridge/controller";
-import { defaultTheme, loadConfig } from "@cartridge/presets";
+import { defaultTheme } from "@cartridge/presets";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
 import {
   evaluateLocationGate,
   reverseGeocodeLocation,
@@ -27,100 +26,51 @@ type ResolvedLocation = {
   regionCode?: string | null;
 };
 
-const CANCEL_RESPONSE = {
+export type LocationGateResponse = {
+  code: ResponseCodes;
+  message: string;
+};
+
+const CANCEL_RESPONSE: LocationGateResponse = {
   code: ResponseCodes.CANCELED,
   message: "Canceled",
 };
 
-function errorResponse(gameName: string) {
+function errorResponse(gameName: string): LocationGateResponse {
   return {
     code: ResponseCodes.ERROR,
     message: `${gameName} is not available in your region.`,
   };
 }
 
-export function LocationGate() {
-  const { closeModal, setLocationGateVerified, theme } = useConnection();
+/**
+ * GPS geofence verification UI. Rendered inline by the route that owns the
+ * pending request (ConnectRoute) rather than on its own route: navigating the
+ * owning route away mid-request unmounts it, and useRouteParams' unmount
+ * cleanup deletes the stored connection callbacks — after which the parent
+ * SDK's connect() promise can never settle and the modal hangs blank.
+ *
+ * On success, calls setLocationGateVerified(true) so the owning route resumes.
+ * On cancel or a blocked region, reports the terminal response via onExit.
+ */
+export function LocationGate({
+  gate,
+  onExit,
+}: {
+  gate: LocationGateOptions;
+  onExit: (response: LocationGateResponse) => void;
+}) {
+  const { setLocationGateVerified, theme } = useConnection();
   const { setShowClose } = useNavigation();
-  const { search } = useLocation();
-  const navigate = useNavigate();
   const [state, setState] = useState<GateState>("checking");
   const [error, setError] = useState<string | null>(null);
-
-  const [presetGate, setPresetGate] = useState<LocationGateOptions | null>(
-    null,
-  );
-
-  const { returnTo, gateFromUrl, preset } = useMemo(() => {
-    const searchParams = new URLSearchParams(search);
-    const returnToParam = searchParams.get("returnTo");
-    const gateParam = searchParams.get("gate");
-    const presetParam = searchParams.get("preset");
-
-    let parsedGate: LocationGateOptions | null = null;
-    if (gateParam) {
-      try {
-        parsedGate = JSON.parse(gateParam) as LocationGateOptions;
-      } catch (parseError) {
-        console.error("Failed to parse location gate params:", parseError);
-      }
-    }
-
-    return {
-      returnTo: returnToParam,
-      gateFromUrl: parsedGate,
-      preset: presetParam,
-    };
-  }, [search]);
-
-  useEffect(() => {
-    if (!preset || gateFromUrl) return;
-    loadConfig(preset)
-      .then((config) => {
-        const configObj = config as Record<string, unknown> | null;
-        if (configObj?.locationGate) {
-          setPresetGate(configObj.locationGate as LocationGateOptions);
-        }
-      })
-      .catch((err) => console.error("Failed to load preset config:", err));
-  }, [preset, gateFromUrl]);
-
-  const gate = gateFromUrl ?? presetGate;
 
   useEffect(() => {
     setShowClose(true);
   }, [setShowClose]);
 
-  const connectId = useMemo(() => {
-    if (!returnTo) {
-      return null;
-    }
-    try {
-      const url = new URL(returnTo, window.location.origin);
-      return url.searchParams.get("id");
-    } catch (err) {
-      console.error("Failed to parse returnTo:", err);
-      return null;
-    }
-  }, [returnTo]);
-
-  const resolveConnect = useCallback(
-    (response: { code: ResponseCodes; message: string }) => {
-      if (connectId) {
-        const callbacks = getCallbacks(connectId);
-        callbacks?.resolve?.(response);
-        cleanupCallbacks(connectId);
-      }
-      closeModal?.();
-    },
-    [connectId, closeModal],
-  );
-
   const evaluateAndContinue = useCallback(
     (geo: ResolvedLocation) => {
-      if (!gate || !returnTo) {
-        throw new Error("Location requirements are missing");
-      }
       if (!geo.countryCode && !geo.regionCode) {
         throw new Error("Location could not be resolved");
       }
@@ -132,9 +82,8 @@ export function LocationGate() {
       }
 
       setLocationGateVerified(true);
-      navigate(returnTo, { replace: true });
     },
-    [gate, navigate, returnTo, setLocationGateVerified],
+    [gate, setLocationGateVerified],
   );
 
   const handleLocationError = useCallback(
@@ -151,12 +100,6 @@ export function LocationGate() {
 
   const requestLocation = useCallback(
     (silent = false) => {
-      if (!gate || !returnTo) {
-        setState("idle");
-        setError("Location requirements are missing.");
-        return;
-      }
-
       if (typeof navigator === "undefined" || !navigator.geolocation) {
         setState("idle");
         setError("Location services are not available in this browser.");
@@ -190,12 +133,10 @@ export function LocationGate() {
         },
       );
     },
-    [evaluateAndContinue, gate, handleLocationError, returnTo],
+    [evaluateAndContinue, handleLocationError],
   );
 
   useEffect(() => {
-    if (!gate || !returnTo) return;
-
     let cancelled = false;
     const showPrompt = () => {
       if (!cancelled) setState("idle");
@@ -221,15 +162,15 @@ export function LocationGate() {
     return () => {
       cancelled = true;
     };
-  }, [gate, requestLocation, returnTo]);
+  }, [requestLocation]);
 
   const handleContinue = useCallback(() => {
     requestLocation();
   }, [requestLocation]);
 
   const handleCancel = useCallback(() => {
-    resolveConnect(CANCEL_RESPONSE);
-  }, [resolveConnect]);
+    onExit(CANCEL_RESPONSE);
+  }, [onExit]);
 
   const gameName =
     theme.name && theme.name !== defaultTheme.name ? theme.name : "This game";
@@ -244,8 +185,21 @@ export function LocationGate() {
     [],
   );
 
-  if (!gate || state === "checking") {
-    return null;
+  if (state === "checking") {
+    return (
+      <>
+        <HeaderInner
+          title="Location Verification"
+          icon={<GlobeIcon variant="solid" size="lg" />}
+        />
+        <LayoutContent className="p-4 items-center justify-center">
+          <SpinnerIcon className="animate-spin text-foreground-300" size="lg" />
+          <p className="text-sm text-foreground-300">
+            Verifying your location…
+          </p>
+        </LayoutContent>
+      </>
+    );
   }
 
   if (state === "blocked") {
@@ -267,7 +221,7 @@ export function LocationGate() {
           <Button
             variant="secondary"
             className="w-full"
-            onClick={() => resolveConnect(errorResponse(gameName))}
+            onClick={() => onExit(errorResponse(gameName))}
           >
             CLOSE
           </Button>
