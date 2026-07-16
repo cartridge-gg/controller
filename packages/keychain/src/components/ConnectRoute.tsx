@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { hasApprovalPolicies } from "@/hooks/session";
@@ -10,7 +9,10 @@ import {
   supportsConnectKeepOpen,
 } from "@/utils/connection/connect";
 import { hasConfiguredLocationGate } from "@/utils/location-gate";
-import { createLocationGateUrl } from "@/utils/connection/location-gate";
+import {
+  LocationGate,
+  type LocationGateResponse,
+} from "./location/LocationGate";
 import { CreateSession } from "./connect/CreateSession";
 import {
   createVerifiedSession,
@@ -62,8 +64,8 @@ export function ConnectRoute() {
     locationGateVerified,
     isNewControllerRef,
     controllerVersion,
+    closeModal,
   } = useConnection();
-  const navigate = useNavigate();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
   const [isSessionCreating, setIsSessionCreating] = useState(false);
   const [sessionError, setSessionError] = useState<Error>();
@@ -307,12 +309,10 @@ export function ConnectRoute() {
       return;
     }
 
+    // The gate renders inline below (never navigate away: unmounting this
+    // route deletes the stored connect callbacks, leaving the parent SDK's
+    // connect() promise unresolved). Hold auto-connect until it verifies.
     if (hasLocationGate && isUS && !locationGateVerified) {
-      const currentUrl = window.location.pathname + window.location.search;
-      navigate(
-        createLocationGateUrl({ returnTo: currentUrl, gate: locationGate! }),
-        { replace: true },
-      );
       return;
     }
 
@@ -447,14 +447,40 @@ export function ConnectRoute() {
     locationGateVerified,
     countryCodeLoaded,
     isUS,
-    navigate,
     isNewControllerRef,
     canKeepOpen,
   ]);
 
+  // Terminal gate outcomes (cancel, blocked region) settle the pending
+  // connect so the parent SDK promise never hangs, then close the modal.
+  const handleGateExit = useCallback(
+    (response: LocationGateResponse) => {
+      params?.resolve?.(response);
+      if (params?.params.id) {
+        cleanupCallbacks(params.params.id);
+      }
+      closeModal?.();
+    },
+    [params, closeModal],
+  );
+
   // Don't render anything if we don't have controller yet - CreateController handles loading
   if (!controller) {
     return null;
+  }
+
+  const hasLocationGate = hasConfiguredLocationGate(locationGate);
+
+  // Hold rendering until the IP-country lookup decides whether the GPS gate
+  // applies, so gated flows cannot flash a connect UI before the gate.
+  if (hasLocationGate && !countryCodeLoaded) {
+    return null;
+  }
+
+  // Render the gate inline so this route (and its pending connect callbacks)
+  // stays mounted while the user verifies their location.
+  if (hasLocationGate && isUS && !locationGateVerified) {
+    return <LocationGate gate={locationGate!} onExit={handleGateExit} />;
   }
 
   // Embedded mode: No policies and verified policies are handled in useCreateController

@@ -48,6 +48,12 @@ export type Account = Node & {
   teams: TeamConnection;
   updatedAt: Scalars['Time'];
   username: Scalars['String'];
+  /**
+   * The portion of creditsPlain earned from play (game payouts) rather
+   * than deposited — the amount eligible for withdrawal. Deposited credits
+   * burn first when spending, so this is capped by the live balance.
+   */
+  withdrawableCreditsPlain: Scalars['Int'];
 };
 
 
@@ -116,6 +122,14 @@ export type AccountTeamsArgs = {
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
   where?: InputMaybe<TeamWhereInput>;
+};
+
+export type AccountAgeVerificationResult = {
+  __typename?: 'AccountAgeVerificationResult';
+  status: Scalars['String'];
+  username: Scalars['String'];
+  verified: Scalars['Boolean'];
+  verifiedAt?: Maybe<Scalars['Time']>;
 };
 
 /** A connection to a list of items. */
@@ -818,7 +832,6 @@ export enum AttestationOrderField {
 
 /** AttestationType is enum for the field type */
 export enum AttestationType {
-  AgeOver_18 = 'AGE_OVER_18',
   Document = 'DOCUMENT',
   Location = 'LOCATION',
   OauthIdentity = 'OAUTH_IDENTITY'
@@ -3328,6 +3341,7 @@ export type Mutation = {
    * The code expires after 10 minutes.
    */
   sendPhoneVerification: SendVerificationResponse;
+  setAccountAgeVerification: AccountAgeVerificationResult;
   signDocument: Attestation;
   /**
    * Submit identity fields (SSN last 4, date of birth) to request an upgrade of
@@ -3642,6 +3656,11 @@ export type MutationSendNotificationArgs = {
 
 export type MutationSendPhoneVerificationArgs = {
   input: SendPhoneVerificationInput;
+};
+
+
+export type MutationSetAccountAgeVerificationArgs = {
+  input: SetAccountAgeVerificationInput;
 };
 
 
@@ -6361,6 +6380,15 @@ export type SessionWhereInput = {
   updatedAtLTE?: InputMaybe<Scalars['Time']>;
   updatedAtNEQ?: InputMaybe<Scalars['Time']>;
   updatedAtNotIn?: InputMaybe<Array<Scalars['Time']>>;
+};
+
+export type SetAccountAgeVerificationInput = {
+  /** Required when granting verification; must be an adult date in YYYY-MM-DD format. */
+  dob?: InputMaybe<Scalars['String']>;
+  /** Audit reason for this administrative override. */
+  reason: Scalars['String'];
+  username: Scalars['String'];
+  verified: Scalars['Boolean'];
 };
 
 export type Signer = Node & {
