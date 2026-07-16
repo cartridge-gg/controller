@@ -22,12 +22,25 @@ export const VerifyErrorAlert = ({ error }: { error: string }) => {
       };
     }
 
-    return error.toLowerCase().includes("invalid or expired verification")
-      ? { title: "Invalid or expired verification code" }
-      : {
-          title: "Verification failed",
-          description: "Please try again.",
-        };
+    if (error.toLowerCase().includes("invalid or expired verification")) {
+      return { title: "Invalid or expired verification code" };
+    }
+    if (error.startsWith("Identity verification service")) {
+      return {
+        title: "Verification service unavailable",
+        description: error,
+      };
+    }
+    if (error.startsWith("We couldn't verify these details")) {
+      return {
+        title: "Details could not be verified",
+        description: error,
+      };
+    }
+    return {
+      title: "Verification failed",
+      description: "Please try again.",
+    };
   }, [advancedView, error]);
   return <ErrorAlert title={title} description={description} />;
 };
