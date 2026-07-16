@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Drawer, DrawerContent, Button } from "@cartridge/controller-ui";
 import { CREDITS_DESCRIPTION } from "@/components/inventory/token";
 import { AmountSelection } from "@/components/funding/AmountSelection";
+import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 
 interface AmountSelectionDrawerProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface AmountSelectionDrawerProps {
   minAmount?: number;
   maxAmount?: number;
   isLoading?: boolean;
+  error?: string;
   onContinue: (amount: number) => void;
 }
 
@@ -18,6 +20,7 @@ export function AmountSelectionDrawer({
   minAmount,
   maxAmount,
   isLoading,
+  error,
   onContinue,
 }: AmountSelectionDrawerProps) {
   const [amount, setAmount] = useState(0);
@@ -36,8 +39,12 @@ export function AmountSelectionDrawer({
           {CREDITS_DESCRIPTION}
         </div>
 
+        {error && (
+          <ErrorCard variant="error" title="Age Restricted" message={error} />
+        )}
+
         <Button
-          disabled={!amount}
+          disabled={!amount || !!error}
           isLoading={isLoading}
           onClick={() => {
             onContinue(amount);

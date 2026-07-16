@@ -48,7 +48,6 @@ import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { useGeoLocation } from "@/hooks/geo";
 import { num } from "starknet";
 import { useIdentityContext } from "@/components/identity/provider";
-import { AgeGate } from "@/components/identity/AgeGate";
 import { useCreditsContext } from "@/components/credits/provider";
 import {
   MAX_CREDITS_PURCHASE_USD,
@@ -139,7 +138,7 @@ export function OnchainCheckout() {
     isEmailVerified,
     isPhoneNumberVerified,
     refetchUserData,
-    ageGateStatus: { isAllowed },
+    ageGateStatus: { isAllowed, isBlocked },
   } = useIdentityContext();
   const { loginViaPopup: loginWithWebauthnPopup } = useWebauthnAuthentication();
   const isCoinflowEnabled = useFeature("coinflow-support");
@@ -150,7 +149,7 @@ export function OnchainCheckout() {
   const [isCoinflowDrawerOpen, setIsCoinflowDrawerOpen] = useState(false);
   const [isCoinbaseDrawerOpen, setIsCoinbaseDrawerOpen] = useState(false);
   const [verificationMethod, setVerificationMethod] = useState<
-    "coinflow" | "apple-pay" | null
+    "coinflow" | "apple-pay" | "identity" | null
   >(null);
   const { isUS, countryCodeLoaded } = useGeoLocation();
   const configuredCard = defaultPaymentMethod === "credit-card";
@@ -696,6 +695,20 @@ export function OnchainCheckout() {
       return;
     }
 
+    if (isBlocked) {
+      setDisplayError(
+        new Error(
+          "This purchase is unavailable because you do not meet the game's age requirement.",
+        ),
+      );
+      return;
+    }
+
+    if (!isAllowed) {
+      setVerificationMethod("identity");
+      return;
+    }
+
     purchaseInFlightRef.current = true;
 
     captureAnalyticsEvent(posthog, "purchase_checkout_started", { method });
@@ -792,6 +805,8 @@ export function OnchainCheckout() {
     configuredCoinflowAvailable,
     isCoinflowSandbox,
     setDisplayError,
+    isAllowed,
+    isBlocked,
   ]);
 
   const handleBridge = useCallback(async () => {
@@ -809,10 +824,6 @@ export function OnchainCheckout() {
     clearError();
     return () => clearError();
   }, [clearError]);
-
-  if (!isAllowed) {
-    return <AgeGate />;
-  }
 
   if (
     isStarterpackLoading ||
