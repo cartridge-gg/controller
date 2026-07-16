@@ -18,7 +18,6 @@ import { JsCall } from "@cartridge/controller-wasm/controller";
 import { mutex } from "./sync";
 import Controller from "../controller";
 import { storeCallbacks, generateCallbackId } from "./callbacks";
-import { getAgeGateStatus } from "../age-gate-store";
 
 export type ControllerError = {
   code: ErrorCode;
@@ -171,23 +170,6 @@ export function execute({
           if (!controller) {
             return reject({
               message: "Controller context not available",
-            });
-          }
-
-          // Age gate: a policy-approved transaction would otherwise execute
-          // headlessly here. If an age gate applies and isn't satisfied, divert
-          // to the UI instead — the /execute route's ExecutionContainer renders
-          // <AgeGate /> until the gate clears, then proceeds to the review.
-          if (!getAgeGateStatus().isAllowed) {
-            const url = createExecuteUrl(toArray(transactions), {
-              resolve,
-              reject,
-            });
-            navigate(url, { replace: true });
-
-            return resolve({
-              code: ResponseCodes.USER_INTERACTION_REQUIRED,
-              message: "Age verification required",
             });
           }
 
