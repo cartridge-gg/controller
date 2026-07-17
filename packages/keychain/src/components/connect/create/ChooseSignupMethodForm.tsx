@@ -163,7 +163,7 @@ export function ChooseSignupMethodForm({
           e.preventDefault();
           if (options[highlightedIndex]) {
             const option = options[highlightedIndex];
-            if (option === "password" || option === "sms") {
+            if (option === "password") {
               onClose(option);
             } else {
               setSelectedAuth(option);
@@ -204,7 +204,7 @@ export function ChooseSignupMethodForm({
     }
     e.preventDefault();
 
-    if (option === "password" || option === "sms") {
+    if (option === "password") {
       onClose(option);
     } else {
       setSelectedAuth(option);
