@@ -51,6 +51,7 @@ export async function createVerifiedSession({
   chainPolicies,
   durationSeconds = DEFAULT_VERIFIED_SESSION_DURATION_S,
   nowFn = now,
+  onProgress,
 }: {
   controller: Controller;
   origin: string;
@@ -59,6 +60,8 @@ export async function createVerifiedSession({
   chainPolicies?: SessionChainPolicies;
   durationSeconds?: bigint;
   nowFn?: () => bigint;
+  /** Reports which chain is being signed during multichain creation. */
+  onProgress?: (chainId: string, index: number, total: number) => void;
 }): Promise<void> {
   if (requiresSessionApproval(policies, chainPolicies)) {
     throw new Error("Verified session creation requires explicit approval");
@@ -75,6 +78,7 @@ export async function createVerifiedSession({
         rpcUrl: chain.rpcUrl,
         policies: processPolicies(chain.policies, false),
       })),
+      onProgress,
     );
     const failed = results.find((r) => r.error);
     if (failed) {

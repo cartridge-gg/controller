@@ -34,7 +34,9 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
+  SpinnerIcon,
 } from "@cartridge/controller-ui";
+import { getChainName } from "@cartridge/controller-ui/utils";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { useGeoLocation } from "@/hooks/geo";
 
@@ -65,12 +67,19 @@ export function ConnectRoute() {
     isNewControllerRef,
     controllerVersion,
     closeModal,
+    isPoliciesResolved,
   } = useConnection();
   const [hasAutoConnected, setHasAutoConnected] = useState(false);
   const [isSessionCreating, setIsSessionCreating] = useState(false);
   const [sessionError, setSessionError] = useState<Error>();
   const [showContinueButton, setShowContinueButton] = useState(false);
   const [locationGateVerified, setLocationGateVerified] = useState(false);
+  // Which chain is being signed during (multichain) auto session creation.
+  const [signingProgress, setSigningProgress] = useState<{
+    chainId: string;
+    index: number;
+    total: number;
+  }>();
   const [hasRequestedSession, setHasRequestedSession] = useState<
     boolean | undefined
   >(undefined);
@@ -301,6 +310,14 @@ export function ConnectRoute() {
       return;
     }
 
+    // Wait for policy resolution (e.g. preset config still loading) before
+    // deciding between auto-create and the approval UI — otherwise a stored
+    // controller races the config fetch and we act on the empty fallback
+    // policies.
+    if (!isPoliciesResolved) {
+      return;
+    }
+
     const hasLocationGate = hasConfiguredLocationGate(locationGate);
 
     // Location gating is a US-only feature. Wait for the shared IP-country
@@ -392,6 +409,7 @@ export function ConnectRoute() {
     if (!requiresSessionApproval(policies, chainPolicies)) {
       const createSessionForVerifiedPolicies = async () => {
         try {
+          setIsSessionCreating(true);
           if (requiresWebauthnPopup) {
             // When session auth relies on WebAuthn, delegate it to a popup window.
             // The popup export blob carries a single session, so multichain
@@ -408,6 +426,8 @@ export function ConnectRoute() {
               origin,
               policies,
               chainPolicies,
+              onProgress: (chainId, index, total) =>
+                setSigningProgress({ chainId, index, total }),
             });
           }
           params.resolve?.(
@@ -432,6 +452,9 @@ export function ConnectRoute() {
             // Fall back to rejecting on other browsers
             params.reject?.(e);
           }
+        } finally {
+          setIsSessionCreating(false);
+          setSigningProgress(undefined);
         }
       };
 
@@ -442,6 +465,7 @@ export function ConnectRoute() {
     controller,
     policies,
     chainPolicies,
+    isPoliciesResolved,
     handleCompletion,
     isStandalone,
     redirectUrl,
@@ -502,6 +526,12 @@ export function ConnectRoute() {
         persistVerification={false}
       />
     );
+  }
+
+  // Policies still resolving (e.g. preset config loading): rendering now
+  // would show an approval screen built from the empty fallback policies.
+  if (!isPoliciesResolved) {
+    return null;
   }
 
   // Embedded mode: No policies and verified policies are handled in useCreateController
@@ -577,6 +607,28 @@ export function ConnectRoute() {
               continue
             </Button>
           </LayoutFooter>
+        </>
+      );
+    }
+
+    // Auto-creation in progress: show what is being signed instead of a
+    // blank modal — external-wallet owners (e.g. Rabby) see one signature
+    // request per chain and need context for each prompt.
+    if (isSessionCreating) {
+      return (
+        <>
+          <HeaderInner
+            className="pb-0"
+            title={theme ? `Play ${theme.name}` : "Creating Session"}
+            description={
+              signingProgress && signingProgress.total > 1
+                ? `Signing session ${signingProgress.index + 1}/${signingProgress.total} — ${getChainName(signingProgress.chainId)}`
+                : "Creating your session…"
+            }
+          />
+          <LayoutContent className="flex items-center justify-center">
+            <SpinnerIcon className="animate-spin" />
+          </LayoutContent>
         </>
       );
     }
