@@ -30,7 +30,7 @@ describe("usePurchaseLocationGate", () => {
     mocks.geo.isUS = true;
   });
 
-  it("requires a fresh gate before every configured game purchase", () => {
+  it("requires a fresh gate before every configured game purchase", async () => {
     const firstPurchase = vi.fn();
     const secondPurchase = vi.fn();
     const { result } = renderHook(() => usePurchaseLocationGate());
@@ -41,7 +41,7 @@ describe("usePurchaseLocationGate", () => {
     expect(result.current.locationGateView).not.toBeNull();
     expect(firstPurchase).not.toHaveBeenCalled();
 
-    act(() => {
+    await act(async () => {
       const gate = result.current.locationGateView as ReactElement<{
         onVerified: () => void;
       }>;
@@ -66,6 +66,33 @@ describe("usePurchaseLocationGate", () => {
 
     expect(purchase).toHaveBeenCalledOnce();
     expect(mocks.connection.setLocationGateVerified).not.toHaveBeenCalled();
+    expect(result.current.locationGateView).toBeNull();
+  });
+
+  it("keeps the gate mounted until an async purchase continuation is ready", async () => {
+    let finishPurchase: (() => void) | undefined;
+    const purchase = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishPurchase = resolve;
+        }),
+    );
+    const { result } = renderHook(() => usePurchaseLocationGate());
+
+    act(() => result.current.runAfterLocationGate(purchase));
+
+    await act(async () => {
+      const gate = result.current.locationGateView as ReactElement<{
+        onVerified: () => void;
+      }>;
+      gate.props.onVerified();
+    });
+
+    expect(purchase).toHaveBeenCalledOnce();
+    expect(result.current.locationGateView).not.toBeNull();
+
+    await act(async () => finishPurchase?.());
+
     expect(result.current.locationGateView).toBeNull();
   });
 });

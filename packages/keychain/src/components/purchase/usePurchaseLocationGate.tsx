@@ -34,8 +34,27 @@ export function usePurchaseLocationGate() {
   const continuePendingPurchase = useCallback(() => {
     const action = pendingActionRef.current;
     pendingActionRef.current = undefined;
-    setIsPending(false);
-    void action?.();
+
+    if (!action) {
+      setIsPending(false);
+      return;
+    }
+
+    void (async () => {
+      try {
+        // Keep the gate mounted while the next purchase UI initializes. If we
+        // clear it first, the review page flashes between location verification
+        // and Coinflow, which looks like the entire app refreshed.
+        await action();
+      } catch (error) {
+        console.error(
+          "Failed to continue purchase after location verification:",
+          error,
+        );
+      } finally {
+        setIsPending(false);
+      }
+    })();
   }, []);
 
   const cancelPendingPurchase = useCallback(() => {
