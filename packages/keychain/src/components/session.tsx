@@ -61,7 +61,8 @@ export function Session() {
     }
   }, [queries.expires_at]);
 
-  const { controller, setController, policies } = useConnection();
+  const { controller, setController, policies, chainPolicies } =
+    useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [isFailure, setIsFailure] = useState<boolean>(false);
@@ -172,6 +173,14 @@ export function Session() {
       return;
     }
 
+    // Multichain registration: the already-registered shortcut only checks
+    // the active chain, which cannot prove the other chains are covered —
+    // always go through the registration flow (it is idempotent per chain).
+    if (chainPolicies?.length) {
+      setIsLoading(false);
+      return;
+    }
+
     // If the requested policies has no mismatch with existing policies and public key already
     // registered then return the exising session
     controller
@@ -203,6 +212,7 @@ export function Session() {
   }, [
     controller,
     policies,
+    chainPolicies,
     queries.public_key,
     hasExternalTarget,
     markCompleted,
@@ -242,6 +252,7 @@ export function Session() {
       {queries.public_key ? (
         <RegisterSession
           policies={policies}
+          chainPolicies={chainPolicies}
           onConnect={onConnect}
           publicKey={queries.public_key}
           expiresAt={expiresAt}
@@ -249,6 +260,7 @@ export function Session() {
       ) : (
         <CreateSession
           policies={policies}
+          chainPolicies={chainPolicies}
           onConnect={onConnect}
           expiresAt={expiresAt}
         />

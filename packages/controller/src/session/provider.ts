@@ -26,9 +26,20 @@ interface SessionRegistration {
   allowedPoliciesRoot?: string;
 }
 
+export type SessionChainOption = {
+  rpc: string;
+  chainId: string;
+};
+
 export type SessionOptions = {
   rpc: string;
   chainId: string;
+  /**
+   * Explicit opt-in to multichain sessions: every chain (beyond `rpc`/
+   * `chainId`, which stays the active one) that a single registration flow
+   * must cover. Each chain needs resolvable policies (preset or manual).
+   */
+  chains?: SessionChainOption[];
   policies?: SessionPolicies;
   preset?: string;
   shouldOverridePresetPolicies?: boolean;
@@ -49,6 +60,11 @@ export default class SessionProvider extends BaseProvider {
   protected _redirectUrl: string;
   protected _disconnectRedirectUrl?: string;
   protected _policies: ParsedSessionPolicies;
+  // Multichain opt-in: every covered chain (active one included), with its
+  // resolved policies. Empty when single-chain.
+  protected _sessionChains: SessionChainOption[] = [];
+  protected _chainPolicies: Map<string, ParsedSessionPolicies> = new Map();
+  protected _accounts: Map<string, SessionAccount> = new Map();
   protected _preset?: string;
   protected _keychainUrl: string;
   protected _apiUrl: string;
@@ -61,6 +77,7 @@ export default class SessionProvider extends BaseProvider {
   constructor({
     rpc,
     chainId,
+    chains,
     policies,
     preset,
     shouldOverridePresetPolicies,
@@ -92,6 +109,19 @@ export default class SessionProvider extends BaseProvider {
         );
       }
       this._policies = { verified: false };
+    }
+
+    // Multichain opt-in: normalize to the full covered set, active chain
+    // first, deduplicated by chain id.
+    if (chains && chains.length > 0) {
+      const seen = new Set<bigint>([BigInt(chainId)]);
+      this._sessionChains = [{ rpc, chainId }];
+      for (const chain of chains) {
+        const id = BigInt(chain.chainId);
+        if (seen.has(id)) continue;
+        seen.add(id);
+        this._sessionChains.push(chain);
+      }
     }
 
     this._rpcUrl = rpc;
@@ -138,7 +168,13 @@ export default class SessionProvider extends BaseProvider {
   // Resolve preset policies asynchronously.
   // Public methods await this before proceeding.
   private async _resolvePreset(): Promise<void> {
-    if (!this._preset) return;
+    if (!this._preset) {
+      // Manual policies apply to every opted-in chain.
+      for (const chain of this._sessionChains) {
+        this._chainPolicies.set(chain.chainId, this._policies);
+      }
+      return;
+    }
 
     const config = await loadConfig(this._preset);
     if (!config) {
@@ -153,6 +189,19 @@ export default class SessionProvider extends BaseProvider {
     }
 
     this._policies = parsePolicies(sessionPolicies);
+
+    // Multichain opt-in: every covered chain must resolve, a missing chain is
+    // an error (the registration flow would silently cover fewer chains than
+    // the dapp asked for).
+    for (const chain of this._sessionChains) {
+      const chainPolicies = getPresetSessionPolicies(config, chain.chainId);
+      if (!chainPolicies) {
+        throw new Error(
+          `No policies found for chain ${chain.chainId} in preset ${this._preset}`,
+        );
+      }
+      this._chainPolicies.set(chain.chainId, parsePolicies(chainPolicies));
+    }
   }
 
   private validatePoliciesSubset(
@@ -272,7 +321,10 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
-    localStorage.setItem("sessionPolicies", JSON.stringify(this._policies));
+    localStorage.setItem(
+      "sessionPolicies",
+      JSON.stringify(this._storablePolicies()),
+    );
     localStorage.setItem("lastUsedConnector", this.id);
 
     try {
@@ -296,6 +348,16 @@ export default class SessionProvider extends BaseProvider {
           `&redirect_uri=${this._redirectUrl}` +
           `&redirect_query_name=startapp` +
           `&rpc_url=${this._rpcUrl}`;
+
+        // Multichain opt-in: the keychain registers the session on every
+        // covered chain within the same flow.
+        if (this._sessionChains.length > 0) {
+          const sessionChains = this._sessionChains.map((chain) => ({
+            chainId: chain.chainId,
+            rpcUrl: chain.rpc,
+          }));
+          url += `&session_chains=${encodeURIComponent(JSON.stringify(sessionChains))}`;
+        }
 
         if (this._preset) {
           url += `&preset=${encodeURIComponent(this._preset)}`;
@@ -337,8 +399,104 @@ export default class SessionProvider extends BaseProvider {
     }
   }
 
-  switchStarknetChain(_chainId: string): Promise<boolean> {
-    throw new Error("switchStarknetChain not implemented");
+  // Stored shape of the approved policies: a per-chain map when multichain,
+  // the plain active-chain policies otherwise (legacy shape).
+  private _storablePolicies():
+    | ParsedSessionPolicies
+    | { multichain: true; chains: Record<string, ParsedSessionPolicies> } {
+    if (this._sessionChains.length === 0) {
+      return this._policies;
+    }
+    const chains: Record<string, ParsedSessionPolicies> = {};
+    for (const [chainId, policies] of this._chainPolicies) {
+      chains[chainId] = policies;
+    }
+    return { multichain: true, chains };
+  }
+
+  /**
+   * Switches the active chain of a multichain session.
+   *
+   * The stored registration is chain-agnostic (registered sessions are
+   * validated on-chain), so switching only rebinds the account to the target
+   * chain's rpc and policies — no new approval. Returns false when the chain
+   * was not part of the multichain opt-in or no session is available.
+   */
+  async switchStarknetChain(chainId: string): Promise<boolean> {
+    await this._readyPromise;
+
+    if (BigInt(chainId) === BigInt(this._chainId)) {
+      return true;
+    }
+
+    const chain = this._sessionChains.find(
+      (c) => BigInt(c.chainId) === BigInt(chainId),
+    );
+    const policies = this._chainPolicies.get(chain?.chainId ?? "");
+    if (!chain || !policies) {
+      console.error(
+        `switchStarknetChain: chain ${chainId} is not part of the session's chains`,
+      );
+      return false;
+    }
+
+    // Make sure a session exists before rebinding.
+    if (!this.account) {
+      this.tryRetrieveSessionAccount();
+      if (!this.account) {
+        return false;
+      }
+    }
+
+    const cached = this._accounts.get(chain.chainId);
+    if (cached) {
+      this.account = cached;
+    } else {
+      const account = this._buildSessionAccount(chain, policies);
+      if (!account) {
+        return false;
+      }
+      this._accounts.set(chain.chainId, account);
+      this.account = account;
+    }
+
+    this._chainId = chain.chainId;
+    this._rpcUrl = chain.rpc;
+    this.emitNetworkChanged(chain.chainId);
+
+    return true;
+  }
+
+  private _buildSessionAccount(
+    chain: SessionChainOption,
+    policies: ParsedSessionPolicies,
+  ): SessionAccount | undefined {
+    const sessionString = localStorage.getItem("session");
+    const signerString = localStorage.getItem("sessionSigner");
+    if (!sessionString || !signerString) {
+      return undefined;
+    }
+
+    const sessionRegistration = this.normalizeSession(
+      JSON.parse(sessionString) as Partial<SessionRegistration>,
+    );
+    if (!sessionRegistration) {
+      return undefined;
+    }
+    const signer = JSON.parse(signerString);
+
+    return new SessionAccount(this, {
+      rpcUrl: chain.rpc,
+      privateKey: signer.privKey,
+      address: sessionRegistration.address,
+      ownerGuid: sessionRegistration.ownerGuid,
+      chainId: chain.chainId,
+      expiresAt: parseInt(sessionRegistration.expiresAt),
+      policies: toWasmPolicies(policies),
+      guardianKeyGuid: sessionRegistration.guardianKeyGuid,
+      metadataHash: sessionRegistration.metadataHash,
+      sessionKeyGuid: sessionRegistration.sessionKeyGuid,
+    });
   }
 
   addStarknetChain(_chain: AddStarknetChainParameters): Promise<boolean> {
@@ -352,6 +510,7 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("lastUsedConnector");
     this.account = undefined;
     this._username = undefined;
+    this._accounts.clear();
 
     // calling this InjectedConnector callback hangs forever, and we do not disconnect properly
     // looking at InjectedConnector, it will disconnect is we pass [], so it must be safe to bypass
@@ -441,21 +600,58 @@ export default class SessionProvider extends BaseProvider {
       return;
     }
 
-    // Check stored policies
+    // Check stored policies. The stored value is either the legacy
+    // single-chain shape or a per-chain map for multichain sessions.
     const storedPoliciesStr = localStorage.getItem("sessionPolicies");
     if (storedPoliciesStr) {
-      const storedPolicies = JSON.parse(
-        storedPoliciesStr,
-      ) as ParsedSessionPolicies;
+      const stored = JSON.parse(storedPoliciesStr) as
+        | ParsedSessionPolicies
+        | { multichain: true; chains: Record<string, ParsedSessionPolicies> };
 
-      const isValid = this.validatePoliciesSubset(
-        this._policies,
-        storedPolicies,
-      );
-
-      if (!isValid) {
-        this.clearStoredSession();
-        return;
+      if ("multichain" in stored && stored.multichain) {
+        if (this._sessionChains.length === 0) {
+          // Multichain grant, single-chain request: the active chain's stored
+          // policies must cover the request.
+          const active = this._findStoredChainPolicies(
+            stored.chains,
+            this._chainId,
+          );
+          if (!active || !this.validatePoliciesSubset(this._policies, active)) {
+            this.clearStoredSession();
+            return;
+          }
+        } else {
+          // Every requested chain must be covered by the stored grant.
+          for (const chain of this._sessionChains) {
+            const requested = this._chainPolicies.get(chain.chainId);
+            const storedChain = this._findStoredChainPolicies(
+              stored.chains,
+              chain.chainId,
+            );
+            if (
+              !requested ||
+              !storedChain ||
+              !this.validatePoliciesSubset(requested, storedChain)
+            ) {
+              this.clearStoredSession();
+              return;
+            }
+          }
+        }
+      } else {
+        if (this._sessionChains.length > 0) {
+          // Single-chain grant cannot satisfy a multichain request.
+          this.clearStoredSession();
+          return;
+        }
+        const isValid = this.validatePoliciesSubset(
+          this._policies,
+          stored as ParsedSessionPolicies,
+        );
+        if (!isValid) {
+          this.clearStoredSession();
+          return;
+        }
       }
     }
 
@@ -472,8 +668,29 @@ export default class SessionProvider extends BaseProvider {
       metadataHash: sessionRegistration.metadataHash,
       sessionKeyGuid: sessionRegistration.sessionKeyGuid,
     });
+    if (this._sessionChains.length > 0) {
+      this._accounts.set(this._chainId, this.account as SessionAccount);
+    }
 
     return this.account;
+  }
+
+  // Stored chain keys may differ in casing/padding from the requested ones;
+  // compare as field elements.
+  private _findStoredChainPolicies(
+    chains: Record<string, ParsedSessionPolicies>,
+    chainId: string,
+  ): ParsedSessionPolicies | undefined {
+    for (const [storedChainId, policies] of Object.entries(chains)) {
+      try {
+        if (BigInt(storedChainId) === BigInt(chainId)) {
+          return policies;
+        }
+      } catch {
+        // Ignore malformed keys.
+      }
+    }
+    return undefined;
   }
 
   private clearStoredSession(): void {
@@ -481,5 +698,6 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("session");
     localStorage.removeItem("sessionPolicies");
     localStorage.removeItem("lastUsedConnector");
+    this._accounts.clear();
   }
 }

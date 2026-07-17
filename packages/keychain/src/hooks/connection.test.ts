@@ -6,11 +6,13 @@ import {
   isSameRpcUrl,
   parseControllerVersion,
   parseDefaultPaymentMethod,
+  resolveChainPolicies,
   resolveCoinflowSandbox,
   resolveDefaultPaymentMethod,
   resolvePolicies,
   verifyStandaloneOrigin,
 } from "./connection";
+import { getPresetSessionPolicies } from "@cartridge/controller";
 import { vi } from "vitest";
 
 vi.mock("@cartridge/controller", async () => {
@@ -669,6 +671,167 @@ describe("resolvePolicies", () => {
 
     expect(result.isPoliciesResolved).toBe(false);
     expect(result.policies).toBeUndefined();
+  });
+});
+
+describe("resolveChainPolicies", () => {
+  const SEPOLIA = "0x534e5f5345504f4c4941";
+  const APPCHAIN = "0x4341525452494447455f544553544e4554";
+  const sessionChains = [
+    { chainId: SEPOLIA, rpcUrl: "https://sepolia.example/rpc" },
+    { chainId: APPCHAIN, rpcUrl: "https://appchain.example/rpc" },
+  ];
+  const encodedPolicies = encodeURIComponent(
+    JSON.stringify({
+      contracts: {
+        "0x1": {
+          methods: [{ entrypoint: "transfer" }],
+        },
+      },
+    }),
+  );
+
+  afterEach(() => {
+    vi.mocked(getPresetSessionPolicies).mockReset();
+    vi.mocked(getPresetSessionPolicies).mockImplementation(() => undefined);
+  });
+
+  it("resolves to undefined without error when no session chains are requested", () => {
+    const result = resolveChainPolicies({
+      policiesStr: encodedPolicies,
+      preset: null,
+      shouldOverridePresetPolicies: false,
+      configData: null,
+      sessionChains: undefined,
+      verified: false,
+      isConfigLoading: false,
+    });
+
+    expect(result.isResolved).toBe(true);
+    expect(result.chainPolicies).toBeUndefined();
+    expect(result.error).toBeUndefined();
+  });
+
+  it("replicates manual policies on every requested chain", () => {
+    const result = resolveChainPolicies({
+      policiesStr: encodedPolicies,
+      preset: null,
+      shouldOverridePresetPolicies: false,
+      configData: null,
+      sessionChains,
+      verified: false,
+      isConfigLoading: false,
+    });
+
+    expect(result.isResolved).toBe(true);
+    expect(result.error).toBeUndefined();
+    expect(result.chainPolicies).toHaveLength(2);
+    expect(result.chainPolicies![0].chainId).toBe(SEPOLIA);
+    expect(result.chainPolicies![0].rpcUrl).toBe(sessionChains[0].rpcUrl);
+    expect(result.chainPolicies![1].chainId).toBe(APPCHAIN);
+    expect(result.chainPolicies![0].policies.contracts).toBeDefined();
+  });
+
+  it("resolves per-chain policies from the preset config", () => {
+    vi.mocked(getPresetSessionPolicies).mockImplementation(
+      (_config, chainId) => ({
+        contracts: {
+          [chainId === SEPOLIA ? "0xaaa" : "0xbbb"]: {
+            methods: [{ entrypoint: "play" }],
+          },
+        },
+      }),
+    );
+
+    const result = resolveChainPolicies({
+      policiesStr: null,
+      preset: "glitch-bomb",
+      shouldOverridePresetPolicies: false,
+      configData: { chains: {} },
+      sessionChains,
+      verified: true,
+      isConfigLoading: false,
+    });
+
+    expect(result.isResolved).toBe(true);
+    expect(result.error).toBeUndefined();
+    expect(result.chainPolicies).toHaveLength(2);
+    expect(
+      result.chainPolicies![0].policies.contracts?.["0xaaa"],
+    ).toBeDefined();
+    expect(
+      result.chainPolicies![1].policies.contracts?.["0xbbb"],
+    ).toBeDefined();
+    expect(result.chainPolicies![0].policies.verified).toBe(true);
+  });
+
+  it("errors when the preset lacks policies for a requested chain", () => {
+    vi.mocked(getPresetSessionPolicies).mockImplementation(
+      (_config, chainId) =>
+        chainId === SEPOLIA
+          ? { contracts: { "0xaaa": { methods: [{ entrypoint: "play" }] } } }
+          : undefined,
+    );
+
+    const result = resolveChainPolicies({
+      policiesStr: null,
+      preset: "glitch-bomb",
+      shouldOverridePresetPolicies: false,
+      configData: { chains: {} },
+      sessionChains,
+      verified: true,
+      isConfigLoading: false,
+    });
+
+    expect(result.isResolved).toBe(true);
+    expect(result.error).toBe(true);
+    expect(result.chainPolicies).toBeUndefined();
+  });
+
+  it("errors when neither preset nor manual policies are available", () => {
+    const result = resolveChainPolicies({
+      policiesStr: null,
+      preset: null,
+      shouldOverridePresetPolicies: false,
+      configData: null,
+      sessionChains,
+      verified: false,
+      isConfigLoading: false,
+    });
+
+    expect(result.isResolved).toBe(true);
+    expect(result.error).toBe(true);
+  });
+
+  it("waits for the preset config before resolving", () => {
+    const result = resolveChainPolicies({
+      policiesStr: null,
+      preset: "glitch-bomb",
+      shouldOverridePresetPolicies: false,
+      configData: null,
+      sessionChains,
+      verified: true,
+      isConfigLoading: true,
+    });
+
+    expect(result.isResolved).toBe(false);
+    expect(result.chainPolicies).toBeUndefined();
+    expect(result.error).toBeUndefined();
+  });
+
+  it("overrides preset policies on every chain when requested", () => {
+    const result = resolveChainPolicies({
+      policiesStr: encodedPolicies,
+      preset: "glitch-bomb",
+      shouldOverridePresetPolicies: true,
+      configData: null,
+      sessionChains,
+      verified: false,
+      isConfigLoading: true,
+    });
+
+    expect(result.isResolved).toBe(true);
+    expect(result.chainPolicies).toHaveLength(2);
   });
 });
 

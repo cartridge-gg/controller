@@ -4,12 +4,13 @@ import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSession
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { now } from "@/constants";
 import { CreateSessionProvider } from "@/context/session";
-import { useConnection } from "@/hooks/connection";
+import { useConnection, type SessionChainPolicies } from "@/hooks/connection";
 import {
   type ContractType,
   type ParsedSessionPolicies,
   useCreateSession,
 } from "@/hooks/session";
+import { getChainName } from "@cartridge/controller-ui/utils";
 import { Button, LayoutContent, SliderIcon } from "@cartridge/controller-ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -23,11 +24,14 @@ const requiredPolicies: Array<ContractType> = ["VRF"];
 
 export function RegisterSession({
   policies,
+  chainPolicies,
   onConnect,
   publicKey,
   expiresAt: expiresAtOverride,
 }: {
   policies: ParsedSessionPolicies;
+  /** Multichain registration: one policy set per opted-in chain. */
+  chainPolicies?: SessionChainPolicies;
   onConnect: (transaction_hash: string, expiresAt: bigint) => void;
   publicKey?: string;
   expiresAt?: bigint;
@@ -38,6 +42,7 @@ export function RegisterSession({
       requiredPolicies={requiredPolicies}
     >
       <RegisterSessionLayout
+        chainPolicies={chainPolicies}
         onConnect={onConnect}
         publicKey={publicKey}
         expiresAtOverride={expiresAtOverride}
@@ -47,19 +52,22 @@ export function RegisterSession({
 }
 
 const RegisterSessionLayout = ({
+  chainPolicies,
   onConnect,
   publicKey,
   expiresAtOverride,
 }: {
+  chainPolicies?: SessionChainPolicies;
   onConnect: (transaction_hash: string, expiresAt: bigint) => void;
   publicKey?: string;
   expiresAtOverride?: bigint;
 }) => {
   const { policies } = useCreateSession();
-  const { controller, theme, origin, isAppchain } = useConnection();
+  const { controller, theme, origin, isAppchain, chainId } = useConnection();
   const [transactions, setTransactions] = useState<Call[] | undefined>(
     undefined,
   );
+  const [registeringChain, setRegisteringChain] = useState<string>();
 
   const { duration, isEditable, onToggleEditable } = useCreateSession();
 
@@ -110,9 +118,50 @@ const RegisterSessionLayout = ({
         ],
       });
 
+      // Multichain registration: after the active chain, register on every
+      // other opted-in chain. Already-registered chains count as success, so
+      // resubmitting after a partial failure only retries what's missing.
+      if (chainPolicies?.length) {
+        const otherChains = chainPolicies.filter(
+          (chain) => !chainId || BigInt(chain.chainId) !== BigInt(chainId),
+        );
+        if (otherChains.length > 0) {
+          try {
+            const results = await controller.registerSessionOnChains(
+              origin,
+              expiresAt,
+              otherChains.map((chain) => ({
+                chainId: chain.chainId,
+                rpcUrl: chain.rpcUrl,
+                policies: chain.policies,
+              })),
+              publicKey,
+              (registeringChainId) =>
+                setRegisteringChain(getChainName(registeringChainId)),
+            );
+            const failed = results.filter((r) => r.error);
+            if (failed.length > 0) {
+              throw failed[0].error;
+            }
+          } finally {
+            setRegisteringChain(undefined);
+          }
+        }
+      }
+
       onConnect(transaction_hash, expiresAt);
     },
-    [controller, expiresAt, policies, publicKey, onConnect, origin, isAppchain],
+    [
+      controller,
+      expiresAt,
+      policies,
+      chainPolicies,
+      chainId,
+      publicKey,
+      onConnect,
+      origin,
+      isAppchain,
+    ],
   );
 
   if (!transactions) {
@@ -124,7 +173,11 @@ const RegisterSessionLayout = ({
       title="Register Session"
       transactions={transactions}
       onSubmit={onRegisterSession}
-      buttonText="Register Session"
+      buttonText={
+        registeringChain
+          ? `Registering on ${registeringChain}…`
+          : "Register Session"
+      }
       right={
         !isEditable ? (
           <Button
@@ -142,7 +195,30 @@ const RegisterSessionLayout = ({
     >
       <LayoutContent>
         <SessionConsent isVerified={policies?.verified} />
-        {policies?.verified ? (
+        {chainPolicies?.length ? (
+          <div className="flex flex-col gap-4">
+            {chainPolicies.map((chain) => (
+              <div key={chain.chainId} className="flex flex-col gap-2">
+                <h3 className="text-xs font-semibold uppercase text-foreground-300">
+                  {getChainName(chain.chainId)}
+                </h3>
+                {chain.policies.verified ? (
+                  <VerifiedSessionSummary
+                    game={theme.name}
+                    contracts={chain.policies.contracts}
+                    messages={chain.policies.messages}
+                  />
+                ) : (
+                  <UnverifiedSessionSummary
+                    game={theme?.name}
+                    contracts={chain.policies.contracts}
+                    messages={chain.policies.messages}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        ) : policies?.verified ? (
           <VerifiedSessionSummary
             game={theme.name}
             contracts={policies.contracts}

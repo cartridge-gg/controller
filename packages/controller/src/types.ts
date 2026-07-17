@@ -264,6 +264,15 @@ export type IFrameOptions = {
   preset?: string;
 };
 
+/**
+ * A chain covered by a multichain session approval, resolved to its rpcUrl
+ * SDK-side so the keychain never re-derives chain ids from URLs.
+ */
+export type SessionChain = {
+  chainId: string;
+  rpcUrl: string;
+};
+
 export type Chain = {
   /** RPC url */
   rpcUrl: string;
@@ -304,6 +313,14 @@ export type KeychainOptions = IFrameOptions & {
   coinflowSandbox?: boolean;
   /** When true, manually provided policies will override preset policies. Default is false. */
   shouldOverridePresetPolicies?: boolean;
+  /**
+   * Explicit opt-in to multichain sessions: chain IDs covered by a single
+   * session approval flow. Each entry must correspond to a chain configured
+   * via `chains` (or a default Cartridge chain), and `policies` or `preset`
+   * must be provided. When absent, sessions are created for the active chain
+   * only (current behavior).
+   */
+  multichainSessions?: ChainId[];
   /** The project name of Slot instance. */
   slot?: string;
   /** The Torii indexer URL used to fetch tokens/collections. Takes precedence over `slot`. */

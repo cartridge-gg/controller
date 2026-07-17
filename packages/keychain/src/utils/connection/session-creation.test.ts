@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type Controller from "@/utils/controller";
 import type { ParsedSessionPolicies } from "@/hooks/session";
+import type { SessionChainPolicies } from "@/hooks/connection";
 import {
+  canAutoCreateSession,
   createVerifiedSession,
   requiresSessionApproval,
   DEFAULT_VERIFIED_SESSION_DURATION_S,
@@ -109,6 +111,142 @@ describe("session-creation helpers", () => {
       );
       expect(processedPolicies.messages[0].id).toBeUndefined();
       expect(processedPolicies.messages[0].authorized).toBe(true);
+    });
+  });
+
+  describe("multichain sessions", () => {
+    const verifiedPolicies = {
+      verified: true,
+      contracts: {
+        "0x1": { methods: [{ entrypoint: "transfer" }] },
+      },
+    } as unknown as ParsedSessionPolicies;
+
+    const unverifiedPolicies = {
+      verified: false,
+      contracts: {
+        "0x1": { methods: [{ entrypoint: "transfer" }] },
+      },
+    } as unknown as ParsedSessionPolicies;
+
+    const chains = (
+      policiesByChain: Record<string, ParsedSessionPolicies>,
+    ): SessionChainPolicies =>
+      Object.entries(policiesByChain).map(([chainId, policies]) => ({
+        chainId,
+        rpcUrl: `https://${chainId}.example/rpc`,
+        policies,
+      }));
+
+    it("requires approval when any chain requires it", () => {
+      expect(
+        requiresSessionApproval(
+          undefined,
+          chains({ "0x1": verifiedPolicies, "0x2": unverifiedPolicies }),
+        ),
+      ).toBe(true);
+      expect(
+        requiresSessionApproval(
+          undefined,
+          chains({ "0x1": verifiedPolicies, "0x2": verifiedPolicies }),
+        ),
+      ).toBe(false);
+    });
+
+    it("gates auto-creation on the whole chain set", () => {
+      expect(
+        canAutoCreateSession(
+          verifiedPolicies,
+          chains({ "0x1": verifiedPolicies, "0x2": unverifiedPolicies }),
+        ),
+      ).toBe(false);
+      expect(
+        canAutoCreateSession(
+          verifiedPolicies,
+          chains({ "0x1": verifiedPolicies, "0x2": verifiedPolicies }),
+        ),
+      ).toBe(true);
+    });
+
+    it("creates one session per chain through createMultichainSession", async () => {
+      const createMultichainSession = vi
+        .fn()
+        .mockResolvedValue([{ chainId: "0x1" }, { chainId: "0x2" }]);
+      const createSession = vi.fn();
+      const controller = {
+        createSession,
+        createMultichainSession,
+      } as unknown as Controller;
+
+      const chainPolicies = chains({
+        "0x1": verifiedPolicies,
+        "0x2": verifiedPolicies,
+      });
+
+      const nowFn = () => BigInt(1_000);
+      await createVerifiedSession({
+        controller,
+        origin: "origin",
+        policies: verifiedPolicies,
+        chainPolicies,
+        nowFn,
+      });
+
+      expect(createSession).not.toHaveBeenCalled();
+      expect(createMultichainSession).toHaveBeenCalledTimes(1);
+      const [origin, expiresAt, inputs] = createMultichainSession.mock.calls[0];
+      expect(origin).toBe("origin");
+      expect(expiresAt).toBe(
+        BigInt(1_000) + DEFAULT_VERIFIED_SESSION_DURATION_S,
+      );
+      expect(inputs).toHaveLength(2);
+      expect(inputs[0].chainId).toBe("0x1");
+      expect(inputs[0].rpcUrl).toBe("https://0x1.example/rpc");
+      expect(inputs[0].policies.contracts["0x1"].methods[0].authorized).toBe(
+        true,
+      );
+    });
+
+    it("throws when a chain fails to create", async () => {
+      const createMultichainSession = vi
+        .fn()
+        .mockResolvedValue([
+          { chainId: "0x1" },
+          { chainId: "0x2", error: new Error("user cancelled") },
+        ]);
+      const controller = {
+        createMultichainSession,
+      } as unknown as Controller;
+
+      await expect(
+        createVerifiedSession({
+          controller,
+          origin: "origin",
+          policies: verifiedPolicies,
+          chainPolicies: chains({
+            "0x1": verifiedPolicies,
+            "0x2": verifiedPolicies,
+          }),
+        }),
+      ).rejects.toThrow("user cancelled");
+    });
+
+    it("throws when any chain requires approval", async () => {
+      const controller = {
+        createMultichainSession: vi.fn(),
+      } as unknown as Controller;
+
+      await expect(
+        createVerifiedSession({
+          controller,
+          origin: "origin",
+          policies: verifiedPolicies,
+          chainPolicies: chains({
+            "0x1": verifiedPolicies,
+            "0x2": unverifiedPolicies,
+          }),
+        }),
+      ).rejects.toThrow(/requires explicit approval/i);
     });
   });
 });
