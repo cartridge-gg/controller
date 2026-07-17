@@ -282,6 +282,60 @@ describe("CreateController", () => {
     );
   });
 
+  it("initializes SMS login when selected from the method chooser", async () => {
+    const handleInitOtpWithUsername = vi.fn().mockResolvedValue(undefined);
+    const setAuthenticationStep = vi.fn();
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit: vi.fn(),
+      handleInitOtp: vi.fn(),
+      handleInitOtpWithUsername,
+      smsState: null,
+      setSmsState: vi.fn(),
+      authenticationStep: AuthenticationStep.ChooseMethod,
+      setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
+      setChangeWallet: vi.fn(),
+      signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
+    });
+    mockUseUsernameValidation.mockReturnValue({
+      status: "valid",
+      exists: true,
+      error: undefined,
+      signers: [
+        { __typename: "WebauthnCredentials" },
+        {
+          __typename: "Eip191Credentials",
+          eip191: [{ provider: "sms", ethAddress: "0x123" }],
+        },
+      ],
+    });
+
+    renderWithProviders(
+      <CreateController {...defaultProps} prefillUsername="existinguser" />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "SMS" }));
+
+    expect(handleInitOtpWithUsername).toHaveBeenCalledWith("existinguser");
+    expect(setAuthenticationStep).toHaveBeenCalledWith(
+      AuthenticationStep.SmsForm,
+    );
+
+    handleInitOtpWithUsername.mockClear();
+    setAuthenticationStep.mockClear();
+    fireEvent.keyDown(document, { key: "Enter" });
+
+    expect(handleInitOtpWithUsername).toHaveBeenCalledWith("existinguser");
+    expect(setAuthenticationStep).toHaveBeenCalledWith(
+      AuthenticationStep.SmsForm,
+    );
+  });
+
   it("shows loading state during submission", async () => {
     mockUseCreateController.mockReturnValue({
       isLoading: true,
