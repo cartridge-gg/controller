@@ -13,7 +13,7 @@ type PurchaseAction = () => void | Promise<void>;
  * recovery UI.
  */
 export function usePurchaseLocationGate() {
-  const { locationGate, setLocationGateVerified } = useConnection();
+  const { locationGate } = useConnection();
   const { isUS } = useGeoLocation();
   const [isPending, setIsPending] = useState(false);
   const pendingActionRef = useRef<PurchaseAction>();
@@ -26,12 +26,9 @@ export function usePurchaseLocationGate() {
       }
 
       pendingActionRef.current = action;
-      // Verification is deliberately per-attempt. A successful connect or an
-      // earlier purchase must never authorize the next purchase implicitly.
-      setLocationGateVerified(false);
       setIsPending(true);
     },
-    [isUS, locationGate, setLocationGateVerified],
+    [isUS, locationGate],
   );
 
   const continuePendingPurchase = useCallback(() => {
@@ -54,6 +51,7 @@ export function usePurchaseLocationGate() {
           gate={locationGate}
           onExit={cancelPendingPurchase}
           onVerified={continuePendingPurchase}
+          persistVerification={false}
         />
       ) : null,
   };

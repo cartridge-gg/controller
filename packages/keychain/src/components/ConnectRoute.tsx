@@ -61,7 +61,6 @@ export function ConnectRoute() {
     policiesStr,
     rpcUrl,
     locationGate,
-    locationGateVerified,
     isNewControllerRef,
     controllerVersion,
     closeModal,
@@ -70,6 +69,7 @@ export function ConnectRoute() {
   const [isSessionCreating, setIsSessionCreating] = useState(false);
   const [sessionError, setSessionError] = useState<Error>();
   const [showContinueButton, setShowContinueButton] = useState(false);
+  const [locationGateVerified, setLocationGateVerified] = useState(false);
   const [hasRequestedSession, setHasRequestedSession] = useState<
     boolean | undefined
   >(undefined);
@@ -464,6 +464,10 @@ export function ConnectRoute() {
     [params, closeModal],
   );
 
+  const handleGateVerified = useCallback(() => {
+    setLocationGateVerified(true);
+  }, []);
+
   // Don't render anything if we don't have controller yet - CreateController handles loading
   if (!controller) {
     return null;
@@ -480,7 +484,14 @@ export function ConnectRoute() {
   // Render the gate inline so this route (and its pending connect callbacks)
   // stays mounted while the user verifies their location.
   if (hasLocationGate && isUS && !locationGateVerified) {
-    return <LocationGate gate={locationGate!} onExit={handleGateExit} />;
+    return (
+      <LocationGate
+        gate={locationGate!}
+        onExit={handleGateExit}
+        onVerified={handleGateVerified}
+        persistVerification={false}
+      />
+    );
   }
 
   // Embedded mode: No policies and verified policies are handled in useCreateController
