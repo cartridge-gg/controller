@@ -232,6 +232,56 @@ describe("CreateController", () => {
     );
   });
 
+  it("shows a generic login label when login opens the method chooser", async () => {
+    const setAuthenticationStep = vi.fn();
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit: vi.fn(),
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
+      setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
+      signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
+      shouldAutoCreateSession: true,
+      hasPolicies: true,
+    });
+    mockUseUsernameValidation.mockReturnValue({
+      status: "valid",
+      exists: true,
+      error: undefined,
+      signers: [
+        { __typename: "WebauthnCredentials" },
+        {
+          __typename: "Eip191Credentials",
+          eip191: [{ provider: "google", ethAddress: "0x123" }],
+        },
+      ],
+    });
+
+    renderComponent();
+    const input = screen.getByPlaceholderText("Username");
+    fireEvent.change(input, { target: { value: "existinguser" } });
+    fireEvent.blur(input);
+
+    const submitButton = screen.getByTestId("submit-button");
+    await waitFor(() => expect(submitButton).not.toBeDisabled());
+    expect(submitButton).toHaveTextContent("log in");
+    expect(submitButton).not.toHaveTextContent("log in with Passkey");
+
+    fireEvent.submit(submitButton.closest("form")!);
+
+    expect(setAuthenticationStep).toHaveBeenCalledWith(
+      AuthenticationStep.ChooseMethod,
+    );
+  });
+
   it("shows loading state during submission", async () => {
     mockUseCreateController.mockReturnValue({
       isLoading: true,
