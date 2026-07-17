@@ -12,6 +12,7 @@ import { parsePolicies, ParsedSessionPolicies } from "../policies";
 import BaseProvider from "../provider";
 import { AuthOptions } from "../types";
 import { getPresetSessionPolicies, toWasmPolicies } from "../utils";
+import type { RateLimitRetryOptions } from "../rate-limit";
 import SessionAccount from "./account";
 
 interface SessionRegistration {
@@ -48,6 +49,7 @@ export type SessionOptions = {
   keychainUrl?: string;
   apiUrl?: string;
   signupOptions?: AuthOptions;
+  rpcRetry?: false | RateLimitRetryOptions;
 };
 
 export default class SessionProvider extends BaseProvider {
@@ -71,6 +73,7 @@ export default class SessionProvider extends BaseProvider {
   protected _publicKey!: string;
   protected _sessionKeyGuid!: string;
   protected _signupOptions?: AuthOptions;
+  protected _rpcRetry?: false | RateLimitRetryOptions;
   private _readyPromise: Promise<void>;
   public reopenBrowser: boolean = true;
 
@@ -86,6 +89,7 @@ export default class SessionProvider extends BaseProvider {
     keychainUrl,
     apiUrl,
     signupOptions,
+    rpcRetry,
   }: SessionOptions) {
     super();
 
@@ -131,6 +135,7 @@ export default class SessionProvider extends BaseProvider {
     this._keychainUrl = keychainUrl || KEYCHAIN_URL;
     this._apiUrl = apiUrl ?? API_URL;
     this._signupOptions = signupOptions;
+    this._rpcRetry = rpcRetry;
 
     this._setSigningKeys();
     this._readyPromise = this._resolvePreset();
@@ -667,6 +672,7 @@ export default class SessionProvider extends BaseProvider {
       guardianKeyGuid: sessionRegistration.guardianKeyGuid,
       metadataHash: sessionRegistration.metadataHash,
       sessionKeyGuid: sessionRegistration.sessionKeyGuid,
+      rpcRetry: this._rpcRetry,
     });
     if (this._sessionChains.length > 0) {
       this._accounts.set(this._chainId, this.account as SessionAccount);

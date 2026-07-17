@@ -9,6 +9,7 @@ import BaseProvider from "../provider";
 import { getPresetSessionPolicies, toWasmPolicies } from "../utils";
 import { parsePolicies, ParsedSessionPolicies } from "../policies";
 import { AuthOptions } from "../types";
+import type { RateLimitRetryOptions } from "../rate-limit";
 import { NodeBackend } from "./backend";
 
 export type SessionOptions = {
@@ -20,6 +21,7 @@ export type SessionOptions = {
   basePath: string;
   keychainUrl?: string;
   signupOptions?: AuthOptions;
+  rpcRetry?: false | RateLimitRetryOptions;
 };
 
 export default class SessionProvider extends BaseProvider {
@@ -34,6 +36,7 @@ export default class SessionProvider extends BaseProvider {
   protected _keychainUrl: string;
   protected _signupOptions?: AuthOptions;
   protected _backend: NodeBackend;
+  protected _rpcRetry?: false | RateLimitRetryOptions;
   private _readyPromise: Promise<void>;
 
   constructor({
@@ -45,6 +48,7 @@ export default class SessionProvider extends BaseProvider {
     basePath,
     keychainUrl,
     signupOptions,
+    rpcRetry,
   }: SessionOptions) {
     super();
 
@@ -75,6 +79,7 @@ export default class SessionProvider extends BaseProvider {
     this._keychainUrl = keychainUrl || KEYCHAIN_URL;
     this._signupOptions = signupOptions;
     this._backend = new NodeBackend(basePath);
+    this._rpcRetry = rpcRetry;
 
     this._readyPromise = this._resolvePreset();
   }
@@ -195,6 +200,7 @@ export default class SessionProvider extends BaseProvider {
       guardianKeyGuid: session.guardianKeyGuid,
       metadataHash: session.metadataHash,
       sessionKeyGuid: session.sessionKeyGuid,
+      rpcRetry: this._rpcRetry,
     });
 
     return this.account;
