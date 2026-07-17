@@ -9,7 +9,7 @@ import {
   isValidCalendarDate,
   type DateValue,
 } from "@cartridge/controller-ui";
-import { useAccountVerifyMutation } from "@/utils/api";
+import { AccountVerifyReasonCode, useAccountVerifyMutation } from "@/utils/api";
 import { VerifyErrorAlert } from "./error";
 
 interface VerifyIdentityDrawerProps {
@@ -65,8 +65,23 @@ export function VerifyIdentityDrawer({
           // sandbox: true, //returns true, but do not store
         },
       });
-      if (!result.accountVerify) {
-        setError("Account verification failed");
+      if (!result.accountVerify.verified) {
+        const reference = result.accountVerify.correlationId
+          ? ` Reference: ${result.accountVerify.correlationId}`
+          : "";
+        if (
+          result.accountVerify.reasonCode ===
+            AccountVerifyReasonCode.ProviderUnavailable ||
+          result.accountVerify.retryable
+        ) {
+          setError(
+            `Identity verification service is temporarily unavailable. Please try again.${reference}`,
+          );
+        } else {
+          setError(
+            `We couldn't verify these details. Check that your legal name and date of birth match the identity associated with your verified phone number.${reference}`,
+          );
+        }
         return;
       }
       // The owner closes the drawer after it refreshes verified user data.
