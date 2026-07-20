@@ -1,13 +1,12 @@
 import {
   useCoinflowIsMainnet,
-  useCreateCoinflowBankAccount,
   useCreateCoinflowKYC,
 } from "@/hooks/payments/coinflow-withdraw";
 import { useIdentityContext } from "@/components/identity/provider";
 import { Verification } from "@/components/purchase/verification";
 import { useWithdrawContext } from "./provider";
+import { BankAuthDrawer } from "./BankAuthDrawer";
 import { CoinflowKycDrawer } from "./CoinflowKycDrawer";
-import { CreateBankAccountDrawer } from "./CreateBankAccountDrawer";
 import { OverviewDrawer } from "./OverviewDrawer";
 import { WithdrawMethodDrawer } from "./WithdrawMethodDrawer";
 
@@ -54,12 +53,6 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
     isLoading: isKycSubmitting,
     error: kycError,
   } = useCreateCoinflowKYC();
-
-  const {
-    createBankAccount,
-    isLoading: isBankSubmitting,
-    error: bankError,
-  } = useCreateCoinflowBankAccount();
 
   // The Drawer dismiss path fires onClose when a drawer closes because the
   // step moved on (not just on user intent) — same as DepositCredits, every
@@ -114,24 +107,18 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
         onSelect={selectDestination}
       />
 
-      <CreateBankAccountDrawer
+      {/* Hosted Bank Authentication UI (Coinflow's CoinflowWithdraw iframe) —
+          the primary add-bank path. The provider owns the session + the
+          onLinked handoff; on success it refetches the status and returns to
+          the method picker with the new destination listed. The legacy raw
+          CreateBankAccountDrawer form is intentionally no longer wired. */}
+      <BankAuthDrawer
         isOpen={isOpen && step === "add-bank"}
         onClose={() => {
           // Cancel back to the amount step — only on user intent (see above).
           if (step === "add-bank") closeMethodSelection();
         }}
-        isSubmitting={isBankSubmitting}
-        error={bankError}
         sandbox={isCoinflowSandbox}
-        onSubmit={(form) => {
-          // The mutation returns the normalized CoinflowDestination — select
-          // it directly (the invalidated status query lists the same entry).
-          // Failures surface through the hook's error; "address required"
-          // reveals the drawer's address fields for a resubmit (§8.10).
-          createBankAccount(form)
-            .then(selectDestination)
-            .catch(() => {});
-        }}
       />
 
       {/* Email → phone → identity gauntlet (headless — the drawers live in

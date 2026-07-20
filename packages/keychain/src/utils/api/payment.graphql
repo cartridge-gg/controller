@@ -292,6 +292,19 @@ mutation CreateCoinflowBankAccount($input: CreateCoinflowBankAccountInput!) {
   }
 }
 
+# Mints the session for Coinflow's hosted Bank Authentication UI (the
+# CoinflowWithdraw iframe). Returns the on-ramp intent shape minus the JWT —
+# there is no transaction; the iframe links the bank/card inside Coinflow and
+# the new destination lands on the next CoinflowWithdrawStatus refetch.
+mutation CreateCoinflowBankAuthSession(
+  $input: CreateCoinflowBankAuthSessionInput
+) {
+  createCoinflowBankAuthSession(input: $input) {
+    sessionKey
+    merchantId
+  }
+}
+
 mutation DeleteCoinflowDestination($input: DeleteCoinflowDestinationInput!) {
   deleteCoinflowDestination(input: $input)
 }
