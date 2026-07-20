@@ -8,7 +8,9 @@ import {
 } from "react";
 import {
   CoinflowKycStatus,
+  useCoinflowBankAuthSession,
   useCoinflowWithdrawStatus,
+  type CoinflowBankAuthSession,
   type CoinflowDestination,
 } from "@/hooks/payments/coinflow-withdraw";
 import type { CoinflowWithdrawStatusQuery } from "@/utils/api";
@@ -93,12 +95,25 @@ export type WithdrawContextValue = {
   selectDestination: (destination: CoinflowDestination) => void;
   /**
    * Opens the transfer-method sub-step: the picker when destinations exist,
-   * the add-bank form otherwise (amount Continue with no confirmed method,
+   * the add-bank hosted UI otherwise (amount Continue with no confirmed method,
    * or the SelectedWithdrawMethod change affordance).
    */
   openMethodSelection: () => void;
   /** Cancels the method sub-step back to the amount step. */
   closeMethodSelection: () => void;
+  /**
+   * Coinflow hosted Bank Authentication UI (§3.4). The provider owns the
+   * session (minted via `useCoinflowBankAuthSession`); `BankAuthDrawer` is a
+   * thin view that reads `session` and renders the `CoinflowWithdraw` iframe.
+   * `onLinked` (the iframe success/`accountLinked` event) refetches the status
+   * so the freshly-linked destination lists, then returns to the method picker.
+   */
+  bankAuth: {
+    session?: CoinflowBankAuthSession;
+    isMinting: boolean;
+    error: Error | null;
+    onLinked: () => void;
+  };
 };
 
 export const WithdrawContext = createContext<WithdrawContextValue>({
@@ -119,6 +134,12 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
   selectDestination: () => {},
   openMethodSelection: () => {},
   closeMethodSelection: () => {},
+  bankAuth: {
+    session: undefined,
+    isMinting: false,
+    error: null,
+    onLinked: () => {},
+  },
 });
 
 export function WithdrawProvider({ children }: PropsWithChildren) {
@@ -148,6 +169,10 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     enabled: isOpen,
   });
 
+  // Hosted Bank Authentication UI session (§3.4). Owned here; BankAuthDrawer
+  // only reads `session`. `launch()` mints it when the add-bank step is entered.
+  const bankAuthSession = useCoinflowBankAuthSession();
+
   // Entry-point gate (§3.2): the "coinflow-payouts" flag controls visibility;
   // geo (US-only) + signed-in control the enabled state. The button renders
   // disabled for non-US / signed-out users, and initiateWithdraw no-ops while
@@ -169,7 +194,8 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     setCredits(undefined);
     setMethodFlow("none");
     setSelectedDestination(undefined);
-  }, []);
+    bankAuthSession.reset();
+  }, [bankAuthSession]);
 
   // Enters the flow from the overview drawer. Requires the status to have
   // resolved — the derived step below is meaningless without it.
@@ -186,15 +212,33 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   }, []);
 
   // Enters the method sub-step from the amount step: pick among the linked
-  // destinations, or straight to the add-bank form when nothing is linked yet.
+  // destinations, or straight to the hosted add-bank UI when nothing is linked
+  // yet — minting its session as the step opens (the drawer renders a loader
+  // until it lands).
   const openMethodSelection = useCallback(() => {
     if (!status) return;
-    setMethodFlow(status.destinations.length === 0 ? "add" : "select");
-  }, [status]);
+    if (status.destinations.length === 0) {
+      setMethodFlow("add");
+      bankAuthSession.launch().catch(() => {});
+      return;
+    }
+    setMethodFlow("select");
+  }, [status, bankAuthSession]);
 
   const closeMethodSelection = useCallback(() => {
     setMethodFlow("none");
-  }, []);
+    bankAuthSession.reset();
+  }, [bankAuthSession]);
+
+  // The hosted iframe linked a destination: refetch the live status so it
+  // lists, then hand back to the method picker (now non-empty) to confirm it.
+  // We select from the refreshed status rather than the iframe payload — the
+  // status query is the single source of truth for destinations.
+  const onBankLinked = useCallback(() => {
+    bankAuthSession.onLinked();
+    bankAuthSession.reset();
+    setMethodFlow("select");
+  }, [bankAuthSession]);
 
   // Confirms a destination (picked on the method drawer, or freshly returned
   // by createCoinflowBankAccount) and lands back on the amount step.
@@ -255,6 +299,12 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
         selectDestination,
         openMethodSelection,
         closeMethodSelection,
+        bankAuth: {
+          session: bankAuthSession.session,
+          isMinting: bankAuthSession.isMinting,
+          error: bankAuthSession.error,
+          onLinked: onBankLinked,
+        },
       }}
     >
       {children}

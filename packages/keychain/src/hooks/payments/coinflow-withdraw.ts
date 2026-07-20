@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useConnection } from "../connection";
 import { request } from "@/utils/graphql";
@@ -17,6 +17,7 @@ import {
   useCoinflowWithdrawQuoteQuery,
   useCoinflowWithdrawStatusQuery,
   useCreateCoinflowBankAccountMutation,
+  useCreateCoinflowBankAuthSessionMutation,
   useCreateCoinflowKycMutation,
   useCreateCoinflowWithdrawalMutation,
   useDeleteCoinflowDestinationMutation,
@@ -135,6 +136,74 @@ export const useCreateCoinflowBankAccount = () => {
   );
 
   return { createBankAccount, isLoading, error: error as Error | null };
+};
+
+/**
+ * The Coinflow hosted Bank Authentication UI session — the primary add-bank
+ * path. `env` is derived alongside the session so the drawer can feed
+ * `CoinflowWithdraw` (merchantId + env + sessionKey) without re-resolving the
+ * network itself, exactly as the on-ramp rail carries `{ intent, env }` into
+ * `CoinflowCardForm`.
+ */
+export type CoinflowBankAuthSession = {
+  sessionKey: string;
+  merchantId: string;
+  env: "prod" | "sandbox";
+};
+
+/**
+ * Mints (and holds) the session for Coinflow's hosted Bank Authentication UI —
+ * the sibling of the on-ramp's `useCoinflowPayment` (coinflow.ts). `launch()`
+ * calls `createCoinflowBankAuthSession` (threading `isMainnet`) and stores the
+ * returned `{ sessionKey, merchantId }` + resolved `env`; the `CoinflowWithdraw`
+ * iframe links the bank/card entirely inside Coinflow. `onLinked()` (wired to
+ * the iframe's success event) invalidates the status query so the new
+ * destination lists on the next refetch — we persist nothing client-side. The
+ * provider owns this hook (§3.4); the drawer only reads `session`.
+ */
+export const useCoinflowBankAuthSession = () => {
+  const queryClient = useQueryClient();
+  const { isCoinflowMainnet } = useCoinflowIsMainnet();
+  const {
+    mutateAsync,
+    isLoading,
+    error,
+    reset: resetMutation,
+  } = useCreateCoinflowBankAuthSessionMutation();
+  const [session, setSession] = useState<CoinflowBankAuthSession | undefined>();
+
+  const env = isCoinflowMainnet ? ("prod" as const) : ("sandbox" as const);
+
+  const launch = useCallback(async () => {
+    const result = await mutateAsync({
+      input: { isMainnet: isCoinflowMainnet },
+    });
+    const next: CoinflowBankAuthSession = {
+      ...result.createCoinflowBankAuthSession,
+      env,
+    };
+    setSession(next);
+    return next;
+  }, [mutateAsync, isCoinflowMainnet, env]);
+
+  // The iframe reported a linked destination — pull it into the live status.
+  const onLinked = useCallback(async () => {
+    await queryClient.invalidateQueries([WITHDRAW_STATUS_KEY]);
+  }, [queryClient]);
+
+  const reset = useCallback(() => {
+    setSession(undefined);
+    resetMutation();
+  }, [resetMutation]);
+
+  return {
+    launch,
+    session,
+    isMinting: isLoading,
+    error: error as Error | null,
+    onLinked,
+    reset,
+  };
 };
 
 /**

@@ -1336,6 +1336,14 @@ export enum CoinflowBankAccountType {
   Savings = "SAVINGS",
 }
 
+export type CoinflowBankAuthSession = {
+  __typename?: "CoinflowBankAuthSession";
+  /** Coinflow merchant ID for the hosted bank-linking UI URL/component. */
+  merchantId: Scalars["String"];
+  /** Session key authenticating the hosted bank-linking UI for this user. */
+  sessionKey: Scalars["String"];
+};
+
 export type CoinflowCardCheckoutInput = {
   /** Street address line 1. Required by Coinflow address validation. */
   address1: Scalars["String"];
@@ -1792,6 +1800,10 @@ export type CreateCoinflowBankAccountInput = {
   /** Required only if the user wants wire-speed payouts. */
   wireRoutingNumber?: InputMaybe<Scalars["String"]>;
   zip?: InputMaybe<Scalars["String"]>;
+};
+
+export type CreateCoinflowBankAuthSessionInput = {
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type CreateCoinflowCreditsIntentInput = {
@@ -3491,6 +3503,15 @@ export type Mutation = {
    */
   createCoinflowBankAccount: CoinflowDestination;
   /**
+   * Mint a Coinflow session key for the hosted Bank Authentication UI. Mirrors the on-ramp
+   * createCoinflow*Intent mutations, but there is no transaction: it returns only the
+   * session key + merchant id the frontend needs to render Coinflow's hosted bank-linking UI
+   * (Plaid bank-linking + card tokenization + destination creation, all inside Coinflow).
+   * KYC is done separately via createCoinflowKYC before this. The new destination appears on
+   * the next coinflowWithdrawStatus. Persists nothing.
+   */
+  createCoinflowBankAuthSession: CoinflowBankAuthSession;
+  /**
    * Create a Coinflow checkout intent to buy account credits (a top-up, not a
    * bundle). Mirrors createCoinflowStarterpackIntent — same session key, JWT, and
    * pricing — but creates a CoinflowPayments row WITHOUT a PurchaseFulfillment. On
@@ -3665,6 +3686,10 @@ export type MutationCreateCoinbaseOnrampOrderArgs = {
 
 export type MutationCreateCoinflowBankAccountArgs = {
   input: CreateCoinflowBankAccountInput;
+};
+
+export type MutationCreateCoinflowBankAuthSessionArgs = {
+  input?: InputMaybe<CreateCoinflowBankAuthSessionInput>;
 };
 
 export type MutationCreateCoinflowCreditsIntentArgs = {
@@ -8299,6 +8324,19 @@ export type CreateCoinflowBankAccountMutation = {
   };
 };
 
+export type CreateCoinflowBankAuthSessionMutationVariables = Exact<{
+  input?: InputMaybe<CreateCoinflowBankAuthSessionInput>;
+}>;
+
+export type CreateCoinflowBankAuthSessionMutation = {
+  __typename?: "Mutation";
+  createCoinflowBankAuthSession: {
+    __typename?: "CoinflowBankAuthSession";
+    sessionKey: string;
+    merchantId: string;
+  };
+};
+
 export type DeleteCoinflowDestinationMutationVariables = Exact<{
   input: DeleteCoinflowDestinationInput;
 }>;
@@ -9685,6 +9723,38 @@ export const useCreateCoinflowBankAccountMutation = <
       CreateCoinflowBankAccountMutation,
       CreateCoinflowBankAccountMutationVariables
     >(CreateCoinflowBankAccountDocument),
+    options,
+  );
+export const CreateCoinflowBankAuthSessionDocument = `
+    mutation CreateCoinflowBankAuthSession($input: CreateCoinflowBankAuthSessionInput) {
+  createCoinflowBankAuthSession(input: $input) {
+    sessionKey
+    merchantId
+  }
+}
+    `;
+export const useCreateCoinflowBankAuthSessionMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinflowBankAuthSessionMutation,
+    TError,
+    CreateCoinflowBankAuthSessionMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinflowBankAuthSessionMutation,
+    TError,
+    CreateCoinflowBankAuthSessionMutationVariables,
+    TContext
+  >(
+    ["CreateCoinflowBankAuthSession"],
+    useFetchData<
+      CreateCoinflowBankAuthSessionMutation,
+      CreateCoinflowBankAuthSessionMutationVariables
+    >(CreateCoinflowBankAuthSessionDocument),
     options,
   );
 export const DeleteCoinflowDestinationDocument = `
