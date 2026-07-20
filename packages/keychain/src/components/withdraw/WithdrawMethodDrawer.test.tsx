@@ -10,7 +10,7 @@ const bank = {
   type: CoinflowDestinationType.Bank,
   token: "bank-token-1",
   display: "Bank ****0283",
-  supportedSpeeds: [CoinflowPayoutSpeed.Standard],
+  supportedSpeeds: [CoinflowPayoutSpeed.Standard, CoinflowPayoutSpeed.SameDay],
 };
 
 const card = {
@@ -20,62 +20,108 @@ const card = {
   supportedSpeeds: [CoinflowPayoutSpeed.Asap],
 };
 
+const quote = {
+  amountCents: 613,
+  feeCents: 25,
+  netCents: 588,
+  remainingLimitCents: null,
+  eta: null,
+};
+
 const baseProps = {
   isOpen: true,
   onClose: () => {},
-  onSelect: () => {},
+  onSelectMethod: () => {},
   destinations: [bank, card],
   credits: 613,
 };
 
 describe("WithdrawMethodDrawer", () => {
-  it("renders the amount summary and every linked destination", () => {
+  it("renders one card per (destination, speed) with its processing time", () => {
     render(<WithdrawMethodDrawer {...baseProps} />);
 
     expect(screen.getByText("Withdrawal Amount")).toBeInTheDocument();
     expect(screen.getByText("$6.13")).toBeInTheDocument();
     expect(screen.getByText("Processing Fee")).toBeInTheDocument();
-    expect(screen.getByText("Bank ****0283")).toBeInTheDocument();
+
+    // Bank supports two speeds → two cards; card supports one → one card.
+    expect(screen.getAllByText("Bank ****0283")).toHaveLength(2);
     expect(screen.getByText("Debit Card ****4242")).toBeInTheDocument();
+
+    // Speed labels + processing times render per card.
+    expect(screen.getByText("Standard")).toBeInTheDocument();
+    expect(screen.getByText("Same Day")).toBeInTheDocument();
+    expect(screen.getByText("3-5 business days")).toBeInTheDocument();
+    expect(screen.getByText("Within minutes")).toBeInTheDocument();
   });
 
-  it("keeps the withdraw button disabled until a destination is highlighted", () => {
-    const onSelect = vi.fn();
-    render(<WithdrawMethodDrawer {...baseProps} onSelect={onSelect} />);
+  it("picks a destination + speed when a card is clicked", () => {
+    const onSelectMethod = vi.fn();
+    render(
+      <WithdrawMethodDrawer {...baseProps} onSelectMethod={onSelectMethod} />,
+    );
 
-    const button = screen.getByText("Withdraw $6.13").closest("button")!;
-    expect(button).toBeDisabled();
-    // No selection yet — no "Transfer to:" summary either.
-    expect(screen.queryByText("Transfer to:")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("Same Day"));
+    expect(onSelectMethod).toHaveBeenCalledWith({
+      token: bank.token,
+      speed: CoinflowPayoutSpeed.SameDay,
+    });
+  });
 
-    fireEvent.click(screen.getByText("Bank ****0283"));
-    expect(button).toBeEnabled();
+  it("keeps the withdraw button disabled until a quote resolves", () => {
+    const { rerender } = render(<WithdrawMethodDrawer {...baseProps} />);
+
+    // No selection, no quote → disabled, button shows the gross amount.
+    expect(screen.getByText("Withdraw $6.13").closest("button")).toBeDisabled();
+
+    // Selection made but quote still loading → still disabled.
+    rerender(
+      <WithdrawMethodDrawer
+        {...baseProps}
+        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
+        quoteLoading
+      />,
+    );
+    expect(screen.getByText("Withdraw $6.13").closest("button")).toBeDisabled();
+    expect(screen.getByText("Calculating fee…")).toBeInTheDocument();
+
+    // Quote resolved → enabled, button shows the net (received) amount.
+    rerender(
+      <WithdrawMethodDrawer
+        {...baseProps}
+        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
+        quote={quote}
+      />,
+    );
+    expect(screen.getByText("Withdraw $5.88").closest("button")).toBeEnabled();
+  });
+
+  it("shows the quoted fee on the selected card and the processing-fee row", () => {
+    render(
+      <WithdrawMethodDrawer
+        {...baseProps}
+        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
+        quote={quote}
+      />,
+    );
+
+    // Fee on the card ($0.25 fee) and mirrored on the Processing Fee row.
+    expect(screen.getByText("$0.25 fee")).toBeInTheDocument();
+    expect(screen.getByText("$0.25")).toBeInTheDocument();
+    // The confirmation summary names the destination + chosen speed.
     expect(screen.getByText("Transfer to:")).toBeInTheDocument();
-
-    fireEvent.click(button);
-    expect(onSelect).toHaveBeenCalledWith(bank);
   });
 
-  it("moves the highlight when another destination is clicked", () => {
-    const onSelect = vi.fn();
-    render(<WithdrawMethodDrawer {...baseProps} onSelect={onSelect} />);
+  it("surfaces a quote error on the selected card", () => {
+    render(
+      <WithdrawMethodDrawer
+        {...baseProps}
+        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
+        quoteError={new Error("temporarily unavailable")}
+      />,
+    );
 
-    fireEvent.click(screen.getByText("Bank ****0283"));
-    fireEvent.click(screen.getByText("Debit Card ****4242"));
-
-    fireEvent.click(screen.getByText("Withdraw $6.13").closest("button")!);
-    expect(onSelect).toHaveBeenCalledWith(card);
-  });
-
-  it("seeds the highlight from the confirmed selection when re-opened", () => {
-    render(<WithdrawMethodDrawer {...baseProps} selectedToken={card.token} />);
-
-    expect(screen.getByText("Withdraw $6.13").closest("button")).toBeEnabled();
-    // The display renders on the card and on the "Transfer to:" summary; the
-    // card is the one carrying the pressed state.
-    const highlighted = screen
-      .getAllByText("Debit Card ****4242")[0]
-      .closest('[role="button"]');
-    expect(highlighted).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Couldn't load fee")).toBeInTheDocument();
+    expect(screen.getByText("Withdraw $6.13").closest("button")).toBeDisabled();
   });
 });
