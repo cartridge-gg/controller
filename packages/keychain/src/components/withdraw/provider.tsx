@@ -3,6 +3,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -18,6 +19,7 @@ import { useConnection } from "@/hooks/connection";
 import { useFeature } from "@/hooks/features";
 import { useGeoLocation } from "@/hooks/geo";
 import { useIdentityContext } from "@/components/identity/provider";
+import { useWithdrawQuote, type WithdrawQuote } from "./useWithdrawQuote";
 import { WithdrawCredits } from "./WithdrawCredits";
 
 export type CoinflowWithdrawStatus =
@@ -114,6 +116,13 @@ export type WithdrawContextValue = {
     error: Error | null;
     onLinked: () => void;
   };
+  /**
+   * The transfer-method quote (§3.5). The provider owns it here; its selection
+   * + fetch logic live in `useWithdrawQuote`. The method drawer reads
+   * `quote.data`/`isLoading`/`error` and calls `quote.select` as cards are
+   * clicked, quoting the chosen destination + speed for the picked `credits`.
+   */
+  quote: WithdrawQuote;
 };
 
 export const WithdrawContext = createContext<WithdrawContextValue>({
@@ -139,6 +148,14 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
     isMinting: false,
     error: null,
     onLinked: () => {},
+  },
+  quote: {
+    selection: undefined,
+    select: () => {},
+    reset: () => {},
+    data: undefined,
+    isLoading: false,
+    error: null,
   },
 });
 
@@ -169,9 +186,18 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     enabled: isOpen,
   });
 
+  useEffect(() => {
+    console.log(`WITHDRAW STATUS:`, status);
+  }, [status]);
+
   // Hosted Bank Authentication UI session (§3.4). Owned here; BankAuthDrawer
   // only reads `session`. `launch()` mints it when the add-bank step is entered.
   const bankAuthSession = useCoinflowBankAuthSession();
+
+  // Transfer-method quote (§3.5). Owned here; the method drawer reads it and
+  // calls `quote.select` as cards are clicked. Keyed on the picked `credits`,
+  // so it re-quotes automatically if the amount changes.
+  const quote = useWithdrawQuote(credits);
 
   // Entry-point gate (§3.2): the "coinflow-payouts" flag controls visibility;
   // geo (US-only) + signed-in control the enabled state. The button renders
@@ -195,7 +221,8 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     setMethodFlow("none");
     setSelectedDestination(undefined);
     bankAuthSession.reset();
-  }, [bankAuthSession]);
+    quote.reset();
+  }, [bankAuthSession, quote]);
 
   // Enters the flow from the overview drawer. Requires the status to have
   // resolved — the derived step below is meaningless without it.
@@ -217,18 +244,22 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   // until it lands).
   const openMethodSelection = useCallback(() => {
     if (!status) return;
+    // Fresh picker every open — a stale card selection would otherwise show a
+    // quote for a method the user hasn't re-picked.
+    quote.reset();
     if (status.destinations.length === 0) {
       setMethodFlow("add");
       bankAuthSession.launch().catch(() => {});
       return;
     }
     setMethodFlow("select");
-  }, [status, bankAuthSession]);
+  }, [status, bankAuthSession, quote]);
 
   const closeMethodSelection = useCallback(() => {
     setMethodFlow("none");
     bankAuthSession.reset();
-  }, [bankAuthSession]);
+    quote.reset();
+  }, [bankAuthSession, quote]);
 
   // The hosted iframe linked a destination: refetch the live status so it
   // lists, then hand back to the method picker (now non-empty) to confirm it.
@@ -305,6 +336,7 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
           error: bankAuthSession.error,
           onLinked: onBankLinked,
         },
+        quote,
       }}
     >
       {children}

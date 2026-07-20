@@ -40,9 +40,9 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
     credits,
     setCredits,
     selectedDestination,
-    selectDestination,
     openMethodSelection,
     closeMethodSelection,
+    quote,
   } = useWithdrawContext();
 
   const { isCoinflowSandbox } = useCoinflowIsMainnet();
@@ -102,9 +102,14 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
         }}
         destinations={status?.destinations ?? []}
         credits={credits ?? 0}
-        selectedToken={selectedDestination?.token}
         sandbox={isCoinflowSandbox}
-        onSelect={selectDestination}
+        // The provider owns the quote; the drawer picks a (destination, speed)
+        // card and renders the fee/net it prices.
+        selection={quote.selection}
+        onSelectMethod={quote.select}
+        quote={quote.data}
+        quoteLoading={quote.isLoading}
+        quoteError={quote.error}
       />
 
       {/* Hosted Bank Authentication UI (Coinflow's CoinflowWithdraw iframe) —

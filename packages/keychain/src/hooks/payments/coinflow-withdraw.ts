@@ -37,6 +37,7 @@ export {
 export type {
   CoinflowDestinationFieldsFragment as CoinflowDestination,
   CoinflowWithdrawalFieldsFragment as CoinflowWithdrawal,
+  CoinflowWithdrawQuote,
 } from "@/utils/api";
 export { useCoinflowIsMainnet } from "./coinflow";
 
@@ -253,7 +254,7 @@ const QUOTE_STALE_MS = 60_000;
  */
 export const useCoinflowWithdrawQuote = (
   credits: number | undefined,
-  method: CoinflowPayoutSpeed,
+  method: CoinflowPayoutSpeed | undefined,
   token: string | undefined,
   options?: { enabled?: boolean },
 ) => {
@@ -270,7 +271,9 @@ export const useCoinflowWithdrawQuote = (
     {
       input: {
         credits: credits ?? 0,
-        method,
+        // Disabled until a speed is picked (isReady below); the fallback only
+        // satisfies the input type for the idle query.
+        method: method ?? CoinflowPayoutSpeed.Standard,
         token: token ?? "",
         isMainnet: isCoinflowMainnet,
       },

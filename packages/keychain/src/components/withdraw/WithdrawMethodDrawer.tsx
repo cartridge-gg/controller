@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   ArrowFromLineIcon,
   BankIcon,
@@ -6,43 +5,40 @@ import {
   CreditCardIcon,
   Drawer,
   DrawerContent,
+  Spinner,
   Thumbnail,
 } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
 import { formatUsdValue } from "@/utils/format-value";
 import {
   CoinflowDestinationType,
+  CoinflowPayoutSpeed,
   type CoinflowDestination,
+  type CoinflowWithdrawQuote,
 } from "@/hooks/payments/coinflow-withdraw";
+import type { WithdrawQuoteSelection } from "./useWithdrawQuote";
 import { OverviewRow, SandboxWarning } from "./OverviewDrawer";
 
 /**
- * Display metadata per destination type. Fee/ETA are static design copy —
- * before an amount+method+destination exists there is no quote to price
- * against (the authoritative fee lands on the confirm step); only bank
- * destinations can be linked in-app today, the other types render if Coinflow
- * returns them.
+ * Icon + label for a destination. Fee and ETA are no longer static copy — the
+ * fee comes from the live quote and the processing time from the chosen speed
+ * (see `getSpeedDisplay`). Only bank destinations can be linked in-app today;
+ * the other types render if Coinflow returns them.
  */
 export function getDestinationDisplay(destination: CoinflowDestination): {
   icon: React.ReactElement;
   title: string;
-  fee?: string;
-  eta?: string;
 } {
   switch (destination.type) {
     case CoinflowDestinationType.Card:
       return {
         icon: <CreditCardIcon variant="solid" />,
         title: destination.display,
-        fee: "3% or $1 processing fee",
-        eta: "1 Day",
       };
     case CoinflowDestinationType.Bank:
       return {
         icon: <BankIcon />,
         title: destination.display,
-        fee: "No Fee",
-        eta: "3-5 business days",
       };
     default:
       return {
@@ -50,6 +46,33 @@ export function getDestinationDisplay(destination: CoinflowDestination): {
         title: destination.display,
       };
   }
+}
+
+/**
+ * Human-readable label + processing time per delivery speed. A destination
+ * exposes one card per `supportedSpeeds` entry, and the card renders the
+ * processing time so the user can weigh speed against the quoted fee.
+ */
+export function getSpeedDisplay(speed: CoinflowPayoutSpeed): {
+  label: string;
+  processingTime: string;
+} {
+  switch (speed) {
+    case CoinflowPayoutSpeed.Asap:
+      return { label: "Instant", processingTime: "Within minutes" };
+    case CoinflowPayoutSpeed.SameDay:
+      return { label: "Same Day", processingTime: "Same business day" };
+    case CoinflowPayoutSpeed.Wire:
+      return { label: "Wire", processingTime: "1-2 business days" };
+    case CoinflowPayoutSpeed.Standard:
+    default:
+      return { label: "Standard", processingTime: "3-5 business days" };
+  }
+}
+
+/** Fee copy for a card: cents from the quote, or "No fee" when it's free. */
+function formatFee(feeCents: number): string {
+  return feeCents === 0 ? "No fee" : `${formatUsdValue(feeCents / 100)} fee`;
 }
 
 interface WithdrawMethodDrawerProps {
@@ -60,45 +83,46 @@ interface WithdrawMethodDrawerProps {
   destinations: CoinflowDestination[];
   /** Gross amount picked on the amount step, in whole credits. */
   credits: number;
-  /**
-   * Processing fee in USD cents when one is known. No quote exists before a
-   * method is confirmed, so this renders $0.00 until the quote step supplies
-   * it.
-   */
-  feeCents?: number;
-  /** Token of the currently selected destination (re-opening to change it). */
-  selectedToken?: string;
   /** Coinflow sandbox is active — renders the standing sandbox warning. */
   sandbox?: boolean;
-  /** Confirms the highlighted destination and returns to the amount step. */
-  onSelect: (destination: CoinflowDestination) => void;
+  /** The picked (destination, speed) card; drives the quote and the highlight. */
+  selection?: WithdrawQuoteSelection;
+  /** Picks a card — the provider quotes that destination + speed. */
+  onSelectMethod: (selection: WithdrawQuoteSelection) => void;
+  /** The priced quote for `selection`; undefined until it resolves. */
+  quote?: CoinflowWithdrawQuote;
+  /** A quote request is in flight for the current selection. */
+  quoteLoading?: boolean;
+  /** The quote request failed (e.g. temporarily unavailable). */
+  quoteError?: Error | null;
 }
 
 /**
- * The "Choose Transfer Method" drawer: lists the user's linked payout
- * destinations; the WITHDRAW button stays disabled until one is highlighted
- * and confirms it back to the overview drawer (the actual withdrawal happens
- * on the confirm step, plan step 6+).
+ * The "Choose Transfer Method" drawer: lists one card per (destination, speed)
+ * pair. Picking a card quotes that destination + speed on the backend; the
+ * quoted fee lands on the card and the "Processing Fee" row, and the WITHDRAW
+ * button shows the net amount the user receives (gross − fee) and stays
+ * disabled until a quote resolves. The button carries no action yet — this
+ * step only implements and validates the quote.
  */
 export function WithdrawMethodDrawer({
   isOpen,
   onClose,
   destinations,
   credits,
-  feeCents,
-  selectedToken,
   sandbox,
-  onSelect,
+  selection,
+  onSelectMethod,
+  quote,
+  quoteLoading,
+  quoteError,
 }: WithdrawMethodDrawerProps) {
-  const [token, setToken] = useState<string | undefined>(selectedToken);
-
-  // Re-seed the highlight from the confirmed selection on every open, so a
-  // canceled change doesn't leave a half-picked highlight behind.
-  useEffect(() => {
-    if (isOpen) setToken(selectedToken);
-  }, [isOpen, selectedToken]);
-
-  const selected = destinations.find((d) => d.token === token);
+  const selectedDestination = destinations.find(
+    (d) => d.token === selection?.token,
+  );
+  // Net = what actually reaches the bank. Only trustworthy once a quote for the
+  // current selection resolves; until then the (disabled) button shows gross.
+  const netCents = quote?.netCents ?? credits;
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
@@ -117,40 +141,58 @@ export function WithdrawMethodDrawer({
           />
           <OverviewRow
             label="Processing Fee"
-            value={formatUsdValue((feeCents ?? 0) / 100)}
+            value={formatUsdValue((quote?.feeCents ?? 0) / 100)}
             tooltip="The fee depends on the transfer method and comes out of the withdrawal amount."
           />
         </div>
 
         <div className="flex flex-col gap-3">
-          {destinations.map((destination) => (
-            <DestinationCard
-              key={destination.token}
-              destination={destination}
-              selected={destination.token === token}
-              onClick={() => setToken(destination.token)}
-            />
-          ))}
+          {destinations.flatMap((destination) =>
+            destination.supportedSpeeds.map((speed) => {
+              const isSelected =
+                selection?.token === destination.token &&
+                selection?.speed === speed;
+              return (
+                <DestinationCard
+                  key={`${destination.token}:${speed}`}
+                  destination={destination}
+                  speed={speed}
+                  selected={isSelected}
+                  // The quote is per-selection, so fee/loading/error only apply
+                  // to the currently highlighted card.
+                  feeCents={isSelected ? quote?.feeCents : undefined}
+                  feeLoading={isSelected && !!quoteLoading}
+                  feeError={isSelected ? (quoteError ?? null) : null}
+                  onClick={() =>
+                    onSelectMethod({ token: destination.token, speed })
+                  }
+                />
+              );
+            }),
+          )}
         </div>
 
-        {selected && (
+        {selectedDestination && selection && (
           <div className="flex items-center justify-between text-xs text-foreground-300">
             <p>Transfer to:</p>
             <div className="flex items-center gap-1.5 text-foreground-100">
               <Thumbnail
-                icon={getDestinationDisplay(selected).icon}
+                icon={getDestinationDisplay(selectedDestination).icon}
                 size="xs"
                 className="bg-background-200"
               />
               <p className="font-medium">
-                {getDestinationDisplay(selected).title}
+                {getDestinationDisplay(selectedDestination).title} ·{" "}
+                {getSpeedDisplay(selection.speed).label}
               </p>
             </div>
           </div>
         )}
 
-        <Button disabled={!selected} onClick={() => onSelect(selected!)}>
-          Withdraw {formatUsdValue(credits / 100)}
+        {/* Enabled only once a quote resolves for the current selection; no
+            action wired yet — the withdrawal lands on a later step. */}
+        <Button disabled={!quote || !!quoteLoading}>
+          Withdraw {formatUsdValue(netCents / 100)}
         </Button>
       </DrawerContent>
     </Drawer>
@@ -159,14 +201,23 @@ export function WithdrawMethodDrawer({
 
 function DestinationCard({
   destination,
+  speed,
   selected,
+  feeCents,
+  feeLoading,
+  feeError,
   onClick,
 }: {
   destination: CoinflowDestination;
+  speed: CoinflowPayoutSpeed;
   selected: boolean;
+  feeCents?: number;
+  feeLoading?: boolean;
+  feeError?: Error | null;
   onClick: () => void;
 }) {
-  const { icon, title, fee, eta } = getDestinationDisplay(destination);
+  const { icon, title } = getDestinationDisplay(destination);
+  const { label, processingTime } = getSpeedDisplay(speed);
 
   return (
     <div
@@ -181,9 +232,51 @@ function DestinationCard({
       <Thumbnail icon={icon} size="md" className="bg-background-200" />
       <div className="flex flex-col gap-0.5 flex-1">
         <p className="text-sm font-medium text-foreground-100">{title}</p>
-        {fee && <p className="text-xs text-foreground-300">{fee}</p>}
+        <MethodDetail
+          label={label}
+          selected={selected}
+          feeCents={feeCents}
+          feeLoading={feeLoading}
+          feeError={feeError}
+        />
       </div>
-      {eta && <p className="text-xs text-foreground-300">{eta}</p>}
+      <p className="text-xs text-foreground-300">{processingTime}</p>
     </div>
   );
+}
+
+/**
+ * The card's secondary line: the speed label until this card is picked, then
+ * the live quote for the chosen speed — a spinner while it loads, the fee once
+ * it resolves, or a fallback when it fails.
+ */
+function MethodDetail({
+  label,
+  selected,
+  feeCents,
+  feeLoading,
+  feeError,
+}: {
+  label: string;
+  selected: boolean;
+  feeCents?: number;
+  feeLoading?: boolean;
+  feeError?: Error | null;
+}) {
+  if (selected && feeLoading) {
+    return (
+      <span className="flex items-center gap-1 text-xs text-foreground-300">
+        <Spinner size="sm" /> Calculating fee…
+      </span>
+    );
+  }
+  if (selected && feeError) {
+    return (
+      <p className="text-xs text-destructive-100">Couldn&apos;t load fee</p>
+    );
+  }
+  if (selected && feeCents !== undefined) {
+    return <p className="text-xs text-foreground-300">{formatFee(feeCents)}</p>;
+  }
+  return <p className="text-xs text-foreground-300">{label}</p>;
 }

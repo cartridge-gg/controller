@@ -10,7 +10,7 @@ const bank = {
   type: CoinflowDestinationType.Bank,
   token: "bank-token-1",
   display: "Bank ****0283",
-  supportedSpeeds: [CoinflowPayoutSpeed.Standard],
+  supportedSpeeds: [CoinflowPayoutSpeed.Standard, CoinflowPayoutSpeed.SameDay],
 };
 
 const card = {
@@ -32,7 +32,7 @@ const meta = {
   args: {
     isOpen: true,
     onClose: () => {},
-    onSelect: () => {},
+    onSelectMethod: () => {},
     destinations: [bank],
     credits: 613,
   },
@@ -42,21 +42,43 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** Nothing highlighted yet — the WITHDRAW button stays disabled. */
+/** No card picked yet — the WITHDRAW button stays disabled (no quote). */
 export const Default: Story = {};
 
-/** Bank highlighted — "Transfer to:" summary + WITHDRAW enabled. */
-export const Selected: Story = {
+/** A card picked, quote resolved — fee on the card + row, WITHDRAW shows net. */
+export const Quoted: Story = {
   args: {
-    selectedToken: bank.token,
+    selection: { token: bank.token, speed: CoinflowPayoutSpeed.Standard },
+    quote: {
+      amountCents: 613,
+      feeCents: 25,
+      netCents: 588,
+      remainingLimitCents: null,
+      eta: null,
+    },
   },
 };
 
-/** Several linked destinations, card highlighted. */
+/** A card picked, quote in flight — the card shows the calculating spinner. */
+export const Quoting: Story = {
+  args: {
+    selection: { token: bank.token, speed: CoinflowPayoutSpeed.Standard },
+    quoteLoading: true,
+  },
+};
+
+/** The quote request failed — the card surfaces the fallback, button disabled. */
+export const QuoteError: Story = {
+  args: {
+    selection: { token: bank.token, speed: CoinflowPayoutSpeed.Standard },
+    quoteError: new Error("temporarily unavailable"),
+  },
+};
+
+/** Several destinations, each fanned out to one card per supported speed. */
 export const MultipleDestinations: Story = {
   args: {
     destinations: [card, bank],
-    selectedToken: card.token,
   },
 };
 
