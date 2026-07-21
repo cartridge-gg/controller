@@ -49,9 +49,9 @@ describe("WithdrawMethodDrawer", () => {
     expect(screen.getByText("Debit Card ****4242")).toBeInTheDocument();
 
     // Speed labels + processing times render per card.
-    expect(screen.getByText("Standard")).toBeInTheDocument();
-    expect(screen.getByText("Same Day")).toBeInTheDocument();
-    expect(screen.getByText("3-5 business days")).toBeInTheDocument();
+    expect(screen.getByText("Standard ACH")).toBeInTheDocument();
+    expect(screen.getByText("Same Day ACH")).toBeInTheDocument();
+    expect(screen.getByText("2-3 business days")).toBeInTheDocument();
     expect(screen.getByText("Within minutes")).toBeInTheDocument();
   });
 
@@ -61,7 +61,7 @@ describe("WithdrawMethodDrawer", () => {
       <WithdrawMethodDrawer {...baseProps} onSelectMethod={onSelectMethod} />,
     );
 
-    fireEvent.click(screen.getByText("Same Day"));
+    fireEvent.click(screen.getByText("Same Day ACH"));
     expect(onSelectMethod).toHaveBeenCalledWith({
       token: bank.token,
       speed: CoinflowPayoutSpeed.SameDay,
@@ -120,7 +120,7 @@ describe("WithdrawMethodDrawer", () => {
       />,
     );
 
-    expect(screen.getByText("Couldn't load fee")).toBeInTheDocument();
+    expect(screen.getByText("Unable to calculate fee")).toBeInTheDocument();
     expect(screen.getByText("Withdraw $6.13").closest("button")).toBeDisabled();
   });
 });

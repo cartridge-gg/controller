@@ -32,12 +32,34 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** Minting the hosted-UI session — loader until Coinflow returns the key. */
+/** Minting the hosted-UI session — "Preparing…" message until the key lands. */
 export const Loading: Story = {
   decorators: [
     withBankAuth({
       session: undefined,
       isMinting: true,
+      isLinking: false,
+      error: null,
+      onLinked: () => {},
+    }),
+  ],
+};
+
+/**
+ * The iframe reported success — "Adding your bank account…" message held while
+ * the linked destination settles into the refetched status, before handing
+ * back to the picker.
+ */
+export const Linking: Story = {
+  decorators: [
+    withBankAuth({
+      session: {
+        sessionKey: "sk_test",
+        merchantId: "cartridge",
+        env: "sandbox",
+      },
+      isMinting: false,
+      isLinking: true,
       error: null,
       onLinked: () => {},
     }),
@@ -50,6 +72,7 @@ export const ErrorState: Story = {
     withBankAuth({
       session: undefined,
       isMinting: false,
+      isLinking: false,
       error: new Error("Unable to reach Coinflow. Please try again."),
       onLinked: () => {},
     }),
@@ -65,6 +88,7 @@ export const Sandbox: Story = {
     withBankAuth({
       session: undefined,
       isMinting: true,
+      isLinking: false,
       error: null,
       onLinked: () => {},
     }),
