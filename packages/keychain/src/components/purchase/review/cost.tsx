@@ -157,6 +157,7 @@ export function OnchainCostBreakdown({
     isFetchingConversion,
     feeEstimationError,
     quantity,
+    usdAmount,
     isApplePaySelected,
     isCoinflowSelected,
     isCreditsSelected,
@@ -277,6 +278,14 @@ export function OnchainCostBreakdown({
     ],
   );
 
+  // USD equivalent of the purchase, shown as a "(…)" prefix before the token
+  // amount. usdAmount is derived from the quote's USDC total, so it is only
+  // shown when available (> 0).
+  const totalUsd = usdAmount * quantity;
+  const usdEquivalent = totalUsd > 0 && (
+    <span className="text-foreground-300">{`($${totalUsd.toFixed(2)})`}</span>
+  );
+
   const value = isCreditsSelected ? (
     isCreditsQuoteLoading ? (
       <Spinner />
@@ -316,13 +325,19 @@ export function OnchainCostBreakdown({
       <Spinner />
     )
   ) : isPaymentTokenSameAsSelected ? (
-    <span className="text-foreground-300">{formatAmount(paymentAmount)}</span>
+    <>
+      {usdEquivalent}
+      <span className="text-foreground-300">{formatAmount(paymentAmount)}</span>
+    </>
   ) : (
     convertedEquivalent !== null &&
     displayToken && (
-      <span className="text-foreground-100">
-        {formatAmount(convertedEquivalent)}
-      </span>
+      <>
+        {usdEquivalent}
+        <span className="text-foreground-100">
+          {formatAmount(convertedEquivalent)}
+        </span>
+      </>
     )
   );
 
