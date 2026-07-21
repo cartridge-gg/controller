@@ -8,7 +8,7 @@ import {
 import { CoinbaseDrawer } from "@/components/purchase/checkout/coinbase/drawer";
 import { useCoinbase } from "@/hooks/payments/coinbase";
 import { waitForCryptoPaymentConfirmation } from "@/hooks/payments/crypto";
-import { useUsdcToken } from "@/hooks/payments/usdc";
+import { CREDITS_TOKEN } from "@/components/purchase/review/cost";
 import { MIN_CREDITS_PURCHASE_USD } from "@/utils/credits";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import { CoinbaseOnrampStatus } from "@/utils/api";
@@ -51,7 +51,6 @@ export function CoinbaseCreditsCheckout({
   onChangeAmount,
 }: CoinbaseCreditsCheckoutProps) {
   const { isMainnet } = useConnection();
-  const usdcToken = useUsdcToken();
   const [orderError, setOrderError] = useState<Error | null>(null);
 
   const coinbase = useCoinbase({ onError: setOrderError });
@@ -217,7 +216,7 @@ export function CoinbaseCreditsCheckout({
               amount={amount}
               onChangeMethod={onChangeMethod}
               onChangeAmount={onChangeAmount}
-              costToken={usdcToken}
+              costToken={CREDITS_TOKEN}
               costValue={
                 coinbaseQuote ? (
                   <span className="text-foreground-100">
