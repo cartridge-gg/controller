@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   ArrowFromLineIcon,
   Button,
@@ -70,6 +71,27 @@ export function WithdrawMethodDrawer({
   // current selection resolves; until then the (disabled) button shows gross.
   const netCents = quote?.netCents ?? credits;
 
+  // One card per (destination, speed) the picker can actually offer today.
+  // Speeds outside AVAILABLE_SPEEDS are dropped up front (see constants) so the
+  // rendered card count reflects what's really selectable.
+  const allowedCards = destinations.flatMap((destination) =>
+    destination.supportedSpeeds
+      .filter((speed) => AVAILABLE_SPEEDS.includes(speed))
+      .map((speed) => ({ destination, speed })),
+  );
+
+  // With a single option there's nothing to choose — auto-select it so the
+  // quote starts resolving immediately. Guarded on `selection` so we never
+  // fight a user's (or a re-)selection.
+  const soleCard = allowedCards.length === 1 ? allowedCards[0] : undefined;
+  useEffect(() => {
+    if (selection || !soleCard) return;
+    onSelectMethod({
+      token: soleCard.destination.token,
+      speed: soleCard.speed,
+    });
+  }, [selection, soleCard?.destination.token, soleCard?.speed, onSelectMethod]);
+
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
       <DrawerContent
@@ -108,24 +130,22 @@ export function WithdrawMethodDrawer({
         </div>
 
         <div className="flex flex-col gap-3">
-          {destinations.flatMap((destination) =>
-            destination.supportedSpeeds.map((speed) => {
-              const isSelected =
-                selection?.token === destination.token &&
-                selection?.speed === speed;
-              return (
-                <DestinationCard
-                  key={`${destination.token}:${speed}`}
-                  destination={destination}
-                  speed={speed}
-                  selected={isSelected}
-                  onClick={() =>
-                    onSelectMethod({ token: destination.token, speed })
-                  }
-                />
-              );
-            }),
-          )}
+          {allowedCards.map(({ destination, speed }) => {
+            const isSelected =
+              selection?.token === destination.token &&
+              selection?.speed === speed;
+            return (
+              <DestinationCard
+                key={`${destination.token}:${speed}`}
+                destination={destination}
+                speed={speed}
+                selected={isSelected}
+                onClick={() =>
+                  onSelectMethod({ token: destination.token, speed })
+                }
+              />
+            );
+          })}
         </div>
 
         {selectedDestination && selection && (
@@ -168,8 +188,6 @@ function DestinationCard({
 }) {
   const { icon, title } = getDestinationDisplay(destination);
   const { label, processingTime } = SPEED_DISPLAY[speed];
-
-  if (!AVAILABLE_SPEEDS.includes(speed)) return <></>;
 
   return (
     <div

@@ -13,6 +13,13 @@ const bank = {
   supportedSpeeds: [CoinflowPayoutSpeed.Standard, CoinflowPayoutSpeed.SameDay],
 };
 
+const bank2 = {
+  type: CoinflowDestinationType.Bank,
+  token: "bank-token-2",
+  display: "Bank ****9999",
+  supportedSpeeds: [CoinflowPayoutSpeed.Standard],
+};
+
 const card = {
   type: CoinflowDestinationType.Card,
   token: "card-token-1",
@@ -75,10 +82,14 @@ export const QuoteError: Story = {
   },
 };
 
-/** Several destinations, each fanned out to one card per supported speed. */
+/**
+ * Several destinations, each fanned out to one card per available speed. The
+ * card destination (Asap only) and the bank's Same Day speed are filtered out,
+ * leaving one Standard card per bank.
+ */
 export const MultipleDestinations: Story = {
   args: {
-    destinations: [card, bank],
+    destinations: [card, bank, bank2],
   },
 };
 
