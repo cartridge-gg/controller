@@ -60,7 +60,7 @@ describe("payment preference", () => {
     ).toBeUndefined();
   });
 
-  it("keeps funded Controller ahead of the configured default", () => {
+  it("defaults to credits when the balance covers the purchase", () => {
     expect(
       resolveInitialPaymentMethod({
         configuredDefault: true,
@@ -70,7 +70,7 @@ describe("payment preference", () => {
         cardTopupAvailable: true,
         directCardAvailable: true,
       }),
-    ).toEqual({ status: "resolved", method: "controller" });
+    ).toEqual({ status: "resolved", method: "credits" });
   });
 
   it("preserves legacy Controller behavior when no default is configured", () => {
@@ -78,12 +78,40 @@ describe("payment preference", () => {
       resolveInitialPaymentMethod({
         configuredDefault: false,
         funding: "pending",
-        credits: "pending",
+        credits: "unavailable",
         hasSufficientCredits: false,
         cardTopupAvailable: false,
         directCardAvailable: false,
       }),
     ).toEqual({ status: "resolved", method: "controller" });
+  });
+
+  it("waits for credits before applying another default", () => {
+    expect(
+      resolveInitialPaymentMethod({
+        remembered: "coinflow",
+        configuredDefault: true,
+        funding: "funded",
+        credits: "pending",
+        hasSufficientCredits: false,
+        cardTopupAvailable: true,
+        directCardAvailable: true,
+      }),
+    ).toEqual({ status: "pending" });
+  });
+
+  it("prefers sufficient credits over a remembered card preference", () => {
+    expect(
+      resolveInitialPaymentMethod({
+        remembered: "coinflow",
+        configuredDefault: true,
+        funding: "funded",
+        credits: "available",
+        hasSufficientCredits: true,
+        cardTopupAvailable: true,
+        directCardAvailable: true,
+      }),
+    ).toEqual({ status: "resolved", method: "credits" });
   });
 
   it("selects credits only after Controller funding is exhausted", () => {

@@ -41,14 +41,15 @@ import {
   type PaymentMethodSelection,
 } from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
-import { CoinflowDrawer } from "../coinflow/drawer";
 import { CoinbaseDrawer } from "../coinbase/drawer";
 import { VerificationDrawer } from "../../verification/drawer";
-import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { useGeoLocation } from "@/hooks/geo";
-import { num } from "starknet";
 import { useIdentityContext } from "@/components/identity/provider";
 import { useCreditsContext } from "@/components/credits/provider";
+import {
+  creditsTopupAmountUsd,
+  shouldOpenCreditsDeposit,
+} from "@/utils/credits-topup";
 import {
   MAX_CREDITS_PURCHASE_USD,
   MIN_CREDITS_PURCHASE_USD,
@@ -121,8 +122,6 @@ export function OnchainCheckout() {
     onCreditsSelect,
   } = useOnchainPurchaseContext();
   const {
-    onCreditCardPurchase,
-    isCoinflowLoading,
     creditsQuote,
     isCreditsQuoteLoading,
     creditsQuoteError,
@@ -148,7 +147,6 @@ export function OnchainCheckout() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isCoinflowDrawerOpen, setIsCoinflowDrawerOpen] = useState(false);
   const [isCoinbaseDrawerOpen, setIsCoinbaseDrawerOpen] = useState(false);
   const [verificationMethod, setVerificationMethod] = useState<
     "apple-pay" | "identity" | null
@@ -248,17 +246,6 @@ export function OnchainCheckout() {
   const isFree = useMemo(() => {
     return quote ? quote.totalCost === BigInt(0) : undefined;
   }, [quote]);
-
-  const isCoinflowStarterpackSupported = useMemo(() => {
-    if (!controller || !quote) {
-      return true;
-    }
-
-    const usdcAddress = USDC_ADDRESSES[controller.chainId()];
-    return (
-      !!usdcAddress && num.toHex(quote.paymentToken) === num.toHex(usdcAddress)
-    );
-  }, [controller, quote]);
 
   const {
     balanceError,
@@ -374,8 +361,7 @@ export function OnchainCheckout() {
       credits: creditsResolution,
       hasSufficientCredits,
       cardTopupAvailable: configuredCoinflowAvailable,
-      directCardAvailable:
-        configuredCoinflowAvailable && isCoinflowStarterpackSupported,
+      directCardAvailable: configuredCoinflowAvailable,
     });
     if (resolution.status === "pending") return;
 
@@ -414,7 +400,6 @@ export function OnchainCheckout() {
     tokenFundingStatus,
     hasSufficientCredits,
     configuredCoinflowAvailable,
-    isCoinflowStarterpackSupported,
     onCreditsSelect,
     onCoinflowSelect,
     clearSelectedWallet,
@@ -433,7 +418,7 @@ export function OnchainCheckout() {
   const showConfiguredCreditsTopup = configuredCard && showInsufficientCredits;
 
   const globalDisabled = useMemo(() => {
-    if (isCreditsSelected) {
+    if (isCreditsSelected || isCoinflowSelected) {
       return (
         isCreditsQuoteLoading ||
         !!creditsQuoteError ||
@@ -442,10 +427,6 @@ export function OnchainCheckout() {
         !creditsQuote ||
         isCreditsLoading
       );
-    }
-
-    if (isCoinflowSelected) {
-      return !isCoinflowStarterpackSupported || isCoinflowLoading;
     }
 
     // Disable if there's a fee estimation error (e.g., bridge amount too low)
@@ -479,8 +460,6 @@ export function OnchainCheckout() {
     isApplePaySelected,
     isApplePayAmountTooLow,
     isCoinflowSelected,
-    isCoinflowStarterpackSupported,
-    isCoinflowLoading,
     isCreditsSelected,
     isCreditsQuoteLoading,
     isCreditsBalanceLoading,
@@ -615,23 +594,17 @@ export function OnchainCheckout() {
           ? "credits"
           : "onchain";
 
-    if (
-      method === "coinflow" &&
-      (!isUS || !isCoinflowEnabled || !isCoinflowStarterpackSupported)
-    ) {
+    if (method === "coinflow" && (!isUS || !isCoinflowEnabled)) {
       return;
     }
-    if (method === "credits" && !hasSufficientCredits) {
+    if (shouldOpenCreditsDeposit(method, hasSufficientCredits)) {
       if (!creditsQuote || !purchaseKey) return;
       const requiredCredits = BigInt(creditsQuote.requiredCredits);
-      const shortfall =
-        requiredCredits > creditsBalance
-          ? requiredCredits - creditsBalance
-          : 0n;
-      // $1 = 1e8 raw credit units. Round upward to a cent so the top-up can
-      // never land a fraction below the authoritative bundle quote.
-      const shortfallUsd = Number((shortfall + 999_999n) / 1_000_000n) / 100;
-      const topupAmount = Math.max(MIN_CREDITS_PURCHASE_USD, shortfallUsd);
+      const topupAmount = creditsTopupAmountUsd({
+        requiredCredits,
+        creditsBalance,
+        minimumAmount: MIN_CREDITS_PURCHASE_USD,
+      });
       if (topupAmount > MAX_CREDITS_PURCHASE_USD) {
         setDisplayError(
           new Error(
@@ -644,9 +617,10 @@ export function OnchainCheckout() {
       const originatingPurchaseKey = purchaseKey;
 
       initiateCreditsDeposit({
-        preferredMethod: configuredCoinflowAvailable
-          ? { type: "coinflow" }
-          : undefined,
+        preferredMethod:
+          method === "coinflow" || configuredCoinflowAvailable
+            ? { type: "coinflow" }
+            : undefined,
         minimumAmount: topupAmount,
         purchaseKey: originatingPurchaseKey,
         onSuccess: async () => {
@@ -723,9 +697,6 @@ export function OnchainCheckout() {
       if (method === "credits") {
         await onCreditsPurchase();
         navigate("/purchase/success", { reset: true });
-      } else if (method === "coinflow") {
-        await onCreditCardPurchase();
-        setIsCoinflowDrawerOpen(true);
       } else if (method === "apple-pay") {
         resetCoinbasePurchase();
 
@@ -778,13 +749,11 @@ export function OnchainCheckout() {
     isFree,
     isCoinflowSelected,
     isCoinflowEnabled,
-    isCoinflowStarterpackSupported,
     isUS,
     isApplePaySelected,
     applePayLimitExceeded,
     fetchCoinbaseLimits,
     resetCoinbasePurchase,
-    onCreditCardPurchase,
     isPhoneNumberVerified,
     isEmailVerified,
     onCreateCoinbaseOrder,
@@ -951,25 +920,18 @@ export function OnchainCheckout() {
                   />
                 )}
 
-                {isCoinflowSelected && !isCoinflowStarterpackSupported && (
-                  <ErrorCard
-                    variant="error"
-                    title="Credit Card Checkout Unavailable"
-                    message="Credit card checkout is only available for starterpacks priced in USDC."
-                  />
-                )}
-
-                {isCreditsSelected && creditsQuoteError && (
-                  <ErrorCard
-                    variant="error"
-                    title="Credits Checkout Unavailable"
-                    message={
-                      advancedView
-                        ? creditsQuoteError.message
-                        : "Credits checkout could not be prepared. Please try again."
-                    }
-                  />
-                )}
+                {(isCreditsSelected || isCoinflowSelected) &&
+                  creditsQuoteError && (
+                    <ErrorCard
+                      variant="error"
+                      title="Credits Checkout Unavailable"
+                      message={
+                        advancedView
+                          ? creditsQuoteError.message
+                          : "Credits checkout could not be prepared. Please try again."
+                      }
+                    />
+                  )}
 
                 {showInsufficientCredits && (
                   <ErrorCard
@@ -1020,8 +982,7 @@ export function OnchainCheckout() {
                     isCheckingFallback ||
                     (bridgeFrom !== null && isFetchingFees) ||
                     isCreatingOrder ||
-                    isCoinflowLoading ||
-                    (isCreditsSelected &&
+                    ((isCreditsSelected || isCoinflowSelected) &&
                       (isCreditsQuoteLoading || isCreditsLoading)) ||
                     applePayLimitsLoading
                   }
@@ -1065,11 +1026,6 @@ export function OnchainCheckout() {
         enableCoinflow={configuredCard}
         showCredits={false} // credits available from controller
         showController={true}
-      />
-
-      <CoinflowDrawer
-        isOpen={isCoinflowDrawerOpen}
-        onClose={() => setIsCoinflowDrawerOpen(false)}
       />
 
       <CoinbaseDrawer

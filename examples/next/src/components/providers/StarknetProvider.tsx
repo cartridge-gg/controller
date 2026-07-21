@@ -169,29 +169,33 @@ const provider = jsonRpcProvider({
 });
 
 const getKeychainUrl = () => {
+  const configuredUrl = process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL;
+
   if (
     process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" &&
     process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF
   ) {
-    let branchName: string;
+    let branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
+      /[^a-zA-Z0-9-]/g,
+      "-",
+    );
 
-    const url = window.location.href;
-    const match = url.match(/git-([a-zA-Z0-9-]+)\.preview/);
+    // Some Vercel builds report the fallback branch name "update-ui". In
+    // that case, recover the branch name from the current URL.
+    if (branchName === "update-ui") {
+      const match = window.location.href.match(/git-([a-zA-Z0-9-]+)\.preview/);
 
-    if (match && match[1]) {
-      branchName = match[1];
-    } else {
-      branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
-        /[^a-zA-Z0-9-]/g,
-        "-",
-      );
+      if (match && match[1]) {
+        branchName = match[1];
+      }
     }
 
-    const keychainUrl = `https://keychain-git-${branchName}.preview.cartridge.gg/`;
+    const keychainPreviewLabel = `keychain-git-${branchName}`;
+    const keychainUrl = `https://${keychainPreviewLabel}.preview.cartridge.gg/`;
 
     return keychainUrl;
   } else {
-    return process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL;
+    return configuredUrl;
   }
 };
 
