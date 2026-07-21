@@ -140,6 +140,9 @@ export function WithdrawMethodDrawer({
                 destination={destination}
                 speed={speed}
                 selected={isSelected}
+                // The quote returns a more precise ETA than the static
+                // per-speed copy; once it resolves, it lands on this card.
+                processingTime={isSelected && !!soleCard ? (quote?.eta ?? undefined) : undefined}
                 onClick={() =>
                   onSelectMethod({ token: destination.token, speed })
                 }
@@ -179,15 +182,18 @@ function DestinationCard({
   destination,
   speed,
   selected,
+  processingTime,
   onClick,
 }: {
   destination: CoinflowDestination;
   speed: CoinflowPayoutSpeed;
   selected: boolean;
+  /** Live ETA from the quote; falls back to the static per-speed copy. */
+  processingTime?: string;
   onClick: () => void;
 }) {
   const { icon, title } = getDestinationDisplay(destination);
-  const { label, processingTime } = SPEED_DISPLAY[speed];
+  const { label, processingTime: defaultProcessingTime } = SPEED_DISPLAY[speed];
 
   return (
     <div
@@ -204,7 +210,9 @@ function DestinationCard({
         <p className="text-sm font-medium text-foreground-100">{title}</p>
         <p className="text-xs text-foreground-300">{label}</p>
       </div>
-      <p className="text-xs text-foreground-300">{processingTime}</p>
+      <p className="text-xs text-foreground-300">
+        {processingTime ?? defaultProcessingTime}
+      </p>
     </div>
   );
 }
