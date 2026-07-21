@@ -9313,3 +9313,159 @@ export const useUpdateResponsibleGamingLimitsMutation = <
     >(UpdateResponsibleGamingLimitsDocument),
     options,
   );
+
+// ---------------------------------------------------------------------------
+// Responsible Gaming — gross-outflow spend enforcement
+//
+// NOTE: Like the block above, these types/documents are hand-authored to match
+// the output of `pnpm graphql:gen` because the `reserveResponsibleGamingSpend`,
+// `settleResponsibleGamingSpend`, and `releaseResponsibleGamingSpend` mutations
+// are not yet present on the deployed GraphQL schema. Source of truth is
+// `responsible-gaming.graphql`; re-running `pnpm graphql:gen` once the backend
+// contract ships will regenerate this whole file and replace this block.
+// ---------------------------------------------------------------------------
+
+export type ResponsibleGamingSpendReservation = {
+  __typename?: "ResponsibleGamingSpendReservation";
+  reference: Scalars["String"];
+  amountCents: Scalars["Int"];
+  state: ResponsibleGamingSpendState;
+};
+
+export type ResponsibleGamingSpendState = "RELEASED" | "RESERVED" | "SETTLED";
+
+export type ResponsibleGamingSpendFieldsFragment = {
+  __typename?: "ResponsibleGamingSpendReservation";
+  reference: string;
+  amountCents: number;
+  state: ResponsibleGamingSpendState;
+};
+
+export type ReserveResponsibleGamingSpendMutationVariables = Exact<{
+  reference: Scalars["String"];
+  amountCents: Scalars["Int"];
+}>;
+
+export type ReserveResponsibleGamingSpendMutation = {
+  __typename?: "Mutation";
+  reserveResponsibleGamingSpend: ResponsibleGamingSpendFieldsFragment;
+};
+
+export type SettleResponsibleGamingSpendMutationVariables = Exact<{
+  reference: Scalars["String"];
+}>;
+
+export type SettleResponsibleGamingSpendMutation = {
+  __typename?: "Mutation";
+  settleResponsibleGamingSpend: ResponsibleGamingSpendFieldsFragment;
+};
+
+export type ReleaseResponsibleGamingSpendMutationVariables = Exact<{
+  reference: Scalars["String"];
+}>;
+
+export type ReleaseResponsibleGamingSpendMutation = {
+  __typename?: "Mutation";
+  releaseResponsibleGamingSpend: ResponsibleGamingSpendFieldsFragment;
+};
+
+export const ResponsibleGamingSpendFieldsFragmentDoc = `
+    fragment ResponsibleGamingSpendFields on ResponsibleGamingSpendReservation {
+  reference
+  amountCents
+  state
+}
+    `;
+export const ReserveResponsibleGamingSpendDocument = `
+    mutation ReserveResponsibleGamingSpend($reference: String!, $amountCents: Int!) {
+  reserveResponsibleGamingSpend(reference: $reference, amountCents: $amountCents) {
+    ...ResponsibleGamingSpendFields
+  }
+}
+    ${ResponsibleGamingSpendFieldsFragmentDoc}`;
+export const useReserveResponsibleGamingSpendMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    ReserveResponsibleGamingSpendMutation,
+    TError,
+    ReserveResponsibleGamingSpendMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    ReserveResponsibleGamingSpendMutation,
+    TError,
+    ReserveResponsibleGamingSpendMutationVariables,
+    TContext
+  >(
+    ["ReserveResponsibleGamingSpend"],
+    useFetchData<
+      ReserveResponsibleGamingSpendMutation,
+      ReserveResponsibleGamingSpendMutationVariables
+    >(ReserveResponsibleGamingSpendDocument),
+    options,
+  );
+export const SettleResponsibleGamingSpendDocument = `
+    mutation SettleResponsibleGamingSpend($reference: String!) {
+  settleResponsibleGamingSpend(reference: $reference) {
+    ...ResponsibleGamingSpendFields
+  }
+}
+    ${ResponsibleGamingSpendFieldsFragmentDoc}`;
+export const useSettleResponsibleGamingSpendMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    SettleResponsibleGamingSpendMutation,
+    TError,
+    SettleResponsibleGamingSpendMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    SettleResponsibleGamingSpendMutation,
+    TError,
+    SettleResponsibleGamingSpendMutationVariables,
+    TContext
+  >(
+    ["SettleResponsibleGamingSpend"],
+    useFetchData<
+      SettleResponsibleGamingSpendMutation,
+      SettleResponsibleGamingSpendMutationVariables
+    >(SettleResponsibleGamingSpendDocument),
+    options,
+  );
+export const ReleaseResponsibleGamingSpendDocument = `
+    mutation ReleaseResponsibleGamingSpend($reference: String!) {
+  releaseResponsibleGamingSpend(reference: $reference) {
+    ...ResponsibleGamingSpendFields
+  }
+}
+    ${ResponsibleGamingSpendFieldsFragmentDoc}`;
+export const useReleaseResponsibleGamingSpendMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    ReleaseResponsibleGamingSpendMutation,
+    TError,
+    ReleaseResponsibleGamingSpendMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    ReleaseResponsibleGamingSpendMutation,
+    TError,
+    ReleaseResponsibleGamingSpendMutationVariables,
+    TContext
+  >(
+    ["ReleaseResponsibleGamingSpend"],
+    useFetchData<
+      ReleaseResponsibleGamingSpendMutation,
+      ReleaseResponsibleGamingSpendMutationVariables
+    >(ReleaseResponsibleGamingSpendDocument),
+    options,
+  );

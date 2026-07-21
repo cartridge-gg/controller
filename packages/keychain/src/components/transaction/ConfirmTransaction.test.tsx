@@ -42,6 +42,13 @@ vi.mock("@/context/toast", () => ({
   })),
 }));
 
+vi.mock("@/utils/connection/spend-enforcement", () => ({
+  executeWithSpendEnforcement: vi.fn(
+    (_controller: unknown, _calls: unknown, execute: () => Promise<unknown>) =>
+      execute(),
+  ),
+}));
+
 // Stub the balance-change simulation. These tests assert on the confirm/execute
 // flow, not on simulation output. The real hook kicks off an async tx simulation
 // (and a 10s repeat loop) that outlives the test and, on its error path, rejects

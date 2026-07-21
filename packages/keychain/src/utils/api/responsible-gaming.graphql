@@ -32,3 +32,33 @@ mutation UpdateResponsibleGamingLimits(
     ...ResponsibleGamingFields
   }
 }
+
+fragment ResponsibleGamingSpendFields on ResponsibleGamingSpendReservation {
+  reference
+  amountCents
+  state
+}
+
+mutation ReserveResponsibleGamingSpend(
+  $reference: String!
+  $amountCents: Int!
+) {
+  reserveResponsibleGamingSpend(
+    reference: $reference
+    amountCents: $amountCents
+  ) {
+    ...ResponsibleGamingSpendFields
+  }
+}
+
+mutation SettleResponsibleGamingSpend($reference: String!) {
+  settleResponsibleGamingSpend(reference: $reference) {
+    ...ResponsibleGamingSpendFields
+  }
+}
+
+mutation ReleaseResponsibleGamingSpend($reference: String!) {
+  releaseResponsibleGamingSpend(reference: $reference) {
+    ...ResponsibleGamingSpendFields
+  }
+}

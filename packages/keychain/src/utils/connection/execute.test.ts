@@ -26,6 +26,13 @@ vi.mock("./sync", () => ({
   },
 }));
 
+vi.mock("./spend-enforcement", () => ({
+  executeWithSpendEnforcement: vi.fn(
+    (_controller: unknown, _calls: unknown, execute: () => Promise<unknown>) =>
+      execute(),
+  ),
+}));
+
 // Mock window.controller
 const mockController = {
   hasAuthorizedPoliciesForCalls: vi.fn(() => Promise.resolve(true)),
