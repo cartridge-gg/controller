@@ -6,11 +6,20 @@ import {
 } from "@/hooks/payments/coinflow-withdraw";
 import { WithdrawMethodDrawer } from "./WithdrawMethodDrawer";
 
+// Standard is the only live speed (see AVAILABLE_SPEEDS): SameDay/Asap on these
+// fixtures are dropped by the picker, so they double as filtering fixtures.
 const bank = {
   type: CoinflowDestinationType.Bank,
   token: "bank-token-1",
   display: "Bank ****0283",
   supportedSpeeds: [CoinflowPayoutSpeed.Standard, CoinflowPayoutSpeed.SameDay],
+};
+
+const bank2 = {
+  type: CoinflowDestinationType.Bank,
+  token: "bank-token-2",
+  display: "Bank ****9999",
+  supportedSpeeds: [CoinflowPayoutSpeed.Standard],
 };
 
 const card = {
@@ -32,27 +41,25 @@ const baseProps = {
   isOpen: true,
   onClose: () => {},
   onSelectMethod: () => {},
-  destinations: [bank, card],
+  destinations: [bank, bank2, card],
   credits: 613,
 };
 
 describe("WithdrawMethodDrawer", () => {
-  it("renders one card per (destination, speed) with its processing time", () => {
+  it("renders one card per allowed (destination, speed), filtering out unavailable speeds", () => {
     render(<WithdrawMethodDrawer {...baseProps} />);
 
     expect(screen.getByText("Withdrawal Amount")).toBeInTheDocument();
     expect(screen.getByText("$6.13")).toBeInTheDocument();
     expect(screen.getByText("Processing Fee")).toBeInTheDocument();
 
-    // Bank supports two speeds → two cards; card supports one → one card.
-    expect(screen.getAllByText("Bank ****0283")).toHaveLength(2);
-    expect(screen.getByText("Debit Card ****4242")).toBeInTheDocument();
-
-    // Speed labels + processing times render per card.
-    expect(screen.getByText("Standard ACH")).toBeInTheDocument();
-    expect(screen.getByText("Same Day ACH")).toBeInTheDocument();
-    expect(screen.getByText("2-3 business days")).toBeInTheDocument();
-    expect(screen.getByText("Within minutes")).toBeInTheDocument();
+    // Only Standard is live: the two banks each yield one Standard card; the
+    // bank's Same Day speed and the card's Asap speed are dropped entirely.
+    expect(screen.getByText("Bank ****0283")).toBeInTheDocument();
+    expect(screen.getByText("Bank ****9999")).toBeInTheDocument();
+    expect(screen.getAllByText("Standard ACH")).toHaveLength(2);
+    expect(screen.queryByText("Same Day ACH")).not.toBeInTheDocument();
+    expect(screen.queryByText("Debit Card ****4242")).not.toBeInTheDocument();
   });
 
   it("picks a destination + speed when a card is clicked", () => {
@@ -61,11 +68,37 @@ describe("WithdrawMethodDrawer", () => {
       <WithdrawMethodDrawer {...baseProps} onSelectMethod={onSelectMethod} />,
     );
 
-    fireEvent.click(screen.getByText("Same Day ACH"));
+    fireEvent.click(screen.getByText("Bank ****9999"));
+    expect(onSelectMethod).toHaveBeenCalledWith({
+      token: bank2.token,
+      speed: CoinflowPayoutSpeed.Standard,
+    });
+  });
+
+  it("auto-selects when only one card is available", () => {
+    const onSelectMethod = vi.fn();
+    // The card destination has no live speed, so a lone bank is the only card.
+    render(
+      <WithdrawMethodDrawer
+        {...baseProps}
+        destinations={[bank, card]}
+        onSelectMethod={onSelectMethod}
+      />,
+    );
+
     expect(onSelectMethod).toHaveBeenCalledWith({
       token: bank.token,
-      speed: CoinflowPayoutSpeed.SameDay,
+      speed: CoinflowPayoutSpeed.Standard,
     });
+  });
+
+  it("does not auto-select when more than one card is available", () => {
+    const onSelectMethod = vi.fn();
+    render(
+      <WithdrawMethodDrawer {...baseProps} onSelectMethod={onSelectMethod} />,
+    );
+
+    expect(onSelectMethod).not.toHaveBeenCalled();
   });
 
   it("keeps the withdraw button disabled until a quote resolves", () => {
