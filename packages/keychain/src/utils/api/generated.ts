@@ -9152,3 +9152,164 @@ export const useSubmitCoinbaseLimitsUpgradeMutation = <
     >(SubmitCoinbaseLimitsUpgradeDocument),
     options,
   );
+
+// ---------------------------------------------------------------------------
+// Responsible Gaming
+//
+// NOTE: These types and hooks were hand-authored to match the output of
+// `pnpm graphql:gen` because the `responsibleGaming` query and
+// `updateResponsibleGamingLimits` mutation are not yet present on the
+// deployed GraphQL schema (https://api.cartridge.gg/query). The source of
+// truth is `responsible-gaming.graphql`; re-run `pnpm graphql:gen` once the
+// backend contract ships and this whole file (overwrite: true) will be
+// regenerated, replacing this block.
+// ---------------------------------------------------------------------------
+
+export type ResponsibleGamingLimit = {
+  __typename?: "ResponsibleGamingLimit";
+  amountCents?: Maybe<Scalars["Int"]>;
+  usedCents: Scalars["Int"];
+  pendingAmountCents?: Maybe<Scalars["Int"]>;
+  pendingRemoval: Scalars["Boolean"];
+};
+
+export type ResponsibleGamingStatus = {
+  __typename?: "ResponsibleGamingStatus";
+  period: Scalars["String"];
+  windowStart?: Maybe<Scalars["Time"]>;
+  deposit: ResponsibleGamingLimit;
+  spending: ResponsibleGamingLimit;
+  sessionMaxDurationSeconds?: Maybe<Scalars["Int"]>;
+  pendingSessionMaxDurationSeconds?: Maybe<Scalars["Int"]>;
+  pendingSessionRemoval: Scalars["Boolean"];
+  pendingEffectiveAt?: Maybe<Scalars["Time"]>;
+};
+
+export type UpdateResponsibleGamingLimitsInput = {
+  period: Scalars["String"];
+  depositLimitCents?: InputMaybe<Scalars["Int"]>;
+  removeDepositLimit?: InputMaybe<Scalars["Boolean"]>;
+  spendingLimitCents?: InputMaybe<Scalars["Int"]>;
+  removeSpendingLimit?: InputMaybe<Scalars["Boolean"]>;
+  sessionMaxDurationSeconds?: InputMaybe<Scalars["Int"]>;
+  removeSessionMaxDuration?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type ResponsibleGamingFieldsFragment = {
+  __typename?: "ResponsibleGamingStatus";
+  period: string;
+  windowStart?: string | null;
+  sessionMaxDurationSeconds?: number | null;
+  pendingSessionMaxDurationSeconds?: number | null;
+  pendingSessionRemoval: boolean;
+  pendingEffectiveAt?: string | null;
+  deposit: {
+    __typename?: "ResponsibleGamingLimit";
+    amountCents?: number | null;
+    usedCents: number;
+    pendingAmountCents?: number | null;
+    pendingRemoval: boolean;
+  };
+  spending: {
+    __typename?: "ResponsibleGamingLimit";
+    amountCents?: number | null;
+    usedCents: number;
+    pendingAmountCents?: number | null;
+    pendingRemoval: boolean;
+  };
+};
+
+export type ResponsibleGamingQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type ResponsibleGamingQuery = {
+  __typename?: "Query";
+  responsibleGaming: ResponsibleGamingFieldsFragment;
+};
+
+export type UpdateResponsibleGamingLimitsMutationVariables = Exact<{
+  input: UpdateResponsibleGamingLimitsInput;
+}>;
+
+export type UpdateResponsibleGamingLimitsMutation = {
+  __typename?: "Mutation";
+  updateResponsibleGamingLimits: ResponsibleGamingFieldsFragment;
+};
+
+export const ResponsibleGamingFieldsFragmentDoc = `
+    fragment ResponsibleGamingFields on ResponsibleGamingStatus {
+  period
+  windowStart
+  deposit {
+    amountCents
+    usedCents
+    pendingAmountCents
+    pendingRemoval
+  }
+  spending {
+    amountCents
+    usedCents
+    pendingAmountCents
+    pendingRemoval
+  }
+  sessionMaxDurationSeconds
+  pendingSessionMaxDurationSeconds
+  pendingSessionRemoval
+  pendingEffectiveAt
+}
+    `;
+export const ResponsibleGamingDocument = `
+    query ResponsibleGaming {
+  responsibleGaming {
+    ...ResponsibleGamingFields
+  }
+}
+    ${ResponsibleGamingFieldsFragmentDoc}`;
+export const useResponsibleGamingQuery = <
+  TData = ResponsibleGamingQuery,
+  TError = unknown,
+>(
+  variables?: ResponsibleGamingQueryVariables,
+  options?: UseQueryOptions<ResponsibleGamingQuery, TError, TData>,
+) =>
+  useQuery<ResponsibleGamingQuery, TError, TData>(
+    variables === undefined
+      ? ["ResponsibleGaming"]
+      : ["ResponsibleGaming", variables],
+    useFetchData<ResponsibleGamingQuery, ResponsibleGamingQueryVariables>(
+      ResponsibleGamingDocument,
+    ).bind(null, variables),
+    options,
+  );
+export const UpdateResponsibleGamingLimitsDocument = `
+    mutation UpdateResponsibleGamingLimits($input: UpdateResponsibleGamingLimitsInput!) {
+  updateResponsibleGamingLimits(input: $input) {
+    ...ResponsibleGamingFields
+  }
+}
+    ${ResponsibleGamingFieldsFragmentDoc}`;
+export const useUpdateResponsibleGamingLimitsMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    UpdateResponsibleGamingLimitsMutation,
+    TError,
+    UpdateResponsibleGamingLimitsMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    UpdateResponsibleGamingLimitsMutation,
+    TError,
+    UpdateResponsibleGamingLimitsMutationVariables,
+    TContext
+  >(
+    ["UpdateResponsibleGamingLimits"],
+    useFetchData<
+      UpdateResponsibleGamingLimitsMutation,
+      UpdateResponsibleGamingLimitsMutationVariables
+    >(UpdateResponsibleGamingLimitsDocument),
+    options,
+  );

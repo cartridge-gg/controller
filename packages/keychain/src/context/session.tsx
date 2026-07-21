@@ -6,7 +6,12 @@ import {
   CreateSessionContext,
   type ParsedSessionPolicies,
 } from "@/hooks/session";
-import { useCallback, useMemo, useState } from "react";
+import { useResponsibleGamingQuery } from "@/utils/api";
+import {
+  clampSessionDurationSeconds,
+  effectiveSessionCapSeconds,
+} from "@/utils/responsible-gaming";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { shortString } from "starknet";
 
 export interface CreateSessionProviderProps {
@@ -62,6 +67,25 @@ export const CreateSessionProvider = ({
 
   const { controller } = useConnection();
 
+  // Fetch the user's responsible-gaming session cap so we never request an
+  // expiration longer than their own limit. The backend stays authoritative.
+  const responsibleGamingQuery = useResponsibleGamingQuery(undefined, {
+    enabled: !!controller,
+    select: (data) => data.responsibleGaming,
+  });
+  const sessionMaxDurationSeconds = useMemo(
+    () => effectiveSessionCapSeconds(responsibleGamingQuery.data),
+    [responsibleGamingQuery.data],
+  );
+
+  // If the fetched cap is below the current selection, clamp it down.
+  useEffect(() => {
+    if (sessionMaxDurationSeconds === null) return;
+    setDuration((prev) =>
+      clampSessionDurationSeconds(prev, sessionMaxDurationSeconds),
+    );
+  }, [sessionMaxDurationSeconds]);
+
   const onToggleMethod = useCallback(
     (address: string, id: string, authorized: boolean) => {
       if (!policies.contracts) return;
@@ -93,9 +117,14 @@ export const CreateSessionProvider = ({
     setIsEditable((prev) => !prev);
   }, []);
 
-  const onDurationChange = useCallback((newDuration: bigint) => {
-    setDuration(newDuration);
-  }, []);
+  const onDurationChange = useCallback(
+    (newDuration: bigint) => {
+      setDuration(
+        clampSessionDurationSeconds(newDuration, sessionMaxDurationSeconds),
+      );
+    },
+    [sessionMaxDurationSeconds],
+  );
 
   const chainSpecificMessages = useMemo(() => {
     if (externalChainSpecificMessages) {
@@ -118,6 +147,7 @@ export const CreateSessionProvider = ({
       value={{
         policies,
         duration,
+        sessionMaxDurationSeconds,
         isEditable,
         requiredPolicies: requiredPolicies ?? [],
         chainSpecificMessages,

@@ -1,0 +1,34 @@
+fragment ResponsibleGamingFields on ResponsibleGamingStatus {
+  period
+  windowStart
+  deposit {
+    amountCents
+    usedCents
+    pendingAmountCents
+    pendingRemoval
+  }
+  spending {
+    amountCents
+    usedCents
+    pendingAmountCents
+    pendingRemoval
+  }
+  sessionMaxDurationSeconds
+  pendingSessionMaxDurationSeconds
+  pendingSessionRemoval
+  pendingEffectiveAt
+}
+
+query ResponsibleGaming {
+  responsibleGaming {
+    ...ResponsibleGamingFields
+  }
+}
+
+mutation UpdateResponsibleGamingLimits(
+  $input: UpdateResponsibleGamingLimitsInput!
+) {
+  updateResponsibleGamingLimits(input: $input) {
+    ...ResponsibleGamingFields
+  }
+}
