@@ -11,7 +11,12 @@
 @layer base {
   html,
   body {
-    @apply bg-background text-foreground ring-foreground touch-manipulation;
+    @apply bg-background text-foreground ring-foreground touch-manipulation select-none;
+  }
+
+  input,
+  textarea {
+    @apply select-text;
   }
 
   * {
