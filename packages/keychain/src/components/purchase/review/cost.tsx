@@ -167,21 +167,8 @@ export function OnchainCostBreakdown({
     coinbaseQuote,
     isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
-  const {
-    coinflowQuote,
-    isCoinflowQuoteLoading,
-    creditsQuote,
-    isCreditsQuoteLoading,
-  } = useCreditPurchaseContext();
+  const { creditsQuote, isCreditsQuoteLoading } = useCreditPurchaseContext();
   const { decimals } = quote.paymentTokenMetadata;
-  // When credit card is selected, use the Coinflow backend quote so that
-  // pricing is correct even for non-USDC starterpacks (handles Ekubo swap).
-  const coinflowCostDetails = useMemo(() => {
-    if (!isCoinflowSelected) {
-      return undefined;
-    }
-    return coinflowQuote?.pricing;
-  }, [isCoinflowSelected, coinflowQuote]);
 
   // Get default token (matching quote if available) or fallback to the first available token
   const defaultToken =
@@ -190,7 +177,9 @@ export function OnchainCostBreakdown({
     ) || availableTokens[0];
 
   // Use selectedToken or fallback to defaultToken for display
-  const displayToken = selectedToken || defaultToken;
+  const displayToken = isCoinflowSelected
+    ? CREDITS_TOKEN
+    : selectedToken || defaultToken;
 
   // Auto-select defaultToken if none is selected (for initial load)
   useEffect(() => {
@@ -286,65 +275,58 @@ export function OnchainCostBreakdown({
     <span className="text-foreground-300">{`($${totalUsd.toFixed(2)})`}</span>
   );
 
-  const value = isCreditsSelected ? (
-    isCreditsQuoteLoading ? (
-      <Spinner />
-    ) : creditsQuote ? (
-      <span className="text-foreground-100">
-        {formatCredits(creditsQuote.requiredCredits).formatted}
-      </span>
-    ) : (
-      <span className="text-foreground-400">—</span>
-    )
-  ) : isCoinflowSelected ? (
-    isCoinflowQuoteLoading ? (
-      <Spinner />
-    ) : coinflowCostDetails ? (
-      <span className="text-foreground-100">
-        {formatAmount(coinflowCostDetails.totalInCents / 100)}
-      </span>
-    ) : (
-      <span className="text-foreground-400">—</span>
-    )
-  ) : isApplePaySelected ? (
-    coinbaseQuote ? (
-      <span className="text-foreground-100">
-        {`$${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)}`}
-      </span>
-    ) : (
-      <span className="text-foreground-400">—</span>
-    )
-  ) : isUsingLayerswap ? (
-    feeEstimationError ? (
-      <span className="text-foreground-400">—</span>
-    ) : layerswapTotal !== null && displayToken ? (
-      <span className="text-foreground-100">
-        {formatAmount(layerswapTotal)}
-      </span>
-    ) : (
-      <Spinner />
-    )
-  ) : isPaymentTokenSameAsSelected ? (
-    <>
-      {usdEquivalent}
-      <span className="text-foreground-300">{formatAmount(paymentAmount)}</span>
-    </>
-  ) : (
-    convertedEquivalent !== null &&
-    displayToken && (
+  const value =
+    isCreditsSelected || isCoinflowSelected ? (
+      isCreditsQuoteLoading ? (
+        <Spinner />
+      ) : creditsQuote ? (
+        <span className="text-foreground-100">
+          {formatCredits(creditsQuote.requiredCredits).formatted}
+        </span>
+      ) : (
+        <span className="text-foreground-400">—</span>
+      )
+    ) : isApplePaySelected ? (
+      coinbaseQuote ? (
+        <span className="text-foreground-100">
+          {`$${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)}`}
+        </span>
+      ) : (
+        <span className="text-foreground-400">—</span>
+      )
+    ) : isUsingLayerswap ? (
+      feeEstimationError ? (
+        <span className="text-foreground-400">—</span>
+      ) : layerswapTotal !== null && displayToken ? (
+        <span className="text-foreground-100">
+          {formatAmount(layerswapTotal)}
+        </span>
+      ) : (
+        <Spinner />
+      )
+    ) : isPaymentTokenSameAsSelected ? (
       <>
         {usdEquivalent}
-        <span className="text-foreground-100">
-          {formatAmount(convertedEquivalent)}
+        <span className="text-foreground-300">
+          {formatAmount(paymentAmount)}
         </span>
       </>
-    )
-  );
+    ) : (
+      convertedEquivalent !== null &&
+      displayToken && (
+        <>
+          {usdEquivalent}
+          <span className="text-foreground-100">
+            {formatAmount(convertedEquivalent)}
+          </span>
+        </>
+      )
+    );
 
   return (
     <CostBreakdown
       platform={platform}
-      tokens={availableTokens}
+      tokens={isCoinflowSelected ? [CREDITS_TOKEN] : availableTokens}
       selectedToken={displayToken}
       onSelectToken={handleTokenChange}
       tokenSelectDisabled={
@@ -361,12 +343,6 @@ export function OnchainCostBreakdown({
           quantity={quantity}
           layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
           coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
-          creditCardFeeInCents={
-            coinflowCostDetails
-              ? coinflowCostDetails.cardFeeInCents +
-                coinflowCostDetails.gasFeeInCents
-              : undefined
-          }
         />
       }
     />

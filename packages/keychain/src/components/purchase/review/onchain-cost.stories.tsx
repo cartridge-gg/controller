@@ -30,9 +30,11 @@ const mockUsdcToken = {
 const MockOnchainPurchaseProvider = ({
   children,
   overrides,
+  creditOverrides,
 }: {
   children: ReactNode;
   overrides?: Partial<OnchainPurchaseContextType>;
+  creditOverrides?: Partial<CreditPurchaseContextType>;
 }) => {
   const mockValue: OnchainPurchaseContextType = {
     purchaseItems: [],
@@ -122,7 +124,9 @@ const MockOnchainPurchaseProvider = ({
 
   return (
     <OnchainPurchaseContext.Provider value={{ ...mockValue, ...overrides }}>
-      <CreditPurchaseContext.Provider value={mockCreditValue}>
+      <CreditPurchaseContext.Provider
+        value={{ ...mockCreditValue, ...creditOverrides }}
+      >
         {children}
       </CreditPurchaseContext.Provider>
     </OnchainPurchaseContext.Provider>
@@ -133,7 +137,10 @@ const meta = {
   component: OnchainCostBreakdown,
   decorators: [
     (Story, { parameters }) => (
-      <MockOnchainPurchaseProvider overrides={parameters.mockOverrides}>
+      <MockOnchainPurchaseProvider
+        overrides={parameters.mockOverrides}
+        creditOverrides={parameters.mockCreditOverrides}
+      >
         <Story />
       </MockOnchainPurchaseProvider>
     ),
@@ -179,6 +186,37 @@ export const USDCPaymentWithUsdPrefix: Story = {
       protocolFee: 2500000n, // $2.50 protocol fee
       referralFee: 5000000n, // $5 USDC referral fee
       totalCost: 107500000n, // $107.50 total
+      paymentToken: USDC_ADDRESS,
+      paymentTokenMetadata: {
+        symbol: "USDC",
+        decimals: 6,
+      },
+    },
+    platform: "starknet",
+  },
+};
+
+export const CreditCardPurchase: Story = {
+  parameters: {
+    mockOverrides: {
+      isCoinflowSelected: true,
+    } satisfies Partial<OnchainPurchaseContextType>,
+    mockCreditOverrides: {
+      creditsQuote: {
+        requiredCredits: "200000000",
+        costInUsdc: "2000000",
+        paymentToken: USDC_ADDRESS,
+        paymentTokenAmount: "2000000",
+        needsSwap: false,
+      },
+    } satisfies Partial<CreditPurchaseContextType>,
+  },
+  args: {
+    quote: {
+      basePrice: 2000000n,
+      protocolFee: 0n,
+      referralFee: 0n,
+      totalCost: 2000000n,
       paymentToken: USDC_ADDRESS,
       paymentTokenMetadata: {
         symbol: "USDC",
