@@ -1,10 +1,8 @@
 import { useMemo, useState } from "react";
 import {
   CoinflowWithdraw,
-  MerchantStyle,
   WithdrawSpeed,
   type CoinflowWithdrawProps,
-  type MerchantTheme,
 } from "@coinflowlabs/react";
 import {
   Drawer,
@@ -12,33 +10,25 @@ import {
   PlusIcon,
   Skeleton,
 } from "@cartridge/controller-ui";
-import { useControllerTheme } from "@/hooks/connection";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useWithdrawContext } from "./provider";
 import { SandboxWarning } from "./OverviewDrawer";
-
-const COINFLOW_PRIMARY_FALLBACK = "#fbcb4a";
-
-// Match Coinflow's hosted UI to the keychain surface, same as the on-ramp card
-// form (checkout/coinflow/form.tsx).
-const COINFLOW_THEME_BASE = {
-  background: "#1e221f",
-  backgroundAccent: "#242824",
-  backgroundAccent2: "#242824",
-  textColor: "#ffffff",
-  textColorAccent: "#505050",
-  textColorAction: "#ffffff",
-  style: MerchantStyle.Sharp,
-  fontSize: "12px",
-} as const;
+import { useCoinflowTheme } from "./coinflow-theme";
 
 // v1 exposes the bank-deposit subset only (§ plan D3 / open question 2). Card
 // speeds are a later follow-up; drive the whitelist off the destination's
 // supportedSpeeds when a picker lands.
 const ALLOWED_WITHDRAW_SPEEDS: WithdrawSpeed[] = [
-  WithdrawSpeed.STANDARD,
+  // bank account
   WithdrawSpeed.SAME_DAY,
-];
+  WithdrawSpeed.STANDARD,
+  WithdrawSpeed.WIRE,
+  WithdrawSpeed.ASAP,
+  // debit card / apple play
+  // WithdrawSpeed.CARD,
+ ];
+
+const MAX_HEIGHT = 500;
 
 interface BankAuthDrawerProps {
   isOpen: boolean;
@@ -66,22 +56,10 @@ export function BankAuthDrawer({
   sandbox,
 }: BankAuthDrawerProps) {
   const { bankAuth } = useWithdrawContext();
-  // The iframe reports its content height so the drawer can size to it
-  // (handleHeightChange); before the first message a min-height keeps room for
-  // the loader.
-  const [height, setHeight] = useState<number>();
-
-  const controllerTheme = useControllerTheme();
-  const coinflowTheme = useMemo<MerchantTheme>(() => {
-    const primary = controllerTheme?.colors?.primary;
-    return {
-      ...COINFLOW_THEME_BASE,
-      primary:
-        typeof primary === "string" ? primary : COINFLOW_PRIMARY_FALLBACK,
-    };
-  }, [controllerTheme]);
-
   const { session } = bankAuth;
+
+  const coinflowTheme = useCoinflowTheme();
+  const [height, setHeight] = useState(MAX_HEIGHT);
 
   // Session-key auth with no on-chain wallet: `CoinflowWithdraw`'s prop union is
   // discriminated by blockchain and types wallet/connection as required, but the
@@ -111,32 +89,45 @@ export function BankAuthDrawer({
     [session, coinflowTheme, bankAuth],
   );
 
-  return (
-    <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-      <DrawerContent
-        title="Add Bank Account"
-        icon={<PlusIcon variant="line" />}
-      >
-        {/* Always visible while sandbox is active, whatever the drawer state. */}
-        {sandbox && <SandboxWarning />}
+  const isError = !!bankAuth.error;
+  const isLoading = bankAuth.isMinting || !withdrawProps;
+  const isIframe = !isError && !isLoading;
 
-        {bankAuth.error ? (
-          <ErrorAlert
-            title="Unable to start bank linking"
-            description={bankAuth.error.message}
-          />
-        ) : bankAuth.isMinting || !withdrawProps ? (
-          <div className="flex flex-col gap-3">
-            <Skeleton className="h-10 w-full rounded" />
-            <Skeleton className="h-10 w-full rounded" />
-            <Skeleton className="h-40 w-full rounded" />
-          </div>
-        ) : (
-          <div style={{ height: height ?? 480 }}>
-            <CoinflowWithdraw {...withdrawProps} />
-          </div>
-        )}
-      </DrawerContent>
+  return (
+    <Drawer
+      isOpen={isOpen}
+      onClose={onClose}
+      className="gap-4"
+      showClose={!isIframe || height < MAX_HEIGHT}
+    >
+      {!isIframe ? (
+        <DrawerContent
+          title="Add Bank Account"
+          icon={<PlusIcon variant="line" />}
+        >
+          {/* Always visible while sandbox is active, whatever the drawer state. */}
+          {sandbox && <SandboxWarning />}
+
+          {isError && (
+            <ErrorAlert
+              title="Unable to start bank linking"
+              description={bankAuth.error!.message}
+            />
+          )}
+
+          {isLoading && (
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-10 w-full rounded" />
+              <Skeleton className="h-10 w-full rounded" />
+              <Skeleton className="h-40 w-full rounded" />
+            </div>
+          )}
+        </DrawerContent>
+      ) : (
+        <div style={{ height: MAX_HEIGHT }}>
+          <CoinflowWithdraw {...withdrawProps} />
+        </div>
+      )}
     </Drawer>
   );
 }
