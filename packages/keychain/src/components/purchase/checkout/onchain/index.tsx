@@ -861,7 +861,7 @@ export function OnchainCheckout() {
         }
       />
 
-      <LayoutContent>
+      <LayoutContent className="select-none">
         <Receiving
           title={`You Receive ${quantity > 1 ? `(${quantity})` : ""}`}
           items={purchaseItems}
@@ -870,7 +870,7 @@ export function OnchainCheckout() {
         />
       </LayoutContent>
 
-      <LayoutFooter>
+      <LayoutFooter className="select-none">
         {needsReauth ? (
           <>
             <ErrorCard
