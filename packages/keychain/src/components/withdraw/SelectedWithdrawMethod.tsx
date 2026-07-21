@@ -2,7 +2,7 @@ import React from "react";
 import { ListIcon } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
 import type { CoinflowDestination } from "@/hooks/payments/coinflow-withdraw";
-import { getDestinationDisplay } from "./WithdrawMethodDrawer";
+import { getDestinationDisplay } from "./constants";
 
 interface SelectedWithdrawMethodProps {
   destination: CoinflowDestination;

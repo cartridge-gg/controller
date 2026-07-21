@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CoinflowWithdraw,
-  WithdrawSpeed,
   type CoinflowWithdrawProps,
 } from "@coinflowlabs/react";
 import { Drawer, DrawerContent, PlusIcon } from "@cartridge/controller-ui";
@@ -10,21 +9,9 @@ import { ConfirmingTransaction } from "@/components/purchase/pending/confirming-
 import { useWithdrawContext } from "./provider";
 import { SandboxWarning } from "./OverviewDrawer";
 import { useCoinflowTheme } from "./coinflow-theme";
+import { ALLOWED_LINKING_SPEEDS } from "./constants";
 
 const IFRAME_HEIGHT = 500;
-
-// v1 exposes the bank-deposit subset only (§ plan D3 / open question 2). Card
-// speeds are a later follow-up; drive the whitelist off the destination's
-// supportedSpeeds when a picker lands.
-const ALLOWED_WITHDRAW_SPEEDS: WithdrawSpeed[] = [
-  // bank account
-  WithdrawSpeed.ASAP,
-  WithdrawSpeed.SAME_DAY,
-  WithdrawSpeed.STANDARD,
-  WithdrawSpeed.WIRE,
-  // debit card / apple play
-  // WithdrawSpeed.CARD,
-];
 
 // Coinflow posts iframe events from its own origin (mirrors the SDK's own
 // origin check in CoinflowIFrame). We only run `sandbox`/`prod`.
@@ -88,7 +75,7 @@ export function BankAuthDrawer({
             // inside the iframe. Link completion is handled by the
             // `accountLinked` listener below, not `onSuccess` (which the SDK
             // only fires for a completed withdrawal).
-            allowedWithdrawSpeeds: ALLOWED_WITHDRAW_SPEEDS,
+            allowedWithdrawSpeeds: ALLOWED_LINKING_SPEEDS,
             handleHeightChange: (h: string) => {
               const next = Number.parseInt(h, 10);
               if (Number.isFinite(next) && next > 0) setHeight(next);
