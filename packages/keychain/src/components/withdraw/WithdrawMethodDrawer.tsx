@@ -70,11 +70,6 @@ export function getSpeedDisplay(speed: CoinflowPayoutSpeed): {
   }
 }
 
-/** Fee copy for a card: cents from the quote, or "No fee" when it's free. */
-function formatFee(feeCents: number): string {
-  return feeCents === 0 ? "No fee" : `${formatUsdValue(feeCents / 100)} fee`;
-}
-
 interface WithdrawMethodDrawerProps {
   isOpen: boolean;
   /** Cancels back to the amount step without changing the selection. */
@@ -133,15 +128,30 @@ export function WithdrawMethodDrawer({
         {/* Always visible while sandbox is active, whatever the drawer state. */}
         {sandbox && <SandboxWarning />}
 
-        <div className="flex flex-col gap-3 p-3 bg-background-100 rounded">
+        <div className="flex flex-col gap-2 p-3 bg-background-100 rounded">
           <OverviewRow
             label="Withdrawal Amount"
             value={formatUsdValue(credits / 100)}
             tooltip="The amount that will be withdrawn from your account."
           />
+          <div className="h-px bg-background-200" />
           <OverviewRow
             label="Processing Fee"
-            value={formatUsdValue((quote?.feeCents ?? 0) / 100)}
+            // The quote's fee/loading/error all surface here (not on the cards):
+            // a spinner while it prices, an error fallback, else the fee amount.
+            value={
+              selection && quoteLoading ? (
+                <span className="flex items-center gap-1 text-xs font-medium text-foreground-300">
+                  <Spinner size="sm" /> Calculating fee…
+                </span>
+              ) : selection && quoteError ? (
+                <span className="text-xs font-medium text-destructive-100">
+                  Unable to calculate fee
+                </span>
+              ) : (
+                formatUsdValue((quote?.feeCents ?? 0) / 100)
+              )
+            }
             tooltip="The fee depends on the transfer method and comes out of the withdrawal amount."
           />
         </div>
@@ -158,11 +168,6 @@ export function WithdrawMethodDrawer({
                   destination={destination}
                   speed={speed}
                   selected={isSelected}
-                  // The quote is per-selection, so fee/loading/error only apply
-                  // to the currently highlighted card.
-                  feeCents={isSelected ? quote?.feeCents : undefined}
-                  feeLoading={isSelected && !!quoteLoading}
-                  feeError={isSelected ? (quoteError ?? null) : null}
                   onClick={() =>
                     onSelectMethod({ token: destination.token, speed })
                   }
@@ -203,17 +208,11 @@ function DestinationCard({
   destination,
   speed,
   selected,
-  feeCents,
-  feeLoading,
-  feeError,
   onClick,
 }: {
   destination: CoinflowDestination;
   speed: CoinflowPayoutSpeed;
   selected: boolean;
-  feeCents?: number;
-  feeLoading?: boolean;
-  feeError?: Error | null;
   onClick: () => void;
 }) {
   const { icon, title } = getDestinationDisplay(destination);
@@ -232,51 +231,9 @@ function DestinationCard({
       <Thumbnail icon={icon} size="md" className="bg-background-200" />
       <div className="flex flex-col gap-0.5 flex-1">
         <p className="text-sm font-medium text-foreground-100">{title}</p>
-        <MethodDetail
-          label={label}
-          selected={selected}
-          feeCents={feeCents}
-          feeLoading={feeLoading}
-          feeError={feeError}
-        />
+        <p className="text-xs text-foreground-300">{label}</p>
       </div>
       <p className="text-xs text-foreground-300">{processingTime}</p>
     </div>
   );
-}
-
-/**
- * The card's secondary line: the speed label until this card is picked, then
- * the live quote for the chosen speed — a spinner while it loads, the fee once
- * it resolves, or a fallback when it fails.
- */
-function MethodDetail({
-  label,
-  selected,
-  feeCents,
-  feeLoading,
-  feeError,
-}: {
-  label: string;
-  selected: boolean;
-  feeCents?: number;
-  feeLoading?: boolean;
-  feeError?: Error | null;
-}) {
-  if (selected && feeLoading) {
-    return (
-      <span className="flex items-center gap-1 text-xs text-foreground-300">
-        <Spinner size="sm" /> Calculating fee…
-      </span>
-    );
-  }
-  if (selected && feeError) {
-    return (
-      <p className="text-xs text-destructive-100">Couldn&apos;t load fee</p>
-    );
-  }
-  if (selected && feeCents !== undefined) {
-    return <p className="text-xs text-foreground-300">{formatFee(feeCents)}</p>;
-  }
-  return <p className="text-xs text-foreground-300">{label}</p>;
 }

@@ -26,8 +26,8 @@ export function SandboxWarning() {
   return (
     <ErrorCard
       variant="warning"
-      title="Coinflow Sandbox Enabled"
-      message="Withdrawal will run in Coinflow's sandbox environment. No real payout will be made."
+      title="Coinflow Sandbox Environment"
+      message="No real payout will be made."
     />
   );
 }
@@ -221,12 +221,17 @@ export function OverviewRow({
   isLoading = false,
 }: {
   label: string;
-  value: string;
+  /**
+   * The right-aligned value. A string renders with the standard value styling;
+   * a node renders as-is, so callers can supply their own state (e.g. an
+   * inline "Calculating…" spinner or an error message).
+   */
+  value: React.ReactNode;
   tooltip: string;
   isLoading?: boolean;
 }) {
   return (
-    <div className="flex gap-1 w-full items-center justify-between cursor-default select-none">
+    <div className="flex gap-1 w-full h-4 items-center justify-between cursor-default select-none">
       <p className="text-xs text-foreground-300">{label}</p>
       <TooltipProvider>
         <Tooltip delayDuration={0}>
@@ -251,8 +256,10 @@ export function OverviewRow({
       <div className="flex-1" />
       {isLoading ? (
         <Spinner />
-      ) : (
+      ) : typeof value === "string" ? (
         <p className="text-xs font-medium text-foreground-100">{value}</p>
+      ) : (
+        value
       )}
     </div>
   );

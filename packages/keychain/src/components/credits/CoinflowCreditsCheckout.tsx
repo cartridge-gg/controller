@@ -136,8 +136,8 @@ export function CoinflowCreditsCheckout({
                     {isCoinflowSandbox && (
                       <ErrorCard
                         variant="warning"
-                        title="Coinflow Sandbox Enabled"
-                        message="Card checkout will run in Coinflow's sandbox environment. No real charge will be made."
+                        title="Coinflow Sandbox Environment"
+                        message="No real charge will be made."
                       />
                     )}
                   </>

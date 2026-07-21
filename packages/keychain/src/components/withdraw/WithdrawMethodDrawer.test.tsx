@@ -96,7 +96,7 @@ describe("WithdrawMethodDrawer", () => {
     expect(screen.getByText("Withdraw $5.88").closest("button")).toBeEnabled();
   });
 
-  it("shows the quoted fee on the selected card and the processing-fee row", () => {
+  it("shows the quoted fee on the processing-fee row", () => {
     render(
       <WithdrawMethodDrawer
         {...baseProps}
@@ -105,14 +105,13 @@ describe("WithdrawMethodDrawer", () => {
       />,
     );
 
-    // Fee on the card ($0.25 fee) and mirrored on the Processing Fee row.
-    expect(screen.getByText("$0.25 fee")).toBeInTheDocument();
+    // Fee lands on the Processing Fee row (not the card).
     expect(screen.getByText("$0.25")).toBeInTheDocument();
     // The confirmation summary names the destination + chosen speed.
     expect(screen.getByText("Transfer to:")).toBeInTheDocument();
   });
 
-  it("surfaces a quote error on the selected card", () => {
+  it("surfaces a quote error on the processing-fee row", () => {
     render(
       <WithdrawMethodDrawer
         {...baseProps}
