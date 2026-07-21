@@ -368,6 +368,8 @@ export type BundleOptions = {
   onPurchaseComplete?: () => void;
   /** Options for social claim conditional starterpack */
   socialClaimOptions?: SocialClaimOptions;
+  /** When true, hides the quantity selector and fixes the purchase to a single bundle */
+  singlePurchaseOnly?: boolean;
 };
 
 export type StarterpackOptions = {
@@ -375,6 +377,8 @@ export type StarterpackOptions = {
   preimage?: string;
   /** Callback fired after the Play button closes the starterpack modal */
   onPurchaseComplete?: () => void;
+  /** When true, hides the quantity selector and fixes the purchase to a single starterpack */
+  singlePurchaseOnly?: boolean;
 };
 
 export type MerkleDropsOptions = {

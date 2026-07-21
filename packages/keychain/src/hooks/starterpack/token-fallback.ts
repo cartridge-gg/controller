@@ -17,7 +17,11 @@ import Controller from "@/utils/controller";
  * quotes between them are wasted Ekubo requests. Treat the pair as equivalent
  * when estimating how much of a fallback candidate the user would need.
  */
-function isUsdcVariantPair(a: string, b: string, chainId: string): boolean {
+export function isUsdcVariantPair(
+  a: string,
+  b: string,
+  chainId: string,
+): boolean {
   const usdc = USDC_ADDRESSES[chainId];
   const usdce = USDCE_ADDRESSES[chainId];
   if (!usdc || !usdce) return false;
@@ -46,7 +50,7 @@ export interface UseTokenFallbackReturn {
   status: "pending" | "funded" | "exhausted" | "indeterminate";
 }
 
-async function fetchBalance(
+export async function fetchErc20Balance(
   controller: Controller,
   tokenAddress: string,
   ownerAddress: string,
@@ -225,7 +229,7 @@ export function useTokenFallback({
 
             if (abortController.signal.aborted) return;
 
-            const balance = await fetchBalance(
+            const balance = await fetchErc20Balance(
               controller,
               candidate.address,
               ownerAddress,

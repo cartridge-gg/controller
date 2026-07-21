@@ -33,11 +33,19 @@ export interface StarterpackContextType {
     id: number,
     registryAddress: string,
     socialClaimOptions?: SocialClaimOptions,
+    singlePurchaseOnly?: boolean,
   ) => void;
 
   // Starterpack identification
   starterpackId: string | number | undefined;
-  setStarterpack: (id: string | number, registryAddress: string) => void;
+  setStarterpack: (
+    id: string | number,
+    registryAddress: string,
+    singlePurchaseOnly?: boolean,
+  ) => void;
+
+  // When true, the quantity selector is hidden and purchases are fixed to 1
+  singlePurchaseOnly: boolean;
 
   // Merkle drop identification
   merkleDropKeys: string[] | undefined;
@@ -87,6 +95,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   const [transactionHash, setTransactionHash] = useState<string | undefined>();
   const [displayError, setDisplayError] = useState<Error | undefined>();
   const [claimItemsState, setClaimItemsState] = useState<Item[]>([]);
+  const [singlePurchaseOnly, setSinglePurchaseOnly] = useState(false);
 
   // Detect which source (claimed or onchain) based on starterpack ID
   const type = detectStarterpackType(starterpackId ?? bundleId);
@@ -189,10 +198,12 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
       id: number,
       registryAddress: string,
       socialClaimOptions?: SocialClaimOptions,
+      singlePurchaseOnly?: boolean,
     ) => {
       setBundleId(id);
       setRegistryAddress(registryAddress);
       setSocialClaimOptions(socialClaimOptions);
+      setSinglePurchaseOnly(singlePurchaseOnly ?? false);
       setStarterpackId(undefined);
       setMerkleDropKeys(undefined);
       setMerkleDropOptions(undefined);
@@ -201,9 +212,14 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
   );
 
   const setStarterpack = useCallback(
-    (id: number | string, registryAddress: string) => {
+    (
+      id: number | string,
+      registryAddress: string,
+      singlePurchaseOnly?: boolean,
+    ) => {
       setStarterpackId(id);
       setRegistryAddress(registryAddress);
+      setSinglePurchaseOnly(singlePurchaseOnly ?? false);
       setBundleId(undefined);
       setSocialClaimOptions(undefined);
       setMerkleDropKeys(undefined);
@@ -220,6 +236,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
       setBundleId(undefined);
       setRegistryAddress(undefined);
       setSocialClaimOptions(undefined);
+      setSinglePurchaseOnly(false);
     },
     [],
   );
@@ -264,6 +281,7 @@ export const StarterpackProvider = ({ children }: StarterpackProviderProps) => {
     clearError,
     socialClaimOptions,
     socialClaimConditions,
+    singlePurchaseOnly,
   };
 
   return (
