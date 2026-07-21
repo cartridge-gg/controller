@@ -36,6 +36,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     walletAddress: undefined,
     clearSelectedWallet: () => {},
     availableTokens: [mockUsdcToken],
+    insufficientTokens: new Set<string>(),
     selectedToken: mockUsdcToken,
     setSelectedToken: () => {},
     convertedPrice: null,

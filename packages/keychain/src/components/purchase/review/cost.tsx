@@ -53,6 +53,7 @@ export function CostBreakdown({
   selectedToken,
   onSelectToken,
   tokenSelectDisabled,
+  disabledTokens,
   feesTooltip,
   isLoading,
   value,
@@ -62,6 +63,8 @@ export function CostBreakdown({
   selectedToken?: TokenOption;
   onSelectToken: (address: string) => void;
   tokenSelectDisabled?: boolean;
+  /** Hex-normalized token addresses to render as non-selectable. */
+  disabledTokens?: Set<string>;
   feesTooltip?: ReactNode;
   isLoading?: boolean;
   value: ReactNode;
@@ -99,7 +102,14 @@ export function CostBreakdown({
           />
           <SelectContent>
             {tokens.map((token) => (
-              <SelectItem key={token.address} value={token.address}>
+              <SelectItem
+                key={token.address}
+                value={token.address}
+                disabled={
+                  !token.isCredits &&
+                  (disabledTokens?.has(num.toHex(token.address)) ?? false)
+                }
+              >
                 <div className="flex items-center gap-2">
                   {token.icon ? (
                     <Thumbnail
@@ -138,6 +148,7 @@ export function OnchainCostBreakdown({
     depositAmount: layerswapDepositAmount,
     layerswapFees,
     availableTokens,
+    insufficientTokens,
     selectedPlatform,
     selectedToken,
     setSelectedToken,
@@ -237,6 +248,14 @@ export function OnchainCostBreakdown({
         (t) => t.address.toLowerCase() === address.toLowerCase(),
       );
       if (!token) return;
+      // Insufficient-balance tokens are disabled in the selector; guard here
+      // too so no other code path can select a token that can't pay.
+      if (
+        !token.isCredits &&
+        insufficientTokens.has(num.toHex(token.address))
+      ) {
+        return;
+      }
       // The credits pseudo-token is a payment-method choice, not a token:
       // route it through the rail so the payment method and the displayed
       // token can never disagree, and leave the rail again when a real token
@@ -250,6 +269,7 @@ export function OnchainCostBreakdown({
     },
     [
       availableTokens,
+      insufficientTokens,
       setSelectedToken,
       onCreditsSelect,
       isCreditsRailSelected,
@@ -315,6 +335,7 @@ export function OnchainCostBreakdown({
       tokenSelectDisabled={
         availableTokens.length <= 1 || isTokenSelectionLocked
       }
+      disabledTokens={insufficientTokens}
       isLoading={isFetchingConversion || isFetchingCoinbaseQuote}
       value={value}
       feesTooltip={

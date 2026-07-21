@@ -79,6 +79,7 @@ export function OnchainCheckout() {
     registryAddress,
     bundleId,
     starterpackId,
+    singlePurchaseOnly,
   } = useStarterpackContext();
   const {
     isFetchingConversion,
@@ -1039,6 +1040,7 @@ export function OnchainCheckout() {
                   onPurchase={handlePurchase}
                   onBridge={handleBridge}
                   isApplePayAmountTooLow={isApplePayAmountTooLow}
+                  hideQuantity={singlePurchaseOnly}
                   purchaseLabel={
                     isCoinflowSelected
                       ? "Continue"

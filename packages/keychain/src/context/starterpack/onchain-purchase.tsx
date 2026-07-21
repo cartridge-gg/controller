@@ -32,6 +32,7 @@ import {
   useExternalWallet,
   useLayerswap,
   useTokenSelection,
+  useTokenSufficiency,
   useCoinbase,
   COINBASE_APPLE_PAY_MIN_USD,
   type TokenOption,
@@ -76,6 +77,8 @@ export interface OnchainPurchaseContextType {
 
   // Token selection
   availableTokens: TokenOption[];
+  /** Hex-normalized addresses of tokens the paying wallet cannot cover. */
+  insufficientTokens: Set<string>;
   selectedToken: TokenOption | undefined;
   setSelectedToken: (token: TokenOption | undefined) => void;
   convertedPrice: {
@@ -176,6 +179,7 @@ export const OnchainPurchaseProvider = ({
     setDisplayError,
     registryAddress,
     socialClaimConditions,
+    singlePurchaseOnly,
   } = useStarterpackContext();
   const { connectedHandle } = useSocialClaimConnection(socialClaimConditions);
 
@@ -470,6 +474,18 @@ export const OnchainPurchaseProvider = ({
     return [...availableTokens, CREDITS_TOKEN];
   }, [availableTokens, isApplePaySelected, isCoinflowSelected]);
 
+  // Per-token balance sufficiency so the selector can disable tokens the
+  // paying wallet can't cover (the credits pseudo-token is never checked).
+  const { insufficientTokens } = useTokenSufficiency({
+    controller,
+    starterpackDetails: onchainDetails,
+    availableTokens,
+    quantity,
+    selectedWallet,
+    walletAddress,
+    selectedPlatform,
+  });
+
   // Wrap onSendDeposit to clear errors before sending
   const onSendDeposit = useCallback(async () => {
     setDisplayError(undefined);
@@ -496,9 +512,11 @@ export const OnchainPurchaseProvider = ({
 
   // Apple Pay has a per-transaction minimum ($1.86). If the starterpack's
   // unit cost in USDC is below that, bump the quantity so the total clears
-  // the minimum and surface it to the user via applePayMinQuantity.
+  // the minimum and surface it to the user via applePayMinQuantity. With
+  // singlePurchaseOnly the quantity must stay at 1, so no bump — the
+  // "Amount Too Low" gate blocks Apple Pay instead.
   useEffect(() => {
-    if (!isApplePaySelected) {
+    if (!isApplePaySelected || singlePurchaseOnly) {
       if (applePayMinQuantity !== undefined) setApplePayMinQuantity(undefined);
       return;
     }
@@ -526,6 +544,7 @@ export const OnchainPurchaseProvider = ({
     }
   }, [
     isApplePaySelected,
+    singlePurchaseOnly,
     convertedPrice,
     quantity,
     setQuantity,
@@ -873,6 +892,7 @@ export const OnchainPurchaseProvider = ({
     walletAddress,
     clearSelectedWallet,
     availableTokens: listedTokens,
+    insufficientTokens,
     selectedToken,
     setSelectedToken,
     convertedPrice,
