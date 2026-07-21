@@ -9,6 +9,7 @@ credits settle, resume the original bundle purchase automatically.
 ## Goals
 
 - Always open the credits deposit flow when "Credit Card" is selected.
+- Default to the Credits rail whenever the existing balance covers the purchase.
 - Display the card-backed purchase amount in USD, not USDC.
 - Preserve automatic purchase completion after the deposited credits become
   available.

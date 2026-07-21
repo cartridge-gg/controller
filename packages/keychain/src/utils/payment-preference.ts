@@ -107,6 +107,14 @@ export function resolveInitialPaymentMethod({
   cardTopupAvailable: boolean;
   directCardAvailable: boolean;
 }): InitialPaymentResolution {
+  // Spend an existing credits balance before applying remembered or configured
+  // funding preferences. Wait for the quote and balance so a faster funding
+  // check cannot incorrectly select Controller or card checkout first.
+  if (credits === "pending") return { status: "pending" };
+  if (credits === "available" && hasSufficientCredits) {
+    return { status: "resolved", method: "credits" };
+  }
+
   if (remembered === "controller") {
     return { status: "resolved", method: "controller" };
   }
@@ -122,11 +130,7 @@ export function resolveInitialPaymentMethod({
   }
 
   if (remembered === "credits") {
-    if (credits === "pending") return { status: "pending" };
-    if (
-      credits === "available" &&
-      (hasSufficientCredits || cardTopupAvailable)
-    ) {
+    if (credits === "available" && cardTopupAvailable) {
       return { status: "resolved", method: "credits" };
     }
     return {
@@ -144,8 +148,7 @@ export function resolveInitialPaymentMethod({
   if (funding === "funded") {
     return { status: "resolved", method: "controller" };
   }
-  if (credits === "pending") return { status: "pending" };
-  if (credits === "available" && (hasSufficientCredits || cardTopupAvailable)) {
+  if (credits === "available" && cardTopupAvailable) {
     return { status: "resolved", method: "credits" };
   }
   return {
