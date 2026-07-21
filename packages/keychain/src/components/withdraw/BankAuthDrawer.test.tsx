@@ -25,18 +25,43 @@ describe("BankAuthDrawer", () => {
   const base = {
     session: undefined,
     isMinting: false,
+    isLinking: false,
     error: null,
     onLinked: () => {},
   } satisfies WithdrawContextValue["bankAuth"];
 
-  it("shows a loader while the session is minting", () => {
+  it("shows the preparing message while the session is minting", () => {
     const { container } = renderWithBankAuth({ ...base, isMinting: true });
     expect(screen.getByText("Add Bank Account")).toBeInTheDocument();
+    expect(
+      screen.getByText("Preparing bank authorization..."),
+    ).toBeInTheDocument();
     // No error alert while loading.
     expect(
       screen.queryByText("Unable to start bank linking"),
     ).not.toBeInTheDocument();
     // The Coinflow iframe stub (returns null) is not mounted yet.
+    expect(container.querySelector("iframe")).toBeNull();
+  });
+
+  it("shows the adding message while the linked destination settles", () => {
+    // A session is present, but isLinking keeps the processing message up
+    // (rather than the iframe) until the refetched status lists the new
+    // destination.
+    const { container } = renderWithBankAuth({
+      ...base,
+      isLinking: true,
+      session: {
+        sessionKey: "sk_test",
+        merchantId: "cartridge",
+        env: "sandbox",
+      },
+    });
+    expect(screen.getByText("Add Bank Account")).toBeInTheDocument();
+    expect(screen.getByText("Adding your bank account...")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Preparing bank authorization..."),
+    ).not.toBeInTheDocument();
     expect(container.querySelector("iframe")).toBeNull();
   });
 
@@ -59,10 +84,14 @@ describe("BankAuthDrawer", () => {
         env: "sandbox",
       },
     });
-    // Neither the loader-only nor the error-only branch is showing.
+    // The iframe branch is active, so the non-iframe DrawerContent chrome
+    // (title) and both the error and processing messages are all gone.
+    expect(screen.queryByText("Add Bank Account")).not.toBeInTheDocument();
     expect(
       screen.queryByText("Unable to start bank linking"),
     ).not.toBeInTheDocument();
-    expect(screen.getByText("Add Bank Account")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Preparing bank authorization..."),
+    ).not.toBeInTheDocument();
   });
 });

@@ -52,6 +52,8 @@ export function getDestinationDisplay(destination: CoinflowDestination): {
  * Human-readable label + processing time per delivery speed. A destination
  * exposes one card per `supportedSpeeds` entry, and the card renders the
  * processing time so the user can weigh speed against the quoted fee.
+ * https://docs.coinflow.cash/guides/payouts/beyond-payouts/understanding-payout-speeds
+ * https://docs.coinflow.cash/guides/payouts/payout-methods/supported-payout-methods/overview#implementation
  */
 export function getSpeedDisplay(speed: CoinflowPayoutSpeed): {
   label: string;
@@ -59,14 +61,14 @@ export function getSpeedDisplay(speed: CoinflowPayoutSpeed): {
 } {
   switch (speed) {
     case CoinflowPayoutSpeed.Asap:
-      return { label: "Instant", processingTime: "Within minutes" };
+      return { label: "RTP", processingTime: "Within minutes" };
     case CoinflowPayoutSpeed.SameDay:
-      return { label: "Same Day", processingTime: "Same business day" };
+      return { label: "Same Day ACH", processingTime: "Same business day" };
     case CoinflowPayoutSpeed.Wire:
-      return { label: "Wire", processingTime: "1-2 business days" };
+      return { label: "Wire Transfer", processingTime: "1-2 business days" };
     case CoinflowPayoutSpeed.Standard:
     default:
-      return { label: "Standard", processingTime: "3-5 business days" };
+      return { label: "Standard ACH", processingTime: "2-3 business days" };
   }
 }
 

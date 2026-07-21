@@ -1,34 +1,37 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CoinflowWithdraw,
   WithdrawSpeed,
   type CoinflowWithdrawProps,
 } from "@coinflowlabs/react";
-import {
-  Drawer,
-  DrawerContent,
-  PlusIcon,
-  Skeleton,
-} from "@cartridge/controller-ui";
+import { Drawer, DrawerContent, PlusIcon } from "@cartridge/controller-ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { ConfirmingTransaction } from "@/components/purchase/pending/confirming-transaction";
 import { useWithdrawContext } from "./provider";
 import { SandboxWarning } from "./OverviewDrawer";
 import { useCoinflowTheme } from "./coinflow-theme";
+
+const IFRAME_HEIGHT = 500;
 
 // v1 exposes the bank-deposit subset only (§ plan D3 / open question 2). Card
 // speeds are a later follow-up; drive the whitelist off the destination's
 // supportedSpeeds when a picker lands.
 const ALLOWED_WITHDRAW_SPEEDS: WithdrawSpeed[] = [
   // bank account
+  WithdrawSpeed.ASAP,
   WithdrawSpeed.SAME_DAY,
   WithdrawSpeed.STANDARD,
   WithdrawSpeed.WIRE,
-  WithdrawSpeed.ASAP,
   // debit card / apple play
   // WithdrawSpeed.CARD,
- ];
+];
 
-const MAX_HEIGHT = 500;
+// Coinflow posts iframe events from its own origin (mirrors the SDK's own
+// origin check in CoinflowIFrame). We only run `sandbox`/`prod`.
+const COINFLOW_ORIGIN: Record<"prod" | "sandbox", string> = {
+  prod: "https://coinflow.cash",
+  sandbox: "https://sandbox.coinflow.cash",
+};
 
 interface BankAuthDrawerProps {
   isOpen: boolean;
@@ -45,10 +48,12 @@ interface BankAuthDrawerProps {
  * inside Coinflow — no bank credentials touch our backend. A thin view (mirror
  * of checkout/coinflow/form.tsx): the session is minted + owned by
  * `WithdrawProvider` via `useCoinflowBankAuthSession()`; this drawer only reads
- * it and renders the iframe. On the iframe's success (the `accountLinked`
- * event) `bankAuth.onLinked()` refetches the status so the new destination
- * lists. The legacy raw-form `CreateBankAccountDrawer` is kept in the tree but
- * no longer wired.
+ * it and renders the iframe. Coinflow's SDK has NO callback for a linked bank —
+ * its message switch no-ops on the `accountLinked` event and only invokes
+ * `onSuccess` for a completed *withdrawal* — so we listen for that raw
+ * postMessage ourselves and call `bankAuth.onLinked()` to refetch the status so
+ * the new destination lists. The legacy raw-form `CreateBankAccountDrawer` is
+ * kept in the tree but no longer wired.
  */
 export function BankAuthDrawer({
   isOpen,
@@ -59,7 +64,7 @@ export function BankAuthDrawer({
   const { session } = bankAuth;
 
   const coinflowTheme = useCoinflowTheme();
-  const [height, setHeight] = useState(MAX_HEIGHT);
+  const [height, setHeight] = useState(IFRAME_HEIGHT);
 
   // Session-key auth with no on-chain wallet: `CoinflowWithdraw`'s prop union is
   // discriminated by blockchain and types wallet/connection as required, but the
@@ -75,58 +80,99 @@ export function BankAuthDrawer({
             sessionKey: session.sessionKey,
             blockchain: "solana",
             theme: coinflowTheme,
-            bankAccountLinkRedirect: window.location.href,
+            // Deliberately NOT passing `bankAccountLinkRedirect`: supplying it
+            // opts the bank-link into Coinflow's redirect flow, where the SDK
+            // reacts to the iframe's `redirect` message with
+            // `window.open(url, "_blank")` and hands off to that URL to finish
+            // setup — popping a second tab. Omitting it keeps the entire link
+            // inside the iframe. Link completion is handled by the
+            // `accountLinked` listener below, not `onSuccess` (which the SDK
+            // only fires for a completed withdrawal).
             allowedWithdrawSpeeds: ALLOWED_WITHDRAW_SPEEDS,
-            onSuccess: () => {
-              bankAuth.onLinked();
-            },
             handleHeightChange: (h: string) => {
               const next = Number.parseInt(h, 10);
               if (Number.isFinite(next) && next > 0) setHeight(next);
             },
           } as unknown as CoinflowWithdrawProps)
         : undefined,
-    [session, coinflowTheme, bankAuth],
+    [session, coinflowTheme],
   );
 
+  // Coinflow's SDK swallows the `accountLinked` event (no callback prop exists),
+  // so we listen for the raw postMessage ourselves — the same message its own
+  // handler receives and ignores — and treat it as link-complete. Guard against
+  // a duplicate event firing `onLinked` twice before the step unmounts.
+  const linkedRef = useRef(false);
+  const onLinked = bankAuth.onLinked;
+  useEffect(() => {
+    const env = session?.env;
+    if (!env) return;
+    linkedRef.current = false;
+    const expectedOrigin = COINFLOW_ORIGIN[env];
+    const handler = (event: MessageEvent) => {
+      if (event.origin !== expectedOrigin) return;
+      if (typeof event.data !== "string") return;
+      let method: string | undefined;
+      try {
+        method = JSON.parse(event.data)?.method;
+      } catch {
+        return;
+      }
+      if (method === "accountLinked" && !linkedRef.current) {
+        linkedRef.current = true;
+        onLinked();
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [session?.env, onLinked]);
+
   const isError = !!bankAuth.error;
-  const isLoading = bankAuth.isMinting || !withdrawProps;
-  const isIframe = !isError && !isLoading;
+  // Two distinct processing phases bookend the iframe, each with its own
+  // message: `isPreparing` before it (minting the session / booting the iframe)
+  // and `isLinking` after (holding from the iframe's success event until the
+  // linked destination lands in the refetched status, so the drawer never
+  // flashes an empty picker mid-navigation).
+  const isPreparing = bankAuth.isMinting || !withdrawProps;
+  const isLinking = bankAuth.isLinking;
+  const isIframe = !isError && !isPreparing && !isLinking;
 
   return (
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
       className="gap-4"
-      showClose={!isIframe || height < MAX_HEIGHT}
+      showClose={!isIframe || height < IFRAME_HEIGHT}
     >
-      {!isIframe ? (
+      {isIframe ? (
+        <div style={{ height: IFRAME_HEIGHT }}>
+          <CoinflowWithdraw {...withdrawProps} />
+        </div>
+      ) : (
         <DrawerContent
           title="Add Bank Account"
           icon={<PlusIcon variant="line" />}
         >
-          {/* Always visible while sandbox is active, whatever the drawer state. */}
           {sandbox && <SandboxWarning />}
-
           {isError && (
             <ErrorAlert
               title="Unable to start bank linking"
               description={bankAuth.error!.message}
             />
           )}
-
-          {isLoading && (
-            <div className="flex flex-col gap-3">
-              <Skeleton className="h-10 w-full rounded" />
-              <Skeleton className="h-10 w-full rounded" />
-              <Skeleton className="h-40 w-full rounded" />
-            </div>
+          {isPreparing && (
+            <ConfirmingTransaction
+              title={"Preparing bank authorization..."}
+              status="loading"
+            />
+          )}
+          {isLinking && (
+            <ConfirmingTransaction
+              title={"Adding your bank account..."}
+              status="loading"
+            />
           )}
         </DrawerContent>
-      ) : (
-        <div style={{ height: MAX_HEIGHT }}>
-          <CoinflowWithdraw {...withdrawProps} />
-        </div>
       )}
     </Drawer>
   );

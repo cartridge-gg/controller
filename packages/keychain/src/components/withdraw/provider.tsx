@@ -3,7 +3,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -113,6 +112,12 @@ export type WithdrawContextValue = {
   bankAuth: {
     session?: CoinflowBankAuthSession;
     isMinting: boolean;
+    /**
+     * True from the iframe's success event until the refetched status contains
+     * the freshly-linked destination — drives the drawer's loading state so it
+     * holds instead of flashing an empty picker before navigating.
+     */
+    isLinking: boolean;
     error: Error | null;
     onLinked: () => void;
   };
@@ -146,6 +151,7 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
   bankAuth: {
     session: undefined,
     isMinting: false,
+    isLinking: false,
     error: null,
     onLinked: () => {},
   },
@@ -174,6 +180,9 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   const [selectedDestination, setSelectedDestination] = useState<
     CoinflowDestination | undefined
   >();
+  // True while the linked destination settles into the refetched status (see
+  // onBankLinked) — drives the add-bank drawer's loader through the round-trip.
+  const [isLinking, setIsLinking] = useState(false);
 
   // Live gate: KYC state, destinations, bounds, active withdrawal. Only
   // fetched while the flow is open; refetch-on-focus (in the hook) covers the
@@ -185,10 +194,6 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   } = useCoinflowWithdrawStatus({
     enabled: isOpen,
   });
-
-  useEffect(() => {
-    console.log(`WITHDRAW STATUS:`, status);
-  }, [status]);
 
   // Hosted Bank Authentication UI session (§3.4). Owned here; BankAuthDrawer
   // only reads `session`. `launch()` mints it when the add-bank step is entered.
@@ -220,6 +225,7 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     setCredits(undefined);
     setMethodFlow("none");
     setSelectedDestination(undefined);
+    setIsLinking(false);
     bankAuthSession.reset();
     quote.reset();
   }, [bankAuthSession, quote]);
@@ -265,10 +271,15 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   // lists, then hand back to the method picker (now non-empty) to confirm it.
   // We select from the refreshed status rather than the iframe payload — the
   // status query is the single source of truth for destinations.
-  const onBankLinked = useCallback(() => {
-    bankAuthSession.onLinked();
+  const onBankLinked = useCallback(async () => {
+    setIsLinking(true);
+    // Await the refetch (invalidateQueries resolves once the active status
+    // refetch settles) so the picker lands on a status that already lists the
+    // new destination — no empty-picker flash between the iframe and the pick.
+    await bankAuthSession.onLinked();
     bankAuthSession.reset();
     setMethodFlow("select");
+    setIsLinking(false);
   }, [bankAuthSession]);
 
   // Confirms a destination (picked on the method drawer, or freshly returned
@@ -333,6 +344,7 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
         bankAuth: {
           session: bankAuthSession.session,
           isMinting: bankAuthSession.isMinting,
+          isLinking,
           error: bankAuthSession.error,
           onLinked: onBankLinked,
         },
