@@ -1,7 +1,7 @@
 {
   "name": "@cartridge/controller-example-minimal",
   "private": true,
-  "version": "0.13.15",
+  "version": "0.13.16",
   "type": "module",
   "scripts": {
     "dev": "env-cmd -f .env.dev vite --port 3003",
