@@ -1,8 +1,6 @@
 import {
   ArrowFromLineIcon,
-  BankIcon,
   Button,
-  CreditCardIcon,
   Drawer,
   DrawerContent,
   Spinner,
@@ -11,66 +9,17 @@ import {
 import { cn } from "@cartridge/controller-ui/utils";
 import { formatUsdValue } from "@/utils/format-value";
 import {
-  CoinflowDestinationType,
   CoinflowPayoutSpeed,
   type CoinflowDestination,
   type CoinflowWithdrawQuote,
 } from "@/hooks/payments/coinflow-withdraw";
 import type { WithdrawQuoteSelection } from "./useWithdrawQuote";
 import { OverviewRow, SandboxWarning } from "./OverviewDrawer";
-
-/**
- * Icon + label for a destination. Fee and ETA are no longer static copy — the
- * fee comes from the live quote and the processing time from the chosen speed
- * (see `getSpeedDisplay`). Only bank destinations can be linked in-app today;
- * the other types render if Coinflow returns them.
- */
-export function getDestinationDisplay(destination: CoinflowDestination): {
-  icon: React.ReactElement;
-  title: string;
-} {
-  switch (destination.type) {
-    case CoinflowDestinationType.Card:
-      return {
-        icon: <CreditCardIcon variant="solid" />,
-        title: destination.display,
-      };
-    case CoinflowDestinationType.Bank:
-      return {
-        icon: <BankIcon />,
-        title: destination.display,
-      };
-    default:
-      return {
-        icon: <BankIcon />,
-        title: destination.display,
-      };
-  }
-}
-
-/**
- * Human-readable label + processing time per delivery speed. A destination
- * exposes one card per `supportedSpeeds` entry, and the card renders the
- * processing time so the user can weigh speed against the quoted fee.
- * https://docs.coinflow.cash/guides/payouts/beyond-payouts/understanding-payout-speeds
- * https://docs.coinflow.cash/guides/payouts/payout-methods/supported-payout-methods/overview#implementation
- */
-export function getSpeedDisplay(speed: CoinflowPayoutSpeed): {
-  label: string;
-  processingTime: string;
-} {
-  switch (speed) {
-    case CoinflowPayoutSpeed.Asap:
-      return { label: "RTP", processingTime: "Within minutes" };
-    case CoinflowPayoutSpeed.SameDay:
-      return { label: "Same Day ACH", processingTime: "Same business day" };
-    case CoinflowPayoutSpeed.Wire:
-      return { label: "Wire Transfer", processingTime: "1-2 business days" };
-    case CoinflowPayoutSpeed.Standard:
-    default:
-      return { label: "Standard ACH", processingTime: "2-3 business days" };
-  }
-}
+import {
+  AVAILABLE_SPEEDS,
+  getDestinationDisplay,
+  SPEED_DISPLAY,
+} from "./constants";
 
 interface WithdrawMethodDrawerProps {
   isOpen: boolean;
@@ -190,7 +139,7 @@ export function WithdrawMethodDrawer({
               />
               <p className="font-medium">
                 {getDestinationDisplay(selectedDestination).title} ·{" "}
-                {getSpeedDisplay(selection.speed).label}
+                {SPEED_DISPLAY[selection.speed].label}
               </p>
             </div>
           </div>
@@ -218,7 +167,9 @@ function DestinationCard({
   onClick: () => void;
 }) {
   const { icon, title } = getDestinationDisplay(destination);
-  const { label, processingTime } = getSpeedDisplay(speed);
+  const { label, processingTime } = SPEED_DISPLAY[speed];
+
+  if (!AVAILABLE_SPEEDS.includes(speed)) return <></>;
 
   return (
     <div
