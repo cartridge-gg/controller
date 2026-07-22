@@ -23,7 +23,11 @@ import { fetchData } from "@/utils/graphql";
 import { parseSimulationEvents } from "@/components/simulation/event-parser";
 import { getChecksumAddress, uint256 } from "starknet";
 import type { SimulationEvent } from "@/components/simulation/event-parser";
-import { executeWithSpendEnforcement } from "./spend-enforcement";
+import {
+  executeWithSpendEnforcement,
+  invalidatePlayerControlsCache,
+  __resetPlayerControlsCacheForTests,
+} from "./spend-enforcement";
 import type { ControllerError } from "./execute";
 
 const mockFetchData = vi.mocked(fetchData);
@@ -107,6 +111,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
   mockCallContract.mockResolvedValue(["0x6"]);
+  // The player-controls status cache is module-level (keyed by address), so
+  // it must be reset between tests to keep them independent.
+  __resetPlayerControlsCacheForTests();
 });
 
 describe("executeWithSpendEnforcement", () => {
@@ -216,5 +223,81 @@ describe("executeWithSpendEnforcement", () => {
     expect(error?.code).toBe(ErrorCode.InsufficientBalance);
     expect(error?.message.toLowerCase()).toContain("entry and purchase limit");
     expect(execute).not.toHaveBeenCalled();
+  });
+
+  describe("player-controls status cache", () => {
+    it("serves a fresh cache entry without a network call", async () => {
+      routeFetchData({ entryPurchaseAmountCents: null });
+      const execute = vi.fn().mockResolvedValue({ transaction_hash: "0xabc" });
+
+      await executeWithSpendEnforcement(controller, [], execute);
+      expect(mockFetchData).toHaveBeenCalledTimes(1);
+
+      // Second execution within the TTL: no additional status fetch.
+      await executeWithSpendEnforcement(controller, [], execute);
+      expect(mockFetchData).toHaveBeenCalledTimes(1);
+      expect(execute).toHaveBeenCalledTimes(2);
+    });
+
+    it("falls back to the last known-good result when a re-fetch fails (stale-on-error)", async () => {
+      routeFetchData({
+        entryPurchaseAmountCents: 150,
+        events: [outboundTransfer(USDC, 1_000_000n)],
+      });
+      const execute = vi.fn().mockResolvedValue({ transaction_hash: "0xabc" });
+
+      // Establish a known-good cached limit.
+      await executeWithSpendEnforcement(controller, [], execute);
+
+      // Force the next lookup to re-fetch, and make that re-fetch fail.
+      invalidatePlayerControlsCache(ADDRESS);
+      mockFetchData.mockImplementation((async (doc: string) => {
+        if (doc.includes("priceByAddresses")) {
+          return {
+            priceByAddresses: [
+              {
+                __typename: "Price",
+                base: USDC,
+                quote: "USD",
+                amount: "100000000",
+                decimals: 8,
+              },
+            ],
+          };
+        }
+        throw new Error("player controls status unavailable");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any);
+
+      // The prior known limit (150 cents, $1 already used) is still
+      // enforced even though the status re-fetch failed — a second $1
+      // transfer would push local usage over the limit.
+      await expect(
+        executeWithSpendEnforcement(controller, [], execute),
+      ).rejects.toMatchObject({ code: ErrorCode.InsufficientBalance });
+    });
+
+    it("fails closed on fetch failure when the address has never been fetched successfully", async () => {
+      routeFetchData({ entryPurchaseAmountCents: null, statusThrows: true });
+      const execute = vi.fn().mockResolvedValue({ transaction_hash: "0xabc" });
+
+      await expect(
+        executeWithSpendEnforcement(controller, [], execute),
+      ).rejects.toMatchObject({ code: ErrorCode.StarknetContractError });
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it("invalidatePlayerControlsCache forces a re-fetch on the next lookup", async () => {
+      routeFetchData({ entryPurchaseAmountCents: null });
+      const execute = vi.fn().mockResolvedValue({ transaction_hash: "0xabc" });
+
+      await executeWithSpendEnforcement(controller, [], execute);
+      expect(mockFetchData).toHaveBeenCalledTimes(1);
+
+      invalidatePlayerControlsCache(ADDRESS);
+
+      await executeWithSpendEnforcement(controller, [], execute);
+      expect(mockFetchData).toHaveBeenCalledTimes(2);
+    });
   });
 });

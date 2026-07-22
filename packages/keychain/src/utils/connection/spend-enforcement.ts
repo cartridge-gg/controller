@@ -28,9 +28,10 @@ import type { ControllerError } from "./execute";
  * (`executeCore`) and manual `account.execute` (ConfirmTransaction).
  *
  * Flow:
- *   1. Query player-controls status. If there is no active entry-and-purchase
- *      limit, run `execute` directly with no simulation or reservation. This is
- *      the common fast path. A status-query failure blocks execution.
+ *   1. Load player-controls status (cached — see `loadEntryPurchaseLimit`). If
+ *      there is no active entry-and-purchase limit, run `execute` directly
+ *      with no simulation or reservation. This is the common fast path, and
+ *      with a fresh cache entry it costs zero network round-trips.
  *   2. With an active entry-and-purchase limit: simulate the calls, compute
  *      gross USD outflow, and **fail closed** if simulation or valuation errors.
  *   3. Compare the outflow against server-recorded credit spend plus this
@@ -45,7 +46,7 @@ export async function executeWithSpendEnforcement(
 ): Promise<InvokeFunctionResponse> {
   let limit: EntryPurchaseLimit | null;
   try {
-    limit = await loadEntryPurchaseLimit();
+    limit = await loadEntryPurchaseLimit(controller.address());
   } catch (cause) {
     throw valuationBlockedError(cause);
   }
@@ -84,34 +85,105 @@ export async function executeWithSpendEnforcement(
   return result;
 }
 
-/**
- * Whether the user currently has an active entry-and-purchase limit. Query
- * failures are propagated so callers fail closed rather than bypassing a
- * configured limit.
- */
 type EntryPurchaseLimit = {
   amountCents: number;
   serverUsedCents: number;
   windowStart: string;
 };
 
-async function loadEntryPurchaseLimit(): Promise<EntryPurchaseLimit | null> {
-  const data = await fetchData<
-    PlayerControlsQuery,
-    PlayerControlsQueryVariables
-  >(PlayerControlsDocument);
-  const { entryPurchase, windowStart } = data.playerControls;
-  if (
-    entryPurchase.amountCents === null ||
-    entryPurchase.amountCents === undefined
-  ) {
-    return null;
+/**
+ * Per-address cache entry for the last successful `playerControls` status
+ * lookup. `result` is `null` when the last successful fetch found no active
+ * entry-and-purchase limit (still a meaningful, cacheable fact).
+ */
+type PlayerControlsCacheEntry = {
+  result: EntryPurchaseLimit | null;
+  fetchedAt: number;
+};
+
+const PLAYER_CONTROLS_CACHE_TTL_MS = 60_000;
+const playerControlsCache = new Map<string, PlayerControlsCacheEntry>();
+
+/**
+ * Loads the user's entry-and-purchase limit, with an in-memory, per-address
+ * cache in front of the `playerControls` query.
+ *
+ * Enforcement here is client-side and advisory by design — the backend
+ * remains authoritative and re-checks on its own. Given that, this trades a
+ * little staleness (up to `PLAYER_CONTROLS_CACHE_TTL_MS`) for making the
+ * common no-limit path a zero-round-trip check on every transaction, and for
+ * not letting a transient API blip block all transactions for a user who has
+ * a known limit: on fetch failure we fall back to the last successful result
+ * for this address regardless of its age ("stale-on-error"), so enforcement
+ * stays in effect whenever a limit is known. Only an address that has never
+ * had a successful fetch fails closed (`valuationBlockedError`), matching the
+ * previous behavior for a user we know nothing about yet.
+ *
+ * Callers that change limits (the settings mutation) should call
+ * `invalidatePlayerControlsCache(address)` so the new limit is honored
+ * immediately instead of waiting out the TTL.
+ */
+async function loadEntryPurchaseLimit(
+  address: string,
+): Promise<EntryPurchaseLimit | null> {
+  const key = address.toLowerCase();
+  const cached = playerControlsCache.get(key);
+  if (cached && Date.now() - cached.fetchedAt < PLAYER_CONTROLS_CACHE_TTL_MS) {
+    return cached.result;
   }
-  return {
-    amountCents: entryPurchase.amountCents,
-    serverUsedCents: entryPurchase.usedCents,
-    windowStart: String(windowStart),
-  };
+
+  try {
+    const data = await fetchData<
+      PlayerControlsQuery,
+      PlayerControlsQueryVariables
+    >(PlayerControlsDocument);
+    const { entryPurchase, windowStart } = data.playerControls;
+    const result =
+      entryPurchase.amountCents === null ||
+      entryPurchase.amountCents === undefined
+        ? null
+        : {
+            amountCents: entryPurchase.amountCents,
+            serverUsedCents: entryPurchase.usedCents,
+            windowStart: String(windowStart),
+          };
+    playerControlsCache.set(key, { result, fetchedAt: Date.now() });
+    return result;
+  } catch (cause) {
+    // Stale-on-error: a previously-known result (of any age) is preserved
+    // enforcement; only a never-fetched address fails closed.
+    if (cached) {
+      return cached.result;
+    }
+    throw cause;
+  }
+}
+
+/**
+ * Forces the next lookup for `address` to re-fetch instead of using a stale
+ * (up to TTL) cached limit. Call this right after a successful
+ * `updatePlayerControls` mutation so limit changes take effect immediately
+ * in the same tab.
+ *
+ * This marks the entry expired rather than deleting it outright: if there
+ * *was* a previously-known result, it remains available as the stale-on-
+ * error fallback should the forced re-fetch itself fail. An address with no
+ * cache entry yet has nothing to invalidate.
+ */
+export function invalidatePlayerControlsCache(address: string): void {
+  const key = address.toLowerCase();
+  const existing = playerControlsCache.get(key);
+  if (existing) {
+    playerControlsCache.set(key, { result: existing.result, fetchedAt: 0 });
+  }
+}
+
+/**
+ * Test-only: fully resets the in-memory cache across all addresses.
+ * @internal
+ */
+export function __resetPlayerControlsCacheForTests(): void {
+  playerControlsCache.clear();
 }
 
 /** Simulate the calls and reduce them to per-token gross outflow. */
