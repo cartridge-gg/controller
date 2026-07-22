@@ -1,4 +1,5 @@
 import { addAddressPadding, getChecksumAddress } from "starknet";
+import { resolveNestedImageUri } from "./image-url";
 
 /**
  * Resolve the Torii base URL — the single source of truth for how a Torii URL
@@ -68,6 +69,10 @@ export function getToriiTokenImageUrls(
  * The standard fallback chain for a token image: token-level URLs first, then
  * the token metadata image, then the collection-level image. This mirrors the
  * chain used by the asset page preview, which is the reference behavior.
+ *
+ * When the metadata image is a malformed data URI wrapping a plain URL (see
+ * `resolveNestedImageUri`), the decoded URL is the image the game intended,
+ * so it is promoted ahead of the Torii candidates (cartridge-gg/controller#2664).
  */
 export function getTokenImageFallbacks(
   toriiUrl: string,
@@ -75,9 +80,13 @@ export function getTokenImageFallbacks(
   tokenId: string,
   metadataImage?: string,
 ): string[] {
+  const nestedUri = metadataImage
+    ? resolveNestedImageUri(metadataImage)
+    : undefined;
   return [
+    ...(nestedUri ? [nestedUri] : []),
     ...getToriiTokenImageUrls(toriiUrl, contractAddress, tokenId),
-    ...(metadataImage ? [metadataImage] : []),
+    ...(!nestedUri && metadataImage ? [metadataImage] : []),
     getToriiCollectionImageUrl(toriiUrl, contractAddress),
   ];
 }

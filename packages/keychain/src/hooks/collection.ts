@@ -12,6 +12,7 @@ import {
   getToriiCollectionImageUrl,
   getToriiTokenImageUrls,
 } from "@/helpers/torii-url";
+import { resolveMetadataImage } from "@/helpers/image-url";
 
 export const ERC721 = "ERC721";
 export const ERC1155 = "ERC1155";
@@ -110,7 +111,7 @@ export function useCollection({
         imageUrls: [
           getToriiCollectionImageUrl(toriiUrl, contractAddress),
           ...getToriiTokenImageUrls(toriiUrl, contractAddress, asset.token_id!),
-          metadata.image,
+          resolveMetadataImage(metadata.image) || "",
         ],
         totalCount: ids.length,
       };
@@ -273,7 +274,7 @@ export function useCollections(): UseCollectionsResponse {
                 contractAddress,
                 asset.token_id!,
               ),
-              metadata?.image || "",
+              resolveMetadataImage(metadata?.image) || "",
             ],
             totalCount: tokenIds.length,
           };

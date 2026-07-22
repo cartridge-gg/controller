@@ -89,4 +89,17 @@ describe("getTokenImageFallbacks", () => {
       getTokenImageFallbacks(TORII_URL, CONTRACT_ADDRESS, TOKEN_ID),
     ).toHaveLength(3);
   });
+
+  it("promotes a nested metadata image URL ahead of Torii candidates", () => {
+    const malformed =
+      "data:image/svg+xml;base64,aHR0cHM6Ly9zdGF0aWMuY2FydHJpZGdlLmdnL3ByZXNldHMvZ2xpdGNoLWJvbWIvaWNvbi5wbmc=";
+    expect(
+      getTokenImageFallbacks(TORII_URL, CONTRACT_ADDRESS, TOKEN_ID, malformed),
+    ).toEqual([
+      "https://static.cartridge.gg/presets/glitch-bomb/icon.png",
+      `${TORII_URL}/static/${NORMALIZED_CONTRACT_ADDRESS}/${TOKEN_ID}/image`,
+      `${TORII_URL}/static/${CONTRACT_ADDRESS}/${TOKEN_ID}/image`,
+      `${TORII_URL}/static/${NORMALIZED_CONTRACT_ADDRESS}/image`,
+    ]);
+  });
 });
