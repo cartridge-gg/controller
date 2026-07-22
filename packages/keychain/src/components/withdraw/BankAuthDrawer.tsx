@@ -58,6 +58,7 @@ export function BankAuthDrawer({
   // hosted bank-auth UI is driven purely by the session key (matching the
   // on-ramp settlement chain, "solana"). Cast to satisfy the union — the iframe
   // never requests a transaction signature in this flow.
+  // https://github.com/coinflow-labs-us/coinflow-react#withdraw-usage
   const withdrawProps = useMemo(
     () =>
       session
@@ -67,6 +68,9 @@ export function BankAuthDrawer({
             sessionKey: session.sessionKey,
             blockchain: "solana",
             theme: coinflowTheme,
+            // do not allow to withdraw
+            amount: 0,
+            lockAmount: true,
             // Deliberately NOT passing `bankAccountLinkRedirect`: supplying it
             // opts the bank-link into Coinflow's redirect flow, where the SDK
             // reacts to the iframe's `redirect` message with
