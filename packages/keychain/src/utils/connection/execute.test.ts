@@ -264,7 +264,7 @@ describe("execute utils", () => {
       // Should navigate to UI for session refresh
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.stringMatching(/^\/execute\?/),
-        { replace: true },
+        { replace: true, reset: true },
       );
 
       // Parse the URL to verify error is included
@@ -308,7 +308,7 @@ describe("execute utils", () => {
       // Should navigate to UI for manual execution
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.stringMatching(/^\/execute\?/),
-        { replace: true },
+        { replace: true, reset: true },
       );
 
       // Parse the URL to verify error is included
@@ -394,7 +394,7 @@ describe("execute utils", () => {
 
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.stringMatching(/^\/execute\?/),
-        { replace: true },
+        { replace: true, reset: true },
       );
 
       // The promise should be pending since sync mode waits for navigation
@@ -450,7 +450,7 @@ describe("execute utils", () => {
 
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.stringMatching(/^\/execute\?/),
-        { replace: true },
+        { replace: true, reset: true },
       );
 
       expect(result).toEqual({
@@ -482,7 +482,7 @@ describe("execute utils", () => {
 
       expect(mockNavigate).toHaveBeenCalledWith(
         expect.stringMatching(/^\/execute\?/),
-        { replace: true },
+        { replace: true, reset: true },
       );
 
       // When trySessionExecute fails, we return USER_INTERACTION_REQUIRED
