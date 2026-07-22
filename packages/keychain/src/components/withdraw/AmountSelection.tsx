@@ -5,6 +5,16 @@ import { formatUsdValue } from "@/utils/format-value";
 
 export const WITHDRAW_PERCENT_PRESETS = [25, 50, 75, 100];
 
+/**
+ * Formats whole credits (1 credit = $0.01) into the dollar string the amount
+ * input shows, with no trailing zeros: 5000 -> "50", 5050 -> "50.5",
+ * 613 -> "6.13". (String() yields the shortest round-tripping decimal, which
+ * for credits/100 is always the ≤2-decimal form.)
+ */
+export function creditsToInputValue(credits: number): string {
+  return String(credits / 100);
+}
+
 type AmountSelectionProps = {
   /** Minimum withdrawal from coinflowWithdrawStatus, in whole credits. */
   minCredits: number;
@@ -61,15 +71,19 @@ export function AmountSelection({
       <div className="relative">
         <Input
           className="pl-8 flex-1"
-          type="number"
+          type="text"
           inputMode="decimal"
-          step="0.01"
-          min="0"
           value={value}
           disabled={lockSelection}
           onChange={(e) => {
-            setValue(e.target.value);
-            setSelectedPercent(undefined);
+            // Text input (not type="number") so the decimal separator is always
+            // "." regardless of locale. Accept a comma as a dot, then keep only
+            // digits with a single optional decimal point.
+            const next = e.target.value.replace(/,/g, ".");
+            if (next === "" || /^\d*\.?\d*$/.test(next)) {
+              setValue(next);
+              setSelectedPercent(undefined);
+            }
           }}
           onClear={() => {
             setValue("");
@@ -93,7 +107,7 @@ export function AmountSelection({
             disabled={lockSelection || maxCredits < minCredits}
             onClick={() => {
               const presetCredits = Math.floor((maxCredits * percent) / 100);
-              setValue((presetCredits / 100).toFixed(2));
+              setValue(creditsToInputValue(presetCredits));
               setSelectedPercent(percent);
             }}
           >

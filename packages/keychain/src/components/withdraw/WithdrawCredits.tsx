@@ -7,6 +7,7 @@ import { Verification } from "@/components/purchase/verification";
 import { useWithdrawContext } from "./provider";
 import { BankAuthDrawer } from "./BankAuthDrawer";
 import { CoinflowKycDrawer } from "./CoinflowKycDrawer";
+import { creditsToInputValue } from "./AmountSelection";
 import { OverviewDrawer } from "./OverviewDrawer";
 import { WithdrawMethodDrawer } from "./WithdrawMethodDrawer";
 
@@ -81,7 +82,7 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
         amountMode={step === "amount"}
         // Restores the picked amount when the drawer re-opens after the
         // method sub-step (the drawer resets its input on close).
-        defaultAmountValue={credits ? (credits / 100).toFixed(2) : undefined}
+        defaultAmountValue={credits ? creditsToInputValue(credits) : undefined}
         activeWithdrawal={activeWithdrawal}
         historyLoading={activeWithdrawalLoading}
         onContinue={(credits) => {
