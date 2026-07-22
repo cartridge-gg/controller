@@ -156,4 +156,48 @@ describe("WithdrawMethodDrawer", () => {
     expect(screen.getByText("Unable to calculate fee")).toBeInTheDocument();
     expect(screen.getByText("Withdraw $6.13").closest("button")).toBeDisabled();
   });
+
+  it("initiates the withdrawal when the button is clicked with a resolved quote", () => {
+    const onWithdraw = vi.fn();
+    render(
+      <WithdrawMethodDrawer
+        {...baseProps}
+        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
+        quote={quote}
+        onWithdraw={onWithdraw}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("Withdraw $5.88"));
+    expect(onWithdraw).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables the button while the withdrawal is submitting", () => {
+    const { container } = render(
+      <WithdrawMethodDrawer
+        {...baseProps}
+        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
+        quote={quote}
+        isSubmitting
+      />,
+    );
+
+    // A resolved quote would otherwise enable it; the in-flight submit holds it
+    // disabled (the cards are role="button" divs — the real submit is <button>).
+    expect(container.querySelector("button")).toBeDisabled();
+  });
+
+  it("renders the submit error above the button", () => {
+    render(
+      <WithdrawMethodDrawer
+        {...baseProps}
+        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
+        quote={quote}
+        submitError={new Error("insufficient balance")}
+      />,
+    );
+
+    expect(screen.getByText("Withdrawal failed")).toBeInTheDocument();
+    expect(screen.getByText("insufficient balance")).toBeInTheDocument();
+  });
 });

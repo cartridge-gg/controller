@@ -9,9 +9,11 @@ import {
 import {
   CoinflowKycStatus,
   useCoinflowBankAuthSession,
+  useCoinflowWithdrawal,
   useCoinflowWithdrawStatus,
   type CoinflowBankAuthSession,
   type CoinflowDestination,
+  type CoinflowWithdrawal,
 } from "@/hooks/payments/coinflow-withdraw";
 import type { CoinflowWithdrawStatusQuery } from "@/utils/api";
 import { useConnection } from "@/hooks/connection";
@@ -19,6 +21,7 @@ import { useFeature } from "@/hooks/features";
 import { useGeoLocation } from "@/hooks/geo";
 import { useIdentityContext } from "@/components/identity/provider";
 import { useWithdrawQuote, type WithdrawQuote } from "./useWithdrawQuote";
+import { useWithdrawSubmit, type WithdrawSubmit } from "./useWithdrawSubmit";
 import { WithdrawCredits } from "./WithdrawCredits";
 
 export type CoinflowWithdrawStatus =
@@ -128,6 +131,21 @@ export type WithdrawContextValue = {
    * clicked, quoting the chosen destination + speed for the picked `credits`.
    */
   quote: WithdrawQuote;
+  /**
+   * The final payout (§3.6): initiates the withdrawal for the confirmed amount
+   * + method and reports its return status. The provider owns it here (logic in
+   * `useWithdrawSubmit`); the method drawer's WITHDRAW button calls
+   * `submit.submit` and reads `submit.isLoading`/`submit.error`. On success the
+   * flow returns to the overview drawer, now listing the new withdrawal below.
+   */
+  submit: WithdrawSubmit;
+  /**
+   * The active (in-flight) withdrawal, resolved from `activeWithdrawalId` — the
+   * overview History card. Undefined when none is in flight.
+   */
+  activeWithdrawal?: CoinflowWithdrawal;
+  /** The active-withdrawal lookup is in flight. */
+  activeWithdrawalLoading: boolean;
 };
 
 export const WithdrawContext = createContext<WithdrawContextValue>({
@@ -163,6 +181,14 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
     isLoading: false,
     error: null,
   },
+  submit: {
+    submit: () => {},
+    isLoading: false,
+    error: null,
+    reset: () => {},
+  },
+  activeWithdrawal: undefined,
+  activeWithdrawalLoading: false,
 });
 
 export function WithdrawProvider({ children }: PropsWithChildren) {
@@ -203,6 +229,35 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   // calls `quote.select` as cards are clicked. Keyed on the picked `credits`,
   // so it re-quotes automatically if the amount changes.
   const quote = useWithdrawQuote(credits);
+
+  // The active (in-flight) withdrawal for the overview History card. Resolved
+  // from `activeWithdrawalId` (the backend keeps one active per user); a
+  // successful initiation refetches the status so this id lands, then this
+  // query pulls the row. Only fetched while the flow is open.
+  const { data: activeWithdrawal, isLoading: activeWithdrawalLoading } =
+    useCoinflowWithdrawal(status?.activeWithdrawalId ?? undefined, {
+      enabled: isOpen && !!status?.activeWithdrawalId,
+    });
+
+  // Lands back on the overview drawer after a successful initiation — as if
+  // freshly opened from the menu, its History section now listing the new
+  // withdrawal. Clears the picked amount/method/quote so the next withdrawal
+  // starts fresh; leaves the drawer open (isOpen untouched).
+  const onWithdrawSuccess = useCallback(() => {
+    setStarted(false);
+    setMethodFlow("none");
+    setCredits(undefined);
+    setSelectedDestination(undefined);
+    quote.reset();
+  }, [quote]);
+
+  // The final payout (§3.6). Owned here; the method drawer's WITHDRAW button
+  // drives it. Keyed on the picked amount + the quote's confirmed selection.
+  const submit = useWithdrawSubmit({
+    credits,
+    selection: quote.selection,
+    onSuccess: onWithdrawSuccess,
+  });
 
   // Entry-point gate (§3.2): the "coinflow-payouts" flag controls visibility;
   // geo (US-only) + signed-in control the enabled state. The button renders
@@ -251,21 +306,24 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   const openMethodSelection = useCallback(() => {
     if (!status) return;
     // Fresh picker every open — a stale card selection would otherwise show a
-    // quote for a method the user hasn't re-picked.
+    // quote for a method the user hasn't re-picked; a stale submit error would
+    // linger on the reopened drawer.
     quote.reset();
+    submit.reset();
     if (status.destinations.length === 0) {
       setMethodFlow("add");
       bankAuthSession.launch().catch(() => {});
       return;
     }
     setMethodFlow("select");
-  }, [status, bankAuthSession, quote]);
+  }, [status, bankAuthSession, quote, submit]);
 
   const closeMethodSelection = useCallback(() => {
     setMethodFlow("none");
     bankAuthSession.reset();
     quote.reset();
-  }, [bankAuthSession, quote]);
+    submit.reset();
+  }, [bankAuthSession, quote, submit]);
 
   // The hosted iframe linked a destination: refetch the live status so it
   // lists, then hand back to the method picker (now non-empty) to confirm it.
@@ -349,6 +407,9 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
           onLinked: onBankLinked,
         },
         quote,
+        submit,
+        activeWithdrawal,
+        activeWithdrawalLoading,
       }}
     >
       {children}

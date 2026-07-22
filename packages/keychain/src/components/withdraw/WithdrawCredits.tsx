@@ -43,6 +43,9 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
     openMethodSelection,
     closeMethodSelection,
     quote,
+    submit,
+    activeWithdrawal,
+    activeWithdrawalLoading,
   } = useWithdrawContext();
 
   const { isCoinflowSandbox } = useCoinflowIsMainnet();
@@ -80,6 +83,8 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
         defaultAmountValue={credits ? (credits / 100).toFixed(2) : undefined}
         selectedDestination={selectedDestination}
         onChangeMethod={openMethodSelection}
+        activeWithdrawal={activeWithdrawal}
+        historyLoading={activeWithdrawalLoading}
         onContinue={(credits) => {
           // Whole credits, ready for the quote/withdrawal inputs.
           setCredits(credits);
@@ -110,6 +115,9 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
         quote={quote.data}
         quoteLoading={quote.isLoading}
         quoteError={quote.error}
+        onWithdraw={submit.submit}
+        isSubmitting={submit.isLoading}
+        submitError={submit.error}
       />
 
       {/* Hosted Bank Authentication UI (Coinflow's CoinflowWithdraw iframe) —

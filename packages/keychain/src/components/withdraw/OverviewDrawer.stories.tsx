@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import {
   CoinflowDestinationType,
   CoinflowPayoutSpeed,
+  CoinflowWithdrawalStatus,
 } from "@/hooks/payments/coinflow-withdraw";
 import { OverviewDrawer } from "./OverviewDrawer";
 
@@ -32,7 +33,25 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+/** No prior withdrawals — the History section shows its empty placeholder. */
 export const Default: Story = {};
+
+/** An in-flight withdrawal — the History section lists it as a Processing card. */
+export const WithHistory: Story = {
+  args: {
+    activeWithdrawal: {
+      id: "wd_1",
+      status: CoinflowWithdrawalStatus.Processing,
+      amountCents: 600,
+      feeCents: 12,
+      netCents: 588,
+      method: CoinflowPayoutSpeed.Standard,
+      destinationDisplay: "Bank ****0283",
+      failureCode: null,
+      failureReason: null,
+    },
+  },
+};
 
 export const WithDailyLimit: Story = {
   args: {

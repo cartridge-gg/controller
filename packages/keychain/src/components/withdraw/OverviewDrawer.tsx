@@ -14,9 +14,13 @@ import {
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import { formatUsdValue } from "@/utils/format-value";
-import type { CoinflowDestination } from "@/hooks/payments/coinflow-withdraw";
+import type {
+  CoinflowDestination,
+  CoinflowWithdrawal,
+} from "@/hooks/payments/coinflow-withdraw";
 import { AmountSelection } from "./AmountSelection";
 import { SelectedWithdrawMethod } from "./SelectedWithdrawMethod";
+import { WithdrawHistory } from "./WithdrawHistory";
 
 /**
  * Same warning as the deposit flow (CoinflowCreditsCheckout) — shown on every
@@ -69,6 +73,12 @@ interface OverviewDrawerProps {
   /** Continue with the picked amount (whole credits); opens the method
    * sub-step when no method is confirmed yet, the quote step otherwise. */
   onContinue: (credits: number) => void;
+  /** The active (in-flight) withdrawal for the History section, resolved from
+   * `activeWithdrawalId`; undefined renders the empty state. Shown only on the
+   * base overview (not the amount step). */
+  activeWithdrawal?: CoinflowWithdrawal;
+  /** The active-withdrawal lookup is in flight. */
+  historyLoading?: boolean;
 }
 
 /**
@@ -92,6 +102,8 @@ export function OverviewDrawer({
   selectedDestination,
   onChangeMethod,
   onContinue,
+  activeWithdrawal,
+  historyLoading,
 }: OverviewDrawerProps) {
   const [credits, setCredits] = useState(0);
 
@@ -173,6 +185,15 @@ export function OverviewDrawer({
           </>
         ) : (
           <>
+            {/* History lives on the base overview only — the amount step
+                replaces it with the amount selection. */}
+            {!amountMode && !loading && (
+              <WithdrawHistory
+                withdrawal={activeWithdrawal}
+                isLoading={historyLoading}
+              />
+            )}
+
             {amountMode && !loading && (
               <div className="flex flex-col gap-3">
                 <p className="text-xs font-semibold text-foreground-400">
