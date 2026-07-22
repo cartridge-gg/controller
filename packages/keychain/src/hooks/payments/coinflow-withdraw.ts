@@ -303,6 +303,7 @@ export const useCoinflowWithdrawQuote = (
  * history. Poll it with `waitForCoinflowWithdrawal`.
  */
 export const useCreateCoinflowWithdrawal = () => {
+  const queryClient = useQueryClient();
   const { isCoinflowMainnet } = useCoinflowIsMainnet();
   const { mutateAsync, isLoading, error } =
     useCreateCoinflowWithdrawalMutation();
@@ -314,9 +315,13 @@ export const useCreateCoinflowWithdrawal = () => {
       const result = await mutateAsync({
         input: { ...input, isMainnet: isCoinflowMainnet },
       });
+      // A successful withdrawal debits credits and registers the active
+      // withdrawal — refetch the status so the updated withdrawable balance and
+      // `activeWithdrawalId` land (the latter drives the overview History card).
+      await queryClient.invalidateQueries([WITHDRAW_STATUS_KEY]);
       return result.createCoinflowWithdrawal;
     },
-    [mutateAsync, isCoinflowMainnet],
+    [mutateAsync, isCoinflowMainnet, queryClient],
   );
 
   return { createWithdrawal, isLoading, error: error as Error | null };

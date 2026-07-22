@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   ArrowFromLineIcon,
   Button,
@@ -8,6 +8,7 @@ import {
   Thumbnail,
 } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
+import { ErrorAlert } from "@/components/ErrorAlert";
 import { formatUsdValue } from "@/utils/format-value";
 import {
   CoinflowPayoutSpeed,
@@ -42,6 +43,12 @@ interface WithdrawMethodDrawerProps {
   quoteLoading?: boolean;
   /** The quote request failed (e.g. temporarily unavailable). */
   quoteError?: Error | null;
+  /** Initiates the withdrawal for the current (amount, destination, speed). */
+  onWithdraw?: () => void;
+  /** A withdrawal request is in flight — drives the button's loading state. */
+  isSubmitting?: boolean;
+  /** The withdrawal initiation failed — rendered as an error above the button. */
+  submitError?: Error | null;
 }
 
 /**
@@ -63,6 +70,9 @@ export function WithdrawMethodDrawer({
   quote,
   quoteLoading,
   quoteError,
+  onWithdraw,
+  isSubmitting,
+  submitError,
 }: WithdrawMethodDrawerProps) {
   const selectedDestination = destinations.find(
     (d) => d.token === selection?.token,
@@ -73,11 +83,16 @@ export function WithdrawMethodDrawer({
 
   // One card per (destination, speed) the picker can actually offer today.
   // Speeds outside AVAILABLE_SPEEDS are dropped up front (see constants) so the
-  // rendered card count reflects what's really selectable.
-  const allowedCards = destinations.flatMap((destination) =>
-    destination.supportedSpeeds
-      .filter((speed) => AVAILABLE_SPEEDS.includes(speed))
-      .map((speed) => ({ destination, speed })),
+  // rendered card count reflects what's really selectable. Memoized so the
+  // sole-card auto-select effect below has a stable dependency.
+  const allowedCards = useMemo(
+    () =>
+      destinations.flatMap((destination) =>
+        destination.supportedSpeeds
+          .filter((speed) => AVAILABLE_SPEEDS.includes(speed))
+          .map((speed) => ({ destination, speed })),
+      ),
+    [destinations],
   );
 
   // With a single option there's nothing to choose — auto-select it so the
@@ -90,7 +105,7 @@ export function WithdrawMethodDrawer({
       token: soleCard.destination.token,
       speed: soleCard.speed,
     });
-  }, [selection, soleCard?.destination.token, soleCard?.speed, onSelectMethod]);
+  }, [selection, soleCard, onSelectMethod]);
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
@@ -142,7 +157,11 @@ export function WithdrawMethodDrawer({
                 selected={isSelected}
                 // The quote returns a more precise ETA than the static
                 // per-speed copy; once it resolves, it lands on this card.
-                processingTime={isSelected && !!soleCard ? (quote?.eta ?? undefined) : undefined}
+                processingTime={
+                  isSelected && !!soleCard
+                    ? (quote?.eta ?? undefined)
+                    : undefined
+                }
                 onClick={() =>
                   onSelectMethod({ token: destination.token, speed })
                 }
@@ -168,9 +187,24 @@ export function WithdrawMethodDrawer({
           </div>
         )}
 
-        {/* Enabled only once a quote resolves for the current selection; no
-            action wired yet — the withdrawal lands on a later step. */}
-        <Button disabled={!quote || !!quoteLoading}>
+        {/* The initiation failed (e.g. balance/limit re-validation) — the fee
+            row already covers quote-time errors, so this is submit-only. */}
+        {submitError && (
+          <ErrorAlert
+            title="Withdrawal failed"
+            description={submitError.message}
+            isExpanded
+          />
+        )}
+
+        {/* Enabled only once a quote resolves for the current selection;
+            initiates the withdrawal and holds in its loading state until the
+            flow returns to the overview. */}
+        <Button
+          disabled={!quote || !!quoteLoading || isSubmitting}
+          isLoading={isSubmitting}
+          onClick={onWithdraw}
+        >
           Withdraw {formatUsdValue(netCents / 100)}
         </Button>
       </DrawerContent>
