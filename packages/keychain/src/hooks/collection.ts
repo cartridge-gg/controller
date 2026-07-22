@@ -7,6 +7,7 @@ import { useConnection } from "@/hooks/connection";
 import { addAddressPadding } from "starknet";
 import * as torii from "@dojoengine/torii-wasm";
 import Torii from "@/helpers/torii";
+import { getImageUrlCandidates } from "@/helpers/image-url";
 
 export const ERC721 = "ERC721";
 export const ERC1155 = "ERC1155";
@@ -104,7 +105,10 @@ export function useCollection({
         address: contractAddress,
         name: asset.name || metadata.name,
         type: ERC721,
-        imageUrls: [contractImage, newImage, oldImage, metadata.image],
+        imageUrls: getImageUrlCandidates(
+          [contractImage, newImage, oldImage],
+          metadata.image,
+        ),
         totalCount: ids.length,
       };
       setCollection(newCollection);
@@ -141,7 +145,10 @@ export function useCollection({
             tokenId: asset.token_id || "",
             name: metadata?.name || asset.name,
             description: metadata?.description,
-            imageUrls: [newImage, oldImage, metadata?.image || ""],
+            imageUrls: getImageUrlCandidates(
+              [newImage, oldImage],
+              metadata?.image,
+            ),
             attributes: Array.isArray(metadata?.attributes)
               ? metadata.attributes
               : [],
@@ -258,7 +265,10 @@ export function useCollections(): UseCollectionsResponse {
             address: contractAddress,
             name: asset.name || metadata?.name || "",
             type: type || "",
-            imageUrls: [newImage, oldImage, metadata?.image || ""],
+            imageUrls: getImageUrlCandidates(
+              [newImage, oldImage],
+              metadata?.image,
+            ),
             totalCount: tokenIds.length,
           };
         }),
