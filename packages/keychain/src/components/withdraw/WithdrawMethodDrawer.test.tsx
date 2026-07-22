@@ -6,13 +6,14 @@ import {
 } from "@/hooks/payments/coinflow-withdraw";
 import { WithdrawMethodDrawer } from "./WithdrawMethodDrawer";
 
-// Standard is the only live speed (see AVAILABLE_SPEEDS): SameDay/Asap on these
-// fixtures are dropped by the picker, so they double as filtering fixtures.
+// The picker lists one card per allowed destination *type* (bank account
+// today), not per linked account. Bank account settles Standard ACH (see
+// WITHDRAW_DESTINATIONS), so a selected bank quotes/withdraws at Standard.
 const bank = {
   type: CoinflowDestinationType.Bank,
   token: "bank-token-1",
   display: "Bank ****0283",
-  supportedSpeeds: [CoinflowPayoutSpeed.Standard, CoinflowPayoutSpeed.SameDay],
+  supportedSpeeds: [CoinflowPayoutSpeed.Standard],
 };
 
 const bank2 = {
@@ -41,49 +42,30 @@ const baseProps = {
   isOpen: true,
   onClose: () => {},
   onSelectMethod: () => {},
-  destinations: [bank, bank2, card],
+  destinations: [bank],
   credits: 613,
 };
 
 describe("WithdrawMethodDrawer", () => {
-  it("renders one card per allowed (destination, speed), filtering out unavailable speeds", () => {
-    render(<WithdrawMethodDrawer {...baseProps} />);
+  it("renders one card per allowed destination type, not per linked account", () => {
+    // A card destination is present but "card" is not an allowed kind, so only
+    // the Bank Account card renders.
+    render(<WithdrawMethodDrawer {...baseProps} destinations={[bank, card]} />);
 
     expect(screen.getByText("Withdrawal Amount")).toBeInTheDocument();
     expect(screen.getByText("$6.13")).toBeInTheDocument();
-    expect(screen.getByText("Processing Fee")).toBeInTheDocument();
 
-    // Only Standard is live: the two banks each yield one Standard card; the
-    // bank's Same Day speed and the card's Asap speed are dropped entirely.
-    expect(screen.getByText("Bank ****0283")).toBeInTheDocument();
-    expect(screen.getByText("Bank ****9999")).toBeInTheDocument();
-    expect(screen.getAllByText("Standard ACH")).toHaveLength(2);
-    expect(screen.queryByText("Same Day ACH")).not.toBeInTheDocument();
-    expect(screen.queryByText("Debit Card ****4242")).not.toBeInTheDocument();
+    // The card advertises the type + its default processing time — never an
+    // account number.
+    expect(screen.getByText("Bank Account")).toBeInTheDocument();
+    expect(screen.getByText("1-2 business days")).toBeInTheDocument();
+    expect(screen.queryByText("Debit Card")).not.toBeInTheDocument();
   });
 
-  it("picks a destination + speed when a card is clicked", () => {
+  it("auto-selects the sole allowed type and quotes its linked account", () => {
     const onSelectMethod = vi.fn();
     render(
       <WithdrawMethodDrawer {...baseProps} onSelectMethod={onSelectMethod} />,
-    );
-
-    fireEvent.click(screen.getByText("Bank ****9999"));
-    expect(onSelectMethod).toHaveBeenCalledWith({
-      token: bank2.token,
-      speed: CoinflowPayoutSpeed.Standard,
-    });
-  });
-
-  it("auto-selects when only one card is available", () => {
-    const onSelectMethod = vi.fn();
-    // The card destination has no live speed, so a lone bank is the only card.
-    render(
-      <WithdrawMethodDrawer
-        {...baseProps}
-        destinations={[bank, card]}
-        onSelectMethod={onSelectMethod}
-      />,
     );
 
     expect(onSelectMethod).toHaveBeenCalledWith({
@@ -92,63 +74,76 @@ describe("WithdrawMethodDrawer", () => {
     });
   });
 
-  it("does not auto-select when more than one card is available", () => {
+  it("quotes the first linked account when several of the type exist", () => {
     const onSelectMethod = vi.fn();
     render(
-      <WithdrawMethodDrawer {...baseProps} onSelectMethod={onSelectMethod} />,
+      <WithdrawMethodDrawer
+        {...baseProps}
+        destinations={[bank, bank2]}
+        onSelectMethod={onSelectMethod}
+      />,
     );
 
-    expect(onSelectMethod).not.toHaveBeenCalled();
+    // Multi-account-per-type selection is not built yet — the first match wins.
+    expect(onSelectMethod).toHaveBeenCalledWith({
+      token: bank.token,
+      speed: CoinflowPayoutSpeed.Standard,
+    });
+  });
+
+  it("shows a Link Account button when nothing of the type is linked", () => {
+    const onLink = vi.fn();
+    const onResetSelection = vi.fn();
+    render(
+      <WithdrawMethodDrawer
+        {...baseProps}
+        destinations={[]}
+        onResetSelection={onResetSelection}
+        onLink={onLink}
+      />,
+    );
+
+    // No linked account → no quote and no Transfer-to row, but the fee row
+    // stays visible (defaulting to $0.00); the button links the account.
+    expect(onResetSelection).toHaveBeenCalled();
+    expect(screen.queryByText("Transfer to:")).not.toBeInTheDocument();
+    expect(screen.getByText("Processing Fee")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Link Account"));
+    expect(onLink).toHaveBeenCalledWith("bank-account");
   });
 
   it("keeps the withdraw button disabled until a quote resolves", () => {
     const { rerender } = render(<WithdrawMethodDrawer {...baseProps} />);
 
-    // No selection, no quote → disabled, button shows the gross amount.
+    // Linked account but no quote yet → disabled, button shows the gross amount.
     expect(screen.getByText("Withdraw $6.13").closest("button")).toBeDisabled();
 
-    // Selection made but quote still loading → still disabled.
-    rerender(
-      <WithdrawMethodDrawer
-        {...baseProps}
-        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
-        quoteLoading
-      />,
-    );
+    // Quote still loading → still disabled, fee row shows the spinner.
+    rerender(<WithdrawMethodDrawer {...baseProps} quoteLoading />);
     expect(screen.getByText("Withdraw $6.13").closest("button")).toBeDisabled();
     expect(screen.getByText("Calculating fee…")).toBeInTheDocument();
 
     // Quote resolved → enabled, button shows the net (received) amount.
-    rerender(
-      <WithdrawMethodDrawer
-        {...baseProps}
-        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
-        quote={quote}
-      />,
-    );
+    rerender(<WithdrawMethodDrawer {...baseProps} quote={quote} />);
     expect(screen.getByText("Withdraw $5.88").closest("button")).toBeEnabled();
   });
 
-  it("shows the quoted fee on the processing-fee row", () => {
-    render(
-      <WithdrawMethodDrawer
-        {...baseProps}
-        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
-        quote={quote}
-      />,
-    );
+  it("shows the quoted fee and the linked account on the confirmation rows", () => {
+    render(<WithdrawMethodDrawer {...baseProps} quote={quote} />);
 
     // Fee lands on the Processing Fee row (not the card).
+    expect(screen.getByText("Processing Fee")).toBeInTheDocument();
     expect(screen.getByText("$0.25")).toBeInTheDocument();
-    // The confirmation summary names the destination + chosen speed.
+    // The Transfer-to row names the specific linked account.
     expect(screen.getByText("Transfer to:")).toBeInTheDocument();
+    expect(screen.getByText("Bank ****0283")).toBeInTheDocument();
   });
 
   it("surfaces a quote error on the processing-fee row", () => {
     render(
       <WithdrawMethodDrawer
         {...baseProps}
-        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
         quoteError={new Error("temporarily unavailable")}
       />,
     );
@@ -162,7 +157,6 @@ describe("WithdrawMethodDrawer", () => {
     render(
       <WithdrawMethodDrawer
         {...baseProps}
-        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
         quote={quote}
         onWithdraw={onWithdraw}
       />,
@@ -174,16 +168,12 @@ describe("WithdrawMethodDrawer", () => {
 
   it("disables the button while the withdrawal is submitting", () => {
     const { container } = render(
-      <WithdrawMethodDrawer
-        {...baseProps}
-        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
-        quote={quote}
-        isSubmitting
-      />,
+      <WithdrawMethodDrawer {...baseProps} quote={quote} isSubmitting />,
     );
 
     // A resolved quote would otherwise enable it; the in-flight submit holds it
-    // disabled (the cards are role="button" divs — the real submit is <button>).
+    // disabled (its label is swapped for a spinner while loading, so query the
+    // <button> directly — the cards are role="button" divs).
     expect(container.querySelector("button")).toBeDisabled();
   });
 
@@ -191,7 +181,6 @@ describe("WithdrawMethodDrawer", () => {
     render(
       <WithdrawMethodDrawer
         {...baseProps}
-        selection={{ token: bank.token, speed: CoinflowPayoutSpeed.Standard }}
         quote={quote}
         submitError={new Error("insufficient balance")}
       />,

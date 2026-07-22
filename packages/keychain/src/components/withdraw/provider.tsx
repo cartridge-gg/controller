@@ -101,20 +101,28 @@ export type WithdrawContextValue = {
   setCredits: (credits: number | undefined) => void;
   /**
    * The confirmed transfer method — a linked Coinflow destination. Undefined
-   * until the user picks one on the method drawer (or links a bank account);
-   * the overview drawer's amount step renders it as SelectedWithdrawMethod.
+   * until the user picks one on the method drawer (or links a bank account).
    */
   selectedDestination?: CoinflowDestination;
   /** Confirms a destination and returns to the amount step. */
   selectDestination: (destination: CoinflowDestination) => void;
   /**
    * Opens the transfer-method sub-step: the picker when destinations exist,
-   * the add-bank hosted UI otherwise (amount Continue with no confirmed method,
-   * or the SelectedWithdrawMethod change affordance).
+   * the add-bank hosted UI otherwise (amount Continue with no confirmed method).
    */
   openMethodSelection: () => void;
   /** Cancels the method sub-step back to the amount step. */
   closeMethodSelection: () => void;
+  /**
+   * Launches the hosted link flow from the picker's "Link Account" button, for
+   * a destination kind with nothing linked yet (bank account today).
+   */
+  startLinkDestination: () => void;
+  /**
+   * Cancels the hosted link flow — back to the picker in withdraw intent, or
+   * closes in add-bank intent.
+   */
+  cancelLinkDestination: () => void;
   /**
    * Coinflow hosted Bank Authentication UI (§3.4). The provider owns the
    * session (minted via `useCoinflowBankAuthSession`); `BankAuthDrawer` is a
@@ -177,6 +185,8 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
   selectDestination: () => {},
   openMethodSelection: () => {},
   closeMethodSelection: () => {},
+  startLinkDestination: () => {},
+  cancelLinkDestination: () => {},
   bankAuth: {
     session: undefined,
     isMinting: false,
@@ -334,10 +344,10 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     setMethodFlow("none");
   }, [intent, closeWithdraw]);
 
-  // Enters the method sub-step from the amount step: pick among the linked
-  // destinations, or straight to the hosted add-bank UI when nothing is linked
-  // yet — minting its session as the step opens (the drawer renders a loader
-  // until it lands).
+  // Enters the method sub-step from the amount step: the picker lists one card
+  // per allowed destination *type*, whether or not an account is linked yet —
+  // the in-drawer "Link Account" button (see startLinkDestination) is the
+  // add-bank entry point, so we always land on the picker.
   const openMethodSelection = useCallback(() => {
     if (!status) return;
     // Fresh picker every open — a stale card selection would otherwise show a
@@ -345,13 +355,29 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     // linger on the reopened drawer.
     quote.reset();
     submit.reset();
-    if (status.destinations.length === 0) {
-      setMethodFlow("add");
-      bankAuthSession.launch().catch(() => {});
+    setMethodFlow("select");
+  }, [status, quote, submit]);
+
+  // Launches the hosted link flow from the picker's "Link Account" button, for
+  // a kind with no linked account. Bank account is the only linkable type
+  // today, so this mints the bank-auth session regardless of `kind`; the
+  // derived step follows methodFlow into "add-bank".
+  const startLinkDestination = useCallback(() => {
+    setMethodFlow("add");
+    bankAuthSession.launch().catch(() => {});
+  }, [bankAuthSession]);
+
+  // Cancels the hosted link flow. In withdraw intent it returns to the picker
+  // (the link was launched from there); in add-bank intent the link *is* the
+  // whole flow, so cancelling closes.
+  const cancelLinkDestination = useCallback(() => {
+    if (intent === "add-bank") {
+      closeWithdraw();
       return;
     }
+    bankAuthSession.reset();
     setMethodFlow("select");
-  }, [status, bankAuthSession, quote, submit]);
+  }, [intent, closeWithdraw, bankAuthSession]);
 
   const closeMethodSelection = useCallback(() => {
     // In add-bank intent the bank-link drawer is the whole flow — cancelling it
@@ -465,6 +491,8 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
         selectDestination,
         openMethodSelection,
         closeMethodSelection,
+        startLinkDestination,
+        cancelLinkDestination,
         bankAuth: {
           session: bankAuthSession.session,
           isMinting: bankAuthSession.isMinting,

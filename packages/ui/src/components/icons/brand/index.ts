@@ -32,5 +32,6 @@ export * from "./solana";
 export * from "./starknet";
 export * from "./stripe";
 export * from "./telegram";
+export * from "./venmo";
 export * from "./wallet-connect";
 export * from "./x";

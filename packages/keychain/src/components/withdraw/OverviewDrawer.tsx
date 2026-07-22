@@ -14,12 +14,8 @@ import {
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import { formatUsdValue } from "@/utils/format-value";
-import type {
-  CoinflowDestination,
-  CoinflowWithdrawal,
-} from "@/hooks/payments/coinflow-withdraw";
+import type { CoinflowWithdrawal } from "@/hooks/payments/coinflow-withdraw";
 import { AmountSelection } from "./AmountSelection";
-import { SelectedWithdrawMethod } from "./SelectedWithdrawMethod";
 import { WithdrawHistory } from "./WithdrawHistory";
 
 /**
@@ -65,11 +61,6 @@ interface OverviewDrawerProps {
   /** Seeds the amount input (dollars string) — also used to restore the
    * picked amount when the drawer re-opens after the method sub-step. */
   defaultAmountValue?: string;
-  /** The confirmed transfer method, once one is selected/linked — rendered as
-   * the slim SelectedWithdrawMethod row on the amount step. */
-  selectedDestination?: CoinflowDestination;
-  /** Re-opens the transfer-method drawer to change the selection. */
-  onChangeMethod?: () => void;
   /** Continue with the picked amount (whole credits); opens the method
    * sub-step when no method is confirmed yet, the quote step otherwise. */
   onContinue: (credits: number) => void;
@@ -99,8 +90,6 @@ export function OverviewDrawer({
   sandbox,
   amountMode = false,
   defaultAmountValue,
-  selectedDestination,
-  onChangeMethod,
   onContinue,
   activeWithdrawal,
   historyLoading,
@@ -173,6 +162,13 @@ export function OverviewDrawer({
           )}
         </div>
 
+        {!amountMode && !loading && (
+          <WithdrawHistory
+            withdrawal={activeWithdrawal}
+            isLoading={historyLoading}
+          />
+        )}
+
         {error ? (
           <>
             <ErrorAlert
@@ -183,52 +179,34 @@ export function OverviewDrawer({
               Close
             </Button>
           </>
-        ) : (
+        ) : amountMode ? (
           <>
-            {/* History lives on the base overview only — the amount step
-                replaces it with the amount selection. */}
-            {!amountMode && !loading && (
-              <WithdrawHistory
-                withdrawal={activeWithdrawal}
-                isLoading={historyLoading}
+            <div className="flex flex-col gap-3">
+              <p className="text-xs font-semibold text-foreground-400">
+                Withdraw Amount
+              </p>
+              <AmountSelection
+                key={isOpen ? "open" : "closed"}
+                minCredits={minCredits!}
+                maxCredits={effectiveMaxCredits}
+                defaultValue={defaultAmountValue}
+                onChange={setCredits}
+                lockSelection={loading}
               />
-            )}
+            </div>
 
-            {amountMode && !loading && (
-              <div className="flex flex-col gap-3">
-                <p className="text-xs font-semibold text-foreground-400">
-                  Withdraw Amount
-                </p>
-                <AmountSelection
-                  key={isOpen ? "open" : "closed"}
-                  minCredits={minCredits!}
-                  maxCredits={effectiveMaxCredits}
-                  defaultValue={defaultAmountValue}
-                  onChange={setCredits}
-                />
-                {selectedDestination && onChangeMethod && (
-                  <SelectedWithdrawMethod
-                    destination={selectedDestination}
-                    onClick={onChangeMethod}
-                  />
-                )}
-              </div>
-            )}
-
-            {amountMode ? (
-              <Button disabled={!credits} onClick={() => onContinue(credits)}>
-                Continue
-              </Button>
-            ) : (
-              <Button
-                disabled={loading || belowMin}
-                onClick={onWithdraw}
-                isLoading={loading}
-              >
-                Withdraw
-              </Button>
-            )}
+            <Button disabled={!credits} onClick={() => onContinue(credits)}>
+              Continue
+            </Button>
           </>
+        ) : (
+          <Button
+            disabled={loading || belowMin}
+            onClick={onWithdraw}
+            isLoading={loading}
+          >
+            Withdraw
+          </Button>
         )}
       </DrawerContent>
     </Drawer>

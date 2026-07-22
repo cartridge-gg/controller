@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowFromLineIcon,
   Button,
@@ -6,22 +6,35 @@ import {
   DrawerContent,
   Spinner,
   Thumbnail,
+  WithdrawDestinationCard,
+  type WithdrawDestinationKind,
 } from "@cartridge/controller-ui";
-import { cn } from "@cartridge/controller-ui/utils";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { formatUsdValue } from "@/utils/format-value";
 import {
-  CoinflowPayoutSpeed,
   type CoinflowDestination,
   type CoinflowWithdrawQuote,
 } from "@/hooks/payments/coinflow-withdraw";
 import type { WithdrawQuoteSelection } from "./useWithdrawQuote";
 import { OverviewRow, SandboxWarning } from "./OverviewDrawer";
 import {
-  AVAILABLE_SPEEDS,
-  getDestinationDisplay,
-  SPEED_DISPLAY,
+  ALLOWED_DESTINATION_KINDS,
+  getDestinationIcon,
+  WITHDRAW_DESTINATIONS,
 } from "./constants";
+
+/**
+ * Finds the linked account of a given kind among the live destinations. Returns
+ * the first match — multi-account-per-kind selection is not built yet.
+ */
+export function findLinkedAccount(
+  destinations: CoinflowDestination[],
+  kind: WithdrawDestinationKind,
+): CoinflowDestination | undefined {
+  return destinations.find(
+    (d) => d.type === WITHDRAW_DESTINATIONS[kind].coinflowDestinationType,
+  );
+}
 
 interface WithdrawMethodDrawerProps {
   isOpen: boolean;
@@ -33,10 +46,12 @@ interface WithdrawMethodDrawerProps {
   credits: number;
   /** Coinflow sandbox is active — renders the standing sandbox warning. */
   sandbox?: boolean;
-  /** The picked (destination, speed) card; drives the quote and the highlight. */
-  selection?: WithdrawQuoteSelection;
-  /** Picks a card — the provider quotes that destination + speed. */
+  /** Quotes the linked account of the selected kind (destination + speed). */
   onSelectMethod: (selection: WithdrawQuoteSelection) => void;
+  /** Clears the quote — called when the selected kind has no linked account. */
+  onResetSelection?: () => void;
+  /** Launches the link flow for a kind with no linked account (bank auth UI). */
+  onLink?: (kind: WithdrawDestinationKind) => void;
   /** The priced quote for `selection`; undefined until it resolves. */
   quote?: CoinflowWithdrawQuote;
   /** A quote request is in flight for the current selection. */
@@ -52,12 +67,12 @@ interface WithdrawMethodDrawerProps {
 }
 
 /**
- * The "Choose Transfer Method" drawer: lists one card per (destination, speed)
- * pair. Picking a card quotes that destination + speed on the backend; the
- * quoted fee lands on the card and the "Processing Fee" row, and the WITHDRAW
- * button shows the net amount the user receives (gross − fee) and stays
- * disabled until a quote resolves. The button carries no action yet — this
- * step only implements and validates the quote.
+ * The "Choose Transfer Method" drawer: lists one card per allowed destination
+ * *type* (bank account, card, …) — not per linked account. Picking a type with
+ * a linked account quotes it (fee on the "Processing Fee" row) and turns the
+ * button into WITHDRAW (net amount); picking a type with nothing linked turns
+ * the button into "Link Account"/"Link Card", which launches the hosted link
+ * flow. The button initiates the withdrawal once a quote resolves.
  */
 export function WithdrawMethodDrawer({
   isOpen,
@@ -65,8 +80,9 @@ export function WithdrawMethodDrawer({
   destinations,
   credits,
   sandbox,
-  selection,
   onSelectMethod,
+  onResetSelection,
+  onLink,
   quote,
   quoteLoading,
   quoteError,
@@ -74,38 +90,49 @@ export function WithdrawMethodDrawer({
   isSubmitting,
   submitError,
 }: WithdrawMethodDrawerProps) {
-  const selectedDestination = destinations.find(
-    (d) => d.token === selection?.token,
-  );
-  // Net = what actually reaches the bank. Only trustworthy once a quote for the
-  // current selection resolves; until then the (disabled) button shows gross.
-  const netCents = quote?.netCents ?? credits;
+  const kinds = ALLOWED_DESTINATION_KINDS;
 
-  // One card per (destination, speed) the picker can actually offer today.
-  // Speeds outside AVAILABLE_SPEEDS are dropped up front (see constants) so the
-  // rendered card count reflects what's really selectable. Memoized so the
-  // sole-card auto-select effect below has a stable dependency.
-  const allowedCards = useMemo(
-    () =>
-      destinations.flatMap((destination) =>
-        destination.supportedSpeeds
-          .filter((speed) => AVAILABLE_SPEEDS.includes(speed))
-          .map((speed) => ({ destination, speed })),
-      ),
-    [destinations],
-  );
+  // The picked destination *type*. With a single allowed kind there's nothing
+  // to choose, so it auto-selects below. Local to the drawer — the provider
+  // only tracks the quoted (token, speed).
+  const soleKind = kinds.length === 1 ? kinds[0] : undefined;
+  const [selectedKind, setSelectedKind] = useState<
+    WithdrawDestinationKind | undefined
+  >(soleKind);
 
-  // With a single option there's nothing to choose — auto-select it so the
-  // quote starts resolving immediately. Guarded on `selection` so we never
-  // fight a user's (or a re-)selection.
-  const soleCard = allowedCards.length === 1 ? allowedCards[0] : undefined;
   useEffect(() => {
-    if (selection || !soleCard) return;
-    onSelectMethod({
-      token: soleCard.destination.token,
-      speed: soleCard.speed,
-    });
-  }, [selection, soleCard, onSelectMethod]);
+    if (!selectedKind && soleKind) setSelectedKind(soleKind);
+  }, [selectedKind, soleKind]);
+
+  // The linked account (if any) backing the selected kind — drives the button
+  // (Link vs Withdraw) and the "Transfer to:" row.
+  const selectedAccount = selectedKind
+    ? findLinkedAccount(destinations, selectedKind)
+    : undefined;
+
+  // Quote the linked account of the selected kind; clear the quote when the
+  // selected kind has nothing linked (so a stale quote never gates WITHDRAW).
+  // Gated on `isOpen`, and re-runs on every open: the provider clears its quote
+  // selection when this sub-step opens (openMethodSelection), and this drawer
+  // stays mounted across the flow — so selectedKind/destinations alone don't
+  // change on re-open. Without re-asserting on `isOpen`, the quote would never
+  // be requested and WITHDRAW would stay disabled.
+  useEffect(() => {
+    if (!isOpen || !selectedKind) return;
+    const account = findLinkedAccount(destinations, selectedKind);
+    if (account) {
+      onSelectMethod({
+        token: account.token,
+        speed: WITHDRAW_DESTINATIONS[selectedKind].coinflowPayoutSpeed,
+      });
+    } else {
+      onResetSelection?.();
+    }
+  }, [isOpen, selectedKind, destinations, onSelectMethod, onResetSelection]);
+
+  // Net = what actually reaches the destination. Only trustworthy once a quote
+  // for the current selection resolves; until then the button shows gross.
+  const netCents = quote?.netCents ?? credits;
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
@@ -125,14 +152,15 @@ export function WithdrawMethodDrawer({
           <div className="h-px bg-background-200" />
           <OverviewRow
             label="Processing Fee"
-            // The quote's fee/loading/error all surface here (not on the cards):
-            // a spinner while it prices, an error fallback, else the fee amount.
+            // The quote's fee/loading/error all surface here (not on the
+            // cards): a spinner while it prices, an error fallback, else the
+            // fee amount.
             value={
-              selection && quoteLoading ? (
+              quoteLoading ? (
                 <span className="flex items-center gap-1 text-xs font-medium text-foreground-300">
                   <Spinner size="sm" /> Calculating fee…
                 </span>
-              ) : selection && quoteError ? (
+              ) : quoteError ? (
                 <span className="text-xs font-medium text-destructive-100">
                   Unable to calculate fee
                 </span>
@@ -145,46 +173,34 @@ export function WithdrawMethodDrawer({
         </div>
 
         <div className="flex flex-col gap-3">
-          {allowedCards.map(({ destination, speed }) => {
-            const isSelected =
-              selection?.token === destination.token &&
-              selection?.speed === speed;
+          {kinds.map((kind) => {
+            const isSelected = selectedKind === kind;
             return (
-              <DestinationCard
-                key={`${destination.token}:${speed}`}
-                destination={destination}
-                speed={speed}
+              <WithdrawDestinationCard
+                key={kind}
+                kind={kind}
                 selected={isSelected}
-                // The quote returns a more precise ETA than the static
-                // per-speed copy; once it resolves, it lands on this card.
+                // The quote returns a more precise ETA than the static per-kind
+                // copy; once it resolves for the selected linked account, it
+                // lands on this card.
                 processingTime={
-                  isSelected && !!soleCard
+                  isSelected && selectedAccount
                     ? (quote?.eta ?? undefined)
                     : undefined
                 }
-                onClick={() =>
-                  onSelectMethod({ token: destination.token, speed })
-                }
+                onClick={() => setSelectedKind(kind)}
               />
             );
           })}
         </div>
 
-        {selectedDestination && selection && (
-          <div className="flex items-center justify-between text-xs text-foreground-300">
-            <p>Transfer to:</p>
-            <div className="flex items-center gap-1.5 text-foreground-100">
-              <Thumbnail
-                icon={getDestinationDisplay(selectedDestination).icon}
-                size="xs"
-                className="bg-background-200"
-              />
-              <p className="font-medium">
-                {getDestinationDisplay(selectedDestination).title} ·{" "}
-                {SPEED_DISPLAY[selection.speed].label}
-              </p>
-            </div>
-          </div>
+        {/* Always reserve the row's height (the xs thumbnail is 20px tall) so
+            the layout doesn't shift when a selection resolves to a linked
+            account. */}
+        {selectedAccount ? (
+          <TransferToRow account={selectedAccount} />
+        ) : (
+          <div aria-hidden className="h-5" />
         )}
 
         {/* The initiation failed (e.g. balance/limit re-validation) — the fee
@@ -197,56 +213,48 @@ export function WithdrawMethodDrawer({
           />
         )}
 
-        {/* Enabled only once a quote resolves for the current selection;
-            initiates the withdrawal and holds in its loading state until the
-            flow returns to the overview. */}
-        <Button
-          disabled={!quote || !!quoteLoading || isSubmitting}
-          isLoading={isSubmitting}
-          onClick={onWithdraw}
-        >
-          Withdraw {formatUsdValue(netCents / 100)}
-        </Button>
+        {selectedAccount ? (
+          // Enabled only once a quote resolves for the current selection;
+          // initiates the withdrawal and holds in its loading state until the
+          // flow returns to the overview.
+          <Button
+            disabled={!quote || !!quoteLoading || isSubmitting}
+            isLoading={isSubmitting || !!quoteLoading}
+            onClick={onWithdraw}
+          >
+            Withdraw {formatUsdValue(netCents / 100)}
+          </Button>
+        ) : (
+          // No account of the selected kind is linked — launch the hosted link
+          // flow instead of withdrawing.
+          <Button
+            onClick={() => selectedKind && onLink?.(selectedKind)}
+            disabled={!selectedKind}
+          >
+            {selectedKind === "card" ? "Link Card" : "Link Account"}
+          </Button>
+        )}
       </DrawerContent>
     </Drawer>
   );
 }
 
-function DestinationCard({
-  destination,
-  speed,
-  selected,
-  processingTime,
-  onClick,
-}: {
-  destination: CoinflowDestination;
-  speed: CoinflowPayoutSpeed;
-  selected: boolean;
-  /** Live ETA from the quote; falls back to the static per-speed copy. */
-  processingTime?: string;
-  onClick: () => void;
-}) {
-  const { icon, title } = getDestinationDisplay(destination);
-  const { label, processingTime: defaultProcessingTime } = SPEED_DISPLAY[speed];
-
+/**
+ * The "Transfer to:" row — shows the icon + masked display of the linked
+ * account backing the current selection (e.g. "Bank ****0283").
+ */
+function TransferToRow({ account }: { account: CoinflowDestination }) {
   return (
-    <div
-      role="button"
-      aria-pressed={selected}
-      className={cn(
-        "flex items-center gap-3 p-3 rounded border bg-background-100 cursor-pointer transition-colors hover:bg-background-200",
-        selected ? "border-primary-100" : "border-transparent",
-      )}
-      onClick={onClick}
-    >
-      <Thumbnail icon={icon} size="md" className="bg-background-200" />
-      <div className="flex flex-col gap-0.5 flex-1">
-        <p className="text-sm font-medium text-foreground-100">{title}</p>
-        <p className="text-xs text-foreground-300">{label}</p>
+    <div className="flex items-center justify-between text-xs text-foreground-300">
+      <p>Transfer to:</p>
+      <div className="flex items-center gap-1.5 text-foreground-100">
+        <Thumbnail
+          icon={getDestinationIcon(account)}
+          size="xs"
+          className="bg-background-200"
+        />
+        <p className="font-medium">{account.display}</p>
       </div>
-      <p className="text-xs text-foreground-300">
-        {processingTime ?? defaultProcessingTime}
-      </p>
     </div>
   );
 }

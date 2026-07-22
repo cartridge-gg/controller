@@ -80,7 +80,15 @@ export function ErrorAlert({
     }
   }, [variant]);
 
-  const noContents = !description;
+  const cleanDescription = useMemo(() => {
+    if (description && typeof description === "string") {
+      const parts = description.split(" desc = ");
+      return parts[1] ?? description;
+    }
+    return description;
+  }, [description]);
+
+  const noContents = !cleanDescription;
 
   return (
     <Accordion
@@ -93,7 +101,7 @@ export function ErrorAlert({
       <AccordionItem
         value="item-1"
         className={cn(
-          "flex flex-col rounded gap-2 h-fit box-border",
+          "flex flex-col rounded h-fit box-border",
           styles.bg,
           styles.text,
         )}
@@ -137,7 +145,9 @@ export function ErrorAlert({
               )}
             </Button>
           )}
-          {description && <div className="text-xs mr-7">{description}</div>}
+          {cleanDescription && (
+            <div className="text-xs mr-7">{cleanDescription}</div>
+          )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>

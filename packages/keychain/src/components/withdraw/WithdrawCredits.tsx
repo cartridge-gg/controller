@@ -25,9 +25,8 @@ interface WithdrawCreditsProps {
  * verifications are never requested twice unless the identity provider or
  * Coinflow reports them invalidated. Continue on the amount step with no
  * confirmed transfer method opens the method picker (or the add-bank form
- * when nothing is linked); both land back on the amount step with the
- * confirmed method summarized inline. Continue with a method confirmed
- * advances to the quote step (plan step 6).
+ * when nothing is linked); both land back on the amount step. Continue with a
+ * method confirmed advances to the quote step (plan step 6).
  */
 export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
   const {
@@ -42,6 +41,8 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
     selectedDestination,
     openMethodSelection,
     closeMethodSelection,
+    startLinkDestination,
+    cancelLinkDestination,
     quote,
     submit,
     activeWithdrawal,
@@ -81,8 +82,6 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
         // Restores the picked amount when the drawer re-opens after the
         // method sub-step (the drawer resets its input on close).
         defaultAmountValue={credits ? (credits / 100).toFixed(2) : undefined}
-        selectedDestination={selectedDestination}
-        onChangeMethod={openMethodSelection}
         activeWithdrawal={activeWithdrawal}
         historyLoading={activeWithdrawalLoading}
         onContinue={(credits) => {
@@ -108,10 +107,11 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
         destinations={status?.destinations ?? []}
         credits={credits ?? 0}
         sandbox={isCoinflowSandbox}
-        // The provider owns the quote; the drawer picks a (destination, speed)
-        // card and renders the fee/net it prices.
-        selection={quote.selection}
+        // The provider owns the quote; the drawer picks a destination *type*,
+        // quotes its linked account, and renders the fee/net it prices.
         onSelectMethod={quote.select}
+        onResetSelection={quote.reset}
+        onLink={startLinkDestination}
         quote={quote.data}
         quoteLoading={quote.isLoading}
         quoteError={quote.error}
@@ -128,8 +128,9 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
       <BankAuthDrawer
         isOpen={isOpen && step === "add-bank"}
         onClose={() => {
-          // Cancel back to the amount step — only on user intent (see above).
-          if (step === "add-bank") closeMethodSelection();
+          // Cancel the link flow — back to the picker (withdraw intent) or
+          // close (add-bank intent); only on user intent (see above).
+          if (step === "add-bank") cancelLinkDestination();
         }}
         sandbox={isCoinflowSandbox}
       />
