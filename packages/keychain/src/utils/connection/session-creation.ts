@@ -6,6 +6,7 @@ import {
 } from "@/hooks/session";
 import type { SessionChainPolicies } from "@/hooks/connection";
 import { processPolicies } from "@/utils/session/policies";
+import { clampSessionDurationSeconds } from "@/utils/player-controls";
 
 export const DEFAULT_VERIFIED_SESSION_DURATION_S = BigInt(24 * 60 * 60);
 
@@ -50,6 +51,7 @@ export async function createVerifiedSession({
   policies,
   chainPolicies,
   durationSeconds = DEFAULT_VERIFIED_SESSION_DURATION_S,
+  maxDurationSeconds = null,
   nowFn = now,
   onProgress,
 }: {
@@ -59,6 +61,12 @@ export async function createVerifiedSession({
   /** When set, creates one session per chain (multichain opt-in). */
   chainPolicies?: SessionChainPolicies;
   durationSeconds?: bigint;
+  /**
+   * Effective play-time control cap (seconds). When set, the requested duration
+   * is clamped to this value before signing. The backend remains authoritative;
+   * this is a client-side guard.
+   */
+  maxDurationSeconds?: bigint | null;
   nowFn?: () => bigint;
   /** Reports which chain is being signed during multichain creation. */
   onProgress?: (chainId: string, index: number, total: number) => void;
@@ -67,7 +75,11 @@ export async function createVerifiedSession({
     throw new Error("Verified session creation requires explicit approval");
   }
 
-  const expiresAt = durationSeconds + nowFn();
+  const effectiveDuration = clampSessionDurationSeconds(
+    durationSeconds,
+    maxDurationSeconds,
+  );
+  const expiresAt = effectiveDuration + nowFn();
 
   if (chainPolicies && chainPolicies.length > 0) {
     const results = await controller.createMultichainSession(

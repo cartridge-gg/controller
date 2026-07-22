@@ -6,7 +6,12 @@ import {
   CreateSessionContext,
   type ParsedSessionPolicies,
 } from "@/hooks/session";
-import { useCallback, useMemo, useState } from "react";
+import { usePlayerControlsQuery } from "@/utils/api";
+import {
+  clampSessionDurationSeconds,
+  effectivePlayTimeCapSeconds,
+} from "@/utils/player-controls";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { shortString } from "starknet";
 
 export interface CreateSessionProviderProps {
@@ -62,6 +67,25 @@ export const CreateSessionProvider = ({
 
   const { controller } = useConnection();
 
+  // Fetch the user's play-time control cap so we never request an expiration
+  // longer than their own limit. The backend stays authoritative.
+  const playerControlsQuery = usePlayerControlsQuery(undefined, {
+    enabled: !!controller,
+    select: (data) => data.playerControls,
+  });
+  const playTimeMaxDurationSeconds = useMemo(
+    () => effectivePlayTimeCapSeconds(playerControlsQuery.data),
+    [playerControlsQuery.data],
+  );
+
+  // If the fetched cap is below the current selection, clamp it down.
+  useEffect(() => {
+    if (playTimeMaxDurationSeconds === null) return;
+    setDuration((prev) =>
+      clampSessionDurationSeconds(prev, playTimeMaxDurationSeconds),
+    );
+  }, [playTimeMaxDurationSeconds]);
+
   const onToggleMethod = useCallback(
     (address: string, id: string, authorized: boolean) => {
       if (!policies.contracts) return;
@@ -93,9 +117,14 @@ export const CreateSessionProvider = ({
     setIsEditable((prev) => !prev);
   }, []);
 
-  const onDurationChange = useCallback((newDuration: bigint) => {
-    setDuration(newDuration);
-  }, []);
+  const onDurationChange = useCallback(
+    (newDuration: bigint) => {
+      setDuration(
+        clampSessionDurationSeconds(newDuration, playTimeMaxDurationSeconds),
+      );
+    },
+    [playTimeMaxDurationSeconds],
+  );
 
   const chainSpecificMessages = useMemo(() => {
     if (externalChainSpecificMessages) {
@@ -118,6 +147,7 @@ export const CreateSessionProvider = ({
       value={{
         policies,
         duration,
+        playTimeMaxDurationSeconds,
         isEditable,
         requiredPolicies: requiredPolicies ?? [],
         chainSpecificMessages,

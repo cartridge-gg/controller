@@ -13,6 +13,7 @@ import {
   hasApprovalPolicies,
 } from "@/hooks/session";
 import { processPolicies } from "@/utils/session/policies";
+import { clampSessionDurationSeconds } from "@/utils/player-controls";
 import type { ControllerError } from "@/utils/connection";
 import {
   Button,
@@ -83,8 +84,13 @@ const CreateSessionLayout = ({
   const createButtonRef = useRef<HTMLButtonElement>(null);
   const { setOnBackCallback } = useNavigation();
 
-  const { policies, duration, isEditable, onToggleEditable } =
-    useCreateSession();
+  const {
+    policies,
+    duration,
+    playTimeMaxDurationSeconds,
+    isEditable,
+    onToggleEditable,
+  } = useCreateSession();
 
   const { controller, theme, origin } = useConnection();
   const advancedView = useAdvancedView();
@@ -159,8 +165,19 @@ const CreateSessionLayout = ({
   }, [step, setOnBackCallback]);
 
   const expiresAt = useMemo(() => {
-    return expiresAtOverride ?? duration + now();
-  }, [expiresAtOverride, duration]);
+    if (expiresAtOverride === undefined) return duration + now();
+    // A caller-supplied expiry (e.g. the `/session?expires_at=` external
+    // registration flow) bypasses the `duration` state entirely, so it must
+    // be clamped here too — otherwise a dapp-requested expiry could exceed
+    // the user's own play-time control cap.
+    const requestedDuration = expiresAtOverride - now();
+    return (
+      clampSessionDurationSeconds(
+        requestedDuration,
+        playTimeMaxDurationSeconds,
+      ) + now()
+    );
+  }, [expiresAtOverride, duration, playTimeMaxDurationSeconds]);
 
   const createSession = useCallback(
     async ({

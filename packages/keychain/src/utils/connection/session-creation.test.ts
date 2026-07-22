@@ -112,6 +112,57 @@ describe("session-creation helpers", () => {
       expect(processedPolicies.messages[0].id).toBeUndefined();
       expect(processedPolicies.messages[0].authorized).toBe(true);
     });
+
+    it("clamps the requested duration to the play-time cap", async () => {
+      const createSession = vi.fn().mockResolvedValue(undefined);
+      const controller = { createSession } as unknown as Controller;
+
+      const policies = {
+        verified: true,
+        contracts: { "0xabc": { methods: [{ entrypoint: "transfer" }] } },
+      } as unknown as ParsedSessionPolicies;
+
+      const nowFn = () => BigInt(1_000);
+      const cap = BigInt(60 * 60); // 1h cap
+
+      await createVerifiedSession({
+        controller,
+        origin: "origin",
+        policies,
+        nowFn,
+        durationSeconds: BigInt(7 * 24 * 60 * 60), // requested 7d
+        maxDurationSeconds: cap,
+      });
+
+      const [, expiresAt] = createSession.mock.calls[0];
+      // Expiry uses the clamped 1h cap, not the requested 7d.
+      expect(expiresAt).toBe(BigInt(1_000) + cap);
+    });
+
+    it("leaves duration unchanged when the cap is null", async () => {
+      const createSession = vi.fn().mockResolvedValue(undefined);
+      const controller = { createSession } as unknown as Controller;
+
+      const policies = {
+        verified: true,
+        contracts: { "0xabc": { methods: [{ entrypoint: "transfer" }] } },
+      } as unknown as ParsedSessionPolicies;
+
+      const nowFn = () => BigInt(1_000);
+      const duration = BigInt(2 * 60 * 60);
+
+      await createVerifiedSession({
+        controller,
+        origin: "origin",
+        policies,
+        nowFn,
+        durationSeconds: duration,
+        maxDurationSeconds: null,
+      });
+
+      const [, expiresAt] = createSession.mock.calls[0];
+      expect(expiresAt).toBe(BigInt(1_000) + duration);
+    });
   });
 
   describe("multichain sessions", () => {

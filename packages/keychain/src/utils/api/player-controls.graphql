@@ -1,0 +1,33 @@
+fragment PlayerControlsFields on PlayerControlsStatus {
+  period
+  windowStart
+  creditsPurchase {
+    amountCents
+    usedCents
+    pendingAmountCents
+    pendingRemoval
+  }
+  entryPurchase {
+    amountCents
+    usedCents
+    pendingAmountCents
+    pendingRemoval
+  }
+  playTimeMaxDurationSeconds
+  pendingPlayTimeMaxDurationSeconds
+  pendingPlayTimeRemoval
+  pendingPeriod
+  pendingEffectiveAt
+}
+
+query PlayerControls {
+  playerControls {
+    ...PlayerControlsFields
+  }
+}
+
+mutation UpdatePlayerControls($input: UpdatePlayerControlsInput!) {
+  updatePlayerControls(input: $input) {
+    ...PlayerControlsFields
+  }
+}

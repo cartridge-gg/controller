@@ -18,6 +18,7 @@ import { JsCall } from "@cartridge/controller-wasm/controller";
 import { mutex } from "./sync";
 import Controller from "../controller";
 import { storeCallbacks, generateCallbackId } from "./callbacks";
+import { executeWithSpendEnforcement } from "./spend-enforcement";
 
 export type ControllerError = {
   code: ErrorCode;
@@ -118,7 +119,9 @@ export async function executeCore(
   }
 
   const calls = normalizeCalls(transactions);
-  return await controller.trySessionExecute(origin, calls, feeSource);
+  return await executeWithSpendEnforcement(controller, calls, () =>
+    controller.trySessionExecute(origin, calls, feeSource),
+  );
 }
 
 export function execute({

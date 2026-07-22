@@ -6,6 +6,7 @@ import { ControllerError } from "@/utils/connection";
 import { Call, FeeEstimate } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { executeCore } from "@/utils/connection/execute";
+import { executeWithSpendEnforcement } from "@/utils/connection/spend-enforcement";
 import { CreateSession } from "@/components/connect";
 import { PageLoading } from "@/components/Loading";
 import { ErrorCode } from "@cartridge/controller-wasm";
@@ -78,7 +79,11 @@ export function ConfirmTransaction({
     });
 
     try {
-      const { transaction_hash } = await account.execute(transactions, maxFee);
+      const { transaction_hash } = await executeWithSpendEnforcement(
+        account,
+        transactions,
+        () => account.execute(transactions, maxFee),
+      );
       onComplete(transaction_hash);
       toast.transaction("", {
         status: "confirmed",
