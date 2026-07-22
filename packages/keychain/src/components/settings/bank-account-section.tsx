@@ -6,29 +6,33 @@ import {
   SectionHeader,
   SettingsCard,
 } from "@cartridge/controller-ui";
-import { useFeature } from "@/hooks/features";
 import {
   CoinflowDestinationType,
   useCoinflowWithdrawStatus,
 } from "@/hooks/payments/coinflow-withdraw";
+import { useWithdrawContext } from "@/components/withdraw/provider";
 
 /**
  * Lists the user's Coinflow-linked payout destinations (bank accounts / cards)
  * as read-only rows. Mirrors the other settings sections: a `SectionHeader`
- * followed by `SettingsCard` rows and an add affordance. Gated behind the same
- * "coinflow-payouts" flag as the withdraw flow, so it only appears where
- * payouts are enabled. The unlink action and the "Add Payment Method" button
- * are not wired up yet.
+ * followed by `SettingsCard` rows and an add affordance. Visibility follows the
+ * withdraw flow's `withdrawHidden` gate (the "coinflow-payouts" flag), so the
+ * section only appears where payouts are enabled. "Add Payment Method" runs the
+ * withdraw flow's verification → KYC → hosted bank-link gauntlet in "add-bank"
+ * intent (`initiateAddBank`); the newly linked account lands in this list via
+ * the shared status query. The unlink action is not wired up yet.
  */
 export function BankAccountSection() {
-  const payoutsEnabled = useFeature("coinflow-payouts");
-  // Destinations ride along on the withdraw-status query; only fetch it when
-  // the section is actually shown.
+  const { withdrawHidden, withdrawDisabled, initiateAddBank } =
+    useWithdrawContext();
+  // Destinations ride along on the withdraw-status query; only fetch it while
+  // the section is shown. The withdraw flow observes the same query key, so a
+  // freshly linked account refetches into this list automatically.
   const { data: status, isLoading } = useCoinflowWithdrawStatus({
-    enabled: payoutsEnabled,
+    enabled: !withdrawHidden,
   });
 
-  if (!payoutsEnabled) return null;
+  if (withdrawHidden) return null;
 
   const destinations = status?.destinations ?? [];
 
@@ -49,8 +53,11 @@ export function BankAccountSection() {
             label={destination.display}
           />
         ))}
-        {/* Placeholder — linking a new payment method is implemented later. */}
-        <Button variant="sans" disabled>
+        <Button
+          variant="sans"
+          onClick={initiateAddBank}
+          disabled={withdrawDisabled || isLoading}
+        >
           <PlusIcon size="sm" variant="line" />
           Add Payment Method
         </Button>

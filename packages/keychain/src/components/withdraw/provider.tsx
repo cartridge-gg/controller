@@ -3,6 +3,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -55,6 +56,15 @@ export type WithdrawContextValue = {
   isOpen: boolean;
   /** Opens the withdraw flow (from NavigationHeader onWithdraw). */
   initiateWithdraw: () => void;
+  /**
+   * Opens the flow in "add-bank" intent: runs the same verification → KYC →
+   * hosted bank-link gauntlet as the withdraw flow, but skips the
+   * overview/amount/quote steps and closes once a destination is linked (the
+   * shared status query refreshes, so any bank list re-renders). Entry point
+   * for the settings "Add Payment Method" button. Same gate as
+   * `initiateWithdraw` (feature flag + US + signed-in).
+   */
+  initiateAddBank: () => void;
   closeWithdraw: () => void;
   /**
    * Entry-point gating (§3.2): `withdrawHidden` — the `"coinflow-payouts"`
@@ -151,6 +161,7 @@ export type WithdrawContextValue = {
 export const WithdrawContext = createContext<WithdrawContextValue>({
   isOpen: false,
   initiateWithdraw: () => {},
+  initiateAddBank: () => {},
   closeWithdraw: () => {},
   withdrawHidden: true,
   withdrawDisabled: true,
@@ -193,6 +204,10 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
 
 export function WithdrawProvider({ children }: PropsWithChildren) {
   const [isOpen, setIsOpen] = useState(false);
+  // Why the flow was opened. "withdraw" is the full off-ramp; "add-bank" runs
+  // only the verification → KYC → bank-link gauntlet (settings "Add Payment
+  // Method") and closes once a destination lands. Reset on close.
+  const [intent, setIntent] = useState<"withdraw" | "add-bank">("withdraw");
   // False while the overview drawer shows; beginWithdraw flips it to enter the
   // derived flow. Reset on close so every open starts at the overview.
   const [started, setStarted] = useState(false);
@@ -271,11 +286,25 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
 
   const initiateWithdraw = useCallback(() => {
     if (withdrawHidden || withdrawDisabled) return;
+    setIntent("withdraw");
     setIsOpen(true);
   }, [withdrawHidden, withdrawDisabled]);
 
+  // Enters "add-bank" intent directly (no overview): `started` flips on so the
+  // step derives straight into the verification/KYC/bank-link gauntlet.
+  // `status` is available from the shared query cache (the settings section
+  // observes the same key), so the derived onboarding-kyc/add-bank steps always
+  // have it — mirroring beginWithdraw's status guard.
+  const initiateAddBank = useCallback(() => {
+    if (withdrawHidden || withdrawDisabled || !status) return;
+    setIntent("add-bank");
+    setIsOpen(true);
+    setStarted(true);
+  }, [withdrawHidden, withdrawDisabled, status]);
+
   const closeWithdraw = useCallback(() => {
     setIsOpen(false);
+    setIntent("withdraw");
     setStarted(false);
     setCredits(undefined);
     setMethodFlow("none");
@@ -293,11 +322,17 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   }, [status]);
 
   // Cancels an in-flight gate back to the overview; WITHDRAW resumes at the
-  // first incomplete gate (the derived step recomputes from live data).
+  // first incomplete gate (the derived step recomputes from live data). In
+  // add-bank intent there is no overview to fall back to, so a cancel closes
+  // the flow.
   const returnToOverview = useCallback(() => {
+    if (intent === "add-bank") {
+      closeWithdraw();
+      return;
+    }
     setStarted(false);
     setMethodFlow("none");
-  }, []);
+  }, [intent, closeWithdraw]);
 
   // Enters the method sub-step from the amount step: pick among the linked
   // destinations, or straight to the hosted add-bank UI when nothing is linked
@@ -319,11 +354,17 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   }, [status, bankAuthSession, quote, submit]);
 
   const closeMethodSelection = useCallback(() => {
+    // In add-bank intent the bank-link drawer is the whole flow — cancelling it
+    // closes, rather than returning to the (skipped) amount step.
+    if (intent === "add-bank") {
+      closeWithdraw();
+      return;
+    }
     setMethodFlow("none");
     bankAuthSession.reset();
     quote.reset();
     submit.reset();
-  }, [bankAuthSession, quote, submit]);
+  }, [intent, closeWithdraw, bankAuthSession, quote, submit]);
 
   // The hosted iframe linked a destination: refetch the live status so it
   // lists, then hand back to the method picker (now non-empty) to confirm it.
@@ -335,10 +376,17 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     // refetch settles) so the picker lands on a status that already lists the
     // new destination — no empty-picker flash between the iframe and the pick.
     await bankAuthSession.onLinked();
+    // In add-bank intent, linking is the whole task: the refreshed status now
+    // lists the destination (the same query the settings list observes), so
+    // just close — no picker to return to.
+    if (intent === "add-bank") {
+      closeWithdraw();
+      return;
+    }
     bankAuthSession.reset();
     setMethodFlow("select");
     setIsLinking(false);
-  }, [bankAuthSession]);
+  }, [bankAuthSession, intent, closeWithdraw]);
 
   // Confirms a destination (picked on the method drawer, or freshly returned
   // by createCoinflowBankAccount) and lands back on the amount step.
@@ -370,6 +418,11 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     if (!status || status.kycStatus !== CoinflowKycStatus.Approved) {
       return "onboarding-kyc";
     }
+    // Add-bank intent goes straight to the hosted bank-link once the identity
+    // and KYC gates clear — no amount/method steps.
+    if (intent === "add-bank") {
+      return "add-bank";
+    }
     if (methodFlow === "add") {
       return "add-bank";
     }
@@ -377,13 +430,26 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
       return "select-method";
     }
     return "amount";
-  }, [started, isIdentityGateVerified, status, methodFlow]);
+  }, [started, isIdentityGateVerified, status, methodFlow, intent]);
+
+  // In add-bank intent nothing calls openMethodSelection to mint the hosted
+  // session, so mint it when the derived step lands on the bank-link (once the
+  // gates clear). The withdraw intent mints it in openMethodSelection instead.
+  const { launch: launchBankAuth } = bankAuthSession;
+  const bankAuthSessionData = bankAuthSession.session;
+  const bankAuthMinting = bankAuthSession.isMinting;
+  useEffect(() => {
+    if (intent !== "add-bank" || step !== "add-bank") return;
+    if (bankAuthSessionData || bankAuthMinting) return;
+    launchBankAuth().catch(() => {});
+  }, [intent, step, bankAuthSessionData, bankAuthMinting, launchBankAuth]);
 
   return (
     <WithdrawContext.Provider
       value={{
         isOpen,
         initiateWithdraw,
+        initiateAddBank,
         closeWithdraw,
         withdrawHidden,
         withdrawDisabled,
