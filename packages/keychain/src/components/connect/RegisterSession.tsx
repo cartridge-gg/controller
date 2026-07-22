@@ -12,6 +12,7 @@ import {
 } from "@/hooks/session";
 import { getChainName } from "@cartridge/controller-ui/utils";
 import { Button, LayoutContent, SliderIcon } from "@cartridge/controller-ui";
+import { clampSessionDurationSeconds } from "@/utils/player-controls";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type Call,
@@ -69,11 +70,23 @@ const RegisterSessionLayout = ({
   );
   const [registeringChain, setRegisteringChain] = useState<string>();
 
-  const { duration, isEditable, onToggleEditable } = useCreateSession();
+  const { duration, playTimeMaxDurationSeconds, isEditable, onToggleEditable } =
+    useCreateSession();
 
   const expiresAt = useMemo(() => {
-    return expiresAtOverride ?? duration + now();
-  }, [expiresAtOverride, duration]);
+    if (expiresAtOverride === undefined) return duration + now();
+    // A caller-supplied expiry (e.g. the `/session?expires_at=` external
+    // registration flow) bypasses the `duration` state entirely, so it must
+    // be clamped here too — otherwise a dapp-requested expiry could exceed
+    // the user's own play-time control cap.
+    const requestedDuration = expiresAtOverride - now();
+    return (
+      clampSessionDurationSeconds(
+        requestedDuration,
+        playTimeMaxDurationSeconds,
+      ) + now()
+    );
+  }, [expiresAtOverride, duration, playTimeMaxDurationSeconds]);
 
   useEffect(() => {
     if (!publicKey || !controller) {
