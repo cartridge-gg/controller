@@ -9,18 +9,9 @@ import {
 import type Controller from "@/utils/controller";
 import { fetchData } from "@/utils/graphql";
 import {
-  ReserveResponsibleGamingSpendDocument,
-  type ReserveResponsibleGamingSpendMutation,
-  type ReserveResponsibleGamingSpendMutationVariables,
-  ReleaseResponsibleGamingSpendDocument,
-  type ReleaseResponsibleGamingSpendMutation,
-  type ReleaseResponsibleGamingSpendMutationVariables,
   ResponsibleGamingDocument,
   type ResponsibleGamingQuery,
   type ResponsibleGamingQueryVariables,
-  SettleResponsibleGamingSpendDocument,
-  type SettleResponsibleGamingSpendMutation,
-  type SettleResponsibleGamingSpendMutationVariables,
 } from "@/utils/api";
 import { parseSimulationEvents } from "@/components/simulation/event-parser";
 import {
@@ -42,24 +33,23 @@ import type { ControllerError } from "./execute";
  *      common fast path. A status-query failure blocks execution.
  *   2. With an active spending limit: simulate the calls, compute gross USD
  *      outflow, and **fail closed** if simulation or valuation errors.
- *   3. Reserve the computed cents *before* executing. A rejected reservation
- *      (limit exceeded) blocks execution.
- *   4. Settle the reservation once a transaction hash comes back; release it if
- *      execution throws synchronously. Settlement/release failures are logged
- *      and never replace the transaction result or the original execution error.
+ *   3. Compare the outflow against server-recorded credit spend plus this
+ *      browser's self-custodial usage for the current limit window.
+ *   4. Optimistically record the local usage before execution and roll it back
+ *      if execution fails or returns no transaction hash.
  */
 export async function executeWithSpendEnforcement(
   controller: Controller,
   calls: Call[],
   execute: () => Promise<InvokeFunctionResponse>,
 ): Promise<InvokeFunctionResponse> {
-  let hasLimit: boolean;
+  let limit: SpendingLimit | null;
   try {
-    hasLimit = await hasActiveSpendingLimit();
+    limit = await loadSpendingLimit();
   } catch (cause) {
     throw valuationBlockedError(cause);
   }
-  if (!hasLimit) {
+  if (!limit) {
     return await execute();
   }
 
@@ -77,34 +67,18 @@ export async function executeWithSpendEnforcement(
     return await execute();
   }
 
-  const reference = generateSpendReference();
-  try {
-    await reserveSpend(reference, cents);
-  } catch (cause) {
-    throw limitExceededError(cause);
-  }
+  const rollback = reserveClientSpend(controller.address(), limit, cents);
 
   let result: InvokeFunctionResponse;
   try {
     result = await execute();
   } catch (executionError) {
-    // Synchronous execution failure: release the hold, but never let a release
-    // error mask the original execution error.
-    await releaseSpendQuietly(reference);
+    rollback();
     throw executionError;
   }
 
-  if (result?.transaction_hash) {
-    // Settlement is best-effort: a failure here must not replace the successful
-    // transaction result. The reservation is left in place (conservative).
-    await settleSpendQuietly(reference);
-  } else {
-    // No transaction hash returned and no throw: leave the reservation in place
-    // (conservative) rather than releasing against a possibly-live spend.
-    console.warn(
-      "[spend-enforcement] execute returned no transaction hash; leaving reservation in place",
-      reference,
-    );
+  if (!result?.transaction_hash) {
+    rollback();
   }
 
   return result;
@@ -114,13 +88,26 @@ export async function executeWithSpendEnforcement(
  * Whether the user currently has an active spending limit. Query failures are
  * propagated so callers fail closed rather than bypassing a configured limit.
  */
-async function hasActiveSpendingLimit(): Promise<boolean> {
+type SpendingLimit = {
+  amountCents: number;
+  serverUsedCents: number;
+  windowStart: string;
+};
+
+async function loadSpendingLimit(): Promise<SpendingLimit | null> {
   const data = await fetchData<
     ResponsibleGamingQuery,
     ResponsibleGamingQueryVariables
   >(ResponsibleGamingDocument);
-  const amountCents = data.responsibleGaming.spending.amountCents;
-  return amountCents !== null && amountCents !== undefined;
+  const { spending, windowStart } = data.responsibleGaming;
+  if (spending.amountCents === null || spending.amountCents === undefined) {
+    return null;
+  }
+  return {
+    amountCents: spending.amountCents,
+    serverUsedCents: spending.usedCents,
+    windowStart: String(windowStart),
+  };
 }
 
 /** Simulate the calls and reduce them to per-token gross outflow. */
@@ -207,69 +194,72 @@ function resolvePrice(
   return { amount: BigInt(price.amount), decimals: price.decimals };
 }
 
-async function reserveSpend(
-  reference: string,
+type ClientSpendUsage = {
+  entries: Array<{ createdAt: string; amountCents: number }>;
+};
+
+const clientSpendMemory = new Map<string, ClientSpendUsage>();
+const clientSpendKeyPrefix = "responsible-gaming:self-custodial-spend:";
+
+function reserveClientSpend(
+  address: string,
+  limit: SpendingLimit,
   amountCents: number,
-): Promise<void> {
-  await fetchData<
-    ReserveResponsibleGamingSpendMutation,
-    ReserveResponsibleGamingSpendMutationVariables
-  >(ReserveResponsibleGamingSpendDocument, { reference, amountCents });
-}
-
-async function settleSpendQuietly(reference: string): Promise<void> {
-  try {
-    await fetchData<
-      SettleResponsibleGamingSpendMutation,
-      SettleResponsibleGamingSpendMutationVariables
-    >(SettleResponsibleGamingSpendDocument, { reference });
-  } catch (error) {
-    console.error(
-      "[spend-enforcement] failed to settle reservation; leaving it in place",
-      reference,
-      error,
-    );
+): () => void {
+  const key = `${clientSpendKeyPrefix}${address.toLowerCase()}`;
+  const previous = readClientSpend(key, limit.windowStart);
+  const locallyUsedCents = previous.entries.reduce(
+    (total, entry) => total + entry.amountCents,
+    0,
+  );
+  if (
+    limit.serverUsedCents + locallyUsedCents + amountCents >
+    limit.amountCents
+  ) {
+    throw limitExceededError();
   }
+
+  writeClientSpend(key, {
+    entries: [
+      ...previous.entries,
+      { createdAt: new Date().toISOString(), amountCents },
+    ],
+  });
+  return () => writeClientSpend(key, previous);
 }
 
-async function releaseSpendQuietly(reference: string): Promise<void> {
+function readClientSpend(key: string, windowStart: string): ClientSpendUsage {
+  let stored: ClientSpendUsage | undefined;
   try {
-    await fetchData<
-      ReleaseResponsibleGamingSpendMutation,
-      ReleaseResponsibleGamingSpendMutationVariables
-    >(ReleaseResponsibleGamingSpendDocument, { reference });
-  } catch (error) {
-    console.error(
-      "[spend-enforcement] failed to release reservation; leaving it in place",
-      reference,
-      error,
-    );
-  }
-}
-
-/**
- * Bounded, unique reservation reference. Prefers `crypto.randomUUID`; falls back
- * to a time + counter + random hex string when it's unavailable. Capped at 64
- * characters.
- */
-let referenceCounter = 0;
-export function generateSpendReference(): string {
-  try {
-    if (
-      typeof crypto !== "undefined" &&
-      typeof crypto.randomUUID === "function"
-    ) {
-      return `rg-${crypto.randomUUID()}`;
+    if (globalThis.localStorage) {
+      const raw = globalThis.localStorage.getItem(key);
+      stored = raw ? (JSON.parse(raw) as ClientSpendUsage) : undefined;
+    } else {
+      stored = clientSpendMemory.get(key);
     }
   } catch {
-    // fall through to the manual fallback
+    stored = clientSpendMemory.get(key);
   }
-  referenceCounter = (referenceCounter + 1) % 0x10000;
-  const seq = referenceCounter.toString(16).padStart(4, "0");
-  const rand = Math.floor(Math.random() * 0xffffffff)
-    .toString(16)
-    .padStart(8, "0");
-  return `rg-${Date.now().toString(16)}-${seq}-${rand}`.slice(0, 64);
+
+  const cutoff = Date.parse(windowStart);
+  const entries = Array.isArray(stored?.entries)
+    ? stored.entries.filter(
+        (entry) =>
+          Number.isFinite(entry.amountCents) &&
+          entry.amountCents > 0 &&
+          Date.parse(entry.createdAt) >= cutoff,
+      )
+    : [];
+  return { entries };
+}
+
+function writeClientSpend(key: string, usage: ClientSpendUsage): void {
+  clientSpendMemory.set(key, usage);
+  try {
+    globalThis.localStorage?.setItem(key, JSON.stringify(usage));
+  } catch {
+    // Memory storage remains authoritative for this page lifecycle.
+  }
 }
 
 /**
@@ -277,7 +267,8 @@ export function generateSpendReference(): string {
  * Reuse the existing responsible-gaming user message and map to the closest
  * existing controller error code.
  */
-function limitExceededError(cause: unknown): ControllerError {
+function limitExceededError(): ControllerError {
+  const cause = new Error("spending limit exceeded");
   return {
     code: ErrorCode.InsufficientBalance,
     message: mapResponsibleGamingError(cause),

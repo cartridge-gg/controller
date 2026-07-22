@@ -60,54 +60,21 @@ function outboundTransfer(
   };
 }
 
-type Order = string[];
-
 function routeFetchData({
   spendingAmountCents,
+  spendingUsedCents = 0,
   events = [],
-  reserveThrows = false,
   statusThrows = false,
   priceAddress = USDC,
-  order,
-  captured,
 }: {
   spendingAmountCents: number | null;
+  spendingUsedCents?: number;
   events?: SimulationEvent[];
-  reserveThrows?: boolean;
   statusThrows?: boolean;
   priceAddress?: string;
-  order?: Order;
-  captured?: { reference?: string };
 }) {
   mockParse.mockResolvedValue(events);
-  mockFetchData.mockImplementation((async (doc: string, vars?: unknown) => {
-    if (doc.includes("reserveResponsibleGamingSpend")) {
-      order?.push("reserve");
-      if (captured)
-        captured.reference = (vars as { reference: string }).reference;
-      if (reserveThrows) throw new Error("spending limit exceeded");
-      return {
-        reserveResponsibleGamingSpend: {
-          ...(vars as object),
-          state: "RESERVED",
-        },
-      };
-    }
-    if (doc.includes("settleResponsibleGamingSpend")) {
-      order?.push("settle");
-      return {
-        settleResponsibleGamingSpend: { ...(vars as object), state: "SETTLED" },
-      };
-    }
-    if (doc.includes("releaseResponsibleGamingSpend")) {
-      order?.push("release");
-      return {
-        releaseResponsibleGamingSpend: {
-          ...(vars as object),
-          state: "RELEASED",
-        },
-      };
-    }
+  mockFetchData.mockImplementation((async (doc: string) => {
     if (doc.includes("priceByAddresses")) {
       // $1.00 per whole token (amount 1e8, decimals 8)
       return {
@@ -125,7 +92,11 @@ function routeFetchData({
     if (statusThrows) throw new Error("responsible gaming status unavailable");
     return {
       responsibleGaming: {
-        spending: { amountCents: spendingAmountCents },
+        windowStart: "2026-07-22T00:00:00Z",
+        spending: {
+          amountCents: spendingAmountCents,
+          usedCents: spendingUsedCents,
+        },
       },
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,6 +105,7 @@ function routeFetchData({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
   mockCallContract.mockResolvedValue(["0x6"]);
 });
 
@@ -146,7 +118,7 @@ describe("executeWithSpendEnforcement", () => {
 
     expect(result).toEqual({ transaction_hash: "0xabc" });
     expect(execute).toHaveBeenCalledTimes(1);
-    // Only the status query — no simulation, no reservation.
+    // Only the status query — no simulation or server-side spend mutation.
     expect(mockParse).not.toHaveBeenCalled();
     expect(mockFetchData).toHaveBeenCalledTimes(1);
   });
@@ -176,71 +148,41 @@ describe("executeWithSpendEnforcement", () => {
       entrypoint: "decimals",
       calldata: [],
     });
-    const reserveCall = mockFetchData.mock.calls.find((call) =>
-      String(call[0]).includes("reserveResponsibleGamingSpend"),
-    );
-    expect((reserveCall?.[1] as { amountCents: number }).amountCents).toBe(100);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(mockFetchData).toHaveBeenCalledTimes(2);
   });
 
-  it("reserves before executing then settles on a returned transaction hash", async () => {
-    const order: Order = [];
-    const captured: { reference?: string } = {};
+  it("tracks successful self-custodial spend locally across executions", async () => {
     routeFetchData({
-      spendingAmountCents: 100000,
+      spendingAmountCents: 150,
       events: [outboundTransfer(USDC, 1_000_000n)], // 1 USDC = $1.00 = 100 cents
-      order,
-      captured,
     });
-    const execute = vi.fn().mockImplementation(async () => {
-      order.push("execute");
-      return { transaction_hash: "0xdef" };
-    });
+    const execute = vi.fn().mockResolvedValue({ transaction_hash: "0xdef" });
 
     const result = await executeWithSpendEnforcement(controller, [], execute);
-
     expect(result).toEqual({ transaction_hash: "0xdef" });
-    expect(order).toEqual(["reserve", "execute", "settle"]);
-
-    // Reserve got the computed cents; settle used the same reference.
-    const reserveCall = mockFetchData.mock.calls.find((c) =>
-      String(c[0]).includes("reserveResponsibleGamingSpend"),
-    );
-    expect((reserveCall?.[1] as { amountCents: number }).amountCents).toBe(100);
-    expect(captured.reference).toBeTruthy();
-    const settleCall = mockFetchData.mock.calls.find((c) =>
-      String(c[0]).includes("settleResponsibleGamingSpend"),
-    );
-    expect((settleCall?.[1] as { reference: string }).reference).toBe(
-      captured.reference,
-    );
+    await expect(
+      executeWithSpendEnforcement(controller, [], execute),
+    ).rejects.toMatchObject({ code: ErrorCode.InsufficientBalance });
+    expect(execute).toHaveBeenCalledTimes(1);
   });
 
-  it("releases the reservation and rethrows when execution fails", async () => {
-    const order: Order = [];
-    const captured: { reference?: string } = {};
+  it("rolls back local usage when execution fails", async () => {
     routeFetchData({
-      spendingAmountCents: 100000,
+      spendingAmountCents: 100,
       events: [outboundTransfer(USDC, 1_000_000n)],
-      order,
-      captured,
     });
     const executionError = new Error("execution reverted");
-    const execute = vi.fn().mockImplementation(async () => {
-      order.push("execute");
-      throw executionError;
-    });
+    const execute = vi.fn().mockRejectedValueOnce(executionError);
 
     await expect(
       executeWithSpendEnforcement(controller, [], execute),
     ).rejects.toBe(executionError);
 
-    expect(order).toEqual(["reserve", "execute", "release"]);
-    const releaseCall = mockFetchData.mock.calls.find((c) =>
-      String(c[0]).includes("releaseResponsibleGamingSpend"),
-    );
-    expect((releaseCall?.[1] as { reference: string }).reference).toBe(
-      captured.reference,
-    );
+    execute.mockResolvedValueOnce({ transaction_hash: "0xdef" });
+    await expect(
+      executeWithSpendEnforcement(controller, [], execute),
+    ).resolves.toEqual({ transaction_hash: "0xdef" });
   });
 
   it("fails closed (blocks) when simulation errors while a limit is active", async () => {
@@ -256,11 +198,11 @@ describe("executeWithSpendEnforcement", () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
-  it("maps a rejected reservation to a spending-limit controller error", async () => {
+  it("includes server-recorded credit spend in the client-side check", async () => {
     routeFetchData({
-      spendingAmountCents: 100000,
+      spendingAmountCents: 150,
+      spendingUsedCents: 100,
       events: [outboundTransfer(USDC, 1_000_000n)],
-      reserveThrows: true,
     });
     const execute = vi.fn().mockResolvedValue({ transaction_hash: "0x1" });
 
