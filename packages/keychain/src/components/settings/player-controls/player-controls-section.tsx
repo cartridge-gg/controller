@@ -7,6 +7,7 @@ import {
   type PlayerControlsFieldsFragment,
   type UpdatePlayerControlsInput,
 } from "@/utils/api";
+import { invalidatePlayerControlsCache } from "@/utils/connection/spend-enforcement";
 import {
   Button,
   CalendarIcon,
@@ -48,13 +49,24 @@ export const PlayerControlsSection = () => {
   const mutation = useUpdatePlayerControlsMutation({
     onSuccess: () => {
       setError(undefined);
+      // A period change may be held pending (window-shortening cooling-off),
+      // in which case `pc.period` from the refetch below stays at the old
+      // value. Drop the local selection so the selector snaps back to the
+      // still-effective period instead of showing the requested-but-not-yet-
+      // effective one.
+      setPeriod(undefined);
       queryClient.invalidateQueries(["PlayerControls"]);
+      if (controller) {
+        invalidatePlayerControlsCache(controller.address());
+      }
     },
     onError: (err) => setError(mapPlayerControlsError(err)),
   });
 
   // Period drives which window the credits-purchase / entry-and-purchase limits
-  // apply to. Defaults to the backend's current value.
+  // apply to. Defaults to the backend's current *effective* value — never the
+  // pending one — so a queued (cooling-off) period change never appears to
+  // have applied immediately.
   const [period, setPeriod] = useState<PlayerControlsPeriod | undefined>();
   const effectivePeriod = period ?? pc?.period ?? PLAYER_CONTROLS_PERIODS[0];
 
@@ -85,6 +97,14 @@ export const PlayerControlsSection = () => {
             onChange={setPeriod}
             disabled={mutation.isLoading}
           />
+          {pc.pendingPeriod && (
+            <PendingLine
+              pendingAmount={
+                PERIOD_LABELS[pc.pendingPeriod] ?? pc.pendingPeriod
+              }
+              pendingRemoval={false}
+            />
+          )}
 
           <MoneyLimitRow
             icon={<CoinsIcon variant="solid" size="sm" />}
