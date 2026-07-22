@@ -15,10 +15,11 @@ const HOUR = 3600;
 function pc(overrides: Partial<PlayerControlsData> = {}): PlayerControlsData {
   return {
     period: PlayerControlsPeriod.Weekly,
-    windowStart: null,
+    windowStart: "2026-07-22T00:00:00Z",
     playTimeMaxDurationSeconds: null,
     pendingPlayTimeMaxDurationSeconds: null,
     pendingPlayTimeRemoval: false,
+    pendingPeriod: null,
     pendingEffectiveAt: null,
     creditsPurchase: {
       amountCents: null,

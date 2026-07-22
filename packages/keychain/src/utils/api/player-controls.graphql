@@ -16,6 +16,7 @@ fragment PlayerControlsFields on PlayerControlsStatus {
   playTimeMaxDurationSeconds
   pendingPlayTimeMaxDurationSeconds
   pendingPlayTimeRemoval
+  pendingPeriod
   pendingEffectiveAt
 }
 

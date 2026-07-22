@@ -3369,6 +3369,13 @@ export type Mutation = {
   updateDeployment: Deployment;
   updateMe: Account;
   updatePaymaster: Scalars['Boolean'];
+  /**
+   * Update the authenticated account's player controls. Decreases (more
+   * restrictive) take effect immediately; increases and removals (less
+   * restrictive) are held as a pending change effective after a cooling-off
+   * period. All amounts are in USD cents.
+   */
+  updatePlayerControls: PlayerControlsStatus;
   updateRpcApiKey: RpcApiKey;
   updateRpcCorsDomain: RpcCorsDomain;
   updateTeam: Team;
@@ -3720,6 +3727,11 @@ export type MutationUpdatePaymasterArgs = {
   paymasterName: Scalars['ID'];
   sponsorCapBps?: InputMaybe<Scalars['Int']>;
   teamName?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationUpdatePlayerControlsArgs = {
+  input: UpdatePlayerControlsInput;
 };
 
 
@@ -4887,6 +4899,51 @@ export type PlayerAchievementResult = {
   items: Array<PlayerAchievementItem>;
 };
 
+export type PlayerControlsLimit = {
+  __typename?: 'PlayerControlsLimit';
+  /** Effective limit in USD cents. Null means no limit. */
+  amountCents?: Maybe<Scalars['Int']>;
+  /**
+   * Pending (cooling-off) limit value in USD cents. Null when there is no
+   * pending change or when the pending change is a removal (see pendingRemoval).
+   */
+  pendingAmountCents?: Maybe<Scalars['Int']>;
+  /** True when the pending change removes the limit entirely. */
+  pendingRemoval: Scalars['Boolean'];
+  /** Amount already used in the current window, in USD cents. */
+  usedCents: Scalars['Int'];
+};
+
+export enum PlayerControlsPeriod {
+  Daily = 'DAILY',
+  Monthly = 'MONTHLY',
+  Weekly = 'WEEKLY'
+}
+
+export type PlayerControlsStatus = {
+  __typename?: 'PlayerControlsStatus';
+  /** Limit on credits purchased (funds converted to off-chain credits). */
+  creditsPurchase: PlayerControlsLimit;
+  /** Limit on gross credits spent on game entries and purchases. */
+  entryPurchase: PlayerControlsLimit;
+  /** When the pending change(s) become effective. Null when none pending. */
+  pendingEffectiveAt?: Maybe<Scalars['Time']>;
+  /**
+   * Pending (cooling-off) window-shortening period change, if any. Null when
+   * there is no pending period change.
+   */
+  pendingPeriod?: Maybe<PlayerControlsPeriod>;
+  /** Pending (cooling-off) play-time duration cap in seconds, if any. */
+  pendingPlayTimeMaxDurationSeconds?: Maybe<Scalars['Int']>;
+  /** True when the pending change removes the play-time duration cap. */
+  pendingPlayTimeRemoval: Scalars['Boolean'];
+  period: PlayerControlsPeriod;
+  /** Effective play-time duration cap in seconds. Null means no cap. */
+  playTimeMaxDurationSeconds?: Maybe<Scalars['Int']>;
+  /** Inclusive start of the current rolling usage window. */
+  windowStart: Scalars['Time'];
+};
+
 export type PlaythroughEntry = {
   __typename?: 'PlaythroughEntry';
   actionCount: Scalars['Int'];
@@ -5081,6 +5138,11 @@ export type Query = {
   paymasterTransactions: Array<PaymasterTransaction>;
   paymasters?: Maybe<PaymasterConnection>;
   playerAchievements: PlayerAchievementResult;
+  /**
+   * Player-controls status for the authenticated account: effective limits,
+   * current-window usage, and any pending (cooling-off) changes.
+   */
+  playerControls: PlayerControlsStatus;
   playthroughs: PlaythroughResult;
   price: Array<Price>;
   priceByAddresses: Array<Price>;
@@ -7307,6 +7369,20 @@ export type UpdateMerkleDropInput = {
   removeClaimIDs?: InputMaybe<Array<Scalars['ID']>>;
   salt?: InputMaybe<Scalars['String']>;
   updatedAt?: InputMaybe<Scalars['Time']>;
+};
+
+export type UpdatePlayerControlsInput = {
+  /** Set the credits-purchase limit (USD cents). Mutually exclusive with removeCreditsPurchaseLimit. */
+  creditsPurchaseLimitCents?: InputMaybe<Scalars['Int']>;
+  /** Set the entry-and-purchase limit (USD cents). Mutually exclusive with removeEntryPurchaseLimit. */
+  entryPurchaseLimitCents?: InputMaybe<Scalars['Int']>;
+  period?: InputMaybe<PlayerControlsPeriod>;
+  /** Set the play-time duration cap in seconds. Mutually exclusive with removePlayTimeMaxDuration. */
+  playTimeMaxDurationSeconds?: InputMaybe<Scalars['Int']>;
+  /** Remove the credits-purchase limit (unlimited). Loosening, so it goes through cooling-off. */
+  removeCreditsPurchaseLimit?: InputMaybe<Scalars['Boolean']>;
+  removeEntryPurchaseLimit?: InputMaybe<Scalars['Boolean']>;
+  removePlayTimeMaxDuration?: InputMaybe<Scalars['Boolean']>;
 };
 
 export type UpdateServiceInput = {
