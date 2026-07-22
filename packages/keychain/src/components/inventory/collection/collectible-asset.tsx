@@ -302,11 +302,11 @@ export function CollectibleAsset() {
                         username={props.username || ""}
                         timestamp={props.timestamp}
                         category={props.category}
-                        collectibleImage={
-                          asset.imageUrls[0] ||
-                          collectible.imageUrls[0] ||
-                          placeholder
-                        }
+                        collectibleImage={[
+                          ...asset.imageUrls,
+                          ...collectible.imageUrls,
+                          placeholder,
+                        ]}
                         collectibleName={title || collectible.name}
                         currencyImage={props.currencyImage}
                         quantity={props.amount}

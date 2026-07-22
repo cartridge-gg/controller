@@ -100,7 +100,7 @@ export function Activity() {
                             collection={props.collection}
                             address={props.address}
                             username={props.username}
-                            image={props.image}
+                            image={props.images ?? props.image}
                             action={props.action}
                             timestamp={props.timestamp * 1000}
                           />

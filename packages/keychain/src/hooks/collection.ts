@@ -7,6 +7,11 @@ import { useConnection } from "@/hooks/connection";
 import { addAddressPadding } from "starknet";
 import * as torii from "@dojoengine/torii-wasm";
 import Torii from "@/helpers/torii";
+import {
+  getTokenImageFallbacks,
+  getToriiCollectionImageUrl,
+  getToriiTokenImageUrls,
+} from "@/helpers/torii-url";
 
 export const ERC721 = "ERC721";
 export const ERC1155 = "ERC1155";
@@ -62,7 +67,8 @@ export function useCollection({
   }, [toriiUrl]);
 
   useEffect(() => {
-    if (!client || !address || !trigger || !contractAddress) return;
+    if (!client || !address || !trigger || !contractAddress || !toriiUrl)
+      return;
     setTrigger(false);
     const getCollections = async () => {
       const contract = await Torii.fetchContract(client, contractAddress);
@@ -97,14 +103,15 @@ export function useCollection({
         console.error(error);
       }
       if (!metadata.name || !metadata.image) return;
-      const contractImage = `${toriiUrl}/static/${addAddressPadding(contractAddress)}/image`;
-      const oldImage = `${toriiUrl}/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
-      const newImage = `${toriiUrl}/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
       const newCollection: Collection = {
         address: contractAddress,
         name: asset.name || metadata.name,
         type: ERC721,
-        imageUrls: [contractImage, newImage, oldImage, metadata.image],
+        imageUrls: [
+          getToriiCollectionImageUrl(toriiUrl, contractAddress),
+          ...getToriiTokenImageUrls(toriiUrl, contractAddress, asset.token_id!),
+          metadata.image,
+        ],
         totalCount: ids.length,
       };
       setCollection(newCollection);
@@ -130,8 +137,6 @@ export function useCollection({
               BigInt(b.balance) !== 0n,
           )?.account_address;
           if (!owner) return; // Skip assets without owners
-          const oldImage = `${toriiUrl}/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
-          const newImage = `${toriiUrl}/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
           const balance =
             balances.find(
               (b) =>
@@ -141,7 +146,12 @@ export function useCollection({
             tokenId: asset.token_id || "",
             name: metadata?.name || asset.name,
             description: metadata?.description,
-            imageUrls: [newImage, oldImage, metadata?.image || ""],
+            imageUrls: getTokenImageFallbacks(
+              toriiUrl,
+              contractAddress,
+              asset.token_id!,
+              metadata?.image,
+            ),
             attributes: Array.isArray(metadata?.attributes)
               ? metadata.attributes
               : [],
@@ -210,7 +220,7 @@ export function useCollections(): UseCollectionsResponse {
   }, [toriiUrl]);
 
   useEffect(() => {
-    if (!client || !address || !trigger) return;
+    if (!client || !address || !trigger || !toriiUrl) return;
     setTrigger(false);
     const getCollections = async () => {
       const contracts = await Torii.fetchContracts(client, [ERC721, ERC1155]);
@@ -249,8 +259,6 @@ export function useCollections(): UseCollectionsResponse {
           } catch (error) {
             console.error(error);
           }
-          const oldImage = `${toriiUrl}/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
-          const newImage = `${toriiUrl}/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
           const type = contracts.find(
             (c) => c.contract_address === contractAddress,
           )?.contract_type;
@@ -258,7 +266,15 @@ export function useCollections(): UseCollectionsResponse {
             address: contractAddress,
             name: asset.name || metadata?.name || "",
             type: type || "",
-            imageUrls: [newImage, oldImage, metadata?.image || ""],
+            imageUrls: [
+              getToriiCollectionImageUrl(toriiUrl, contractAddress),
+              ...getToriiTokenImageUrls(
+                toriiUrl,
+                contractAddress,
+                asset.token_id!,
+              ),
+              metadata?.image || "",
+            ],
             totalCount: tokenIds.length,
           };
         }),
