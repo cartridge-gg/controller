@@ -269,11 +269,11 @@ export function CollectionAsset() {
                         timestamp={props.timestamp}
                         category={props.category}
                         amount={props.amount}
-                        collectibleImage={
-                          asset.imageUrls[0] ||
-                          collection.imageUrls[0] ||
-                          placeholder
-                        }
+                        collectibleImage={[
+                          ...asset.imageUrls,
+                          ...collection.imageUrls,
+                          placeholder,
+                        ]}
                         collectibleName={title || collection.name}
                         currencyImage={props.currencyImage}
                       />
