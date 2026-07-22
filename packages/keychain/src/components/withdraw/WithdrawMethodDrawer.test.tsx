@@ -114,14 +114,18 @@ describe("WithdrawMethodDrawer", () => {
   });
 
   it("keeps the withdraw button disabled until a quote resolves", () => {
-    const { rerender } = render(<WithdrawMethodDrawer {...baseProps} />);
+    const { rerender, container } = render(
+      <WithdrawMethodDrawer {...baseProps} />,
+    );
 
     // Linked account but no quote yet → disabled, button shows the gross amount.
     expect(screen.getByText("Withdraw $6.13").closest("button")).toBeDisabled();
 
-    // Quote still loading → still disabled, fee row shows the spinner.
+    // Quote still loading → still disabled and in its loading state (the label
+    // is swapped for a spinner, so query the <button> directly); the fee row
+    // also shows a spinner.
     rerender(<WithdrawMethodDrawer {...baseProps} quoteLoading />);
-    expect(screen.getByText("Withdraw $6.13").closest("button")).toBeDisabled();
+    expect(container.querySelector("button")).toBeDisabled();
     expect(screen.getByText("Calculating fee…")).toBeInTheDocument();
 
     // Quote resolved → enabled, button shows the net (received) amount.
