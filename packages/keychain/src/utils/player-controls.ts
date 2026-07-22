@@ -1,47 +1,48 @@
-import type { ResponsibleGamingFieldsFragment } from "@/utils/api";
+import {
+  PlayerControlsPeriod,
+  type PlayerControlsFieldsFragment,
+} from "@/utils/api";
 
-export type ResponsibleGamingData = ResponsibleGamingFieldsFragment;
+export type PlayerControlsData = PlayerControlsFieldsFragment;
 
 /**
- * Responsible-gaming reporting periods. The backend is the source of truth for
+ * Player-controls reporting periods. The backend is the source of truth for
  * which values are valid; these are the values surfaced in the settings UI.
  */
-export const RESPONSIBLE_GAMING_PERIODS = [
-  "DAILY",
-  "WEEKLY",
-  "MONTHLY",
+export const PLAYER_CONTROLS_PERIODS = [
+  PlayerControlsPeriod.Daily,
+  PlayerControlsPeriod.Weekly,
+  PlayerControlsPeriod.Monthly,
 ] as const;
-export type ResponsibleGamingPeriod =
-  (typeof RESPONSIBLE_GAMING_PERIODS)[number];
 
 export const PERIOD_LABELS: Record<string, string> = {
-  DAILY: "Daily",
-  WEEKLY: "Weekly",
-  MONTHLY: "Monthly",
+  [PlayerControlsPeriod.Daily]: "Daily",
+  [PlayerControlsPeriod.Weekly]: "Weekly",
+  [PlayerControlsPeriod.Monthly]: "Monthly",
 };
 
 /**
- * The currently-enforced session duration cap, in seconds.
+ * The currently-enforced play-time cap, in seconds.
  *
  * A pending change (increase, decrease, or removal) does NOT take effect until
  * its cooling-off period elapses (`pendingEffectiveAt`), so the value that must
- * be respected right now is the active `sessionMaxDurationSeconds`. Returns
- * `null` when the user has not set a session cap (i.e. uncapped).
+ * be respected right now is the active `playTimeMaxDurationSeconds`. Returns
+ * `null` when the user has not set a play-time limit (i.e. uncapped).
  *
  * The backend remains authoritative — this is a client-side guard so we never
- * even request a session longer than the user's own limit.
+ * even request a session longer than the user's own play-time limit.
  */
-export function effectiveSessionCapSeconds(
-  rg?: ResponsibleGamingData | null,
+export function effectivePlayTimeCapSeconds(
+  pc?: PlayerControlsData | null,
 ): bigint | null {
-  const cap = rg?.sessionMaxDurationSeconds;
+  const cap = pc?.playTimeMaxDurationSeconds;
   if (cap === null || cap === undefined) return null;
   return BigInt(cap);
 }
 
 /**
- * Clamp a requested session duration (seconds) to the effective cap. A `null`
- * cap means no limit, so the requested value is returned unchanged.
+ * Clamp a requested session duration (seconds) to the effective play-time cap.
+ * A `null` cap means no limit, so the requested value is returned unchanged.
  */
 export function clampSessionDurationSeconds(
   requestedSeconds: bigint,
@@ -51,8 +52,8 @@ export function clampSessionDurationSeconds(
   return requestedSeconds > capSeconds ? capSeconds : requestedSeconds;
 }
 
-/** Whether a requested duration exceeds the effective cap. */
-export function exceedsSessionCap(
+/** Whether a requested duration exceeds the effective play-time cap. */
+export function exceedsPlayTimeCap(
   requestedSeconds: bigint,
   capSeconds: bigint | null,
 ): boolean {
@@ -83,14 +84,14 @@ export function formatDurationSeconds(seconds?: number | null): string {
 }
 
 /**
- * Map a backend responsible-gaming error to a clear, user-facing message.
+ * Map a backend player-controls error to a clear, user-facing message.
  *
  * The GraphQL fetcher throws `new Error(message)` using the first error's
  * message, so we match on both structured `extensions.code` (when present) and
  * the raw message text. Unknown errors fall back to the backend message (or a
  * generic string) so we never swallow useful detail.
  */
-export function mapResponsibleGamingError(error: unknown): string {
+export function mapPlayerControlsError(error: unknown): string {
   const raw = extractErrorMessage(error);
   const code = extractErrorCode(error);
   const haystack = `${code ?? ""} ${raw}`.toLowerCase();
@@ -112,21 +113,26 @@ export function mapResponsibleGamingError(error: unknown): string {
 
   // The limit would be exceeded by the current action.
   if (
-    haystack.includes("deposit") &&
+    haystack.includes("credit") &&
     (haystack.includes("limit") || haystack.includes("exceed"))
   ) {
-    return "This would exceed your deposit limit for the current period.";
+    return "This would exceed your credits purchase limit for the current period.";
   }
   if (
-    haystack.includes("spend") &&
+    haystack.includes("entry") &&
     (haystack.includes("limit") || haystack.includes("exceed"))
   ) {
-    return "This would exceed your spending limit for the current period.";
+    return "This would exceed your entry and purchase limit for the current period.";
   }
 
-  // Session duration above the configured cap.
-  if (haystack.includes("session") && haystack.includes("duration")) {
-    return "The requested session length exceeds your maximum session duration limit.";
+  // Play-time above the configured limit.
+  if (
+    haystack.includes("play") &&
+    (haystack.includes("time") ||
+      haystack.includes("duration") ||
+      haystack.includes("limit"))
+  ) {
+    return "The requested play-time exceeds your play-time limit.";
   }
 
   // Invalid input.

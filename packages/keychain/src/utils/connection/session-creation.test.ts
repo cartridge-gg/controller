@@ -113,7 +113,7 @@ describe("session-creation helpers", () => {
       expect(processedPolicies.messages[0].authorized).toBe(true);
     });
 
-    it("clamps the requested duration to the responsible-gaming cap", async () => {
+    it("clamps the requested duration to the play-time cap", async () => {
       const createSession = vi.fn().mockResolvedValue(undefined);
       const controller = { createSession } as unknown as Controller;
 

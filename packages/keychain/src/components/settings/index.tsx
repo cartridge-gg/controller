@@ -23,7 +23,7 @@ import { UserDataSection } from "./user-data-section";
 import { DeleteAccountSection } from "./delete-account-section";
 import { useFeature } from "@/hooks/features";
 import { AdvancedViewSection } from "./advanced-view-section";
-import { ResponsibleGamingSection } from "./responsible-gaming";
+import { PlayerControlsSection } from "./player-controls";
 
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
@@ -61,7 +61,7 @@ export function Settings() {
 
         <SessionsSection />
 
-        <ResponsibleGamingSection />
+        <PlayerControlsSection />
 
         <SignersSection controllerQuery={controllerQuery} />
 

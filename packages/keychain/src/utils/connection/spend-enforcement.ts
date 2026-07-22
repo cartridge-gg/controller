@@ -9,9 +9,9 @@ import {
 import type Controller from "@/utils/controller";
 import { fetchData } from "@/utils/graphql";
 import {
-  ResponsibleGamingDocument,
-  type ResponsibleGamingQuery,
-  type ResponsibleGamingQueryVariables,
+  PlayerControlsDocument,
+  type PlayerControlsQuery,
+  type PlayerControlsQueryVariables,
 } from "@/utils/api";
 import { parseSimulationEvents } from "@/components/simulation/event-parser";
 import {
@@ -20,7 +20,7 @@ import {
   type TokenGrossOutflow,
   type TokenPrice,
 } from "@/utils/gross-outflow";
-import { mapResponsibleGamingError } from "@/utils/responsible-gaming";
+import { mapPlayerControlsError } from "@/utils/player-controls";
 import type { ControllerError } from "./execute";
 
 /**
@@ -28,11 +28,11 @@ import type { ControllerError } from "./execute";
  * (`executeCore`) and manual `account.execute` (ConfirmTransaction).
  *
  * Flow:
- *   1. Query responsible-gaming status. If there is no active spending limit,
- *      run `execute` directly with no simulation or reservation. This is the
- *      common fast path. A status-query failure blocks execution.
- *   2. With an active spending limit: simulate the calls, compute gross USD
- *      outflow, and **fail closed** if simulation or valuation errors.
+ *   1. Query player-controls status. If there is no active entry-and-purchase
+ *      limit, run `execute` directly with no simulation or reservation. This is
+ *      the common fast path. A status-query failure blocks execution.
+ *   2. With an active entry-and-purchase limit: simulate the calls, compute
+ *      gross USD outflow, and **fail closed** if simulation or valuation errors.
  *   3. Compare the outflow against server-recorded credit spend plus this
  *      browser's self-custodial usage for the current limit window.
  *   4. Optimistically record the local usage before execution and roll it back
@@ -43,9 +43,9 @@ export async function executeWithSpendEnforcement(
   calls: Call[],
   execute: () => Promise<InvokeFunctionResponse>,
 ): Promise<InvokeFunctionResponse> {
-  let limit: SpendingLimit | null;
+  let limit: EntryPurchaseLimit | null;
   try {
-    limit = await loadSpendingLimit();
+    limit = await loadEntryPurchaseLimit();
   } catch (cause) {
     throw valuationBlockedError(cause);
   }
@@ -85,27 +85,31 @@ export async function executeWithSpendEnforcement(
 }
 
 /**
- * Whether the user currently has an active spending limit. Query failures are
- * propagated so callers fail closed rather than bypassing a configured limit.
+ * Whether the user currently has an active entry-and-purchase limit. Query
+ * failures are propagated so callers fail closed rather than bypassing a
+ * configured limit.
  */
-type SpendingLimit = {
+type EntryPurchaseLimit = {
   amountCents: number;
   serverUsedCents: number;
   windowStart: string;
 };
 
-async function loadSpendingLimit(): Promise<SpendingLimit | null> {
+async function loadEntryPurchaseLimit(): Promise<EntryPurchaseLimit | null> {
   const data = await fetchData<
-    ResponsibleGamingQuery,
-    ResponsibleGamingQueryVariables
-  >(ResponsibleGamingDocument);
-  const { spending, windowStart } = data.responsibleGaming;
-  if (spending.amountCents === null || spending.amountCents === undefined) {
+    PlayerControlsQuery,
+    PlayerControlsQueryVariables
+  >(PlayerControlsDocument);
+  const { entryPurchase, windowStart } = data.playerControls;
+  if (
+    entryPurchase.amountCents === null ||
+    entryPurchase.amountCents === undefined
+  ) {
     return null;
   }
   return {
-    amountCents: spending.amountCents,
-    serverUsedCents: spending.usedCents,
+    amountCents: entryPurchase.amountCents,
+    serverUsedCents: entryPurchase.usedCents,
     windowStart: String(windowStart),
   };
 }
@@ -199,11 +203,11 @@ type ClientSpendUsage = {
 };
 
 const clientSpendMemory = new Map<string, ClientSpendUsage>();
-const clientSpendKeyPrefix = "responsible-gaming:self-custodial-spend:";
+const clientSpendKeyPrefix = "player-controls:self-custodial-spend:";
 
 function reserveClientSpend(
   address: string,
-  limit: SpendingLimit,
+  limit: EntryPurchaseLimit,
   amountCents: number,
 ): () => void {
   const key = `${clientSpendKeyPrefix}${address.toLowerCase()}`;
@@ -263,28 +267,29 @@ function writeClientSpend(key: string, usage: ClientSpendUsage): void {
 }
 
 /**
- * A rejected reservation means the transaction would exceed the spending limit.
- * Reuse the existing responsible-gaming user message and map to the closest
- * existing controller error code.
+ * A rejected reservation means the transaction would exceed the entry-and-
+ * purchase limit. Reuse the existing player-controls user message and map to
+ * the closest existing controller error code.
  */
 function limitExceededError(): ControllerError {
-  const cause = new Error("spending limit exceeded");
+  const cause = new Error("entry purchase limit exceeded");
   return {
     code: ErrorCode.InsufficientBalance,
-    message: mapResponsibleGamingError(cause),
+    message: mapPlayerControlsError(cause),
     data: cause,
   };
 }
 
 /**
- * Simulation or valuation failed while a spending limit is active. We fail
- * closed: the transaction is blocked because its spend can't be verified.
+ * Simulation or valuation failed while an entry-and-purchase limit is active.
+ * We fail closed: the transaction is blocked because its spend can't be
+ * verified.
  */
 function valuationBlockedError(cause: unknown): ControllerError {
   return {
     code: ErrorCode.StarknetContractError,
     message:
-      "Couldn't verify this transaction against your spending limit. Please try again.",
+      "Couldn't verify this transaction against your entry and purchase limit. Please try again.",
     data: cause,
   };
 }

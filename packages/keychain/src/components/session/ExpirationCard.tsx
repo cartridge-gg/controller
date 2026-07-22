@@ -6,13 +6,13 @@ import {
 } from "@cartridge/controller-ui";
 
 export function ExpirationCard() {
-  const { isEditable, duration, sessionMaxDurationSeconds, onDurationChange } =
+  const { isEditable, duration, playTimeMaxDurationSeconds, onDurationChange } =
     useCreateSession();
 
-  // Disable preset options that exceed the responsible-gaming session cap.
+  // Disable preset options that exceed the player-controls play-time cap.
   const isOverCap = (seconds: number) =>
-    sessionMaxDurationSeconds !== null &&
-    BigInt(seconds) > sessionMaxDurationSeconds;
+    playTimeMaxDurationSeconds !== null &&
+    BigInt(seconds) > playTimeMaxDurationSeconds;
 
   return (
     <div className="w-full flex flex-row items-center justify-between font-medium text-sm">

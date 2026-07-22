@@ -6,7 +6,7 @@ import {
 } from "@/hooks/session";
 import type { SessionChainPolicies } from "@/hooks/connection";
 import { processPolicies } from "@/utils/session/policies";
-import { clampSessionDurationSeconds } from "@/utils/responsible-gaming";
+import { clampSessionDurationSeconds } from "@/utils/player-controls";
 
 export const DEFAULT_VERIFIED_SESSION_DURATION_S = BigInt(24 * 60 * 60);
 
@@ -62,9 +62,9 @@ export async function createVerifiedSession({
   chainPolicies?: SessionChainPolicies;
   durationSeconds?: bigint;
   /**
-   * Effective responsible-gaming session cap (seconds). When set, the requested
-   * duration is clamped to this value before signing. The backend remains
-   * authoritative; this is a client-side guard.
+   * Effective play-time control cap (seconds). When set, the requested duration
+   * is clamped to this value before signing. The backend remains authoritative;
+   * this is a client-side guard.
    */
   maxDurationSeconds?: bigint | null;
   nowFn?: () => bigint;

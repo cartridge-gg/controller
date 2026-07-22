@@ -6,11 +6,11 @@ import {
   CreateSessionContext,
   type ParsedSessionPolicies,
 } from "@/hooks/session";
-import { useResponsibleGamingQuery } from "@/utils/api";
+import { usePlayerControlsQuery } from "@/utils/api";
 import {
   clampSessionDurationSeconds,
-  effectiveSessionCapSeconds,
-} from "@/utils/responsible-gaming";
+  effectivePlayTimeCapSeconds,
+} from "@/utils/player-controls";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { shortString } from "starknet";
 
@@ -67,24 +67,24 @@ export const CreateSessionProvider = ({
 
   const { controller } = useConnection();
 
-  // Fetch the user's responsible-gaming session cap so we never request an
-  // expiration longer than their own limit. The backend stays authoritative.
-  const responsibleGamingQuery = useResponsibleGamingQuery(undefined, {
+  // Fetch the user's play-time control cap so we never request an expiration
+  // longer than their own limit. The backend stays authoritative.
+  const playerControlsQuery = usePlayerControlsQuery(undefined, {
     enabled: !!controller,
-    select: (data) => data.responsibleGaming,
+    select: (data) => data.playerControls,
   });
-  const sessionMaxDurationSeconds = useMemo(
-    () => effectiveSessionCapSeconds(responsibleGamingQuery.data),
-    [responsibleGamingQuery.data],
+  const playTimeMaxDurationSeconds = useMemo(
+    () => effectivePlayTimeCapSeconds(playerControlsQuery.data),
+    [playerControlsQuery.data],
   );
 
   // If the fetched cap is below the current selection, clamp it down.
   useEffect(() => {
-    if (sessionMaxDurationSeconds === null) return;
+    if (playTimeMaxDurationSeconds === null) return;
     setDuration((prev) =>
-      clampSessionDurationSeconds(prev, sessionMaxDurationSeconds),
+      clampSessionDurationSeconds(prev, playTimeMaxDurationSeconds),
     );
-  }, [sessionMaxDurationSeconds]);
+  }, [playTimeMaxDurationSeconds]);
 
   const onToggleMethod = useCallback(
     (address: string, id: string, authorized: boolean) => {
@@ -120,10 +120,10 @@ export const CreateSessionProvider = ({
   const onDurationChange = useCallback(
     (newDuration: bigint) => {
       setDuration(
-        clampSessionDurationSeconds(newDuration, sessionMaxDurationSeconds),
+        clampSessionDurationSeconds(newDuration, playTimeMaxDurationSeconds),
       );
     },
-    [sessionMaxDurationSeconds],
+    [playTimeMaxDurationSeconds],
   );
 
   const chainSpecificMessages = useMemo(() => {
@@ -147,7 +147,7 @@ export const CreateSessionProvider = ({
       value={{
         policies,
         duration,
-        sessionMaxDurationSeconds,
+        playTimeMaxDurationSeconds,
         isEditable,
         requiredPolicies: requiredPolicies ?? [],
         chainSpecificMessages,

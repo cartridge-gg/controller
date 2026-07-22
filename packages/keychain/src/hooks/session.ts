@@ -151,10 +151,10 @@ interface ICreateSessionContext {
   policies: ParsedSessionPolicies;
   duration: bigint;
   /**
-   * Effective responsible-gaming session-duration cap (seconds), or null when
-   * the user has no cap set. Used to constrain the requested expiration.
+   * Effective play-time control cap (seconds), or null when the user has no cap
+   * set. Used to constrain the requested session expiration.
    */
-  sessionMaxDurationSeconds: bigint | null;
+  playTimeMaxDurationSeconds: bigint | null;
   isEditable: boolean;
   requiredPolicies: Array<ContractType>;
   chainSpecificMessages:
@@ -175,7 +175,7 @@ interface ICreateSessionContext {
 export const CreateSessionContext = createContext<ICreateSessionContext>({
   policies: {} as ParsedSessionPolicies,
   duration: DEFAULT_SESSION_DURATION,
-  sessionMaxDurationSeconds: null,
+  playTimeMaxDurationSeconds: null,
   isEditable: false,
   requiredPolicies: [],
   chainSpecificMessages: [],

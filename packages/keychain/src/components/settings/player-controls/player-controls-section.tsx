@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useConnection } from "@/hooks/connection";
 import {
-  useResponsibleGamingQuery,
-  useUpdateResponsibleGamingLimitsMutation,
-  type ResponsibleGamingFieldsFragment,
-  type UpdateResponsibleGamingLimitsInput,
+  usePlayerControlsQuery,
+  useUpdatePlayerControlsMutation,
+  PlayerControlsPeriod,
+  type PlayerControlsFieldsFragment,
+  type UpdatePlayerControlsInput,
 } from "@/utils/api";
 import {
   Button,
@@ -25,40 +26,40 @@ import { useQueryClient } from "react-query";
 import {
   formatCents,
   formatDurationSeconds,
-  mapResponsibleGamingError,
+  mapPlayerControlsError,
   PERIOD_LABELS,
-  RESPONSIBLE_GAMING_PERIODS,
-} from "@/utils/responsible-gaming";
+  PLAYER_CONTROLS_PERIODS,
+} from "@/utils/player-controls";
 
-type Limit = ResponsibleGamingFieldsFragment["deposit"];
+type Limit = PlayerControlsFieldsFragment["creditsPurchase"];
 
-export const ResponsibleGamingSection = () => {
+export const PlayerControlsSection = () => {
   const { controller } = useConnection();
   const queryClient = useQueryClient();
 
-  const query = useResponsibleGamingQuery(undefined, {
+  const query = usePlayerControlsQuery(undefined, {
     enabled: !!controller,
-    select: (data) => data.responsibleGaming,
+    select: (data) => data.playerControls,
   });
-  const rg = query.data;
+  const pc = query.data;
 
   const [error, setError] = useState<string | undefined>();
 
-  const mutation = useUpdateResponsibleGamingLimitsMutation({
+  const mutation = useUpdatePlayerControlsMutation({
     onSuccess: () => {
       setError(undefined);
-      queryClient.invalidateQueries(["ResponsibleGaming"]);
+      queryClient.invalidateQueries(["PlayerControls"]);
     },
-    onError: (err) => setError(mapResponsibleGamingError(err)),
+    onError: (err) => setError(mapPlayerControlsError(err)),
   });
 
-  // Period drives which window deposit/spending limits apply to. Defaults to
-  // the backend's current value.
-  const [period, setPeriod] = useState<string | undefined>();
-  const effectivePeriod = period ?? rg?.period ?? RESPONSIBLE_GAMING_PERIODS[0];
+  // Period drives which window the credits-purchase / entry-and-purchase limits
+  // apply to. Defaults to the backend's current value.
+  const [period, setPeriod] = useState<PlayerControlsPeriod | undefined>();
+  const effectivePeriod = period ?? pc?.period ?? PLAYER_CONTROLS_PERIODS[0];
 
   const submit = useCallback(
-    (input: Omit<UpdateResponsibleGamingLimitsInput, "period">) => {
+    (input: Omit<UpdatePlayerControlsInput, "period">) => {
       setError(undefined);
       mutation.mutate({ input: { period: effectivePeriod, ...input } });
     },
@@ -70,14 +71,14 @@ export const ResponsibleGamingSection = () => {
   return (
     <section className="space-y-4">
       <h1 className="flex gap-2 items-center text-foreground-200 text-sm font-medium">
-        Responsible Gaming
+        Player Controls
       </h1>
 
       {query.isLoading ? (
         <LoadingState />
       ) : query.isError ? (
-        <ErrorMessage label={mapResponsibleGamingError(query.error)} />
-      ) : rg ? (
+        <ErrorMessage label={mapPlayerControlsError(query.error)} />
+      ) : pc ? (
         <div className="space-y-4">
           <PeriodSelect
             value={effectivePeriod}
@@ -87,33 +88,35 @@ export const ResponsibleGamingSection = () => {
 
           <MoneyLimitRow
             icon={<CoinsIcon variant="solid" size="sm" />}
-            label="Deposit limit"
-            limit={rg.deposit}
+            label="Credits purchase limit"
+            limit={pc.creditsPurchase}
             disabled={mutation.isLoading}
-            onSave={(cents) => submit({ depositLimitCents: cents })}
-            onRemove={() => submit({ removeDepositLimit: true })}
+            onSave={(cents) => submit({ creditsPurchaseLimitCents: cents })}
+            onRemove={() => submit({ removeCreditsPurchaseLimit: true })}
           />
 
           <MoneyLimitRow
             icon={<CoinsIcon variant="solid" size="sm" />}
-            label="Spending limit"
-            limit={rg.spending}
+            label="Entry and purchase limit"
+            limit={pc.entryPurchase}
             disabled={mutation.isLoading}
-            onSave={(cents) => submit({ spendingLimitCents: cents })}
-            onRemove={() => submit({ removeSpendingLimit: true })}
+            onSave={(cents) => submit({ entryPurchaseLimitCents: cents })}
+            onRemove={() => submit({ removeEntryPurchaseLimit: true })}
           />
 
-          <SessionLimitRow
-            currentSeconds={rg.sessionMaxDurationSeconds}
-            pendingSeconds={rg.pendingSessionMaxDurationSeconds}
-            pendingRemoval={rg.pendingSessionRemoval}
+          <PlayTimeLimitRow
+            currentSeconds={pc.playTimeMaxDurationSeconds}
+            pendingSeconds={pc.pendingPlayTimeMaxDurationSeconds}
+            pendingRemoval={pc.pendingPlayTimeRemoval}
             disabled={mutation.isLoading}
-            onSave={(seconds) => submit({ sessionMaxDurationSeconds: seconds })}
-            onRemove={() => submit({ removeSessionMaxDuration: true })}
+            onSave={(seconds) =>
+              submit({ playTimeMaxDurationSeconds: seconds })
+            }
+            onRemove={() => submit({ removePlayTimeMaxDuration: true })}
           />
 
-          {rg.pendingEffectiveAt && (
-            <PendingBanner effectiveAt={rg.pendingEffectiveAt} />
+          {pc.pendingEffectiveAt && (
+            <PendingBanner effectiveAt={pc.pendingEffectiveAt} />
           )}
 
           {error && <ErrorMessage label={error} />}
@@ -128,18 +131,22 @@ const PeriodSelect = ({
   onChange,
   disabled,
 }: {
-  value: string;
-  onChange: (value: string) => void;
+  value: PlayerControlsPeriod;
+  onChange: (value: PlayerControlsPeriod) => void;
   disabled?: boolean;
 }) => (
   <div className="flex items-center justify-between gap-3">
     <span className="text-foreground-300 text-xs">Limit period</span>
-    <Select value={value} onValueChange={onChange} disabled={disabled}>
+    <Select
+      value={value}
+      onValueChange={(v) => onChange(v as PlayerControlsPeriod)}
+      disabled={disabled}
+    >
       <SelectTrigger className="w-32">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {RESPONSIBLE_GAMING_PERIODS.map((p) => (
+        {PLAYER_CONTROLS_PERIODS.map((p) => (
           <SelectItem key={p} value={p}>
             {PERIOD_LABELS[p] ?? p}
           </SelectItem>
@@ -232,7 +239,7 @@ const MoneyLimitRow = ({
   );
 };
 
-const SessionLimitRow = ({
+const PlayTimeLimitRow = ({
   currentSeconds,
   pendingSeconds,
   pendingRemoval,
@@ -267,7 +274,7 @@ const SessionLimitRow = ({
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-2 text-sm text-foreground-100">
           <ClockIcon variant="solid" size="sm" />
-          Max session length
+          Play-time limit
         </span>
         <span className="text-xs text-foreground-300">
           {hasLimit ? formatDurationSeconds(currentSeconds) : "No limit set"}

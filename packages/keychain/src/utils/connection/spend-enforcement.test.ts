@@ -61,14 +61,14 @@ function outboundTransfer(
 }
 
 function routeFetchData({
-  spendingAmountCents,
-  spendingUsedCents = 0,
+  entryPurchaseAmountCents,
+  entryPurchaseUsedCents = 0,
   events = [],
   statusThrows = false,
   priceAddress = USDC,
 }: {
-  spendingAmountCents: number | null;
-  spendingUsedCents?: number;
+  entryPurchaseAmountCents: number | null;
+  entryPurchaseUsedCents?: number;
   events?: SimulationEvent[];
   statusThrows?: boolean;
   priceAddress?: string;
@@ -89,13 +89,13 @@ function routeFetchData({
         ],
       };
     }
-    if (statusThrows) throw new Error("responsible gaming status unavailable");
+    if (statusThrows) throw new Error("player controls status unavailable");
     return {
-      responsibleGaming: {
+      playerControls: {
         windowStart: "2026-07-22T00:00:00Z",
-        spending: {
-          amountCents: spendingAmountCents,
-          usedCents: spendingUsedCents,
+        entryPurchase: {
+          amountCents: entryPurchaseAmountCents,
+          usedCents: entryPurchaseUsedCents,
         },
       },
     };
@@ -110,8 +110,8 @@ beforeEach(() => {
 });
 
 describe("executeWithSpendEnforcement", () => {
-  it("takes the fast path when there is no active spending limit", async () => {
-    routeFetchData({ spendingAmountCents: null });
+  it("takes the fast path when there is no active entry-and-purchase limit", async () => {
+    routeFetchData({ entryPurchaseAmountCents: null });
     const execute = vi.fn().mockResolvedValue({ transaction_hash: "0xabc" });
 
     const result = await executeWithSpendEnforcement(controller, [], execute);
@@ -123,8 +123,8 @@ describe("executeWithSpendEnforcement", () => {
     expect(mockFetchData).toHaveBeenCalledTimes(1);
   });
 
-  it("fails closed when responsible-gaming status cannot be fetched", async () => {
-    routeFetchData({ spendingAmountCents: null, statusThrows: true });
+  it("fails closed when player-controls status cannot be fetched", async () => {
+    routeFetchData({ entryPurchaseAmountCents: null, statusThrows: true });
     const execute = vi.fn().mockResolvedValue({ transaction_hash: "0xabc" });
 
     await expect(
@@ -135,7 +135,7 @@ describe("executeWithSpendEnforcement", () => {
 
   it("loads decimals on-chain for an unlisted ERC20 token", async () => {
     routeFetchData({
-      spendingAmountCents: 100000,
+      entryPurchaseAmountCents: 100000,
       events: [outboundTransfer(DYNAMIC_TOKEN, 1_000_000n)],
       priceAddress: DYNAMIC_TOKEN,
     });
@@ -154,7 +154,7 @@ describe("executeWithSpendEnforcement", () => {
 
   it("tracks successful self-custodial spend locally across executions", async () => {
     routeFetchData({
-      spendingAmountCents: 150,
+      entryPurchaseAmountCents: 150,
       events: [outboundTransfer(USDC, 1_000_000n)], // 1 USDC = $1.00 = 100 cents
     });
     const execute = vi.fn().mockResolvedValue({ transaction_hash: "0xdef" });
@@ -169,7 +169,7 @@ describe("executeWithSpendEnforcement", () => {
 
   it("rolls back local usage when execution fails", async () => {
     routeFetchData({
-      spendingAmountCents: 100,
+      entryPurchaseAmountCents: 100,
       events: [outboundTransfer(USDC, 1_000_000n)],
     });
     const executionError = new Error("execution reverted");
@@ -186,7 +186,7 @@ describe("executeWithSpendEnforcement", () => {
   });
 
   it("fails closed (blocks) when simulation errors while a limit is active", async () => {
-    routeFetchData({ spendingAmountCents: 100000 });
+    routeFetchData({ entryPurchaseAmountCents: 100000 });
     mockParse.mockRejectedValue(new Error("simulation failed"));
     const execute = vi.fn().mockResolvedValue({ transaction_hash: "0x1" });
 
@@ -200,8 +200,8 @@ describe("executeWithSpendEnforcement", () => {
 
   it("includes server-recorded credit spend in the client-side check", async () => {
     routeFetchData({
-      spendingAmountCents: 150,
-      spendingUsedCents: 100,
+      entryPurchaseAmountCents: 150,
+      entryPurchaseUsedCents: 100,
       events: [outboundTransfer(USDC, 1_000_000n)],
     });
     const execute = vi.fn().mockResolvedValue({ transaction_hash: "0x1" });
@@ -214,7 +214,7 @@ describe("executeWithSpendEnforcement", () => {
     }
 
     expect(error?.code).toBe(ErrorCode.InsufficientBalance);
-    expect(error?.message.toLowerCase()).toContain("spending limit");
+    expect(error?.message.toLowerCase()).toContain("entry and purchase limit");
     expect(execute).not.toHaveBeenCalled();
   });
 });
