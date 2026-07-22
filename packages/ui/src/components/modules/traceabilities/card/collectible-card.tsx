@@ -17,7 +17,7 @@ export interface TraceabilityCollectibleCardProps
   username: string;
   timestamp: number;
   category: "send" | "receive" | "mint" | "sale" | "list";
-  collectibleImage: string;
+  collectibleImage: string | string[];
   collectibleName: string;
   currencyImage?: string;
   amount?: number;
