@@ -1,4 +1,8 @@
-import { BankIcon, CreditCardIcon } from "@cartridge/controller-ui";
+import {
+  BankIcon,
+  CreditCardIcon,
+  type WithdrawDestinationKind,
+} from "@cartridge/controller-ui";
 import { WithdrawSpeed } from "@coinflowlabs/react";
 import {
   CoinflowDestinationType,
@@ -6,84 +10,88 @@ import {
   type CoinflowDestination,
 } from "@/hooks/payments/coinflow-withdraw";
 
-// Speeds offered to Coinflow's hosted Bank Authentication UI
-// (the `allowedWithdrawSpeeds` prop).
-// This whitelist is ONLY for the purpose of bank linking
-export const ALLOWED_LINKING_SPEEDS: WithdrawSpeed[] = [
-  // bank account
-  // WithdrawSpeed.ASAP,
-  // WithdrawSpeed.SAME_DAY,
-  WithdrawSpeed.STANDARD,
-  // WithdrawSpeed.WIRE,
-
-  // debit card / apple play
-  // WithdrawSpeed.CARD,
-];
-
-// Speeds the withdraw method picker actually renders a card for (see
-// `DestinationCard`). Add every CoinflowPayoutSpeed here and uncomment the ones
-// that are live; today only Standard is available.
-export const AVAILABLE_SPEEDS: CoinflowPayoutSpeed[] = [
-  // CoinflowPayoutSpeed.Asap,
-  // CoinflowPayoutSpeed.SameDay,
-  CoinflowPayoutSpeed.Standard,
-  // CoinflowPayoutSpeed.Wire,
-];
-
 /**
- * Human-readable label + processing time per delivery speed. A destination
- * exposes one card per `supportedSpeeds` entry, and the card renders the
- * processing time so the user can weigh speed against the quoted fee.
- * https://docs.coinflow.cash/guides/payouts/beyond-payouts/understanding-payout-speeds
- * https://docs.coinflow.cash/guides/payouts/payout-methods/supported-payout-methods/overview#implementation
+ * Everything the withdraw flow needs to know about a destination *kind*, in one
+ * place — one entry per `WithdrawDestinationKind`:
+ *
+ * - `allowed`: the method picker offers this kind today (renders one
+ *   `WithdrawDestinationCard`) and its `withdrawSpeed` is whitelisted for bank
+ *   linking. Flip to `true` as a kind goes live.
+ * - `withdrawSpeed`: the `@coinflowlabs/react` speed handed to Coinflow's hosted
+ *   Bank Authentication UI (`allowedWithdrawSpeeds`) when linking — must line up
+ *   with `coinflowPayoutSpeed`.
+ * - `coinflowDestinationType`: how the kind maps onto a live Coinflow
+ *   destination — used to find a linked account of the selected kind.
+ * - `coinflowPayoutSpeed`: the speed the kind is quoted / withdrawn at (bank
+ *   account settles Standard ACH today).
  */
-export const SPEED_DISPLAY: Record<
-  CoinflowPayoutSpeed,
-  { label: string; processingTime: string }
+export interface WithdrawDestinationConfig {
+  allowed: boolean;
+  withdrawSpeed: WithdrawSpeed;
+  coinflowDestinationType: CoinflowDestinationType;
+  coinflowPayoutSpeed: CoinflowPayoutSpeed;
+}
+
+export const WITHDRAW_DESTINATIONS: Record<
+  WithdrawDestinationKind,
+  WithdrawDestinationConfig
 > = {
-  [CoinflowPayoutSpeed.Asap]: {
-    label: "RTP",
-    processingTime: "Within minutes",
+  "bank-account": {
+    allowed: true,
+    withdrawSpeed: WithdrawSpeed.STANDARD,
+    coinflowDestinationType: CoinflowDestinationType.Bank,
+    coinflowPayoutSpeed: CoinflowPayoutSpeed.Standard,
   },
-  [CoinflowPayoutSpeed.SameDay]: {
-    label: "Same Day ACH",
-    processingTime: "Same business day",
+  card: {
+    allowed: false,
+    withdrawSpeed: WithdrawSpeed.CARD,
+    coinflowDestinationType: CoinflowDestinationType.Card,
+    coinflowPayoutSpeed: CoinflowPayoutSpeed.Asap,
   },
-  [CoinflowPayoutSpeed.Wire]: {
-    label: "Wire Transfer",
-    processingTime: "1-2 business days",
+  venmo: {
+    allowed: false,
+    withdrawSpeed: WithdrawSpeed.ASAP,
+    coinflowDestinationType: CoinflowDestinationType.Venmo,
+    coinflowPayoutSpeed: CoinflowPayoutSpeed.Asap,
   },
-  [CoinflowPayoutSpeed.Standard]: {
-    label: "Standard ACH",
-    processingTime: "2-3 business days",
+  paypal: {
+    allowed: false,
+    withdrawSpeed: WithdrawSpeed.ASAP,
+    coinflowDestinationType: CoinflowDestinationType.Paypal,
+    coinflowPayoutSpeed: CoinflowPayoutSpeed.Asap,
   },
 };
 
 /**
- * Icon + label for a destination. Fee and ETA are no longer static copy — the
- * fee comes from the live quote and the processing time from the chosen speed
- * (see `SPEED_DISPLAY`). Only bank destinations can be linked in-app today;
- * the other types render if Coinflow returns them.
+ * The destination *kinds* the method picker offers today — one
+ * `WithdrawDestinationCard` per entry, regardless of whether an account of that
+ * kind is linked yet. Derived from the `allowed` flag above.
  */
-export function getDestinationDisplay(destination: CoinflowDestination): {
-  icon: React.ReactElement;
-  title: string;
-} {
+export const ALLOWED_DESTINATION_KINDS = (
+  Object.keys(WITHDRAW_DESTINATIONS) as WithdrawDestinationKind[]
+).filter((kind) => WITHDRAW_DESTINATIONS[kind].allowed);
+
+/**
+ * Speeds offered to Coinflow's hosted Bank Authentication UI (the
+ * `allowedWithdrawSpeeds` prop). ONLY for bank linking — derived from the
+ * allowed kinds' `withdrawSpeed`, deduped.
+ */
+export const ALLOWED_LINKING_SPEEDS: WithdrawSpeed[] = [
+  ...new Set(
+    ALLOWED_DESTINATION_KINDS.map(
+      (kind) => WITHDRAW_DESTINATIONS[kind].withdrawSpeed,
+    ),
+  ),
+];
+
+export function getDestinationIcon(
+  destination: CoinflowDestination,
+): React.ReactElement {
   switch (destination.type) {
     case CoinflowDestinationType.Card:
-      return {
-        icon: <CreditCardIcon variant="solid" />,
-        title: destination.display,
-      };
+      return <CreditCardIcon variant="solid" />;
     case CoinflowDestinationType.Bank:
-      return {
-        icon: <BankIcon />,
-        title: destination.display,
-      };
     default:
-      return {
-        icon: <BankIcon />,
-        title: destination.display,
-      };
+      return <BankIcon />;
   }
 }
