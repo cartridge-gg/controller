@@ -13,7 +13,7 @@ import { useNavigation } from "@/context";
 import { useLocation } from "react-router-dom";
 import { useIdentityContext } from "@/components/identity/provider";
 
-type VerificationMethod = "coinflow" | "apple-pay" | "identity";
+type VerificationMethod = "coinflow" | "apple-pay" | "identity" | "withdraw";
 
 interface VerificationProps {
   /** Overrides the `method` URL search param. Host this in a drawer by
@@ -59,7 +59,11 @@ export function Verification({
         text: "Email Address",
         icon: <EnvelopeIcon />,
         onClick: initiateEmailVerification,
-        required: !method || method === "apple-pay",
+        required:
+          !method ||
+          method === "apple-pay" ||
+          method === "coinflow" ||
+          method === "withdraw",
         completed: isEmailVerified,
       },
       {
@@ -67,7 +71,11 @@ export function Verification({
         text: "Phone Number",
         icon: <MobileIcon variant="solid" />,
         onClick: initiatePhoneNumberVerification,
-        required: !method || method === "apple-pay" || method === "identity",
+        required:
+          !method ||
+          method === "apple-pay" ||
+          method === "identity" ||
+          method === "withdraw",
         completed: isPhoneNumberVerified,
       },
       {
@@ -75,7 +83,7 @@ export function Verification({
         text: "Identity",
         icon: <UserIcon variant="solid" />,
         onClick: initiateIdentityVerification,
-        required: !method || method === "apple-pay" || method === "identity",
+        required: !method || method === "identity" || method === "withdraw",
         completed: isIdentityVerified,
       },
     ],

@@ -20,6 +20,7 @@ import { RecoveryAccountSection } from "./recovery/recovery-section";
 import { RegisteredAccountSection } from "./registered-account-section";
 // import { CurrencySection } from "./currency-section";
 import { UserDataSection } from "./user-data-section";
+import { BankAccountSection } from "./bank-account-section";
 import { DeleteAccountSection } from "./delete-account-section";
 import { useFeature } from "@/hooks/features";
 import { AdvancedViewSection } from "./advanced-view-section";
@@ -69,6 +70,8 @@ export function Settings() {
         {/* {featureFlags.delegate && <DelegateAccountSection />} */}
 
         {isRegisteredAccountsEnabled && <RegisteredAccountSection />}
+
+        <BankAccountSection />
 
         <UserDataSection />
 

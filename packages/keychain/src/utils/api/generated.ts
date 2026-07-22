@@ -1330,6 +1330,20 @@ export type CoinbaseTransactionsResponse = {
   transactions: Array<CoinbaseTransaction>;
 };
 
+/** Bank account subtype for linking. */
+export enum CoinflowBankAccountType {
+  Checking = "CHECKING",
+  Savings = "SAVINGS",
+}
+
+export type CoinflowBankAuthSession = {
+  __typename?: "CoinflowBankAuthSession";
+  /** Coinflow merchant ID for the hosted bank-linking UI URL/component. */
+  merchantId: Scalars["String"];
+  /** Session key authenticating the hosted bank-linking UI for this user. */
+  sessionKey: Scalars["String"];
+};
+
 export type CoinflowCardCheckoutInput = {
   /** Street address line 1. Required by Coinflow address validation. */
   address1: Scalars["String"];
@@ -1370,6 +1384,44 @@ export type CoinflowCreditsIntent = {
   sessionKey: Scalars["String"];
 };
 
+export type CoinflowDestination = {
+  __typename?: "CoinflowDestination";
+  /** Human-readable label (alias / masked last4) from the single display builder. */
+  display: Scalars["String"];
+  /** Speeds this destination supports (v1-whitelisted). */
+  supportedSpeeds: Array<CoinflowPayoutSpeed>;
+  /** Opaque Coinflow token identifying the destination. */
+  token: Scalars["String"];
+  type: CoinflowDestinationType;
+};
+
+/** Category of a linked payout destination (what create/delete key on). */
+export enum CoinflowDestinationType {
+  Bank = "BANK",
+  Card = "CARD",
+  Iban = "IBAN",
+  Interac = "INTERAC",
+  Paypal = "PAYPAL",
+  Pix = "PIX",
+  Venmo = "VENMO",
+}
+
+export type CoinflowKycResult = {
+  __typename?: "CoinflowKYCResult";
+  status: CoinflowKycStatus;
+  verificationLink?: Maybe<Scalars["String"]>;
+};
+
+/** Cached-hint KYC status; the live 451 on a payout is the real gate. */
+export enum CoinflowKycStatus {
+  Approved = "APPROVED",
+  /** KYC lapsed and must be redone via the verificationLink. */
+  Expired = "EXPIRED",
+  None = "NONE",
+  Pending = "PENDING",
+  Rejected = "REJECTED",
+}
+
 export type CoinflowPayment = {
   __typename?: "CoinflowPayment";
   id: Scalars["ID"];
@@ -1381,6 +1433,14 @@ export enum CoinflowPaymentStatus {
   Failed = "FAILED",
   Pending = "PENDING",
   Succeeded = "SUCCEEDED",
+}
+
+/** Per-withdrawal delivery speed. v1 exposes the bank-deposit subset only. */
+export enum CoinflowPayoutSpeed {
+  Asap = "ASAP",
+  SameDay = "SAME_DAY",
+  Standard = "STANDARD",
+  Wire = "WIRE",
 }
 
 export type CoinflowPricingDetails = {
@@ -1424,6 +1484,92 @@ export type CoinflowStarterpackQuoteInput = {
   registryAddress: Scalars["String"];
   starterpackId: Scalars["String"];
 };
+
+export type CoinflowWithdrawQuote = {
+  __typename?: "CoinflowWithdrawQuote";
+  /** Gross amount requested, in USD cents (the requested credits converted to cents). */
+  amountCents: Scalars["Int"];
+  /** Human-readable ETA for this speed, if Coinflow reports one. */
+  eta?: Maybe<Scalars["String"]>;
+  /** Coinflow fee, in USD cents. */
+  feeCents: Scalars["Int"];
+  /** Net amount that reaches the bank (amount − fee), in USD cents. */
+  netCents: Scalars["Int"];
+  /** The user's remaining withdrawal limit for this method, if Coinflow reports one. */
+  remainingLimitCents?: Maybe<Scalars["Int"]>;
+};
+
+export type CoinflowWithdrawQuoteInput = {
+  /**
+   * Gross amount to withdraw, in whole account credits (no decimals). 1 credit = $0.01,
+   * so 1000 credits = $10. The backend converts credits → cents once before quoting; all
+   * amounts in the response are the resulting cents.
+   */
+  credits: Scalars["Int"];
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  /** Delivery speed; must be one of the destination's supportedSpeeds. */
+  method: CoinflowPayoutSpeed;
+  /** Destination token to pay out to. */
+  token: Scalars["String"];
+};
+
+export type CoinflowWithdrawStatus = {
+  __typename?: "CoinflowWithdrawStatus";
+  /** Set when a withdrawal is already in flight (one active per user). */
+  activeWithdrawalId?: Maybe<Scalars["ID"]>;
+  /** Live linked destinations (empty until the user links one). */
+  destinations: Array<CoinflowDestination>;
+  kycStatus: CoinflowKycStatus;
+  /**
+   * Maximum withdrawal in whole credits: the fixed per-withdrawal ceiling from Coinflow,
+   * NOT trimmed to the balance. Clamp against withdrawableCredits client-side.
+   */
+  maxCredits: Scalars["Int"];
+  /** Minimum withdrawal in whole credits (1 credit = $0.01). */
+  minCredits: Scalars["Int"];
+  /** Coinflow-hosted link to complete/refresh KYC, when verification is required. */
+  verificationLink?: Maybe<Scalars["String"]>;
+  /** The user's current withdrawable balance, in whole credits. */
+  withdrawableCredits: Scalars["Int"];
+};
+
+export type CoinflowWithdrawal = {
+  __typename?: "CoinflowWithdrawal";
+  /** Gross amount debited, in USD cents. */
+  amountCents: Scalars["Int"];
+  /** Snapshot of the destination label at initiation (survives an unlink). */
+  destinationDisplay: Scalars["String"];
+  /** Set when the withdrawal terminally failed. */
+  failureCode?: Maybe<CoinflowWithdrawalFailureCode>;
+  /** User-facing failure message derived from failureCode. */
+  failureReason?: Maybe<Scalars["String"]>;
+  /** Coinflow fee captured at initiation, in USD cents. */
+  feeCents: Scalars["Int"];
+  id: Scalars["ID"];
+  method: CoinflowPayoutSpeed;
+  /** Net amount reaching the bank, in USD cents. */
+  netCents: Scalars["Int"];
+  status: CoinflowWithdrawalStatus;
+};
+
+/** Why a withdrawal terminally failed. The credits were credited back in all cases. */
+export enum CoinflowWithdrawalFailureCode {
+  /** KYC must be (re)completed — fetch coinflowWithdrawStatus for the verificationLink. */
+  KycRequired = "KYC_REQUIRED",
+  /** The payout was rejected. */
+  Rejected = "REJECTED",
+  /** The bank returned the payout (e.g. ACH return). */
+  Returned = "RETURNED",
+  /** Withdrawals are temporarily unavailable; retry later. */
+  TemporarilyUnavailable = "TEMPORARILY_UNAVAILABLE",
+}
+
+export enum CoinflowWithdrawalStatus {
+  Completed = "COMPLETED",
+  Failed = "FAILED",
+  Pending = "PENDING",
+  Processing = "PROCESSING",
+}
 
 export type Collectible = {
   __typename?: "Collectible";
@@ -1640,10 +1786,44 @@ export type CreateCoinbaseOnrampOrderInput = {
   usdcTransferAuthorization: UsdcTransferAuthorizationInput;
 };
 
+export type CreateCoinflowBankAccountInput = {
+  accountNumber: Scalars["String"];
+  accountType: CoinflowBankAccountType;
+  /** Required only when the KYC record has no address (retry after a 412). */
+  address1?: InputMaybe<Scalars["String"]>;
+  /** User-facing label for the account. */
+  alias: Scalars["String"];
+  city?: InputMaybe<Scalars["String"]>;
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  routingNumber: Scalars["String"];
+  state?: InputMaybe<Scalars["String"]>;
+  /** Required only if the user wants wire-speed payouts. */
+  wireRoutingNumber?: InputMaybe<Scalars["String"]>;
+  zip?: InputMaybe<Scalars["String"]>;
+};
+
+export type CreateCoinflowBankAuthSessionInput = {
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+};
+
 export type CreateCoinflowCreditsIntentInput = {
   /** Credit amount to buy. Bounded by the standard $2 min / $25,000 max. */
   credits: CreditsInput;
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type CreateCoinflowKycInput = {
+  /** US address; all fields are required by Coinflow's US KYC schema. */
+  address1: Scalars["String"];
+  city: Scalars["String"];
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  /**
+   * Last 4 digits of the SSN. Required by Coinflow's US KYC schema; passed through to
+   * Coinflow and never persisted on our side.
+   */
+  ssnLast4: Scalars["String"];
+  state: Scalars["String"];
+  zip: Scalars["String"];
 };
 
 export type CreateCoinflowStarterpackIntentInput = {
@@ -1654,6 +1834,18 @@ export type CreateCoinflowStarterpackIntentInput = {
   referralGroup?: InputMaybe<Scalars["String"]>;
   registryAddress: Scalars["String"];
   starterpackId: Scalars["String"];
+};
+
+export type CreateCoinflowWithdrawalInput = {
+  /**
+   * Gross amount to withdraw, in whole account credits (no decimals). 1 credit = $0.01,
+   * so 1000 credits = $10. The backend converts credits → cents once before initiating.
+   */
+  credits: Scalars["Int"];
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  method: CoinflowPayoutSpeed;
+  /** Destination token to pay out to. */
+  token: Scalars["String"];
 };
 
 export type CreateCryptoPaymentInput = {
@@ -1777,6 +1969,12 @@ export type CreditsHistory = Node & {
   __typename?: "CreditsHistory";
   accountID: Scalars["String"];
   amount: Scalars["Int"];
+  /**
+   * The linked Coinflow payout when this entry is part of a withdrawal (paymentMethod
+   * WITHDRAWAL) — carries the payout id + live status so the client can group the debit
+   * and any reversal and track settlement. Null for all other entries.
+   */
+  coinflowPayout?: Maybe<CoinflowWithdrawal>;
   /** Optional comment for transaction reason */
   comment?: Maybe<Scalars["String"]>;
   createdAt: Scalars["Time"];
@@ -1784,8 +1982,9 @@ export type CreditsHistory = Node & {
   /**
    * How the credits in this entry moved: for deposits (transactionType CREDIT) it is
    * how they were acquired — CARD, CRYPTO, or FREE; for spends (transactionType DEBIT)
-   * it is always CREDITS, debited from the balance. The reason for a spend (bundle
-   * purchase, transaction fee, team transfer) is carried by `comment`.
+   * it is always CREDITS, debited from the balance. Rows linked to a Coinflow payout
+   * (the withdrawal debit and its reversal credit) are WITHDRAWAL. The reason for a
+   * spend (bundle purchase, transaction fee, team transfer) is carried by `comment`.
    */
   paymentMethod: CreditsPaymentMethod;
   /** Transaction hash for debit transactions */
@@ -1947,6 +2146,8 @@ export enum CreditsPaymentMethod {
   Crypto = "CRYPTO",
   /** Deposit granted at no cost (e.g. a booster-pack claim). */
   Free = "FREE",
+  /** A withdrawal (off-ramp): the debit at initiation and the reversal credit on failure. */
+  Withdrawal = "WITHDRAWAL",
 }
 
 export type CryptoPayment = {
@@ -1966,6 +2167,12 @@ export enum CryptoPaymentStatus {
   Failed = "FAILED",
   Pending = "PENDING",
 }
+
+export type DeleteCoinflowDestinationInput = {
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  token: Scalars["String"];
+  type: CoinflowDestinationType;
+};
 
 export type Deployment = Node & {
   __typename?: "Deployment";
@@ -3289,6 +3496,22 @@ export type Mutation = {
    */
   createCoinbaseOnrampOrder: CoinbaseOnrampOrderResponse;
   /**
+   * Link a bank account for payouts. Passthrough to Coinflow's create-bank-account: we
+   * persist nothing, Coinflow tokenizes and stores it. A FAILED_PRECONDITION with reason
+   * "address required" means the KYC record has no address — resubmit with the address
+   * fields.
+   */
+  createCoinflowBankAccount: CoinflowDestination;
+  /**
+   * Mint a Coinflow session key for the hosted Bank Authentication UI. Mirrors the on-ramp
+   * createCoinflow*Intent mutations, but there is no transaction: it returns only the
+   * session key + merchant id the frontend needs to render Coinflow's hosted bank-linking UI
+   * (Plaid bank-linking + card tokenization + destination creation, all inside Coinflow).
+   * KYC is done separately via createCoinflowKYC before this. The new destination appears on
+   * the next coinflowWithdrawStatus. Persists nothing.
+   */
+  createCoinflowBankAuthSession: CoinflowBankAuthSession;
+  /**
    * Create a Coinflow checkout intent to buy account credits (a top-up, not a
    * bundle). Mirrors createCoinflowStarterpackIntent — same session key, JWT, and
    * pricing — but creates a CoinflowPayments row WITHOUT a PurchaseFulfillment. On
@@ -3298,12 +3521,28 @@ export type Mutation = {
    */
   createCoinflowCreditsIntent: CoinflowCreditsIntent;
   /**
+   * Register (or refresh) payout KYC. Name/DOB/email are pre-filled server-side from the
+   * identity we already hold; the client supplies the address and SSN last-4 (Coinflow's
+   * US KYC schema requires every info field, ssn included — it is passed through and never
+   * persisted). Returns the verification status or a Coinflow-hosted verificationLink to
+   * complete.
+   */
+  createCoinflowKYC: CoinflowKycResult;
+  /**
    * Create a Coinflow checkout intent for a starterpack purchase.
    * Mirrors createStripeStarterpackIntent: computes pricing, creates a
    * PurchaseFulfillment (AWAITING_PAYMENT), and returns the session key
    * and JWT the frontend needs to render the Coinflow checkout component.
    */
   createCoinflowStarterpackIntent: CoinflowStarterpackIntent;
+  /**
+   * Initiate a withdrawal: validates bounds/method/active-lock, resolves the destination
+   * live, then in one DB transaction debits credits + creates the payout and debit-history
+   * rows, and calls Coinflow's delegated payout. A synchronous definitive failure
+   * (402/451/4xx) reverses the debit immediately; ambiguous failures leave it pending for
+   * reconciliation. Returns the payout row to poll.
+   */
+  createCoinflowWithdrawal: CoinflowWithdrawal;
   createCryptoPayment: CryptoPayment;
   createDeployment: Deployment;
   createLayerswapDeposit: LayerswapPayment;
@@ -3317,6 +3556,11 @@ export type Mutation = {
   createStripeStarterpackIntent: StripePaymentIntent;
   createTeam: Team;
   decreaseBudget: Paymaster;
+  /**
+   * Unlink a payout destination by type + token. Passthrough to Coinflow's per-type delete;
+   * the next coinflowWithdrawStatus stops listing it.
+   */
+  deleteCoinflowDestination: Scalars["Boolean"];
   deleteDeployment: Scalars["Boolean"];
   deleteEmailAddress: Scalars["Boolean"];
   deleteMe: Scalars["Boolean"];
@@ -3440,12 +3684,28 @@ export type MutationCreateCoinbaseOnrampOrderArgs = {
   input: CreateCoinbaseOnrampOrderInput;
 };
 
+export type MutationCreateCoinflowBankAccountArgs = {
+  input: CreateCoinflowBankAccountInput;
+};
+
+export type MutationCreateCoinflowBankAuthSessionArgs = {
+  input?: InputMaybe<CreateCoinflowBankAuthSessionInput>;
+};
+
 export type MutationCreateCoinflowCreditsIntentArgs = {
   input: CreateCoinflowCreditsIntentInput;
 };
 
+export type MutationCreateCoinflowKycArgs = {
+  input: CreateCoinflowKycInput;
+};
+
 export type MutationCreateCoinflowStarterpackIntentArgs = {
   input: CreateCoinflowStarterpackIntentInput;
+};
+
+export type MutationCreateCoinflowWithdrawalArgs = {
+  input: CreateCoinflowWithdrawalInput;
 };
 
 export type MutationCreateCryptoPaymentArgs = {
@@ -3525,6 +3785,10 @@ export type MutationDecreaseBudgetArgs = {
   paymasterName: Scalars["ID"];
   reason?: InputMaybe<AdminBudgetReason>;
   unit: FeeUnit;
+};
+
+export type MutationDeleteCoinflowDestinationArgs = {
+  input: DeleteCoinflowDestinationInput;
 };
 
 export type MutationDeleteDeploymentArgs = {
@@ -4990,6 +5254,22 @@ export type Query = {
    * checkout totals API to get the actual processing fees.
    */
   coinflowStarterpackQuote: CoinflowStarterpackQuote;
+  /**
+   * Quote a withdrawal: validates the amount/speed, pre-checks that our Coinflow payout
+   * balance can cover it (friendly "temporarily unavailable" otherwise), then returns the
+   * Coinflow delegated quote. Fees come out of the requested amount — netCents is what
+   * reaches the bank. Display-only; the authoritative fee is captured at initiation.
+   */
+  coinflowWithdrawQuote: CoinflowWithdrawQuote;
+  /**
+   * Live withdrawal status for the current user: KYC state, the set of linked payout
+   * destinations (fetched on demand from Coinflow — never persisted), and the current
+   * withdrawable bounds. Never gate on a cached KYC flag; this reflects Coinflow's live
+   * state.
+   */
+  coinflowWithdrawStatus: CoinflowWithdrawStatus;
+  /** Poll a withdrawal's status by its id. */
+  coinflowWithdrawal: CoinflowWithdrawal;
   collectible: Collectible;
   collectibles: CollectibleConnection;
   collection: Collection;
@@ -5117,6 +5397,18 @@ export type QueryCoinflowPaymentArgs = {
 
 export type QueryCoinflowStarterpackQuoteArgs = {
   input: CoinflowStarterpackQuoteInput;
+};
+
+export type QueryCoinflowWithdrawQuoteArgs = {
+  input: CoinflowWithdrawQuoteInput;
+};
+
+export type QueryCoinflowWithdrawStatusArgs = {
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type QueryCoinflowWithdrawalArgs = {
+  id: Scalars["ID"];
 };
 
 export type QueryCollectibleArgs = {
@@ -7315,6 +7607,18 @@ export type CreditsHistoryQuery = {
           transactionHash?: string | null;
           comment?: string | null;
           createdAt: string;
+          coinflowPayout?: {
+            __typename?: "CoinflowWithdrawal";
+            id: string;
+            status: CoinflowWithdrawalStatus;
+            amountCents: number;
+            feeCents: number;
+            netCents: number;
+            method: CoinflowPayoutSpeed;
+            destinationDisplay: string;
+            failureCode?: CoinflowWithdrawalFailureCode | null;
+            failureReason?: string | null;
+          } | null;
         } | null;
       } | null> | null;
     };
@@ -7968,6 +8272,157 @@ export type CoinbaseOnrampLimitsFieldsFragment = {
   }> | null;
 };
 
+export type CoinflowWithdrawStatusQueryVariables = Exact<{
+  isMainnet?: InputMaybe<Scalars["Boolean"]>;
+}>;
+
+export type CoinflowWithdrawStatusQuery = {
+  __typename?: "Query";
+  coinflowWithdrawStatus: {
+    __typename?: "CoinflowWithdrawStatus";
+    kycStatus: CoinflowKycStatus;
+    verificationLink?: string | null;
+    minCredits: number;
+    maxCredits: number;
+    withdrawableCredits: number;
+    activeWithdrawalId?: string | null;
+    destinations: Array<{
+      __typename?: "CoinflowDestination";
+      type: CoinflowDestinationType;
+      token: string;
+      display: string;
+      supportedSpeeds: Array<CoinflowPayoutSpeed>;
+    }>;
+  };
+};
+
+export type CreateCoinflowKycMutationVariables = Exact<{
+  input: CreateCoinflowKycInput;
+}>;
+
+export type CreateCoinflowKycMutation = {
+  __typename?: "Mutation";
+  createCoinflowKYC: {
+    __typename?: "CoinflowKYCResult";
+    status: CoinflowKycStatus;
+    verificationLink?: string | null;
+  };
+};
+
+export type CreateCoinflowBankAccountMutationVariables = Exact<{
+  input: CreateCoinflowBankAccountInput;
+}>;
+
+export type CreateCoinflowBankAccountMutation = {
+  __typename?: "Mutation";
+  createCoinflowBankAccount: {
+    __typename?: "CoinflowDestination";
+    type: CoinflowDestinationType;
+    token: string;
+    display: string;
+    supportedSpeeds: Array<CoinflowPayoutSpeed>;
+  };
+};
+
+export type CreateCoinflowBankAuthSessionMutationVariables = Exact<{
+  input?: InputMaybe<CreateCoinflowBankAuthSessionInput>;
+}>;
+
+export type CreateCoinflowBankAuthSessionMutation = {
+  __typename?: "Mutation";
+  createCoinflowBankAuthSession: {
+    __typename?: "CoinflowBankAuthSession";
+    sessionKey: string;
+    merchantId: string;
+  };
+};
+
+export type DeleteCoinflowDestinationMutationVariables = Exact<{
+  input: DeleteCoinflowDestinationInput;
+}>;
+
+export type DeleteCoinflowDestinationMutation = {
+  __typename?: "Mutation";
+  deleteCoinflowDestination: boolean;
+};
+
+export type CoinflowWithdrawQuoteQueryVariables = Exact<{
+  input: CoinflowWithdrawQuoteInput;
+}>;
+
+export type CoinflowWithdrawQuoteQuery = {
+  __typename?: "Query";
+  coinflowWithdrawQuote: {
+    __typename?: "CoinflowWithdrawQuote";
+    amountCents: number;
+    feeCents: number;
+    netCents: number;
+    remainingLimitCents?: number | null;
+    eta?: string | null;
+  };
+};
+
+export type CreateCoinflowWithdrawalMutationVariables = Exact<{
+  input: CreateCoinflowWithdrawalInput;
+}>;
+
+export type CreateCoinflowWithdrawalMutation = {
+  __typename?: "Mutation";
+  createCoinflowWithdrawal: {
+    __typename?: "CoinflowWithdrawal";
+    id: string;
+    status: CoinflowWithdrawalStatus;
+    amountCents: number;
+    feeCents: number;
+    netCents: number;
+    method: CoinflowPayoutSpeed;
+    destinationDisplay: string;
+    failureCode?: CoinflowWithdrawalFailureCode | null;
+    failureReason?: string | null;
+  };
+};
+
+export type CoinflowWithdrawalQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type CoinflowWithdrawalQuery = {
+  __typename?: "Query";
+  coinflowWithdrawal: {
+    __typename?: "CoinflowWithdrawal";
+    id: string;
+    status: CoinflowWithdrawalStatus;
+    amountCents: number;
+    feeCents: number;
+    netCents: number;
+    method: CoinflowPayoutSpeed;
+    destinationDisplay: string;
+    failureCode?: CoinflowWithdrawalFailureCode | null;
+    failureReason?: string | null;
+  };
+};
+
+export type CoinflowDestinationFieldsFragment = {
+  __typename?: "CoinflowDestination";
+  type: CoinflowDestinationType;
+  token: string;
+  display: string;
+  supportedSpeeds: Array<CoinflowPayoutSpeed>;
+};
+
+export type CoinflowWithdrawalFieldsFragment = {
+  __typename?: "CoinflowWithdrawal";
+  id: string;
+  status: CoinflowWithdrawalStatus;
+  amountCents: number;
+  feeCents: number;
+  netCents: number;
+  method: CoinflowPayoutSpeed;
+  destinationDisplay: string;
+  failureCode?: CoinflowWithdrawalFailureCode | null;
+  failureReason?: string | null;
+};
+
 export type CryptoPaymentFieldsFragment = {
   __typename?: "CryptoPayment";
   id: string;
@@ -8057,6 +8512,27 @@ export const CoinbaseOnrampLimitsFieldsFragmentDoc = `
     limitType
     maxUpgrade
   }
+}
+    `;
+export const CoinflowDestinationFieldsFragmentDoc = `
+    fragment CoinflowDestinationFields on CoinflowDestination {
+  type
+  token
+  display
+  supportedSpeeds
+}
+    `;
+export const CoinflowWithdrawalFieldsFragmentDoc = `
+    fragment CoinflowWithdrawalFields on CoinflowWithdrawal {
+  id
+  status
+  amountCents
+  feeCents
+  netCents
+  method
+  destinationDisplay
+  failureCode
+  failureReason
 }
     `;
 export const CryptoPaymentFieldsFragmentDoc = `
@@ -8191,12 +8667,15 @@ export const CreditsHistoryDocument = `
           transactionHash
           comment
           createdAt
+          coinflowPayout {
+            ...CoinflowWithdrawalFields
+          }
         }
       }
     }
   }
 }
-    `;
+    ${CoinflowWithdrawalFieldsFragmentDoc}`;
 export const useCreditsHistoryQuery = <
   TData = CreditsHistoryQuery,
   TError = unknown,
@@ -9150,5 +9629,238 @@ export const useSubmitCoinbaseLimitsUpgradeMutation = <
       SubmitCoinbaseLimitsUpgradeMutation,
       SubmitCoinbaseLimitsUpgradeMutationVariables
     >(SubmitCoinbaseLimitsUpgradeDocument),
+    options,
+  );
+export const CoinflowWithdrawStatusDocument = `
+    query CoinflowWithdrawStatus($isMainnet: Boolean) {
+  coinflowWithdrawStatus(isMainnet: $isMainnet) {
+    kycStatus
+    verificationLink
+    destinations {
+      ...CoinflowDestinationFields
+    }
+    minCredits
+    maxCredits
+    withdrawableCredits
+    activeWithdrawalId
+  }
+}
+    ${CoinflowDestinationFieldsFragmentDoc}`;
+export const useCoinflowWithdrawStatusQuery = <
+  TData = CoinflowWithdrawStatusQuery,
+  TError = unknown,
+>(
+  variables?: CoinflowWithdrawStatusQueryVariables,
+  options?: UseQueryOptions<CoinflowWithdrawStatusQuery, TError, TData>,
+) =>
+  useQuery<CoinflowWithdrawStatusQuery, TError, TData>(
+    variables === undefined
+      ? ["CoinflowWithdrawStatus"]
+      : ["CoinflowWithdrawStatus", variables],
+    useFetchData<
+      CoinflowWithdrawStatusQuery,
+      CoinflowWithdrawStatusQueryVariables
+    >(CoinflowWithdrawStatusDocument).bind(null, variables),
+    options,
+  );
+export const CreateCoinflowKycDocument = `
+    mutation CreateCoinflowKYC($input: CreateCoinflowKYCInput!) {
+  createCoinflowKYC(input: $input) {
+    status
+    verificationLink
+  }
+}
+    `;
+export const useCreateCoinflowKycMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinflowKycMutation,
+    TError,
+    CreateCoinflowKycMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinflowKycMutation,
+    TError,
+    CreateCoinflowKycMutationVariables,
+    TContext
+  >(
+    ["CreateCoinflowKYC"],
+    useFetchData<CreateCoinflowKycMutation, CreateCoinflowKycMutationVariables>(
+      CreateCoinflowKycDocument,
+    ),
+    options,
+  );
+export const CreateCoinflowBankAccountDocument = `
+    mutation CreateCoinflowBankAccount($input: CreateCoinflowBankAccountInput!) {
+  createCoinflowBankAccount(input: $input) {
+    ...CoinflowDestinationFields
+  }
+}
+    ${CoinflowDestinationFieldsFragmentDoc}`;
+export const useCreateCoinflowBankAccountMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinflowBankAccountMutation,
+    TError,
+    CreateCoinflowBankAccountMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinflowBankAccountMutation,
+    TError,
+    CreateCoinflowBankAccountMutationVariables,
+    TContext
+  >(
+    ["CreateCoinflowBankAccount"],
+    useFetchData<
+      CreateCoinflowBankAccountMutation,
+      CreateCoinflowBankAccountMutationVariables
+    >(CreateCoinflowBankAccountDocument),
+    options,
+  );
+export const CreateCoinflowBankAuthSessionDocument = `
+    mutation CreateCoinflowBankAuthSession($input: CreateCoinflowBankAuthSessionInput) {
+  createCoinflowBankAuthSession(input: $input) {
+    sessionKey
+    merchantId
+  }
+}
+    `;
+export const useCreateCoinflowBankAuthSessionMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinflowBankAuthSessionMutation,
+    TError,
+    CreateCoinflowBankAuthSessionMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinflowBankAuthSessionMutation,
+    TError,
+    CreateCoinflowBankAuthSessionMutationVariables,
+    TContext
+  >(
+    ["CreateCoinflowBankAuthSession"],
+    useFetchData<
+      CreateCoinflowBankAuthSessionMutation,
+      CreateCoinflowBankAuthSessionMutationVariables
+    >(CreateCoinflowBankAuthSessionDocument),
+    options,
+  );
+export const DeleteCoinflowDestinationDocument = `
+    mutation DeleteCoinflowDestination($input: DeleteCoinflowDestinationInput!) {
+  deleteCoinflowDestination(input: $input)
+}
+    `;
+export const useDeleteCoinflowDestinationMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    DeleteCoinflowDestinationMutation,
+    TError,
+    DeleteCoinflowDestinationMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    DeleteCoinflowDestinationMutation,
+    TError,
+    DeleteCoinflowDestinationMutationVariables,
+    TContext
+  >(
+    ["DeleteCoinflowDestination"],
+    useFetchData<
+      DeleteCoinflowDestinationMutation,
+      DeleteCoinflowDestinationMutationVariables
+    >(DeleteCoinflowDestinationDocument),
+    options,
+  );
+export const CoinflowWithdrawQuoteDocument = `
+    query CoinflowWithdrawQuote($input: CoinflowWithdrawQuoteInput!) {
+  coinflowWithdrawQuote(input: $input) {
+    amountCents
+    feeCents
+    netCents
+    remainingLimitCents
+    eta
+  }
+}
+    `;
+export const useCoinflowWithdrawQuoteQuery = <
+  TData = CoinflowWithdrawQuoteQuery,
+  TError = unknown,
+>(
+  variables: CoinflowWithdrawQuoteQueryVariables,
+  options?: UseQueryOptions<CoinflowWithdrawQuoteQuery, TError, TData>,
+) =>
+  useQuery<CoinflowWithdrawQuoteQuery, TError, TData>(
+    ["CoinflowWithdrawQuote", variables],
+    useFetchData<
+      CoinflowWithdrawQuoteQuery,
+      CoinflowWithdrawQuoteQueryVariables
+    >(CoinflowWithdrawQuoteDocument).bind(null, variables),
+    options,
+  );
+export const CreateCoinflowWithdrawalDocument = `
+    mutation CreateCoinflowWithdrawal($input: CreateCoinflowWithdrawalInput!) {
+  createCoinflowWithdrawal(input: $input) {
+    ...CoinflowWithdrawalFields
+  }
+}
+    ${CoinflowWithdrawalFieldsFragmentDoc}`;
+export const useCreateCoinflowWithdrawalMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    CreateCoinflowWithdrawalMutation,
+    TError,
+    CreateCoinflowWithdrawalMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    CreateCoinflowWithdrawalMutation,
+    TError,
+    CreateCoinflowWithdrawalMutationVariables,
+    TContext
+  >(
+    ["CreateCoinflowWithdrawal"],
+    useFetchData<
+      CreateCoinflowWithdrawalMutation,
+      CreateCoinflowWithdrawalMutationVariables
+    >(CreateCoinflowWithdrawalDocument),
+    options,
+  );
+export const CoinflowWithdrawalDocument = `
+    query CoinflowWithdrawal($id: ID!) {
+  coinflowWithdrawal(id: $id) {
+    ...CoinflowWithdrawalFields
+  }
+}
+    ${CoinflowWithdrawalFieldsFragmentDoc}`;
+export const useCoinflowWithdrawalQuery = <
+  TData = CoinflowWithdrawalQuery,
+  TError = unknown,
+>(
+  variables: CoinflowWithdrawalQueryVariables,
+  options?: UseQueryOptions<CoinflowWithdrawalQuery, TError, TData>,
+) =>
+  useQuery<CoinflowWithdrawalQuery, TError, TData>(
+    ["CoinflowWithdrawal", variables],
+    useFetchData<CoinflowWithdrawalQuery, CoinflowWithdrawalQueryVariables>(
+      CoinflowWithdrawalDocument,
+    ).bind(null, variables),
     options,
   );
