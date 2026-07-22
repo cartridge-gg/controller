@@ -45,7 +45,6 @@
     }
   },
   "dependencies": {
-    "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
     "@starknet-io/get-starknet-core": "5.0.0",
     "@starknet-io/types-js": "0.9.1",

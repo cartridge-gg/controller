@@ -1,7 +1,7 @@
 import { ec, encode, stark, WalletAccount } from "starknet";
 import { loadConfig, SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
-import { signerToGuid } from "@cartridge/controller-wasm";
+import { signerToGuid } from "../session";
 
 import SessionAccount from "./account";
 import { KEYCHAIN_URL } from "../constants";
