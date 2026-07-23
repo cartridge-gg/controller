@@ -1765,7 +1765,7 @@ export type CreateCoinbaseLayerswapOrderInput = {
    * delivering USDC to their controller: the bridged USDC settles to a deposit
    * address we control and the equivalent credits (computed on the backend from
    * purchaseUSDCAmount) are granted when the swap completes. Subject to the
-   * standard buy-credits min/max ($2 / $25,000).
+   * standard buy-credits min/max ($2 / $2,500).
    */
   credits?: InputMaybe<Scalars["Boolean"]>;
   /**
@@ -1807,7 +1807,7 @@ export type CreateCoinflowBankAuthSessionInput = {
 };
 
 export type CreateCoinflowCreditsIntentInput = {
-  /** Credit amount to buy. Bounded by the standard $2 min / $25,000 max. */
+  /** Credit amount to buy. Bounded by the standard $2 min / $2,500 max. */
   credits: CreditsInput;
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
 };
@@ -3575,6 +3575,8 @@ export type Mutation = {
   finalizeLogin: Scalars["String"];
   finalizeRegistration: Account;
   increaseBudget: Paymaster;
+  /** Expire the cookie session. */
+  logout: Scalars["Boolean"];
   /**
    * Spend the authenticated account's off-chain credit balance to purchase a
    * starterpack bundle. Mirrors createCoinflowStarterpackIntent's pricing and
@@ -3587,6 +3589,11 @@ export type Mutation = {
   purchaseBundleWithCredits: PurchaseFulfillment;
   register: Account;
   registerNotificationDevice: NotificationDevice;
+  /**
+   * Create an account (no controller, no signer) from a verified-phone
+   * signupToken plus a chosen username, then establish the cookie session.
+   */
+  registerPhoneAccount: Account;
   removeAllPolicies: Scalars["Boolean"];
   removeFromTeam: Scalars["Boolean"];
   removeOwner: Scalars["Boolean"];
@@ -3607,6 +3614,11 @@ export type Mutation = {
   setAccountAgeVerification: AccountAgeVerificationResult;
   signDocument: Attestation;
   /**
+   * Send a login verification code via SMS. Unauthenticated. Rate-limited per
+   * phone number. Never reveals whether an account exists for the phone.
+   */
+  startPhoneLogin: SendVerificationResponse;
+  /**
    * Submit identity fields (SSN last 4, date of birth) to request an upgrade of
    * the user's Coinbase onramp limits. Coinbase processes the submission
    * asynchronously — clients should poll coinbaseOnrampLimits after calling this.
@@ -3618,6 +3630,13 @@ export type Mutation = {
   updateDeployment: Deployment;
   updateMe: Account;
   updatePaymaster: Scalars["Boolean"];
+  /**
+   * Update the authenticated account's player controls. Decreases (more
+   * restrictive) take effect immediately; increases and removals (less
+   * restrictive) are held as a pending change effective after a cooling-off
+   * period. All amounts are in USD cents.
+   */
+  updatePlayerControls: PlayerControlsStatus;
   updateRpcApiKey: RpcApiKey;
   updateRpcCorsDomain: RpcCorsDomain;
   updateTeam: Team;
@@ -3631,6 +3650,12 @@ export type Mutation = {
    * Updates the user's phone number and verification timestamp on success.
    */
   verifyPhone: VerifyResponse;
+  /**
+   * Verify a login code. If the phone maps to an existing account, establishes
+   * the cookie session and returns the account. Otherwise returns a single-use,
+   * short-TTL signupToken for registerPhoneAccount.
+   */
+  verifyPhoneLogin: PhoneLoginResult;
   /**
    * Verify an email address against a Twilio code and write it to the named
    * team. The caller must be a member of the team. Uses the same code sent by
@@ -3853,6 +3878,10 @@ export type MutationRegisterNotificationDeviceArgs = {
   input: RegisterNotificationDeviceInput;
 };
 
+export type MutationRegisterPhoneAccountArgs = {
+  input: RegisterPhoneAccountInput;
+};
+
 export type MutationRemoveAllPoliciesArgs = {
   paymasterName: Scalars["ID"];
 };
@@ -3902,6 +3931,10 @@ export type MutationSignDocumentArgs = {
   input: AttestationInput;
 };
 
+export type MutationStartPhoneLoginArgs = {
+  input: StartPhoneLoginInput;
+};
+
 export type MutationSubmitCoinbaseLimitsUpgradeArgs = {
   input: SubmitCoinbaseLimitsUpgradeInput;
 };
@@ -3936,6 +3969,10 @@ export type MutationUpdatePaymasterArgs = {
   teamName?: InputMaybe<Scalars["String"]>;
 };
 
+export type MutationUpdatePlayerControlsArgs = {
+  input: UpdatePlayerControlsInput;
+};
+
 export type MutationUpdateRpcApiKeyArgs = {
   id: Scalars["ID"];
   update: RpcApiKeyInput;
@@ -3957,6 +3994,10 @@ export type MutationVerifyEmailArgs = {
 
 export type MutationVerifyPhoneArgs = {
   input: VerifyPhoneInput;
+};
+
+export type MutationVerifyPhoneLoginArgs = {
+  input: VerifyPhoneLoginInput;
 };
 
 export type MutationVerifyTeamEmailArgs = {
@@ -5063,6 +5104,12 @@ export type PaymasterWhereInput = {
   updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
 };
 
+export type PhoneLoginResult = {
+  __typename?: "PhoneLoginResult";
+  account?: Maybe<Account>;
+  signupToken?: Maybe<Scalars["String"]>;
+};
+
 export type PlayerAchievement = {
   __typename?: "PlayerAchievement";
   /** The unique identifier for the achievement. */
@@ -5090,6 +5137,51 @@ export type PlayerAchievementItem = {
 export type PlayerAchievementResult = {
   __typename?: "PlayerAchievementResult";
   items: Array<PlayerAchievementItem>;
+};
+
+export type PlayerControlsLimit = {
+  __typename?: "PlayerControlsLimit";
+  /** Effective limit in USD cents. Null means no limit. */
+  amountCents?: Maybe<Scalars["Int"]>;
+  /**
+   * Pending (cooling-off) limit value in USD cents. Null when there is no
+   * pending change or when the pending change is a removal (see pendingRemoval).
+   */
+  pendingAmountCents?: Maybe<Scalars["Int"]>;
+  /** True when the pending change removes the limit entirely. */
+  pendingRemoval: Scalars["Boolean"];
+  /** Amount already used in the current window, in USD cents. */
+  usedCents: Scalars["Int"];
+};
+
+export enum PlayerControlsPeriod {
+  Daily = "DAILY",
+  Monthly = "MONTHLY",
+  Weekly = "WEEKLY",
+}
+
+export type PlayerControlsStatus = {
+  __typename?: "PlayerControlsStatus";
+  /** Limit on credits purchased (funds converted to off-chain credits). */
+  creditsPurchase: PlayerControlsLimit;
+  /** Limit on gross credits spent on game entries and purchases. */
+  entryPurchase: PlayerControlsLimit;
+  /** When the pending change(s) become effective. Null when none pending. */
+  pendingEffectiveAt?: Maybe<Scalars["Time"]>;
+  /**
+   * Pending (cooling-off) window-shortening period change, if any. Null when
+   * there is no pending period change.
+   */
+  pendingPeriod?: Maybe<PlayerControlsPeriod>;
+  /** Pending (cooling-off) play-time duration cap in seconds, if any. */
+  pendingPlayTimeMaxDurationSeconds?: Maybe<Scalars["Int"]>;
+  /** True when the pending change removes the play-time duration cap. */
+  pendingPlayTimeRemoval: Scalars["Boolean"];
+  period: PlayerControlsPeriod;
+  /** Effective play-time duration cap in seconds. Null means no cap. */
+  playTimeMaxDurationSeconds?: Maybe<Scalars["Int"]>;
+  /** Inclusive start of the current rolling usage window. */
+  windowStart: Scalars["Time"];
 };
 
 export type PlaythroughEntry = {
@@ -5302,6 +5394,11 @@ export type Query = {
   paymasterTransactions: Array<PaymasterTransaction>;
   paymasters?: Maybe<PaymasterConnection>;
   playerAchievements: PlayerAchievementResult;
+  /**
+   * Player-controls status for the authenticated account: effective limits,
+   * current-window usage, and any pending (cooling-off) changes.
+   */
+  playerControls: PlayerControlsStatus;
   playthroughs: PlaythroughResult;
   price: Array<Price>;
   priceByAddresses: Array<Price>;
@@ -6244,6 +6341,11 @@ export type RegisterNotificationDeviceInput = {
   token: Scalars["String"];
 };
 
+export type RegisterPhoneAccountInput = {
+  signupToken: Scalars["String"];
+  username: Scalars["String"];
+};
+
 export type Resources = {
   __typename?: "Resources";
   cpu?: Maybe<Scalars["Float"]>;
@@ -6698,6 +6800,10 @@ export type StarknetCredential = {
 export type StarknetCredentials = {
   __typename?: "StarknetCredentials";
   starknet?: Maybe<Array<StarknetCredential>>;
+};
+
+export type StartPhoneLoginInput = {
+  phoneNumber: Scalars["String"];
 };
 
 export type Streak = {
@@ -7473,6 +7579,20 @@ export type UpdateMerkleDropInput = {
   updatedAt?: InputMaybe<Scalars["Time"]>;
 };
 
+export type UpdatePlayerControlsInput = {
+  /** Set the credits-purchase limit (USD cents). Mutually exclusive with removeCreditsPurchaseLimit. */
+  creditsPurchaseLimitCents?: InputMaybe<Scalars["Int"]>;
+  /** Set the entry-and-purchase limit (USD cents). Mutually exclusive with removeEntryPurchaseLimit. */
+  entryPurchaseLimitCents?: InputMaybe<Scalars["Int"]>;
+  period?: InputMaybe<PlayerControlsPeriod>;
+  /** Set the play-time duration cap in seconds. Mutually exclusive with removePlayTimeMaxDuration. */
+  playTimeMaxDurationSeconds?: InputMaybe<Scalars["Int"]>;
+  /** Remove the credits-purchase limit (unlimited). Loosening, so it goes through cooling-off. */
+  removeCreditsPurchaseLimit?: InputMaybe<Scalars["Boolean"]>;
+  removeEntryPurchaseLimit?: InputMaybe<Scalars["Boolean"]>;
+  removePlayTimeMaxDuration?: InputMaybe<Scalars["Boolean"]>;
+};
+
 export type UpdateServiceInput = {
   config?: InputMaybe<Scalars["String"]>;
   torii?: InputMaybe<ToriiUpdateInput>;
@@ -7497,6 +7617,11 @@ export type VerifyPhoneInput = {
    * The phone number that was sent the verification code.
    * Must match the phone number used in sendPhoneVerification.
    */
+  phoneNumber: Scalars["String"];
+};
+
+export type VerifyPhoneLoginInput = {
+  code: Scalars["String"];
   phoneNumber: Scalars["String"];
 };
 

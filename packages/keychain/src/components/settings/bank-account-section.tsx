@@ -9,6 +9,7 @@ import {
 import {
   CoinflowDestinationType,
   useCoinflowWithdrawStatus,
+  useDeleteCoinflowDestination,
 } from "@/hooks/payments/coinflow-withdraw";
 import { useWithdrawContext } from "@/components/withdraw/provider";
 
@@ -20,7 +21,9 @@ import { useWithdrawContext } from "@/components/withdraw/provider";
  * section only appears where payouts are enabled. "Add Payment Method" runs the
  * withdraw flow's verification → KYC → hosted bank-link gauntlet in "add-bank"
  * intent (`initiateAddBank`); the newly linked account lands in this list via
- * the shared status query. The unlink action is not wired up yet.
+ * the shared status query. Each row's unlink action calls
+ * `deleteCoinflowDestination` (by `type` + `token`), which invalidates the
+ * shared status query so the removed destination drops out of the list.
  */
 export function BankAccountSection() {
   const { withdrawHidden, withdrawDisabled, initiateAddBank } =
@@ -31,6 +34,8 @@ export function BankAccountSection() {
   const { data: status, isLoading } = useCoinflowWithdrawStatus({
     enabled: !withdrawHidden,
   });
+  const { deleteDestination, isLoading: isDeleting } =
+    useDeleteCoinflowDestination();
 
   if (withdrawHidden) return null;
 
@@ -51,6 +56,15 @@ export function BankAccountSection() {
               )
             }
             label={destination.display}
+            onDelete={async () => {
+              await deleteDestination({
+                type: destination.type,
+                token: destination.token,
+              });
+            }}
+            confirm="unlink"
+            confirmLabel={destination.display}
+            isLoading={isDeleting}
           />
         ))}
         <Button
