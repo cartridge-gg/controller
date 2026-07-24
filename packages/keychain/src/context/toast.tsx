@@ -17,6 +17,7 @@ import {
   MarketplaceToastOptions,
   UserToastOptions,
   SettingToastOptions,
+  CreditsToastOptions,
   CONTROLLER_TOAST_MESSAGE_TYPE,
 } from "@cartridge/controller-ui";
 import { isIframe } from "@cartridge/controller-ui/utils";
@@ -66,6 +67,10 @@ interface ToastContextType {
     ) => void;
     setting: (
       options: Omit<SettingToastOptions, "variant">,
+      disabled?: boolean,
+    ) => void;
+    credits: (
+      options: Omit<CreditsToastOptions, "variant">,
       disabled?: boolean,
     ) => void;
   };
@@ -199,6 +204,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         emitToast({
           ...options,
           variant: "setting",
+        });
+      },
+      credits: (
+        options: Omit<CreditsToastOptions, "variant">,
+        disabled?: boolean,
+      ) => {
+        if (disabled) return;
+        emitToast({
+          ...options,
+          variant: "credits",
         });
       },
     }),

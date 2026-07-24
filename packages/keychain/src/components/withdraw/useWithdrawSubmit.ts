@@ -25,8 +25,8 @@ export type WithdrawSubmit = {
  * Owns the final payout (§3.6): initiates the withdrawal for the confirmed
  * (amount, destination, speed) and reports its return status. The provider
  * holds this in context; the method drawer's WITHDRAW button calls `submit`
- * and reads `isLoading`/`error`. On success it emits the "Withdrawal Initiated"
- * toast and hands back to `onSuccess`, where the provider returns to the
+ * and reads `isLoading`/`error`. On success it emits the credits "withdraw
+ * initiated" toast and hands back to `onSuccess`, where the provider returns to the
  * overview drawer — now listing the freshly-created withdrawal in History.
  *
  * The gross amount is `credits` (whole account credits); the display quote's
@@ -64,7 +64,11 @@ export const useWithdrawSubmit = ({
       token: selection.token,
     })
       .then((withdrawal) => {
-        toast.success("Withdrawal Initiated");
+        toast.credits({
+          kind: "withdraw",
+          status: "initiated",
+          amount: credits,
+        });
         onSuccess(withdrawal);
       })
       .catch((e) => setError(e as Error))
