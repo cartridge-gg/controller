@@ -1,10 +1,73 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import { PropsWithChildren, useState } from "react";
+import type { Decorator, Meta, StoryObj } from "@storybook/react";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 import {
   CoinflowPayoutSpeed,
   CoinflowWithdrawalStatus,
+  type CoinflowWithdrawal,
 } from "@/hooks/payments/coinflow-withdraw";
 import { OverviewDrawer } from "./OverviewDrawer";
+
+// OverviewDrawer fetches its own withdrawal history via useCoinflowWithdrawals
+// (react-query key ["CoinflowWithdrawal", {}]). Stories seed that cache rather
+// than hit the network: a fresh client per story, marked fresh (staleTime
+// Infinity, retry off) so the seeded rows render without a background refetch.
+function SeededHistory({
+  withdrawals,
+  children,
+}: PropsWithChildren<{ withdrawals: CoinflowWithdrawal[] }>) {
+  const [client] = useState(() => {
+    const c = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    });
+    c.setQueryData(["CoinflowWithdrawal", {}], {
+      coinflowWithdrawal: withdrawals,
+    });
+    return c;
+  });
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+}
+
+const withWithdrawals =
+  (withdrawals: CoinflowWithdrawal[]): Decorator =>
+  (Story) => (
+    <SeededHistory withdrawals={withdrawals}>
+      <Story />
+    </SeededHistory>
+  );
+
+const PROCESSING_WITHDRAWAL: CoinflowWithdrawal = {
+  id: "wd_2",
+  status: CoinflowWithdrawalStatus.Processing,
+  amountCents: 600,
+  feeCents: 12,
+  netCents: 588,
+  method: CoinflowPayoutSpeed.Standard,
+  effectiveSpeed: null,
+  destinationDisplay: "Bank ****0283",
+  failureCode: null,
+  failureReason: null,
+  createdAt: "2026-07-24T18:00:00Z",
+  updatedAt: "2026-07-24T18:00:00Z",
+  reversedAt: null,
+};
+
+const COMPLETED_WITHDRAWAL: CoinflowWithdrawal = {
+  id: "wd_1",
+  status: CoinflowWithdrawalStatus.Completed,
+  amountCents: 2500,
+  feeCents: 25,
+  netCents: 2475,
+  method: CoinflowPayoutSpeed.Standard,
+  effectiveSpeed: null,
+  destinationDisplay: "Bank ****0283",
+  failureCode: null,
+  failureReason: null,
+  createdAt: "2026-07-20T12:00:00Z",
+  updatedAt: "2026-07-21T09:00:00Z",
+  reversedAt: null,
+};
 
 const meta = {
   component: OverviewDrawer,
@@ -14,6 +77,9 @@ const meta = {
         <Story />
       </div>
     ),
+    // Default: no prior withdrawals — the History section shows its empty
+    // placeholder. Stories that need history override this decorator.
+    withWithdrawals([]),
   ],
   args: {
     isOpen: true,
@@ -35,21 +101,13 @@ type Story = StoryObj<typeof meta>;
 /** No prior withdrawals — the History section shows its empty placeholder. */
 export const Default: Story = {};
 
-/** An in-flight withdrawal — the History section lists it as a Processing card. */
+/**
+ * Withdrawal history — the section lists the two most recent (an in-flight
+ * Processing card on top, a terminal Completed one below). The Processing row
+ * locks the WITHDRAW button.
+ */
 export const WithHistory: Story = {
-  args: {
-    activeWithdrawal: {
-      id: "wd_1",
-      status: CoinflowWithdrawalStatus.Processing,
-      amountCents: 600,
-      feeCents: 12,
-      netCents: 588,
-      method: CoinflowPayoutSpeed.Standard,
-      destinationDisplay: "Bank ****0283",
-      failureCode: null,
-      failureReason: null,
-    },
-  },
+  decorators: [withWithdrawals([PROCESSING_WITHDRAWAL, COMPLETED_WITHDRAWAL])],
 };
 
 export const WithDailyLimit: Story = {

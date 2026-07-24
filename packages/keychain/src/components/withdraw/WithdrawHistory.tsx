@@ -33,27 +33,32 @@ const STATUS_DISPLAY: Record<
   },
 };
 
+// The History section lists at most this many rows — the two most recent
+// withdrawals (the full list lands with a dedicated "View All" screen later).
+const MAX_HISTORY_ROWS = 2;
+
 interface WithdrawHistoryProps {
   /**
-   * The active (in-flight) withdrawal, resolved from `activeWithdrawalId`.
-   * Undefined renders the empty state — the backend exposes one active
-   * withdrawal per user, so History lists at most this row today.
+   * The caller's withdrawals, newest-first. Only the two most recent render
+   * here; an empty/undefined list shows the empty placeholder.
    */
-  withdrawal?: CoinflowWithdrawal;
-  /** The active-withdrawal lookup is in flight. */
+  withdrawals?: CoinflowWithdrawal[];
+  /** The withdrawal-history lookup is in flight. */
   isLoading?: boolean;
 }
 
 /**
  * The overview drawer's History section: the empty placeholder until a
- * withdrawal exists, then the active withdrawal as a single card (bank + amount
- * + status). "View All" and older rows land with the full history-list query
- * (not exposed by the backend yet), so the header carries no link today.
+ * withdrawal exists, then the two most recent withdrawals as cards (bank +
+ * amount + status). "View All" and older rows land with a dedicated
+ * history screen later, so the header carries no link today.
  */
 export function WithdrawHistory({
-  withdrawal,
+  withdrawals,
   isLoading,
 }: WithdrawHistoryProps) {
+  const recent = withdrawals?.slice(0, MAX_HISTORY_ROWS) ?? [];
+
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs font-semibold text-foreground-400">History</p>
@@ -62,8 +67,10 @@ export function WithdrawHistory({
         <div className="flex items-center justify-center p-6 border border-background-200 rounded">
           <Spinner />
         </div>
-      ) : withdrawal ? (
-        <WithdrawHistoryCard withdrawal={withdrawal} />
+      ) : recent.length > 0 ? (
+        recent.map((withdrawal) => (
+          <WithdrawHistoryCard key={withdrawal.id} withdrawal={withdrawal} />
+        ))
       ) : (
         <div className="flex items-center justify-center p-6 border border-background-200 rounded text-xs text-foreground-300">
           You have not made any withdrawals
@@ -71,6 +78,18 @@ export function WithdrawHistory({
       )}
     </div>
   );
+}
+
+// The withdrawal's initiation date (createdAt), e.g. "Jul 24, 2026". Empty on
+// an unparseable value rather than rendering "Invalid Date".
+function formatWithdrawalDate(createdAt: string): string {
+  const date = new Date(createdAt);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function WithdrawHistoryCard({
@@ -85,9 +104,14 @@ function WithdrawHistoryCard({
       {/* Only banks can be linked in-app today; the icon is generic since the
           withdrawal carries only the display label, not the destination type. */}
       <Thumbnail icon={<BankIcon />} size="md" className="bg-background-200" />
-      <p className="flex-1 text-sm font-medium text-foreground-100">
-        {withdrawal.destinationDisplay}
-      </p>
+      <div className="flex flex-1 flex-col gap-0.5">
+        <p className="text-sm font-medium text-foreground-100">
+          {withdrawal.destinationDisplay}
+        </p>
+        <p className="text-xs font-medium text-foreground-300">
+          {formatWithdrawalDate(withdrawal.createdAt)}
+        </p>
+      </div>
       <div className="flex flex-col items-end gap-0.5">
         <p className="text-sm font-medium text-foreground-100">
           {formatUsdValue(withdrawal.amountCents / 100)}

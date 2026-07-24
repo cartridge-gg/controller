@@ -10,11 +10,9 @@ import {
 import {
   CoinflowKycStatus,
   useCoinflowBankAuthSession,
-  useCoinflowWithdrawal,
   useCoinflowWithdrawStatus,
   type CoinflowBankAuthSession,
   type CoinflowDestination,
-  type CoinflowWithdrawal,
 } from "@/hooks/payments/coinflow-withdraw";
 import type { CoinflowWithdrawStatusQuery } from "@/utils/api";
 import { useConnection } from "@/hooks/connection";
@@ -157,13 +155,6 @@ export type WithdrawContextValue = {
    * flow returns to the overview drawer, now listing the new withdrawal below.
    */
   submit: WithdrawSubmit;
-  /**
-   * The active (in-flight) withdrawal, resolved from `activeWithdrawalId` — the
-   * overview History card. Undefined when none is in flight.
-   */
-  activeWithdrawal?: CoinflowWithdrawal;
-  /** The active-withdrawal lookup is in flight. */
-  activeWithdrawalLoading: boolean;
 };
 
 export const WithdrawContext = createContext<WithdrawContextValue>({
@@ -208,8 +199,6 @@ export const WithdrawContext = createContext<WithdrawContextValue>({
     error: null,
     reset: () => {},
   },
-  activeWithdrawal: undefined,
-  activeWithdrawalLoading: false,
 });
 
 export function WithdrawProvider({ children }: PropsWithChildren) {
@@ -254,15 +243,6 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
   // calls `quote.select` as cards are clicked. Keyed on the picked `credits`,
   // so it re-quotes automatically if the amount changes.
   const quote = useWithdrawQuote(credits);
-
-  // The active (in-flight) withdrawal for the overview History card. Resolved
-  // from `activeWithdrawalId` (the backend keeps one active per user); a
-  // successful initiation refetches the status so this id lands, then this
-  // query pulls the row. Only fetched while the flow is open.
-  const { data: activeWithdrawal, isLoading: activeWithdrawalLoading } =
-    useCoinflowWithdrawal(status?.activeWithdrawalId ?? undefined, {
-      enabled: isOpen && !!status?.activeWithdrawalId,
-    });
 
   // Lands back on the overview drawer after a successful initiation — as if
   // freshly opened from the menu, its History section now listing the new
@@ -502,8 +482,6 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
         },
         quote,
         submit,
-        activeWithdrawal,
-        activeWithdrawalLoading,
       }}
     >
       {children}

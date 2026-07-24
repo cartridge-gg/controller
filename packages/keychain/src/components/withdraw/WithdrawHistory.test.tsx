@@ -14,13 +14,17 @@ const withdrawal: CoinflowWithdrawal = {
   feeCents: 12,
   netCents: 588,
   method: CoinflowPayoutSpeed.Standard,
+  effectiveSpeed: null,
   destinationDisplay: "Bank ****0283",
   failureCode: null,
   failureReason: null,
+  createdAt: "2026-07-24T18:00:00Z",
+  updatedAt: "2026-07-24T18:00:00Z",
+  reversedAt: null,
 };
 
 describe("WithdrawHistory", () => {
-  it("renders the empty placeholder when there is no withdrawal", () => {
+  it("renders the empty placeholder when there are no withdrawals", () => {
     render(<WithdrawHistory />);
 
     expect(screen.getByText("History")).toBeInTheDocument();
@@ -29,8 +33,16 @@ describe("WithdrawHistory", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the active withdrawal as a card with amount + status", () => {
-    render(<WithdrawHistory withdrawal={withdrawal} />);
+  it("renders the empty placeholder for an empty list", () => {
+    render(<WithdrawHistory withdrawals={[]} />);
+
+    expect(
+      screen.getByText("You have not made any withdrawals"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders a withdrawal as a card with amount + status", () => {
+    render(<WithdrawHistory withdrawals={[withdrawal]} />);
 
     expect(screen.getByText("Bank ****0283")).toBeInTheDocument();
     // Gross amount, not net — matches the mock's $6.00.
@@ -41,13 +53,32 @@ describe("WithdrawHistory", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("renders only the two most recent withdrawals", () => {
+    render(
+      <WithdrawHistory
+        withdrawals={[
+          { ...withdrawal, id: "wd_3", destinationDisplay: "Bank ****0001" },
+          { ...withdrawal, id: "wd_2", destinationDisplay: "Bank ****0002" },
+          { ...withdrawal, id: "wd_1", destinationDisplay: "Bank ****0003" },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Bank ****0001")).toBeInTheDocument();
+    expect(screen.getByText("Bank ****0002")).toBeInTheDocument();
+    // The third (oldest) row is dropped — History caps at two.
+    expect(screen.queryByText("Bank ****0003")).not.toBeInTheDocument();
+  });
+
   it("labels a terminal failure", () => {
     render(
       <WithdrawHistory
-        withdrawal={{
-          ...withdrawal,
-          status: CoinflowWithdrawalStatus.Failed,
-        }}
+        withdrawals={[
+          {
+            ...withdrawal,
+            status: CoinflowWithdrawalStatus.Failed,
+          },
+        ]}
       />,
     );
 

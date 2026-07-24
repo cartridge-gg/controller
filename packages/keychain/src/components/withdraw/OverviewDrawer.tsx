@@ -16,7 +16,7 @@ import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import { formatUsdValue } from "@/utils/format-value";
 import {
   CoinflowWithdrawalStatus,
-  type CoinflowWithdrawal,
+  useCoinflowWithdrawals,
 } from "@/hooks/payments/coinflow-withdraw";
 import { AmountSelection } from "./AmountSelection";
 import { WithdrawHistory } from "./WithdrawHistory";
@@ -67,12 +67,6 @@ interface OverviewDrawerProps {
   /** Continue with the picked amount (whole credits); opens the method
    * sub-step when no method is confirmed yet, the quote step otherwise. */
   onContinue: (credits: number) => void;
-  /** The active (in-flight) withdrawal for the History section, resolved from
-   * `activeWithdrawalId`; undefined renders the empty state. Shown only on the
-   * base overview (not the amount step). */
-  activeWithdrawal?: CoinflowWithdrawal;
-  /** The active-withdrawal lookup is in flight. */
-  historyLoading?: boolean;
 }
 
 /**
@@ -94,10 +88,16 @@ export function OverviewDrawer({
   amountMode = false,
   defaultAmountValue,
   onContinue,
-  activeWithdrawal,
-  historyLoading,
 }: OverviewDrawerProps) {
   const [credits, setCredits] = useState(0);
+
+  // The withdrawal history (newest-first) for the History card + the WITHDRAW
+  // button lock. Owned here rather than in the provider/orchestrator — it
+  // belongs to this drawer. Only fetched while the drawer is open. A successful
+  // initiation invalidates this key upstream, so the new row lists and the
+  // button re-locks on the next refetch.
+  const { data: withdrawals, isLoading: historyLoading } =
+    useCoinflowWithdrawals({ enabled: isOpen });
 
   // Reset the picked amount when the drawer closes (the keyed selection
   // below remounts with a cleared input on the next open).
@@ -118,12 +118,14 @@ export function OverviewDrawer({
     maxCredits ?? 0,
     withdrawableCredits ?? 0,
   );
-  // Only one withdrawal can be in flight per user (backend invariant): while the
-  // active one is Pending/Processing, block starting another. Completed/Failed
+  // Only one withdrawal can be in flight per user (backend invariant): while any
+  // withdrawal is Pending/Processing, block starting another. Completed/Failed
   // are terminal and don't block a fresh withdrawal.
-  const withdrawInProgress =
-    activeWithdrawal?.status === CoinflowWithdrawalStatus.Pending ||
-    activeWithdrawal?.status === CoinflowWithdrawalStatus.Processing;
+  const withdrawInProgress = (withdrawals ?? []).some(
+    (w) =>
+      w.status === CoinflowWithdrawalStatus.Pending ||
+      w.status === CoinflowWithdrawalStatus.Processing,
+  );
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
@@ -173,7 +175,7 @@ export function OverviewDrawer({
 
         {!amountMode && !loading && (
           <WithdrawHistory
-            withdrawal={activeWithdrawal}
+            withdrawals={withdrawals}
             isLoading={historyLoading}
           />
         )}

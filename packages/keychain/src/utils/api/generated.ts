@@ -1537,8 +1537,12 @@ export type CoinflowWithdrawal = {
   __typename?: "CoinflowWithdrawal";
   /** Gross amount debited, in USD cents. */
   amountCents: Scalars["Int"];
+  /** When the withdrawal was initiated. */
+  createdAt: Scalars["Time"];
   /** Snapshot of the destination label at initiation (survives an unlink). */
   destinationDisplay: Scalars["String"];
+  /** The effective speed Coinflow reported for this payout, if any (raw label). */
+  effectiveSpeed?: Maybe<Scalars["String"]>;
   /** Set when the withdrawal terminally failed. */
   failureCode?: Maybe<CoinflowWithdrawalFailureCode>;
   /** User-facing failure message derived from failureCode. */
@@ -1546,10 +1550,15 @@ export type CoinflowWithdrawal = {
   /** Coinflow fee captured at initiation, in USD cents. */
   feeCents: Scalars["Int"];
   id: Scalars["ID"];
+  /** The payout speed/method requested at initiation. */
   method: CoinflowPayoutSpeed;
   /** Net amount reaching the bank, in USD cents. */
   netCents: Scalars["Int"];
+  /** When the credit-back landed after a terminal failure. Null unless reversed. */
+  reversedAt?: Maybe<Scalars["Time"]>;
   status: CoinflowWithdrawalStatus;
+  /** When the withdrawal row last changed (e.g. a status transition). */
+  updatedAt: Scalars["Time"];
 };
 
 /** Why a withdrawal terminally failed. The credits were credited back in all cases. */
@@ -5360,8 +5369,12 @@ export type Query = {
    * state.
    */
   coinflowWithdrawStatus: CoinflowWithdrawStatus;
-  /** Poll a withdrawal's status by its id. */
-  coinflowWithdrawal: CoinflowWithdrawal;
+  /**
+   * The current user's withdrawals, most-recent-first. Pass `id` to poll a single
+   * withdrawal (returns a one-element list, empty if it isn't the caller's); omit `id`
+   * to return the caller's full withdrawal history ordered by initiation, newest first.
+   */
+  coinflowWithdrawal: Array<CoinflowWithdrawal>;
   collectible: Collectible;
   collectibles: CollectibleConnection;
   collection: Collection;
@@ -5505,7 +5518,7 @@ export type QueryCoinflowWithdrawStatusArgs = {
 };
 
 export type QueryCoinflowWithdrawalArgs = {
-  id: Scalars["ID"];
+  id?: InputMaybe<Scalars["ID"]>;
 };
 
 export type QueryCollectibleArgs = {
@@ -7740,9 +7753,13 @@ export type CreditsHistoryQuery = {
             feeCents: number;
             netCents: number;
             method: CoinflowPayoutSpeed;
+            effectiveSpeed?: string | null;
             destinationDisplay: string;
             failureCode?: CoinflowWithdrawalFailureCode | null;
             failureReason?: string | null;
+            createdAt: string;
+            updatedAt: string;
+            reversedAt?: string | null;
           } | null;
         } | null;
       } | null> | null;
@@ -8410,7 +8427,6 @@ export type CoinflowWithdrawStatusQuery = {
     minCredits: number;
     maxCredits: number;
     withdrawableCredits: number;
-    activeWithdrawalId?: string | null;
     destinations: Array<{
       __typename?: "CoinflowDestination";
       type: CoinflowDestinationType;
@@ -8501,19 +8517,23 @@ export type CreateCoinflowWithdrawalMutation = {
     feeCents: number;
     netCents: number;
     method: CoinflowPayoutSpeed;
+    effectiveSpeed?: string | null;
     destinationDisplay: string;
     failureCode?: CoinflowWithdrawalFailureCode | null;
     failureReason?: string | null;
+    createdAt: string;
+    updatedAt: string;
+    reversedAt?: string | null;
   };
 };
 
 export type CoinflowWithdrawalQueryVariables = Exact<{
-  id: Scalars["ID"];
+  id?: InputMaybe<Scalars["ID"]>;
 }>;
 
 export type CoinflowWithdrawalQuery = {
   __typename?: "Query";
-  coinflowWithdrawal: {
+  coinflowWithdrawal: Array<{
     __typename?: "CoinflowWithdrawal";
     id: string;
     status: CoinflowWithdrawalStatus;
@@ -8521,10 +8541,14 @@ export type CoinflowWithdrawalQuery = {
     feeCents: number;
     netCents: number;
     method: CoinflowPayoutSpeed;
+    effectiveSpeed?: string | null;
     destinationDisplay: string;
     failureCode?: CoinflowWithdrawalFailureCode | null;
     failureReason?: string | null;
-  };
+    createdAt: string;
+    updatedAt: string;
+    reversedAt?: string | null;
+  }>;
 };
 
 export type CoinflowDestinationFieldsFragment = {
@@ -8543,9 +8567,13 @@ export type CoinflowWithdrawalFieldsFragment = {
   feeCents: number;
   netCents: number;
   method: CoinflowPayoutSpeed;
+  effectiveSpeed?: string | null;
   destinationDisplay: string;
   failureCode?: CoinflowWithdrawalFailureCode | null;
   failureReason?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  reversedAt?: string | null;
 };
 
 export type CryptoPaymentFieldsFragment = {
@@ -8655,9 +8683,13 @@ export const CoinflowWithdrawalFieldsFragmentDoc = `
   feeCents
   netCents
   method
+  effectiveSpeed
   destinationDisplay
   failureCode
   failureReason
+  createdAt
+  updatedAt
+  reversedAt
 }
     `;
 export const CryptoPaymentFieldsFragmentDoc = `
@@ -9767,7 +9799,6 @@ export const CoinflowWithdrawStatusDocument = `
     minCredits
     maxCredits
     withdrawableCredits
-    activeWithdrawalId
   }
 }
     ${CoinflowDestinationFieldsFragmentDoc}`;
@@ -9969,7 +10000,7 @@ export const useCreateCoinflowWithdrawalMutation = <
     options,
   );
 export const CoinflowWithdrawalDocument = `
-    query CoinflowWithdrawal($id: ID!) {
+    query CoinflowWithdrawal($id: ID) {
   coinflowWithdrawal(id: $id) {
     ...CoinflowWithdrawalFields
   }
@@ -9979,11 +10010,13 @@ export const useCoinflowWithdrawalQuery = <
   TData = CoinflowWithdrawalQuery,
   TError = unknown,
 >(
-  variables: CoinflowWithdrawalQueryVariables,
+  variables?: CoinflowWithdrawalQueryVariables,
   options?: UseQueryOptions<CoinflowWithdrawalQuery, TError, TData>,
 ) =>
   useQuery<CoinflowWithdrawalQuery, TError, TData>(
-    ["CoinflowWithdrawal", variables],
+    variables === undefined
+      ? ["CoinflowWithdrawal"]
+      : ["CoinflowWithdrawal", variables],
     useFetchData<CoinflowWithdrawalQuery, CoinflowWithdrawalQueryVariables>(
       CoinflowWithdrawalDocument,
     ).bind(null, variables),

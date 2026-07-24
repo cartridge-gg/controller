@@ -1,6 +1,45 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  CoinflowPayoutSpeed,
+  CoinflowWithdrawalStatus,
+  useCoinflowWithdrawals,
+  type CoinflowWithdrawal,
+} from "@/hooks/payments/coinflow-withdraw";
 import { OverviewDrawer } from "./OverviewDrawer";
+
+// The drawer fetches its own history via useCoinflowWithdrawals (which reaches
+// for ConnectionProvider + a QueryClient). Mock it so these tests stay a pure
+// view test; the data-plumbing lives in the hook's own suite.
+vi.mock("@/hooks/payments/coinflow-withdraw", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("@/hooks/payments/coinflow-withdraw")
+  >()),
+  useCoinflowWithdrawals: vi.fn(),
+}));
+
+const withdrawalsMock = vi.mocked(useCoinflowWithdrawals);
+
+const mockWithdrawals = (data?: CoinflowWithdrawal[]) =>
+  withdrawalsMock.mockReturnValue({ data, isLoading: false } as ReturnType<
+    typeof useCoinflowWithdrawals
+  >);
+
+const processingWithdrawal: CoinflowWithdrawal = {
+  id: "wd_1",
+  status: CoinflowWithdrawalStatus.Processing,
+  amountCents: 600,
+  feeCents: 12,
+  netCents: 588,
+  method: CoinflowPayoutSpeed.Standard,
+  effectiveSpeed: null,
+  destinationDisplay: "Bank ****0283",
+  failureCode: null,
+  failureReason: null,
+  createdAt: "2026-07-24T18:00:00Z",
+  updatedAt: "2026-07-24T18:00:00Z",
+  reversedAt: null,
+};
 
 const baseProps = {
   isOpen: true,
@@ -10,6 +49,8 @@ const baseProps = {
 };
 
 describe("OverviewDrawer", () => {
+  beforeEach(() => mockWithdrawals(undefined));
+
   it("renders the error alert and a Close button when the status query fails", () => {
     const onClose = vi.fn();
     render(
@@ -122,5 +163,22 @@ describe("OverviewDrawer", () => {
       screen.getByText(/You need at least \$6\.00 in/),
     ).toBeInTheDocument();
     expect(screen.getByText("Withdraw").closest("button")).toBeDisabled();
+  });
+
+  it("locks the Withdraw button while a withdrawal is in flight", () => {
+    mockWithdrawals([processingWithdrawal]);
+    render(
+      <OverviewDrawer
+        {...baseProps}
+        minCredits={600}
+        maxCredits={250000}
+        withdrawableCredits={613}
+      />,
+    );
+
+    const button = screen.getByText("Withdraw in progress").closest("button");
+    expect(button).toBeDisabled();
+    // The in-flight row also lists in History.
+    expect(screen.getByText("Bank ****0283")).toBeInTheDocument();
   });
 });

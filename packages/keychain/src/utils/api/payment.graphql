@@ -275,7 +275,6 @@ query CoinflowWithdrawStatus($isMainnet: Boolean) {
     minCredits
     maxCredits
     withdrawableCredits
-    activeWithdrawalId
   }
 }
 
@@ -325,7 +324,10 @@ mutation CreateCoinflowWithdrawal($input: CreateCoinflowWithdrawalInput!) {
   }
 }
 
-query CoinflowWithdrawal($id: ID!) {
+# `id` given → a one-element list for that withdrawal (empty if it isn't the
+# caller's); `id` omitted → the caller's full withdrawal history, newest-first.
+# Always scoped to the caller server-side.
+query CoinflowWithdrawal($id: ID) {
   coinflowWithdrawal(id: $id) {
     ...CoinflowWithdrawalFields
   }
@@ -345,9 +347,13 @@ fragment CoinflowWithdrawalFields on CoinflowWithdrawal {
   feeCents
   netCents
   method
+  effectiveSpeed
   destinationDisplay
   failureCode
   failureReason
+  createdAt
+  updatedAt
+  reversedAt
 }
 
 fragment CryptoPaymentFields on CryptoPayment {

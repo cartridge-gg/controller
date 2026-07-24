@@ -46,8 +46,6 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
     cancelLinkDestination,
     quote,
     submit,
-    activeWithdrawal,
-    activeWithdrawalLoading,
   } = useWithdrawContext();
 
   const { isCoinflowSandbox } = useCoinflowIsMainnet();
@@ -83,8 +81,6 @@ export function WithdrawCredits({ isOpen, onClose }: WithdrawCreditsProps) {
         // Restores the picked amount when the drawer re-opens after the
         // method sub-step (the drawer resets its input on close).
         defaultAmountValue={credits ? creditsToInputValue(credits) : undefined}
-        activeWithdrawal={activeWithdrawal}
-        historyLoading={activeWithdrawalLoading}
         onContinue={(credits) => {
           // Whole credits, ready for the quote/withdrawal inputs.
           setCredits(credits);

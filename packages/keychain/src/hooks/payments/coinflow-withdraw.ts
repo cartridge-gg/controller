@@ -45,6 +45,11 @@ export { useCoinflowIsMainnet } from "./coinflow";
 // mutation that mutates KYC/destinations re-fetches the live Coinflow state.
 const WITHDRAW_STATUS_KEY = "CoinflowWithdrawStatus";
 
+// react-query key prefix for the withdrawal-history list query (the overview
+// History card). Invalidated after a successful initiation so the new row lists
+// and the WITHDRAW button re-locks on the freshly in-flight withdrawal.
+const WITHDRAWALS_KEY = "CoinflowWithdrawal";
+
 // ---------------------------------------------------------------------------
 // Status query
 // ---------------------------------------------------------------------------
@@ -315,10 +320,13 @@ export const useCreateCoinflowWithdrawal = () => {
       const result = await mutateAsync({
         input: { ...input, isMainnet: isCoinflowMainnet },
       });
-      // A successful withdrawal debits credits and registers the active
-      // withdrawal — refetch the status so the updated withdrawable balance and
-      // `activeWithdrawalId` land (the latter drives the overview History card).
-      await queryClient.invalidateQueries([WITHDRAW_STATUS_KEY]);
+      // A successful withdrawal debits credits and registers the new
+      // withdrawal — refetch the status (updated withdrawable balance) and the
+      // withdrawal-history list (the overview History card + button lock).
+      await Promise.all([
+        queryClient.invalidateQueries([WITHDRAW_STATUS_KEY]),
+        queryClient.invalidateQueries([WITHDRAWALS_KEY]),
+      ]);
       return result.createCoinflowWithdrawal;
     },
     [mutateAsync, isCoinflowMainnet, queryClient],
@@ -356,7 +364,16 @@ export async function waitForCoinflowWithdrawal(
       CoinflowWithdrawalDocument,
       { id },
     );
-    latest = result.coinflowWithdrawal;
+    // The query returns a list; polling by id yields a one-element list (empty
+    // if it isn't the caller's). Keep polling until the row shows up.
+    const row = result.coinflowWithdrawal[0];
+    if (!row) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, WITHDRAWAL_POLL_INTERVAL_MS),
+      );
+      continue;
+    }
+    latest = row;
 
     switch (latest.status) {
       case CoinflowWithdrawalStatus.Processing:
@@ -381,24 +398,23 @@ export async function waitForCoinflowWithdrawal(
 }
 
 // ---------------------------------------------------------------------------
-// Single-withdrawal query (status drawer)
+// Withdrawal-history list query (overview History card)
 // ---------------------------------------------------------------------------
 
 /**
- * Reads a single withdrawal by id — used by the status drawer to render the
- * current state (incl. `failureCode`/`failureReason` on failure). Disabled
- * until an id is present.
+ * The caller's withdrawal history, newest-first (backend `ORDER BY created_at
+ * DESC`), always scoped to the caller. `id` is omitted, so this is the full
+ * list; the overview History card renders the two most recent and locks the
+ * WITHDRAW button while any row is still in flight (Pending/Processing).
  */
-export const useCoinflowWithdrawal = (
-  id: string | undefined,
-  options?: { enabled?: boolean; refetchInterval?: number | false },
-) => {
+export const useCoinflowWithdrawals = (options?: { enabled?: boolean }) => {
+  const { controller } = useConnection();
+
   const result = useCoinflowWithdrawalQuery(
-    { id: id ?? "" },
+    {},
     {
-      enabled: (options?.enabled ?? true) && !!id,
+      enabled: (options?.enabled ?? true) && !!controller,
       retry: false,
-      refetchInterval: options?.refetchInterval,
     },
   );
 
