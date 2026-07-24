@@ -14,7 +14,10 @@ import {
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import { formatUsdValue } from "@/utils/format-value";
-import type { CoinflowWithdrawal } from "@/hooks/payments/coinflow-withdraw";
+import {
+  CoinflowWithdrawalStatus,
+  type CoinflowWithdrawal,
+} from "@/hooks/payments/coinflow-withdraw";
 import { AmountSelection } from "./AmountSelection";
 import { WithdrawHistory } from "./WithdrawHistory";
 
@@ -115,6 +118,12 @@ export function OverviewDrawer({
     maxCredits ?? 0,
     withdrawableCredits ?? 0,
   );
+  // Only one withdrawal can be in flight per user (backend invariant): while the
+  // active one is Pending/Processing, block starting another. Completed/Failed
+  // are terminal and don't block a fresh withdrawal.
+  const withdrawInProgress =
+    activeWithdrawal?.status === CoinflowWithdrawalStatus.Pending ||
+    activeWithdrawal?.status === CoinflowWithdrawalStatus.Processing;
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
@@ -201,11 +210,11 @@ export function OverviewDrawer({
           </>
         ) : (
           <Button
-            disabled={loading || belowMin}
+            disabled={loading || belowMin || withdrawInProgress}
             onClick={onWithdraw}
             isLoading={loading}
           >
-            Withdraw
+            {withdrawInProgress ? "Withdraw in progress" : "Withdraw"}
           </Button>
         )}
       </DrawerContent>

@@ -17,15 +17,15 @@ const STATUS_DISPLAY: Record<
 > = {
   [CoinflowWithdrawalStatus.Pending]: {
     label: "Processing",
-    className: "text-[#EDA83A]",
+    className: "text-[#fac400]",
   },
   [CoinflowWithdrawalStatus.Processing]: {
     label: "Processing",
-    className: "text-[#EDA83A]",
+    className: "text-[#fac400]",
   },
   [CoinflowWithdrawalStatus.Completed]: {
     label: "Completed",
-    className: "text-constructive-100",
+    className: "text-foreground-100",
   },
   [CoinflowWithdrawalStatus.Failed]: {
     label: "Failed",
