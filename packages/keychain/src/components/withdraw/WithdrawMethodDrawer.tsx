@@ -18,22 +18,22 @@ import {
 import type { WithdrawQuoteSelection } from "./useWithdrawQuote";
 import { OverviewRow, SandboxWarning } from "./OverviewDrawer";
 import {
-  ALLOWED_DESTINATION_KINDS,
   getDestinationIcon,
   WITHDRAW_DESTINATIONS,
+  WITHDRAW_SPEED_INFO,
+  type WithdrawDestinationConfig,
 } from "./constants";
 
 /**
- * Finds the linked account of a given kind among the live destinations. Returns
- * the first match — multi-account-per-kind selection is not built yet.
+ * Finds the linked account backing a destination option among the live
+ * destinations. Returns the first match — multi-account-per-type selection is
+ * not built yet.
  */
 export function findLinkedAccount(
   destinations: CoinflowDestination[],
-  kind: WithdrawDestinationKind,
+  config: WithdrawDestinationConfig,
 ): CoinflowDestination | undefined {
-  return destinations.find(
-    (d) => d.type === WITHDRAW_DESTINATIONS[kind].coinflowDestinationType,
-  );
+  return destinations.find((d) => d.type === config.coinflowDestinationType);
 }
 
 interface WithdrawMethodDrawerProps {
@@ -90,45 +90,47 @@ export function WithdrawMethodDrawer({
   isSubmitting,
   submitError,
 }: WithdrawMethodDrawerProps) {
-  const kinds = ALLOWED_DESTINATION_KINDS;
-
-  // The picked destination *type*. With a single allowed kind there's nothing
-  // to choose, so it auto-selects below. Local to the drawer — the provider
-  // only tracks the quoted (token, speed).
-  const soleKind = kinds.length === 1 ? kinds[0] : undefined;
-  const [selectedKind, setSelectedKind] = useState<
-    WithdrawDestinationKind | undefined
-  >(soleKind);
+  // The picked destination *option*. With a single offered option there's
+  // nothing to choose, so it auto-selects below. Local to the drawer — the
+  // provider only tracks the quoted (token, speed).
+  const soleId =
+    WITHDRAW_DESTINATIONS.length === 1
+      ? WITHDRAW_DESTINATIONS[0].id
+      : undefined;
+  const [selectedId, setSelectedId] = useState<string | undefined>(soleId);
 
   useEffect(() => {
-    if (!selectedKind && soleKind) setSelectedKind(soleKind);
-  }, [selectedKind, soleKind]);
+    if (!selectedId && soleId) setSelectedId(soleId);
+  }, [selectedId, soleId]);
 
-  // The linked account (if any) backing the selected kind — drives the button
+  // Stable reference from the module-level array (safe to use as an effect dep).
+  const selectedConfig = WITHDRAW_DESTINATIONS.find((d) => d.id === selectedId);
+
+  // The linked account (if any) backing the selected option — drives the button
   // (Link vs Withdraw) and the "Transfer to:" row.
-  const selectedAccount = selectedKind
-    ? findLinkedAccount(destinations, selectedKind)
+  const selectedAccount = selectedConfig
+    ? findLinkedAccount(destinations, selectedConfig)
     : undefined;
 
-  // Quote the linked account of the selected kind; clear the quote when the
-  // selected kind has nothing linked (so a stale quote never gates WITHDRAW).
+  // Quote the linked account of the selected option; clear the quote when the
+  // selected option has nothing linked (so a stale quote never gates WITHDRAW).
   // Gated on `isOpen`, and re-runs on every open: the provider clears its quote
   // selection when this sub-step opens (openMethodSelection), and this drawer
-  // stays mounted across the flow — so selectedKind/destinations alone don't
+  // stays mounted across the flow — so selectedConfig/destinations alone don't
   // change on re-open. Without re-asserting on `isOpen`, the quote would never
   // be requested and WITHDRAW would stay disabled.
   useEffect(() => {
-    if (!isOpen || !selectedKind) return;
-    const account = findLinkedAccount(destinations, selectedKind);
+    if (!isOpen || !selectedConfig) return;
+    const account = findLinkedAccount(destinations, selectedConfig);
     if (account) {
       onSelectMethod({
         token: account.token,
-        speed: WITHDRAW_DESTINATIONS[selectedKind].coinflowPayoutSpeed,
+        speed: selectedConfig.coinflowPayoutSpeed,
       });
     } else {
       onResetSelection?.();
     }
-  }, [isOpen, selectedKind, destinations, onSelectMethod, onResetSelection]);
+  }, [isOpen, selectedConfig, destinations, onSelectMethod, onResetSelection]);
 
   // Net = what actually reaches the destination. Only trustworthy once a quote
   // for the current selection resolves; until then the button shows gross.
@@ -173,22 +175,24 @@ export function WithdrawMethodDrawer({
         </div>
 
         <div className="flex flex-col gap-3">
-          {kinds.map((kind) => {
-            const isSelected = selectedKind === kind;
+          {WITHDRAW_DESTINATIONS.map((config) => {
+            const isSelected = selectedId === config.id;
+            const speedInfo = WITHDRAW_SPEED_INFO[config.withdrawSpeed];
             return (
               <WithdrawDestinationCard
-                key={kind}
-                kind={kind}
+                key={config.id}
+                kind={config.kind}
                 selected={isSelected}
-                // The quote returns a more precise ETA than the static per-kind
+                fees={speedInfo.fees}
+                // The quote returns a more precise ETA than the static per-speed
                 // copy; once it resolves for the selected linked account, it
-                // lands on this card.
+                // lands on this card. Otherwise fall back to the speed's copy.
                 processingTime={
-                  isSelected && selectedAccount
-                    ? (quote?.eta ?? undefined)
-                    : undefined
+                  isSelected && selectedAccount && quote?.eta
+                    ? quote.eta
+                    : speedInfo.processingTime
                 }
-                onClick={() => setSelectedKind(kind)}
+                onClick={() => setSelectedId(config.id)}
               />
             );
           })}
@@ -228,10 +232,10 @@ export function WithdrawMethodDrawer({
           // No account of the selected kind is linked — launch the hosted link
           // flow instead of withdrawing.
           <Button
-            onClick={() => selectedKind && onLink?.(selectedKind)}
-            disabled={!selectedKind}
+            onClick={() => selectedConfig && onLink?.(selectedConfig.kind)}
+            disabled={!selectedConfig}
           >
-            {selectedKind === "card" ? "Link Card" : "Link Account"}
+            {selectedConfig?.kind === "card" ? "Link Card" : "Link Account"}
           </Button>
         )}
       </DrawerContent>
