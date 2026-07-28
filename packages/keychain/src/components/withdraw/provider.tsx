@@ -421,7 +421,10 @@ export function WithdrawProvider({ children }: PropsWithChildren) {
     if (!isIdentityGateVerified) {
       return "verification";
     }
-    if (!status || status.kycStatus !== CoinflowKycStatus.Approved) {
+    if (
+      status?.kycStatus !== CoinflowKycStatus.Approved &&
+      status?.kycStatus !== CoinflowKycStatus.VerificationRequired // hosted kyc requested, resolves in bank linking
+    ) {
       return "onboarding-kyc";
     }
     // Add-bank intent goes straight to the hosted bank-link once the identity

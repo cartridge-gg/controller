@@ -133,11 +133,13 @@ export function BankAuthDrawer({
       isOpen={isOpen}
       onClose={onClose}
       className="gap-4"
-      showClose={!isIframe || height < IFRAME_HEIGHT}
+      showClose={!isIframe}
     >
       {isIframe ? (
-        <div style={{ height: IFRAME_HEIGHT }}>
-          <CoinflowWithdraw {...withdrawProps} />
+        <div className="overflow-y-auto" style={{ height: IFRAME_HEIGHT }}>
+          <div style={{ height: height }}>
+            <CoinflowWithdraw {...withdrawProps} />
+          </div>
         </div>
       ) : (
         <DrawerContent
