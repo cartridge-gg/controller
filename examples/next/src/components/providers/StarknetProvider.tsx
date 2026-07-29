@@ -264,32 +264,32 @@ export const presets = {
   none: {},
   nums: {
     // nums (achievements, quests)
-    slot: "nums-mainnet",
     namespace: "NUMS",
     preset: "nums",
+    slot: "nums-mainnet",
   },
   "loot-survivor": {
     // Loot Survivor (no achievements, no quests)
     namespace: "ls_0_0_9",
-    slot: "pg-mainnet-10",
     preset: "loot-survivor",
+    // slot: "pg-mainnet-10",
   },
   summit: {
     // Summit (no achievements, no quests)
     namespace: "relayer_0_0_1",
-    slot: "pg-mainnet-10",
     preset: "savage-summit",
+    // slot: "pg-mainnet-10",
   },
   pistols: {
     // Pistols (achievements, no quests)
-    slot: "pistols-mainnet-2",
     namespace: "pistols",
     preset: "pistols",
+    // slot: "pistols-mainnet-2",
   },
   cagecalls: {
-    // slot: "cagecalls-mainnet",
-    // namespace: "cagecalls",
+    namespace: "cagecalls",
     preset: "cage-calls",
+    // slot: "cagecalls-mainnet",
   },
   "jokers-of-neon": {
     namespace: "jokers_of_neon_core",
@@ -323,7 +323,7 @@ export const controllerConnector = new ControllerConnector({
   ...(controllerPreset ? presets[controllerPreset] : {}),
   /// slot instance for tokens
   // slot: "pg-mainnet-10", // build torii url
-  toriiUrl: "https://api.cartridge.gg/x/pg-mainnet-10/torii",
+  // toriiUrl: "https://api.cartridge.gg/x/pg-mainnet-10/torii",
   // toriiUrl: "http://localhost:8080",
 });
 

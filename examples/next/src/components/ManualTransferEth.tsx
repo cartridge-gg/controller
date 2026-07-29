@@ -19,13 +19,18 @@ export const ManualTransferEth = () => {
       }
       setTxnHash(undefined);
 
+      const isZero = Number(amount) == 0;
       account
         .execute([
-          {
-            contractAddress: ETH_CONTRACT_ADDRESS,
-            entrypoint: "increaseAllowance",
-            calldata: [account?.address, amount, "0x0"],
-          },
+          ...(!isZero
+            ? [
+                {
+                  contractAddress: ETH_CONTRACT_ADDRESS,
+                  entrypoint: "increaseAllowance",
+                  calldata: [account?.address, amount, "0x0"],
+                },
+              ]
+            : []),
           {
             contractAddress: ETH_CONTRACT_ADDRESS,
             entrypoint: "transfer",
@@ -48,12 +53,17 @@ export const ManualTransferEth = () => {
         return;
       }
 
+      const isZero = Number(amount) == 0;
       const transactions: Call[] = [
-        {
-          contractAddress: ETH_CONTRACT_ADDRESS,
-          entrypoint: "increaseAllowance",
-          calldata: [account.address, amount, "0x0"],
-        },
+        ...(!isZero
+          ? [
+              {
+                contractAddress: ETH_CONTRACT_ADDRESS,
+                entrypoint: "increaseAllowance",
+                calldata: [account.address, amount, "0x0"],
+              },
+            ]
+          : []),
         {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "transfer",
