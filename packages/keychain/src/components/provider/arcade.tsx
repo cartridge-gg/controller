@@ -29,7 +29,13 @@ const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
  * @param props.children - Child components that will have access to the Arcade context
  * @throws {Error} If ArcadeProvider is used more than once in the component tree
  */
-export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
+export const ArcadeProvider = ({
+  children,
+  disabled = false,
+}: {
+  children: ReactNode;
+  disabled?: boolean;
+}) => {
   const currentValue = useContext(ArcadeContext);
   const [book, setBook] = useState<BookModel | null>(null);
   const [orders, setOrders] = useState<{
@@ -250,7 +256,11 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         addOrder,
         removeOrder,
         initializable,
-        setInitializable,
+        setInitializable: (v: boolean) => {
+          if (!disabled) {
+            setInitializable(v);
+          }
+        },
         marketplaceAddress,
       }}
     >

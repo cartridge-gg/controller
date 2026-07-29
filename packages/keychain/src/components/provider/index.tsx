@@ -101,7 +101,7 @@ export function Provider({ children }: PropsWithChildren) {
                             >
                               <ToastProvider>
                                 <TokensProvider>
-                                  <ProfileArcadeProvider>
+                                  <ProfileArcadeProvider disabled={true}>
                                     <MarketplaceClientProvider
                                       config={marketplaceConfig}
                                     >
