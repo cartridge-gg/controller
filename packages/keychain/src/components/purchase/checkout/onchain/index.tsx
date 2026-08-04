@@ -576,7 +576,7 @@ export function OnchainCheckout() {
       }
     };
   }, [purchaseKey]);
-  const autoCreditsPurchaseRef = useRef<string>();
+  const autoCreditsPurchaseRef = useRef<string>(undefined);
 
   const purchaseInFlightRef = useRef(false);
   const continuePurchase = useCallback(async () => {

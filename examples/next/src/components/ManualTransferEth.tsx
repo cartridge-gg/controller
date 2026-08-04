@@ -28,12 +28,12 @@ export const ManualTransferEth = () => {
       sendAsync([
         ...(!isZero
           ? [
-            {
-              contractAddress: ETH_CONTRACT_ADDRESS,
-              entrypoint: "increaseAllowance",
-              calldata: [address, amount, "0x0"],
-            },
-          ]
+              {
+                contractAddress: ETH_CONTRACT_ADDRESS,
+                entrypoint: "increaseAllowance",
+                calldata: [address, amount, "0x0"],
+              },
+            ]
           : []),
         {
           contractAddress: ETH_CONTRACT_ADDRESS,
@@ -60,11 +60,13 @@ export const ManualTransferEth = () => {
       const isZero = Number(amount) == 0;
       const transactions: Call[] = [
         ...(!isZero
-          ? [{
-              contractAddress: ETH_CONTRACT_ADDRESS,
-              entrypoint: "increaseAllowance",
-              calldata: [address, amount, "0x0"],
-            }]
+          ? [
+              {
+                contractAddress: ETH_CONTRACT_ADDRESS,
+                entrypoint: "increaseAllowance",
+                calldata: [address, amount, "0x0"],
+              },
+            ]
           : []),
         {
           contractAddress: ETH_CONTRACT_ADDRESS,

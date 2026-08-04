@@ -270,12 +270,12 @@ describe("LocationGate", () => {
 
     renderGate();
 
+    // "Location Verification" also titles the "checking" state, so wait on the
+    // error text to know the denied permission has actually been applied.
     expect(
-      await screen.findByText("Location Verification"),
+      await screen.findByText("Location permission was denied."),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Location permission was denied."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Location Verification")).toBeInTheDocument();
     expect(mocks.getCurrentPosition).not.toHaveBeenCalled();
     expect(mocks.setLocationGateVerified).not.toHaveBeenCalled();
   });

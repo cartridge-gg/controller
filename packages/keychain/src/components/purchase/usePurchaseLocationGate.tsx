@@ -16,7 +16,7 @@ export function usePurchaseLocationGate() {
   const { locationGate } = useConnection();
   const { isUS } = useGeoLocation();
   const [isPending, setIsPending] = useState(false);
-  const pendingActionRef = useRef<PurchaseAction>();
+  const pendingActionRef = useRef<PurchaseAction>(undefined);
 
   const runAfterLocationGate = useCallback(
     (action: PurchaseAction) => {
