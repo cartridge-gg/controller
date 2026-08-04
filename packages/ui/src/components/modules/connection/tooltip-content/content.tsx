@@ -52,6 +52,8 @@ export interface ConnectionTooltipContentProps
   onOpenSettings?: () => void;
   onDeposit?: () => void;
   onWithdraw?: () => void;
+  /** Renders the Withdraw button disabled (e.g. non-US or signed-out users). */
+  withdrawDisabled?: boolean;
   onLogout?: () => void;
 }
 
@@ -69,6 +71,7 @@ export const ConnectionTooltipContent = ({
   onOpenSettings,
   onDeposit,
   onWithdraw,
+  withdrawDisabled = false,
   onLogout,
   variant,
   className,
@@ -226,6 +229,12 @@ export const ConnectionTooltipContent = ({
         <Button
           variant="secondary"
           className="w-full h-9 normal-case font-sans text-sm font-medium tracking-normal px-1.5 py-2"
+          disabled={withdrawDisabled}
+          title={
+            withdrawDisabled
+              ? "Withdrawals are available to signed-in US users only"
+              : undefined
+          }
           onClick={onWithdraw}
         >
           <ArrowFromLineIcon variant="up" size="sm" />

@@ -59,6 +59,7 @@ const PAYMENT_METHOD_LABELS: Record<CreditsPaymentMethod, string> = {
   [CreditsPaymentMethod.Crypto]: "Wallet",
   [CreditsPaymentMethod.Free]: "Free",
   [CreditsPaymentMethod.Credits]: "Credits",
+  [CreditsPaymentMethod.Withdrawal]: "Withdrawal",
 };
 
 function Credits() {
