@@ -1,4 +1,6 @@
 import {
+  AdvancedDetails,
+  AdvancedLink,
   Card,
   CardContent,
   CardHeader,
@@ -30,40 +32,44 @@ export const ERC20Detail = ({
   chainId,
 }: ERC20DetailProps) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-semibold text-xs">Details</CardTitle>
-      </CardHeader>
-      <CardContent className="flex items-center justify-between">
-        <p className="text-foreground-300 font-normal text-sm">
-          Contract Address
-        </p>
-        {isPublicChain && chainId ? (
-          <a
-            href={`${StarkscanUrl(chainId).contract(token.metadata.address)} `}
-            className="flex items-center gap-1 text-sm"
-            target="_blank"
-          >
-            <p className="font-medium">
-              {formatAddress(token.metadata.address, {
-                size: "sm",
-                first: 4,
-                last: 4,
-              })}
+    <AdvancedDetails>
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-semibold text-xs">Details</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <p className="text-foreground-300 font-normal text-sm">
+            Contract Address
+          </p>
+          {isPublicChain && chainId ? (
+            <AdvancedLink
+              href={StarkscanUrl(chainId).contract(token.metadata.address)}
+              className="flex items-center gap-1 text-sm"
+              target="_blank"
+            >
+              <p className="font-medium">
+                {formatAddress(token.metadata.address, {
+                  size: "sm",
+                  first: 4,
+                  last: 4,
+                })}
+              </p>
+              <ExternalIcon size="sm" />
+            </AdvancedLink>
+          ) : (
+            <p>
+              {formatAddress(token.metadata.address, { first: 4, last: 4 })}
             </p>
-            <ExternalIcon size="sm" />
-          </a>
-        ) : (
-          <p>{formatAddress(token.metadata.address, { first: 4, last: 4 })}</p>
-        )}
-      </CardContent>
+          )}
+        </CardContent>
 
-      <CardContent className="flex items-center justify-between">
-        <p className="text-foreground-300 font-normal text-sm">
-          Token Standard
-        </p>
-        <p className="font-medium text-sm text-foreground-100">ERC-20</p>
-      </CardContent>
-    </Card>
+        <CardContent className="flex items-center justify-between">
+          <p className="text-foreground-300 font-normal text-sm">
+            Token Standard
+          </p>
+          <p className="font-medium text-sm text-foreground-100">ERC-20</p>
+        </CardContent>
+      </Card>
+    </AdvancedDetails>
   );
 };

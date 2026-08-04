@@ -53,6 +53,7 @@ export function CostBreakdown({
   selectedToken,
   onSelectToken,
   tokenSelectDisabled,
+  disabledTokens,
   feesTooltip,
   isLoading,
   value,
@@ -62,6 +63,8 @@ export function CostBreakdown({
   selectedToken?: TokenOption;
   onSelectToken: (address: string) => void;
   tokenSelectDisabled?: boolean;
+  /** Hex-normalized token addresses to render as non-selectable. */
+  disabledTokens?: Set<string>;
   feesTooltip?: ReactNode;
   isLoading?: boolean;
   value: ReactNode;
@@ -99,7 +102,14 @@ export function CostBreakdown({
           />
           <SelectContent>
             {tokens.map((token) => (
-              <SelectItem key={token.address} value={token.address}>
+              <SelectItem
+                key={token.address}
+                value={token.address}
+                disabled={
+                  !token.isCredits &&
+                  (disabledTokens?.has(num.toHex(token.address)) ?? false)
+                }
+              >
                 <div className="flex items-center gap-2">
                   {token.icon ? (
                     <Thumbnail
@@ -138,6 +148,7 @@ export function OnchainCostBreakdown({
     depositAmount: layerswapDepositAmount,
     layerswapFees,
     availableTokens,
+    insufficientTokens,
     selectedPlatform,
     selectedToken,
     setSelectedToken,
@@ -146,6 +157,7 @@ export function OnchainCostBreakdown({
     isFetchingConversion,
     feeEstimationError,
     quantity,
+    usdAmount,
     isApplePaySelected,
     isCoinflowSelected,
     isCreditsSelected,
@@ -155,21 +167,8 @@ export function OnchainCostBreakdown({
     coinbaseQuote,
     isFetchingCoinbaseQuote,
   } = useOnchainPurchaseContext();
-  const {
-    coinflowQuote,
-    isCoinflowQuoteLoading,
-    creditsQuote,
-    isCreditsQuoteLoading,
-  } = useCreditPurchaseContext();
+  const { creditsQuote, isCreditsQuoteLoading } = useCreditPurchaseContext();
   const { decimals } = quote.paymentTokenMetadata;
-  // When credit card is selected, use the Coinflow backend quote so that
-  // pricing is correct even for non-USDC starterpacks (handles Ekubo swap).
-  const coinflowCostDetails = useMemo(() => {
-    if (!isCoinflowSelected) {
-      return undefined;
-    }
-    return coinflowQuote?.pricing;
-  }, [isCoinflowSelected, coinflowQuote]);
 
   // Get default token (matching quote if available) or fallback to the first available token
   const defaultToken =
@@ -178,7 +177,9 @@ export function OnchainCostBreakdown({
     ) || availableTokens[0];
 
   // Use selectedToken or fallback to defaultToken for display
-  const displayToken = selectedToken || defaultToken;
+  const displayToken = isCoinflowSelected
+    ? CREDITS_TOKEN
+    : selectedToken || defaultToken;
 
   // Auto-select defaultToken if none is selected (for initial load)
   useEffect(() => {
@@ -237,6 +238,14 @@ export function OnchainCostBreakdown({
         (t) => t.address.toLowerCase() === address.toLowerCase(),
       );
       if (!token) return;
+      // Insufficient-balance tokens are disabled in the selector; guard here
+      // too so no other code path can select a token that can't pay.
+      if (
+        !token.isCredits &&
+        insufficientTokens.has(num.toHex(token.address))
+      ) {
+        return;
+      }
       // The credits pseudo-token is a payment-method choice, not a token:
       // route it through the rail so the payment method and the displayed
       // token can never disagree, and leave the rail again when a real token
@@ -250,6 +259,7 @@ export function OnchainCostBreakdown({
     },
     [
       availableTokens,
+      insufficientTokens,
       setSelectedToken,
       onCreditsSelect,
       isCreditsRailSelected,
@@ -257,64 +267,72 @@ export function OnchainCostBreakdown({
     ],
   );
 
-  const value = isCreditsSelected ? (
-    isCreditsQuoteLoading ? (
-      <Spinner />
-    ) : creditsQuote ? (
-      <span className="text-foreground-100">
-        {formatCredits(creditsQuote.requiredCredits).formatted}
-      </span>
-    ) : (
-      <span className="text-foreground-400">—</span>
-    )
-  ) : isCoinflowSelected ? (
-    isCoinflowQuoteLoading ? (
-      <Spinner />
-    ) : coinflowCostDetails ? (
-      <span className="text-foreground-100">
-        {formatAmount(coinflowCostDetails.totalInCents / 100)}
-      </span>
-    ) : (
-      <span className="text-foreground-400">—</span>
-    )
-  ) : isApplePaySelected ? (
-    coinbaseQuote ? (
-      <span className="text-foreground-100">
-        {`$${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)}`}
-      </span>
-    ) : (
-      <span className="text-foreground-400">—</span>
-    )
-  ) : isUsingLayerswap ? (
-    feeEstimationError ? (
-      <span className="text-foreground-400">—</span>
-    ) : layerswapTotal !== null && displayToken ? (
-      <span className="text-foreground-100">
-        {formatAmount(layerswapTotal)}
-      </span>
-    ) : (
-      <Spinner />
-    )
-  ) : isPaymentTokenSameAsSelected ? (
-    <span className="text-foreground-300">{formatAmount(paymentAmount)}</span>
-  ) : (
-    convertedEquivalent !== null &&
-    displayToken && (
-      <span className="text-foreground-100">
-        {formatAmount(convertedEquivalent)}
-      </span>
-    )
+  // USD equivalent of the purchase, shown as a "(…)" prefix before the token
+  // amount. usdAmount is derived from the quote's USDC total, so it is only
+  // shown when available (> 0).
+  const totalUsd = usdAmount * quantity;
+  const usdEquivalent = totalUsd > 0 && (
+    <span className="text-foreground-300">{`($${totalUsd.toFixed(2)})`}</span>
   );
+
+  const value =
+    isCreditsSelected || isCoinflowSelected ? (
+      isCreditsQuoteLoading ? (
+        <Spinner />
+      ) : creditsQuote ? (
+        <span className="text-foreground-100">
+          {formatCredits(creditsQuote.requiredCredits).formatted}
+        </span>
+      ) : (
+        <span className="text-foreground-400">—</span>
+      )
+    ) : isApplePaySelected ? (
+      coinbaseQuote ? (
+        <span className="text-foreground-100">
+          {`$${Number(coinbaseQuote.paymentTotal.amount).toFixed(2)}`}
+        </span>
+      ) : (
+        <span className="text-foreground-400">—</span>
+      )
+    ) : isUsingLayerswap ? (
+      feeEstimationError ? (
+        <span className="text-foreground-400">—</span>
+      ) : layerswapTotal !== null && displayToken ? (
+        <span className="text-foreground-100">
+          {formatAmount(layerswapTotal)}
+        </span>
+      ) : (
+        <Spinner />
+      )
+    ) : isPaymentTokenSameAsSelected ? (
+      <>
+        {usdEquivalent}
+        <span className="text-foreground-300">
+          {formatAmount(paymentAmount)}
+        </span>
+      </>
+    ) : (
+      convertedEquivalent !== null &&
+      displayToken && (
+        <>
+          {usdEquivalent}
+          <span className="text-foreground-100">
+            {formatAmount(convertedEquivalent)}
+          </span>
+        </>
+      )
+    );
 
   return (
     <CostBreakdown
       platform={platform}
-      tokens={availableTokens}
+      tokens={isCoinflowSelected ? [CREDITS_TOKEN] : availableTokens}
       selectedToken={displayToken}
       onSelectToken={handleTokenChange}
       tokenSelectDisabled={
         availableTokens.length <= 1 || isTokenSelectionLocked
       }
+      disabledTokens={insufficientTokens}
       isLoading={isFetchingConversion || isFetchingCoinbaseQuote}
       value={value}
       feesTooltip={
@@ -325,12 +343,6 @@ export function OnchainCostBreakdown({
           quantity={quantity}
           layerswapFees={isUsingLayerswap ? layerswapFees : undefined}
           coinbaseQuote={isApplePaySelected ? coinbaseQuote : undefined}
-          creditCardFeeInCents={
-            coinflowCostDetails
-              ? coinflowCostDetails.cardFeeInCents +
-                coinflowCostDetails.gasFeeInCents
-              : undefined
-          }
         />
       }
     />

@@ -8,6 +8,7 @@ import {
   PencilIcon,
   Switch,
   Thumbnail,
+  AdvancedDetails,
 } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
 import { useCreateSession } from "@/hooks/session";
@@ -110,70 +111,72 @@ export function MessageContent({
               />
             </div>
 
-            <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">
-              {/* Domain section */}
-              {Object.values(m.domain).filter((f) => typeof f !== "undefined")
-                .length > 0 && (
-                <CollapsibleRow
-                  key="domain"
-                  title="domain"
-                  enabled={m.authorized ?? true}
-                >
-                  {m.domain.name && (
-                    <ValueRow
-                      values={[
-                        {
-                          name: "name",
-                          value: m.domain.name,
-                        },
-                      ]}
-                      enabled={m.authorized ?? true}
-                    />
-                  )}
-                </CollapsibleRow>
-              )}
-
-              <ValueRow
-                values={[
-                  {
-                    name: "primaryType",
-                    value: m.primaryType,
-                  },
-                ]}
-                enabled={m.authorized ?? true}
-              />
-
-              <CollapsibleRow title="types" enabled={m.authorized ?? true}>
-                {Object.entries(m.types).map(([name, types]) => (
+            <AdvancedDetails>
+              <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">
+                {/* Domain section */}
+                {Object.values(m.domain).filter((f) => typeof f !== "undefined")
+                  .length > 0 && (
                   <CollapsibleRow
-                    key={name}
-                    title={name}
+                    key="domain"
+                    title="domain"
                     enabled={m.authorized ?? true}
                   >
-                    {types.map((t, typeIndex) => (
+                    {m.domain.name && (
                       <ValueRow
-                        key={`${t.name}-${typeIndex}`}
                         values={[
-                          { name: "name", value: t.name },
-                          { name: "type", value: t.type },
-                          ...(["enum", "merkletree"].includes(t.name)
-                            ? [
-                                {
-                                  name: "contains",
-                                  value: (
-                                    t as StarknetEnumType | StarknetMerkleType
-                                  ).contains,
-                                },
-                              ]
-                            : []),
+                          {
+                            name: "name",
+                            value: m.domain.name,
+                          },
                         ]}
                         enabled={m.authorized ?? true}
                       />
-                    ))}
+                    )}
                   </CollapsibleRow>
-                ))}
-              </CollapsibleRow>
-            </div>
+                )}
+
+                <ValueRow
+                  values={[
+                    {
+                      name: "primaryType",
+                      value: m.primaryType,
+                    },
+                  ]}
+                  enabled={m.authorized ?? true}
+                />
+
+                <CollapsibleRow title="types" enabled={m.authorized ?? true}>
+                  {Object.entries(m.types).map(([name, types]) => (
+                    <CollapsibleRow
+                      key={name}
+                      title={name}
+                      enabled={m.authorized ?? true}
+                    >
+                      {types.map((t, typeIndex) => (
+                        <ValueRow
+                          key={`${t.name}-${typeIndex}`}
+                          values={[
+                            { name: "name", value: t.name },
+                            { name: "type", value: t.type },
+                            ...(["enum", "merkletree"].includes(t.name)
+                              ? [
+                                  {
+                                    name: "contains",
+                                    value: (
+                                      t as StarknetEnumType | StarknetMerkleType
+                                    ).contains,
+                                  },
+                                ]
+                              : []),
+                          ]}
+                          enabled={m.authorized ?? true}
+                        />
+                      ))}
+                    </CollapsibleRow>
+                  ))}
+                </CollapsibleRow>
+              </div>
+            </AdvancedDetails>
           </div>
         ))}
     </>

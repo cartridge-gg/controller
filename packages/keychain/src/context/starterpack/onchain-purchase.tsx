@@ -32,6 +32,7 @@ import {
   useExternalWallet,
   useLayerswap,
   useTokenSelection,
+  useTokenSufficiency,
   useCoinbase,
   COINBASE_APPLE_PAY_MIN_USD,
   type TokenOption,
@@ -43,11 +44,17 @@ import {
 import { useSocialClaimConnection } from "@/hooks/starterpack/social";
 import { Explorer } from "@/hooks/starterpack/layerswap";
 import { CREDITS_TOKEN } from "@/components/purchase/review/cost";
+import {
+  clearPaymentPreference,
+  writePaymentPreference,
+  type PaymentPreference,
+} from "@/utils/payment-preference";
 
 export type { TokenOption } from "@/hooks/starterpack";
 
 /** Non-wallet payment rails selectable in the checkout. */
 export type PurchaseRail = "apple-pay" | "coinflow" | "credits";
+export type PaymentSelectionOptions = { persist?: boolean };
 
 export interface OnchainPurchaseContextType {
   // Purchase items
@@ -66,10 +73,12 @@ export interface OnchainPurchaseContextType {
   selectedWallet: ExternalWallet | undefined;
   selectedPlatform: ExternalPlatform | undefined;
   walletAddress: string | undefined;
-  clearSelectedWallet: () => void;
+  clearSelectedWallet: (options?: PaymentSelectionOptions) => void;
 
   // Token selection
   availableTokens: TokenOption[];
+  /** Hex-normalized addresses of tokens the paying wallet cannot cover. */
+  insufficientTokens: Set<string>;
   selectedToken: TokenOption | undefined;
   setSelectedToken: (token: TokenOption | undefined) => void;
   convertedPrice: {
@@ -129,8 +138,8 @@ export interface OnchainPurchaseContextType {
   onSendDeposit: () => Promise<void>;
   waitForDeposit: (swapId: string) => Promise<string>;
   onApplePaySelect: () => void;
-  onCoinflowSelect: () => void;
-  onCreditsSelect: () => void;
+  onCoinflowSelect: (options?: PaymentSelectionOptions) => void;
+  onCreditsSelect: (options?: PaymentSelectionOptions) => void;
   onCreateCoinbaseOrder: (opts?: {
     force?: boolean;
   }) => Promise<CoinbaseOrderResult | undefined>;
@@ -170,6 +179,7 @@ export const OnchainPurchaseProvider = ({
     setDisplayError,
     registryAddress,
     socialClaimConditions,
+    singlePurchaseOnly,
   } = useStarterpackContext();
   const { connectedHandle } = useSocialClaimConnection(socialClaimConditions);
 
@@ -208,30 +218,32 @@ export const OnchainPurchaseProvider = ({
   });
 
   const savePaymentMethod = useCallback(
-    (method: string) => {
-      if (!controller) return;
+    (method: PaymentPreference) => {
+      if (!controller || !origin) return;
       try {
-        localStorage.setItem(
-          `@cartridge/lastPaymentMethod:${controller.chainId()}`,
+        writePaymentPreference({
+          origin,
+          chainId: controller.chainId(),
           method,
-        );
+        });
       } catch {
         // localStorage may be unavailable
       }
     },
-    [controller],
+    [controller, origin],
   );
 
   const clearPaymentMethod = useCallback(() => {
-    if (!controller) return;
+    if (!controller || !origin) return;
     try {
+      clearPaymentPreference({ origin, chainId: controller.chainId() });
       localStorage.removeItem(
         `@cartridge/lastPaymentMethod:${controller.chainId()}`,
       );
     } catch {
       // localStorage may be unavailable
     }
-  }, [controller]);
+  }, [controller, origin]);
 
   // Get onchain starterpack details if available
   const onchainDetails =
@@ -266,12 +278,17 @@ export const OnchainPurchaseProvider = ({
     }
   }, [selectedToken, resetTokenSelection]);
 
-  const clearSelectedWallet = useCallback(() => {
-    clearSelectedWalletInternal();
-    setSelectedRail(null);
-    clearCreditsToken();
-    clearPaymentMethod();
-  }, [clearSelectedWalletInternal, clearCreditsToken, clearPaymentMethod]);
+  const clearSelectedWallet = useCallback(
+    (options?: PaymentSelectionOptions) => {
+      clearSelectedWalletInternal();
+      setSelectedRail(null);
+      clearCreditsToken();
+      if (options?.persist !== false) {
+        savePaymentMethod("controller");
+      }
+    },
+    [clearSelectedWalletInternal, clearCreditsToken, savePaymentMethod],
+  );
 
   const onExternalConnect = useCallback(
     async (
@@ -353,7 +370,28 @@ export const OnchainPurchaseProvider = ({
     setCoinbaseLsSwapId(undefined);
   }, [resetCoinbaseOrder]);
 
-  // Handle Apple Pay selection from URL (returning from verification)
+  // Reset state when starterpack changes
+  useEffect(() => {
+    resetCoinbasePurchase();
+    resetTokenSelection();
+    setSelectedRail(null);
+    clearSelectedWalletInternal();
+    resetQuantity();
+    setPurchaseItems([]);
+    setPurchaseDescription(undefined);
+    setIssueSignature(undefined);
+  }, [
+    bundleId,
+    starterpackId,
+    resetTokenSelection,
+    clearSelectedWalletInternal,
+    resetQuantity,
+    resetCoinbasePurchase,
+  ]);
+
+  // Handle Apple Pay selection from URL (returning from verification). Keep
+  // this after the starterpack reset so a return navigation that also changes
+  // the purchase identity re-applies the verified rail.
   useEffect(() => {
     const isAndroid =
       typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent);
@@ -365,22 +403,6 @@ export const OnchainPurchaseProvider = ({
       clearSelectedWalletInternal();
     }
   }, [location.search, clearSelectedWalletInternal, resetCoinbasePurchase]);
-
-  // Reset state when starterpack changes
-  useEffect(() => {
-    resetCoinbasePurchase();
-    resetTokenSelection();
-    resetQuantity();
-    setPurchaseItems([]);
-    setPurchaseDescription(undefined);
-    setIssueSignature(undefined);
-  }, [
-    bundleId,
-    starterpackId,
-    resetTokenSelection,
-    resetQuantity,
-    resetCoinbasePurchase,
-  ]);
 
   // Update purchase items and USD amount when starterpack details change
   useEffect(() => {
@@ -452,6 +474,18 @@ export const OnchainPurchaseProvider = ({
     return [...availableTokens, CREDITS_TOKEN];
   }, [availableTokens, isApplePaySelected, isCoinflowSelected]);
 
+  // Per-token balance sufficiency so the selector can disable tokens the
+  // paying wallet can't cover (the credits pseudo-token is never checked).
+  const { insufficientTokens } = useTokenSufficiency({
+    controller,
+    starterpackDetails: onchainDetails,
+    availableTokens,
+    quantity,
+    selectedWallet,
+    walletAddress,
+    selectedPlatform,
+  });
+
   // Wrap onSendDeposit to clear errors before sending
   const onSendDeposit = useCallback(async () => {
     setDisplayError(undefined);
@@ -478,9 +512,11 @@ export const OnchainPurchaseProvider = ({
 
   // Apple Pay has a per-transaction minimum ($1.86). If the starterpack's
   // unit cost in USDC is below that, bump the quantity so the total clears
-  // the minimum and surface it to the user via applePayMinQuantity.
+  // the minimum and surface it to the user via applePayMinQuantity. With
+  // singlePurchaseOnly the quantity must stay at 1, so no bump — the
+  // "Amount Too Low" gate blocks Apple Pay instead.
   useEffect(() => {
-    if (!isApplePaySelected) {
+    if (!isApplePaySelected || singlePurchaseOnly) {
       if (applePayMinQuantity !== undefined) setApplePayMinQuantity(undefined);
       return;
     }
@@ -508,6 +544,7 @@ export const OnchainPurchaseProvider = ({
     }
   }, [
     isApplePaySelected,
+    singlePurchaseOnly,
     convertedPrice,
     quantity,
     setQuantity,
@@ -767,7 +804,7 @@ export const OnchainPurchaseProvider = ({
       if (rail !== "credits") {
         clearCreditsToken();
       }
-      if (opts?.persist) {
+      if (opts?.persist && rail !== "apple-pay") {
         savePaymentMethod(rail);
       }
     },
@@ -785,12 +822,14 @@ export const OnchainPurchaseProvider = ({
   );
 
   const onCoinflowSelect = useCallback(
-    () => selectRail("coinflow", { persist: true }),
+    (options?: PaymentSelectionOptions) =>
+      selectRail("coinflow", { persist: options?.persist !== false }),
     [selectRail],
   );
 
   const onCreditsSelect = useCallback(
-    () => selectRail("credits", { persist: true }),
+    (options?: PaymentSelectionOptions) =>
+      selectRail("credits", { persist: options?.persist !== false }),
     [selectRail],
   );
 
@@ -853,6 +892,7 @@ export const OnchainPurchaseProvider = ({
     walletAddress,
     clearSelectedWallet,
     availableTokens: listedTokens,
+    insufficientTokens,
     selectedToken,
     setSelectedToken,
     convertedPrice,

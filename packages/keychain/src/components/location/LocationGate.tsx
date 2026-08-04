@@ -1,167 +1,238 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import {
   Button,
   GlobeIcon,
   HeaderInner,
   LayoutContent,
   LayoutFooter,
+  SpinnerIcon,
 } from "@cartridge/controller-ui";
 import { LocationGateOptions, ResponseCodes } from "@cartridge/controller";
-import { defaultTheme, loadConfig } from "@cartridge/presets";
+import { defaultTheme } from "@cartridge/presets";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
-import { evaluateLocationGate } from "@/utils/location-gate";
-import { useGeoLocation } from "@/hooks/geo";
+import {
+  evaluateLocationGate,
+  reverseGeocodeLocation,
+} from "@/utils/location-gate";
+import { getLocationPermissionHelp, getSupportedUSStates } from "./location-ui";
 import { USMap } from "./USMap";
 
-type GateState = "checking" | "blocked" | "error";
+type GateState = "checking" | "idle" | "requesting" | "blocked";
 
-function errorResponse(gameName: string) {
+type ResolvedLocation = {
+  countryCode?: string | null;
+  regionCode?: string | null;
+};
+
+export type LocationGateResponse = {
+  code: ResponseCodes;
+  message: string;
+};
+
+const CANCEL_RESPONSE: LocationGateResponse = {
+  code: ResponseCodes.CANCELED,
+  message: "Canceled",
+};
+
+function errorResponse(gameName: string): LocationGateResponse {
   return {
     code: ResponseCodes.ERROR,
     message: `${gameName} is not available in your region.`,
   };
 }
 
-export function LocationGate() {
-  const { closeModal, setLocationGateVerified, theme } = useConnection();
-  const { search } = useLocation();
-  const navigate = useNavigate();
+/**
+ * GPS geofence verification UI. Rendered inline by the route that owns the
+ * pending request (ConnectRoute) rather than on its own route: navigating the
+ * owning route away mid-request unmounts it, and useRouteParams' unmount
+ * cleanup deletes the stored connection callbacks — after which the parent
+ * SDK's connect() promise can never settle and the modal hangs blank.
+ *
+ * On success, calls setLocationGateVerified(true) so the owning route resumes.
+ * On cancel or a blocked region, reports the terminal response via onExit.
+ */
+export function LocationGate({
+  gate,
+  onExit,
+  onVerified,
+  persistVerification = true,
+}: {
+  gate: LocationGateOptions;
+  onExit: (response: LocationGateResponse) => void;
+  onVerified?: () => void;
+  /** Connect flows persist this globally; purchase flows resume locally. */
+  persistVerification?: boolean;
+}) {
+  const { setLocationGateVerified, theme } = useConnection();
+  const { setShowClose } = useNavigation();
   const [state, setState] = useState<GateState>("checking");
-
-  const [presetGate, setPresetGate] = useState<LocationGateOptions | null>(
-    null,
-  );
-
-  const { returnTo, gateFromUrl, preset } = useMemo(() => {
-    const searchParams = new URLSearchParams(search);
-    const returnToParam = searchParams.get("returnTo");
-    const gateParam = searchParams.get("gate");
-    const presetParam = searchParams.get("preset");
-
-    let parsedGate: LocationGateOptions | null = null;
-    if (gateParam) {
-      try {
-        parsedGate = JSON.parse(gateParam) as LocationGateOptions;
-      } catch (parseError) {
-        console.error("Failed to parse location gate params:", parseError);
-      }
-    }
-
-    return {
-      returnTo: returnToParam,
-      gateFromUrl: parsedGate,
-      preset: presetParam,
-    };
-  }, [search]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!preset || gateFromUrl) return;
-    loadConfig(preset)
-      .then((config) => {
-        const configObj = config as Record<string, unknown> | null;
-        if (configObj?.locationGate) {
-          setPresetGate(configObj.locationGate as LocationGateOptions);
-        }
-      })
-      .catch((err) => console.error("Failed to load preset config:", err));
-  }, [preset, gateFromUrl]);
+    setShowClose(true);
+  }, [setShowClose]);
 
-  const gate = gateFromUrl ?? presetGate;
-
-  const connectId = useMemo(() => {
-    if (!returnTo) {
-      return null;
-    }
-    try {
-      const url = new URL(returnTo, window.location.origin);
-      return url.searchParams.get("id");
-    } catch (err) {
-      console.error("Failed to parse returnTo:", err);
-      return null;
-    }
-  }, [returnTo]);
-
-  const resolveConnect = useCallback(
-    (response: { code: ResponseCodes; message: string }) => {
-      if (connectId) {
-        const callbacks = getCallbacks(connectId);
-        callbacks?.resolve?.(response);
-        cleanupCallbacks(connectId);
+  const evaluateAndContinue = useCallback(
+    (geo: ResolvedLocation) => {
+      if (!geo.countryCode && !geo.regionCode) {
+        throw new Error("Location could not be resolved");
       }
-      closeModal?.();
+
+      const result = evaluateLocationGate({ gate, geo });
+      if (!result.allowed) {
+        setState("blocked");
+        return;
+      }
+
+      if (persistVerification) {
+        setLocationGateVerified(true);
+      }
+      onVerified?.();
     },
-    [connectId, closeModal],
+    [gate, onVerified, persistVerification, setLocationGateVerified],
   );
 
-  const { countryCode, regionCode, countryCodeLoaded, isError } =
-    useGeoLocation();
+  const handleLocationError = useCallback(
+    (geoError?: Pick<GeolocationPositionError, "code" | "message">) => {
+      setState("idle");
+      if (geoError?.code === 1) {
+        setError("Location permission was denied.");
+        return;
+      }
+      setError(geoError?.message || "Unable to verify location.");
+    },
+    [],
+  );
 
-  // Evaluate the gate once the IP location resolves and the gate is available.
+  const requestLocation = useCallback(
+    (silent = false) => {
+      if (typeof navigator === "undefined" || !navigator.geolocation) {
+        setState("idle");
+        setError("Location services are not available in this browser.");
+        return;
+      }
+
+      setError(null);
+      setState(silent ? "checking" : "requesting");
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          void (async () => {
+            try {
+              const geo = await reverseGeocodeLocation(position.coords);
+              evaluateAndContinue({
+                countryCode: geo.countryCode ?? null,
+                regionCode: geo.regionCode ?? null,
+              });
+            } catch (locationError) {
+              console.error("Location gate failed:", locationError);
+              setState("idle");
+              setError("Unable to verify location.");
+            }
+          })();
+        },
+        handleLocationError,
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 60000,
+        },
+      );
+    },
+    [evaluateAndContinue, handleLocationError],
+  );
+
   useEffect(() => {
-    if (!gate || !returnTo || !countryCodeLoaded) return;
+    let cancelled = false;
+    const showPrompt = () => {
+      if (!cancelled) setState("idle");
+    };
 
-    if (isError) {
-      setState("error");
+    if (typeof navigator === "undefined" || !navigator.permissions?.query) {
+      showPrompt();
       return;
     }
 
-    const result = evaluateLocationGate({
-      gate,
-      geo: { countryCode, regionCode },
-    });
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((permission) => {
+        if (cancelled) return;
+        if (permission.state === "granted") {
+          requestLocation(true);
+        } else {
+          setState("idle");
+          if (permission.state === "denied") {
+            setError("Location permission was denied.");
+          }
+        }
+      })
+      .catch(showPrompt);
 
-    if (result.allowed) {
-      setLocationGateVerified(true);
-      navigate(returnTo, { replace: true });
-    } else {
-      setState("blocked");
-    }
-  }, [
-    gate,
-    returnTo,
-    navigate,
-    setLocationGateVerified,
-    countryCode,
-    regionCode,
-    countryCodeLoaded,
-    isError,
-  ]);
+    return () => {
+      cancelled = true;
+    };
+  }, [requestLocation]);
+
+  const handleContinue = useCallback(() => {
+    requestLocation();
+  }, [requestLocation]);
+
+  const handleCancel = useCallback(() => {
+    onExit(CANCEL_RESPONSE);
+  }, [onExit]);
 
   const gameName =
     theme.name && theme.name !== defaultTheme.name ? theme.name : "This game";
 
-  const blockedUSStates = useMemo(() => {
-    if (!gate?.blocked) return [];
-    return gate.blocked.filter((code) => code.toUpperCase().startsWith("US-"));
-  }, [gate]);
+  const supportedUSStates = useMemo(() => getSupportedUSStates(gate), [gate]);
 
-  // Show nothing while checking
+  const permissionHelp = useMemo(
+    () =>
+      getLocationPermissionHelp(
+        typeof navigator === "undefined" ? "" : navigator.userAgent,
+      ),
+    [],
+  );
+
   if (state === "checking") {
-    return null;
-  }
-
-  if (state === "error") {
     return (
       <>
         <HeaderInner
-          title="Location Check"
+          title="Location Verification"
+          icon={<GlobeIcon variant="solid" size="lg" />}
+        />
+        <LayoutContent className="p-4 items-center justify-center">
+          <SpinnerIcon className="animate-spin text-foreground-300" size="lg" />
+          <p className="text-sm text-foreground-300">
+            Verifying your location…
+          </p>
+        </LayoutContent>
+      </>
+    );
+  }
+
+  if (state === "blocked") {
+    return (
+      <>
+        <HeaderInner
+          title="Region Restricted"
           icon={<GlobeIcon variant="solid" size="lg" />}
         />
         <LayoutContent className="p-4">
-          <ErrorAlert
-            title="Error"
-            description="Unable to verify location."
-            isExpanded={true}
-          />
+          <div className="mb-3">
+            <USMap supportedStates={supportedUSStates} />
+          </div>
+          <p className="text-sm text-foreground-300 leading-relaxed">
+            {gameName} is not available in your region.
+          </p>
         </LayoutContent>
         <LayoutFooter>
           <Button
             variant="secondary"
             className="w-full"
-            onClick={() => resolveConnect(errorResponse(gameName))}
+            onClick={() => onExit(errorResponse(gameName))}
           >
             CLOSE
           </Button>
@@ -173,26 +244,54 @@ export function LocationGate() {
   return (
     <>
       <HeaderInner
-        title="Region Restricted"
+        title="Location Verification"
         icon={<GlobeIcon variant="solid" size="lg" />}
       />
-      <LayoutContent className="p-4">
-        {blockedUSStates.length > 0 && (
-          <div className="mb-3">
-            <USMap blockedStates={blockedUSStates} />
-          </div>
-        )}
+      <LayoutContent className="p-4 gap-3">
+        <USMap supportedStates={supportedUSStates} />
         <p className="text-sm text-foreground-300 leading-relaxed">
-          {gameName} is not available in your region.
+          {gameName} needs your location to confirm availability in your region.
         </p>
       </LayoutContent>
       <LayoutFooter>
+        {error && (
+          <ErrorAlert
+            title="Error"
+            description={
+              error === "Location permission was denied." ? (
+                <>
+                  <span>{error} </span>
+                  <a
+                    href={permissionHelp.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    Learn how to enable location in {permissionHelp.name}.
+                  </a>
+                </>
+              ) : (
+                error
+              )
+            }
+            isExpanded={true}
+          />
+        )}
+        <Button
+          variant="primary"
+          className="w-full"
+          onClick={handleContinue}
+          isLoading={state === "requesting"}
+        >
+          CONTINUE
+        </Button>
         <Button
           variant="secondary"
           className="w-full"
-          onClick={() => resolveConnect(errorResponse(gameName))}
+          onClick={handleCancel}
+          disabled={state === "requesting"}
         >
-          CLOSE
+          CANCEL
         </Button>
       </LayoutFooter>
     </>

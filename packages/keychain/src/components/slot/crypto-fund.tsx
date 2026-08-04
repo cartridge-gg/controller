@@ -49,6 +49,7 @@ import { STRK_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { createStarknetCryptoPayment } from "@/hooks/payments/crypto";
 import { Team } from "./teams";
+import { useAdvancedView } from "@/hooks/features";
 
 type SlotFundingToken = {
   key: "USDC" | "STRK";
@@ -97,6 +98,7 @@ function SlotCryptoFundInner({
   const { address: extAddress } = useAccount();
   const { sendAsync } = useSendTransaction({});
   const { switchChainAsync } = useSwitchChain({});
+  const advancedView = useAdvancedView();
 
   useEffect(() => {
     setOnBackCallback(() => onBack);
@@ -392,7 +394,11 @@ function SlotCryptoFundInner({
           <ErrorAlert
             variant="error"
             title="Balance Error"
-            description={balanceError.message}
+            description={
+              advancedView
+                ? balanceError.message
+                : "Your balance could not be loaded. Check your connection and try again."
+            }
           />
         )}
         {amountInput && amount === undefined && (
@@ -427,7 +433,11 @@ function SlotCryptoFundInner({
           <ErrorAlert
             variant="error"
             title="Funding Error"
-            description={getHumanReadableError(error)}
+            description={
+              advancedView
+                ? getHumanReadableError(error)
+                : "The funds could not be sent. Please try again."
+            }
           />
         )}
         {!extAddress ? (

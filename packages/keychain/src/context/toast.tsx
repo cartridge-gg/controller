@@ -17,12 +17,14 @@ import {
   MarketplaceToastOptions,
   UserToastOptions,
   SettingToastOptions,
+  CreditsToastOptions,
   CONTROLLER_TOAST_MESSAGE_TYPE,
 } from "@cartridge/controller-ui";
 import { isIframe } from "@cartridge/controller-ui/utils";
 import { toast as sonnerToast } from "sonner";
 import { useConnection } from "@/hooks/connection";
 import type { Chain } from "@cartridge/controller";
+import { useAdvancedView } from "@/hooks/features";
 
 interface ToastContextType {
   toast: {
@@ -65,6 +67,10 @@ interface ToastContextType {
     ) => void;
     setting: (
       options: Omit<SettingToastOptions, "variant">,
+      disabled?: boolean,
+    ) => void;
+    credits: (
+      options: Omit<CreditsToastOptions, "variant">,
       disabled?: boolean,
     ) => void;
   };
@@ -200,6 +206,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           variant: "setting",
         });
       },
+      credits: (
+        options: Omit<CreditsToastOptions, "variant">,
+        disabled?: boolean,
+      ) => {
+        if (disabled) return;
+        emitToast({
+          ...options,
+          variant: "credits",
+        });
+      },
     }),
     [emitToast],
   );
@@ -225,6 +241,7 @@ export function useToast() {
 }
 
 function ChainSwitchDetector() {
+  const advancedView = useAdvancedView();
   const { controller, configuredChains } = useConnection();
   const connectedChainId = useMemo(() => controller?.chainId(), [controller]);
   const [currentChainId, setCurrentChainId] = useState<string | undefined>();
@@ -235,7 +252,7 @@ function ChainSwitchDetector() {
         (chain) => BigInt(chain?.chainId ?? 0) === BigInt(connectedChainId),
       ) as Chain;
       const kind = !currentChainId ? "connect" : "switch-chain";
-      const disabled = kind == "connect";
+      const disabled = kind === "connect" || !advancedView;
       toast.network(
         {
           kind,
@@ -247,7 +264,14 @@ function ChainSwitchDetector() {
       );
     }
     setCurrentChainId(connectedChainId);
-  }, [controller, connectedChainId, currentChainId, configuredChains, toast]);
+  }, [
+    advancedView,
+    controller,
+    connectedChainId,
+    currentChainId,
+    configuredChains,
+    toast,
+  ]);
 
   return <></>;
 }

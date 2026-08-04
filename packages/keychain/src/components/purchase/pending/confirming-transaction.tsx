@@ -1,4 +1,6 @@
 import {
+  AdvancedDetails,
+  AdvancedLink,
   Card,
   CardDescription,
   ExternalIcon,
@@ -37,13 +39,17 @@ export function ConfirmingTransaction({
             {title}
           </span>
           {externalLink && (
-            <a
-              href={externalLink}
-              target="_blank"
-              className="flex items-center"
-            >
-              <ExternalIcon size="sm" className="inline-block" />
-            </a>
+            <AdvancedDetails>
+              <AdvancedLink
+                href={externalLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center"
+                fallback={null}
+              >
+                <ExternalIcon size="sm" className="inline-block" />
+              </AdvancedLink>
+            </AdvancedDetails>
           )}
         </span>
       </CardDescription>

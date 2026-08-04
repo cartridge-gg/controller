@@ -10,8 +10,12 @@ import { cn } from "@cartridge/controller-ui/utils";
 import { Call } from "starknet";
 import { humanizeString } from "@cartridge/controller";
 import { useState, PropsWithChildren } from "react";
+import { useAdvancedView } from "@/hooks/features";
 import { ContractLink } from "@/components/ContractLink";
-import { CallCardContents } from "@/components/transaction/CallCard";
+import {
+  CallCardContents,
+  SimpleCallSafetyDetails,
+} from "@/components/transaction/CallCard";
 import { SimulationResults } from "@/components/simulation/SimulationResults";
 
 interface TransactionSummaryProps {
@@ -101,6 +105,24 @@ export function CollapsibleTransactionRow({
   highlighted,
 }: CollapsibleTransactionProps) {
   const [value, setValue] = useState("");
+  const advancedView = useAdvancedView();
+
+  if (!advancedView) {
+    return (
+      <div
+        className={cn(
+          "flex gap-1 py-1 w-full text-xs items-center rounded-md",
+          highlighted ? "text-foreground-100" : "text-foreground-300",
+        )}
+      >
+        <CheckboxIcon variant="check" size="sm" />
+        <h1 className="flex-grow text-foregroung-100">
+          {humanizeString(transaction.entrypoint)}
+        </h1>
+        <SimpleCallSafetyDetails call={transaction} />
+      </div>
+    );
+  }
 
   return (
     <Accordion type="single" collapsible value={value} onValueChange={setValue}>

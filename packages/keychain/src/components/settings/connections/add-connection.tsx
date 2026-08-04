@@ -45,6 +45,7 @@ export function AddConnection({ username }: { username?: string }) {
 
   // Feature flags - connections can be toggled via /feature/connections/enable or /feature/connections/disable
   const { isFeatureEnabled } = useFeatures();
+  const advancedView = isFeatureEnabled("advanced-view");
   const featureFlags = useMemo(
     () => ({
       twitter: true,
@@ -142,8 +143,7 @@ export function AddConnection({ username }: { username?: string }) {
       }, 500);
     } catch (error) {
       console.error(error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+      const errorMessage = getConnectionErrorMessage(error, advancedView);
       setHeaderIcon(<AlertIcon size="lg" />);
       setConnectionPending({
         provider: "TIKTOK",
@@ -151,7 +151,7 @@ export function AddConnection({ username }: { username?: string }) {
         error: errorMessage,
       });
     }
-  }, [username, queryClient]);
+  }, [advancedView, username, queryClient]);
 
   const handleInstagramConnect = useCallback(() => {
     if (!username) {
@@ -241,8 +241,7 @@ export function AddConnection({ username }: { username?: string }) {
       }, 500);
     } catch (error) {
       console.error(error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+      const errorMessage = getConnectionErrorMessage(error, advancedView);
       setHeaderIcon(<AlertIcon size="lg" />);
       setConnectionPending({
         provider: "INSTAGRAM",
@@ -250,7 +249,7 @@ export function AddConnection({ username }: { username?: string }) {
         error: errorMessage,
       });
     }
-  }, [username, queryClient]);
+  }, [advancedView, username, queryClient]);
 
   const handleTwitterConnect = useCallback(() => {
     if (!username) {
@@ -340,8 +339,7 @@ export function AddConnection({ username }: { username?: string }) {
       }, 500);
     } catch (error) {
       console.error(error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+      const errorMessage = getConnectionErrorMessage(error, advancedView);
       setHeaderIcon(<AlertIcon size="lg" />);
       setConnectionPending({
         provider: "TWITTER",
@@ -349,7 +347,7 @@ export function AddConnection({ username }: { username?: string }) {
         error: errorMessage,
       });
     }
-  }, [username, queryClient]);
+  }, [advancedView, username, queryClient]);
 
   useEffect(() => {
     if (username && !connectionPending) {
@@ -492,6 +490,15 @@ function ConnectionMethod({
       </div>
     </button>
   );
+}
+
+function getConnectionErrorMessage(
+  error: unknown,
+  advancedView: boolean,
+): string {
+  return advancedView && error instanceof Error
+    ? error.message
+    : "The account could not be connected. Please try again.";
 }
 
 function ConnectionPendingCard({

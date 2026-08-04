@@ -1,5 +1,6 @@
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
+import { useAdvancedView } from "@/hooks/features";
 import { OpenQrCodeEvent } from "@/wallets/wallet-connect";
 import {
   AchievementPlayerAvatar,
@@ -85,6 +86,7 @@ function QrCodeDisplay({
 export function UIProvider({ children }: PropsWithChildren) {
   const { controller, closeModal, openSettings, logout } = useConnection();
   const account = useAccount();
+  const advancedView = useAdvancedView();
   const [showQrCode, setShowQrCode] = useState(false);
   const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
 
@@ -117,6 +119,7 @@ export function UIProvider({ children }: PropsWithChildren) {
   return (
     <Provider
       value={{
+        advancedView,
         account:
           account && controller
             ? {

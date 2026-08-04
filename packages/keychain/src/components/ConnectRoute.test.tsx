@@ -11,6 +11,21 @@ vi.mock("@/utils/url-validator", () => ({
   safeRedirect: (...args: unknown[]) => mockSafeRedirect(...args),
 }));
 
+const mockUseGeoLocation = vi.fn();
+vi.mock("@/hooks/geo", () => ({
+  useGeoLocation: () => mockUseGeoLocation(),
+}));
+
+const mockReverseGeocodeLocation = vi.fn();
+vi.mock("@/utils/location-gate", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/location-gate")>();
+  return {
+    ...actual,
+    reverseGeocodeLocation: (...args: unknown[]) =>
+      mockReverseGeocodeLocation(...args),
+  };
+});
+
 const mockIsIframe = vi.fn();
 vi.mock("@cartridge/controller-ui/utils", async (importOriginal) => {
   const actual =
@@ -46,6 +61,8 @@ const defaultConnection = {
   locationGate: undefined,
   ageGate: undefined,
   locationGateVerified: false,
+  setLocationGateVerified: vi.fn(),
+  closeModal: vi.fn(),
   isNewControllerRef: { current: false },
   controllerVersion: new SemVer("0.13.13"),
 };
@@ -129,6 +146,25 @@ describe("ConnectRoute", () => {
     mockUseRouteParams.mockReturnValue(mockParams);
     mockUseRouteCompletion.mockReturnValue(vi.fn());
     mockLocation.search = "";
+    // Gate tests render the real LocationGate; with no permissions API it
+    // falls back to the consent prompt instead of silently checking.
+    Object.defineProperty(navigator, "permissions", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: undefined,
+    });
+    mockUseGeoLocation.mockReturnValue({
+      countryCode: "US",
+      regionCode: "US-CA",
+      isUS: true,
+      countryCodeLoaded: true,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
     // mockSnapshotLocalStorageToCookie.mockResolvedValue("mock-encrypted-blob");
 
     mockUseConnection.mockReturnValue({});
@@ -158,6 +194,152 @@ describe("ConnectRoute", () => {
         });
         expect(mockCleanupCallbacks).toHaveBeenCalledWith("test-id");
       });
+    });
+
+    it("renders the location gate inline for US users", async () => {
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        locationGate: { blocked: ["US-NY"] },
+        locationGateVerified: false,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      expect(
+        await screen.findByText("Location Verification"),
+      ).toBeInTheDocument();
+      expect(mockParams.resolve).not.toHaveBeenCalled();
+    });
+
+    it("skips a configured location gate for non-US users", async () => {
+      mockUseGeoLocation.mockReturnValue({
+        countryCode: "CA",
+        regionCode: "CA-ON",
+        isUS: false,
+        countryCodeLoaded: true,
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        locationGate: { blocked: ["US-NY"] },
+        locationGateVerified: false,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      await waitFor(() => {
+        expect(mockParams.resolve).toHaveBeenCalled();
+      });
+      expect(
+        screen.queryByText("Location Verification"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("waits for country detection before deciding on location gating", () => {
+      mockUseGeoLocation.mockReturnValue({
+        countryCode: null,
+        regionCode: null,
+        isUS: false,
+        countryCodeLoaded: false,
+        isLoading: true,
+        isError: false,
+        error: null,
+      });
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        locationGate: { blocked: ["US-NY"] },
+        locationGateVerified: false,
+      });
+
+      const { container } = renderWithProviders(<ConnectRoute />);
+
+      expect(container.textContent).toBe("");
+      expect(mockParams.resolve).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      { authFlow: "login", isNewController: false, keepOpen: false },
+      { authFlow: "signup", isNewController: true, keepOpen: true },
+    ])(
+      "resumes the pending $authFlow after gate verification",
+      async ({ isNewController, keepOpen }) => {
+        // Regression: the gate used to live on its own route; navigating there
+        // unmounted ConnectRoute, whose unmount cleanup deleted the stored
+        // connect callbacks — the parent SDK's connect() promise then never
+        // settled and the modal hung blank after verification.
+        Object.defineProperty(navigator, "permissions", {
+          configurable: true,
+          value: { query: vi.fn().mockResolvedValue({ state: "granted" }) },
+        });
+        Object.defineProperty(navigator, "geolocation", {
+          configurable: true,
+          value: {
+            getCurrentPosition: (
+              success: (position: {
+                coords: { latitude: number; longitude: number };
+              }) => void,
+            ) => success({ coords: { latitude: 34.05, longitude: -118.24 } }),
+          },
+        });
+        mockReverseGeocodeLocation.mockResolvedValue({
+          countryCode: "US",
+          regionCode: "US-CA",
+        });
+
+        const setLocationGateVerified = vi.fn();
+        mockUseConnection.mockReturnValue({
+          controller: mockController,
+          policies: null,
+          locationGate: { blocked: ["US-NY"] },
+          locationGateVerified: false,
+          setLocationGateVerified,
+          isNewControllerRef: { current: isNewController },
+        });
+
+        renderWithProviders(<ConnectRoute />);
+
+        await waitFor(() => {
+          expect(mockParams.resolve).toHaveBeenCalledWith({
+            code: ResponseCodes.SUCCESS,
+            address: "0x123456789abcdef",
+            keepOpen,
+          });
+        });
+        expect(mockCleanupCallbacks).toHaveBeenCalledWith("test-id");
+        expect(setLocationGateVerified).not.toHaveBeenCalled();
+      },
+    );
+
+    it("settles the pending connect when the gate is cancelled", async () => {
+      const closeModal = vi.fn();
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        locationGate: { blocked: ["US-NY"] },
+        locationGateVerified: false,
+        closeModal,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      const cancelButton = await screen.findByRole("button", {
+        name: "CANCEL",
+      });
+      cancelButton.click();
+
+      await waitFor(() => {
+        expect(mockParams.resolve).toHaveBeenCalledWith({
+          code: ResponseCodes.CANCELED,
+          message: "Canceled",
+        });
+      });
+      expect(mockCleanupCallbacks).toHaveBeenCalledWith("test-id");
+      expect(closeModal).toHaveBeenCalled();
     });
 
     it("keeps onboarding visible on first mount for v0.13.13", async () => {

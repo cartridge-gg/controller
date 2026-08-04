@@ -3,6 +3,7 @@ import { LayoutHeader, HeaderProps } from "@cartridge/controller-ui";
 import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
 import { useCreditsContext } from "@/components/credits/provider";
+import { useWithdrawContext } from "@/components/withdraw/provider";
 
 export type NavigationHeaderProps = {
   // Navigation props
@@ -50,6 +51,8 @@ export function NavigationHeader({
   }, [onClose, closeModal, navigateToRoot]);
 
   const { initiateCreditsDeposit } = useCreditsContext();
+  const { initiateWithdraw, withdrawHidden, withdrawDisabled } =
+    useWithdrawContext();
 
   return (
     <LayoutHeader
@@ -57,6 +60,8 @@ export function NavigationHeader({
       onBack={shouldShowBack ? handleBack : undefined}
       onClose={shouldShowClose ? handleCloseAction : undefined}
       onDeposit={initiateCreditsDeposit}
+      onWithdraw={withdrawHidden ? undefined : initiateWithdraw}
+      withdrawDisabled={withdrawDisabled}
       hideSettings
     />
   );

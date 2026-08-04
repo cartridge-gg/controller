@@ -24,6 +24,8 @@ import {
   WalletAdapter,
   WalletBridge,
   type Chain,
+  type DefaultPaymentMethod,
+  type SessionChain,
 } from "@cartridge/controller";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import {
@@ -84,10 +86,17 @@ type ResolvedUrlParams = {
   ref: string | null;
   refGroup: string | null;
   propagateError: boolean;
+  /** Optional so snapshots persisted before this field existed stay valid. */
+  defaultPaymentMethod?: DefaultPaymentMethod;
+  /** Optional so snapshots persisted before this field existed stay valid. */
+  coinflowSandbox?: boolean;
   errorDisplayMode?: "modal" | "notification" | "silent";
   /** Chains the dapp explicitly configured (SDK `chains` param). Optional so
    *  url-param snapshots persisted before this field existed stay valid. */
   chains?: Chain[];
+  /** Chains covered by a single multichain session approval (SDK
+   *  `multichainSessions` opt-in), resolved to their rpcUrl SDK-side. */
+  sessionChains?: SessionChain[];
 };
 
 export const URL_PARAMS_STORAGE_KEY = "keychain.urlParams";
@@ -102,6 +111,30 @@ export function parseControllerVersion(
   } catch {
     return undefined;
   }
+}
+
+export function parseDefaultPaymentMethod(
+  value?: string | null,
+): DefaultPaymentMethod | undefined {
+  return value === "credit-card" ? value : undefined;
+}
+
+export function resolveDefaultPaymentMethod(
+  value?: string | null,
+  previousValue?: string | null,
+): DefaultPaymentMethod | undefined {
+  return (
+    parseDefaultPaymentMethod(value) ?? parseDefaultPaymentMethod(previousValue)
+  );
+}
+
+export function resolveCoinflowSandbox(
+  value?: string | null,
+  previousValue?: boolean,
+): boolean {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return previousValue ?? false;
 }
 
 // Stable fallback so consumers keyed on `configuredChains` identity don't re-run.
@@ -283,6 +316,89 @@ export function resolvePolicies({
   return { policies: urlPolicies, isPoliciesResolved: true };
 }
 
+/** One entry per chain of a multichain session approval, in signing order. */
+export type SessionChainPolicies = Array<
+  SessionChain & { policies: ParsedSessionPolicies }
+>;
+
+/**
+ * Resolves session policies for every chain of a multichain session approval.
+ *
+ * Unlike `resolvePolicies`, a chain with no resolvable policies is an ERROR,
+ * never a silent fallback: multichain sessions are an explicit opt-in and
+ * creating fewer sessions than the dapp asked the user to approve would break
+ * that contract.
+ */
+export function resolveChainPolicies({
+  policiesStr,
+  preset,
+  shouldOverridePresetPolicies,
+  configData,
+  sessionChains,
+  verified,
+  isConfigLoading,
+}: {
+  policiesStr: string | null;
+  preset: string | null;
+  shouldOverridePresetPolicies: boolean;
+  configData: Record<string, unknown> | null;
+  sessionChains: SessionChain[] | undefined;
+  verified: boolean;
+  isConfigLoading: boolean;
+}): {
+  chainPolicies: SessionChainPolicies | undefined;
+  isResolved: boolean;
+  error?: boolean;
+} {
+  if (!sessionChains || sessionChains.length === 0) {
+    return { chainPolicies: undefined, isResolved: true };
+  }
+
+  const urlPolicies = parseUrlPolicies(policiesStr);
+  if (urlPolicies instanceof Error) {
+    return { chainPolicies: undefined, isResolved: true, error: true };
+  }
+
+  // Manual policies (no preset, or explicit override) apply to every
+  // requested chain.
+  if ((shouldOverridePresetPolicies || !preset) && urlPolicies) {
+    return {
+      chainPolicies: sessionChains.map((chain) => ({
+        ...chain,
+        policies: urlPolicies,
+      })),
+      isResolved: true,
+    };
+  }
+
+  if (!preset) {
+    // No preset and no manual policies: nothing to authorize.
+    return { chainPolicies: undefined, isResolved: true, error: true };
+  }
+
+  if (isConfigLoading) {
+    return { chainPolicies: undefined, isResolved: false };
+  }
+
+  const chainPolicies: SessionChainPolicies = [];
+  for (const chain of sessionChains) {
+    const configPolicies = getConfigChainPolicies(
+      configData,
+      chain.chainId,
+      verified,
+    );
+    if (configPolicies instanceof Error || !configPolicies) {
+      console.error(
+        `No preset policies found for multichain session chain ${chain.chainId}`,
+      );
+      return { chainPolicies: undefined, isResolved: true, error: true };
+    }
+    chainPolicies.push({ ...chain, policies: configPolicies });
+  }
+
+  return { chainPolicies, isResolved: true };
+}
+
 function computeVerifiedState(
   configData: Record<string, unknown>,
   currentOrigin: string | undefined,
@@ -410,6 +526,7 @@ export function useConnectionValue() {
     import.meta.env.VITE_RPC_MAINNET,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
+  const [chainPolicies, setChainPolicies] = useState<SessionChainPolicies>();
   const [isPoliciesResolved, setIsPoliciesResolved] = useState<boolean>(false);
   const [isPoliciesError, setIsPoliciesError] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
@@ -592,6 +709,14 @@ export function useConnectionValue() {
     const ref = urlParams.get("ref");
     const refGroup = urlParams.get("ref_group");
     const propagateError = urlParams.get("propagate_error") === "true";
+    const defaultPaymentMethod = resolveDefaultPaymentMethod(
+      urlParams.get("default_payment_method"),
+      urlParamsRef.current?.defaultPaymentMethod,
+    );
+    const coinflowSandbox = resolveCoinflowSandbox(
+      urlParams.get("coinflow_sandbox"),
+      urlParamsRef.current?.coinflowSandbox,
+    );
     const errorDisplayMode = urlParams.get("error_display_mode") as
       | "modal"
       | "notification"
@@ -609,6 +734,27 @@ export function useConnectionValue() {
           ? parsed.filter(
               (c): c is Chain =>
                 !!c && typeof c === "object" && typeof c.rpcUrl === "string",
+            )
+          : null;
+      } catch {
+        return null;
+      }
+    })();
+
+    // JSON array of {chainId, rpcUrl} for multichain sessions, encoded by the
+    // SDK the same way as `chains`.
+    const sessionChains = (() => {
+      const raw = urlParams.get("session_chains");
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(decodeURIComponent(raw));
+        return Array.isArray(parsed)
+          ? parsed.filter(
+              (c): c is SessionChain =>
+                !!c &&
+                typeof c === "object" &&
+                typeof c.chainId === "string" &&
+                typeof c.rpcUrl === "string",
             )
           : null;
       } catch {
@@ -652,9 +798,12 @@ export function useConnectionValue() {
       refGroup: refGroup || urlParamsRef.current?.refGroup || null,
       propagateError:
         propagateError || urlParamsRef.current?.propagateError || false,
+      defaultPaymentMethod,
+      coinflowSandbox,
       errorDisplayMode:
         errorDisplayMode || urlParamsRef.current?.errorDisplayMode || undefined,
       chains: chains ?? urlParamsRef.current?.chains ?? [],
+      sessionChains: sessionChains ?? urlParamsRef.current?.sessionChains,
     };
 
     // Store the new params for future reference
@@ -947,9 +1096,27 @@ export function useConnectionValue() {
       isConfigLoading,
     });
 
+    // Multichain sessions: resolve one policy set per opted-in chain. Both
+    // resolutions must land before policies are considered resolved, and an
+    // error on either side blocks the flow.
+    const {
+      chainPolicies: resolvedChainPolicies,
+      isResolved: chainResolved,
+      error: chainError,
+    } = resolveChainPolicies({
+      policiesStr: policyStr,
+      preset,
+      shouldOverridePresetPolicies,
+      configData,
+      sessionChains: urlParams.sessionChains,
+      verified,
+      isConfigLoading,
+    });
+
     setPolicies(resolvedPolicies || { verified: false });
-    setIsPoliciesResolved(resolved);
-    setIsPoliciesError(error ?? false);
+    setChainPolicies(resolvedChainPolicies);
+    setIsPoliciesResolved(resolved && chainResolved);
+    setIsPoliciesError((error ?? false) || (chainError ?? false));
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
   useThemeEffect({ theme, assetUrl: "" });
@@ -1197,6 +1364,7 @@ export function useConnectionValue() {
     origin: origin || "",
     rpcUrl,
     policies,
+    chainPolicies,
     onModalClose,
     setOnModalClose,
     theme,
@@ -1205,8 +1373,11 @@ export function useConnectionValue() {
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
+    defaultPaymentMethod: urlParams.defaultPaymentMethod,
+    coinflowSandbox: urlParams.coinflowSandbox ?? false,
     webauthnPopup,
     configuredChains: urlParams.chains ?? NO_CONFIGURED_CHAINS,
+    sessionChains: urlParams.sessionChains,
     preset: urlParams.preset,
     policiesStr: urlParams.policies,
     isConfigLoading,

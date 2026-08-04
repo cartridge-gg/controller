@@ -27,6 +27,7 @@ import { waitForCryptoPaymentConfirmation } from "@/hooks/payments/crypto";
 import { ConfirmingTransaction } from "@/components/purchase/pending";
 import { getExplorer } from "@/hooks/starterpack/layerswap";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { useAdvancedView } from "@/hooks/features";
 
 enum FundState {
   SELECT_TEAM,
@@ -159,6 +160,7 @@ function FundingComplete({
   onPaymentConfirmed: () => void;
 }) {
   const { controller, isMainnet } = useConnection();
+  const advancedView = useAdvancedView();
   const [txStatus, setTxStatus] = useState<Step>("loading");
   const [paymentStatus, setPaymentStatus] = useState<Step>("loading");
   const [error, setError] = useState<Error>();
@@ -249,16 +251,26 @@ function FundingComplete({
           <ErrorAlert
             variant="error"
             title="Funding Error"
-            description={error.message}
+            description={
+              advancedView
+                ? error.message
+                : "The payment could not be completed. Please try again."
+            }
           />
         )}
         <ConfirmingTransaction
           title={
-            txStatus === "success"
-              ? "Confirmed on Starknet"
-              : txStatus === "error"
-                ? "Transaction failed"
-                : "Confirming on Starknet"
+            advancedView
+              ? txStatus === "success"
+                ? "Confirmed on Starknet"
+                : txStatus === "error"
+                  ? "Transaction failed"
+                  : "Confirming on Starknet"
+              : txStatus === "success"
+                ? "Purchase complete"
+                : txStatus === "error"
+                  ? "Purchase failed"
+                  : "Confirming purchase"
           }
           status={txStatus}
           externalLink={explorer?.url}

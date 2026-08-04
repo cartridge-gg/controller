@@ -41,8 +41,15 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
   const [searchParams] = useSearchParams();
 
   const { duration, isEditable, onToggleEditable } = useCreateSession();
-  const { setController, theme, parent, closeModal, origin, policies } =
-    useConnection();
+  const {
+    setController,
+    theme,
+    parent,
+    closeModal,
+    origin,
+    policies,
+    chainPolicies,
+  } = useConnection();
 
   const redirectUrl = searchParams.get("redirect_url");
 
@@ -106,8 +113,25 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
         setController(controller);
 
         // Create session (now we have storage access)
-        const processedPolicies = processPolicies(policies, toggleOff);
-        await controller.createSession(origin, expiresAt, processedPolicies);
+        if (chainPolicies?.length && !toggleOff) {
+          // Multichain opt-in: one session per chain within this approval.
+          const results = await controller.createMultichainSession(
+            origin,
+            expiresAt,
+            chainPolicies.map((chain) => ({
+              chainId: chain.chainId,
+              rpcUrl: chain.rpcUrl,
+              policies: processPolicies(chain.policies, false),
+            })),
+          );
+          const failed = results.find((r) => r.error);
+          if (failed) {
+            throw failed.error;
+          }
+        } else {
+          const processedPolicies = processPolicies(policies, toggleOff);
+          await controller.createSession(origin, expiresAt, processedPolicies);
+        }
         // Notify parent that session was created
         if (parent) {
           if (
@@ -145,6 +169,7 @@ export function StandaloneSessionCreation({ username }: { username?: string }) {
     [
       closeModal,
       policies,
+      chainPolicies,
       expiresAt,
       redirectUrl,
       parent,

@@ -9,13 +9,13 @@ import {
   isValidCalendarDate,
   type DateValue,
 } from "@cartridge/controller-ui";
-import { useAccountVerifyMutation } from "@/utils/api";
+import { AccountVerifyReasonCode, useAccountVerifyMutation } from "@/utils/api";
 import { VerifyErrorAlert } from "./error";
 
 interface VerifyIdentityDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onVerified: (result: boolean) => void;
+  onVerified: (result: boolean) => void | Promise<void>;
 }
 
 export function VerifyIdentityDrawer({
@@ -54,6 +54,8 @@ export function VerifyIdentityDrawer({
     }
   }, [isVerifyError, verifyError]);
 
+  const [isCompleting, setIsCompleting] = useState(false);
+
   const handleVerifyIdentity = useCallback(async () => {
     try {
       setError(undefined);
@@ -65,19 +67,52 @@ export function VerifyIdentityDrawer({
           // sandbox: true, //returns true, but do not store
         },
       });
-      if (!result.accountVerify) {
-        setError("Account verification failed");
+      if (!result.accountVerify.verified) {
+        const reference = result.accountVerify.correlationId
+          ? ` Reference: ${result.accountVerify.correlationId}`
+          : "";
+        if (
+          result.accountVerify.reasonCode ===
+            AccountVerifyReasonCode.ProviderUnavailable ||
+          result.accountVerify.retryable
+        ) {
+          setError(
+            `Identity verification service is temporarily unavailable. Please try again.${reference}`,
+          );
+        } else {
+          setError(
+            `We couldn't verify these details. Check that your legal name and date of birth match the identity associated with your verified phone number.${reference}`,
+          );
+        }
         return;
       }
-      onVerified(true);
-      onClose();
+      // The provider's onVerified refetches the user data and closes this
+      // drawer once the verified flags are live. Do NOT call onClose() here —
+      // that's the cancel path (it flags isCanceled), and firing it before
+      // the refetch lands makes a success look like a cancel to gauntlet
+      // hosts like the withdraw flow.
+      setIsCompleting(true);
+      await onVerified(true);
     } catch (err) {
       console.error("verifyAsync error:", (err as Error).message);
+    } finally {
+      setIsCompleting(false);
     }
-  }, [verifyAsync, firstName, lastName, dob, onVerified, onClose]);
+  }, [verifyAsync, firstName, lastName, dob, onVerified]);
+
+  // Ignore dismiss events once the drawer is already closed (mirrors the
+  // email/phone drawers) so a programmatic close never re-fires the cancel.
+  const handleClose = useCallback(
+    (event?: Event) => {
+      if (!isOpen) return;
+      event?.preventDefault();
+      onClose();
+    },
+    [isOpen, onClose],
+  );
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose}>
+    <Drawer isOpen={isOpen} onClose={handleClose}>
       <DrawerContent
         title="Confirm Identity"
         icon={<UserIcon variant="solid" size="lg" />}
@@ -126,7 +161,7 @@ export function VerifyIdentityDrawer({
           className="w-full"
           onClick={handleVerifyIdentity}
           disabled={!canSubmit}
-          isLoading={isVerifyLoading}
+          isLoading={isVerifyLoading || isCompleting}
         >
           Continue
         </Button>

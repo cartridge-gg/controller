@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Call } from "starknet";
+import { addAddressPadding, Call } from "starknet";
 import {
   Card,
   CardContent,
@@ -9,10 +9,12 @@ import {
   AccordionTrigger,
   Badge,
   Address,
+  AdvancedDetails,
   cn,
 } from "@cartridge/controller-ui";
 import { humanizeString } from "@cartridge/controller";
 import { ContractLink } from "@/components/ContractLink";
+import { useAdvancedView } from "@/hooks/features";
 
 interface CallCardProps {
   title: string;
@@ -25,6 +27,48 @@ interface CallCardProps {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isHexAddress(value: any): boolean {
   return typeof value === "string" && /^0x[a-fA-F0-9]{40,64}$/.test(value);
+}
+
+const recipientIndexByEntrypoint: Record<string, number> = {
+  transfer: 0,
+  transfer_from: 1,
+  safe_transfer_from: 1,
+};
+
+function normalizeRecipient(value: unknown): string | undefined {
+  if (typeof value !== "string" || !/^0x[0-9a-f]+$/i.test(value)) {
+    return undefined;
+  }
+
+  try {
+    return addAddressPadding(value);
+  } catch {
+    return undefined;
+  }
+}
+
+export function SimpleCallSafetyDetails({ call }: { call: Call }) {
+  const recipientIndex = recipientIndexByEntrypoint[call.entrypoint];
+  const calldata = Array.isArray(call.calldata) ? call.calldata : [];
+  const recipient = normalizeRecipient(
+    recipientIndex === undefined ? undefined : calldata[recipientIndex],
+  );
+
+  if (!recipient) return null;
+
+  return (
+    <div className="flex flex-col gap-1 text-xs text-foreground-300 mt-1">
+      <div className="flex items-center justify-between gap-2">
+        <span>Recipient</span>
+        <Address
+          address={recipient}
+          first={6}
+          last={4}
+          className="text-foreground-100 font-sans"
+        />
+      </div>
+    </div>
+  );
 }
 
 // Utility function to detect if a value is likely a number
@@ -230,11 +274,27 @@ function CalldataKeyValue({ keyName, value }: { keyName: string; value: any }) {
 
 export function CallCard({ call, defaultExpanded = false }: CallCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const advancedView = useAdvancedView();
 
   // Update expansion state when defaultExpanded prop changes
   useEffect(() => {
     setIsExpanded(defaultExpanded);
   }, [defaultExpanded]);
+
+  if (!advancedView) {
+    return (
+      <Card>
+        <CardContent className="py-2">
+          <div className="bg-background-200 rounded-md px-1 py-2">
+            <p className="text-foreground font-bold">
+              {humanizeString(call.entrypoint)}
+            </p>
+            <SimpleCallSafetyDetails call={call} />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -272,43 +332,45 @@ export function CallCardContents({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-3 p-3 border border-background-100 rounded-md text-xs",
-        className,
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <div className="text-foreground-400">Contract</div>
-        <ContractLink contractAddress={call.contractAddress} />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="text-foreground-400">Entrypoint</div>
-        <div className="text-foreground-100">
-          <CopyableValue
-            value={call.entrypoint}
-            className="text-foreground-100"
-          >
-            {call.entrypoint}
-          </CopyableValue>
+    <AdvancedDetails>
+      <div
+        className={cn(
+          "flex flex-col gap-3 p-3 border border-background-100 rounded-md text-xs",
+          className,
+        )}
+      >
+        <div className="flex items-center justify-between">
+          <div className="text-foreground-400">Contract</div>
+          <ContractLink contractAddress={call.contractAddress} />
         </div>
-      </div>
 
-      {call.calldata && (
-        <>
-          <div className="text-foreground-400 pb-1">Calldata</div>
-          <div className="flex flex-col gap-1">
-            {Array.isArray(call.calldata)
-              ? call.calldata.map((data, i) => (
-                  <CalldataItem key={i} data={data} index={i} />
-                ))
-              : Object.entries(call.calldata).map(([key, value], i) => (
-                  <CalldataKeyValue key={i} keyName={key} value={value} />
-                ))}
+        <div className="flex items-center justify-between">
+          <div className="text-foreground-400">Entrypoint</div>
+          <div className="text-foreground-100">
+            <CopyableValue
+              value={call.entrypoint}
+              className="text-foreground-100"
+            >
+              {call.entrypoint}
+            </CopyableValue>
           </div>
-        </>
-      )}
-    </div>
+        </div>
+
+        {call.calldata && (
+          <>
+            <div className="text-foreground-400 pb-1">Calldata</div>
+            <div className="flex flex-col gap-1">
+              {Array.isArray(call.calldata)
+                ? call.calldata.map((data, i) => (
+                    <CalldataItem key={i} data={data} index={i} />
+                  ))
+                : Object.entries(call.calldata).map(([key, value], i) => (
+                    <CalldataKeyValue key={i} keyName={key} value={value} />
+                  ))}
+            </div>
+          </>
+        )}
+      </div>
+    </AdvancedDetails>
   );
 }

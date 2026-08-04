@@ -24,7 +24,6 @@ import { InvalidVerificationCodeError } from "./error";
 import { VerifyEmailDrawer, EmailOtpState } from "./VerifyEmailDrawer";
 import { useConnection } from "@/hooks/connection";
 import { useRequireAgeVerification } from "@/utils/age-gate";
-import { setAgeGateStatus } from "@/utils/age-gate-store";
 import { humanizeString } from "@cartridge/controller";
 
 export type VerificationStepName = "identity" | "phoneNumber" | "email";
@@ -252,14 +251,22 @@ export function IdentityProvider({ children }: PropsWithChildren) {
     userData.age,
   ]);
 
-  // Mirror the age-gate status to a non-React store so the headless execute
-  // path can read it synchronously. See utils/age-gate-store.
-  useEffect(() => {
-    setAgeGateStatus(ageGateStatus);
-  }, [ageGateStatus]);
-
   const [currentVerificationStep, setCurrentVerificationStep] =
     useState<VerificationStepName | null>(null);
+
+  // Success handlers close their own drawer with this guarded reset. Between
+  // a step's refetchUserData and its close, a gauntlet host (the headless
+  // Verification auto-advance) may already have initiated the next step —
+  // an unconditional setCurrentVerificationStep(null) would clobber it and
+  // strand the flow with no drawer open.
+  const completeVerificationStep = useCallback(
+    (completed: VerificationStepName) => {
+      setCurrentVerificationStep((current) =>
+        current === completed ? null : current,
+      );
+    },
+    [],
+  );
 
   // handle user canceling
   const [isCanceled, setIsCanceled] = useState(false);
@@ -355,7 +362,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
         onVerified={async () => {
           await refetchUserData();
           await identityVerifiedCallback?.();
-          setCurrentVerificationStep(null);
+          completeVerificationStep("identity");
         }}
       />
 
@@ -368,7 +375,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
           await handleSubmitEmailCode(otpCode);
           await refetchUserData();
           await emailVerifiedCallback?.();
-          setCurrentVerificationStep(null);
+          completeVerificationStep("email");
         }}
         emailState={emailState}
       />
@@ -384,7 +391,7 @@ export function IdentityProvider({ children }: PropsWithChildren) {
           await handleSubmitCode(otpCode);
           await refetchUserData();
           await phoneVerifiedCallback?.();
-          setCurrentVerificationStep(null);
+          completeVerificationStep("phoneNumber");
         }}
         smsState={smsState}
       />

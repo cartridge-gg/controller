@@ -6,6 +6,7 @@ const mockGenerateStarknetKeypair = vi.fn();
 const mockEncryptPrivateKey = vi.fn();
 const mockComputeAccountAddress = vi.fn();
 const mockControllerLogin = vi.fn();
+const mockGetIpLocation = vi.fn();
 
 vi.mock("@/components/connect/create/utils", () => ({
   fetchController: (...args: unknown[]) => mockFetchController(...args),
@@ -47,9 +48,44 @@ vi.mock("@/utils/controller", () => ({
   },
 }));
 
+vi.mock("@/utils/ip", () => ({
+  getIpLocation: () => mockGetIpLocation(),
+}));
+
 describe("headless connect auto-signup", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetIpLocation.mockResolvedValue({
+      countryCode: "CA",
+      regionCode: "CA-ON",
+    });
+  });
+
+  it("requires the GPS-capable UI flow for a US headless user", async () => {
+    mockGetIpLocation.mockResolvedValue({
+      countryCode: "US",
+      regionCode: "US-CA",
+    });
+    const { headlessConnect } = await import("./headless");
+    const connect = headlessConnect({
+      setController: vi.fn(),
+      getParent: vi.fn(() => undefined),
+      getConnectionState: () => ({
+        rpcUrl: "https://rpc.example",
+        isPoliciesResolved: true,
+        isConfigLoading: false,
+      }),
+      getLocationGate: () => ({ blocked: ["US-NY"] }),
+    })("https://game.example");
+
+    await expect(
+      connect({ username: "alice", signer: "password", password: "pw" }),
+    ).resolves.toEqual({
+      code: ResponseCodes.ERROR,
+      message:
+        "Location verification is required. Use the UI connect flow instead.",
+    });
+    expect(mockControllerLogin).not.toHaveBeenCalled();
   });
 
   it("creates a new password account when username does not exist", async () => {
@@ -95,6 +131,7 @@ describe("headless connect auto-signup", () => {
       setController,
       getParent,
       getConnectionState,
+      getLocationGate: () => ({ blocked: ["US-NY"] }),
     })("https://game.example");
 
     const result = await connect({
@@ -115,5 +152,6 @@ describe("headless connect auto-signup", () => {
     );
     expect(mockController.register).toHaveBeenCalled();
     expect(setController).toHaveBeenCalledWith(mockController);
+    expect(mockGetIpLocation).toHaveBeenCalledOnce();
   });
 });

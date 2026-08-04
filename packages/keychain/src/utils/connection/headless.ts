@@ -40,6 +40,7 @@ import {
   requiresSessionApproval,
 } from "./session-creation";
 import { hasConfiguredLocationGate } from "@/utils/location-gate";
+import { getIpLocation } from "@/utils/ip";
 
 export type HeadlessConnectionState = {
   origin?: string;
@@ -666,14 +667,17 @@ export const headlessConnect =
       };
     }
 
-    // Headless connect cannot show the location gate UI, so reject when
-    // a location gate is configured.
+    // Location gating is US-only. Headless connect cannot request GPS, so US
+    // users must switch to the UI flow while confirmed non-US users continue.
     if (hasConfiguredLocationGate(getLocationGate?.())) {
-      return {
-        code: ResponseCodes.ERROR,
-        message:
-          "Location verification is required. Use the UI connect flow instead.",
-      };
+      const { countryCode } = await getIpLocation();
+      if (countryCode === "US") {
+        return {
+          code: ResponseCodes.ERROR,
+          message:
+            "Location verification is required. Use the UI connect flow instead.",
+        };
+      }
     }
 
     const state = await waitForConnectionReady(getConnectionState);

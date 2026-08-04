@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ResponseCodes, getPresetSessionPolicies } from "@cartridge/controller";
 import { loadConfig } from "@cartridge/presets";
-import { useConnection } from "@/hooks/connection";
+import { useConnection, type SessionChainPolicies } from "@/hooks/connection";
 import {
   parseSessionPolicies,
   type ParsedSessionPolicies,
@@ -33,9 +33,12 @@ const CANCEL_RESPONSE = {
 };
 
 export function UpdateSessionRoute() {
-  const { controller, origin, theme, chainId, verified } = useConnection();
+  const { controller, origin, theme, chainId, verified, sessionChains } =
+    useConnection();
   const [resolvedPolicies, setResolvedPolicies] =
     useState<ParsedSessionPolicies>();
+  const [resolvedChainPolicies, setResolvedChainPolicies] =
+    useState<SessionChainPolicies>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSessionCreating, setIsSessionCreating] = useState(false);
   const [sessionError, setSessionError] = useState<Error>();
@@ -61,6 +64,12 @@ export function UpdateSessionRoute() {
         verified,
       });
       setResolvedPolicies(parsed);
+      // Multichain opt-in: direct policies apply to every opted-in chain.
+      if (sessionChains?.length) {
+        setResolvedChainPolicies(
+          sessionChains.map((chain) => ({ ...chain, policies: parsed })),
+        );
+      }
       return;
     }
 
@@ -90,6 +99,33 @@ export function UpdateSessionRoute() {
             verified,
           });
           setResolvedPolicies(parsed);
+
+          // Multichain opt-in: resolve every opted-in chain from the preset.
+          // A missing chain is an error — updating fewer chains than the dapp
+          // opted into would silently break the multichain contract.
+          if (sessionChains?.length) {
+            const chainPolicies: SessionChainPolicies = [];
+            for (const chain of sessionChains) {
+              const chainSessionPolicies = getPresetSessionPolicies(
+                config as Record<string, unknown>,
+                chain.chainId,
+              );
+              if (!chainSessionPolicies) {
+                console.error(
+                  `No policies found for chain ${chain.chainId} in preset ${preset}`,
+                );
+                return;
+              }
+              chainPolicies.push({
+                ...chain,
+                policies: parseSessionPolicies({
+                  policies: chainSessionPolicies,
+                  verified,
+                }),
+              });
+            }
+            setResolvedChainPolicies(chainPolicies);
+          }
         })
         .catch((error) => {
           console.error("Failed to resolve preset policies:", error);
@@ -98,7 +134,7 @@ export function UpdateSessionRoute() {
           setIsLoading(false);
         });
     }
-  }, [params, chainId, verified]);
+  }, [params, chainId, verified, sessionChains]);
 
   const handleConnect = useCallback(async () => {
     if (!params || !controller) {
@@ -118,8 +154,10 @@ export function UpdateSessionRoute() {
   // Auto-create session for verified policies that don't require approval
   useEffect(() => {
     if (!resolvedPolicies || !controller || !params) return;
+    // Multichain opt-in: wait for the per-chain resolution before creating.
+    if (sessionChains?.length && !resolvedChainPolicies) return;
 
-    if (!requiresSessionApproval(resolvedPolicies)) {
+    if (!requiresSessionApproval(resolvedPolicies, resolvedChainPolicies)) {
       const autoCreate = async () => {
         try {
           setIsSessionCreating(true);
@@ -127,6 +165,7 @@ export function UpdateSessionRoute() {
             controller,
             origin,
             policies: resolvedPolicies,
+            chainPolicies: resolvedChainPolicies,
           });
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
@@ -146,7 +185,15 @@ export function UpdateSessionRoute() {
 
       void autoCreate();
     }
-  }, [resolvedPolicies, controller, params, origin, handleCompletion]);
+  }, [
+    resolvedPolicies,
+    resolvedChainPolicies,
+    sessionChains,
+    controller,
+    params,
+    origin,
+    handleCompletion,
+  ]);
 
   // Loading state
   if (!controller || isLoading) {
@@ -168,7 +215,10 @@ export function UpdateSessionRoute() {
   }
 
   // Verified policies auto-creating
-  if (resolvedPolicies.verified && !requiresSessionApproval(resolvedPolicies)) {
+  if (
+    resolvedPolicies.verified &&
+    !requiresSessionApproval(resolvedPolicies, resolvedChainPolicies)
+  ) {
     if (sessionError) {
       return (
         <>
@@ -192,6 +242,7 @@ export function UpdateSessionRoute() {
                     controller,
                     origin,
                     policies: resolvedPolicies,
+                    chainPolicies: resolvedChainPolicies,
                   });
                   params?.resolve?.({
                     code: ResponseCodes.SUCCESS,
@@ -223,6 +274,7 @@ export function UpdateSessionRoute() {
   return (
     <CreateSession
       policies={resolvedPolicies}
+      chainPolicies={resolvedChainPolicies}
       onConnect={handleConnect}
       isUpdate
     />

@@ -12,6 +12,7 @@ import { useSwapTransactions } from "@/components/swap/swap";
 import { TokenSwapData, useTokenSwapData } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
 import { formatTokenValue, formatUsdValue } from "@/utils/format-value";
+import { useAdvancedView } from "@/hooks/features";
 
 interface ConfirmSwapProps {
   onSubmit: (maxFee?: FeeEstimate) => Promise<void>;
@@ -28,6 +29,7 @@ export function ConfirmSwap({
   executionError,
   origin,
 }: ConfirmSwapProps) {
+  const advancedView = useAdvancedView();
   const { isSwap, swapTransfers } = useSwapTransactions(transactions);
   const { tokenSwapData: sellingSwapData } = useTokenSwapData(
     swapTransfers.selling,
@@ -63,7 +65,10 @@ export function ConfirmSwap({
           <TransactionSummary calls={transactions} isExpanded />
         ) : (
           <>
-            <TokenSummary title="Simulation Results" className="flex-none">
+            <TokenSummary
+              title={advancedView ? "Simulation Results" : "Changes"}
+              className="flex-none"
+            >
               {sellingSwapData.map((token) => (
                 <TokenCard
                   key={token.address}

@@ -1,6 +1,7 @@
 import { createContext } from "react";
 
 type UIContextValue = {
+  advancedView?: boolean;
   account?: {
     username: string;
     address: string;

@@ -29,6 +29,7 @@ const mockStarterpackValue = {
   clearError: () => {},
   socialClaimOptions: undefined,
   socialClaimConditions: undefined,
+  singlePurchaseOnly: false,
 };
 
 // Mock onchain purchase context
@@ -44,6 +45,7 @@ const mockOnchainPurchaseValue: OnchainPurchaseContextType = {
   walletAddress: undefined,
   clearSelectedWallet: () => {},
   availableTokens: [] as TokenOption[],
+  insufficientTokens: new Set<string>(),
   selectedToken: undefined,
   setSelectedToken: () => {},
   convertedPrice: null,

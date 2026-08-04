@@ -198,6 +198,9 @@ export function connectToController<
               `shareMessage=${encodeURIComponent(options.socialClaimOptions.shareMessage)}`,
             );
           }
+          if (options?.singlePurchaseOnly) {
+            searchParams.push("singlePurchaseOnly=true");
+          }
           navigate(
             `/purchase/bundle/${id}${searchParams.length > 0 ? `?${searchParams.join("&")}` : ""}`,
             { replace: true },
@@ -221,6 +224,9 @@ export function connectToController<
           const searchParams: string[] = [];
           if (options?.preimage) {
             searchParams.push(`preimage=${options.preimage}`);
+          }
+          if (options?.singlePurchaseOnly) {
+            searchParams.push("singlePurchaseOnly=true");
           }
           navigate(
             `/purchase/starterpack/${id}${searchParams.length > 0 ? `?${searchParams.join("&")}` : ""}`,

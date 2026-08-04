@@ -53,6 +53,7 @@ export interface ConnectionTooltipProps
   onOpenSettings?: () => void;
   onDeposit?: () => void;
   onWithdraw?: () => void;
+  withdrawDisabled?: boolean;
   onLogout?: () => void;
 }
 
@@ -69,6 +70,7 @@ export const ConnectionTooltip = ({
   onOpenSettings,
   onDeposit,
   onWithdraw,
+  withdrawDisabled,
   onLogout,
   variant,
   className,
@@ -177,6 +179,7 @@ export const ConnectionTooltip = ({
               }
               onDeposit={onDeposit ? handleDeposit : undefined}
               onWithdraw={onWithdraw ? handleWithdraw : undefined}
+              withdrawDisabled={withdrawDisabled}
               onOpenSettings={onOpenSettings ? handleOpenSettings : undefined}
               onLogout={onLogout ? handleLogout : undefined}
             />

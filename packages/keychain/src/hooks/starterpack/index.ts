@@ -39,6 +39,12 @@ export type {
   UseTokenFallbackReturn,
 } from "./token-fallback";
 
+export { useTokenSufficiency } from "./token-sufficiency";
+export type {
+  UseTokenSufficiencyOptions,
+  UseTokenSufficiencyReturn,
+} from "./token-sufficiency";
+
 // The Coinbase rail hook now lives under hooks/payments (it is payment-rail
 // infrastructure, not starterpack-specific). Re-exported here for back-compat
 // with existing barrel imports.

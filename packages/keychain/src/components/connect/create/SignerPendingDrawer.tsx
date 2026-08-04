@@ -10,6 +10,7 @@ import {
   CheckIcon,
 } from "@cartridge/controller-ui";
 import { useMemo } from "react";
+import { useAdvancedView } from "@/hooks/features";
 
 interface SignerPendingDrawerProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export function SignerPendingDrawer({
   onRetry,
   children,
 }: SignerPendingDrawerProps) {
+  const advancedView = useAdvancedView();
   const authName = useMemo(
     () => (authenticationMode ? AUTH_METHODS_LABELS[authenticationMode] : "?"),
     [authenticationMode],
@@ -46,7 +48,13 @@ export function SignerPendingDrawer({
           <SignerPendingCard
             kind={authenticationMode}
             inProgress={isLoading}
-            error={error ? error.message || "Unknown error" : undefined}
+            error={
+              error
+                ? advancedView
+                  ? error.message || "Unknown error"
+                  : "Authentication failed. Please try again."
+                : undefined
+            }
             // authedAddress={signerPending.authedAddress}
           />
         )}

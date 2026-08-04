@@ -15,7 +15,7 @@ import {
   OnchainStarterpackDetails,
 } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { useFeature } from "@/hooks/features";
+import { useAdvancedView, useFeature } from "@/hooks/features";
 import { useCoinflowIsMainnet } from "@/hooks/payments/coinflow";
 import { useTripleClick } from "@/hooks/tripple-click";
 import {
@@ -41,19 +41,34 @@ import {
   type PaymentMethodSelection,
 } from "./wallet-drawer";
 import { SocialClaimCheckout } from "./social-claim";
-import { CoinflowDrawer } from "../coinflow/drawer";
 import { CoinbaseDrawer } from "../coinbase/drawer";
 import { VerificationDrawer } from "../../verification/drawer";
-import { USDC_ADDRESSES } from "@/utils/ekubo";
 import { useGeoLocation } from "@/hooks/geo";
-import { num } from "starknet";
 import { useIdentityContext } from "@/components/identity/provider";
-import { AgeGate } from "@/components/identity/AgeGate";
 import { useCreditsContext } from "@/components/credits/provider";
+import {
+  creditsTopupAmountUsd,
+  shouldOpenCreditsDeposit,
+} from "@/utils/credits-topup";
+import {
+  MAX_CREDITS_PURCHASE_USD,
+  MIN_CREDITS_PURCHASE_USD,
+} from "@/utils/credits";
+import {
+  clearPaymentPreference,
+  readPaymentPreference,
+  resolveInitialPaymentMethod,
+} from "@/utils/payment-preference";
+import {
+  CreditsBalancePendingError,
+  waitForCreditsBalance,
+} from "@/utils/credits-settlement";
+import { usePurchaseLocationGate } from "@/components/purchase/usePurchaseLocationGate";
 
 export function OnchainCheckout() {
+  const advancedView = useAdvancedView();
   const { navigate } = useNavigation();
-  const { controller } = useConnection();
+  const { controller, origin, defaultPaymentMethod } = useConnection();
   const {
     isStarterpackLoading,
     starterpackDetails,
@@ -62,6 +77,10 @@ export function OnchainCheckout() {
     setDisplayError,
     socialClaimOptions,
     socialClaimConditions,
+    registryAddress,
+    bundleId,
+    starterpackId,
+    singlePurchaseOnly,
   } = useStarterpackContext();
   const {
     isFetchingConversion,
@@ -103,8 +122,6 @@ export function OnchainCheckout() {
     onCreditsSelect,
   } = useOnchainPurchaseContext();
   const {
-    onCreditCardPurchase,
-    isCoinflowLoading,
     creditsQuote,
     isCreditsQuoteLoading,
     creditsQuoteError,
@@ -112,6 +129,9 @@ export function OnchainCheckout() {
     isCreditsLoading,
     onCreditsPurchase,
     refetchCreditsBalance,
+    creditsBalance,
+    isCreditsBalanceLoading,
+    creditsBalanceError,
   } = useCreditPurchaseContext();
   const { initiateCreditsDeposit } = useCreditsContext();
 
@@ -119,7 +139,7 @@ export function OnchainCheckout() {
     isEmailVerified,
     isPhoneNumberVerified,
     refetchUserData,
-    ageGateStatus: { isAllowed },
+    ageGateStatus: { isAllowed, isBlocked },
   } = useIdentityContext();
   const { loginViaPopup: loginWithWebauthnPopup } = useWebauthnAuthentication();
   const isCoinflowEnabled = useFeature("coinflow-support");
@@ -127,16 +147,17 @@ export function OnchainCheckout() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isCoinflowDrawerOpen, setIsCoinflowDrawerOpen] = useState(false);
   const [isCoinbaseDrawerOpen, setIsCoinbaseDrawerOpen] = useState(false);
   const [verificationMethod, setVerificationMethod] = useState<
-    "coinflow" | "apple-pay" | null
+    "apple-pay" | "identity" | null
   >(null);
   const { isUS, countryCodeLoaded } = useGeoLocation();
+  const configuredCard = defaultPaymentMethod === "credit-card";
+  const { runAfterLocationGate, locationGateView } = usePurchaseLocationGate();
 
   const handleIconTripleClick = useTripleClick({
-    featureName: "coinflow-support",
-    callback: onCoinflowSelect,
+    featureName: isUS ? "coinflow-support" : undefined,
+    callback: isUS ? onCoinflowSelect : undefined,
   });
 
   const totalUsdAmount = useMemo(() => {
@@ -226,17 +247,6 @@ export function OnchainCheckout() {
     return quote ? quote.totalCost === BigInt(0) : undefined;
   }, [quote]);
 
-  const isCoinflowStarterpackSupported = useMemo(() => {
-    if (!controller || !quote) {
-      return true;
-    }
-
-    const usdcAddress = USDC_ADDRESSES[controller.chainId()];
-    return (
-      !!usdcAddress && num.toHex(quote.paymentToken) === num.toHex(usdcAddress)
-    );
-  }, [controller, quote]);
-
   const {
     balanceError,
     bridgeFrom,
@@ -257,7 +267,7 @@ export function OnchainCheckout() {
     quantity,
   });
 
-  const { isCheckingFallback } = useTokenFallback({
+  const { isCheckingFallback, status: tokenFundingStatus } = useTokenFallback({
     controller,
     starterpackDetails: starterpackDetails as
       | Parameters<typeof useTokenFallback>[0]["starterpackDetails"]
@@ -270,9 +280,132 @@ export function OnchainCheckout() {
     quantity,
     isCoinflowSelected,
     isApplePaySelected,
+    isCreditsSelected,
     selectedPlatform,
     setSelectedToken,
   });
+
+  const configuredCoinflowAvailable =
+    countryCodeLoaded && isUS && (isCoinflowEnabled || configuredCard);
+  const rememberedPaymentMethod = useMemo(() => {
+    if (!controller || !origin) return undefined;
+    try {
+      return readPaymentPreference({
+        origin,
+        chainId: controller.chainId(),
+        configuredDefault: configuredCard,
+      });
+    } catch {
+      return undefined;
+    }
+  }, [controller, origin, configuredCard]);
+
+  const initialResolutionKey = useMemo(() => {
+    if (!controller || !origin || !registryAddress || !starterpackDetails) {
+      return "";
+    }
+    const details = starterpackDetails as { id?: string | number };
+    const purchaseIdentity =
+      bundleId !== undefined
+        ? `bundle:${bundleId}`
+        : `starterpack:${starterpackId ?? details.id ?? "unknown"}`;
+    return [
+      origin,
+      controller.address(),
+      controller.chainId(),
+      registryAddress,
+      purchaseIdentity,
+    ].join(":");
+  }, [
+    controller,
+    origin,
+    registryAddress,
+    starterpackDetails,
+    bundleId,
+    starterpackId,
+  ]);
+  const resolutionRef = useRef<{ key: string; applied: boolean }>({
+    key: "",
+    applied: false,
+  });
+  const [isInitialPaymentResolved, setIsInitialPaymentResolved] =
+    useState(false);
+
+  useEffect(() => {
+    if (!initialResolutionKey || !quote) return;
+    if (resolutionRef.current.key !== initialResolutionKey) {
+      resolutionRef.current = { key: initialResolutionKey, applied: false };
+      setIsInitialPaymentResolved(false);
+    }
+    if (resolutionRef.current.applied) return;
+
+    if (quote.totalCost === 0n) {
+      resolutionRef.current.applied = true;
+      setIsInitialPaymentResolved(true);
+      return;
+    }
+
+    const creditsResolution =
+      isCreditsQuoteLoading ||
+      isCreditsBalanceLoading ||
+      (!creditsQuote && !creditsQuoteError)
+        ? "pending"
+        : creditsQuoteError || creditsBalanceError || !creditsQuote
+          ? "unavailable"
+          : "available";
+
+    const resolution = resolveInitialPaymentMethod({
+      remembered: rememberedPaymentMethod,
+      configuredDefault: configuredCard,
+      funding: tokenFundingStatus,
+      credits: creditsResolution,
+      hasSufficientCredits,
+      cardTopupAvailable: configuredCoinflowAvailable,
+      directCardAvailable: configuredCoinflowAvailable,
+    });
+    if (resolution.status === "pending") return;
+
+    resolutionRef.current.applied = true;
+    if (resolution.method === "credits") {
+      onCreditsSelect({ persist: false });
+    } else if (resolution.method === "coinflow") {
+      onCoinflowSelect({ persist: false });
+    } else {
+      clearSelectedWallet({ persist: false });
+    }
+    if (resolution.showMethodPicker) {
+      if (rememberedPaymentMethod && controller && origin) {
+        try {
+          clearPaymentPreference({
+            origin,
+            chainId: controller.chainId(),
+          });
+        } catch {
+          // localStorage may be unavailable
+        }
+      }
+      setIsDrawerOpen(true);
+    }
+    setIsInitialPaymentResolved(true);
+  }, [
+    initialResolutionKey,
+    quote,
+    isCreditsQuoteLoading,
+    isCreditsBalanceLoading,
+    creditsQuote,
+    creditsQuoteError,
+    creditsBalanceError,
+    rememberedPaymentMethod,
+    configuredCard,
+    tokenFundingStatus,
+    hasSufficientCredits,
+    configuredCoinflowAvailable,
+    onCreditsSelect,
+    onCoinflowSelect,
+    clearSelectedWallet,
+    controller,
+    origin,
+  ]);
 
   // Insufficient credits doesn't disable the CTA — it turns into "Buy
   // Credits" and opens the top-up drawer (mirrors the Apple Pay
@@ -282,19 +415,18 @@ export function OnchainCheckout() {
     !!creditsQuote &&
     !hasSufficientCredits &&
     !isCreditsQuoteLoading;
+  const showConfiguredCreditsTopup = configuredCard && showInsufficientCredits;
 
   const globalDisabled = useMemo(() => {
-    if (isCreditsSelected) {
+    if (isCreditsSelected || isCoinflowSelected) {
       return (
         isCreditsQuoteLoading ||
         !!creditsQuoteError ||
+        isCreditsBalanceLoading ||
+        !!creditsBalanceError ||
         !creditsQuote ||
         isCreditsLoading
       );
-    }
-
-    if (isCoinflowSelected) {
-      return !isCoinflowStarterpackSupported || isCoinflowLoading;
     }
 
     // Disable if there's a fee estimation error (e.g., bridge amount too low)
@@ -328,11 +460,11 @@ export function OnchainCheckout() {
     isApplePaySelected,
     isApplePayAmountTooLow,
     isCoinflowSelected,
-    isCoinflowStarterpackSupported,
-    isCoinflowLoading,
     isCreditsSelected,
     isCreditsQuoteLoading,
+    isCreditsBalanceLoading,
     creditsQuoteError,
+    creditsBalanceError,
     creditsQuote,
     isCreditsLoading,
   ]);
@@ -369,6 +501,7 @@ export function OnchainCheckout() {
           onApplePaySelect();
           break;
         case "coinflow":
+          if (!isUS) return;
           onCoinflowSelect();
           break;
         case "credits":
@@ -393,6 +526,7 @@ export function OnchainCheckout() {
       onCreditsSelect,
       clearSelectedWallet,
       onExternalConnect,
+      isUS,
     ],
   );
 
@@ -419,8 +553,33 @@ export function OnchainCheckout() {
     }
   }, [controller, loginWithWebauthnPopup, clearError, refetchUserData]);
 
+  const purchaseKey = useMemo(
+    () =>
+      quote && creditsQuote
+        ? [
+            initialResolutionKey,
+            quantity,
+            quote.totalCost.toString(),
+            creditsQuote.requiredCredits,
+          ].join(":")
+        : "",
+    [initialResolutionKey, quantity, quote, creditsQuote],
+  );
+  const activePurchaseKeyRef = useRef("");
+  useEffect(() => {
+    activePurchaseKeyRef.current = purchaseKey;
+    return () => {
+      // Compare before clearing so StrictMode cleanup cannot invalidate a newer
+      // fingerprint installed by a subsequent effect.
+      if (activePurchaseKeyRef.current === purchaseKey) {
+        activePurchaseKeyRef.current = "";
+      }
+    };
+  }, [purchaseKey]);
+  const autoCreditsPurchaseRef = useRef<string>();
+
   const purchaseInFlightRef = useRef(false);
-  const handlePurchase = useCallback(async () => {
+  const continuePurchase = useCallback(async () => {
     if (purchaseInFlightRef.current) return;
     if (isApplePayAmountTooLow) return;
 
@@ -435,17 +594,95 @@ export function OnchainCheckout() {
           ? "credits"
           : "onchain";
 
-    if (method === "coinflow" && !isCoinflowStarterpackSupported) return;
-    if (method === "credits" && !hasSufficientCredits) {
-      // Not enough credits — the CTA reads "Deposit USD": open the top-up
-      // drawer and refresh the balance once the deposit lands.
-      initiateCreditsDeposit(async () => {
-        await refetchCreditsBalance();
+    if (method === "coinflow" && (!isUS || !isCoinflowEnabled)) {
+      return;
+    }
+    if (shouldOpenCreditsDeposit(method, hasSufficientCredits)) {
+      if (!creditsQuote || !purchaseKey) return;
+      const requiredCredits = BigInt(creditsQuote.requiredCredits);
+      const topupAmount = creditsTopupAmountUsd({
+        requiredCredits,
+        creditsBalance,
+        minimumAmount: MIN_CREDITS_PURCHASE_USD,
+      });
+      if (topupAmount > MAX_CREDITS_PURCHASE_USD) {
+        setDisplayError(
+          new Error(
+            `The required credit top-up exceeds the $${MAX_CREDITS_PURCHASE_USD.toLocaleString()} card limit. Choose another payment method.`,
+          ),
+        );
+        setIsDrawerOpen(true);
+        return;
+      }
+      const originatingPurchaseKey = purchaseKey;
+
+      initiateCreditsDeposit({
+        preferredMethod:
+          method === "coinflow" || configuredCoinflowAvailable
+            ? { type: "coinflow" }
+            : undefined,
+        minimumAmount: topupAmount,
+        purchaseKey: originatingPurchaseKey,
+        onSuccess: async () => {
+          if (activePurchaseKeyRef.current !== originatingPurchaseKey) {
+            throw new Error(
+              "The bundle changed while credits were being added. Your credits are available for a new purchase.",
+            );
+          }
+          if (autoCreditsPurchaseRef.current === originatingPurchaseKey) return;
+          autoCreditsPurchaseRef.current = originatingPurchaseKey;
+
+          try {
+            await waitForCreditsBalance({
+              requiredCredits,
+              // On Sepolia, Controller-funded credits are immediately usable,
+              // while Coinflow sandbox payments never grant spendable credits.
+              // Read once so the former succeeds without polling the latter.
+              timeoutMs: isCoinflowSandbox ? 0 : undefined,
+              refetchBalance: async () => {
+                if (activePurchaseKeyRef.current !== originatingPurchaseKey) {
+                  throw new Error(
+                    "The bundle changed while credits were being added. Your credits are available for a new purchase.",
+                  );
+                }
+                return refetchCreditsBalance();
+              },
+            });
+          } catch (error) {
+            autoCreditsPurchaseRef.current = undefined;
+            if (
+              isCoinflowSandbox &&
+              error instanceof CreditsBalancePendingError
+            ) {
+              throw new Error(
+                "Sandbox card payments do not add spendable credits, so the bundle was not purchased.",
+              );
+            }
+            throw error;
+          }
+
+          await onCreditsPurchase();
+          navigate("/purchase/success", { reset: true });
+        },
       });
       return;
     }
     if (method === "onchain" && !hasSufficientBalance && !isFree) {
       console.warn("no means to pay");
+      return;
+    }
+
+    if (isBlocked) {
+      setDisplayError(
+        new Error(
+          "This purchase is unavailable because you do not meet the game's age requirement.",
+        ),
+      );
+      return;
+    }
+
+    if (!isAllowed) {
+      setVerificationMethod("identity");
       return;
     }
 
@@ -460,14 +697,6 @@ export function OnchainCheckout() {
       if (method === "credits") {
         await onCreditsPurchase();
         navigate("/purchase/success", { reset: true });
-      } else if (method === "coinflow") {
-        if (!isEmailVerified) {
-          setVerificationMethod("coinflow");
-          return;
-        }
-
-        await onCreditCardPurchase();
-        setIsCoinflowDrawerOpen(true);
       } else if (method === "apple-pay") {
         resetCoinbasePurchase();
 
@@ -519,12 +748,12 @@ export function OnchainCheckout() {
     hasSufficientBalance,
     isFree,
     isCoinflowSelected,
-    isCoinflowStarterpackSupported,
+    isCoinflowEnabled,
+    isUS,
     isApplePaySelected,
     applePayLimitExceeded,
     fetchCoinbaseLimits,
     resetCoinbasePurchase,
-    onCreditCardPurchase,
     isPhoneNumberVerified,
     isEmailVerified,
     onCreateCoinbaseOrder,
@@ -537,7 +766,19 @@ export function OnchainCheckout() {
     initiateCreditsDeposit,
     refetchCreditsBalance,
     onCreditsPurchase,
+    creditsQuote,
+    creditsBalance,
+    purchaseKey,
+    configuredCoinflowAvailable,
+    isCoinflowSandbox,
+    setDisplayError,
+    isAllowed,
+    isBlocked,
   ]);
+
+  const handlePurchase = useCallback(() => {
+    runAfterLocationGate(continuePurchase);
+  }, [runAfterLocationGate, continuePurchase]);
 
   const handleBridge = useCallback(async () => {
     clearError();
@@ -550,51 +791,22 @@ export function OnchainCheckout() {
     }
   }, [onSendDeposit, navigate, clearError, setDisplayError]);
 
-  // Restore last payment method from localStorage
-  const hasRestoredMethod = useRef(false);
-  useEffect(() => {
-    if (hasRestoredMethod.current || !controller || !quote) return;
-    hasRestoredMethod.current = true;
-    try {
-      const lastMethod = localStorage.getItem(
-        `@cartridge/lastPaymentMethod:${controller.chainId()}`,
-      );
-      if (
-        lastMethod === "coinflow" &&
-        isCoinflowEnabled &&
-        isCoinflowStarterpackSupported &&
-        isUS
-      ) {
-        onCoinflowSelect();
-      } else if (lastMethod === "credits") {
-        // No client-side gate: if the bundle isn't approved for credits the
-        // quote rejects and the checkout surfaces the backend message.
-        onCreditsSelect();
-      }
-    } catch {
-      // localStorage may be unavailable
-    }
-  }, [
-    controller,
-    quote,
-    isCoinflowEnabled,
-    isCoinflowStarterpackSupported,
-    onCoinflowSelect,
-    onCreditsSelect,
-    isUS,
-  ]);
-
   useEffect(() => {
     clearError();
     return () => clearError();
   }, [clearError]);
 
-  if (!isAllowed) {
-    return <AgeGate />;
+  if (
+    isStarterpackLoading ||
+    !quote ||
+    !countryCodeLoaded ||
+    (!isFree && !isInitialPaymentResolved)
+  ) {
+    return <LoadingState />;
   }
 
-  if (isStarterpackLoading || !quote || !countryCodeLoaded) {
-    return <LoadingState />;
+  if (locationGateView) {
+    return locationGateView;
   }
 
   return (
@@ -618,7 +830,7 @@ export function OnchainCheckout() {
         }
       />
 
-      <LayoutContent>
+      <LayoutContent className="select-none">
         <Receiving
           title={`You Receive ${quantity > 1 ? `(${quantity})` : ""}`}
           items={purchaseItems}
@@ -627,7 +839,7 @@ export function OnchainCheckout() {
         />
       </LayoutContent>
 
-      <LayoutFooter>
+      <LayoutFooter className="select-none">
         {needsReauth ? (
           <>
             <ErrorCard
@@ -703,32 +915,37 @@ export function OnchainCheckout() {
                 {isCoinflowSelected && isCoinflowSandbox && (
                   <ErrorCard
                     variant="warning"
-                    title="Coinflow Sandbox Enabled"
-                    message="Card checkout will run in Coinflow's sandbox environment. No real charge will be made."
+                    title="Coinflow Sandbox Environment"
+                    message="No real charge will be made."
                   />
                 )}
 
-                {isCoinflowSelected && !isCoinflowStarterpackSupported && (
-                  <ErrorCard
-                    variant="error"
-                    title="Credit Card Checkout Unavailable"
-                    message="Credit card checkout is only available for starterpacks priced in USDC."
-                  />
-                )}
-
-                {isCreditsSelected && creditsQuoteError && (
-                  <ErrorCard
-                    variant="error"
-                    title="Credits Checkout Unavailable"
-                    message={creditsQuoteError.message}
-                  />
-                )}
+                {(isCreditsSelected || isCoinflowSelected) &&
+                  creditsQuoteError && (
+                    <ErrorCard
+                      variant="error"
+                      title="Credits Checkout Unavailable"
+                      message={
+                        advancedView
+                          ? creditsQuoteError.message
+                          : "Credits checkout could not be prepared. Please try again."
+                      }
+                    />
+                  )}
 
                 {showInsufficientCredits && (
                   <ErrorCard
                     variant="warning"
-                    title="Insufficient Credits"
-                    message="You need more credits to complete this purchase."
+                    title={
+                      showConfiguredCreditsTopup
+                        ? "Insufficient Balance"
+                        : "Insufficient Credits"
+                    }
+                    message={
+                      showConfiguredCreditsTopup
+                        ? "You need to deposit funds to complete this purchase."
+                        : "You need more credits to complete this purchase."
+                    }
                   />
                 )}
 
@@ -748,11 +965,13 @@ export function OnchainCheckout() {
                   />
                 )}
 
-                <WalletSelector
-                  method={selectedMethod}
-                  bridgeFrom={bridgeFrom}
-                  onClick={handleWalletSelect}
-                />
+                {!showConfiguredCreditsTopup && (
+                  <WalletSelector
+                    method={selectedMethod}
+                    bridgeFrom={bridgeFrom}
+                    onClick={handleWalletSelect}
+                  />
+                )}
 
                 <OnchainCostBreakdown quote={quote} />
 
@@ -763,8 +982,7 @@ export function OnchainCheckout() {
                     isCheckingFallback ||
                     (bridgeFrom !== null && isFetchingFees) ||
                     isCreatingOrder ||
-                    isCoinflowLoading ||
-                    (isCreditsSelected &&
+                    ((isCreditsSelected || isCoinflowSelected) &&
                       (isCreditsQuoteLoading || isCreditsLoading)) ||
                     applePayLimitsLoading
                   }
@@ -783,6 +1001,7 @@ export function OnchainCheckout() {
                   onPurchase={handlePurchase}
                   onBridge={handleBridge}
                   isApplePayAmountTooLow={isApplePayAmountTooLow}
+                  hideQuantity={singlePurchaseOnly}
                   purchaseLabel={
                     isCoinflowSelected
                       ? "Continue"
@@ -804,13 +1023,9 @@ export function OnchainCheckout() {
         onClose={() => setIsDrawerOpen(false)}
         setSelected={handlePaymentMethodSelect}
         showFiatOptions={isUS}
+        enableCoinflow={configuredCard}
         showCredits={false} // credits available from controller
         showController={true}
-      />
-
-      <CoinflowDrawer
-        isOpen={isCoinflowDrawerOpen}
-        onClose={() => setIsCoinflowDrawerOpen(false)}
       />
 
       <CoinbaseDrawer
@@ -823,10 +1038,10 @@ export function OnchainCheckout() {
         method={verificationMethod}
         onClose={() => setVerificationMethod(null)}
         onSuccess={() => {
-          // Verification done — close drawer and re-run the purchase which
-          // will now pass the email/phone gate and open the payment drawer.
+          // Verification is part of the purchase attempt that already passed
+          // its fresh location check, so continue without starting a new one.
           setVerificationMethod(null);
-          handlePurchase();
+          void continuePurchase();
         }}
       />
     </>

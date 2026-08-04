@@ -12,6 +12,7 @@ import { ErrorCode } from "@cartridge/controller-wasm";
 import { useToast } from "@/context/toast";
 import { humanizeString } from "@cartridge/controller";
 import { useIsSwapTransaction } from "@/components/swap/swap";
+import { useAdvancedView } from "@/hooks/features";
 
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
@@ -26,6 +27,7 @@ export function ConfirmTransaction({
   transactions,
   executionError,
 }: ConfirmTransactionProps) {
+  const advancedView = useAdvancedView();
   const { controller, origin, policies, isAppchain } = useConnection();
   const account = controller;
   const { toast } = useToast();
@@ -152,7 +154,11 @@ export function ConfirmTransaction({
 
   return (
     <ExecutionContainer
-      title={`Review Transaction${transactions.length > 1 ? "s" : ""}`}
+      title={
+        advancedView
+          ? `Review Transaction${transactions.length > 1 ? "s" : ""}`
+          : "Review request"
+      }
       description={origin}
       executionError={error || executionError}
       transactions={transactions}

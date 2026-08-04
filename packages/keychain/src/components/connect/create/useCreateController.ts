@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
-import { useConnection } from "@/hooks/connection";
+import { useConnection, type SessionChainPolicies } from "@/hooks/connection";
 import { useToast } from "@/context/toast";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
@@ -154,6 +154,7 @@ const createSession = async ({
   controller,
   origin,
   policies,
+  chainPolicies,
   params,
   handleCompletion,
   closeModal,
@@ -165,6 +166,7 @@ const createSession = async ({
   controller: Controller;
   origin: string;
   policies?: ParsedSessionPolicies;
+  chainPolicies?: SessionChainPolicies;
   params?: ReturnType<typeof parseConnectParams>;
   handleCompletion: () => void;
   closeModal?: () => void;
@@ -215,6 +217,7 @@ const createSession = async ({
       controller,
       origin,
       policies,
+      chainPolicies,
     });
     currentParams.resolve?.(
       createConnectReply(controller.address(), isNewController, canKeepOpen),
@@ -344,6 +347,7 @@ export function useCreateController({
     chainId,
     setController,
     policies,
+    chainPolicies,
     isConfigLoading,
     isPoliciesResolved,
     locationGate,
@@ -355,9 +359,8 @@ export function useCreateController({
   const canKeepOpen = supportsConnectKeepOpen(controllerVersion, !isIframe());
 
   // When location gate is configured and not yet verified, skip auto-session
-  // creation and connect resolution. The natural re-render will show LocationGate
-  // (since the URL is still /location-gate), and after verification LocationGate
-  // navigates to /connect where ConnectRoute handles session + resolution.
+  // creation and connect resolution. Once authentication sets the controller,
+  // ConnectRoute redirects to LocationGate and resumes after verification.
   const locationGatePending =
     hasConfiguredLocationGate(locationGate) && !locationGateVerified;
 
@@ -367,7 +370,7 @@ export function useCreateController({
   }, [searchParams]);
   const handleCompletion = useRouteCompletion();
   const hasPolicies = !!policies;
-  const shouldAutoCreateSession = canAutoCreateSession(policies);
+  const shouldAutoCreateSession = canAutoCreateSession(policies, chainPolicies);
 
   const {
     signup: signupWithWebauthn,
@@ -552,9 +555,9 @@ export function useCreateController({
         // }
 
         // If location gate is pending, skip session creation and connect
-        // resolution. The re-render will show LocationGate at the current URL;
-        // after verification it navigates to /connect where ConnectRoute handles
-        // session creation and resolution.
+        // resolution. The controller re-render lets ConnectRoute redirect to
+        // LocationGate; after verification, ConnectRoute handles session
+        // creation and resolution.
         if (locationGatePending) {
           return;
         }
@@ -565,6 +568,7 @@ export function useCreateController({
             controller,
             origin: effectiveOrigin,
             policies,
+            chainPolicies,
             params,
             handleCompletion,
             searchParams,
@@ -580,6 +584,7 @@ export function useCreateController({
       }
     },
     [
+      chainPolicies,
       setController,
       origin,
       policies,
@@ -868,9 +873,9 @@ export function useCreateController({
       // }
 
       // If location gate is pending, skip session creation and connect
-      // resolution. The re-render will show LocationGate at the current URL;
-      // after verification it navigates to /connect where ConnectRoute handles
-      // session creation and resolution.
+      // resolution. The controller re-render lets ConnectRoute redirect to
+      // LocationGate; after verification, ConnectRoute handles session
+      // creation and resolution.
       if (locationGatePending) {
         return;
       }
@@ -881,6 +886,7 @@ export function useCreateController({
           controller: loginRet.controller,
           origin: effectiveOrigin,
           policies,
+          chainPolicies,
           params,
           handleCompletion,
           searchParams,
@@ -895,6 +901,7 @@ export function useCreateController({
       }
     },
     [
+      chainPolicies,
       origin,
       setController,
       policies,
@@ -995,6 +1002,7 @@ export function useCreateController({
               controller: loginController.controller,
               origin,
               policies,
+              chainPolicies,
               params,
               handleCompletion,
               searchParams,
@@ -1108,6 +1116,7 @@ export function useCreateController({
       });
     },
     [
+      chainPolicies,
       isSlot,
       loginWithWebauthn,
       loginWithWebauthnPopup,

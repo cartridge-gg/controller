@@ -150,6 +150,8 @@ interface SessionRequestedProps {
 interface SessionApprovedProps {
   policy_count: number;
   duration_ms: number;
+  /** Number of chains covered by a multichain session approval. */
+  chain_count?: number;
 }
 interface SessionRejectedProps {
   duration_ms: number;

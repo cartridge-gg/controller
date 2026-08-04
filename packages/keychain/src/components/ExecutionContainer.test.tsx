@@ -4,6 +4,7 @@ import { ExecutionContainer } from "./ExecutionContainer";
 import { describe, expect, beforeEach, it, vi } from "vitest";
 import { renderWithConnection } from "@/test/mocks/connection";
 import { renderWithProviders } from "@/test/mocks/providers";
+import { FeatureProvider } from "@/hooks/features";
 
 // Mock the tokens hook for ExecutionContainer tests
 vi.mock("@/hooks/tokens", () => ({
@@ -184,13 +185,15 @@ describe("ExecutionContainer", () => {
   it("shows deploy view when controller is not deployed", async () => {
     await act(async () => {
       renderWithConnection(
-        <ExecutionContainer
-          {...defaultProps}
-          executionError={{
-            code: 112, // ErrorCode.CartridgeControllerNotDeployed,
-            message: "Controller not deployed",
-          }}
-        />,
+        <FeatureProvider>
+          <ExecutionContainer
+            {...defaultProps}
+            executionError={{
+              code: 112, // ErrorCode.CartridgeControllerNotDeployed,
+              message: "Controller not deployed",
+            }}
+          />
+        </FeatureProvider>,
       );
     });
 
@@ -200,13 +203,15 @@ describe("ExecutionContainer", () => {
   it("submits without a deploy screen when not deployed on an appchain", async () => {
     await act(async () => {
       renderWithConnection(
-        <ExecutionContainer
-          {...defaultProps}
-          executionError={{
-            code: 112, // ErrorCode.CartridgeControllerNotDeployed,
-            message: "Controller not deployed",
-          }}
-        />,
+        <FeatureProvider>
+          <ExecutionContainer
+            {...defaultProps}
+            executionError={{
+              code: 112, // ErrorCode.CartridgeControllerNotDeployed,
+              message: "Controller not deployed",
+            }}
+          />
+        </FeatureProvider>,
         {
           // On an appchain the controller deploys itself on first execute, so the
           // transaction submits directly rather than diverting to the
@@ -223,13 +228,15 @@ describe("ExecutionContainer", () => {
   it("shows funding view when balance is insufficient", async () => {
     await act(async () => {
       renderWithProviders(
-        <ExecutionContainer
-          {...defaultProps}
-          executionError={{
-            code: 113, // ErrorCode.InsufficientBalance,
-            message: "Insufficient balance",
-          }}
-        />,
+        <FeatureProvider>
+          <ExecutionContainer
+            {...defaultProps}
+            executionError={{
+              code: 113, // ErrorCode.InsufficientBalance,
+              message: "Insufficient balance",
+            }}
+          />
+        </FeatureProvider>,
         providersConfig,
       );
     });
@@ -263,13 +270,15 @@ describe("ExecutionContainer", () => {
   it("shows continue button for already registered session", async () => {
     await act(async () => {
       renderWithConnection(
-        <ExecutionContainer
-          {...defaultProps}
-          executionError={{
-            code: 132, // ErrorCode.SessionAlreadyRegistered,
-            message: "Session already registered",
-          }}
-        />,
+        <FeatureProvider>
+          <ExecutionContainer
+            {...defaultProps}
+            executionError={{
+              code: 132, // ErrorCode.SessionAlreadyRegistered,
+              message: "Session already registered",
+            }}
+          />
+        </FeatureProvider>,
       );
     });
 

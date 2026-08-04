@@ -16,7 +16,7 @@ import {
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
-import { ErrorAlert } from "@/components/ErrorAlert";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { Network } from "../types";
 import { useConnection } from "@/hooks/connection";
 
@@ -267,7 +267,7 @@ export function SelectWallet() {
       </LayoutContent>
 
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error && <ControllerErrorAlert error={error} />}
         {!hasAnyWallets && (
           <Button variant="secondary" onClick={() => goBack()}>
             Cancel

@@ -21,6 +21,7 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToriiCollection, useToriiCollections } from "@/hooks/collection";
+import { getTokenImageFallbacks } from "@/helpers/torii-url";
 import { useToast } from "@/context/toast";
 import { useTokens } from "@/hooks/token";
 import { useNavigation } from "@/context/navigation";
@@ -184,13 +185,13 @@ export function CollectiblePurchase() {
         } catch {
           tokenName = asset.name;
         }
-        const newImage = toriiUrl
-          ? `${toriiUrl}/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`
-          : undefined;
-        const oldImage = toriiUrl
-          ? `${toriiUrl}/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`
-          : undefined;
-        const images = [newImage, oldImage].filter(Boolean) as string[];
+        const images = toriiUrl
+          ? getTokenImageFallbacks(
+              toriiUrl,
+              contractAddress,
+              asset.token_id ?? "0x0",
+            )
+          : [];
         return {
           orderId: order.id,
           images,

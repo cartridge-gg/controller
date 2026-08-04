@@ -1,5 +1,5 @@
 import React from "react";
-import { ErrorAlert } from "@/components/ErrorAlert";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import {
   useNavigation,
   useStarterpackContext,
@@ -80,16 +80,20 @@ export function PurchaseStarterpack() {
       // store bundle info into provider before navigating to checkout
       const registryAddress = searchParams.get("registryAddress");
       const shareMessage = searchParams.get("shareMessage");
+      const singlePurchaseOnly =
+        searchParams.get("singlePurchaseOnly") === "true";
       setBundle(
         Number(bundleId),
         registryAddress!,
         shareMessage ? { shareMessage } : undefined,
+        singlePurchaseOnly,
       );
     } else if (starterpackId) {
       // store starterpack info into provider before navigating to checkout
       setStarterpack(
         starterpackId,
         import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
+        searchParams.get("singlePurchaseOnly") === "true",
       );
     }
   }, [
@@ -166,7 +170,7 @@ export function PurchaseStarterpack() {
         />
         <LayoutContent />
         <LayoutFooter>
-          <ErrorAlert title="Error" description={displayError.message} />
+          <ControllerErrorAlert error={displayError} />
         </LayoutFooter>
       </>
     );
@@ -228,7 +232,7 @@ export function ClaimStarterPackInner({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error && <ControllerErrorAlert error={error} />}
         {!error && (
           <Card>
             <CardContent
@@ -287,6 +291,7 @@ export function OnchainStarterPackInner({
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();
+  const { singlePurchaseOnly } = useStarterpackContext();
   const {
     selectedWallet,
     quantity,
@@ -340,7 +345,7 @@ export function OnchainStarterPackInner({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error && <ControllerErrorAlert error={error} />}
 
         {/* Insufficient Liquidity Warning - only show if we need conversion */}
         {conversionError && needsConversion && (
@@ -377,26 +382,30 @@ export function OnchainStarterPackInner({
         </div>
         {quote && <OnchainCostBreakdown quote={quote} />}
         <div className="flex flex-row gap-3">
-          <Button
-            variant="secondary"
-            onClick={decrementQuantity}
-            disabled={quantity <= 1 || disableActions}
-          >
-            <MinusIcon size="xs" />
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={incrementQuantity}
-            disabled={disableActions}
-          >
-            <PlusIcon size="xs" variant="solid" />
-          </Button>
+          {!singlePurchaseOnly && (
+            <>
+              <Button
+                variant="secondary"
+                onClick={decrementQuantity}
+                disabled={quantity <= 1 || disableActions}
+              >
+                <MinusIcon size="xs" />
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={incrementQuantity}
+                disabled={disableActions}
+              >
+                <PlusIcon size="xs" variant="solid" />
+              </Button>
+            </>
+          )}
           <Button
             className="w-full"
             onClick={onProceed}
             disabled={disableActions}
           >
-            Buy {quantity}
+            {singlePurchaseOnly ? "Buy" : `Buy ${quantity}`}
           </Button>
         </div>
       </LayoutFooter>

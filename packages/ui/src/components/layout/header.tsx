@@ -8,7 +8,7 @@ import {
 } from "@/components/icons";
 import { Network } from "@/components/network";
 import { Button } from "@/components/primitives/button";
-import { useUI } from "@/hooks";
+import { useAdvancedView, useUI } from "@/hooks";
 import { ConnectionTooltip, Thumbnail } from "@/index";
 import { cn, isIframe } from "@/utils";
 import { useMemo } from "react";
@@ -27,6 +27,8 @@ export type HeaderProps = HeaderInnerProps & {
   onOpenSettings?: () => void;
   onDeposit?: () => void;
   onWithdraw?: () => void;
+  /** Renders the Withdraw button disabled (e.g. non-US or signed-out users). */
+  withdrawDisabled?: boolean;
   onLogout?: () => void;
 };
 
@@ -40,8 +42,10 @@ export function LayoutHeader({
   onOpenSettings,
   onDeposit,
   onWithdraw,
+  withdrawDisabled,
   ...innerProps
 }: HeaderProps) {
+  const advancedView = useAdvancedView();
   const {
     account,
     chainId,
@@ -149,11 +153,12 @@ export function LayoutHeader({
                   }
                   onDeposit={onDeposit}
                   onWithdraw={onWithdraw}
+                  withdrawDisabled={withdrawDisabled}
                   onLogout={onLogout}
                 />
               </>
             ) : (
-              !hideNetwork && <Network chainId={chainId} />
+              !hideNetwork && advancedView && <Network chainId={chainId} />
             ))}
 
           {openSettings && !hideSettings && (

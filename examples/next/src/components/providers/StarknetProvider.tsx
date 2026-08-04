@@ -167,29 +167,33 @@ const provider = jsonRpcProvider({
 });
 
 const getKeychainUrl = () => {
+  const configuredUrl = process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL;
+
   if (
     process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" &&
     process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF
   ) {
-    let branchName: string;
+    let branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
+      /[^a-zA-Z0-9-]/g,
+      "-",
+    );
 
-    const url = window.location.href;
-    const match = url.match(/git-([a-zA-Z0-9-]+)\.preview/);
+    // Some Vercel builds report the fallback branch name "update-ui". In
+    // that case, recover the branch name from the current URL.
+    if (branchName === "update-ui") {
+      const match = window.location.href.match(/git-([a-zA-Z0-9-]+)\.preview/);
 
-    if (match && match[1]) {
-      branchName = match[1];
-    } else {
-      branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
-        /[^a-zA-Z0-9-]/g,
-        "-",
-      );
+      if (match && match[1]) {
+        branchName = match[1];
+      }
     }
 
-    const keychainUrl = `https://keychain-git-${branchName}.preview.cartridge.gg/`;
+    const keychainPreviewLabel = `keychain-git-${branchName}`;
+    const keychainUrl = `https://${keychainPreviewLabel}.preview.cartridge.gg/`;
 
     return keychainUrl;
   } else {
-    return process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL;
+    return configuredUrl;
   }
 };
 
@@ -258,32 +262,32 @@ export const presets = {
   none: {},
   nums: {
     // nums (achievements, quests)
-    slot: "nums-mainnet",
     namespace: "NUMS",
     preset: "nums",
+    slot: "nums-mainnet",
   },
   "loot-survivor": {
     // Loot Survivor (no achievements, no quests)
     namespace: "ls_0_0_9",
-    slot: "pg-mainnet-10",
     preset: "loot-survivor",
+    // slot: "pg-mainnet-10",
   },
   summit: {
     // Summit (no achievements, no quests)
     namespace: "relayer_0_0_1",
-    slot: "pg-mainnet-10",
     preset: "savage-summit",
+    // slot: "pg-mainnet-10",
   },
   pistols: {
     // Pistols (achievements, no quests)
-    slot: "pistols-mainnet-2",
     namespace: "pistols",
     preset: "pistols",
+    // slot: "pistols-mainnet-2",
   },
   cagecalls: {
-    // slot: "cagecalls-mainnet",
-    // namespace: "cagecalls",
+    namespace: "cagecalls",
     preset: "cage-calls",
+    // slot: "cagecalls-mainnet",
   },
   "jokers-of-neon": {
     namespace: "jokers_of_neon_core",
@@ -303,6 +307,10 @@ export const controllerConnector = new ControllerConnector({
   defaultChainId, // if not mainnet, only the original signer will be shown
   url: getKeychainUrl(),
   signupOptions,
+  defaultPaymentMethod: "credit-card",
+  // Exercise the card UI before the production Coinflow integration is active.
+  // Sandbox payments intentionally do not grant spendable credits.
+  coinflowSandbox: true,
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   shouldOverridePresetPolicies: overridePolicies,
@@ -313,7 +321,7 @@ export const controllerConnector = new ControllerConnector({
   ...(controllerPreset ? presets[controllerPreset] : {}),
   /// slot instance for tokens
   // slot: "pg-mainnet-10", // build torii url
-  toriiUrl: "https://api.cartridge.gg/x/pg-mainnet-10/torii",
+  // toriiUrl: "https://api.cartridge.gg/x/pg-mainnet-10/torii",
   // toriiUrl: "http://localhost:8080",
 });
 

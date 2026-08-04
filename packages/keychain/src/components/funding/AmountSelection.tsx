@@ -24,12 +24,31 @@ export function AmountSelection({
   maxAmount,
   onChange,
 }: AmountSelectionProps) {
-  const [selectedAmount, setSelectedAmount] = useState<number | undefined>(
-    creditAmounts[0],
+  const firstAvailablePreset = creditAmounts.find(
+    (value) =>
+      (minAmount === undefined || value >= minAmount) &&
+      (maxAmount === undefined || value <= maxAmount),
   );
-  const [custom, setCustom] = useState<boolean>(false);
+  const [selectedAmount, setSelectedAmount] = useState<number | undefined>(
+    firstAvailablePreset ?? minAmount ?? creditAmounts[0],
+  );
+  const [custom, setCustom] = useState<boolean>(
+    firstAvailablePreset === undefined,
+  );
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const selectionIsInRange =
+      selectedAmount !== undefined &&
+      (minAmount === undefined || selectedAmount >= minAmount) &&
+      (maxAmount === undefined || selectedAmount <= maxAmount);
+    if (selectionIsInRange) return;
+
+    setSelectedAmount(firstAvailablePreset ?? minAmount);
+    setCustom(firstAvailablePreset === undefined);
+    setError(null);
+  }, [firstAvailablePreset, maxAmount, minAmount, selectedAmount]);
 
   useEffect(() => {
     onChange(selectedAmount && !error ? selectedAmount : 0);
@@ -49,28 +68,31 @@ export function AmountSelection({
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3 text-sm">
-        {creditAmounts.map((value) => (
-          <Button
-            key={value}
-            variant="secondary"
-            className={cn(
-              "font-sans font-medium w-full tracking-normal",
-              value === selectedAmount && !custom
-                ? "bg-background-300 text-foreground-100 hover:bg-background-400 hover:text-foreground-100 "
-                : "bg-background-100 text-foreground-300 hover:bg-background-300 hover:text-foreground-100 ",
-            )}
-            disabled={lockSelection}
-            onClick={() => {
-              setCustom(false);
-              setSelectedAmount(value);
-              // Presets are always in range — drop any error left over from
-              // the custom input, or the sync effect keeps emitting 0.
-              setError(null);
-            }}
-          >
-            {`$${value}`}
-          </Button>
-        ))}
+        {creditAmounts.map((value) => {
+          const isOutOfRange =
+            (minAmount !== undefined && value < minAmount) ||
+            (maxAmount !== undefined && value > maxAmount);
+          return (
+            <Button
+              key={value}
+              variant="secondary"
+              className={cn(
+                "font-sans font-medium w-full tracking-normal",
+                value === selectedAmount && !custom
+                  ? "bg-background-300 text-foreground-100 hover:bg-background-400 hover:text-foreground-100 "
+                  : "bg-background-100 text-foreground-300 hover:bg-background-300 hover:text-foreground-100 ",
+              )}
+              disabled={lockSelection || isOutOfRange}
+              onClick={() => {
+                setCustom(false);
+                setSelectedAmount(value);
+                setError(null);
+              }}
+            >
+              {`$${value}`}
+            </Button>
+          );
+        })}
         {enableCustom && (
           <Button
             variant="secondary"

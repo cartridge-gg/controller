@@ -1,4 +1,10 @@
-import { AchievementPlayerAvatar, ActivityDetail, ExternalIcon } from "@/index";
+import {
+  AchievementPlayerAvatar,
+  ActivityDetail,
+  AdvancedDetails,
+  AdvancedLink,
+  ExternalIcon,
+} from "@/index";
 import { cn, formatAddress, isPublicChain, VoyagerUrl } from "@/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { constants, getChecksumAddress } from "starknet";
@@ -49,31 +55,33 @@ export function CollectibleDetails({
           </div>
         </ActivityDetail>
       )}
-      <ActivityDetail label="Contract Address">
-        {isPublicChain(chainId) ? (
-          <a
-            href={VoyagerUrl(chainId).contract(address)}
-            draggable={false}
-            className="flex items-center gap-x-1.5 text-sm"
-            target="_blank"
-          >
-            <div className="font-medium text-sm">
+      <AdvancedDetails>
+        <ActivityDetail label="Contract Address">
+          {isPublicChain(chainId) ? (
+            <AdvancedLink
+              href={VoyagerUrl(chainId).contract(address)}
+              draggable={false}
+              className="flex items-center gap-x-1.5 text-sm"
+              target="_blank"
+            >
+              <div className="font-medium text-sm">
+                {formatAddress(getChecksumAddress(address), { size: "xs" })}
+              </div>
+              <ExternalIcon size="sm" />
+            </AdvancedLink>
+          ) : (
+            <div className="text-sm">
               {formatAddress(getChecksumAddress(address), { size: "xs" })}
             </div>
-            <ExternalIcon size="sm" />
-          </a>
-        ) : (
-          <div className="text-sm">
-            {formatAddress(getChecksumAddress(address), { size: "xs" })}
-          </div>
-        )}
-      </ActivityDetail>
-      <ActivityDetail label="Token ID">
-        {tokenId.startsWith("0x") ? hexToNumber(tokenId as Hex) : tokenId}
-      </ActivityDetail>
-      <ActivityDetail className="rounded-b" label="Token Standard">
-        {standard}
-      </ActivityDetail>
+          )}
+        </ActivityDetail>
+        <ActivityDetail label="Token ID">
+          {tokenId.startsWith("0x") ? hexToNumber(tokenId as Hex) : tokenId}
+        </ActivityDetail>
+        <ActivityDetail className="rounded-b" label="Token Standard">
+          {standard}
+        </ActivityDetail>
+      </AdvancedDetails>
     </ActivityDetails>
   );
 }

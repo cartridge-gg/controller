@@ -18,6 +18,7 @@ import {
 import { RevealState, RewardType } from "./types";
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
+import { useAdvancedView } from "@/hooks/features";
 import { CheckIcon } from "./assets/check";
 import { useMerkleClaim } from "@/hooks/merkle-claim";
 import { hash } from "starknet";
@@ -54,6 +55,7 @@ export function BoosterPack() {
   const { privateKey } = useParams<{ privateKey: string }>();
   const account = useAccount();
   const { controller } = useConnection();
+  const advancedView = useAdvancedView();
 
   // Embla carousel - responsive configuration
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -594,7 +596,11 @@ export function BoosterPack() {
           {/* Error Message */}
           {error ? (
             <div className="backdrop-blur-sm bg-red-900/80 px-4 py-3 rounded-lg max-w-md text-center text-xs">
-              <p className="text-red-200 text-sm">{error}</p>
+              <p className="text-red-200 text-sm">
+                {advancedView
+                  ? error
+                  : "The reward could not be claimed. Please try again."}
+              </p>
             </div>
           ) : null}
 

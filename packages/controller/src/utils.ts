@@ -61,6 +61,30 @@ export function getPresetSessionPolicies(
   return toSessionPolicies(chainConfig.policies as Policies);
 }
 
+/**
+ * Resolves preset session policies for every requested chain.
+ *
+ * Unlike `getPresetSessionPolicies`, a missing chain is an error: multichain
+ * sessions are an explicit opt-in and silently skipping a chain would create
+ * fewer sessions than the dapp asked the user to approve.
+ */
+export function getPresetSessionPoliciesForChains(
+  config: Record<string, unknown>,
+  chainIds: string[],
+): Map<string, SessionPolicies> {
+  const result = new Map<string, SessionPolicies>();
+  for (const chainId of chainIds) {
+    const policies = getPresetSessionPolicies(config, chainId);
+    if (!policies) {
+      throw new Error(
+        `No policies found for chain ${shortString.decodeShortString(chainId)} (${chainId}) in preset config.`,
+      );
+    }
+    result.set(chainId, policies);
+  }
+  return result;
+}
+
 export function toSessionPolicies(policies: Policies): SessionPolicies {
   return Array.isArray(policies)
     ? policies.reduce<SessionPolicies>(

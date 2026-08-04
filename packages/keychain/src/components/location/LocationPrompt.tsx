@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Button,
   GlobeIcon,
@@ -16,6 +16,9 @@ import {
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseLocationPromptParams } from "@/utils/connection/location";
 import { useNavigation } from "@/context";
+import { useConnection } from "@/hooks/connection";
+import { getLocationPermissionHelp, getSupportedUSStates } from "./location-ui";
+import { USMap } from "./USMap";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -29,8 +32,21 @@ export function LocationPrompt() {
   const handleCompletion = useRouteCompletion();
   const { cancelWithoutClosing } = useRouteCallbacks(params, CANCEL_RESPONSE);
   const { setShowClose } = useNavigation();
+  const { locationGate } = useConnection();
   const [state, setState] = useState<LocationState>("idle");
   const [error, setError] = useState<string | null>(null);
+
+  const supportedUSStates = useMemo(
+    () => getSupportedUSStates(locationGate),
+    [locationGate],
+  );
+  const permissionHelp = useMemo(
+    () =>
+      getLocationPermissionHelp(
+        typeof navigator === "undefined" ? "" : navigator.userAgent,
+      ),
+    [],
+  );
 
   useEffect(() => {
     setShowClose(true);
@@ -100,7 +116,8 @@ export function LocationPrompt() {
         title="Location Verification"
         icon={<GlobeIcon variant="solid" size="lg" />}
       />
-      <LayoutContent className="p-4">
+      <LayoutContent className="p-4 gap-3">
+        <USMap supportedStates={supportedUSStates} />
         <p className="text-sm text-foreground-300 leading-relaxed">
           This game needs your location to verify eligibility. We'll share your
           location with the game to complete verification.
@@ -108,7 +125,27 @@ export function LocationPrompt() {
       </LayoutContent>
       <LayoutFooter>
         {error && (
-          <ErrorAlert title="Error" description={error} isExpanded={true} />
+          <ErrorAlert
+            title="Error"
+            description={
+              error === "Location permission was denied." ? (
+                <>
+                  <span>{error} </span>
+                  <a
+                    href={permissionHelp.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    Learn how to enable location in {permissionHelp.name}.
+                  </a>
+                </>
+              ) : (
+                error
+              )
+            }
+            isExpanded={true}
+          />
         )}
         <Button
           variant="primary"

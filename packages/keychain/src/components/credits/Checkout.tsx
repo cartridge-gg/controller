@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import {
-  Button,
-  Drawer,
-  DrawerContent,
-  DepositIcon,
-} from "@cartridge/controller-ui";
+import { Button, Drawer, DrawerContent } from "@cartridge/controller-ui";
 import { useTokens } from "@/hooks/token";
 import { ConfirmingTransaction } from "@/components/purchase/pending/confirming-transaction";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
@@ -14,6 +9,7 @@ import { ControllerCheckout } from "@/components/purchase/checkout/controller";
 import { useCreditsContext } from "./provider";
 import { CoinflowCreditsCheckout } from "./CoinflowCreditsCheckout";
 import { CoinbaseCreditsCheckout } from "./CoinbaseCreditsCheckout";
+import { CoinflowSettlementPendingError } from "@/hooks/payments/coinflow";
 
 interface CheckoutProps {
   isOpen: boolean;
@@ -46,20 +42,28 @@ export function Checkout({
   onChangeAmount,
 }: CheckoutProps) {
   const { credits } = useTokens();
-  const { onDepositStarted, onDepositFinished, depositInProgress } =
-    useCreditsContext();
+  const {
+    onDepositStarted,
+    onDepositFinished,
+    depositInProgress,
+    depositRequest,
+  } = useCreditsContext();
 
   // Controller rail: execute() resolves only after the backend confirms the
   // deposit and grants the credits, so completing is immediately final.
   const onComplete = useCallback(async () => {
     await credits.refetch?.();
-    await onDepositFinished();
+    if (depositRequest?.attemptId) {
+      await onDepositFinished(depositRequest.attemptId);
+    }
     onClose();
-  }, [credits, onDepositFinished, onClose]);
+  }, [credits, onDepositFinished, onClose, depositRequest]);
 
   // Fiat rails re-render their completion trigger (e.g. the Coinbase status
   // effect) until the status view replaces them — run the settlement once.
   const settlingRef = useRef(false);
+  const activeAttemptIdRef = useRef(depositRequest?.attemptId);
+  activeAttemptIdRef.current = depositRequest?.attemptId;
   useEffect(() => {
     if (!isOpen) settlingRef.current = false;
   }, [isOpen]);
@@ -68,15 +72,34 @@ export function Checkout({
     async (settle: () => Promise<void>) => {
       if (settlingRef.current || !paymentMethod) return;
       settlingRef.current = true;
-      onDepositStarted(paymentMethod, amount);
+      const attemptId = onDepositStarted(paymentMethod, amount);
       try {
-        await settle();
+        // A Coinflow polling window expiring is not a terminal payment failure.
+        // Resume polling while this remains the active deposit attempt.
+        while (true) {
+          try {
+            await settle();
+            break;
+          } catch (error) {
+            if (
+              error instanceof CoinflowSettlementPendingError &&
+              activeAttemptIdRef.current === attemptId
+            ) {
+              continue;
+            }
+            if (activeAttemptIdRef.current !== attemptId) return;
+            throw error;
+          }
+        }
         await credits.refetch?.();
-        await onDepositFinished();
+        await onDepositFinished(attemptId);
       } catch (e) {
         // Refetch regardless — on a poll timeout the credits may still land.
         await credits.refetch?.();
-        await onDepositFinished(e instanceof Error ? e.message : String(e));
+        await onDepositFinished(
+          attemptId,
+          e instanceof Error ? e.message : String(e),
+        );
       }
     },
     [paymentMethod, amount, onDepositStarted, onDepositFinished, credits],
@@ -90,10 +113,7 @@ export function Checkout({
     const { status } = depositInProgress;
     return (
       <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-        <DrawerContent
-          title="Deposit USD"
-          icon={<DepositIcon variant="solid" />}
-        >
+        <DrawerContent title="Deposit USD">
           <div className="flex flex-col gap-4">
             {status === "error" ? (
               <ErrorCard
@@ -159,7 +179,7 @@ export function Checkout({
   // Controller (USDC deposit) — review + deposit live in ControllerCheckout.
   return (
     <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-      <DrawerContent title="Deposit USD" icon={<DepositIcon variant="solid" />}>
+      <DrawerContent title="Deposit USD">
         <ControllerRailProvider amount={amount} onComplete={onComplete}>
           <ControllerCheckout
             paymentMethod={paymentMethod}

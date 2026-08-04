@@ -38,7 +38,6 @@ import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
 import { Execute } from "./Execute";
 import { SignMessage } from "./SignMessage";
-import { LocationGate } from "./location/LocationGate";
 import { LocationPrompt } from "./location/LocationPrompt";
 import { ConnectRoute } from "./ConnectRoute";
 import { UpdateSessionRoute } from "./UpdateSessionRoute";
@@ -67,7 +66,6 @@ import { PurchaseStarterpack } from "./purchase/starterpack/starterpack";
 import { CoinbasePopup } from "./coinbase-popup";
 import { PopupAuth } from "./PopupAuth";
 import { Welcome } from "./connect/create/Welcome";
-import { AgeGate } from "./identity/AgeGate";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -151,16 +149,6 @@ function Authentication() {
   // Update-session should bypass auth/login gating entirely so it never flashes
   // CreateController (login) while controller state settles.
   if (pathname.startsWith("/update-session")) {
-    return (
-      <Layout>
-        <Outlet />
-      </Layout>
-    );
-  }
-
-  // Location gate must render even without a controller so that new users
-  // verify their location before the connect flow proceeds.
-  if (!controller && pathname === "/location-gate") {
     return (
       <Layout>
         <Outlet />
@@ -310,12 +298,10 @@ export function App() {
         />
         <Route path="/execute" element={<Execute />} />
         <Route path="/sign-message" element={<SignMessage />} />
-        <Route path="/location-gate" element={<LocationGate />} />
         <Route path="/location" element={<LocationPrompt />} />
         <Route path="/deploy" element={<DeployController />} />
         <Route path="/connect" element={<ConnectRoute />} />
         <Route path="/welcome" element={<Welcome />} />
-        <Route path="/age-gate" element={<AgeGate />} />
         <Route path="/update-session" element={<UpdateSessionRoute />} />
         <Route
           path="/headless-approval/:requestId"

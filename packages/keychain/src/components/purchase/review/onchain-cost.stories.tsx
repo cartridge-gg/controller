@@ -5,6 +5,10 @@ import {
   OnchainPurchaseContextType,
   TokenOption,
 } from "@/context/starterpack/onchain-purchase";
+import {
+  CreditPurchaseContext,
+  CreditPurchaseContextType,
+} from "@/context/starterpack/credit-purchase";
 import { ReactNode } from "react";
 import { USDC_ICON } from "@/utils/ekubo";
 
@@ -23,7 +27,15 @@ const mockUsdcToken = {
 } satisfies TokenOption;
 
 // Mock provider for stories
-const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
+const MockOnchainPurchaseProvider = ({
+  children,
+  overrides,
+  creditOverrides,
+}: {
+  children: ReactNode;
+  overrides?: Partial<OnchainPurchaseContextType>;
+  creditOverrides?: Partial<CreditPurchaseContextType>;
+}) => {
   const mockValue: OnchainPurchaseContextType = {
     purchaseItems: [],
     purchaseDescription: undefined,
@@ -36,6 +48,7 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     walletAddress: undefined,
     clearSelectedWallet: () => {},
     availableTokens: [mockUsdcToken],
+    insufficientTokens: new Set<string>(),
     selectedToken: mockUsdcToken,
     setSelectedToken: () => {},
     convertedPrice: null,
@@ -87,9 +100,35 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
     submitCoinbaseLimitsUpgrade: async () => undefined,
   };
 
+  const mockCreditValue: CreditPurchaseContextType = {
+    usdAmount: 0,
+    setUsdAmount: () => {},
+    coinflowIntent: undefined,
+    coinflowQuote: undefined,
+    isCoinflowQuoteLoading: false,
+    coinflowEnv: "sandbox",
+    isCoinflowLoading: false,
+    creditsQuote: undefined,
+    isCreditsQuoteLoading: false,
+    creditsQuoteError: undefined,
+    creditsBalance: 0n,
+    refetchCreditsBalance: async () => 0n,
+    isCreditsBalanceLoading: false,
+    creditsBalanceError: undefined,
+    hasSufficientCredits: false,
+    isCreditsLoading: false,
+    creditsFulfillment: undefined,
+    onCreditCardPurchase: async () => {},
+    onCreditsPurchase: async () => {},
+  };
+
   return (
-    <OnchainPurchaseContext.Provider value={mockValue}>
-      {children}
+    <OnchainPurchaseContext.Provider value={{ ...mockValue, ...overrides }}>
+      <CreditPurchaseContext.Provider
+        value={{ ...mockCreditValue, ...creditOverrides }}
+      >
+        {children}
+      </CreditPurchaseContext.Provider>
     </OnchainPurchaseContext.Provider>
   );
 };
@@ -97,8 +136,11 @@ const MockOnchainPurchaseProvider = ({ children }: { children: ReactNode }) => {
 const meta = {
   component: OnchainCostBreakdown,
   decorators: [
-    (Story) => (
-      <MockOnchainPurchaseProvider>
+    (Story, { parameters }) => (
+      <MockOnchainPurchaseProvider
+        overrides={parameters.mockOverrides}
+        creditOverrides={parameters.mockCreditOverrides}
+      >
         <Story />
       </MockOnchainPurchaseProvider>
     ),
@@ -121,6 +163,60 @@ export const USDCPayment: Story = {
       protocolFee: 2500000n, // $2.50 protocol fee
       referralFee: 5000000n, // $5 USDC referral fee
       totalCost: 107500000n, // $107.50 total
+      paymentToken: USDC_ADDRESS,
+      paymentTokenMetadata: {
+        symbol: "USDC",
+        decimals: 6,
+      },
+    },
+    platform: "starknet",
+  },
+};
+
+// USD-equivalent prefix shown before the token amount when usdAmount is known
+export const USDCPaymentWithUsdPrefix: Story = {
+  parameters: {
+    mockOverrides: {
+      usdAmount: 107.5,
+    } satisfies Partial<OnchainPurchaseContextType>,
+  },
+  args: {
+    quote: {
+      basePrice: 100000000n, // $100 USDC (6 decimals)
+      protocolFee: 2500000n, // $2.50 protocol fee
+      referralFee: 5000000n, // $5 USDC referral fee
+      totalCost: 107500000n, // $107.50 total
+      paymentToken: USDC_ADDRESS,
+      paymentTokenMetadata: {
+        symbol: "USDC",
+        decimals: 6,
+      },
+    },
+    platform: "starknet",
+  },
+};
+
+export const CreditCardPurchase: Story = {
+  parameters: {
+    mockOverrides: {
+      isCoinflowSelected: true,
+    } satisfies Partial<OnchainPurchaseContextType>,
+    mockCreditOverrides: {
+      creditsQuote: {
+        requiredCredits: "200000000",
+        costInUsdc: "2000000",
+        paymentToken: USDC_ADDRESS,
+        paymentTokenAmount: "2000000",
+        needsSwap: false,
+      },
+    } satisfies Partial<CreditPurchaseContextType>,
+  },
+  args: {
+    quote: {
+      basePrice: 2000000n,
+      protocolFee: 0n,
+      referralFee: 0n,
+      totalCost: 2000000n,
       paymentToken: USDC_ADDRESS,
       paymentTokenMetadata: {
         symbol: "USDC",

@@ -1,5 +1,6 @@
 import { Item } from "@/context";
 import { TransactionPendingBase } from "./base";
+import { useAdvancedView } from "@/hooks/features";
 
 export interface PurchasePendingProps {
   name: string;
@@ -17,13 +18,19 @@ export function PurchasePending({
   transactionHash,
   onCompleted,
 }: PurchasePendingProps) {
+  const advancedView = useAdvancedView();
+
   return (
     <TransactionPendingBase
       headerTitle={`Purchasing ${name}`}
       items={items}
       transactionHash={transactionHash}
-      confirmingTitle="Confirming on Starknet"
-      completedTitle="Confirmed on Starknet"
+      confirmingTitle={
+        advancedView ? "Confirming on Starknet" : "Confirming purchase"
+      }
+      completedTitle={
+        advancedView ? "Confirmed on Starknet" : "Purchase complete"
+      }
       buttonText="Play"
       onCompleted={onCompleted}
       analyticsMethod="onchain"

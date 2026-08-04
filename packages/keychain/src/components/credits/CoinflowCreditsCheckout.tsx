@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Drawer, DrawerContent, DepositIcon } from "@cartridge/controller-ui";
+import { Drawer, DrawerContent } from "@cartridge/controller-ui";
 import { usdToCredits, MIN_CREDITS_PURCHASE_USD } from "@/utils/credits";
 import { ErrorCard } from "@/components/purchase/checkout/onchain/error";
 import {
@@ -7,8 +7,10 @@ import {
   type CoinflowRailContextValue,
 } from "@/components/purchase/checkout/rails";
 import { CoinflowDrawer } from "@/components/purchase/checkout/coinflow/drawer";
-import { convertCentsToDollars } from "@/components/purchase/review/cost";
-import { useUsdcToken } from "@/hooks/payments/usdc";
+import {
+  CREDITS_TOKEN,
+  convertCentsToDollars,
+} from "@/components/purchase/review/cost";
 import {
   useCoinflowCreditsPayment,
   useCoinflowIsMainnet,
@@ -32,7 +34,7 @@ interface CoinflowCreditsCheckoutProps {
 }
 
 /**
- * Credits checkout for the Coinflow (card) rail: review → verify (email) → pay.
+ * Credits checkout for the Coinflow (card) rail: review → pay.
  * The intent is created up front so the review can show the real total (incl.
  * fees) and surface any quote error; the same intent is reused by the
  * CoinflowDrawer in the pay phase.
@@ -47,7 +49,6 @@ export function CoinflowCreditsCheckout({
   onChangeAmount,
 }: CoinflowCreditsCheckoutProps) {
   const { createIntent, env, isLoading, error } = useCoinflowCreditsPayment();
-  const usdcToken = useUsdcToken();
   const { isCoinflowSandbox } = useCoinflowIsMainnet();
   const [intent, setIntent] = useState<CoinflowIntent>();
   const { phase, verifying, handleContinue, backToReview } =
@@ -106,16 +107,13 @@ export function CoinflowCreditsCheckout({
           rather than aborting the whole deposit. */}
       {verifying ? null : phase === "review" ? (
         <Drawer isOpen={isOpen} onClose={onClose} className="gap-4">
-          <DrawerContent
-            title="Deposit USD"
-            icon={<DepositIcon variant="solid" />}
-          >
+          <DrawerContent title="Deposit USD">
             <CheckoutReviewContent
               paymentMethod={paymentMethod}
               amount={amount}
               onChangeMethod={onChangeMethod}
               onChangeAmount={onChangeAmount}
-              costToken={usdcToken}
+              costToken={CREDITS_TOKEN}
               costValue={
                 intent ? (
                   <span className="text-foreground-100">
@@ -139,8 +137,8 @@ export function CoinflowCreditsCheckout({
                     {isCoinflowSandbox && (
                       <ErrorCard
                         variant="warning"
-                        title="Coinflow Sandbox Enabled"
-                        message="Card checkout will run in Coinflow's sandbox environment. No real charge will be made."
+                        title="Coinflow Sandbox Environment"
+                        message="No real charge will be made."
                       />
                     )}
                   </>

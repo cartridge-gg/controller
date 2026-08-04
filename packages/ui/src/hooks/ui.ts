@@ -1,4 +1,4 @@
-import { UIContext } from "@/context";
+import { UIContext } from "../context";
 import { useCallback, useContext, useState } from "react";
 
 export type Disclosure = {
@@ -33,4 +33,9 @@ export function useDisclosure(defaultOpen: boolean = false): Disclosure {
 
 export function useUI() {
   return useContext(UIContext);
+}
+
+export function useAdvancedView(): boolean {
+  const { advancedView } = useUI();
+  return advancedView ?? true;
 }

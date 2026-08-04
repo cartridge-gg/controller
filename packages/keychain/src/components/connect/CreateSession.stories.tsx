@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { constants, shortString } from "starknet";
 import { CreateSession } from "./CreateSession";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { parseSessionPolicies } from "@/hooks/session";
+import type { SessionChainPolicies } from "@/hooks/connection";
 
 const meta: Meta<typeof CreateSession> = {
   component: CreateSession,
@@ -174,6 +176,80 @@ export const Default: Story = {
       },
     }),
     onConnect: () => {},
+  },
+};
+
+// Multichain approval: a settlement chain + an appchain covered by a single
+// approval screen (SDK `multichainSessions` opt-in).
+const gameContractPolicies = (vrfAddress: string) => ({
+  contracts: {
+    "0x0726ff219937aeb721fe61449bfbe60be6abe4f9fd06e391ae0051ec20cc5da2": {
+      name: "Game Actions",
+      methods: [
+        { name: "Pull Orb", entrypoint: "pull", description: "Pull an orb" },
+        {
+          name: "Cash Out",
+          entrypoint: "cash_out",
+          description: "Cash out and end the game",
+        },
+      ],
+    },
+    [vrfAddress]: {
+      name: "VRF Provider",
+      methods: [{ name: "Request Random", entrypoint: "request_random" }],
+    },
+  },
+});
+
+export const MultichainVerified: Story = {
+  args: {
+    policies: parseSessionPolicies({
+      verified: true,
+      policies: gameContractPolicies(
+        "0x051Fea4450Da9D6aeE758BDEbA88B2f665bCbf549D2C61421AA724E9AC0Ced8F",
+      ),
+    }),
+    chainPolicies: [
+      {
+        chainId: constants.StarknetChainId.SN_SEPOLIA,
+        rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9",
+        policies: parseSessionPolicies({
+          verified: true,
+          policies: gameContractPolicies(
+            "0x051Fea4450Da9D6aeE758BDEbA88B2f665bCbf549D2C61421AA724E9AC0Ced8F",
+          ),
+        }),
+      },
+      {
+        chainId: shortString.encodeShortString("CARTRIDGE_TESTNET"),
+        rpcUrl: "https://api.cartridge.gg/x/gbomb/katana",
+        policies: parseSessionPolicies({
+          verified: true,
+          policies: gameContractPolicies(
+            "0x04da58da34ca055e21fdc1ea3e694b9ea88e1a0f0a5e0d9d3ca228cbf4de7490",
+          ),
+        }),
+      },
+    ],
+    onConnect: () => {},
+  },
+};
+
+export const MultichainUnverified: Story = {
+  args: {
+    ...MultichainVerified.args,
+    policies: parseSessionPolicies({
+      verified: false,
+      policies: gameContractPolicies(
+        "0x051Fea4450Da9D6aeE758BDEbA88B2f665bCbf549D2C61421AA724E9AC0Ced8F",
+      ),
+    }),
+    chainPolicies: (
+      MultichainVerified.args!.chainPolicies as SessionChainPolicies
+    ).map((chain) => ({
+      ...chain,
+      policies: { ...chain.policies, verified: false },
+    })),
   },
 };
 

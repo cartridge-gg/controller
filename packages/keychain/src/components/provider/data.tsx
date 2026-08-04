@@ -7,7 +7,7 @@ import {
 } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
-import { getToriiUrl } from "@/helpers/torii-url";
+import { getTokenImageFallbacks, getToriiUrl } from "@/helpers/torii-url";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/controller-ui/utils";
@@ -32,6 +32,8 @@ export interface CardProps {
   name: string;
   collection: string;
   image: string;
+  /** Fallback image candidates for the collectible variant, tried in order. */
+  images?: string[];
   title: string;
   color: string;
   website: string;
@@ -226,7 +228,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
               metadata.attributes?.find(
                 (attribute) => attribute.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
-            const image = `${toriiUrl ?? getToriiUrl(item.meta.project)}/static/${addAddressPadding(transfer.contractAddress)}/${transfer.tokenId}/image`;
+            const base = toriiUrl ?? getToriiUrl(item.meta.project);
+            const images = base
+              ? getTokenImageFallbacks(
+                  base,
+                  transfer.contractAddress,
+                  transfer.tokenId,
+                )
+              : [];
             const userAddress =
               BigInt(transfer.fromAddress) === BigInt(address)
                 ? transfer.toAddress
@@ -242,7 +251,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
               value: "",
               name: name || "",
               collection: transfer.name,
-              image: image,
+              image: images[0] || "",
+              images: images,
               title: "",
               color: theme.color,
               website: "",

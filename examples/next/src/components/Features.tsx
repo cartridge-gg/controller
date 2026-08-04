@@ -7,6 +7,7 @@ import { controllerConnector } from "./providers/StarknetProvider";
 
 const FEATURES = [
   "coinflow-support",
+  "coinflow-payouts",
   "coinflow-sandbox",
   "registered-accounts",
   "recovery-accounts",

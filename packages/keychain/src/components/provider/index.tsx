@@ -24,6 +24,7 @@ import { CartridgeAPIProvider } from "@cartridge/controller-ui/utils/api/cartrid
 import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
 import { IdentityProvider } from "@/components/identity/provider";
 import { CreditsProvider } from "@/components/credits/provider";
+import { WithdrawProvider } from "@/components/withdraw/provider";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { SpinnerIcon } from "@cartridge/controller-ui";
 
@@ -98,7 +99,7 @@ export function Provider({ children }: PropsWithChildren) {
                             >
                               <ToastProvider>
                                 <TokensProvider>
-                                  <ProfileArcadeProvider>
+                                  <ProfileArcadeProvider disabled={true}>
                                     <MarketplaceClientProvider
                                       config={marketplaceConfig}
                                     >
@@ -106,7 +107,9 @@ export function Provider({ children }: PropsWithChildren) {
                                         <StarterpackProviders>
                                           <IdentityProvider>
                                             <CreditsProvider>
-                                              {body}
+                                              <WithdrawProvider>
+                                                {body}
+                                              </WithdrawProvider>
                                             </CreditsProvider>
                                           </IdentityProvider>
                                         </StarterpackProviders>

@@ -24,7 +24,7 @@ export interface ActivityCollectibleCardProps
   address: string; // token address
   username?: string; // token owner username
   collection?: string;
-  image?: string; // token image
+  image?: string | string[]; // token image, with optional fallback candidates
   logo?: string; // game logo
   orderAmount?: string; // order amount
   orderImage?: string; // order token image

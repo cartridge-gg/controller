@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useConnection } from "../connection";
 import { useFeature } from "../features";
+import { useGeoLocation } from "../geo";
 import { request } from "@/utils/graphql";
 import {
   CoinflowPaymentDocument,
@@ -35,17 +36,31 @@ export type {
 // assignable to it.
 export type CoinflowIntent = Omit<CoinflowStarterpackIntent, "__typename">;
 
+const COINFLOW_US_ONLY_ERROR =
+  "Credit card checkout is only available in the United States.";
+
+export const resolveCoinflowMainnet = (
+  isMainnet: boolean,
+  configuredSandbox: boolean,
+  featureSandbox: boolean,
+) => isMainnet && !configuredSandbox && !featureSandbox;
+
 /**
  * Effective network for everything Coinflow. Coinflow runs in its sandbox
  * (UAT) environment whenever this is false: on non-mainnet chains, or on any
- * chain when the "coinflow-sandbox" feature flag is enabled. The backend
- * derives sandbox from `!isMainnet`, so this one value drives every Coinflow
- * route input, the card form's `env`, and the checkout sandbox warnings.
+ * chain when the Controller option or local "coinflow-sandbox" feature flag is
+ * enabled. The backend derives sandbox from `!isMainnet`, so this one value
+ * drives every Coinflow route input, the card form's `env`, and the checkout
+ * sandbox warnings.
  */
 export const useCoinflowIsMainnet = () => {
-  const { isMainnet } = useConnection();
-  const sandboxEnabled = useFeature("coinflow-sandbox");
-  const isCoinflowMainnet = isMainnet && !sandboxEnabled;
+  const { isMainnet, coinflowSandbox } = useConnection();
+  const featureSandbox = useFeature("coinflow-sandbox");
+  const isCoinflowMainnet = resolveCoinflowMainnet(
+    isMainnet,
+    coinflowSandbox,
+    featureSandbox,
+  );
   return {
     isCoinflowMainnet,
     isCoinflowSandbox: !isCoinflowMainnet,
@@ -54,6 +69,7 @@ export const useCoinflowIsMainnet = () => {
 
 const useCoinflowPayment = () => {
   const { controller } = useConnection();
+  const { isUS, countryCodeLoaded } = useGeoLocation();
   const [error, setError] = useState<Error | null>(null);
 
   const { isCoinflowMainnet } = useCoinflowIsMainnet();
@@ -71,6 +87,9 @@ const useCoinflowPayment = () => {
 
       try {
         setError(null);
+        if (!countryCodeLoaded || !isUS) {
+          throw new Error(COINFLOW_US_ONLY_ERROR);
+        }
 
         const result = await mutateAsync({
           input: {
@@ -85,7 +104,7 @@ const useCoinflowPayment = () => {
         throw e;
       }
     },
-    [controller, isCoinflowMainnet, mutateAsync],
+    [controller, countryCodeLoaded, isUS, isCoinflowMainnet, mutateAsync],
   );
 
   return {
@@ -111,6 +130,7 @@ export default useCoinflowPayment;
  */
 export const useCoinflowCreditsPayment = () => {
   const { controller } = useConnection();
+  const { isUS, countryCodeLoaded } = useGeoLocation();
   const [error, setError] = useState<Error | null>(null);
 
   const { isCoinflowMainnet } = useCoinflowIsMainnet();
@@ -125,6 +145,9 @@ export const useCoinflowCreditsPayment = () => {
 
       try {
         setError(null);
+        if (!countryCodeLoaded || !isUS) {
+          throw new Error(COINFLOW_US_ONLY_ERROR);
+        }
 
         const result = await mutateAsync({
           input: {
@@ -139,7 +162,7 @@ export const useCoinflowCreditsPayment = () => {
         throw e;
       }
     },
-    [controller, isCoinflowMainnet, mutateAsync],
+    [controller, countryCodeLoaded, isUS, isCoinflowMainnet, mutateAsync],
   );
 
   return {
@@ -155,6 +178,16 @@ export const useCoinflowCreditsPayment = () => {
 // ---------------------------------------------------------------------------
 
 const SETTLEMENT_POLL_INTERVAL_MS = 2_000;
+
+/** A polling window elapsed, but the payment has not terminally failed. */
+export class CoinflowSettlementPendingError extends Error {
+  constructor(public readonly paymentId: string) {
+    super(
+      "Your payment was accepted but is still settling. Your balance will update automatically once it completes.",
+    );
+    this.name = "CoinflowSettlementPendingError";
+  }
+}
 
 /**
  * Wait for a Coinflow payment to settle. `coinflowCardCheckout` resolves when
@@ -190,9 +223,7 @@ export async function waitForCoinflowSettlement(
     }
   }
 
-  throw new Error(
-    "Your payment was accepted but is still settling. Your balance will update automatically once it completes.",
-  );
+  throw new CoinflowSettlementPendingError(paymentId);
 }
 
 // ---------------------------------------------------------------------------
@@ -224,10 +255,13 @@ export const useCoinflowStarterpackQuote = ({
   enabled = true,
 }: UseCoinflowStarterpackQuoteParams) => {
   const { controller } = useConnection();
+  const { isUS, countryCodeLoaded } = useGeoLocation();
   const { isCoinflowMainnet } = useCoinflowIsMainnet();
 
   const isReady =
     enabled &&
+    countryCodeLoaded &&
+    isUS &&
     !!controller &&
     !!starterpackId &&
     !!registryAddress &&

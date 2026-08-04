@@ -264,6 +264,15 @@ export type IFrameOptions = {
   preset?: string;
 };
 
+/**
+ * A chain covered by a multichain session approval, resolved to its rpcUrl
+ * SDK-side so the keychain never re-derives chain ids from URLs.
+ */
+export type SessionChain = {
+  chainId: string;
+  rpcUrl: string;
+};
+
 export type Chain = {
   /** RPC url */
   rpcUrl: string;
@@ -279,6 +288,8 @@ export type ProviderOptions = {
   defaultChainId?: ChainId;
   chains?: Chain[];
 };
+
+export type DefaultPaymentMethod = "credit-card";
 
 export type KeychainOptions = IFrameOptions & {
   policies?: SessionPolicies;
@@ -296,8 +307,20 @@ export type KeychainOptions = IFrameOptions & {
   feeSource?: FeeSource;
   /** Signup options (the order of the options is reflected in the UI. It's recommended to group socials and wallets together ) */
   signupOptions?: AuthOptions;
+  /** Preferred fallback when no explicit choice or funded Controller token is available. */
+  defaultPaymentMethod?: DefaultPaymentMethod;
+  /** Use Coinflow's sandbox checkout, including on mainnet. Sandbox payments do not grant spendable credits. */
+  coinflowSandbox?: boolean;
   /** When true, manually provided policies will override preset policies. Default is false. */
   shouldOverridePresetPolicies?: boolean;
+  /**
+   * Explicit opt-in to multichain sessions: chain IDs covered by a single
+   * session approval flow. Each entry must correspond to a chain configured
+   * via `chains` (or a default Cartridge chain), and `policies` or `preset`
+   * must be provided. When absent, sessions are created for the active chain
+   * only (current behavior).
+   */
+  multichainSessions?: ChainId[];
   /** The project name of Slot instance. */
   slot?: string;
   /** The Torii indexer URL used to fetch tokens/collections. Takes precedence over `slot`. */
@@ -345,6 +368,8 @@ export type BundleOptions = {
   onPurchaseComplete?: () => void;
   /** Options for social claim conditional starterpack */
   socialClaimOptions?: SocialClaimOptions;
+  /** When true, hides the quantity selector and fixes the purchase to a single bundle */
+  singlePurchaseOnly?: boolean;
 };
 
 export type StarterpackOptions = {
@@ -352,6 +377,8 @@ export type StarterpackOptions = {
   preimage?: string;
   /** Callback fired after the Play button closes the starterpack modal */
   onPurchaseComplete?: () => void;
+  /** When true, hides the quantity selector and fixes the purchase to a single starterpack */
+  singlePurchaseOnly?: boolean;
 };
 
 export type MerkleDropsOptions = {

@@ -12,12 +12,14 @@ import {
 } from "@cartridge/controller-ui";
 import { useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useAdvancedView } from "@/hooks/features";
 
 /**
  * Standalone connect component for verified presets with no custom policies.
  * Used in standalone auth flow to request storage access and redirect back to the application.
  */
 export function StandaloneConnect({ username }: { username?: string }) {
+  const advancedView = useAdvancedView();
   const [searchParams] = useSearchParams();
   const { verified, theme, parent } = useConnection();
 
@@ -88,7 +90,10 @@ export function StandaloneConnect({ username }: { username?: string }) {
       // Redirect to application
       safeRedirect(redirectUrl, true);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to connect";
+      const errorMsg =
+        advancedView && err instanceof Error
+          ? err.message
+          : "Connection failed. Please try again.";
       console.error(
         "[Standalone Flow] StandaloneConnect: Error during connect:",
         err,
@@ -96,7 +101,7 @@ export function StandaloneConnect({ username }: { username?: string }) {
       setError(errorMsg);
       setIsConnecting(false);
     }
-  }, [redirectUrl, parent]);
+  }, [advancedView, redirectUrl, parent]);
 
   if (!redirectUrl) {
     return null;

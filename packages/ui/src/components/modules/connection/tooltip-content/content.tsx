@@ -1,5 +1,6 @@
 import {
   AchievementPlayerBadge,
+  AdvancedDetails,
   ArrowFromLineIcon,
   ArrowToLineIcon,
   Button,
@@ -51,6 +52,8 @@ export interface ConnectionTooltipContentProps
   onOpenSettings?: () => void;
   onDeposit?: () => void;
   onWithdraw?: () => void;
+  /** Renders the Withdraw button disabled (e.g. non-US or signed-out users). */
+  withdrawDisabled?: boolean;
   onLogout?: () => void;
 }
 
@@ -68,6 +71,7 @@ export const ConnectionTooltipContent = ({
   onOpenSettings,
   onDeposit,
   onWithdraw,
+  withdrawDisabled = false,
   onLogout,
   variant,
   className,
@@ -150,34 +154,36 @@ export const ConnectionTooltipContent = ({
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-px bg-background-200">
-        <div className="flex items-center justify-between gap-2 px-2 py-2.5 bg-background-150">
-          <p className="text-sm text-foreground-400 select-none">Address:</p>
-          <div onClick={() => setOpen?.(false)}>
-            <div
-              className="flex items-center gap-1 cursor-pointer text-foreground-300 hover:text-foreground-200"
-              onClick={onCopy}
-            >
-              <p className="text-sm font-normal">{formattedAddress}</p>
-              <CopyIcon size="sm" />
+      <AdvancedDetails>
+        <div className="flex flex-col gap-px bg-background-200">
+          <div className="flex items-center justify-between gap-2 px-2 py-2.5 bg-background-150">
+            <p className="text-sm text-foreground-400 select-none">Address:</p>
+            <div onClick={() => setOpen?.(false)}>
+              <div
+                className="flex items-center gap-1 cursor-pointer text-foreground-300 hover:text-foreground-200"
+                onClick={onCopy}
+              >
+                <p className="text-sm font-normal">{formattedAddress}</p>
+                <CopyIcon size="sm" />
+              </div>
+            </div>
+          </div>
+          <div
+            className={cn(
+              "flex items-center justify-between gap-2 px-2 py-2.5 bg-background-150",
+              hideNetwork && "hidden",
+            )}
+          >
+            <p className="text-sm text-foreground-400 select-none">Network:</p>
+            <div className="flex items-center gap-1.5">
+              <Thumbnail size="xs" icon={Icon} rounded />
+              <p className="text-sm font-normal capitalize">
+                {getChainName(chainId).toLowerCase()}
+              </p>
             </div>
           </div>
         </div>
-        <div
-          className={cn(
-            "flex items-center justify-between gap-2 px-2 py-2.5 bg-background-150",
-            hideNetwork && "hidden",
-          )}
-        >
-          <p className="text-sm text-foreground-400 select-none">Network:</p>
-          <div className="flex items-center gap-1.5">
-            <Thumbnail size="xs" icon={Icon} rounded />
-            <p className="text-sm font-normal capitalize">
-              {getChainName(chainId).toLowerCase()}
-            </p>
-          </div>
-        </div>
-      </div>
+      </AdvancedDetails>
       <div
         className={cn(
           "flex items-center justify-between gap-3",
@@ -223,6 +229,12 @@ export const ConnectionTooltipContent = ({
         <Button
           variant="secondary"
           className="w-full h-9 normal-case font-sans text-sm font-medium tracking-normal px-1.5 py-2"
+          disabled={withdrawDisabled}
+          title={
+            withdrawDisabled
+              ? "Withdrawals are available to signed-in US users only"
+              : undefined
+          }
           onClick={onWithdraw}
         >
           <ArrowFromLineIcon variant="up" size="sm" />
