@@ -29,11 +29,17 @@ const buildUiStyles = () => ({
 // the UI dependencies (controller-ui, sonner, radix, etc.) are intentionally
 // bundled into the react chunk.
 const externalDeps = [
-  "open",
   "starknet",
   "react",
   "react-dom",
 ];
+
+// NOTE: `vite-plugin-node-polyfills` is a devDependency even though this config
+// never uses it. Our bundle references the `Buffer` global, and a consumer that
+// polyfills (keychain does, via nodePolyfills({globals:{Buffer:true}})) has the
+// shim import injected *into dist/index.js*. Rollup then resolves
+// "vite-plugin-node-polyfills/shims/buffer" relative to this package, so it has
+// to be present here or the consumer's build fails to resolve it.
 
 export default defineConfig(({ mode }) => ({
   plugins: [

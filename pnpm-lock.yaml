@@ -57,9 +57,6 @@ catalogs:
     '@types/jest-image-snapshot':
       specifier: ^6.4.0
       version: 6.4.0
-    '@types/mocha':
-      specifier: ^10.0.10
-      version: 10.0.10
     '@types/node':
       specifier: ^22.12.0
       version: 22.15.3
@@ -555,21 +552,12 @@ importers:
       '@starknet-io/types-js':
         specifier: 0.10.2
         version: 0.10.2
-      '@turnkey/sdk-browser':
-        specifier: ^5.15.2
-        version: 5.15.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@wallet-standard/wallet':
         specifier: ^1.1.0
         version: 1.1.0
-      '@walletconnect/ethereum-provider':
-        specifier: ^2.20.0
-        version: 2.20.1(@types/react@19.2.17)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.7)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
-      cbor-x:
-        specifier: ^1.5.0
-        version: 1.6.0
       ethers:
         specifier: ^6.13.5
         version: 6.13.7(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -579,9 +567,6 @@ importers:
       mipd:
         specifier: ^0.0.7
         version: 0.0.7(typescript@5.8.3)
-      open:
-        specifier: ^10.1.0
-        version: 10.1.2
       starknet:
         specifier: 10.0.2
         version: 10.0.2(typescript@5.8.3)(zod@3.24.4)
@@ -592,15 +577,9 @@ importers:
       '@cartridge/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
-      '@microsoft/api-extractor':
-        specifier: ^7
-        version: 7.52.6(@types/node@22.15.3)
       '@types/jest':
         specifier: 'catalog:'
         version: 29.5.14
-      '@types/mocha':
-        specifier: 'catalog:'
-        version: 10.0.10
       '@types/node':
         specifier: 'catalog:'
         version: 22.15.3
@@ -610,15 +589,9 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.2.3(@types/react@19.2.17)
-      autoprefixer:
-        specifier: 'catalog:'
-        version: 10.4.21(postcss@8.5.3)
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.15.3)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@22.15.3)(typescript@5.8.3))
-      postcss:
-        specifier: 'catalog:'
-        version: 8.5.3
       prettier:
         specifier: 'catalog:'
         version: 3.5.3
@@ -649,9 +622,6 @@ importers:
       vite-plugin-dts:
         specifier: ^5.0.3
         version: 5.0.3(@microsoft/api-extractor@7.52.6(@types/node@22.15.3))(esbuild@0.25.4)(rollup@4.40.2)(typescript@5.8.3)(vite@6.3.4(@types/node@22.15.3)(jiti@1.21.7)(terser@5.44.1)(tsx@4.19.4)(yaml@2.7.1))
-      vite-plugin-node-polyfills:
-        specifier: ^0.23.0
-        version: 0.23.0(rollup@4.40.2)(vite@6.3.4(@types/node@22.15.3)(jiti@1.21.7)(terser@5.44.1)(tsx@4.19.4)(yaml@2.7.1))
       vite-plugin-top-level-await:
         specifier: 'catalog:'
         version: 1.5.0(@swc/helpers@0.5.17)(rollup@4.40.2)(vite@6.3.4(@types/node@22.15.3)(jiti@1.21.7)(terser@5.44.1)(tsx@4.19.4)(yaml@2.7.1))
@@ -1718,36 +1688,6 @@ packages:
   '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/f0f3bb5':
     resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/f0f3bb5}
     version: 0.0.1
-
-  '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
-    resolution: {integrity: sha512-P7swiOAdF7aSi0H+tHtHtr6zrpF3aAq/W9FXx5HektRvLTM2O89xCyXF3pk7pLc7QpaY7AoaE8UowVf9QBdh3w==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@cbor-extract/cbor-extract-darwin-x64@2.2.0':
-    resolution: {integrity: sha512-1liF6fgowph0JxBbYnAS7ZlqNYLf000Qnj4KjqPNW4GViKrEql2MgZnAsExhY9LSy8dnvA4C0qHEBgPrll0z0w==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@cbor-extract/cbor-extract-linux-arm64@2.2.0':
-    resolution: {integrity: sha512-rQvhNmDuhjTVXSPFLolmQ47/ydGOFXtbR7+wgkSY0bdOxCFept1hvg59uiLPT2fVDuJFuEy16EImo5tE2x3RsQ==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@cbor-extract/cbor-extract-linux-arm@2.2.0':
-    resolution: {integrity: sha512-QeBcBXk964zOytiedMPQNZr7sg0TNavZeuUCD6ON4vEOU/25+pLhNN6EDIKJ9VLTKaZ7K7EaAriyYQ1NQ05s/Q==}
-    cpu: [arm]
-    os: [linux]
-
-  '@cbor-extract/cbor-extract-linux-x64@2.2.0':
-    resolution: {integrity: sha512-cWLAWtT3kNLHSvP4RKDzSTX9o0wvQEEAj4SKvhWuOVZxiDAeQazr9A+PSiRILK1VYMLeDml89ohxCnUNQNQNCw==}
-    cpu: [x64]
-    os: [linux]
-
-  '@cbor-extract/cbor-extract-win32-x64@2.2.0':
-    resolution: {integrity: sha512-l2M+Z8DO2vbvADOBNLbbh9y5ST1RY5sqkWOg/58GkUPBYou/cuNZ68SGQ644f1CvZ8kcOxyZtw06+dxWHIoN/w==}
-    cpu: [x64]
-    os: [win32]
 
   '@coinflowlabs/react@5.12.0':
     resolution: {integrity: sha512-dtVx0faIIoT8GeKJxD/UACEox45ouRVv0RzyUPTj+kewpFV3h0gZDlRqs8GFJIZ/IRAPUug0azrqTlspJS0R9w==}
@@ -4759,9 +4699,6 @@ packages:
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
 
-  '@types/mocha@10.0.10':
-    resolution: {integrity: sha512-xPyYSz1cMPnJQhl0CLMH68j3gprKZaTjG3s5Vi+fDgx+uhG9NOXwbVt52eFS8ECyXhyKcjDLCBEqBExKuiZb7Q==}
-
   '@types/node@16.18.11':
     resolution: {integrity: sha512-3oJbGBUWuS6ahSnEq1eN2XrCyf4YsWI8OyCvo7c64zQJNplk3mO84t53o8lfTk+2ji59g5ycfc6qQ3fdHliHuA==}
 
@@ -5730,10 +5667,6 @@ packages:
   builtin-status-codes@3.0.0:
     resolution: {integrity: sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ==}
 
-  bundle-name@4.1.0:
-    resolution: {integrity: sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==}
-    engines: {node: '>=18'}
-
   bundle-require@5.1.0:
     resolution: {integrity: sha512-3WrrOuZiyaaZPWiEt4G3+IffISVC9HYlWueJEBWED4ZH4aIAC2PnkdnuRrR94M+w6yGWn4AglWtJtBI8YqvgoA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -5800,15 +5733,8 @@ packages:
     resolution: {integrity: sha512-JSr5eOgoEymtYHBjNWyjrMqet9Am2miJhlfKNdqLp6zoeAh0KN5dRAcxlecj5mAJrmQomgiOBj35xHLrFjqBpw==}
     hasBin: true
 
-  cbor-extract@2.2.0:
-    resolution: {integrity: sha512-Ig1zM66BjLfTXpNgKpvBePq271BPOvu8MR0Jl080yG7Jsl+wAZunfrwiwA+9ruzm/WEdIV5QF/bjDZTqyAIVHA==}
-    hasBin: true
-
   cbor-js@0.1.0:
     resolution: {integrity: sha512-7sQ/TvDZPl7csT1Sif9G0+MA0I0JOVah8+wWlJVQdVEgIbCzlN/ab3x+uvMNsc34TUvO6osQTAmB2ls80JX6tw==}
-
-  cbor-x@1.6.0:
-    resolution: {integrity: sha512-0kareyRwHSkL6ws5VXHEf8uY1liitysCVJjlmhaLG+IXLqhSaOO+t63coaso7yjwEzWZzLy8fJo06gZDVQM9Qg==}
 
   cbor@8.1.0:
     resolution: {integrity: sha512-DwGjNW9omn6EwP70aXsn7FQJx5kO12tX0bZkaTjzdVFM6/7nhA4t0EENocKGx6D2Bch9PE2KzCUf5SceBdeijg==}
@@ -6260,14 +6186,6 @@ packages:
     resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
     engines: {node: '>=0.10.0'}
 
-  default-browser-id@5.0.0:
-    resolution: {integrity: sha512-A6p/pu/6fyBcA1TRz/GqWYPViplrftcW2gZC9q79ngNCKAeR/X3gcEdXQHl4KNXV+3wgIJ1CPkJQ3IHM6lcsyA==}
-    engines: {node: '>=18'}
-
-  default-browser@5.2.1:
-    resolution: {integrity: sha512-WY/3TUME0x3KPYdRRxEJJvXRHV4PyPoUsxtZa78lwItwRQRHhd2U9xOscaT/YTf8uCXIAjeJOFBVEh/7FtD8Xg==}
-    engines: {node: '>=18'}
-
   default-require-extensions@3.0.1:
     resolution: {integrity: sha512-eXTJmRbm2TIt9MgWTsOH1wEuhew6XGZcMeGKCtLedIg/NCsg1iBePXkceTdK4Fii7pzmN9tGsZhKzZ4h7O/fxw==}
     engines: {node: '>=8'}
@@ -6282,10 +6200,6 @@ packages:
   define-lazy-prop@2.0.0:
     resolution: {integrity: sha512-Ds09qNh8yw3khSjiJjiUInaGX9xlqZDY7JVryGxdxV7NPeuqQfplOpQ66yJFZut3jLa5zOwkXw1g9EI2uKh4Og==}
     engines: {node: '>=8'}
-
-  define-lazy-prop@3.0.0:
-    resolution: {integrity: sha512-N+MeXYoqr3pOgn8xfyRPREN7gHakLYjhsHhWGT3fWAiL4IkAt0iDw14QiiEm2bE30c5XX5q0FtAA3CK5f9/BUg==}
-    engines: {node: '>=12'}
 
   define-properties@1.2.1:
     resolution: {integrity: sha512-8QmQKqEASLd5nx0U1B1okLElbUuuttJ/AnYmRXbbbGDWh6uS208EjD4Xqq/I9wK7u0v6O08XhTWnt5XtEbR6Dg==}
@@ -7638,11 +7552,6 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
-  is-docker@3.0.0:
-    resolution: {integrity: sha512-eljcgEDlEns/7AXFosB5K/2nCM4P7FQPkGc/DWLy5rmFEWvZayGrik1d9/QIY5nJ4f9YsVvBkA6kJpHn9rISdQ==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    hasBin: true
-
   is-extglob@2.1.1:
     resolution: {integrity: sha512-SbKbANkN603Vi4jEZv49LeVJMn4yGwsbzZworEoyEiutsN3nJYdbO36zfhGJ6QEDpOZIFkDtnq5JRxmvl3jsoQ==}
     engines: {node: '>=0.10.0'}
@@ -7666,11 +7575,6 @@ packages:
   is-glob@4.0.3:
     resolution: {integrity: sha512-xelSayHH36ZgE7ZWhli7pW34hNbNl8Ojv5KVmkJD4hBdD3th8Tfk9vYasLM+mXWOZhFkgZfxhLSnrwRr4elSSg==}
     engines: {node: '>=0.10.0'}
-
-  is-inside-container@1.0.0:
-    resolution: {integrity: sha512-KIYLCCJghfHZxqjYBE7rEy0OBuTd5xCHS7tHVgvCLkx7StIoaxwNW3hCALgEUjFfeRk+MG/Qxmp/vtETEF3tRA==}
-    engines: {node: '>=14.16'}
-    hasBin: true
 
   is-interactive@1.0.0:
     resolution: {integrity: sha512-2HvIEKRoqS62guEC+qBjpvRubdX910WCMuJTZ+I9yvqKU2/12eSL549HMwtabb4oupdj2sMP50k+XJfB/8JE6w==}
@@ -7773,10 +7677,6 @@ packages:
   is-wsl@2.2.0:
     resolution: {integrity: sha512-fKzAra0rGJUUBwGBgNkHZuToZcn+TtXHpeCgmkMJMMYx1sQDYaCSyjJBSCa2nH1DGm7s3n1oBnohoVTBaN7Lww==}
     engines: {node: '>=8'}
-
-  is-wsl@3.1.0:
-    resolution: {integrity: sha512-UcVfVfaK4Sc4m7X3dUSoHoozQGBEFeDC+zVo06t98xe8CzHSZZBekNXH+tu0NalHolcJ/QAGqS46Hef7QXBIMw==}
-    engines: {node: '>=16'}
 
   isarray@0.0.1:
     resolution: {integrity: sha512-D2S+3GLxWH+uhrNEcoh/fnmYeP8E8/zHl644d/jdA0g2uyXvy3sb0qxotE+ne0LtccHknQzWwZEzhak7oJ0COQ==}
@@ -8674,10 +8574,6 @@ packages:
       encoding:
         optional: true
 
-  node-gyp-build-optional-packages@5.1.1:
-    resolution: {integrity: sha512-+P72GAjVAbTxjjwUmwjVrqrdZROD4nf8KgpBoDxqXXTiYZZt/ud60dE5yvCSr9lRO8e8yv6kgJIC0K0PfZFVQw==}
-    hasBin: true
-
   node-gyp-build-optional-packages@5.2.2:
     resolution: {integrity: sha512-s+w+rBWnpTMwSFbaE0UXsRlg7hU4FjekKU4eyAih5T8nJuNZT1nNsskXpxmeqSK9UzkBl6UgRlnKc8hz8IEqOw==}
     hasBin: true
@@ -8814,10 +8710,6 @@ packages:
   onetime@5.1.2:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
     engines: {node: '>=6'}
-
-  open@10.1.2:
-    resolution: {integrity: sha512-cxN6aIDPz6rm8hbebcP7vrQNhvRcveZoJU72Y7vskh4oIm+BZwBECnx5nTmrlres1Qapvx27Qo1Auukpf8PKXw==}
-    engines: {node: '>=18'}
 
   open@8.4.2:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
@@ -9674,10 +9566,6 @@ packages:
 
   rrweb-cssom@0.8.0:
     resolution: {integrity: sha512-guoltQEx+9aMf2gDZ0s62EcV8lsXR+0w8915TC3ITdn2YueuNjdAYh/levpU9nFaoChh9RUS5ZdQMrKfVEN9tw==}
-
-  run-applescript@7.0.0:
-    resolution: {integrity: sha512-9by4Ij99JUr/MCFBUkDKLWK3G9HVXmabKz9U5MlIAIuvuzkiOicRYs8XJLxX+xahD+mLiiCYDqF9dKAgtzKP1A==}
-    engines: {node: '>=18'}
 
   run-async@2.4.1:
     resolution: {integrity: sha512-tvVnVv01b8c1RrA6Ep7JkStj85Guv/YrMcwqYQnwjsAS2cTmmPGBBjAjpCW7RrSodNSoE2/qg9O4bceNvUuDgQ==}
@@ -11995,24 +11883,6 @@ snapshots:
     dependencies:
       '@starknet-io/types-js': 0.10.2
 
-  '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
-    optional: true
-
-  '@cbor-extract/cbor-extract-darwin-x64@2.2.0':
-    optional: true
-
-  '@cbor-extract/cbor-extract-linux-arm64@2.2.0':
-    optional: true
-
-  '@cbor-extract/cbor-extract-linux-arm@2.2.0':
-    optional: true
-
-  '@cbor-extract/cbor-extract-linux-x64@2.2.0':
-    optional: true
-
-  '@cbor-extract/cbor-extract-win32-x64@2.2.0':
-    optional: true
-
   '@coinflowlabs/react@5.12.0(bs58@6.0.0)(react@19.2.7)':
     dependencies:
       '@nsure-ai/web-client-sdk': 1.1.95
@@ -13591,6 +13461,7 @@ snapshots:
       '@rushstack/node-core-library': 5.13.1(@types/node@22.15.3)
     transitivePeerDependencies:
       - '@types/node'
+    optional: true
 
   '@microsoft/api-extractor@7.52.6(@types/node@22.15.3)':
     dependencies:
@@ -13609,6 +13480,7 @@ snapshots:
       typescript: 5.8.3
     transitivePeerDependencies:
       - '@types/node'
+    optional: true
 
   '@microsoft/tsdoc-config@0.17.1':
     dependencies:
@@ -13616,8 +13488,10 @@ snapshots:
       ajv: 8.12.0
       jju: 1.4.0
       resolve: 1.22.10
+    optional: true
 
-  '@microsoft/tsdoc@0.15.1': {}
+  '@microsoft/tsdoc@0.15.1':
+    optional: true
 
   '@module-federation/error-codes@0.12.0': {}
 
@@ -15023,11 +14897,13 @@ snapshots:
       semver: 7.5.4
     optionalDependencies:
       '@types/node': 22.15.3
+    optional: true
 
   '@rushstack/rig-package@0.5.3':
     dependencies:
       resolve: 1.22.10
       strip-json-comments: 3.1.1
+    optional: true
 
   '@rushstack/terminal@0.15.3(@types/node@22.15.3)':
     dependencies:
@@ -15035,6 +14911,7 @@ snapshots:
       supports-color: 8.1.1
     optionalDependencies:
       '@types/node': 22.15.3
+    optional: true
 
   '@rushstack/ts-command-line@5.0.1(@types/node@22.15.3)':
     dependencies:
@@ -15044,6 +14921,7 @@ snapshots:
       string-argv: 0.3.2
     transitivePeerDependencies:
       - '@types/node'
+    optional: true
 
   '@scure/base@1.1.9': {}
 
@@ -15901,7 +15779,8 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@types/argparse@1.0.38': {}
+  '@types/argparse@1.0.38':
+    optional: true
 
   '@types/aria-query@5.0.4': {}
 
@@ -15984,8 +15863,6 @@ snapshots:
   '@types/json5@0.0.29': {}
 
   '@types/mdx@2.0.13': {}
-
-  '@types/mocha@10.0.10': {}
 
   '@types/node@16.18.11': {}
 
@@ -17110,10 +16987,12 @@ snapshots:
   ajv-draft-04@1.0.0(ajv@8.13.0):
     optionalDependencies:
       ajv: 8.13.0
+    optional: true
 
   ajv-formats@3.0.1(ajv@8.13.0):
     optionalDependencies:
       ajv: 8.13.0
+    optional: true
 
   ajv@6.12.6:
     dependencies:
@@ -17128,6 +17007,7 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
       uri-js: 4.4.1
+    optional: true
 
   ajv@8.13.0:
     dependencies:
@@ -17135,6 +17015,7 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
       uri-js: 4.4.1
+    optional: true
 
   ajv@8.6.3:
     dependencies:
@@ -17640,10 +17521,6 @@ snapshots:
 
   builtin-status-codes@3.0.0: {}
 
-  bundle-name@4.1.0:
-    dependencies:
-      run-applescript: 7.0.0
-
   bundle-require@5.1.0(esbuild@0.25.4):
     dependencies:
       esbuild: 0.25.4
@@ -17709,23 +17586,7 @@ snapshots:
       ansicolors: 0.3.2
       redeyed: 2.1.1
 
-  cbor-extract@2.2.0:
-    dependencies:
-      node-gyp-build-optional-packages: 5.1.1
-    optionalDependencies:
-      '@cbor-extract/cbor-extract-darwin-arm64': 2.2.0
-      '@cbor-extract/cbor-extract-darwin-x64': 2.2.0
-      '@cbor-extract/cbor-extract-linux-arm': 2.2.0
-      '@cbor-extract/cbor-extract-linux-arm64': 2.2.0
-      '@cbor-extract/cbor-extract-linux-x64': 2.2.0
-      '@cbor-extract/cbor-extract-win32-x64': 2.2.0
-    optional: true
-
   cbor-js@0.1.0: {}
-
-  cbor-x@1.6.0:
-    optionalDependencies:
-      cbor-extract: 2.2.0
 
   cbor@8.1.0:
     dependencies:
@@ -18213,13 +18074,6 @@ snapshots:
 
   deepmerge@4.3.1: {}
 
-  default-browser-id@5.0.0: {}
-
-  default-browser@5.2.1:
-    dependencies:
-      bundle-name: 4.1.0
-      default-browser-id: 5.0.0
-
   default-require-extensions@3.0.1:
     dependencies:
       strip-bom: 4.0.0
@@ -18235,8 +18089,6 @@ snapshots:
       gopd: 1.2.0
 
   define-lazy-prop@2.0.0: {}
-
-  define-lazy-prop@3.0.0: {}
 
   define-properties@1.2.1:
     dependencies:
@@ -19250,6 +19102,7 @@ snapshots:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.1
+    optional: true
 
   fs-extra@8.1.0:
     dependencies:
@@ -19724,7 +19577,8 @@ snapshots:
 
   import-from@4.0.0: {}
 
-  import-lazy@4.0.0: {}
+  import-lazy@4.0.0:
+    optional: true
 
   import-local@3.2.0:
     dependencies:
@@ -19866,8 +19720,6 @@ snapshots:
 
   is-docker@2.2.1: {}
 
-  is-docker@3.0.0: {}
-
   is-extglob@2.1.1: {}
 
   is-finalizationregistry@1.1.1:
@@ -19888,10 +19740,6 @@ snapshots:
   is-glob@4.0.3:
     dependencies:
       is-extglob: 2.1.1
-
-  is-inside-container@1.0.0:
-    dependencies:
-      is-docker: 3.0.0
 
   is-interactive@1.0.0: {}
 
@@ -19986,10 +19834,6 @@ snapshots:
   is-wsl@2.2.0:
     dependencies:
       is-docker: 2.2.1
-
-  is-wsl@3.1.0:
-    dependencies:
-      is-inside-container: 1.0.0
 
   isarray@0.0.1: {}
 
@@ -20496,7 +20340,8 @@ snapshots:
 
   jiti@1.21.7: {}
 
-  jju@1.4.0: {}
+  jju@1.4.0:
+    optional: true
 
   joi@17.13.3:
     dependencies:
@@ -20903,6 +20748,7 @@ snapshots:
   minimatch@3.0.8:
     dependencies:
       brace-expansion: 1.1.11
+    optional: true
 
   minimatch@3.1.2:
     dependencies:
@@ -21148,11 +20994,6 @@ snapshots:
     optionalDependencies:
       encoding: 0.1.13
 
-  node-gyp-build-optional-packages@5.1.1:
-    dependencies:
-      detect-libc: 2.1.2
-    optional: true
-
   node-gyp-build-optional-packages@5.2.2:
     dependencies:
       detect-libc: 2.1.2
@@ -21363,13 +21204,6 @@ snapshots:
   onetime@5.1.2:
     dependencies:
       mimic-fn: 2.1.0
-
-  open@10.1.2:
-    dependencies:
-      default-browser: 5.2.1
-      define-lazy-prop: 3.0.0
-      is-inside-container: 1.0.0
-      is-wsl: 3.1.0
 
   open@8.4.2:
     dependencies:
@@ -22282,8 +22116,6 @@ snapshots:
 
   rrweb-cssom@0.8.0: {}
 
-  run-applescript@7.0.0: {}
-
   run-async@2.4.1: {}
 
   run-parallel@1.2.0:
@@ -22356,6 +22188,7 @@ snapshots:
   semver@7.5.4:
     dependencies:
       lru-cache: 6.0.0
+    optional: true
 
   semver@7.7.1: {}
 
@@ -22696,7 +22529,8 @@ snapshots:
 
   strict-uri-encode@2.0.0: {}
 
-  string-argv@0.3.2: {}
+  string-argv@0.3.2:
+    optional: true
 
   string-env-interpolation@1.0.1: {}
 
