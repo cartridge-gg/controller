@@ -10,7 +10,7 @@ import {
 } from "@cartridge/controller-ui";
 import { useController } from "@/hooks/controller";
 import { useChainName } from "@/hooks/chain";
-import { useExplorer } from "@starknet-start/react";
+import { useExplorer } from "@/hooks/explorer";
 
 export type TransactionState = "pending" | "success" | "error";
 

@@ -10,7 +10,7 @@ vi.mock("@/hooks/connection", () => ({
   useConnection: () => ({ controller: { chainId } }),
 }));
 
-vi.mock("@starknet-react/core", () => ({
+vi.mock("@/hooks/explorer", () => ({
   useExplorer: () => ({
     contract: (address: string) => `https://explorer.test/contract/${address}`,
   }),

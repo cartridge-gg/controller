@@ -41,7 +41,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SendCollectibleDrawer } from "./send/collectible-drawer";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { useExplorer } from "@starknet-start/react";
+import { useExplorer } from "@/hooks/explorer";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { OrderModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";

@@ -28,7 +28,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "@/hooks/collection";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { useExplorer } from "@starknet-start/react";
+import { useExplorer } from "@/hooks/explorer";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useAccount, useUsername } from "@/hooks/account";
 import { useMarketplace } from "@/hooks/marketplace";

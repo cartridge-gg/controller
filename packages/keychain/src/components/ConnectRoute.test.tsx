@@ -4,6 +4,7 @@ import { ConnectRoute } from "./ConnectRoute";
 import { renderWithProviders } from "@/test/mocks/providers";
 import { ResponseCodes } from "@cartridge/controller";
 import { SemVer } from "semver";
+import { constants } from "starknet";
 
 // Mock dependencies
 const mockSafeRedirect = vi.fn();
@@ -41,7 +42,7 @@ const mockController = {
   username: vi.fn().mockReturnValue("testuser"),
   address: vi.fn().mockReturnValue("0x123456789abcdef"),
   createSession: vi.fn().mockResolvedValue(undefined),
-  chainId: vi.fn().mockReturnValue("SN_SEPOLIA"),
+  chainId: vi.fn().mockReturnValue(constants.StarknetChainId.SN_SEPOLIA),
 };
 
 const defaultConnection = {

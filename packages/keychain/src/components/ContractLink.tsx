@@ -5,7 +5,7 @@ import {
   AdvancedLink,
   cn,
 } from "@cartridge/controller-ui";
-import { useExplorer } from "@starknet-start/react";
+import { useExplorer } from "@/hooks/explorer";
 import { constants } from "starknet";
 
 export function ContractLink({
