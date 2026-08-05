@@ -4,6 +4,7 @@ import { voyager } from "@starknet-start/explorers";
 import { jsonRpcProvider } from "@starknet-start/providers";
 import { StarknetConfig } from "@starknet-start/react";
 import ControllerConnector from "@cartridge/connector/controller";
+import { AutoConnect } from "./useAutoConnect";
 
 const RPC_URL = "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9";
 
@@ -19,12 +20,13 @@ const provider = jsonRpcProvider({
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
-    <StarknetConfig
-      chains={[mainnet]}
-      provider={provider}
-      explorer={voyager}
-      autoConnect
-    >
+    <StarknetConfig chains={[mainnet]} provider={provider} explorer={voyager}>
+      {/*
+       * `StarknetConfig`'s `autoConnect` prop is typed but not implemented in
+       * @starknet-start/react 1.0.8, so we reconnect the last used connector
+       * ourselves. See ./useAutoConnect.
+       */}
+      <AutoConnect />
       {children}
     </StarknetConfig>
   );
