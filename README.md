@@ -47,12 +47,12 @@ application from `0.13.x` to `0.14.x`.
 
 ## Requirements and Starknet.js v10 migration
 
-Controller requires Node.js 22 or newer and uses Starknet.js `10.0.2`.
-Applications upgrading from Controller 0.13.x should align their Starknet.js
-dependency to `10.0.2`. Starknet.js v10 no longer exposes provider methods
-through account instances, so application code should use
-`account.provider.getChainId()`, `account.provider.callContract()`, and
-`account.provider.waitForTransaction()`.
+Controller requires Node.js 22 or newer and depends on Starknet.js `^10.0.2`.
+Applications upgrading from Controller 0.13.x should move their Starknet.js
+dependency to the same range so both resolve to a single copy. Starknet.js v10
+no longer exposes provider methods through account instances, so application
+code should use `account.provider.getChainId()`,
+`account.provider.callContract()`, and `account.provider.waitForTransaction()`.
 
 The previous `@starknet-react/core` and `@starknet-react/chains` integration has
 moved to `@starknet-start/react@1.0.8`, with `@starknet-start/chains@1.0.7`,
@@ -62,15 +62,23 @@ Starknet Start requires React 19.
 Controller's marketplace and achievement integrations use
 `@cartridge/arcade@0.4.0`, whose published dependency graph is aligned on
 Dojo.js 2 (`@dojoengine/core`, `@dojoengine/grpc`, and `@dojoengine/sdk` at
-`2.0.0`). Together, this migration requires Node.js 22, React 19, and the exact
-Starknet.js `10.0.2` version described above. Applications should upgrade these
+`2.0.0`). Together, this migration requires Node.js 22, React 19, and the
+Starknet.js version described above. Applications should upgrade these
 dependencies together rather than mixing the previous Arcade 0.3 or Dojo.js 1
 packages with Controller 0.14.
 
-The workspace temporarily overrides transitive Starknet.js versions to `10.0.2`
-because `@starknet-start/providers@1.0.7` and `@starknet-start/query@1.0.7`
-resolve Starknet.js v9. The override collapses application bundles to the exact
-v10 version and can be removed once those packages depend on Starknet.js v10.
+`@starknet-start/providers@1.0.7` and `@starknet-start/query@1.0.7` still
+resolve Starknet.js v9, so an application that installs them alongside
+Controller ends up with two copies of Starknet.js. This workspace collapses them
+with a package manager override, and applications should do the same until those
+packages depend on v10:
+
+```json
+{
+  "pnpm": { "overrides": { "starknet": "^10.0.2" } },
+  "overrides": { "starknet": "^10.0.2" }
+}
+```
 
 ## Automatic reconnection
 
@@ -116,7 +124,8 @@ An explicit `toriiUrl` takes precedence over `slot`. When `toriiUrl` is omitted,
 Controller retains the legacy Slot-derived endpoint at
 `https://api.cartridge.gg/x/<slot>/torii`.
 
-A custom Torii is required to display custom ERC-20 and ERC-721 tokens in the Controller.
+A custom Torii is required to display custom ERC-20 and ERC-721 tokens in the
+Controller.
 
 ## Controller client notifications
 
