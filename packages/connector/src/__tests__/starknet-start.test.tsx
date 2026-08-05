@@ -133,7 +133,7 @@ describe("Starknet Start integration", () => {
     }
   });
 
-  it("discovers, connects, and disconnects the real Session wallet wrapper without advertising chain switching", async () => {
+  it("discovers, connects, and disconnects the real Session wallet wrapper and refuses chains outside the session", async () => {
     const registrations: Wallet[] = [];
     window.addEventListener(
       "wallet-standard:register-wallet",
@@ -192,11 +192,23 @@ describe("Starknet Start integration", () => {
     expect(result.current.account.address).toBe(ADDRESS);
     expect(result.current.network.chain.id).toBe(mainnet.id);
 
-    await expect(
-      result.current.switchChain.switchChainAsync({
-        chainId: "0x534e5f5345504f4c4941",
-      }),
-    ).rejects.toThrow("switchStarknetChain not implemented");
+    // The session was opened for mainnet only, so switching to a chain it does
+    // not cover is reported as a plain `false` rather than an error.
+    const errorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    try {
+      await expect(
+        result.current.switchChain.switchChainAsync({
+          chainId: "0x534e5f5345504f4c4941",
+        }),
+      ).resolves.toBe(false);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "switchStarknetChain: chain 0x534e5f5345504f4c4941 is not part of the session's chains",
+      );
+    } finally {
+      errorSpy.mockRestore();
+    }
     expect(result.current.network.chain.id).toBe(mainnet.id);
 
     await act(() => result.current.disconnect.disconnectAsync());
