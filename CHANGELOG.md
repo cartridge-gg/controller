@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.14.0] - 2026-08-05
+
+### ✨ New Features
+- **@cartridge/connector**: Replaced the legacy `@starknet-react/*` integration with wallet-standard discovery for `@starknet-start/react`, covering both Controller and Session connectors (#2634)
+- **@cartridge/controller**: Added serialized, authoritative chain switching so concurrent switch requests cannot leave the provider on an inconsistent chain (#2634)
+
+### 🚀 Improvements
+- **@cartridge/controller / @cartridge/connector**: Upgraded the SDK line from Starknet.js v8 to v10 and added packed npm, pnpm, and Bun consumer checks to enforce a single Starknet.js installation (#2634)
+- **Hosted keychain compatibility**: Preserved the browser protocol for Controller 0.13.12 and 0.13.13 while adding an 8/8 cross-version compatibility matrix for the 0.14 migration (#2634)
+
+### ⚠️ Breaking Changes
+- Controller and connector 0.14.x require Starknet.js `^10.0.2`; applications must upgrade from the v8 line and keep both Cartridge packages on the same version line
+- Starknet Start applications should replace `@starknet-react/core` and `@starknet-react/chains` with `@starknet-start/react@1.0.8` and the matching Starknet Start packages; this integration requires React 19
+- Applications using Starknet.js provider methods through account instances must use `account.provider` instead, for example `account.provider.getChainId()`, `account.provider.callContract()`, and `account.provider.waitForTransaction()`
+- The upgraded integration requires Node.js 22 or newer and should be used with `@cartridge/arcade@0.4.0` / Dojo.js 2 rather than Arcade 0.3 / Dojo.js 1
+
+### 📦 Dependencies
+- **Starknet.js**: Upgraded to `10.0.2`
+- **Starknet Start**: Migrated to `@starknet-start/react@1.0.8`, with chains, providers, and explorers on `1.0.7`
+- **@cartridge/arcade**: Upgraded to `0.4.0`, aligned with Dojo.js `2.0.0`
+
 ## [0.13.13] - 2026-07-09
 
 ### ✨ New Features
