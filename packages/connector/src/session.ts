@@ -1,7 +1,7 @@
 import SessionProvider, { SessionOptions } from "@cartridge/controller/session";
-import type { UseConnectResult } from "@starknet-start/react";
+import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-core";
 
-type StarknetStartConnector = UseConnectResult["connectors"][number];
+type StarknetStartConnector = WalletWithStarknetFeatures;
 
 export default class SessionConnector {
   private static current?: SessionConnector;

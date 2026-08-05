@@ -50,16 +50,15 @@
     "clean": true,
     "dts": "resolve"
   },
-  "peerDependencies": {
-    "@starknet-start/react": "catalog:"
-  },
   "dependencies": {
-    "@cartridge/controller": "workspace:*"
+    "@cartridge/controller": "workspace:*",
+    "@starknet-io/get-starknet-core": "5.0.0"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
     "@starknet-start/chains": "catalog:",
     "@starknet-start/providers": "catalog:",
+    "@starknet-start/react": "catalog:",
     "@testing-library/react": "^16.3.0",
     "@vitest/coverage-v8": "catalog:",
     "jsdom": "^25.0.1",
