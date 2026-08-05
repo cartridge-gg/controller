@@ -3,12 +3,11 @@
 import ControllerConnector from "@cartridge/connector/controller";
 import SessionConnector from "@cartridge/connector/session";
 import { AuthOptions, SessionPolicies } from "@cartridge/controller";
-import { Chain, mainnet, sepolia } from "@starknet-react/chains";
-import {
-  cartridge,
-  jsonRpcProvider,
-  StarknetConfig,
-} from "@starknet-react/core";
+import { Chain, mainnet, sepolia } from "@starknet-start/chains";
+import { cartridge } from "@starknet-start/explorers";
+import { jsonRpcProvider } from "@starknet-start/providers";
+import { StarknetConfig } from "@starknet-start/react";
+import { AutoConnect } from "hooks/autoConnect";
 import { PropsWithChildren } from "react";
 import { constants, num, shortString } from "starknet";
 import {
@@ -327,7 +326,7 @@ export const controllerConnector = new ControllerConnector({
   // toriiUrl: "http://localhost:8080",
 });
 
-const session = new SessionConnector({
+export const sessionConnector = new SessionConnector({
   shouldOverridePresetPolicies: overridePolicies,
   policies: overridePolicies ? policies : {},
   rpc: defaultChainRpc!,
@@ -343,13 +342,17 @@ const session = new SessionConnector({
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
-      autoConnect
       defaultChainId={BigInt(defaultChainId)}
       chains={starknetConfigChains}
-      connectors={[controllerConnector, session]}
       explorer={cartridge}
       provider={provider}
     >
+      {/*
+       * `StarknetConfig`'s `autoConnect` prop is typed but not implemented in
+       * @starknet-start/react 1.0.8, so we reconnect the last used connector
+       * ourselves. See hooks/autoConnect.
+       */}
+      <AutoConnect />
       {children}
     </StarknetConfig>
   );

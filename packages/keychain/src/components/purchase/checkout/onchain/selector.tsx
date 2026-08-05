@@ -26,7 +26,9 @@ export function WalletSelector({
     >
       <div className="flex gap-2">
         <span className="m-auto">
-          {React.cloneElement(icon as React.ReactElement, { size: "sm" })}
+          {React.cloneElement(icon as React.ReactElement<{ size?: "sm" }>, {
+            size: "sm",
+          })}
         </span>
         <span className="m-auto text-sm">Purchase with {name}</span>
         {bridgeFrom ? `(${bridgeFrom})` : ""}

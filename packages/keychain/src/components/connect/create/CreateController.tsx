@@ -67,7 +67,7 @@ interface CreateControllerViewProps {
   setChangeWallet: (value: boolean) => void;
   authOptions: AuthOptions;
   authMethod: AuthOption | undefined;
-  submitButtonRef: React.RefObject<HTMLButtonElement>;
+  submitButtonRef: React.RefObject<HTMLButtonElement | null>;
   isDropdownOpen: boolean;
   onDropdownOpenChange: (isOpen: boolean) => void;
   webauthnPopup: {

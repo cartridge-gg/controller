@@ -36,12 +36,12 @@ vi.mock("@auth0/auth0-react", () => ({
   Auth0Provider: ({ children }: PropsWithChildren) => <>{children}</>,
 }));
 
-vi.mock("@starknet-react/chains", () => ({
+vi.mock("@starknet-start/chains", () => ({
   mainnet: {},
   sepolia: {},
 }));
 
-vi.mock("@starknet-react/core", () => ({
+vi.mock("@starknet-start/react", () => ({
   cartridge: {},
   jsonRpcProvider: vi.fn(() => ({})),
   StarknetConfig: ({ children }: PropsWithChildren) => <>{children}</>,

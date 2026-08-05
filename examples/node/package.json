@@ -2,6 +2,9 @@
   "name": "cartridge-node-example",
   "version": "0.13.16",
   "description": "Example of using Cartridge session controller with Node.js",
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "scripts": {
     "build": "tsc",

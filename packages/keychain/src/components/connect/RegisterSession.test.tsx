@@ -4,6 +4,7 @@ import { act } from "react";
 import { RegisterSession } from "./RegisterSession";
 import { renderWithProviders } from "@/test/mocks/providers";
 import type { ParsedSessionPolicies } from "@/hooks/session";
+import { constants } from "starknet";
 
 // Mock the tokens hook for the Fees component rendered by ExecutionContainer
 vi.mock("@/hooks/tokens", () => ({
@@ -43,6 +44,7 @@ describe("RegisterSession", () => {
   const makeController = () => ({
     address: vi.fn(() => "0x123456789abcdef"),
     username: vi.fn(() => "testuser"),
+    chainId: vi.fn(() => constants.StarknetChainId.SN_SEPOLIA),
     registerSessionCalldata: vi.fn().mockResolvedValue(["0x1"]),
     // Fee estimation fails on funds: no maxFee is available up front.
     estimateInvokeFee: vi.fn().mockRejectedValue({

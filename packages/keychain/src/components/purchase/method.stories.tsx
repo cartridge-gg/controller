@@ -1,11 +1,12 @@
-import type { Meta, StoryObj, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
+import type { ComponentType } from "react";
 import { PaymentMethod } from "./method";
 import { NavigationProvider, StarterpackProviders } from "@/context";
 
 const meta = {
   component: PaymentMethod,
   decorators: [
-    (Story: StoryFn) => (
+    (Story: ComponentType) => (
       <NavigationProvider>
         <StarterpackProviders>
           <Story />

@@ -22,7 +22,7 @@ import {
   AdvancedLink,
 } from "@cartridge/controller-ui";
 import { formatAddress, cn } from "@cartridge/controller-ui/utils";
-import { useExplorer } from "@starknet-react/core";
+import { useExplorer } from "@/hooks/explorer";
 import { constants } from "starknet";
 import { MessageContent } from "./MessageCard";
 import { humanizeString } from "@cartridge/controller";

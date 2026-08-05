@@ -1,19 +1,18 @@
 "use client";
 
-import { useAccount } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector/controller";
+import { useAccount } from "@starknet-start/react";
+import { controllerConnector } from "./providers/StarknetProvider";
 import { Button } from "@cartridge/controller-ui";
 
 export function Settings() {
-  const { account, connector } = useAccount();
-  const cartridgeConnector = connector as unknown as ControllerConnector;
+  const { address } = useAccount();
 
   const onOpenSettings = async () => {
-    if (!account) return;
-    cartridgeConnector.controller.openSettings();
+    if (!address) return;
+    controllerConnector.controller.openSettings();
   };
 
-  if (!account) {
+  if (!address) {
     return null;
   }
 

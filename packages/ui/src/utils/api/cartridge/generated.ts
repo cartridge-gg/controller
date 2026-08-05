@@ -1408,14 +1408,27 @@ export type CoinflowKycResult = {
   verificationLink?: Maybe<Scalars['String']>;
 };
 
-/** Cached-hint KYC status; the live 451 on a payout is the real gate. */
+/**
+ * KYC status. Every value except VERIFICATION_REQUIRED is a cached hint of Coinflow's
+ * last-known verification state; VERIFICATION_REQUIRED is live. The 451 on a payout is
+ * the real gate either way.
+ */
 export enum CoinflowKycStatus {
   Approved = 'APPROVED',
   /** KYC lapsed and must be redone via the verificationLink. */
   Expired = 'EXPIRED',
   None = 'NONE',
+  /** Submitted and under review at Coinflow — nothing to do but wait. */
   Pending = 'PENDING',
-  Rejected = 'REJECTED'
+  Rejected = 'REJECTED',
+  /**
+   * Coinflow is asking the user to complete (or redo) hosted verification right now: it
+   * answered 451 and returned `verificationLink`. Unlike the other values this is a live
+   * condition, never a stored one — it is not cached, and it supersedes whatever status
+   * was last known. Distinguishing it from PENDING is the point: PENDING means wait,
+   * VERIFICATION_REQUIRED means the user must act on the link.
+   */
+  VerificationRequired = 'VERIFICATION_REQUIRED'
 }
 
 export type CoinflowPayment = {
@@ -5441,6 +5454,10 @@ export type Query = {
    * The current user's withdrawals, most-recent-first. Pass `id` to poll a single
    * withdrawal (returns a one-element list, empty if it isn't the caller's); omit `id`
    * to return the caller's full withdrawal history ordered by initiation, newest first.
+   *
+   * Only withdrawals Coinflow accepted are listed: one that never reached Coinflow —
+   * a definitive initiation failure (reversed immediately, surfaced as the mutation's
+   * error) or one whose POST outcome is still unknown — is omitted from both forms.
    */
   coinflowWithdrawal: Array<CoinflowWithdrawal>;
   collectible: Collectible;
@@ -6818,6 +6835,16 @@ export type SessionWhereInput = {
 export type SetAccountAgeVerificationInput = {
   /** Required when granting verification; must be an adult date in YYYY-MM-DD format. */
   dob?: InputMaybe<Scalars['String']>;
+  /**
+   * Legal first name to record alongside the override. Optional, but must be
+   * supplied together with lastName. A prove.com verification writes these
+   * itself; an administrative grant otherwise leaves them null, which strands
+   * every downstream consumer that expects a verified account to carry a legal
+   * name (card-deposit billing prefill being the first).
+   */
+  firstName?: InputMaybe<Scalars['String']>;
+  /** Legal last name. Must be supplied together with firstName. */
+  lastName?: InputMaybe<Scalars['String']>;
   /** Audit reason for this administrative override. */
   reason: Scalars['String'];
   username: Scalars['String'];

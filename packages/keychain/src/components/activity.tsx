@@ -12,7 +12,7 @@ import {
   Skeleton,
 } from "@cartridge/controller-ui";
 import { cn } from "@cartridge/controller-ui/utils";
-import { useExplorer } from "@starknet-react/core";
+import { useExplorer } from "@/hooks/explorer";
 import { useData } from "@/hooks/data";
 import { CardProps } from "@/components/provider/data";
 

@@ -67,7 +67,7 @@ export function CollectiblePurchase() {
       tokenId,
       orderIds,
     },
-    !!contractAddress,
+    { enabled: !!contractAddress },
   );
 
   const tokenOrders = useMemo(() => {
@@ -440,7 +440,7 @@ const Order = ({
       tokenId: tokenId,
       amount: BigInt(price),
     },
-    !!collectionAddress && !!tokenId && !!price,
+    { enabled: !!collectionAddress && !!tokenId && !!price },
   );
 
   useEffect(() => {

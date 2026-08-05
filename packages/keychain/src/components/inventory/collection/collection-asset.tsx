@@ -28,7 +28,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "@/hooks/collection";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { useExplorer } from "@starknet-react/core";
+import { useExplorer } from "@/hooks/explorer";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useAccount, useUsername } from "@/hooks/account";
 import { useMarketplace } from "@/hooks/marketplace";
@@ -120,9 +120,12 @@ export function CollectionAsset() {
     if (!contractAddress || !asset || !isListed || !order || !isOwner) return;
     setLoading(true);
     try {
-      const marketplaceAddress: string = provider.manifest.contracts.find(
+      const marketplaceAddress = (provider.manifest.contracts ?? []).find(
         (c: { tag: string }) => c.tag?.includes("Marketplace"),
       )?.address;
+      if (!marketplaceAddress) {
+        throw new Error("Marketplace contract not found in manifest");
+      }
       const orderIds = selfOrders.map((order) => order.id);
       const calls: AllowArray<Call> = [
         ...orderIds.map((orderId) => ({

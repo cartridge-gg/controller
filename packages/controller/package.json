@@ -10,6 +10,9 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "sideEffects": [
     "**/*.css"
   ],
@@ -48,17 +51,13 @@
     "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
     "@starknet-io/get-starknet-core": "5.0.0",
-    "@starknet-io/types-js": "0.9.1",
-    "@turnkey/sdk-browser": "^5.15.2",
+    "@starknet-io/types-js": "catalog:",
     "@wallet-standard/wallet": "^1.1.0",
-    "@walletconnect/ethereum-provider": "^2.20.0",
     "bs58": "^6.0.0",
-    "cbor-x": "^1.5.0",
     "ethers": "^6.13.5",
     "micro-sol-signer": "^0.5.0",
     "mipd": "^0.0.7",
-    "open": "^10.1.0",
-    "starknet": "^8.5.2"
+    "starknet": "catalog:"
   },
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",
@@ -77,13 +76,10 @@
     "@cartridge/tsconfig": "workspace:*",
     "@microsoft/api-extractor": "^7",
     "@types/jest": "catalog:",
-    "@types/mocha": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "autoprefixer": "catalog:",
     "jest": "^29.7.0",
-    "postcss": "catalog:",
     "prettier": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

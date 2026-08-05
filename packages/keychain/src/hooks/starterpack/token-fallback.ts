@@ -107,8 +107,8 @@ export function useTokenFallback({
   const [status, setStatus] =
     useState<UseTokenFallbackReturn["status"]>("pending");
   const generationRef = useRef(0);
-  const scanKeyRef = useRef<string>();
-  const foundTokenRef = useRef<string>();
+  const scanKeyRef = useRef<string>(undefined);
+  const foundTokenRef = useRef<string>(undefined);
 
   useEffect(() => {
     const quote =

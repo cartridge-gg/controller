@@ -2,11 +2,12 @@
 
 import { useCallback } from "react";
 import { BigNumberish, Call } from "starknet";
-import { useAccount } from "@starknet-react/core";
+import { useAccount, useSendTransaction } from "@starknet-start/react";
 import { Button } from "@cartridge/controller-ui";
 
 export function Swap() {
-  const { account, address } = useAccount();
+  const { address } = useAccount();
+  const { send } = useSendTransaction({});
 
   const execute = useCallback(
     (transactions: Call[]) => {
@@ -20,16 +21,16 @@ export function Swap() {
           BigInt(data) === examplesCaller && address ? address : data,
         ),
       }));
-      if (account) {
-        account.execute(calls);
+      if (address) {
+        send(calls);
         // this causes the controller to close on validation error
         // ctrlConnector.controller.openExecute(calls);
       }
     },
-    [account, address],
+    [address, send],
   );
 
-  if (!account) {
+  if (!address) {
     return null;
   }
 

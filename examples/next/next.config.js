@@ -17,6 +17,22 @@ const nextConfig = {
     // a plain restart always recovers.
     if (dev) config.cache = false;
 
+    // Fonts referenced by CSS imported from a workspace package
+    // (@cartridge/controller-ui/dist/themes/fonts.css) are emitted as webpack
+    // asset modules with publicPath "auto". For CSS-imported assets, "auto"
+    // resolves against the CSS module's internal identifier, producing broken
+    // urls like `webpack:///mini-css-extract-plugin//_next/static/media/*.otf`
+    // that the browser then tries to GET over the `webpack:` protocol (CORS /
+    // ERR_FAILED). Pin the asset publicPath so urls resolve to `/_next/...`.
+    // See: https://github.com/vercel/next.js/discussions/32069
+    config.module.generator = config.module.generator || {};
+    for (const type of ["asset", "asset/resource"]) {
+      config.module.generator[type] = {
+        ...config.module.generator[type],
+        publicPath: "/_next/",
+      };
+    }
+
     config.output.environment = {
       ...config.output.environment,
       asyncFunction: true,

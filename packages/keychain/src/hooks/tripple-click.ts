@@ -11,7 +11,9 @@ export function useTripleClick({
 }) {
   const { enableFeature } = useFeatures();
   const clickCountRef = useRef(0);
-  const clickTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const handleTripleClick = useCallback(() => {
     clickCountRef.current += 1;
     clearTimeout(clickTimerRef.current);

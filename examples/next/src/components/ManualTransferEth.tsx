@@ -1,42 +1,46 @@
 "use client";
 
 import { Button } from "@cartridge/controller-ui";
-import { useAccount, useNetwork } from "@starknet-react/core";
+import {
+  useAccount,
+  useNetwork,
+  useSendTransaction,
+} from "@starknet-start/react";
 import { useCallback, useState } from "react";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/controller-ui/utils";
 import { Call } from "starknet";
 
 export const ManualTransferEth = () => {
-  const { account } = useAccount();
+  const { address } = useAccount();
+  const { sendAsync } = useSendTransaction({});
   const { chain } = useNetwork();
   const [txnHash, setTxnHash] = useState<string>();
   const [network, setNetwork] = useState<string>();
 
   const execute = useCallback(
     async (amount: string) => {
-      if (!account) {
+      if (!address) {
         return;
       }
       setTxnHash(undefined);
 
       const isZero = Number(amount) == 0;
-      account
-        .execute([
-          ...(!isZero
-            ? [
-                {
-                  contractAddress: ETH_CONTRACT_ADDRESS,
-                  entrypoint: "increaseAllowance",
-                  calldata: [account?.address, amount, "0x0"],
-                },
-              ]
-            : []),
-          {
-            contractAddress: ETH_CONTRACT_ADDRESS,
-            entrypoint: "transfer",
-            calldata: [account?.address, amount, "0x0"],
-          },
-        ])
+      sendAsync([
+        ...(!isZero
+          ? [
+              {
+                contractAddress: ETH_CONTRACT_ADDRESS,
+                entrypoint: "increaseAllowance",
+                calldata: [address, amount, "0x0"],
+              },
+            ]
+          : []),
+        {
+          contractAddress: ETH_CONTRACT_ADDRESS,
+          entrypoint: "transfer",
+          calldata: [address, amount, "0x0"],
+        },
+      ])
         .then(({ transaction_hash }) => {
           console.log("transaction_hash", transaction_hash);
           setTxnHash(transaction_hash);
@@ -44,12 +48,12 @@ export const ManualTransferEth = () => {
         })
         .catch((e) => console.error(e));
     },
-    [account, chain],
+    [address, chain, sendAsync],
   );
 
   const openStandaloneTransfer = useCallback(
     (amount: string) => {
-      if (!account) {
+      if (!address) {
         return;
       }
 
@@ -60,14 +64,14 @@ export const ManualTransferEth = () => {
               {
                 contractAddress: ETH_CONTRACT_ADDRESS,
                 entrypoint: "increaseAllowance",
-                calldata: [account.address, amount, "0x0"],
+                calldata: [address, amount, "0x0"],
               },
             ]
           : []),
         {
           contractAddress: ETH_CONTRACT_ADDRESS,
           entrypoint: "transfer",
-          calldata: [account.address, amount, "0x0"],
+          calldata: [address, amount, "0x0"],
         },
       ];
 
@@ -85,10 +89,10 @@ export const ManualTransferEth = () => {
 
       window.open(fullUrl, "_blank");
     },
-    [account, chain],
+    [address, chain],
   );
 
-  if (!account) {
+  if (!address) {
     return null;
   }
 

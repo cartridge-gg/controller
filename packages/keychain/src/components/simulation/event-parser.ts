@@ -2,10 +2,14 @@ import {
   getChecksumAddress,
   hash,
   uint256,
-  RPC,
   RpcProvider,
   type SimulateTransactionOverhead,
 } from "starknet";
+import type {
+  FUNCTION_INVOCATION,
+  INVOKE_TXN_TRACE,
+  ORDERED_EVENT,
+} from "@starknet-io/types-js";
 import { erc20Metadata } from "@cartridge/presets";
 
 export interface SimulationEvent {
@@ -101,16 +105,19 @@ export const parseSimulationEvents = async (
   const result: SimulationEvent[] = [];
 
   const calls = responses.reduce((acc, response) => {
-    const trace = response.transaction_trace as RPC.RPCSPEC09.INVOKE_TXN_TRACE;
-    if (!trace) {
+    const trace = response.transaction_trace as INVOKE_TXN_TRACE;
+    if (
+      !trace ||
+      trace.type !== "INVOKE" ||
+      !("calls" in trace.execute_invocation)
+    ) {
       return acc;
     }
-    const calls = trace.execute_invocation
-      .calls as RPC.RPCSPEC09.FUNCTION_INVOCATION[];
+    const calls = trace.execute_invocation.calls;
 
     const _concatCalls = (
-      acc: RPC.RPCSPEC09.FUNCTION_INVOCATION[],
-      calls: RPC.RPCSPEC09.FUNCTION_INVOCATION[] | undefined,
+      acc: FUNCTION_INVOCATION[],
+      calls: FUNCTION_INVOCATION[] | undefined,
     ) => {
       if (calls) {
         calls.forEach((call) => {
@@ -121,12 +128,12 @@ export const parseSimulationEvents = async (
       return acc;
     };
     return _concatCalls(acc, calls);
-  }, [] as RPC.RPCSPEC09.FUNCTION_INVOCATION[]);
+  }, [] as FUNCTION_INVOCATION[]);
 
   for (const call of calls) {
     const contractAddress: string = getChecksumAddress(call.contract_address);
     const entryPointSelector: string = call.entry_point_selector;
-    const events: RPC.RPCSPEC09.ORDERED_EVENT[] = call.events;
+    const events: ORDERED_EVENT[] = call.events;
 
     for (const e of events) {
       const entry: SimulationEvent = {

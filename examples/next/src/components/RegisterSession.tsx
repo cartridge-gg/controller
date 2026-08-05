@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount } from "@starknet-react/core";
+import { useAccount } from "@starknet-start/react";
 import { Button } from "@cartridge/controller-ui";
 import { ec, stark } from "starknet";
 import { useCallback, useState } from "react";
@@ -22,7 +22,7 @@ const policies = {
 const encodedPolicies = encodeURIComponent(JSON.stringify(policies));
 
 export function RegisterSession() {
-  const { account } = useAccount();
+  const { address } = useAccount();
   const [sessionKey, setSessionKey] = useState<string>();
 
   const onRegister = useCallback(() => {
@@ -44,7 +44,7 @@ export function RegisterSession() {
     window.open(registerSessionUrl, "_blank", "noopener,noreferrer");
   }, [sessionKey]);
 
-  if (!account) {
+  if (!address) {
     return null;
   }
 

@@ -8,20 +8,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@cartridge/controller-ui";
-import ControllerConnector from "@cartridge/connector/controller";
 import {
   useAccount,
   useConnect,
   useDisconnect,
   useNetwork,
   useSwitchChain,
-} from "@starknet-react/core";
+} from "@starknet-start/react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { constants, num, shortString } from "starknet";
-import { Chain } from "@starknet-react/chains";
-import SessionConnector from "@cartridge/connector/session";
+import { Chain } from "@starknet-start/chains";
 import { HeadlessLogin } from "components/HeadlessLogin";
-import { ConnectOptions, presets } from "./providers/StarknetProvider";
+import {
+  ConnectOptions,
+  controllerConnector,
+  presets,
+} from "./providers/StarknetProvider";
 
 type HeadlessModalState = "closed" | "open" | "hidden";
 
@@ -60,17 +62,15 @@ const Header = () => {
   });
   const networkRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
-  const controllerConnector = useMemo(
-    () => ControllerConnector.fromConnectors(connectors),
+  const controllerWallet = useMemo(
+    () => connectors.find((connector) => connector.name === "Controller"),
     [connectors],
   );
 
   useEffect(() => {
     const checkReady = () => {
       try {
-        if (controllerConnector) {
-          setIsControllerReady(controllerConnector.isReady());
-        }
+        setIsControllerReady(controllerConnector.isReady());
       } catch (e) {
         console.error("Error checking controller readiness:", e);
       }
@@ -81,15 +81,13 @@ const Header = () => {
     const interval = setInterval(checkReady, 1000);
 
     return () => clearInterval(interval);
-  }, [controllerConnector]);
+  }, []);
 
-  const sessionConnector = useMemo(() => {
-    try {
-      return SessionConnector.fromConnectors(connectors);
-    } catch {
-      return undefined;
-    }
-  }, [connectors]);
+  const sessionWallet = useMemo(
+    () =>
+      connectors.find((connector) => connector.name === "Controller Session"),
+    [connectors],
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -228,9 +226,9 @@ const Header = () => {
             </Button>
             <Button
               onClick={() => {
-                connect({ connector: controllerConnector });
+                if (controllerWallet) connect({ connector: controllerWallet });
               }}
-              disabled={!isControllerReady}
+              disabled={!isControllerReady || !controllerWallet}
             >
               {isControllerReady ? "Connect" : "Waiting for keychain..."}
             </Button>
@@ -245,9 +243,9 @@ const Header = () => {
             >
               Phantom
             </Button>
-            {sessionConnector && (
+            {sessionWallet && (
               <Button
-                onClick={() => connect({ connector: sessionConnector })}
+                onClick={() => connect({ connector: sessionWallet })}
                 disabled={!isControllerReady}
               >
                 Register Session

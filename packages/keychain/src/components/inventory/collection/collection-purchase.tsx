@@ -65,7 +65,7 @@ export function CollectionPurchase() {
       tokenId,
       orderIds,
     },
-    !!contractAddress,
+    { enabled: !!contractAddress },
   );
 
   const { data: marketplaceFeeConfig } = useMarketplaceFees();
@@ -425,7 +425,7 @@ const Order = ({
       tokenId: tokenId,
       amount: BigInt(price),
     },
-    !!collectionAddress && !!tokenId && !!price,
+    { enabled: !!collectionAddress && !!tokenId && !!price },
   );
 
   useEffect(() => {

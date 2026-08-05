@@ -61,9 +61,10 @@ export const DrawerContent = ({
         <div className="flex flex-row gap-3 items-center">
           {icon && (
             <Thumbnail
-              icon={React.cloneElement(icon as React.ReactElement, {
-                size: "lg",
-              })}
+              icon={React.cloneElement(
+                icon as React.ReactElement<{ size?: "lg" }>,
+                { size: "lg" },
+              )}
               size="lg"
               className="bg-background-100"
             />

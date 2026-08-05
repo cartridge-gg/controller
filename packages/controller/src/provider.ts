@@ -114,7 +114,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           } as UNEXPECTED_ERROR;
         }
 
-        return await this.account.getChainId();
+        return await this.getChainId();
 
       case "wallet_deploymentData":
         throw {
@@ -202,7 +202,11 @@ export default abstract class BaseProvider implements StarknetWindowObject {
     this.subscriptions
       .filter((sub) => sub.type === "networkChanged")
       .forEach((sub) => {
-        (sub.handler as WalletEventHandlers["networkChanged"])(chainId);
+        try {
+          (sub.handler as WalletEventHandlers["networkChanged"])(chainId);
+        } catch (error) {
+          console.error("networkChanged listener failed", error);
+        }
       });
   }
 
@@ -210,8 +214,19 @@ export default abstract class BaseProvider implements StarknetWindowObject {
     this.subscriptions
       .filter((sub) => sub.type === "accountsChanged")
       .forEach((sub) => {
-        (sub.handler as WalletEventHandlers["accountsChanged"])(accounts);
+        try {
+          (sub.handler as WalletEventHandlers["accountsChanged"])(accounts);
+        } catch (error) {
+          // A consumer listener must not prevent the remaining wallet-standard
+          // subscribers from observing disconnects. Starknet.js v10's
+          // WalletAccount currently dereferences accounts[0] for an empty list.
+          console.error("accountsChanged listener failed", error);
+        }
       });
+  }
+
+  protected async getChainId(): Promise<string> {
+    return await this.account!.provider.getChainId();
   }
 
   abstract probe(): Promise<WalletAccount | undefined>;
