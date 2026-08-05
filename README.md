@@ -30,6 +30,21 @@ The project consists of several packages in the `packages` directory:
 
 Integration examples live in `examples/` (Next.js, Svelte, Node.js).
 
+## Starknet.js version support
+
+Pick the Controller and connector line that matches the Starknet.js version your
+application is on:
+
+| `@cartridge/controller` / `@cartridge/connector` | Starknet.js |
+| ------------------------------------------------ | ----------- |
+| `0.13.x`                                         | v8          |
+| `0.14.x`                                         | v10         |
+
+Both packages are released together and share a version number, so keep them on
+the same line, and keep your application's Starknet.js dependency on the
+matching major. See the migration notes above before moving an existing
+application from `0.13.x` to `0.14.x`.
+
 ## Requirements and Starknet.js v10 migration
 
 Controller requires Node.js 22 or newer and uses Starknet.js `10.0.2`.
@@ -57,6 +72,32 @@ because `@starknet-start/providers@1.0.7` and `@starknet-start/query@1.0.7`
 resolve Starknet.js v9. The override collapses application bundles to the exact
 v10 version and can be removed once those packages depend on Starknet.js v10.
 
+## Automatic reconnection
+
+`@starknet-start/react@1.0.8` accepts an `autoConnect` prop on
+`<StarknetConfig>`, but it is only declared in the types — the provider never
+reads it, so a connected player is dropped on page reload. Until it is
+implemented upstream, reconnect from your own app: remember the last connector
+that was connected, reconnect to it on load, and forget it on disconnect.
+
+Both React examples ship a small hook that does exactly that, intended to be
+copied into your own app to replicate the `autoConnect` feature:
+
+- [`examples/minimal/src/useAutoConnect.ts`](examples/minimal/src/useAutoConnect.ts)
+- [`examples/next/src/hooks/autoConnect.ts`](examples/next/src/hooks/autoConnect.ts)
+
+It exports an `AutoConnect` component that renders nothing, so it can be mounted
+inside the provider where the hooks have access to the Starknet Start context:
+
+```tsx
+import { AutoConnect } from "./useAutoConnect";
+
+<StarknetConfig chains={[mainnet]} provider={provider} explorer={voyager}>
+  <AutoConnect />
+  {children}
+</StarknetConfig>;
+```
+
 ## Custom Torii endpoint
 
 Set `toriiUrl` when a game uses a Torii indexer that is not derived from its
@@ -74,6 +115,8 @@ const controller = new Controller({
 An explicit `toriiUrl` takes precedence over `slot`. When `toriiUrl` is omitted,
 Controller retains the legacy Slot-derived endpoint at
 `https://api.cartridge.gg/x/<slot>/torii`.
+
+A custom Torii is required to display custom ERC-20 and ERC-721 tokens in the Controller.
 
 ## Controller client notifications
 
