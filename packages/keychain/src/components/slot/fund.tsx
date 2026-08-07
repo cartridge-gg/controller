@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/controller-ui/utils/api/cartridge";
 import {
@@ -52,12 +52,16 @@ export function Fund() {
     refetch: refetchTeams,
   } = useTeamsQuery(undefined, { refetchInterval: 1000 });
 
+  // `navigate` is re-created whenever the navigation stack changes, so an
+  // unguarded redirect here re-runs this effect forever.
+  const hasRedirected = useRef(false);
   useEffect(() => {
-    if (error) {
-      navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
-        replace: true,
-      });
-    }
+    if (!error || hasRedirected.current) return;
+
+    hasRedirected.current = true;
+    navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
+      replace: true,
+    });
   }, [navigate, pathname, error]);
 
   const teams: Team[] = useMemo(

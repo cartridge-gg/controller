@@ -1380,6 +1380,11 @@ export type CoinflowCreditsIntent = {
   sessionKey: Scalars['String'];
 };
 
+export enum CoinflowDepositPaymentMethod {
+  ApplePay = 'APPLE_PAY',
+  Card = 'CARD'
+}
+
 export type CoinflowDestination = {
   __typename?: 'CoinflowDestination';
   /** Human-readable label (alias / masked last4) from the single display builder. */
@@ -1829,6 +1834,8 @@ export type CreateCoinflowCreditsIntentInput = {
   /** Credit amount to buy. Bounded by the standard $2 min / $2,500 max. */
   credits: CreditsInput;
   isMainnet?: InputMaybe<Scalars['Boolean']>;
+  /** Preferred checkout rail. Omitted callers remain card-compatible. */
+  paymentMethod?: InputMaybe<CoinflowDepositPaymentMethod>;
 };
 
 export type CreateCoinflowKycInput = {
