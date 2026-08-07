@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { mainnet, sepolia } from "@starknet-start/chains";
@@ -100,10 +101,19 @@ function SlotCryptoFundInner({
   const { switchChainAsync } = useSwitchChain({});
   const advancedView = useAdvancedView();
 
+  // Register a stable back handler. Depending on `onBack` directly would
+  // re-register on every render (callers pass an inline arrow), and each
+  // registration updates navigation state, which re-renders the caller and
+  // produces a new `onBack` — an infinite loop.
+  const onBackRef = useRef(onBack);
   useEffect(() => {
-    setOnBackCallback(() => onBack);
+    onBackRef.current = onBack;
+  }, [onBack]);
+
+  useEffect(() => {
+    setOnBackCallback(() => () => onBackRef.current());
     return () => setOnBackCallback(undefined);
-  }, [setOnBackCallback, onBack]);
+  }, [setOnBackCallback]);
 
   const { token: feeToken } = useFeeToken();
   const teamUsdBalance = formatBalance(BigInt(team.credits || 0), 8, 2);
