@@ -1234,6 +1234,21 @@ export function useConnectionValue() {
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
+
+    // Standalone redirect flow (mobile session controllers): the app that
+    // opened this page is waiting on `redirect_url`, exactly as `/disconnect`
+    // does. Hand control back to it logged out instead of reloading into the
+    // login screen, which the app has no way to observe.
+    if (!isIframe()) {
+      const redirectUrl = getStandaloneRedirectUrl(
+        new URLSearchParams(window.location.search),
+      );
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
+    }
+
     try {
       sessionStorage.setItem(PRESERVE_URL_PARAMS_FLAG, "1");
     } catch {
