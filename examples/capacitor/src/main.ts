@@ -181,6 +181,16 @@ const openKeychainSession = async () => {
 
 const handleDeepLink = async (url: string) => {
   try {
+    // A standalone logout / delete-account hands control back with the logout
+    // signal appended. Clear the local session instead of ingesting one.
+    if (provider.ingestLogoutFromRedirect(url)) {
+      await Browser.close().catch(() => undefined);
+      account = undefined;
+      executeButton.disabled = true;
+      setStatus("Logged out.");
+      return;
+    }
+
     const parsed = new URL(url);
     const startapp = parsed.searchParams.get("startapp");
     if (!startapp) {

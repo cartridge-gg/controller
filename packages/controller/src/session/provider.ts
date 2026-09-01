@@ -12,7 +12,12 @@ import {
 } from "@starknet-io/get-starknet-core";
 import { registerWallet } from "@wallet-standard/wallet";
 import { encode } from "starknet";
-import { API_URL, KEYCHAIN_URL, REDIRECT_QUERY_NAME } from "../constants";
+import {
+  API_URL,
+  KEYCHAIN_URL,
+  LOGOUT_QUERY_NAME,
+  REDIRECT_QUERY_NAME,
+} from "../constants";
 import { parsePolicies, ParsedSessionPolicies } from "../policies";
 import BaseProvider from "../provider";
 import { AuthOptions } from "../types";
@@ -544,14 +549,46 @@ export default class SessionProvider extends BaseProvider {
     throw new Error("addStarknetChain not implemented");
   }
 
-  disconnect(): Promise<void> {
-    localStorage.removeItem("sessionSigner");
-    localStorage.removeItem("session");
-    localStorage.removeItem("sessionPolicies");
-    localStorage.removeItem("lastUsedConnector");
+  /**
+   * Consume the logout signal the keychain appends to its redirect target when
+   * handing control back after a standalone logout / delete-account, and clear
+   * the local session/account state so the app no longer appears logged in.
+   *
+   * Unlike {@link disconnect}, this does NOT reopen the keychain `/disconnect`
+   * tab — it only clears local state — so a logout redirect cannot loop back
+   * into another disconnect.
+   *
+   * @param url Optional URL carrying the signal (e.g. a native deep link).
+   *   Falls back to the current `window.location` when omitted (web redirect).
+   * @returns true when a logout signal was found and consumed.
+   */
+  public ingestLogoutFromRedirect(url?: string): boolean {
+    try {
+      const search = url
+        ? new URL(url).search
+        : typeof window !== "undefined"
+          ? window.location.search
+          : "";
+      if (new URLSearchParams(search).get(LOGOUT_QUERY_NAME) !== "1") {
+        return false;
+      }
+      this.resetLocalSession();
+      return true;
+    } catch (e) {
+      console.error("Failed to ingest logout redirect", e);
+      return false;
+    }
+  }
+
+  // Clear every trace of the local session without touching the keychain.
+  private resetLocalSession(): void {
+    this.clearStoredSession();
     this.account = undefined;
     this._username = undefined;
-    this._accounts.clear();
+  }
+
+  disconnect(): Promise<void> {
+    this.resetLocalSession();
 
     // calling this InjectedConnector callback hangs forever, and we do not disconnect properly
     // looking at InjectedConnector, it will disconnect is we pass [], so it must be safe to bypass
@@ -587,6 +624,28 @@ export default class SessionProvider extends BaseProvider {
   private tryRetrieveSessionAccount() {
     if (this.account) {
       return this.account;
+    }
+
+    // A standalone logout hands control back with the logout signal appended to
+    // the redirect target. Consume it before restoring any stored session so
+    // the app clears instead of re-hydrating the session the user just logged
+    // out of. This does not reopen `/disconnect`, so there is no loop.
+    if (
+      typeof window !== "undefined" &&
+      window.location.search.includes(LOGOUT_QUERY_NAME)
+    ) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get(LOGOUT_QUERY_NAME) === "1") {
+        this.resetLocalSession();
+
+        params.delete(LOGOUT_QUERY_NAME);
+        const newUrl =
+          window.location.pathname +
+          (params.toString() ? `?${params.toString()}` : "") +
+          window.location.hash;
+        window.history.replaceState({}, document.title, newUrl);
+        return;
+      }
     }
 
     let sessionRegistration: SessionRegistration | null = null;

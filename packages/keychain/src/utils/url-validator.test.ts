@@ -1,5 +1,12 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
-import { validateRedirectUrl, safeRedirect } from "./url-validator";
+import {
+  safeRedirect,
+  safeStandaloneRedirect,
+  setQueryParam,
+  validateRedirectUrl,
+  validateStandaloneRedirectUrl,
+} from "./url-validator";
+import { LOGOUT_QUERY_NAME } from "@cartridge/controller";
 
 describe("validateRedirectUrl", () => {
   describe("Valid URLs", () => {
@@ -265,5 +272,103 @@ describe("safeRedirect", () => {
     );
 
     consoleSpy.mockRestore();
+  });
+});
+
+describe("standalone redirects", () => {
+  it("allows native custom-scheme callbacks", () => {
+    expect(validateStandaloneRedirectUrl("cagecalls://open").isValid).toBe(
+      true,
+    );
+  });
+
+  it.each([
+    "javascript:alert(1)",
+    "data:text/html,<script>alert(1)</script>",
+    "vbscript:msgbox(1)",
+    "blob:https://example.com/id",
+    "file:///etc/passwd",
+  ])("blocks dangerous callback %s", (target) => {
+    expect(validateStandaloneRedirectUrl(target).isValid).toBe(false);
+  });
+
+  it("adds the logout signal before a URL fragment", () => {
+    expect(
+      setQueryParam(
+        "cagecalls://open?source=controller#screen",
+        LOGOUT_QUERY_NAME,
+        "1",
+      ),
+    ).toBe(`cagecalls://open?source=controller&${LOGOUT_QUERY_NAME}=1#screen`);
+  });
+
+  it("overwrites a stale logout signal", () => {
+    expect(
+      setQueryParam(
+        `cagecalls://open?${LOGOUT_QUERY_NAME}=0&source=controller`,
+        LOGOUT_QUERY_NAME,
+        "1",
+      ),
+    ).toBe(`cagecalls://open?${LOGOUT_QUERY_NAME}=1&source=controller`);
+  });
+
+  it("redirects a native callback with the logout signal", () => {
+    const originalLocation = window.location;
+    let locationHref = "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).location;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).location = { hostname: "x.cartridge.gg" };
+    Object.defineProperty(window.location, "href", {
+      configurable: true,
+      set: (value: string) => {
+        locationHref = value;
+      },
+      get: () => locationHref,
+    });
+
+    try {
+      expect(safeStandaloneRedirect("cagecalls://open", { logout: true })).toBe(
+        true,
+      );
+      expect(locationHref).toBe(`cagecalls://open?${LOGOUT_QUERY_NAME}=1`);
+    } finally {
+      Object.defineProperty(window, "location", {
+        value: originalLocation,
+        writable: true,
+      });
+    }
+  });
+
+  it("does not redirect a dangerous callback", () => {
+    const originalLocation = window.location;
+    let locationHref = "";
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).location;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).location = { hostname: "x.cartridge.gg" };
+    Object.defineProperty(window.location, "href", {
+      configurable: true,
+      set: (value: string) => {
+        locationHref = value;
+      },
+      get: () => locationHref,
+    });
+
+    try {
+      expect(
+        safeStandaloneRedirect("javascript:alert(document.cookie)", {
+          logout: true,
+        }),
+      ).toBe(false);
+      expect(locationHref).toBe("");
+    } finally {
+      consoleSpy.mockRestore();
+      Object.defineProperty(window, "location", {
+        value: originalLocation,
+        writable: true,
+      });
+    }
   });
 });
