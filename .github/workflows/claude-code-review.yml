@@ -24,6 +24,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_bots: "joystick-gg"
           prompt: "/review"
           allowed_tools: "Read,Glob,Grep"
           # CLAUDE.md is a symlink to AGENTS.md in this repo; keep repo rules there.
