@@ -1330,6 +1330,26 @@ export type CoinbaseTransactionsResponse = {
   transactions: Array<CoinbaseTransaction>;
 };
 
+export type CoinflowApplePayCheckoutInput = {
+  /**
+   * The PassKit authorization payload from the iOS shell:
+   * {token: {paymentData, transactionIdentifier, paymentMethod}, billingContact:
+   * {givenName, familyName, addressLines, ...}}. Shape-validated server-side
+   * before any Coinflow call; the verified account email is injected as
+   * billingContact.emailAddress.
+   */
+  applePayPayment: Scalars["JSON"];
+  /** Our internal CoinflowPayments row ID from createCoinflowCreditsIntent. */
+  coinflowPaymentId: Scalars["ID"];
+  /**
+   * The total (in cents) the player authorized on the PassKit sheet. The server
+   * requotes the applePay rail and refuses the checkout if the current total
+   * drifted from this number — the player must never be charged an amount they
+   * did not see.
+   */
+  sheetTotalCents: Scalars["Int"];
+};
+
 /** Bank account subtype for linking. */
 export enum CoinflowBankAccountType {
   Checking = "CHECKING",
@@ -1340,6 +1360,8 @@ export type CoinflowBankAuthSession = {
   __typename?: "CoinflowBankAuthSession";
   /** Coinflow merchant ID for the hosted bank-linking UI URL/component. */
   merchantId: Scalars["String"];
+  /** Whether the server selected Coinflow sandbox for this account. */
+  sandbox: Scalars["Boolean"];
   /** Session key authenticating the hosted bank-linking UI for this user. */
   sessionKey: Scalars["String"];
 };
@@ -1378,8 +1400,17 @@ export type CoinflowCreditsIntent = {
   jwtToken: Scalars["String"];
   /** Coinflow merchant ID for the checkout component. */
   merchantId: Scalars["String"];
+  /**
+   * Server-decided per intent: complete this deposit with the native PassKit sheet
+   * (coinflowApplePayCheckout) instead of the hosted Coinflow component. True only
+   * when the client declared nativeApplePayCapable and the account is in the
+   * rollout (dangotest forced on, allowlist, or stable percentage bucket).
+   */
+  nativeApplePay: Scalars["Boolean"];
   /** Pricing breakdown in cents (subtotal = the credit value, fees added on top). */
   pricing: CoinflowPricingDetails;
+  /** Whether the server selected Coinflow sandbox for this account. */
+  sandbox: Scalars["Boolean"];
   /** Session key (JWT) for authenticating the checkout component with Coinflow. */
   sessionKey: Scalars["String"];
 };
@@ -1524,6 +1555,7 @@ export type CoinflowWithdrawQuoteInput = {
    * amounts in the response are the resulting cents.
    */
   credits: Scalars["Int"];
+  /** Deprecated and ignored. The server selects the Coinflow environment by account. */
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   /** Delivery speed; must be one of the destination's supportedSpeeds. */
   method: CoinflowPayoutSpeed;
@@ -1545,6 +1577,8 @@ export type CoinflowWithdrawStatus = {
   maxCredits: Scalars["Int"];
   /** Minimum withdrawal in whole credits (1 credit = $0.01). */
   minCredits: Scalars["Int"];
+  /** Whether the server selected Coinflow sandbox for this account. */
+  sandbox: Scalars["Boolean"];
   /** Coinflow-hosted link to complete/refresh KYC, when verification is required. */
   verificationLink?: Maybe<Scalars["String"]>;
   /** The user's current withdrawable balance, in whole credits. */
@@ -1821,6 +1855,7 @@ export type CreateCoinflowBankAccountInput = {
   /** User-facing label for the account. */
   alias: Scalars["String"];
   city?: InputMaybe<Scalars["String"]>;
+  /** Deprecated and ignored. The server selects the Coinflow environment by account. */
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   routingNumber: Scalars["String"];
   state?: InputMaybe<Scalars["String"]>;
@@ -1830,13 +1865,22 @@ export type CreateCoinflowBankAccountInput = {
 };
 
 export type CreateCoinflowBankAuthSessionInput = {
+  /** Deprecated and ignored. The server selects the Coinflow environment by account. */
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type CreateCoinflowCreditsIntentInput = {
   /** Credit amount to buy. Bounded by the standard $2 min / $2,500 max. */
   credits: CreditsInput;
+  /** Deprecated and ignored. The server selects the Coinflow environment by account. */
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
+  /**
+   * Whether the client can drive a native PassKit sheet (iOS shell with the
+   * apple-pay bridge and a provisioned card). The server combines this with the
+   * rollout flag to decide nativeApplePay on the returned intent; old shells that
+   * never send it can never land in the native bucket.
+   */
+  nativeApplePayCapable?: InputMaybe<Scalars["Boolean"]>;
   /** Preferred checkout rail. Omitted callers remain card-compatible. */
   paymentMethod?: InputMaybe<CoinflowDepositPaymentMethod>;
 };
@@ -1845,6 +1889,7 @@ export type CreateCoinflowKycInput = {
   /** US address; all fields are required by Coinflow's US KYC schema. */
   address1: Scalars["String"];
   city: Scalars["String"];
+  /** Deprecated and ignored. The server selects the Coinflow environment by account. */
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   /**
    * Last 4 digits of the SSN. Required by Coinflow's US KYC schema; passed through to
@@ -1871,6 +1916,7 @@ export type CreateCoinflowWithdrawalInput = {
    * so 1000 credits = $10. The backend converts credits → cents once before initiating.
    */
   credits: Scalars["Int"];
+  /** Deprecated and ignored. The server selects the Coinflow environment by account. */
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   method: CoinflowPayoutSpeed;
   /** Destination token to pay out to. */
@@ -2197,7 +2243,21 @@ export enum CryptoPaymentStatus {
   Pending = "PENDING",
 }
 
+export type DangoDerbyWaitlistInput = {
+  /** A US phone number. Display formatting is accepted and stored as E.164. */
+  phoneNumber: Scalars["String"];
+  /** Must be true to record affirmative SMS marketing consent. */
+  smsConsent: Scalars["Boolean"];
+};
+
+export type DangoDerbyWaitlistResult = {
+  __typename?: "DangoDerbyWaitlistResult";
+  /** True after the non-enumerating waitlist operation completes. */
+  success: Scalars["Boolean"];
+};
+
 export type DeleteCoinflowDestinationInput = {
+  /** Deprecated and ignored. The server selects the Coinflow environment by account. */
   isMainnet?: InputMaybe<Scalars["Boolean"]>;
   token: Scalars["String"];
   type: CoinflowDestinationType;
@@ -2754,6 +2814,22 @@ export enum FeeUnit {
 export type HasValueInput = {
   index: Scalars["Int"];
   value: Scalars["String"];
+};
+
+/**
+ * One of the caller's deposits that is still settling — the shape the optimistic
+ * "locked funds" display consumes.
+ */
+export type InFlightDeposit = {
+  __typename?: "InFlightDeposit";
+  /** Credited subtotal in whole US cents — the amount that will land in the balance. */
+  amountCents: Scalars["Int"];
+  /** When the intent was created (RFC3339). */
+  createdAt: Scalars["Time"];
+  /** Internal CoinflowPayments row ID (same id space as coinflowPayment). */
+  id: Scalars["ID"];
+  /** Always PENDING for a row in this list; carried for the client's state machine. */
+  status: CoinflowPaymentStatus;
 };
 
 export type Invoice = Node & {
@@ -3503,6 +3579,18 @@ export type Mutation = {
   beginRegistration: Scalars["JSON"];
   broadcastNotification: NotificationSendResult;
   /**
+   * Complete a native (PassKit) Apple Pay checkout server-side. The
+   * coinflowPaymentId must reference a pending intent from
+   * createCoinflowCreditsIntent; the applePayPayment blob is the PassKit
+   * authorization payload from the iOS shell. Idempotent per intent: a repeat call
+   * for an already-charged intent returns the stored paymentId without contacting
+   * Coinflow. A decline fails with FAILED_PRECONDITION and Coinflow's message; an
+   * ambiguous outcome (transport error, 5xx, timeout — the charge may have
+   * happened) fails with UNAVAILABLE and extensions.code = COINFLOW_AMBIGUOUS so
+   * the client must probe instead of retrying.
+   */
+  coinflowApplePayCheckout: CoinflowCardCheckoutResult;
+  /**
    * Process a card checkout using a tokenized card from the frontend.
    * The coinflowPaymentId must reference an existing intent created via
    * createCoinflowStarterpackIntent or createCoinflowCreditsIntent.
@@ -3593,6 +3681,7 @@ export type Mutation = {
   deleteDeployment: Scalars["Boolean"];
   deleteEmailAddress: Scalars["Boolean"];
   deleteMe: Scalars["Boolean"];
+  deleteNotificationApp: Scalars["Boolean"];
   deletePhoneNumber: Scalars["Boolean"];
   deleteProveIdentity: Scalars["Boolean"];
   deleteRpcApiKey: Scalars["Boolean"];
@@ -3604,6 +3693,11 @@ export type Mutation = {
   finalizeLogin: Scalars["String"];
   finalizeRegistration: Account;
   increaseBudget: Paymaster;
+  /**
+   * Join the Dango Derby marketing SMS waitlist. Unauthenticated and rate-limited.
+   * A successful response never reveals whether the phone or an account already existed.
+   */
+  joinDangoDerbyWaitlist: DangoDerbyWaitlistResult;
   /** Expire the cookie session. */
   logout: Scalars["Boolean"];
   /**
@@ -3669,6 +3763,7 @@ export type Mutation = {
   updateRpcApiKey: RpcApiKey;
   updateRpcCorsDomain: RpcCorsDomain;
   updateTeam: Team;
+  upsertNotificationApp: NotificationApp;
   /**
    * Verify an email address using the code sent via email.
    * Updates the user's email and verification timestamp on success.
@@ -3724,6 +3819,10 @@ export type MutationBeginRegistrationArgs = {
 
 export type MutationBroadcastNotificationArgs = {
   input: BroadcastNotificationInput;
+};
+
+export type MutationCoinflowApplePayCheckoutArgs = {
+  input: CoinflowApplePayCheckoutInput;
 };
 
 export type MutationCoinflowCardCheckoutArgs = {
@@ -3850,6 +3949,10 @@ export type MutationDeleteDeploymentArgs = {
   service: DeploymentService;
 };
 
+export type MutationDeleteNotificationAppArgs = {
+  appId: Scalars["String"];
+};
+
 export type MutationDeleteRpcApiKeyArgs = {
   id: Scalars["ID"];
 };
@@ -3890,6 +3993,10 @@ export type MutationIncreaseBudgetArgs = {
   paymasterName: Scalars["ID"];
   reason?: InputMaybe<AdminBudgetReason>;
   unit: FeeUnit;
+};
+
+export type MutationJoinDangoDerbyWaitlistArgs = {
+  input: DangoDerbyWaitlistInput;
 };
 
 export type MutationPurchaseBundleWithCreditsArgs = {
@@ -4017,6 +4124,10 @@ export type MutationUpdateTeamArgs = {
   update: TeamInput;
 };
 
+export type MutationUpsertNotificationAppArgs = {
+  input: UpsertNotificationAppInput;
+};
+
 export type MutationVerifyEmailArgs = {
   input: VerifyEmailInput;
 };
@@ -4045,6 +4156,109 @@ export enum Network {
 export type Node = {
   /** The id of the object. */
   id: Scalars["ID"];
+};
+
+export type NotificationApp = Node & {
+  __typename?: "NotificationApp";
+  /** APNs endpoint override. Empty derives the endpoint from apns_sandbox */
+  apnsEndpoint?: Maybe<Scalars["String"]>;
+  /** Route to the APNs sandbox endpoint. Unset uses the server default */
+  apnsSandbox?: Maybe<Scalars["Boolean"]>;
+  /** APNs topic header, usually the iOS bundle identifier */
+  apnsTopic: Scalars["String"];
+  /** Application namespace matching notification_devices.app_id, such as dopewars */
+  appID: Scalars["String"];
+  createdAt: Scalars["Time"];
+  id: Scalars["ID"];
+  updatedAt: Scalars["Time"];
+};
+
+/**
+ * NotificationAppWhereInput is used for filtering NotificationApp objects.
+ * Input was generated by ent.
+ */
+export type NotificationAppWhereInput = {
+  and?: InputMaybe<Array<NotificationAppWhereInput>>;
+  /** apns_endpoint field predicates */
+  apnsEndpoint?: InputMaybe<Scalars["String"]>;
+  apnsEndpointContains?: InputMaybe<Scalars["String"]>;
+  apnsEndpointContainsFold?: InputMaybe<Scalars["String"]>;
+  apnsEndpointEqualFold?: InputMaybe<Scalars["String"]>;
+  apnsEndpointGT?: InputMaybe<Scalars["String"]>;
+  apnsEndpointGTE?: InputMaybe<Scalars["String"]>;
+  apnsEndpointHasPrefix?: InputMaybe<Scalars["String"]>;
+  apnsEndpointHasSuffix?: InputMaybe<Scalars["String"]>;
+  apnsEndpointIn?: InputMaybe<Array<Scalars["String"]>>;
+  apnsEndpointIsNil?: InputMaybe<Scalars["Boolean"]>;
+  apnsEndpointLT?: InputMaybe<Scalars["String"]>;
+  apnsEndpointLTE?: InputMaybe<Scalars["String"]>;
+  apnsEndpointNEQ?: InputMaybe<Scalars["String"]>;
+  apnsEndpointNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  apnsEndpointNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** apns_sandbox field predicates */
+  apnsSandbox?: InputMaybe<Scalars["Boolean"]>;
+  apnsSandboxIsNil?: InputMaybe<Scalars["Boolean"]>;
+  apnsSandboxNEQ?: InputMaybe<Scalars["Boolean"]>;
+  apnsSandboxNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** apns_topic field predicates */
+  apnsTopic?: InputMaybe<Scalars["String"]>;
+  apnsTopicContains?: InputMaybe<Scalars["String"]>;
+  apnsTopicContainsFold?: InputMaybe<Scalars["String"]>;
+  apnsTopicEqualFold?: InputMaybe<Scalars["String"]>;
+  apnsTopicGT?: InputMaybe<Scalars["String"]>;
+  apnsTopicGTE?: InputMaybe<Scalars["String"]>;
+  apnsTopicHasPrefix?: InputMaybe<Scalars["String"]>;
+  apnsTopicHasSuffix?: InputMaybe<Scalars["String"]>;
+  apnsTopicIn?: InputMaybe<Array<Scalars["String"]>>;
+  apnsTopicLT?: InputMaybe<Scalars["String"]>;
+  apnsTopicLTE?: InputMaybe<Scalars["String"]>;
+  apnsTopicNEQ?: InputMaybe<Scalars["String"]>;
+  apnsTopicNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  /** app_id field predicates */
+  appID?: InputMaybe<Scalars["String"]>;
+  appIDContains?: InputMaybe<Scalars["String"]>;
+  appIDContainsFold?: InputMaybe<Scalars["String"]>;
+  appIDEqualFold?: InputMaybe<Scalars["String"]>;
+  appIDGT?: InputMaybe<Scalars["String"]>;
+  appIDGTE?: InputMaybe<Scalars["String"]>;
+  appIDHasPrefix?: InputMaybe<Scalars["String"]>;
+  appIDHasSuffix?: InputMaybe<Scalars["String"]>;
+  appIDIn?: InputMaybe<Array<Scalars["String"]>>;
+  appIDLT?: InputMaybe<Scalars["String"]>;
+  appIDLTE?: InputMaybe<Scalars["String"]>;
+  appIDNEQ?: InputMaybe<Scalars["String"]>;
+  appIDNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  /** created_at field predicates */
+  createdAt?: InputMaybe<Scalars["Time"]>;
+  createdAtGT?: InputMaybe<Scalars["Time"]>;
+  createdAtGTE?: InputMaybe<Scalars["Time"]>;
+  createdAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  createdAtLT?: InputMaybe<Scalars["Time"]>;
+  createdAtLTE?: InputMaybe<Scalars["Time"]>;
+  createdAtNEQ?: InputMaybe<Scalars["Time"]>;
+  createdAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
+  /** id field predicates */
+  id?: InputMaybe<Scalars["ID"]>;
+  idContainsFold?: InputMaybe<Scalars["ID"]>;
+  idEqualFold?: InputMaybe<Scalars["ID"]>;
+  idGT?: InputMaybe<Scalars["ID"]>;
+  idGTE?: InputMaybe<Scalars["ID"]>;
+  idIn?: InputMaybe<Array<Scalars["ID"]>>;
+  idLT?: InputMaybe<Scalars["ID"]>;
+  idLTE?: InputMaybe<Scalars["ID"]>;
+  idNEQ?: InputMaybe<Scalars["ID"]>;
+  idNotIn?: InputMaybe<Array<Scalars["ID"]>>;
+  not?: InputMaybe<NotificationAppWhereInput>;
+  or?: InputMaybe<Array<NotificationAppWhereInput>>;
+  /** updated_at field predicates */
+  updatedAt?: InputMaybe<Scalars["Time"]>;
+  updatedAtGT?: InputMaybe<Scalars["Time"]>;
+  updatedAtGTE?: InputMaybe<Scalars["Time"]>;
+  updatedAtIn?: InputMaybe<Array<Scalars["Time"]>>;
+  updatedAtLT?: InputMaybe<Scalars["Time"]>;
+  updatedAtLTE?: InputMaybe<Scalars["Time"]>;
+  updatedAtNEQ?: InputMaybe<Scalars["Time"]>;
+  updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
 };
 
 export type NotificationDataInput = {
@@ -5420,10 +5634,20 @@ export type Query = {
   merkleDrops: MerkleDropConnection;
   merkleDropsByKeys: Array<MerkleDrop>;
   metrics: MetricsResult;
+  /**
+   * The caller's own deposits that are still in flight — charged (or possibly
+   * charged) but not yet settled. The client shows these as optimistic "locked"
+   * funds on top of the spendable balance, so a deposit reads as arrived the
+   * instant it is charged; a settled or failed deposit drops out of this list
+   * (locked -> real, or locked -> gone). Authoritative and cross-device, unlike
+   * the client's own per-device pending ledger. Bounded to recent pending rows.
+   */
+  myInFlightDeposits: Array<InFlightDeposit>;
   /** Fetches an object given its ID. */
   node?: Maybe<Node>;
   /** Lookup nodes by a list of IDs. */
   nodes: Array<Maybe<Node>>;
+  notificationApps: Array<NotificationApp>;
   notificationDevices: Array<NotificationDevice>;
   ownerships: OwnershipResult;
   paymaster?: Maybe<Paymaster>;
@@ -7645,6 +7869,13 @@ export type UpdateServiceInput = {
   torii?: InputMaybe<ToriiUpdateInput>;
   type: DeploymentService;
   version?: InputMaybe<Scalars["String"]>;
+};
+
+export type UpsertNotificationAppInput = {
+  apnsEndpoint?: InputMaybe<Scalars["String"]>;
+  apnsSandbox?: InputMaybe<Scalars["Boolean"]>;
+  apnsTopic: Scalars["String"];
+  appId: Scalars["String"];
 };
 
 export type VerifyEmailInput = {
