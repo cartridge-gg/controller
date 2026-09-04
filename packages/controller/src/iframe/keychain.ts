@@ -46,6 +46,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     onSessionCreated,
     onStarterpackPlay,
     encryptedBlob,
+    selfFundedGasMultiplier,
     propagateSessionErrors,
     errorDisplayMode,
     defaultPaymentMethod,
@@ -58,6 +59,13 @@ export class KeychainIFrame extends IFrame<Keychain> {
     let onStarterpackPlayHandler: (() => Promise<void>) | undefined;
     const _url = new URL(url ?? KEYCHAIN_URL);
     const walletBridge = new WalletBridge();
+
+    if (selfFundedGasMultiplier !== undefined) {
+      _url.searchParams.set(
+        "self_funded_gas_multiplier",
+        String(selfFundedGasMultiplier),
+      );
+    }
 
     if (propagateSessionErrors) {
       _url.searchParams.set("propagate_error", "true");

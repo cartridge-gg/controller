@@ -43,6 +43,22 @@ import {
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
 
+const MIN_SELF_FUNDED_GAS_MULTIPLIER = 1.5;
+const MAX_SELF_FUNDED_GAS_MULTIPLIER = 10;
+
+function validateSelfFundedGasMultiplier(value?: number) {
+  if (
+    value !== undefined &&
+    (!Number.isFinite(value) ||
+      value < MIN_SELF_FUNDED_GAS_MULTIPLIER ||
+      value > MAX_SELF_FUNDED_GAS_MULTIPLIER)
+  ) {
+    throw new RangeError(
+      `selfFundedGasMultiplier must be a finite number between ${MIN_SELF_FUNDED_GAS_MULTIPLIER} and ${MAX_SELF_FUNDED_GAS_MULTIPLIER}`,
+    );
+  }
+}
+
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
   private options: ControllerOptions;
@@ -63,6 +79,8 @@ export default class ControllerProvider extends BaseProvider {
 
   constructor(options: ControllerOptions = {}) {
     super();
+
+    validateSelfFundedGasMultiplier(options.selfFundedGasMultiplier);
 
     // Default Cartridge chains that are always available
     const cartridgeChains: Chain[] = [
@@ -907,6 +925,13 @@ export default class ControllerProvider extends BaseProvider {
 
     if (this.rpcUrl()) {
       keychainUrl.searchParams.set("rpc_url", this.rpcUrl());
+    }
+
+    if (this.options.selfFundedGasMultiplier !== undefined) {
+      keychainUrl.searchParams.set(
+        "self_funded_gas_multiplier",
+        String(this.options.selfFundedGasMultiplier),
+      );
     }
 
     // Navigate to standalone keychain

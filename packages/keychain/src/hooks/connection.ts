@@ -7,6 +7,7 @@ import {
 import { useNavigation } from "@/context/navigation";
 import { getToriiUrl } from "@/helpers/torii-url";
 import { connectToController } from "@/utils/connection";
+import Controller from "@/utils/controller";
 import type { HeadlessConnectionState } from "@/utils/connection/headless";
 import { requestPopupAuthOrigin } from "@/utils/connection/popup";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
@@ -88,6 +89,8 @@ type ResolvedUrlParams = {
   refGroup: string | null;
   propagateError: boolean;
   /** Optional so snapshots persisted before this field existed stay valid. */
+  selfFundedGasMultiplier?: number;
+  /** Optional so snapshots persisted before this field existed stay valid. */
   defaultPaymentMethod?: DefaultPaymentMethod;
   /** Optional so snapshots persisted before this field existed stay valid. */
   coinflowSandbox?: boolean;
@@ -138,6 +141,12 @@ export function resolveCoinflowSandbox(
   if (value === "true") return true;
   if (value === "false") return false;
   return previousValue ?? false;
+}
+
+export function parseSelfFundedGasMultiplier(
+  value?: string | null,
+): number | undefined {
+  return value === undefined || value === null ? undefined : Number(value);
 }
 
 // Stable fallback so consumers keyed on `configuredChains` identity don't re-run.
@@ -723,6 +732,9 @@ export function useConnectionValue() {
       urlParams,
       urlParamsRef.current?.standaloneRedirectUrl,
     );
+    const selfFundedGasMultiplier = parseSelfFundedGasMultiplier(
+      urlParams.get("self_funded_gas_multiplier"),
+    );
     const defaultPaymentMethod = resolveDefaultPaymentMethod(
       urlParams.get("default_payment_method"),
       urlParamsRef.current?.defaultPaymentMethod,
@@ -812,6 +824,9 @@ export function useConnectionValue() {
       refGroup: refGroup || urlParamsRef.current?.refGroup || null,
       propagateError:
         propagateError || urlParamsRef.current?.propagateError || false,
+      selfFundedGasMultiplier:
+        selfFundedGasMultiplier ??
+        urlParamsRef.current?.selfFundedGasMultiplier,
       defaultPaymentMethod,
       coinflowSandbox,
       errorDisplayMode:
@@ -823,6 +838,7 @@ export function useConnectionValue() {
 
     // Store the new params for future reference
     urlParamsRef.current = newParams;
+    Controller.setSelfFundedGasMultiplier(newParams.selfFundedGasMultiplier);
 
     // preserve params between keychain reload
     try {
@@ -1408,6 +1424,7 @@ export function useConnectionValue() {
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     propagateError: urlParams.propagateError,
+    selfFundedGasMultiplier: urlParams.selfFundedGasMultiplier,
     defaultPaymentMethod: urlParams.defaultPaymentMethod,
     coinflowSandbox: urlParams.coinflowSandbox ?? false,
     webauthnPopup,

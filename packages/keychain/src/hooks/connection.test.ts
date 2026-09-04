@@ -6,6 +6,7 @@ import {
   isSameRpcUrl,
   parseControllerVersion,
   parseDefaultPaymentMethod,
+  parseSelfFundedGasMultiplier,
   resolveChainPolicies,
   resolveCoinflowSandbox,
   resolveDefaultPaymentMethod,
@@ -35,6 +36,13 @@ describe("parseControllerVersion", () => {
   it("rejects missing or invalid versions", () => {
     expect(parseControllerVersion(null)).toBeUndefined();
     expect(parseControllerVersion("not-semver")).toBeUndefined();
+  });
+});
+
+describe("parseSelfFundedGasMultiplier", () => {
+  it("parses a configured multiplier and leaves an omitted value unset", () => {
+    expect(parseSelfFundedGasMultiplier("3")).toBe(3);
+    expect(parseSelfFundedGasMultiplier(null)).toBeUndefined();
   });
 });
 

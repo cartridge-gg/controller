@@ -28,6 +28,7 @@ export type ConnectionContextValue = {
   toriiUrl: string | null;
   namespace: string | null;
   propagateError: boolean;
+  selfFundedGasMultiplier?: number;
   defaultPaymentMethod?: DefaultPaymentMethod;
   coinflowSandbox: boolean;
   webauthnPopup: {

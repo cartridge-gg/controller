@@ -77,4 +77,22 @@ describe("ControllerProvider defaults", () => {
       });
     }).not.toThrow();
   });
+
+  test.each([1.5, 3, 10])(
+    "should accept self-funded gas multiplier %s",
+    (selfFundedGasMultiplier) => {
+      expect(
+        () => new ControllerProvider({ selfFundedGasMultiplier }),
+      ).not.toThrow();
+    },
+  );
+
+  test.each([1.49, 10.01, Number.NaN, Number.POSITIVE_INFINITY])(
+    "should reject invalid self-funded gas multiplier %s",
+    (selfFundedGasMultiplier) => {
+      expect(() => new ControllerProvider({ selfFundedGasMultiplier })).toThrow(
+        /selfFundedGasMultiplier/,
+      );
+    },
+  );
 });

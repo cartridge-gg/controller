@@ -82,12 +82,17 @@ export type MultichainRegisterResult = {
 };
 
 export default class Controller {
+  private static selfFundedGasMultiplier?: number;
   private cartridge: CartridgeAccount;
   private cartridgeMeta: CartridgeAccountMeta;
   provider: Provider;
 
   constructor() {
     throw new Error("Initialize with Controller.login or Controller.create");
+  }
+
+  static setSelfFundedGasMultiplier(multiplier?: number) {
+    Controller.selfFundedGasMultiplier = multiplier;
   }
 
   address() {
@@ -452,6 +457,7 @@ export default class Controller {
       toJsCalls(calls),
       toJsFeeEstimate(maxFee),
       feeSource,
+      Controller.selfFundedGasMultiplier,
     );
   }
 
@@ -464,6 +470,7 @@ export default class Controller {
       appId,
       toJsCalls(calls),
       feeSource,
+      Controller.selfFundedGasMultiplier,
     );
   }
 
