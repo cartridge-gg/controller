@@ -44,6 +44,12 @@ describe("parseSelfFundedGasMultiplier", () => {
     expect(parseSelfFundedGasMultiplier("3")).toBe(3);
     expect(parseSelfFundedGasMultiplier(null)).toBeUndefined();
   });
+
+  it("falls back to the WASM default for invalid values", () => {
+    expect(parseSelfFundedGasMultiplier("0.1")).toBeUndefined();
+    expect(parseSelfFundedGasMultiplier("11")).toBeUndefined();
+    expect(parseSelfFundedGasMultiplier("not-a-number")).toBeUndefined();
+  });
 });
 
 describe("parseDefaultPaymentMethod", () => {

@@ -16,6 +16,7 @@ import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { KEYCHAIN_URL } from "./constants";
 import { HeadlessAuthenticationError, NotReadyToConnect } from "./errors";
+import { validateSelfFundedGasMultiplier } from "./gas";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
 import { lookupUsername as lookupUsernameApi } from "./lookup";
@@ -42,22 +43,6 @@ import {
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
-
-const MIN_SELF_FUNDED_GAS_MULTIPLIER = 1.5;
-const MAX_SELF_FUNDED_GAS_MULTIPLIER = 10;
-
-function validateSelfFundedGasMultiplier(value?: number) {
-  if (
-    value !== undefined &&
-    (!Number.isFinite(value) ||
-      value < MIN_SELF_FUNDED_GAS_MULTIPLIER ||
-      value > MAX_SELF_FUNDED_GAS_MULTIPLIER)
-  ) {
-    throw new RangeError(
-      `selfFundedGasMultiplier must be a finite number between ${MIN_SELF_FUNDED_GAS_MULTIPLIER} and ${MAX_SELF_FUNDED_GAS_MULTIPLIER}`,
-    );
-  }
-}
 
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;

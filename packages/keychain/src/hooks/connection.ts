@@ -27,6 +27,7 @@ import {
   type Chain,
   type DefaultPaymentMethod,
   type SessionChain,
+  isValidSelfFundedGasMultiplier,
 } from "@cartridge/controller";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import {
@@ -146,7 +147,9 @@ export function resolveCoinflowSandbox(
 export function parseSelfFundedGasMultiplier(
   value?: string | null,
 ): number | undefined {
-  return value === undefined || value === null ? undefined : Number(value);
+  if (value === undefined || value === null) return undefined;
+  const multiplier = Number(value);
+  return isValidSelfFundedGasMultiplier(multiplier) ? multiplier : undefined;
 }
 
 // Stable fallback so consumers keyed on `configuredChains` identity don't re-run.

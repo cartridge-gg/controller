@@ -52,11 +52,11 @@ export function toStarknetFeeEstimate(estimate: JsFeeEstimate): FeeEstimate {
   };
 
   return {
-    l1_gas_consumed: addPercent(estimate.l1_gas_consumed, 50),
+    l1_gas_consumed: estimate.l1_gas_consumed.toString(),
     l1_gas_price: addPercent(estimate.l1_gas_price, 50),
-    l2_gas_consumed: addPercent(estimate.l2_gas_consumed, 50),
+    l2_gas_consumed: estimate.l2_gas_consumed.toString(),
     l2_gas_price: addPercent(estimate.l2_gas_price, 50),
-    l1_data_gas_consumed: addPercent(estimate.l1_data_gas_consumed, 50),
+    l1_data_gas_consumed: estimate.l1_data_gas_consumed.toString(),
     l1_data_gas_price: addPercent(estimate.l1_data_gas_price, 50),
     overall_fee: addPercent(addPercent(estimate.overall_fee, 50), 50),
     unit: "FRI",

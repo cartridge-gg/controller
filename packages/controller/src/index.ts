@@ -1,5 +1,6 @@
 export { default } from "./controller";
 export * from "./errors";
+export * from "./gas";
 export * from "./types";
 export * from "./lookup";
 export * from "./utils";
