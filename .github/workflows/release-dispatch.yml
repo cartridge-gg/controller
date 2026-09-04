@@ -58,6 +58,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_bots: "joystick-gg"
           prompt: |
             Generate a changelog entry for version ${{ github.event.inputs.version }} of the Cartridge Controller SDK.
 
