@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.14.1] - 2026-09-04
+
+### ✨ New Features
+- **@cartridge/controller**: Added `selfFundedGasMultiplier` (supported range `1.5`–`10`) so applications can reserve additional gas headroom for direct self-funded transactions and paymaster-unavailable session fallbacks (#2669)
+
+### 🚀 Improvements
+- **@cartridge/keychain**: Restored Ready wallet availability on the Slot funding page (#2667)
+- **Release automation**: Enabled bot-authored changelog generation and pull-request reviews so automated releases can complete without false-red checks (#2670)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed standalone logout and account deletion so configured `redirect_url` / `redirect_uri` targets regain control after the local session is cleared (#2668)
+- **@cartridge/keychain**: Fixed the Slot funding page after the React upgrade (#2666)
+- **Self-funded fees**: Applied the configured gas multiplier exactly once and safely fell back to the default for malformed or out-of-range values (#2669)
+
+### 📦 Dependencies
+- **@cartridge/controller-wasm**: Updated to `0.10.2` for configurable self-funded gas resource bounds (#2669)
+
 ## [0.14.0] - 2026-08-05
 
 ### ✨ New Features
