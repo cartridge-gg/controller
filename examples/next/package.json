@@ -4,7 +4,7 @@
   "engines": {
     "node": ">=22"
   },
-  "version": "0.14.0",
+  "version": "0.14.1",
   "scripts": {
     "dev": "env-cmd -f .env.dev next dev -p 3002",
     "dev:live": "env-cmd -f .env.live next dev -p 3002",
