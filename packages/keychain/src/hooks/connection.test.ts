@@ -45,11 +45,19 @@ describe("parseSelfFundedGasMultiplier", () => {
     expect(parseSelfFundedGasMultiplier(null)).toBeUndefined();
   });
 
-  it("falls back to the WASM default for invalid values", () => {
-    expect(parseSelfFundedGasMultiplier("0.1")).toBeUndefined();
-    expect(parseSelfFundedGasMultiplier("11")).toBeUndefined();
-    expect(parseSelfFundedGasMultiplier("not-a-number")).toBeUndefined();
+  it("accepts the inclusive bounds", () => {
+    expect(parseSelfFundedGasMultiplier("1.5")).toBe(1.5);
+    expect(parseSelfFundedGasMultiplier("10")).toBe(10);
   });
+
+  // WASM rejects these with a hard error on every self-funded execute, so the
+  // keychain must drop them and let the default apply.
+  it.each(["0.1", "1.49", "10.01", "11", "-3", "", "not-a-number", "Infinity"])(
+    "falls back to the WASM default for invalid value %j",
+    (value) => {
+      expect(parseSelfFundedGasMultiplier(value)).toBeUndefined();
+    },
+  );
 });
 
 describe("parseDefaultPaymentMethod", () => {
