@@ -1,4 +1,5 @@
 import { useConnection } from "@/hooks/connection";
+import { safeStandaloneRedirect } from "@/utils/url-validator";
 import { HeaderInner, LayoutContent } from "@cartridge/controller-ui";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -17,7 +18,10 @@ export const Disconnect = () => {
       if (urlSearchParams) {
         const redirectUrl = urlSearchParams.get("redirect_url");
         if (redirectUrl) {
-          window.location.href = redirectUrl;
+          // Validate the target (native custom schemes allowed, dangerous
+          // script schemes blocked) and append the logout signal so the app
+          // clears its local session state on return.
+          safeStandaloneRedirect(redirectUrl, { logout: true });
         }
       }
     })();

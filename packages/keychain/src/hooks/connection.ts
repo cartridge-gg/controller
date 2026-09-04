@@ -64,6 +64,7 @@ import {
   lookupReferrerAddress,
   isValidFelt,
 } from "@/utils/referral";
+import { safeStandaloneRedirect } from "@/utils/url-validator";
 
 const TOKEN_ADDRESSES: Record<Token, string> = {
   eth: ETH_CONTRACT_ADDRESS,
@@ -97,6 +98,8 @@ type ResolvedUrlParams = {
   /** Chains covered by a single multichain session approval (SDK
    *  `multichainSessions` opt-in), resolved to their rpcUrl SDK-side. */
   sessionChains?: SessionChain[];
+  /** Standalone callback captured before SPA navigation removes the query. */
+  standaloneRedirectUrl?: string | null;
 };
 
 export const URL_PARAMS_STORAGE_KEY = "keychain.urlParams";
@@ -453,6 +456,13 @@ export function getStandaloneRedirectUrl(
   return searchParams.get("redirect_url") || searchParams.get("redirect_uri");
 }
 
+export function resolveStandaloneRedirectUrl(
+  searchParams: URLSearchParams,
+  previousValue?: string | null,
+): string | null {
+  return getStandaloneRedirectUrl(searchParams) ?? previousValue ?? null;
+}
+
 /**
  * Decide whether a standalone (non-iframe) keychain context is verified against
  * the preset's allowed origins.
@@ -709,6 +719,10 @@ export function useConnectionValue() {
     const ref = urlParams.get("ref");
     const refGroup = urlParams.get("ref_group");
     const propagateError = urlParams.get("propagate_error") === "true";
+    const standaloneRedirectUrl = resolveStandaloneRedirectUrl(
+      urlParams,
+      urlParamsRef.current?.standaloneRedirectUrl,
+    );
     const defaultPaymentMethod = resolveDefaultPaymentMethod(
       urlParams.get("default_payment_method"),
       urlParamsRef.current?.defaultPaymentMethod,
@@ -804,6 +818,7 @@ export function useConnectionValue() {
         errorDisplayMode || urlParamsRef.current?.errorDisplayMode || undefined,
       chains: chains ?? urlParamsRef.current?.chains ?? [],
       sessionChains: sessionChains ?? urlParamsRef.current?.sessionChains,
+      standaloneRedirectUrl,
     };
 
     // Store the new params for future reference
@@ -1234,6 +1249,26 @@ export function useConnectionValue() {
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
+
+    // Standalone redirect flow (mobile session controllers): the app that
+    // opened this page is waiting on `redirect_url`, exactly as `/disconnect`
+    // does. Hand control back to it logged out instead of reloading into the
+    // login screen, which the app has no way to observe.
+    //
+    // A redirect alone does not clear the app-origin SessionProvider, so we
+    // append an explicit logout signal the app consumes to drop its own local
+    // session (see safeStandaloneRedirect / SessionProvider). The target is
+    // captured at page load because internal navigation drops the query string.
+    if (!isIframe()) {
+      const redirectUrl = urlParams.standaloneRedirectUrl;
+      if (
+        redirectUrl &&
+        safeStandaloneRedirect(redirectUrl, { logout: true })
+      ) {
+        return;
+      }
+    }
+
     try {
       sessionStorage.setItem(PRESERVE_URL_PARAMS_FLAG, "1");
     } catch {
@@ -1244,7 +1279,7 @@ export function useConnectionValue() {
       parent.close();
       parent.reload();
     }
-  }, [parent]);
+  }, [parent, urlParams.standaloneRedirectUrl]);
 
   const openSettings = useCallback(() => {
     window.dispatchEvent(

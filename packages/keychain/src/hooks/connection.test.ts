@@ -10,6 +10,7 @@ import {
   resolveCoinflowSandbox,
   resolveDefaultPaymentMethod,
   resolvePolicies,
+  resolveStandaloneRedirectUrl,
   verifyStandaloneOrigin,
 } from "./connection";
 import { getPresetSessionPolicies } from "@cartridge/controller";
@@ -227,6 +228,27 @@ describe("getStandaloneRedirectUrl", () => {
 
   it("returns null when no standalone redirect target is present", () => {
     expect(getStandaloneRedirectUrl(new URLSearchParams())).toBeNull();
+  });
+});
+
+describe("resolveStandaloneRedirectUrl", () => {
+  it("preserves the initial callback after SPA navigation drops the query", () => {
+    const initial = resolveStandaloneRedirectUrl(
+      new URLSearchParams({ redirect_uri: "cagecalls://open" }),
+    );
+
+    expect(resolveStandaloneRedirectUrl(new URLSearchParams(), initial)).toBe(
+      "cagecalls://open",
+    );
+  });
+
+  it("uses a newly supplied callback instead of the previous one", () => {
+    expect(
+      resolveStandaloneRedirectUrl(
+        new URLSearchParams({ redirect_url: "https://new.example/callback" }),
+        "https://old.example/callback",
+      ),
+    ).toBe("https://new.example/callback");
   });
 });
 
