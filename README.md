@@ -127,6 +127,40 @@ Controller retains the legacy Slot-derived endpoint at
 A custom Torii is required to display custom ERC-20 and ERC-721 tokens in the
 Controller.
 
+## Self-funded gas headroom
+
+When a transaction is sponsored by the paymaster, the player pays no gas and
+this option does nothing. When the player pays for gas themselves (a direct
+`execute` with a fee estimate, or a session transaction that falls back to
+self-funding because the paymaster is unavailable), Controller reserves extra
+gas headroom so that estimate-to-execution drift does not run the transaction
+out of resources.
+
+Keychain estimates the transaction, then hands the estimated gas amounts to the
+wallet core. The core multiplies each gas amount (L1, L2 and L1 data) by the
+multiplier exactly once and uses the result as the transaction's resource-bound
+`max_amount`. Gas prices are not multiplied. Starknet charges for gas actually
+consumed, so the multiplier raises the worst-case fee cap and the balance the
+player must hold to submit the transaction, not the fee they typically pay.
+
+The default is `1.5`. Set `selfFundedGasMultiplier` to raise it, for example
+when a game's transactions consume gas that varies with on-chain state between
+estimation and execution:
+
+```ts
+import Controller from "@cartridge/controller";
+
+const controller = new Controller({
+  selfFundedGasMultiplier: 3,
+});
+```
+
+The supported range is `1.5` to `10` inclusive. The constructor throws a
+`RangeError` for values outside it. The value is forwarded to Keychain in both
+the iframe and standalone flows, and Keychain falls back to the default if it
+receives a value it cannot use, so an out-of-range value never causes
+transactions to fail.
+
 ## Controller client notifications
 
 The controller emits toast notifications for wallet activity (transactions,
