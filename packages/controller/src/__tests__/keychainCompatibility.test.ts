@@ -119,6 +119,22 @@ describe("hosted keychain compatibility contract", () => {
     );
   });
 
+  it("sends the configured self-funded gas multiplier", () => {
+    createKeychain({ selfFundedGasMultiplier: 3 });
+
+    expect(
+      mockIFrameOptions.url.searchParams.get("self_funded_gas_multiplier"),
+    ).toBe("3");
+  });
+
+  it("omits the self-funded gas multiplier when it is not configured", () => {
+    createKeychain();
+
+    expect(
+      mockIFrameOptions.url.searchParams.has("self_funded_gas_multiplier"),
+    ).toBe(false);
+  });
+
   it.each(["0.13.12", "0.13.13", "0.14.0-alpha.1"])(
     "keeps the same hosted bridge surface for Controller %s",
     (version) => {

@@ -16,6 +16,7 @@ import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { KEYCHAIN_URL } from "./constants";
 import { HeadlessAuthenticationError, NotReadyToConnect } from "./errors";
+import { validateSelfFundedGasMultiplier } from "./gas";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
 import { lookupUsername as lookupUsernameApi } from "./lookup";
@@ -63,6 +64,8 @@ export default class ControllerProvider extends BaseProvider {
 
   constructor(options: ControllerOptions = {}) {
     super();
+
+    validateSelfFundedGasMultiplier(options.selfFundedGasMultiplier);
 
     // Default Cartridge chains that are always available
     const cartridgeChains: Chain[] = [
@@ -907,6 +910,13 @@ export default class ControllerProvider extends BaseProvider {
 
     if (this.rpcUrl()) {
       keychainUrl.searchParams.set("rpc_url", this.rpcUrl());
+    }
+
+    if (this.options.selfFundedGasMultiplier !== undefined) {
+      keychainUrl.searchParams.set(
+        "self_funded_gas_multiplier",
+        String(this.options.selfFundedGasMultiplier),
+      );
     }
 
     // Navigate to standalone keychain

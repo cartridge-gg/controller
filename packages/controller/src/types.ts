@@ -293,6 +293,11 @@ export type DefaultPaymentMethod = "credit-card";
 
 export type KeychainOptions = IFrameOptions & {
   policies?: SessionPolicies;
+  /**
+   * Gas-amount headroom used for self-funded transactions. Must be between
+   * 1.5 and 10; defaults to 1.5. Paymaster transactions are unaffected.
+   */
+  selfFundedGasMultiplier?: number;
   /** The URL of keychain */
   url?: string;
   /** The origin of keychain */
