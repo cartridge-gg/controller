@@ -149,15 +149,42 @@ export class Transaction {
       throw new Error("Transaction requires feePayer and recentBlockhash");
     }
 
-    // Create the transaction with micro-sol-signer
-    const txHex = sol.createTxComplex(
+    console.log(
+      "[keychain/Transaction.serialize] Building transaction with",
+      this.instructions.length,
+      "instructions",
+    );
+    console.log(
+      "[keychain/Transaction.serialize] feePayer:",
+      this.feePayer.toString(),
+    );
+    console.log(
+      "[keychain/Transaction.serialize] recentBlockhash:",
+      this.recentBlockhash,
+    );
+
+    // createTxComplex returns a base64-encoded string, not hex!
+    const txBase64 = sol.createTxComplex(
       this.feePayer.toString(),
       this.instructions,
       this.recentBlockhash,
     );
 
-    // Convert hex string to Uint8Array
-    return new Uint8Array(Buffer.from(txHex, "hex"));
+    console.log(
+      "[keychain/Transaction.serialize] createTxComplex returned base64 length:",
+      txBase64.length,
+    );
+
+    // Decode the base64 string to get the transaction bytes
+    const buffer = new Uint8Array(Buffer.from(txBase64, "base64"));
+
+    console.log("[keychain/Transaction.serialize] Final buffer length:", buffer.length);
+    console.log(
+      "[keychain/Transaction.serialize] First 32 bytes:",
+      Array.from(buffer.slice(0, 32)),
+    );
+
+    return buffer;
   }
 }
 
