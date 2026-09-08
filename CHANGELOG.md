@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.14.2] - 2026-09-08
+
+### 🐛 Bug Fixes
+- **Self-funded sessions**: Added 50% gas-price headroom to the WASM session fallback so small gas-price increases between estimation and submission no longer cause resource-bound failures. Default sponsored execution and JavaScript-supplied fee bounds retain their existing behavior ([#2672](https://github.com/cartridge-gg/controller/pull/2672)).
+
+### 📦 Dependencies
+- **@cartridge/controller-wasm**: Updated to `0.10.3`, including the shared Rust/WASM fallback and gas-price buffer ([#107](https://github.com/cartridge-gg/controller-rs/pull/107), [#108](https://github.com/cartridge-gg/controller-rs/pull/108)).
+- **@cartridge/connector**: Released alongside controller at `0.14.2`; no connector-specific behavior changes.
+
 ## [0.14.1] - 2026-09-04
 
 ### ✨ New Features
