@@ -18,6 +18,15 @@ const sandbox = path.join(artifacts, "sandbox");
 const candidate = path.join(artifacts, "candidate-package");
 const packs = path.join(artifacts, "packs");
 const alphaVersion = "0.14.0-alpha.1";
+const wasmVersion = JSON.parse(
+  readFileSync(
+    path.join(
+      root,
+      "packages/controller/node_modules/@cartridge/controller-wasm/package.json",
+    ),
+    "utf8",
+  ),
+).version;
 
 const run = (command, args, options = {}) =>
   execFileSync(command, args, {
@@ -45,7 +54,7 @@ delete sourcePackage.repository;
 for (const [name, value] of Object.entries(sourcePackage.dependencies)) {
   if (value !== "catalog:") continue;
   const replacements = {
-    "@cartridge/controller-wasm": "0.10.1",
+    "@cartridge/controller-wasm": wasmVersion,
     "@cartridge/penpal": "^6.2.4",
     "@starknet-io/types-js": "0.10.2",
     starknet: "10.0.2",
@@ -118,6 +127,10 @@ assert.equal(readAliasPackage("controller-01313").version, "0.13.13");
 const candidatePackage = readAliasPackage("controller-candidate");
 assert.equal(candidatePackage.version, alphaVersion);
 assert.equal(candidatePackage.dependencies.starknet, "10.0.2");
+assert.equal(
+  candidatePackage.dependencies["@cartridge/controller-wasm"],
+  wasmVersion,
+);
 
 run("pnpm", [
   "--filter",
