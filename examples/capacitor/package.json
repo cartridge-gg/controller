@@ -1,6 +1,6 @@
 {
   "name": "cartridge-capacitor-example",
-  "version": "0.14.1",
+  "version": "0.14.2",
   "private": true,
   "engines": {
     "node": ">=22"
