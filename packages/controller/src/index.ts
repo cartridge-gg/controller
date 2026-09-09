@@ -5,6 +5,7 @@ export * from "./types";
 export * from "./lookup";
 export * from "./utils";
 export * from "./policies";
+export * from "./rate-limit";
 export * from "./wallets";
 export * from "./toast";
 export { LOGOUT_QUERY_NAME } from "./constants";
