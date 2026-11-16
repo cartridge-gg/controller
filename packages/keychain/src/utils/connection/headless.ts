@@ -2,6 +2,10 @@ import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { doSignup } from "@/hooks/account";
 import { fetchController } from "@/components/connect/create/utils";
 import {
+  SIGNUP_DISABLED_MESSAGE,
+  SIGNUP_ENABLED,
+} from "@/components/connect/create/signup";
+import {
   decryptPrivateKey,
   encryptPrivateKey,
   generateStarknetKeypair,
@@ -591,6 +595,10 @@ const signupWithSigner = async ({
   rpcUrl: string;
   getParent: () => HeadlessConnectParent | undefined;
 }) => {
+  if (!SIGNUP_ENABLED) {
+    throw new Error(SIGNUP_DISABLED_MESSAGE);
+  }
+
   if (signer === "webauthn") {
     return signupWithWebauthn({ username, chainId, rpcUrl });
   }

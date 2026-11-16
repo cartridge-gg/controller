@@ -52,6 +52,7 @@ import {
 } from "@/utils/connection/session-creation";
 import { hasConfiguredLocationGate } from "@/utils/location-gate";
 import { posthog } from "@/components/provider/posthog";
+import { SIGNUP_DISABLED_MESSAGE, SIGNUP_ENABLED } from "./signup";
 import { SmsOtpState } from "@/components/identity/VerifyPhoneNumberDrawer";
 import {
   captureAnalyticsEvent,
@@ -604,6 +605,10 @@ export function useCreateController({
       authenticationMode: AuthOption,
       password?: string,
     ) => {
+      if (!SIGNUP_ENABLED) {
+        throw new Error(SIGNUP_DISABLED_MESSAGE);
+      }
+
       if (!origin || !chainId || !rpcUrl) {
         throw new Error("Origin, chainId, or rpcUrl not found");
       }
