@@ -88,70 +88,34 @@ describe("headless connect auto-signup", () => {
     expect(mockControllerLogin).not.toHaveBeenCalled();
   });
 
-  it("creates a new password account when username does not exist", async () => {
-    const mockController = {
-      address: vi.fn(() => "0xnew"),
-      register: vi.fn().mockResolvedValue({ register: { username: "alice" } }),
-    };
-
+  it("rejects signup when username does not exist", async () => {
     mockFetchController.mockRejectedValue(
       new Error("ent: controller not found"),
     );
-    mockGenerateStarknetKeypair.mockReturnValue({
-      privateKey: "0xpriv",
-      publicKey: "0xpub",
-    });
-    mockEncryptPrivateKey.mockResolvedValue("enc");
-    mockComputeAccountAddress.mockReturnValue("0xcomputed");
-    mockControllerLogin.mockResolvedValue({
-      controller: mockController,
-      session: {
-        expiresAt: "1",
-        guardianKeyGuid: "0x0",
-        metadataHash: "0x0",
-        sessionKeyGuid: "0x1",
-        allowedPoliciesRoot: "0x0",
-        authorization: [],
-      },
-    });
 
     const { headlessConnect } = await import("./headless");
     const setController = vi.fn();
-    const getParent = vi.fn(() => undefined);
-    const getConnectionState = () => ({
-      origin: "https://game.example",
-      chainId: "0x534e5f4d41494e",
-      rpcUrl: "https://rpc.example",
-      policies: undefined,
-      isPoliciesResolved: true,
-      isConfigLoading: false,
-    });
-
     const connect = headlessConnect({
       setController,
-      getParent,
-      getConnectionState,
+      getParent: vi.fn(() => undefined),
+      getConnectionState: () => ({
+        origin: "https://game.example",
+        chainId: "0x534e5f4d41494e",
+        rpcUrl: "https://rpc.example",
+        policies: undefined,
+        isPoliciesResolved: true,
+        isConfigLoading: false,
+      }),
       getLocationGate: () => ({ blocked: ["US-NY"] }),
     })("https://game.example");
 
-    const result = await connect({
-      username: "alice",
-      signer: "password",
-      password: "pw",
+    await expect(
+      connect({ username: "alice", signer: "password", password: "pw" }),
+    ).resolves.toEqual({
+      code: ResponseCodes.ERROR,
+      message: "New account signups are currently disabled",
     });
-
-    expect(result).toEqual({
-      code: ResponseCodes.SUCCESS,
-      address: "0xnew",
-    });
-    expect(mockControllerLogin).toHaveBeenCalledWith(
-      expect.objectContaining({
-        username: "alice",
-        isControllerRegistered: false,
-      }),
-    );
-    expect(mockController.register).toHaveBeenCalled();
-    expect(setController).toHaveBeenCalledWith(mockController);
-    expect(mockGetIpLocation).toHaveBeenCalledOnce();
+    expect(mockControllerLogin).not.toHaveBeenCalled();
+    expect(setController).not.toHaveBeenCalled();
   });
 });

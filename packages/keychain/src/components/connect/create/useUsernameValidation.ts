@@ -1,6 +1,7 @@
 import { useConnection } from "@/hooks/connection";
 import { CredentialMetadata } from "@cartridge/controller-ui/utils/api/cartridge";
 import { useEffect, useRef, useState } from "react";
+import { SIGNUP_DISABLED_MESSAGE, SIGNUP_ENABLED } from "./signup";
 import { fetchController } from "./utils";
 
 export type ValidationState = {
@@ -101,6 +102,14 @@ export function useUsernameValidation(username: string) {
         if (abortController.signal.aborted) return;
 
         if (e.message === "ent: controller not found") {
+          if (!SIGNUP_ENABLED) {
+            setValidation({
+              status: "invalid",
+              error: new Error(SIGNUP_DISABLED_MESSAGE),
+            });
+            return;
+          }
+
           // TEMP: disallow periods for signup
           if (username.includes(".")) {
             setValidation({
