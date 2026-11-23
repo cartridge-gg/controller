@@ -1,5 +1,6 @@
 import { NavigationHeader } from "@/components";
 import { LayoutBottomNav } from "@/components/bottom-nav";
+import { DeprecationBanner } from "@/components/DeprecationBanner";
 import { useConnection } from "@/hooks/connection";
 import { GearIcon, LayoutContainer } from "@cartridge/controller-ui";
 import { useMemo } from "react";
@@ -31,6 +32,8 @@ export function Layout({ children }: { children?: React.ReactNode }) {
           icon={<GearIcon />}
           onClose={hasBottomNav ? closeModal : onModalClose}
         />
+
+        <DeprecationBanner />
 
         {children || <Outlet />}
 
